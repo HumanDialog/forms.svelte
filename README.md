@@ -6,8 +6,21 @@ Basic Svelte UI components for Object Reef applications
 To install the package on your Svelte project type:\
 `npm install @humandialog/forms.svelte`
 
+in your tailwind.config.cjs file add:
+```js
+const config = {
+  content: [  ... 
+              './node_modules/flowbite-svelte/**/*.{html,js,svelte,ts}', 
+              './node_modules/@humandialog/forms.svelte/**/*.{html,js,svelte,ts}']
+```
+
 ## Usage
+
+
+
 To be continued..
+
+
 
 
 ## About ObjectReef®
