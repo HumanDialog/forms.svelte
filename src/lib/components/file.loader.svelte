@@ -2,7 +2,7 @@
     import FaExclamation from 'svelte-icons/fa/FaExclamation.svelte'
     import FaCheck from 'svelte-icons/fa/FaCheck.svelte'
     import FaTimes from 'svelte-icons/fa/FaTimes.svelte'
-    import Spinner from 'flowbite-svelte';
+    import {Spinner} from 'flowbite-svelte';
     
     let file :File|undefined = undefined;
     let data :ArrayBuffer = null;

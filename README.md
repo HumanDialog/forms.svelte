@@ -1,4 +1,4 @@
-# <img src="https://objectreef.dev/reef.png" alt="ObjectReef logo" width="26"> @humandialog/auth.svelte
+# <img src="https://objectreef.dev/reef.png" alt="ObjectReef logo" width="26"> @humandialog/forms.svelte
 
 Basic Svelte UI components for Object Reef applications
 
