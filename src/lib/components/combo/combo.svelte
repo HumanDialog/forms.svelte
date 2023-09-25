@@ -5,7 +5,7 @@
     import {afterUpdate, getContext, setContext} from 'svelte';
     import {rCombo_definition, rCombo_item, cached_sources} from './combo'
     import FaChevronDown from 'svelte-icons/fa/FaChevronDown.svelte'
-    import Icon from '../../icon.svelte'
+    import Icon from '../icon.svelte'
     import { Auth } from '@humandialog/auth.svelte/dist/index.js';
 
     export let label = ''

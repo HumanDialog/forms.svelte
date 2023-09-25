@@ -1,4 +1,14 @@
 <script>
+    import { setContext, onMount } from 'svelte';
+    import {
+        context_items_store,
+        data_tick_store,
+        context_types_store,
+        context_info_store,
+        context_toolbar_operations,
+        page_toolbar_operations     } from './stores.js'
+    
+
     export let context = "data"
     export let self = null
     export let typename = '';
@@ -7,17 +17,11 @@
     export let cl =
         "w-full h-full flex flex-col dark:bg-slate-800  overflow-y-hidden  overflow-x-hidden py-1 px-1 border-0" // border-green-500
     export let c = ''
-    import {
-        writable
-    } from 'svelte/store';
-    import {
-        setContext
-    } from 'svelte';
-    import {
-        context_items_store,
-        data_tick_store,
-        context_types_store
-    } from './stores.js'
+    
+    export let toolbar_operations = [];
+    export let clears_context = '';
+
+    
     switch (c) {
         case 'main':
             cl = "w-full h-full flex flex-col dark:bg-slate-800  overflow-y-hidden  overflow-x-hidden py-1 px-1 border-0"
@@ -28,6 +32,12 @@
         default:
             //NOP    
     }
+
+    onMount(() => {
+            $page_toolbar_operations = [...toolbar_operations]
+            return () => { $page_toolbar_operations = [] }
+    })
+
     setContext('ctx', context)
     let item = null;
     let visibilty = "hidden"
@@ -74,9 +84,21 @@
             //console.log("--------------")
         }
     }
+
+    function clear_selection(e)
+    {
+        if(!clears_context)
+            return;
+
+        e.stopPropagation();
+        $context_items_store[clears_context] = null;
+        $context_info_store[clears_context] = '';
+        $context_toolbar_operations = [];
+        $data_tick_store = $data_tick_store + 1;
+    }
 </script>
 
-<div class="{visibilty} {cl} bg-slate-100 dark:bg-slate-800 ">
+<div class="bg-slate-100 dark:bg-slate-800 {visibilty} {cl}" on:click={clear_selection}>
     {#if visibilty == "" }
         <slot/>
     {/if}

@@ -1,6 +1,6 @@
 <svelte:options accessors={true}/>
 <script lang="ts">
-    import Icon from '../../../icon.svelte'
+    import Icon from '../../icon.svelte'
     import type {Document_command} from './Document_command'
 
     export let id           :string;

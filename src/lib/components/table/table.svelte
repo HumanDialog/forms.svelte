@@ -1,8 +1,9 @@
 <script lang="ts">
-    import {data_tick_store, context_items_store, context_info_store, context_types_store } from '../../stores.js'
+    import {data_tick_store, context_items_store, context_info_store, context_types_store, context_toolbar_operations} from '../../stores.js'
     import {getContext, setContext, onDestroy} from 'svelte';
     import { rTable_definition } from './table';
     import {parse_width_directive} from '../../utils.js'
+    import {show_menu} from '../menu'
 
     export let context = ""
     export let collection = ""
@@ -16,6 +17,8 @@
     export let nav = true
     export let c = '';
     export let typename = '';
+    export let toolbar_operations = [];
+    export let menu_operations = [];
     
     let definition :rTable_definition = new rTable_definition;
     setContext('rTable-definition', definition);
@@ -82,6 +85,11 @@
         
         if(focus)
             $context_items_store.focused = select
+
+        if(itm)
+            $context_toolbar_operations = [...toolbar_operations];    
+        else
+            $context_toolbar_operations = [];
         
         if(nav)
             $data_tick_store = $data_tick_store + 1;
@@ -103,6 +111,21 @@
 
         return 0;
     }
+
+    function show_context_menu(e, itm, cinfo)
+    {
+        if(!menu_operations)
+            return;
+
+        if(menu_operations.length == 0)
+            return;
+
+        e.stopPropagation();
+        e.preventDefault();
+
+        show_menu(e.clientX, e.clientY, menu_operations);
+    }
+
 </script>
 
 {#if true}
@@ -132,7 +155,8 @@
             <tbody class="bg-white dark:bg-slate-900">
                 {#each items as item}
                     {#if (item != null )}
-                        <tr on:click={ (e) => { select_item(item, cinfo);} }
+                        <tr on:click={ (e) => { e.stopPropagation(); e.preventDefault(); select_item(item, cinfo);} }
+                            on:contextmenu={ (e) => {select_item(item, cinfo); show_context_menu(e, item, cinfo)} }
                             class="whitespace-nowrap text-sm font-normal text-gray-900 dark:text-gray-300"
                             class:bg-slate-100={item==selected_item}
                             class:dark:bg-slate-700={item==selected_item}>
