@@ -8,6 +8,7 @@
         context_toolbar_operations,
         page_toolbar_operations     } from './stores.js'
     
+    //import {chnages} from './utils.js'
 
     export let context = "data"
     export let self = null
@@ -18,7 +19,7 @@
         "w-full h-full flex flex-col dark:bg-slate-800  overflow-y-hidden  overflow-x-hidden py-1 px-1 border-0" // border-green-500
     export let c = ''
     
-    export let toolbar_operations = [];
+    export let toolbar_operations = undefined;
     export let clears_context = '';
 
     
@@ -34,8 +35,13 @@
     }
 
     onMount(() => {
-            $page_toolbar_operations = [...toolbar_operations]
-            return () => { $page_toolbar_operations = [] }
+            if(toolbar_operations != undefined && Array.isArray(toolbar_operations))
+            {
+                $page_toolbar_operations = [...toolbar_operations]
+                return () => { $page_toolbar_operations = [] }
+            }
+            else
+                return () => {}
     })
 
     setContext('ctx', context)
@@ -62,6 +68,8 @@
     let t = 0
     $: {
         t = $data_tick_store
+        //chnages.just_changed_context = false;
+
         if (t > last_tick) {
             last_tick = t
             if (self != null)
@@ -87,12 +95,21 @@
 
     function clear_selection(e)
     {
+        //console.log('page click', chnages.just_changed_context)
         if(!clears_context)
             return;
 
-        e.stopPropagation();
-        $context_items_store[clears_context] = null;
-        $context_info_store[clears_context] = '';
+       
+
+        let contexts = clears_context.split(' ');
+        contexts.forEach(c => 
+        {
+            $context_items_store[c] = null;
+            $context_info_store[c] = '';
+        })
+
+        //e.stopPropagation();
+    
         $context_toolbar_operations = [];
         $data_tick_store = $data_tick_store + 1;
     }

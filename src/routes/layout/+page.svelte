@@ -1,49 +1,61 @@
 <script>
     import Layout from '$lib/desk.svelte'
-    import {session} from '@humandialog/auth.svelte'
+    import {reef} from '@humandialog/auth.svelte'
 
-    import Empty from './empty.svelte';
-    import FaBars from 'svelte-icons/fa/FaBars.svelte'
+    import Empty from './main.svelte';
+    import Red from './red.svelte';
+    import Green from './green.svelte';
+    import Blue from './blue.svelte';
+    import Orange from './orange.svelte';
+    
 
+    import {    FaRegCompass, 
+                FaSearch, 
+                FaDatabase} from 'svelte-icons/fa'
 
-    $session.configure( {
-                    mode: 'local',
-                    local: {
-                        api:    "http://localhost:1996/",
-                        users:
-                        [
-                            "alice@example.com",
-                            "bob@example.com"
-                        ]}
-                   });
+   
+
+    reef.configure( { mode: 'dsabled'});
 
     const layout = {
                 sidebar : {
                     'TOC': {
-                        authorized :true,
-                        icon: FaBars,
-                        component: Empty
+                        icon: FaRegCompass,
+                        component: Red
+                    },
+                    'FIND':{
+                        icon: FaSearch,
+                        component: Green
+                    },
+                    'DB':{
+                        icon: FaDatabase,
+                        component: Blue
                     }
                 },
                 mainContent : {
-                    routes : {
-                        '/' :           { component: Empty},
-                        '/checklist':   { component: Empty},
-                        '/checklist/*': { component: Empty}
-                    }
+                    component: Empty
                 },
-                selectionDetails : {
-                    routes : {
-                        '/checklist':   { component: Empty},
-                        '/checklist/*': { component: Empty}
-                    }
+                selectionDetails : { 
+                    component: Orange
                 },
                 mainToolbar : {
-                    darkMode : true
+                    signin: true
+                },
+                dark:
+                {
+                    optional: true,
+                    default: false
+                },
+                operations:
+                {
+                    optional: false,
+                    default: true
                 }
+
     }
 
 
 </script>
 
 <Layout {layout}/>
+

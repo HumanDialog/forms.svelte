@@ -1,0 +1,19 @@
+<script lang="ts">
+
+ 
+</script>
+
+<div  class="grid gap-2 grid-cols-3">  
+    <button class="col-span-1 button"><div>Summary</div></button>
+    <button class="col-span-1 button"><div>Responsible</div></button>
+    <button class="col-span-1 button"><div>Due date</div></button>
+    <button class="col-span-1 button"><div>tag</div></button>
+    <button class="col-span-2 button"><div>Task</div></button>
+</div>
+
+<style lang="postcss">
+    .button
+    {
+        @apply py-2.5 px-5 text-xs font-medium text-gray-900 bg-slate-100 hover:bg-slate-200 border rounded border-gray-200 focus:outline-none dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 inline-flex items-center justify-center
+    }
+</style>

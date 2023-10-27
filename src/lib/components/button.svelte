@@ -2,7 +2,7 @@
     import {Button} from 'flowbite-svelte'
     import {getContext} from 'svelte'
     import {data_tick_store, context_items_store, context_types_store} from '../stores.js' 
-    import { Auth } from '@humandialog/auth.svelte/dist/index.js';
+    import { reef } from '@humandialog/auth.svelte/dist/index.js';
 
     export let self = null;
     export let operation = '';
@@ -66,17 +66,11 @@
             {
                 let res;
                 if(params)
-                {
-                    res = await Auth.fetch(`json/yav1/${typename}/${item.Id}/${operation}`,
-                                            {
-                                                method: 'POST',
-                                                body: JSON.stringify(params)
-                                            });
-                }
+                    res = await reef.post(`/${typename}/${item.Id}/${operation}`, params);
                 else
-                    res = await Auth.fetch(`json/yav1/${typename}/${item.Id}/${operation}`);
+                    res = await reef.get(`/${typename}/${item.Id}/${operation}`);
                 
-                if(res.ok)
+                if(res)
                     $data_tick_store = $data_tick_store + 1; 
             }
             catch(err)

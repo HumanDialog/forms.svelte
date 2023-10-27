@@ -1,5 +1,5 @@
 <script lang="ts">
-	
+	export const ssr = false;
 </script>
 
 <div class="prose m-2">

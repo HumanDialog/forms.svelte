@@ -1,11 +1,13 @@
 <script>
-    import FaMoon from 'svelte-icons/fa/FaMoon.svelte'
-    import FaSun from 'svelte-icons/fa/FaSun.svelte'
+    import FaToggleOn from 'svelte-icons/fa/FaToggleOn.svelte'
+    import FaToggleOff from 'svelte-icons/fa/FaToggleOff.svelte'
     import FaEllipsisH from 'svelte-icons/fa/FaEllipsisH.svelte'
     import FaTools from 'svelte-icons/fa/FaTools.svelte'
     import GoPrimitiveDot from 'svelte-icons/go/GoPrimitiveDot.svelte'
     import FaSignInAlt from 'svelte-icons/fa/FaSignInAlt.svelte'
     import FaSignOutAlt from 'svelte-icons/fa/FaSignOutAlt.svelte'
+    import {show_menu} from '$lib/components/menu'
+    //import Menu from '$lib/components/contextmenu.svelte'
 
     import {dark_mode_store, 
             toggle_sidebar, 
@@ -17,8 +19,10 @@
             main_sidebar_visible_store} from "./stores.js";     
     import Icon from './components/icon.svelte';
     import {session, signin_href, signout_href} from '@humandialog/auth.svelte'
+	import { push } from 'svelte-spa-router';
 
     export let app_config;
+    export let mobile=false;
     
     
     let tabs = new Array();
@@ -34,7 +38,7 @@
         config = app_config.mainToolbar;
         has_selection_details = app_config.selectionDetails;
         is_logged_in = $session.is_active;
-        show_sign_in_out_icons = app_config.auth ? true : false;
+        show_sign_in_out_icons = config.signin ? true : false;
         sign_in_href = $signin_href;
         sign_out_href = $signout_href;
 
@@ -62,85 +66,121 @@
         
     }
 
+    function on_tab_clicked(key)
+    {
+        if(!mobile)
+            toggle_sidebar(key);
+        else
+            show_sidebar(key);
+    }
+
+    function show_options(e)
+    {
+
+        let owner = e.target;
+        while(owner && owner.tagName != 'BUTTON')
+            owner = owner.parentElement
+
+        if(!owner)
+            return;
+
+        let rect = owner.getBoundingClientRect();
+        let options = [];
+
+        if(show_sign_in_out_icons)
+        {
+                if(!is_logged_in)
+                {
+                    options.push({
+                        caption: 'Sign in',
+                        icon: FaSignInAlt,
+                        action: (focused) => { push(sign_in_href) }
+                    });
+                }
+                else
+                {
+                    options.push({
+                        caption: 'Sign out',
+                        icon: FaSignOutAlt,
+                        action: (focused) => { push(sign_out_href) }
+                    });
+                }
+
+                options.push({separator: true})
+                
+        }
+
+        if(!config || config.darkMode)
+        {
+            if($dark_mode_store == '')
+            {
+                options.push( {
+                        caption: 'Dark mode',
+                        icon: FaToggleOff,
+                        action: (focused) => { $dark_mode_store = 'dark'; }
+                    });
+            }
+            else
+            {
+                options.push( {
+                        caption: 'Dark mode',
+                        icon: FaToggleOn,
+                        action: (focused) => { $dark_mode_store = ''; }
+                    });
+            }
+        }
+
+        if(config && config.operations)
+        {
+            options.push( {
+                    caption: 'Toolbar',
+                    icon: $tools_visible_store ? FaToggleOn : FaToggleOff,
+                    action: (focused) => { $tools_visible_store = !$tools_visible_store; }
+                });
+        }
+
+        if(has_selection_details)
+        {
+            options.push( {
+                        caption: 'Properties',
+                        icon: $bottom_bar_visible_store ? FaToggleOn : FaToggleOff,
+                        action: (focused) => { $bottom_bar_visible_store = !$bottom_bar_visible_store }
+                    });
+        }
+        
+        let pt = new DOMPoint(rect.right, rect.top)
+        show_menu(pt, options);    
+    }
+    
 </script>
 
 
     <div class="px-0 w-10">
         {#each tabs as tab}
+            {@const is_selected = $main_sidebar_visible_store == tab.key}
             <button
-                class="h-16 px-0 flex justify-center items-center w-full hover:bg-orange-500"
-                class:text-blue-300={$main_sidebar_visible_store == tab.key}
-                on:click={()=> (toggle_sidebar(tab.key))}>
+                class="h-16 px-0 flex justify-center items-center w-full text-slate-300 hover:text-slate-100"
+                class:bg-orange-500={is_selected}
+                on:click={()=> (on_tab_clicked(tab.key))}>
                 
                 <Icon size={6} component={tab.icon}/>
             </button>
         {/each}
     </div>
 
-    <div class="mt-auto h-auto items-center w-full">
-        
-        {#if show_sign_in_out_icons }
-            {#if !is_logged_in}
-                <a  href={sign_in_href} class="h-16 px-0 flex justify-center items-center w-full hover:bg-orange-500">
-                    <Icon size={6} component={FaSignInAlt}/>
-                </a> 
-            {:else}
-                <a  href={sign_out_href} class="h-16 px-0 flex justify-center items-center w-full hover:bg-orange-500">
-                    <Icon size={6} component={FaSignOutAlt}/>
-                </a>
-            {/if}
-        {/if}
-
-        {#if config && config.operations}
+    {#if !mobile}
+    
+        <div class="mt-auto h-auto items-center w-full">
+            
             <button
-                class="h-16 px-0 flex justify-center items-center w-full hover:bg-orange-500"
-                class:text-blue-300={$tools_visible_store}
-                on:click={()=> ($tools_visible_store = !$tools_visible_store)}
-                >
-
-                <Icon size={6} component={FaTools}/>
-            </button>   
-        {/if}
-
-        {#if !config || config.darkMode }
-            {#if $dark_mode_store == ''}
-            <button
-                class="h-16 px-0 flex justify-center items-center w-full hover:bg-orange-500"
-                on:click={()=> ($dark_mode_store = 'dark')}
-                >
-                <Icon size={6} component={FaMoon} />
-            </button>
-            {:else}
-            <button
-                class="h-16 px-0 flex justify-center items-center w-full hover:bg-orange-500"
-                on:click={()=> ($dark_mode_store = '')}
-                >
-                <Icon size={6} component={FaSun} />
-                
-            </button>
-            {/if}
-        {/if}
-
-        {#if !config || config.gotoRoot }
-            <a href='#/'>
-            <button
-                class="h-16 px-0 flex justify-center items-center w-full hover:bg-orange-500"
-                >
-                <Icon size={6} component={GoPrimitiveDot} />
-            </button>
-            </a>
-        {/if}
-
-        {#if has_selection_details}
-            <button
-                class="h-16 px-0 flex justify-center items-center w-full text-slate-200 hover:bg-orange-500"
-                class:text-blue-300={$bottom_bar_visible_store}
-                on:click={()=> ($bottom_bar_visible_store = !$bottom_bar_visible_store)}
-                >
+                class="h-16 px-0 flex justify-center items-center w-full text-slate-300 hover:text-slate-100"
+                on:click={show_options}>
 
                 <Icon size={6} component={FaEllipsisH} />
             </button>
-        {/if}
 
-    </div>
+        </div>
+    {/if} <!-- !mobile -->
 
+
+    <!--Menu bind:this={menu}/-->

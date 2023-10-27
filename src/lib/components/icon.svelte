@@ -116,7 +116,7 @@
     {/if}
 </div>
 
-<style>
+<!--style>
   svg {
     stroke: currentColor;
     fill: currentColor;
@@ -126,4 +126,4 @@
     max-height: 100%;
   }  
 
-</style>
+</style-->

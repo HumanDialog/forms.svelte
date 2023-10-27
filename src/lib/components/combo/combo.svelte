@@ -2,19 +2,22 @@
     import {data_tick_store, context_items_store, context_types_store} from '../../stores.js' 
     import {inform_modification, push_changes} from '../../updates.js'
     import {parse_width_directive,should_be_comapact} from '../../utils.js'
-    import {afterUpdate, getContext, setContext} from 'svelte';
+    import {afterUpdate, getContext, onMount, setContext} from 'svelte';
     import {rCombo_definition, rCombo_item, cached_sources} from './combo'
     import FaChevronDown from 'svelte-icons/fa/FaChevronDown.svelte'
     import Icon from '../icon.svelte'
-    import { Auth } from '@humandialog/auth.svelte/dist/index.js';
+    import { reef } from '@humandialog/auth.svelte/dist/index.js';
 
     export let label = ''
     export let self = null;
     export let a = '';
+    export let is_association = false;
     export let context = ""
     export let typename = '';
     export let choice_callback = '';
     export let on_select = undefined;
+    export let definition :rCombo_definition | null = null;
+    export let changed = undefined;
 
     export let icon :boolean = false;
 
@@ -23,10 +26,18 @@
     export  let s = 'sm'
     export  let c = ''
 
-    let is_table_component :boolean = getContext('rIs-table-component');
+    export let compact :boolean = false;
+    export let in_context :string = 'sel'   // in compact mode
+    export let cached :boolean = false;
     
-    let definition :rCombo_definition = new rCombo_definition;
-    setContext('rCombo-definition', definition);
+
+    let is_compact :boolean = getContext('rIs-table-component') || compact;
+    
+    if(!definition)
+    {
+        definition = new rCombo_definition;
+        setContext('rCombo-definition', definition);
+    }
 
     let   is_dropdown_open = false;
     let   dropdown_position      :string = '';
@@ -38,27 +49,40 @@
     let   highlighted_option :rCombo_item = null;
         
     let   item = null
+    let   root_element;
 
     let label_mb = 'mb-1' //
     let input_pt = 'pt-0.5'
     let input_pb = 'pb-1'
+    let font_size = 'text-sm'
+    let line_h = 'h-5'
     
     switch (s)
     {
         case 'md':
             label_mb = 'mb-2';
             input_pt = 'pt-2.5'
-            input_pb = 'pb-2.5';           
+            input_pb = 'pb-2.5';     
+            font_size = 'text-sm'      
+            line_h = 'h-5'
+            break;
+
+        case 'xs':
+            label_mb = 'mb-0.5';
+            input_pt = 'pt-0.5'
+            input_pb = 'pb-0.5';
+            font_size = 'text-xs'           
+            line_h = 'h-4'
             break;
     }
 
+    let background_class = is_compact && !icon ? "bg-slate-900/10 dark:bg-slate-100/10 rounded-lg" : ""
+
     let appearance_class;
-    if(is_table_component)
-        appearance_class = `   text-gray-900 text-sm 
-                                focus:ring-primary-600 block w-full  ${input_pb} ${input_pt} px-2.5 dark:bg-gray-700 
-                                dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500`;
+    if(is_compact)
+        appearance_class = `${font_size}`;
     else
-        appearance_class = `   bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
+        appearance_class = `   bg-gray-50 border border-gray-300 text-gray-900 ${font_size} rounded-lg 
                                 focus:ring-primary-600 focus:border-primary-600 block w-full  ${input_pb} ${input_pt} px-2.5 dark:bg-gray-700 
                                 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500`;
 
@@ -66,16 +90,16 @@
     let cs =  c ? parse_width_directive(c) : 'col-span-1';
     let ctx = context ? context : getContext('ctx');
     let can_be_activated :boolean  =true;
-
+    
     let  last_tick = -1    
 
-    $: setup($data_tick_store);
+    $: setup($data_tick_store, $context_items_store);
 
 
     function setup(...args)
     {
-        if($data_tick_store <= last_tick)
-            return;
+        //if($data_tick_store <= last_tick)
+        //    return;
 
         last_tick = $data_tick_store;
         item = self ?? $context_items_store[ctx];    
@@ -91,16 +115,34 @@
 
         tick_request_internal = tick_request_internal + 1;
         
-        if(is_table_component)
+        if(is_compact)
         {
-            if($context_items_store['sel'] != self)
-                can_be_activated = false;
-            else
-                can_be_activated = true;
+            can_be_activated = false;
+
+            let contexts = in_context.split(' ');
+            contexts.forEach(ctx => 
+            {
+                if($context_items_store[ctx] == item)
+                    can_be_activated = true;
+            } )
         }
         else
             can_be_activated =  true;
     }
+
+    onMount( () => {
+
+        if(definition.on_collect)
+            definition.on_collect().then( (source) => source_fetched(source)  )
+        else if(definition.collection_expr)
+            fetch_source_from_association().then((source) => source_fetched(source) )
+        else if(definition.collection_path)
+            get_source_collection(definition.collection_path, `${definition.collection_path}`).then((source) => source_fetched(source) )
+        else if(definition.collection)
+            source_fetched(definition.collection);
+        
+        return () => {}
+    })
 
 
     afterUpdate( () => {
@@ -108,14 +150,6 @@
             textbox.focus();
     });
 
-
-    function toggle()
-    {
-        if(is_dropdown_open)
-            hide();
-        else
-            show();
-    }
 
     function dropdown_action(node :HTMLElement)
     {
@@ -136,7 +170,9 @@
         };
     }
 
-    function show()
+    let on_hide_callback = undefined;
+
+    export function show(event, hide_callback)
     {
         if(!can_be_activated)
             return;
@@ -146,6 +182,17 @@
 
         if(is_dropdown_open)
             return;
+
+        if(event)
+        {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+
+        if(!!hide_callback)
+            on_hide_callback = hide_callback;
+        else
+            on_hide_callback = undefined;
 
         let client_rect :DOMRect;
         client_rect = new DOMRect;
@@ -161,6 +208,8 @@
 
         let palette_max_height_px = 500;
         let palette_width_px = rect.width;
+        if(palette_width_px < 120)
+            palette_width_px = 120
 
         let preferred_palette_height = dropdown_height > 0 ? dropdown_height : palette_max_height_px;
         let preferred_palette_width = palette_width_px;
@@ -185,19 +234,25 @@
             y = rect.y;
             show_above = true;
         }
-        else 
-            show_fullscreen = true;
+        else    // like bottom 
+            y = rect.y + rect.height;
 
-        if(false && show_fullscreen)
+        if(show_fullscreen)
         {
             dropdown_position =`position: fixed; left: 0px; top: 0px; width: ${client_rect.width}px; height: ${client_rect.height}px;`;
         }
         else
         {
-            dropdown_position = `width: ${rect.width}px; max-height:${palette_max_height_px}px; position: fixed; left:${x}px; top:${y}px;`;
+            dropdown_position = `min-width: ${palette_width_px}px; max-height:${palette_max_height_px}px; position: fixed; left:${x}px; top:${y}px;`;
             if(show_above)
                 dropdown_position += ' transform: translate(0, -100%);'
         }
+
+        /*console.log('dropdown_position', dropdown_position, rect, client_rect)
+        console.log('preferred_palette_height', preferred_palette_height)
+        console.log('bottom_space', bottom_space)
+        console.log('top_space', top_space)
+        */
 
         is_dropdown_open = true;
         
@@ -216,20 +271,14 @@
                                     characterData: true,
                                     subtree: true } );
 
-        if(definition.collection_expr)
-            fetch_source().then((source) => source_fetched(source) )
-        else if(definition.on_collect)
-        {
-            definition.on_collect().then( (source) => source_fetched(source)  )
-        }
-        else
-        {
-            filtered_source = definition.source.map( e => e);
-            highlighted_option = filtered_source.length > 0 ? filtered_source[0] : null;
-        }
+        
+        
+                                    
+        filtered_source = definition.source.map( e => e);
+        highlighted_option = filtered_source.length > 0 ? filtered_source[0] : null;
     }
 
-    function hide()
+    export function hide()
     {
         if(mutation_observer)
             mutation_observer.disconnect();
@@ -237,7 +286,12 @@
         is_dropdown_open = false;
 
         combo_text = get_combo_text();
-        textbox.innerHtml = combo_text;
+        
+        if(!!textbox)
+            textbox.innerHtml = combo_text;
+
+        if(!!on_hide_callback)
+            on_hide_callback();
 
         tick_request_internal = tick_request_internal + 1;
     }
@@ -297,7 +351,7 @@
             if(found)
                 return found.Name ?? found.Key;
             else
-                return !is_table_component ? placeholder : '';
+                return !is_compact ? placeholder : '';
         }
         else
             return textbox.innerHTML;
@@ -305,53 +359,117 @@
 
     async function on_choose(itm :rCombo_item)
     {
+        //console.log('on_choose')
         hide();
 
-        if(choice_callback)
-        {
-            let body = {
-                choice :
-                {
-                    $ref: itm.Key
-                }
-            }
-
-            let path = `${typename}/${item.Id}/${choice_callback}`;
-            let fields = calc_path_fields_param();
-            if(fields)
-                path += fields;
-            
-            let res = await Auth.fetch(`json/yav1/${path}`,
-                            {
-                                method: 'POST',
-                                body: JSON.stringify(body)
-                            });
-            if(res.ok)
-            {
-                let result_item = await res.json();
-                let result_typename = Object.keys(result_item)[0];
-                item[a] = result_item[result_typename];
-                tick_request_internal = tick_request_internal + 1;
-            }
-            else
-                console.error(res);
-        }
-        else if(on_select)
+        if(on_select)
         {
             await on_select(item, itm.Key, itm.Name);
             tick_request_internal = tick_request_internal + 1;
-        }
+ }
         else
         {
-            item[a] = itm.Key ?? itm.Name;
-            tick_request_internal = tick_request_internal + 1;
-
-            if(item && a && typename)
+            if( is_association )
             {
-                inform_modification(item, a, typename);
-                push_changes();
+                if(choice_callback)
+                {
+                    let body = {
+                        choice : {
+                            $ref: itm.Key
+                        }
+                    }
+
+                    let path :string;
+                    if(item.$ref)
+                        path = `${item.$ref}/${choice_callback}`;
+                    else
+                        path = `${typename}/${item.Id}/${choice_callback}`;
+
+                    let fields = calc_path_fields_param();
+                    if(fields)
+                        path += fields;
+
+                    let result = await reef.post(`/${path}`, body)
+                    if(result)
+                    {
+                        let result_typename = Object.keys(result)[0];
+                        item[a] = result[result_typename];
+
+                        tick_request_internal = tick_request_internal + 1;
+                    }
+                    
+                }
+                else
+                {
+                    let path :string;
+                    if(item.$ref)
+                        path = `/${item.$ref}/set`;
+                    else if(typename && item.Id)
+                        path = `/${typename}/${item.Id}/set`;
+
+
+                    let result = await reef.post(path, 
+                                        {
+                                            [a]: 
+                                            { 
+                                                $ref: itm.Key 
+                                            }
+                                        });
+
+                    if(result)
+                    {
+
+                        let name = definition.element_name ?? '$display'
+                        item[a] = {
+                            $ref: itm.Key,
+                            [name]: itm.Name
+                        }
+
+                        tick_request_internal = tick_request_internal + 1;
+                    }
+
+                    
+                }
+            }
+            else    // or simple property
+            {
+                if(choice_callback)
+                {
+                    let path :string;
+                    if(item.$ref)
+                        path = `/${item.$ref}/${choice_callback}`;
+                    else
+                        path = `/${typename}/${item.Id}/${choice_callback}`;
+
+                    let fields = calc_path_fields_param();
+                    if(fields)
+                        path += fields;
+
+                    let value = itm.Key ?? itm.Name;
+
+                    let result = await reef.post(path, { choice: value })
+                    if(result)
+                    {
+                        item[a] = result;
+                        tick_request_internal = tick_request_internal + 1;
+                    }
+                }
+                else
+                {
+                    item[a] = itm.Key ?? itm.Name;
+                    tick_request_internal = tick_request_internal + 1;
+
+                    if(item && a && typename)
+                    {
+                        inform_modification(item, a, typename);
+                        push_changes();
+                    }
+                }
             }
         }
+
+        if(!!changed)
+            changed(itm.Key, itm.Name); 
     }
 
     function on_keydown(e)
@@ -445,7 +563,7 @@
         highlighted_option = over;
     }
 
-    async function fetch_source() :Promise<object>
+    async function fetch_source_from_association() :Promise<object>
     {
         if(item.hasOwnProperty(definition.collection_expr))
         {
@@ -469,7 +587,12 @@
         }
         else
         {
-            let path :string = `${typename}/${item.Id}/${definition.collection_expr}`;
+            let path :string;
+            if(item.$ref)
+                path = `${item.$ref}/${definition.collection_expr}`;
+            else
+                path = `${typename}/${item.Id}/${definition.collection_expr}`;
+
             return await get_source_collection(path, `${typename}_${definition.collection_expr}`);
         }
     }
@@ -505,28 +628,18 @@
         {
             let promise  = new Promise<object>( async (resolve, fail) =>
             {
-                try
-                {   
-                    let fields = calc_path_fields_param();
-                    if(fields)
-                        path += fields;
-                    
-                    let res = await Auth.fetch(`json/yav1/${path}`, {
-                                    method: 'POST'
-                    });
-                    if(res.ok)
-                        resolve( await res.json() );
-                    else
-                        resolve(null);
-                }
-                catch(err)
-                {
-                    console.error(err);
-                    resolve(null);
-                }   
+                let fields = calc_path_fields_param();
+                if(fields)
+                    path += fields;
+                
+                let res = await reef.get(path);
+                resolve( res );
             });
 
-            cached_sources.set(cache_key, promise);
+            if(!cached)
+                return await promise;
+            else
+                cached_sources.set(cache_key, promise);
         }
             
         let promise = cached_sources.get(cache_key);
@@ -547,7 +660,7 @@
             array = source[type];
         }
 
-        item[definition.collection_expr] = [...array];
+        //item[definition.collection_expr] = [...array];
 
         definition.source = [];
         array.forEach( e =>
@@ -555,13 +668,17 @@
             let el = new rCombo_item;
             if(definition.element_name)
                 el.Name = e[definition.element_name];
-            else
+            else if(e.$display)
                 el.Name = e.$display;
+            else
+                el.Name = e.toString();
 
             if(definition.element_key)
                 el.Key = e[definition.element_key];
-            else
+            else if(e.$ref)
                 el.Key = e.$ref;
+            else
+                el.Key = el.Name;
 
             if(icon)
             {
@@ -574,8 +691,6 @@
             definition.source.push(el);
         })
 
-        filtered_source = definition.source.map( e => e);
-        highlighted_option = filtered_source.length > 0 ? filtered_source[0] : null;
     }
 
     function setup_view(...args)
@@ -593,6 +708,18 @@
 
     }
 
+    function on_focus_out(e)
+    {
+        //console.log(e)
+        if(e.relatedTarget && root_element?.contains(e.relatedTarget))
+        {
+
+        }
+        else
+            hide();
+    }
+
+
 </script>
 
 <slot/>     <!-- definition slot first -->
@@ -600,19 +727,21 @@
 
 {#if true}
     {@const c = setup_view(item, a, tick_request_internal) }
-
-<div class={cs}
-    on:focusout={(e) => setTimeout(() => {hide()}, 100)}>
-    {#if !is_table_component}
+    
+<div class="{cs} max-w-full inline-block"
+    on:focusout={on_focus_out}
+    bind:this={root_element}>
+    {#if !is_compact}
         <label for="name" class="block {label_mb} text-xs font-small text-gray-900 dark:text-white">{label}</label>
     {/if}
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div    bind:this={combo}    
-            on:click|preventDefault|stopPropagation={show}
-            class="{appearance_class} flex flex-row content-between items-center"
+            on:click={(e) => { show(e, undefined) }}
+            class:cursor-pointer={can_be_activated && is_compact}
+            class="max-w-full {appearance_class} flex flex-row content-between items-center"
          >
             
-        <div class="flex-1 flex flex-row items-center">
+        <div class="max-w-full flex-1 flex flex-row items-center">
             {#if !is_dropdown_open}
                 {#if icon && sel_item}
                     {#if sel_item.Color}
@@ -623,16 +752,19 @@
                 {/if}
             {/if}
 
+            
             <p  bind:this={textbox}
-                class="ml-2 dark:text-white"
+                class="dark:text-white {line_h} truncate px-2.5 {background_class}"
+                class:ml-2={icon}
                 class:text-gray-400={ (!is_dropdown_open) && (!sel_item)}
                 class:text-gray-700={ is_dropdown_open || sel_item }
+                class:w-10={!combo_text}
                 contenteditable={is_dropdown_open}
                 on:keydown={on_keydown}>
                 {combo_text}</p>
         </div>
         
-        {#if can_be_activated }
+        {#if can_be_activated && !is_compact }
             <Icon size={3} component={FaChevronDown} class="flex-none text-gray-700 dark:text-gray-200"/>
         {/if}
     </div>
@@ -642,13 +774,6 @@
             style={dropdown_position}
             use:dropdown_action>
         <ul class="py-1">
-<!--        {#if is_dropdown_open && definition.collection_expr}
-                {#await fetch_source()}
-                    <p>Loading...</p>
-                {:then source} 
-                    {@const c = source_fetched(source)}
-                {/await}
-            {/if}  -->
 
             {#if definition.source && definition.source.length}
                 {@const _filtered_source = filtered_source ? filtered_source : definition.source}
@@ -660,7 +785,8 @@
                             class:dark:bg-gray-700={highlighted_option == item}
                             class:dark:hover:bg-gray-700={highlighted_option == item}
                             on:mousemove={() => on_mouse_move(item)}
-                            on:click|preventDefault|stopPropagation={async () => await on_choose(item)}>
+                            on:click|preventDefault|stopPropagation={async () => await on_choose(item)}
+                            tabindex="-1">
 
                             {#if icon}
                                 {#if item.Color}

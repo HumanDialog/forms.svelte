@@ -2,6 +2,7 @@
 	import { afterUpdate, tick} from 'svelte';
     import Icon from './icon.svelte'
     import {context_items_store} from '../stores'
+    import {is_device_smaller_than} from '../utils'
 
     export let width_px     :number = 400;
 
@@ -18,6 +19,7 @@
     let focused_index = 0;
     let menu_items :HTMLElement[] = [];
     let submenus = [];
+    let around_rect :DOMRect;
 
     $: display = visible ? 'block' : 'none';
 
@@ -34,7 +36,7 @@
             x = container_rect.right - rect.width;
 
         if(rect.bottom > container_rect.bottom)
-            y = container_rect.bottom - rect.height;
+            y = container_rect.bottom - rect.height - around_rect.height;
 
         if(rect.left < container_rect.left)
             x = container_rect.left;
@@ -43,10 +45,21 @@
             y = container_rect.top
     })
     
-    export async function show(_x :number, _y :number, _operations)
+    export async function show(around :DOMRect|DOMPoint, _operations)
     {
-        x = _x;
-        y = _y;
+        if(around instanceof DOMRect)
+        {
+            x = around.left;
+            y = around.bottom;
+            around_rect = around;
+        }
+        else if(around instanceof DOMPoint)
+        {
+            x = around.x;
+            y = around.y;
+            around_rect = new DOMRect(x, y, 0, 0)
+        }
+
         visible = true;
         operations = [..._operations];
         focused_index = 0;
@@ -56,6 +69,11 @@
         if(menu_items.length)
             focus_menu_item(focused_index);
         
+    }
+
+    export function is_visible()
+    {
+        return visible;
     }
 
     export function hide()
@@ -134,10 +152,13 @@
 
     function on_change_focus(e)
     {
-        if(e.relatedTarget && e.relatedTarget.id.startsWith(menu_items_id_prefix))
-            return;
-        else
-            hide();
+        if(!is_device_smaller_than("sm"))
+        {
+            if(e.relatedTarget && e.relatedTarget.id.startsWith(menu_items_id_prefix))
+                return;
+            else
+                hide();
+        }
     }
 
     function on_mouse_move(index)
@@ -147,7 +168,6 @@
 
     function execute_action(operation, index)
     {
-        //console.log('prefix', menu_items_id_prefix,  'index', index)
         if(operation.menu)
         {
             focus_menu_item(index);
@@ -213,7 +233,7 @@
 </script>
 
 <div id="__hd_svelte_contextmenu" 
-    class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 shadow-md z-20 fixed min-w-[{min_width_px}px]" 
+    class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 shadow-md z-20 fixed min-w-[{min_width_px}px] w-max" 
     style={`left:${x}px; top:${y}px; display:${display}`}
     bind:this={menu_root}
     on:focusout={on_change_focus}>

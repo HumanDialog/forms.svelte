@@ -123,7 +123,7 @@
         e.stopPropagation();
         e.preventDefault();
 
-        show_menu(e.clientX, e.clientY, menu_operations);
+        show_menu(new DOMPoint(e.clientX, e.clientY), menu_operations);
     }
 
 </script>

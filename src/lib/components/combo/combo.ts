@@ -13,7 +13,10 @@ export class rCombo_definition
     public source :rCombo_item[] = [];
     
     public collection_expr  :string | undefined;
+    public collection_path  :string | undefined;
+    public collection       :object[] | undefined;
     public on_collect       = undefined;
+    
     public element_key      :string | undefined;
     public element_name     :string | undefined;
     public element_avatar   :string | undefined;

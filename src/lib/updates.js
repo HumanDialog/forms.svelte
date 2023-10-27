@@ -1,5 +1,5 @@
 import {writable} from 'svelte/store';
-import {Auth} from '@humandialog/auth.svelte/dist/index'
+import {reef} from '@humandialog/auth.svelte/dist/index'
 
 
 const modified_item_store = writable(null);
@@ -75,12 +75,8 @@ update_request_ticket.subscribe(async (v) => {
 
         try
         {
-            console.log('push: ', changes);
-            const res = await Auth.fetch('/json/yav1/Push', 
-                                        {
-                                        method: "POST",
-                                        body: JSON.stringify({ Items: changes }),
-                                        });
+            //console.log('push: ', changes);
+            const res = await reef.post('/Push', { Items: changes });
 
             if(res)
             {
