@@ -1,0 +1,62 @@
+{
+	"name": "@humandialog/forms.svelte",
+	"version": "0.4.19",
+	"description": "Basic Svelte UI components for Object Reef applications",
+	"scripts": {
+		"dev": "vite dev --host",
+		"build": "svelte-kit sync && svelte-package",
+		"prepublishOnly": "echo 'Did you mean to publish `./package/`, instead of `./`?' && exit 1",
+		"test": "playwright test",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"lint": "prettier --plugin-search-dir . --check . && eslint .",
+		"format": "prettier --plugin-search-dir . --write ."
+	},
+	"devDependencies": {
+		"@playwright/test": "^1.28.1",
+		"@sveltejs/adapter-auto": "^1.0.0-next.90",
+		"@sveltejs/kit": "^1.0.0-next.587",
+		"@sveltejs/package": "^1.0.0-next.6",
+		"@tailwindcss/typography": "^0.5.10",
+		"@typescript-eslint/eslint-plugin": "^5.45.0",
+		"@typescript-eslint/parser": "^5.45.0",
+		"autoprefixer": "^10.4.15",
+		"eslint": "^8.28.0",
+		"eslint-config-prettier": "^8.5.0",
+		"eslint-plugin-svelte3": "^4.0.0",
+		"postcss": "^8.4.29",
+		"prettier": "^2.8.0",
+		"prettier-plugin-svelte": "^2.8.1",
+		"svelte": "^3.54.0",
+		"svelte-check": "^2.9.2",
+		"tailwindcss": "^3.3.3",
+		"tslib": "^2.4.1",
+		"typescript": "^4.9.3",
+		"vite": "^4.0.0"
+	},
+	"type": "module",
+	"dependencies": {
+		"@humandialog/auth.svelte": "^1.1.2",
+		"flowbite-svelte": "^0.29.13",
+		"svelte-icons": "^2.1.0",
+		"svelte-spa-router": "^3.3.0"
+	},
+	"keywords": [
+		"svelte",
+		"objectreef",
+		"reef",
+		"ui",
+		"ux",
+		"components"
+	],
+	"author": "Human Dialog",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/HumanDialog/forms.svelte.git"
+	},
+	"bugs": {
+		"url": "https://github.com/HumanDialog/forms.svelte/issues"
+	},
+	"homepage": "https://github.com/HumanDialog/forms.svelte#readme"
+}
