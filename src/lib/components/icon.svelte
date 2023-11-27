@@ -15,6 +15,7 @@
     export let circle :boolean = false;                     
     
     let additional_class = $$restProps.class ?? '';
+    let id = $$restProps.id ?? '';
     let _bg;
     
     let txt :string = '';
@@ -92,6 +93,7 @@
     style:height={icon_size} 
     style:background-color={_bg}
     style:border-radius={ circle ? '50%' : ''}
+    {id}
     on:blur
     on:click
     on:focus

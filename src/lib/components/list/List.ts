@@ -5,7 +5,8 @@ export enum rList_property_type
     Hidden,
     Text,
     Date,
-    Combo
+    Combo,
+    Static
 }
 
 export class rList_property
@@ -38,12 +39,17 @@ export class rList_definition
 {
     public title                :string = '';
     public title_editable       :boolean = false;
+    public on_title_changed     :Function | undefined = undefined;
+    public title_readonly       :boolean = false;
 
     public summary              :string = '';
     public summary_editable     :boolean = false;
+    public on_summary_changed   :Function | undefined = undefined;
+    public summary_readonly     :boolean = false;
 
     public can_insert           :boolean = false;
     public oninsert             :Function | undefined = undefined;
+    public inserter_icon        :boolean = false;
 
     public properties           :rList_property[] = [];
 }

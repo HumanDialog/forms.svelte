@@ -6,7 +6,8 @@ const disabledCss = {
 
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ['./src/**/*.{html,js,svelte,ts}'],
+  content: ['./src/**/*.{html,js,svelte,ts}',
+  			'./node_modules/@humandialog/forms.svelte/**/*.{html,js,svelte,ts}'],
   theme: {
     extend: {
 			typography: {

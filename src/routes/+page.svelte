@@ -1,5 +1,5 @@
 <script lang="ts">
-	export const ssr = false;
+	//export const ssr = false;
 </script>
 
 <div class="prose m-2">
@@ -11,6 +11,7 @@
     <li><a href="/combo">Combo</a></li>
     <li><a href="/table">Table</a> with context menu</li>
     <li><a href="/layout">Layout</a></li>
+    <li><a href="/list">List</a></li>
 </ul>
 
 <p>Create package using thease steps:</p>
