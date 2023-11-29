@@ -122,7 +122,7 @@
                 else if(item.$ref)
                 {
                     let s = item.$ref.split('/')
-                    typename = s[0];
+                    typename = s[1];
                 }
             }
             
