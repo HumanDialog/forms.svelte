@@ -13,13 +13,26 @@
     export let context = ""
     export let itype="text"
     export let typename = '';
+    export let invalid = false;
     
     export let val = ''
         
-    export const placeholder = 'pl'
+    export let placeholder = 'pl'
 
     export  let s = 'sm'
     export  let c = ''
+    export  let validate_cb = undefined;
+    export function validate()
+    {
+        if(!validate_cb)
+        {
+            invalid = false;
+            return true;
+        }
+
+        invalid = !validate_cb(val);
+        return !invalid;
+    } 
 
     
     let   item = null
@@ -41,6 +54,7 @@
     let ctx = context ? context : getContext('ctx');
         
     let  last_tick = -1    
+    let border_style = "border-gray-300  dark:border-gray-600"
 
     $:{ 
         if($data_tick_store > last_tick)
@@ -60,12 +74,13 @@
         
         if(label == '')
             label = a
+
+        
     }
-    
-    
     
     function value_changed()
     {
+        validate();
         if(item != null)
         {
             item[a] = val
@@ -81,22 +96,33 @@
         push_changes();
             
     }
+
+    function check_validity()
+    {
+        if(invalid)
+            validate();
+    }
         
    
 </script>    
 
 {#if itype == 'text'}
+    {@const border_style = invalid ? "border-red-300 dark:border-red-600" : "border-gray-300 dark:border-gray-600" }
     <div class={cs}>
         <label for="name" class="block {label_mb} text-xs font-small text-gray-900 dark:text-white">{label}</label>
         
         <input  type=text name="name" id="name" 
                 bind:value={val} 
                 on:change={()=> (value_changed())}
-                on:blur={() => { accept_change(); } }
+                on:blur={() => { accept_change();} }
+                on:keydown={(e)=>{check_validity();}}
                 
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
-                focus:ring-primary-600 focus:border-primary-600 block w-full  {input_pb} {input_pt} px-2.5 dark:bg-gray-700
-            dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" 
+                class="     bg-gray-50 dark:bg-gray-700
+                            border {border_style} rounded-lg 
+                            focus:ring-primary-600 focus:border-primary-600 dark:focus:ring-primary-500 dark:focus:border-primary-500
+                            text-gray-900 dark:text-white text-sm  
+                            block w-full {input_pb} {input_pt} px-2.5 
+                            dark:placeholder-gray-400" 
                 
                 placeholder={placeholder}>
     </div>

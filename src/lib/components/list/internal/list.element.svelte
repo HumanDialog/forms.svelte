@@ -45,9 +45,19 @@
         else if(item.$ref)
         {
             let s = item.$ref.split('/')
-            typename = s[0];
+            typename = s[1];
         }
     }
+
+    let item_key :string = ''
+    let keys = Object.keys(item);
+    if(keys.includes('Id'))
+        item_key = 'Id'
+    else if(keys.includes('$ref'))
+        item_key = '$ref';
+    else if(keys.length > 0)
+        item_key = keys[0];
+
 
     if(!title)
         title = definition.title;
@@ -70,16 +80,30 @@
     
     async function change_name(text)
     {
-        item[title] = text;
-        inform_modification(item, title, typename);
-        push_changes();
+        if(definition.on_title_changed)
+        {
+            definition.on_title_changed(item, text, title)
+        }
+        else
+        {
+            item[title] = text;
+            inform_modification(item, title, typename);
+            push_changes();
+        }
     }
 
     async function change_summary(text)
     {
-        item[summary] = text;
-        inform_modification(item, summary, typename);
-        push_changes();
+        if(definition.on_summary_changed)
+        {
+            definition.on_summary_changed(item, text, summary);
+        }
+        else
+        {
+            item[summary] = text;
+            inform_modification(item, summary, typename);
+            push_changes();
+        }
     }
 
     function edit(e)
@@ -192,7 +216,9 @@
 
     export function edit_property(field :string)
     {
-        if(field == 'Summary')
+        if(field == title)
+            force_editing('Title')
+        else if(field == summary)
             force_editing('Summary')
         else
         {
@@ -216,7 +242,7 @@
 
     async function force_editing(field :string)
     {
-        let element_id = `__hd_list_ctrl_${item.Id}_${field}`;
+        let element_id = `__hd_list_ctrl_${item[item_key]}_${field}`;
         let element_node = document.getElementById(element_id);
         if(!element_node)
         {
@@ -272,6 +298,7 @@
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
+{#if item}
 <section    class="flex flex-row my-0  w-full text-sm text-slate-700 dark:text-slate-400 cursor-default rounded-md border-2 border-transparent {selected_class} {focused_class}"
             on:contextmenu={on_contextmenu}
             role="menu"
@@ -282,11 +309,17 @@
     <div class="ml-3 w-full py-1" use:selectable={item} on:click={(e) => {activate_row(e, item)}} role="row" tabindex="0">
         <div class="flex flex-row">
             <p class="font-bold whitespace-nowrap overflow-clip flex-none w-1/2 sm:w-1/3">
-                <span  id="__hd_list_ctrl_{item.Id}_Title" role="gridcell" tabindex="0"
-                    use:editable={(text) => {change_name(text)}}
-                    on:click={edit}> 
+                {#if definition.title_readonly}
+                <span  id="__hd_list_ctrl_{item[item_key]}_Title" role="gridcell" tabindex="0"> 
                     {item[title]}
                 </span>
+                {:else}
+                    <span  id="__hd_list_ctrl_{item[item_key]}_Title" role="gridcell" tabindex="0"
+                        use:editable={(text) => {change_name(text)}}
+                        on:click={edit}> 
+                        {item[title]}
+                    </span>
+                {/if}
             </p>
 
             <!--div class="flex flex-row justify-between text-xs flex-none w-1/2 sm:w-2/3"-->
@@ -317,6 +350,10 @@
                                             definition={prop.combo_definition}
                                             changed={(key,name)=>{on_combo_changed(key, name, prop)}}
                                             s='xs'/>
+                                {:else if prop.type == rList_property_type.Static}
+                                    <span class="dark:text-white text-gray-400 truncate px-2.5 bg-slate-900/10 dark:bg-slate-100/10 rounded-lg">
+                                        {item[prop.a]}
+                                    </span>
                                 {/if}
                             </span>
                         {/if}
@@ -326,9 +363,13 @@
         </div>
 
         {#if summary && (item[summary] || placeholder=='Summary')}
-            {@const element_id = `__hd_list_ctrl_${item.Id}_Summary`}
+            {@const element_id = `__hd_list_ctrl_${item[item_key]}_Summary`}
             <p class="text-xs text-slate-400" style="min-height: 1rem;">
-                {#if item[summary]}
+                {#if definition.summary_readonly}
+                    <span   id={element_id} role="gridcell" tabindex="0">
+                        {item[summary]}
+                    </span>
+                {:else if item[summary]}
                     <span   id={element_id} role="gridcell" tabindex="0"
                             use:editable={(text) => {change_summary(text)}}
                             on:click={edit}>
@@ -344,6 +385,7 @@
         {/if}
     </div>
 </section>
+{/if}
 
 <style>
     .grid-1

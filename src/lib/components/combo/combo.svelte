@@ -374,9 +374,7 @@
                 if(choice_callback)
                 {
                     let body = {
-                        choice : {
-                            $ref: itm.Key
-                        }
+                        choice :  itm.Key
                     }
 
                     let path :string;
@@ -410,10 +408,7 @@
 
                     let result = await reef.post(path, 
                                         {
-                                            [a]: 
-                                            { 
-                                                $ref: itm.Key 
-                                            }
+                                            [a]: itm.Key
                                         });
 
                     if(result)

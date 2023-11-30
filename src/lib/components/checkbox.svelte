@@ -63,13 +63,13 @@
   
 </script>
 
-<div class="ml-2 h-6 {cs} {color_style} {additional_class} flex items-center">
+<div class="ml-1 h-6 text-sm font-medium {cs} {color_style} {additional_class} flex items-center">
     <input  type="checkbox" 
             bind:checked={value} 
             on:change={on_changed}
             {disabled} 
             class="w-4 h-4 bg-gray-100 border-gray-300 dark:ring-offset-gray-800 focus:ring-2 mr-2 dark:bg-gray-700 dark:border-gray-600 rounded text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600"/>
-    <span class="text-sm font-medium ml-1">
+    <span class="ml-1">
         <slot/>
     </span>
     

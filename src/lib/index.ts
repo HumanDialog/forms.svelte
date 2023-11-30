@@ -51,7 +51,10 @@ export { default as ListSummary} from './components/list/list.summary.svelte'
 export { default as ListInserter} from './components/list/list.inserter.svelte'
 export { default as ListDateProperty} from './components/list/list.date.svelte'
 export { default as ListComboProperty} from './components/list/list.combo.svelte'
+export { default as ListStaticProperty} from './components/list/list.static.svelte'
 
+export { default as Modal} from './modal.svelte'
+export { default as MembersPage} from './tenant.members.svelte'
 
 export {
     select_item,

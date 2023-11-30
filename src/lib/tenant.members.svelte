@@ -1,0 +1,397 @@
+<script>
+    import {    FaUserPlus,
+                FaUserMinus,
+                FaPen,
+                FaInfoCircle} from 'svelte-icons/fa'
+    
+    import Page from './page.svelte'
+    import List from './components/list/list.svelte'
+    import ListTitle from './components/list/list.title.svelte'
+    import ListSummary from './components/list/list.summary.svelte'
+    import ListComboProperty from './components/list/list.combo.svelte'
+    import ComboItem from './components/combo/combo.item.svelte'
+    import ListStaticProperty from './components/list/list.static.svelte'
+    import Input from './components/inputbox.ltop.svelte';
+    import Icon from "./components/icon.svelte";
+	import Modal from './modal.svelte'
+	import Checkbox from '$lib/components/checkbox.svelte';
+    import {Popover} from 'flowbite-svelte'
+	import { reef } from '@humandialog/auth.svelte';
+	
+
+    // ==============================================================================
+
+    export let users = undefined;
+    export let name_attrib = "Name";
+    export let email_attrib = "login";
+    export let ref_attrib = "$ref";
+    export let show_files = false;
+    //export let show_admin = true;
+    export let app_groups = undefined;
+
+    // ===============================================================================
+  
+    $: init();
+   
+    // ===============================================================================
+
+	let list;
+
+    let create_new_user_enabled = false;
+
+    let reef_users = [];
+    let new_reef_user_id = 1;
+
+    async function init()
+    {
+        reef_users = [];
+        if(users && Array.isArray(users) && users.length > 0)
+        {
+            users.forEach( u =>
+            {
+                reef_users.push(
+                    {
+                        [name_attrib]: u[name_attrib],
+                        [email_attrib]: u[email_attrib],
+                        [ref_attrib]: u[ref_attrib],
+                        auth_group: 0,
+                        files_group :0,
+                        app_group: 0,
+                        other: "",
+                        avatar_url : "",
+                        invitation_not_accepted: false,
+                        removed: false,
+                        membership_tag: "",
+                        __hd_internal_item_id: new_reef_user_id++
+                    }
+                )
+            })
+        }
+
+        await fetch_details();
+ 
+    }
+
+    
+    async function fetch_details(...args)
+    {
+        let users_no = reef_users.length;
+        let handled_no = 0;
+        reef_users.forEach(async ru =>
+        {
+            let details = await reef.get(`/sys/user_details?email=${ru[email_attrib]}`)
+            set_user_info(ru, details);
+
+            handled_no++;
+            if(handled_no == reef_users.length)
+                list?.update_objects(reef_users);
+        } )
+    }
+
+    function set_user_info(user, info)
+    {
+        user.auth_group = info.auth_group ?? 0;
+        user.files_group = info.files_group ?? 0;
+        user.avatar_url = info.avatar_url ?? "";
+        user.other = info.access_details ?? "";
+        user.app_group = info.reef_user_group_id ?? 0;
+        user.removed = info.removed ?? false;
+        user.invitation_not_accepted = info.invitation_not_accepted ?? false;
+
+        if(user.removed)
+            user.membership_tag = "Removed";
+        else if(user.invitation_not_accepted)
+            user.membership_tag = "Invited";
+        else
+            user.membership_tag = "";
+
+        user.__hd_internal_item_id = new_reef_user_id++;
+    }
+
+    /*onMount(
+        async () => {
+            await fetch_details();
+            return () => {}
+        }
+    )
+    */
+    
+    let new_user = {
+        name: '',
+        email: '',
+        maintainer: false
+    }
+
+    let name_input;
+    let email_input;
+
+    async function delete_user(user)
+    {
+        let email = user[email_attrib];
+        
+        let removed_user_details = await reef.get('/sys/kick_out_user?email=' + email);
+        if(removed_user_details)
+        {
+            //let removed_user = reef_users.find( u => u[email_attrib] == user[email_attrib])
+            set_user_info(user, removed_user_details);
+            list?.refresh();
+        }
+    }
+
+    async function on_name_changed(user, name, property)
+    {
+        user[property] = name;
+
+        let user_path = user[ref_attrib];
+        if(!user_path)
+            return;
+
+        await reef.post(`${user_path}/set`,
+                    {
+                        [name_attrib]: name
+                    }); 
+    }
+
+    async function on_change_privileges(user, flags, name)
+    {
+        if(user.auth_group != flags)
+        {
+            let email = user[email_attrib];
+            let info = await reef.get(`sys/set_user_details?email=${email}&auth_group=${flags}`)
+            if(info)
+            {
+                user.auth_group = flags;
+
+                set_user_info(user, info)
+                list?.refresh();
+            }
+        }
+    }
+
+    async function on_change_files_access(user, flags, name)
+    {
+        if(user.files_group != flags)
+        {
+            user.files_group = flags;
+            
+            let email = user[email_attrib];
+            let info = await reef.get(`sys/set_user_details?email=${email}&files_group=${flags}`)
+            if(info)
+            {
+                set_user_info(user, info)
+                list?.refresh();
+            }
+        }
+    }
+    
+    function create_new_user()
+    {
+        create_new_user_enabled = true;
+    }
+
+    let page_operations=[
+        {
+            icon: FaUserPlus,
+            caption: '',
+            action: (focused) => { create_new_user(); }
+        }
+    ]
+
+    function get_edit_operations(user)
+    {
+        let operations = [
+            {
+                caption: name_attrib,
+                action: (focused) =>  { list.edit(user, name_attrib) }
+            },
+            {
+                caption: 'Privileges',
+                action: (focused) => { list.edit(user, 'Privileges') }
+            }];
+
+        if(show_files)
+        {
+            operations.push({
+                caption: 'Files',
+                action: (focused) => { list.edit(user, 'Files') }
+            });
+        }
+        
+        return operations;
+    }
+
+    let user_operations = (user) => { 
+        
+        let operations = [];
+        
+        let edit_operations = get_edit_operations(user)
+        if(edit_operations.length == 1)
+        {
+            operations.push({
+                                icon: FaPen,
+                                caption: '',
+                                action: edit_operations[0].action
+                            });
+        }
+        else
+        {
+            operations.push({
+                                icon: FaPen,
+                                caption: '',
+                                grid: edit_operations
+                            });
+        }
+
+        operations.push({
+                            caption: '',
+                            icon: FaUserMinus,
+                            action: (focused) => delete_user(user)
+                        });
+
+        return operations;
+    }
+
+    let user_context_menu = (user) => {
+        let edit_operations = get_edit_operations(user);
+        return {
+            grid: edit_operations
+        }
+    }
+
+    let data_item = 
+    { 
+       
+    }
+
+    function is_valid_email_address(e)
+    {
+        let pattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        return (e.match(pattern) != null);
+    }
+
+    function is_valid_name(s)
+    {
+        return !!s;
+    }
+
+    async function on_new_user_requested()
+    {
+        if(!name_input?.validate())
+            return;
+
+        if(!email_input?.validate())
+            return;
+
+        let result = await reef.post('/sys/invite_user',
+                        {
+                            email: new_user.email,
+                            admin: new_user.maintainer,
+                            set:
+                            {
+                                [name_attrib]: new_user.name,
+                                [email_attrib]: new_user.email
+                            }
+                        })
+        if(result)
+        {
+            let created_user = result.User;
+            let new_reef_user = {
+                [name_attrib]: created_user[name_attrib],
+                [email_attrib]: created_user[email_attrib],
+                [ref_attrib]: created_user[ref_attrib]
+            }
+
+            let details = await reef.get(`/sys/user_details?email=${new_reef_user[email_attrib]}`)
+            set_user_info(new_reef_user, details);
+
+            reef_users = [...reef_users, new_reef_user]
+            list?.update_objects(reef_users);
+        }
+
+        new_user.name = '';
+        new_user.email = '';
+        new_user.maintainer = false;
+        create_new_user_enabled = false;
+    }
+
+    function on_new_user_canceled()
+    {
+        new_user.name = '';
+        new_user.email = '';
+        new_user.maintainer = false;
+        create_new_user_enabled = false;
+    }
+
+</script>
+
+<Page   self={data_item} 
+        cl="!bg-white dark:!bg-slate-900 w-full h-full flex flex-col overflow-y-hidden overflow-x-hidden py-1 px-1 border-0" 
+        toolbar_operations={page_operations}
+        clears_context='props sel'>
+    <a href="/" class="underline text-sm font-semibold ml-3"> &lt; Back to root</a>
+
+    {#if reef_users && reef_users.length > 0}
+    <List       objects={reef_users} 
+                title='Members' 
+                toolbar_operations={user_operations} 
+                context_menu={user_context_menu}
+                key='__hd_internal_item_id'
+                bind:this={list}>
+            <ListTitle a={name_attrib} on_change={on_name_changed}/>
+            <ListSummary a={email_attrib} readonly/>
+
+            <ListStaticProperty name="Membership" a="membership_tag"/>
+            
+            <ListComboProperty name='Privileges' a='auth_group' on_select={on_change_privileges}>
+                <ComboItem name='None'       key={0}  />
+                <ComboItem name='Can See'    key={1}  />
+                <ComboItem name='Can Invite' key={3}  />
+                <ComboItem name='Maintainer' key={7}  />
+            </ListComboProperty>
+
+            {#if show_files}
+            <ListComboProperty name='Files' a='files_group' on_select={on_change_files_access}>
+                <ComboItem name='None'      key={0}  />
+                <ComboItem name='Read'      key={1}  />
+                <ComboItem name='Write'     key={2}  />
+                <ComboItem name='Read&Write' key={3}  />
+            </ListComboProperty>
+            {/if}
+
+            
+    </List>
+    {/if}
+
+</Page>
+
+<Modal  bind:open={create_new_user_enabled}
+        title='Invite someone'
+        ok_caption='Invite'
+        on_ok_callback={on_new_user_requested}
+        on_cancel_callback={on_new_user_canceled}
+        icon={FaUserPlus}>
+            <Input  label='Name' 
+                    placeholder='' 
+                    self={new_user} 
+                    a="name"
+                    validate_cb={is_valid_name}
+                    bind:this={name_input}/>
+            
+            <Input  label='E-mail' 
+                    placeholder='' 
+                    self={new_user} 
+                    a="email" 
+                    validate_cb={is_valid_email_address}
+                    bind:this={email_input}/>
+
+            <Checkbox class="mt-2 text-xs font-normal" self={new_user} a="maintainer">
+                <div class="flex flex-row items-center">
+                    <span class="">Maintainer</span>
+                    <Icon id="b1" size={4} component={FaInfoCircle} class="text-slate-400 ml-5 pt-0 mt-1"/>
+                    <Popover class="w-64 text-sm font-light " title="Maintainer" triggeredBy="#b1">
+                        Means that the invited user will be able to add and remove others and manage permissions in this organization.
+                    </Popover>
+                </div>
+            </Checkbox>
+</Modal>
+

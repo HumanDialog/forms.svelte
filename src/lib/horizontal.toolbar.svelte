@@ -10,6 +10,7 @@
     import FaToggleOn from 'svelte-icons/fa/FaToggleOn.svelte'
     import FaToggleOff from 'svelte-icons/fa/FaToggleOff.svelte'
     import {show_menu} from '$lib/components/menu'
+    import {push} from 'svelte-spa-router'
     //import Menu from '$lib/components/contextmenu.svelte'
 
     import {
@@ -92,6 +93,17 @@
 
         let rect = owner.getBoundingClientRect();
         let options = [];
+
+        if(config.customOperations && Array.isArray(config.customOperations) && config.customOperations.length > 0)
+        {
+            config.customOperations.forEach( o => {
+                options.push({
+                            caption: o.caption,
+                            icon: o.icon,
+                            action: o.action
+                        })
+            })
+        }
 
         if(show_sign_in_out_icons)
         {
