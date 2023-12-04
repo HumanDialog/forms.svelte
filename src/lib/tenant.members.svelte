@@ -265,8 +265,28 @@
 
     function is_valid_email_address(e)
     {
-        let pattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-        return (e.match(pattern) != null);
+        //let pattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        //return (e.match(pattern) != null);
+
+        var at_idx = e.indexOf("@"); 
+        var dot_idx = e.lastIndexOf("."); 
+        var space_idx = e.indexOf(" "); 
+
+        if ((at_idx != -1) && 
+            (at_idx != 0) && 
+            (dot_idx != -1) && 
+            (dot_idx != 0) && 
+            (dot_idx > at_idx + 1) && 
+            (e.length > dot_idx + 1) && 
+            (space_idx == -1)) 
+        { 
+            return true; 
+        } 
+        else 
+        { 
+            return false; 
+        } 
+        
     }
 
     function is_valid_name(s)
