@@ -1,6 +1,6 @@
 {
 	"name": "@humandialog/forms.svelte",
-	"version": "0.4.33",
+	"version": "0.4.34",
 	"description": "Basic Svelte UI components for Object Reef applications",
 	"scripts": {
 		"dev": "vite dev",
