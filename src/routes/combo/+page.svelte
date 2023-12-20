@@ -16,7 +16,7 @@
         Description: '',
         Responsible: 
         {
-            $ref: 'User/2',
+            $ref: './User/2',
             Name: 'Alice'
         }
     }
@@ -27,11 +27,11 @@
         return {
             User:[
                 {
-                    $ref: 'User/1',
+                    $ref: './User/1',
                     Name: 'Bob'
                 },
                 {
-                    $ref: 'User/2',
+                    $ref: './User/2',
                     Name: 'Alice'
                 }
             ]
