@@ -39,8 +39,6 @@
 
         let rect = owner.getBoundingClientRect()
 
-        let x = rect.left;
-        let y = mobile ? rect.top : rect.bottom;
 
         if(operation.menu)
             show_menu(rect, operation.menu)

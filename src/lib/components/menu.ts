@@ -8,7 +8,7 @@ let toolbar_component :Floating_container|null = null;
 export function show_menu(around :DOMRect|DOMPoint, operations)
 {
     let menu_element =  document.getElementById("__hd_svelte_contextmenu");
-    if(!!!menu_element)
+    if(!menu_element)
     {
         let app_div = document.getElementById("__hd_svelte_layout_root")
         menu_comopnent = new Menu({
@@ -32,10 +32,19 @@ export function show_menu(around :DOMRect|DOMPoint, operations)
 
 }
 
+export function hide_whole_context_menu()
+{
+    if(menu_comopnent)
+    {
+        if(menu_comopnent.is_visible())
+            menu_comopnent.hide();
+    }
+}
+
 export function show_floating_toolbar(around :DOMRect|DOMPoint, toolbar, props = {})
 {
     let floating_container =  document.getElementById("__hd_svelte_floating_container");
-    if(!!!floating_container)
+    if(!floating_container)
     {
         let app_div = document.getElementById("__hd_svelte_layout_root")
         toolbar_component = new Floating_container({

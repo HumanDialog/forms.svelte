@@ -3,6 +3,7 @@
     import Icon from './icon.svelte'
     import {context_items_store} from '../stores'
     import {is_device_smaller_than} from '../utils'
+    import {hide_whole_context_menu} from './menu'
 
     export let width_px     :number = 400;
 
@@ -61,10 +62,21 @@
         }
 
         visible = true;
+        
         operations = [..._operations];
         focused_index = 0;
 
+        const is_root_menu = (owner_menu_item == undefined)
+
+
+        if(is_root_menu)
+            window.addEventListener('click', on_before_window_click, true)
+        
+
         await tick();
+
+        if(is_root_menu)
+            menu_root.addEventListener('click', on_before_container_click, true)
 
         if(menu_items.length)
             focus_menu_item(focused_index);
@@ -79,6 +91,9 @@
     export function hide()
     {
         visible = false;
+
+        window.removeEventListener('click', on_before_window_click, true);
+        menu_root.removeEventListener('click', on_before_container_click, true);
     }
 
     export function get_rendered_rect() :DOMRect | undefined
@@ -89,6 +104,23 @@
             return undefined;
     }
 
+    let hide_window_indicator :number = 0;
+    function on_before_window_click()
+    {
+        hide_window_indicator++;
+		setTimeout( ()=> {
+            if(hide_window_indicator != 0)
+            {
+                hide_window_indicator = 0;
+                hide();
+            }
+        }, 0);
+    }
+
+    function on_before_container_click()
+    {
+        hide_window_indicator--;
+    }
 
     function on_keydown(e, operation, index)
     {
@@ -98,7 +130,7 @@
         {
         case 'Esc':
         case 'Escape':
-            hide();
+            hide_whole_context_menu();
             break;
 
         case 'ArrowDown':
@@ -174,7 +206,7 @@
             return;
         }
 
-        hide();
+        hide_whole_context_menu();
 
         if(!operation)
             return;
@@ -196,28 +228,40 @@
         let element :HTMLElement = menu_items[focused_index];
         element.focus();
 
-        if(submenus && submenus.length && submenus[focused_index])
+        if(submenus && submenus.length) 
         {
-            let rect :DOMRect = element.getBoundingClientRect();
-            let container_rect = new DOMRect(0, 0, window.innerWidth, window.innerHeight);
-
-            let _x = rect.right;
-            let _y = rect.top;
-
-            let submenu_width = min_width_px;
-            let rendered_rect = submenus[focused_index].get_rendered_rect();
-            if(rendered_rect && rendered_rect.width > 0)
-                submenu_width = rendered_rect.width;
-
-
-            if(_x + submenu_width > container_rect.right)
+            if(submenus[focused_index])
             {
-                // choose left or right side depending on which space is larger
-                if(rect.left - container_rect.left > container_rect.right - rect.right)
-                    _x = rect.left - submenu_width;
+                let rect :DOMRect = element.getBoundingClientRect();
+                let container_rect = new DOMRect(0, 0, window.innerWidth, window.innerHeight);
+
+                let _x = rect.right;
+                let _y = rect.top;
+
+                let submenu_width = min_width_px;
+                let rendered_rect = submenus[focused_index].get_rendered_rect();
+                if(rendered_rect && rendered_rect.width > 0)
+                    submenu_width = rendered_rect.width;
+
+
+                if(_x + submenu_width > container_rect.right)
+                {
+                    // choose left or right side depending on which space is larger
+                    if(rect.left - container_rect.left > container_rect.right - rect.right)
+                        _x = rect.left - submenu_width;
+                }
+
+                submenus[focused_index].show(new DOMPoint(_x, _y), operations[focused_index].menu)
             }
 
-            submenus[focused_index].show(_x, _y, operations[focused_index].menu)
+            for(let i=0; i<submenus.length; i++)
+            {
+                if(i!=focused_index)
+                {
+                    if(submenus[i])
+                        submenus[i].hide();
+                }
+            }
         }
     }
 
@@ -227,6 +271,7 @@
             return;
 
         owner_menu_item.focus();
+        hide();
     }
     
 
@@ -235,8 +280,7 @@
 <div id="__hd_svelte_contextmenu" 
     class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 shadow-md z-20 fixed min-w-[{min_width_px}px] w-max" 
     style={`left:${x}px; top:${y}px; display:${display}`}
-    bind:this={menu_root}
-    on:focusout={on_change_focus}>
+    bind:this={menu_root}>
 
     {#each operations as operation, index}
         {@const is_separator = operation.separator}

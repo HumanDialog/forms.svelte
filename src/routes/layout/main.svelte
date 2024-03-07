@@ -27,6 +27,36 @@
                         action: (focused) => {}
                     },
                     {
+                        caption:'Submenu',
+                        menu:[
+                            {
+                                caption: 'item 1',
+                                action: (focused) => {}
+                            },
+                            {
+                                caption: 'item 2',
+                                action: (focused) => {}
+                            },
+                            {
+                                caption: 'item 3',
+                                menu:[
+                                    {
+                                        caption: 'leaf 1',
+                                        action: (focused) => {}
+                                    },
+                                    {
+                                        caption: 'leaf 2',
+                                        action: (focused) => {}
+                                    }
+                                ]
+                            },
+                            {
+                                caption: 'item 4',
+                                action: (focused) => {}
+                            }
+                        ]
+                    },
+                    {
                         separator: true
                     },
                     {

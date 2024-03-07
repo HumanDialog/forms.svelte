@@ -2,7 +2,7 @@
     import Layout from '$lib/desk.svelte'
     import {reef} from '@humandialog/auth.svelte'
 
-    import Empty from './main.svelte';
+    import Main from './main.svelte';
     import Red from './red.svelte';
     import Green from './green.svelte';
     import Blue from './blue.svelte';
@@ -33,7 +33,7 @@
                     }
                 },
                 mainContent : {
-                    component: Empty
+                    component: Main
                 },
                 selectionDetails : { 
                     component: Orange
@@ -44,7 +44,7 @@
                 dark:
                 {
                     optional: true,
-                    default: false
+                    default: true
                 },
                 operations:
                 {

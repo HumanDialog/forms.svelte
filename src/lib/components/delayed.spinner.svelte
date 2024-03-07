@@ -5,7 +5,7 @@
     export let color = 'blue';
     export let size = 8;
 
-    export let delay :number = 100;
+    export let delay :number = 1000;
     
     let user_class = $$props.class ?? "";
 
