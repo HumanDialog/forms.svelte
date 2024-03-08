@@ -765,7 +765,7 @@
     </div>
 
     <div    hidden={!is_dropdown_open} 
-            class="{cs} bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 shadow-md overflow-y-auto cursor-pointer z-20"
+            class="{cs} bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 shadow-md overflow-y-auto cursor-pointer z-30"
             style={dropdown_position}
             use:dropdown_action>
         <ul class="py-1">

@@ -129,7 +129,7 @@
     <Operations/>
 </div>
 
-<div class="fixed right-3 bottom-0 mb-1 cursor-pointer z-20">
+<div class="fixed right-3 bottom-0 mb-1 cursor-pointer z-10">
     <Fab/>
 </div>
 

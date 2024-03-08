@@ -2,6 +2,7 @@
     import FaToggleOn from 'svelte-icons/fa/FaToggleOn.svelte'
     import FaToggleOff from 'svelte-icons/fa/FaToggleOff.svelte'
     import FaEllipsisH from 'svelte-icons/fa/FaEllipsisH.svelte'
+    import FaCog from 'svelte-icons/fa/FaCog.svelte'
     import FaTools from 'svelte-icons/fa/FaTools.svelte'
     import GoPrimitiveDot from 'svelte-icons/go/GoPrimitiveDot.svelte'
     import FaSignInAlt from 'svelte-icons/fa/FaSignInAlt.svelte'
@@ -187,7 +188,7 @@
                 class="h-16 px-0 flex justify-center items-center w-full text-slate-300 hover:text-slate-100"
                 on:click={show_options}>
 
-                <Icon size={6} component={FaEllipsisH} />
+                <Icon size={4} component={FaCog} />
             </button>
 
         </div>

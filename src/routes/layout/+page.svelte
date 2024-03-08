@@ -7,6 +7,7 @@
     import Green from './green.svelte';
     import Blue from './blue.svelte';
     import Orange from './orange.svelte';
+    import Nav from './nav.svelte'
     
 
     import {    FaRegCompass, 
@@ -21,7 +22,7 @@
                 sidebar : {
                     'TOC': {
                         icon: FaRegCompass,
-                        component: Red
+                        component: Nav
                     },
                     'FIND':{
                         icon: FaSearch,

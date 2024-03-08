@@ -70,7 +70,10 @@
 
 
         if(is_root_menu)
+        {
+            hide_window_indicator = 0;
             window.addEventListener('click', on_before_window_click, true)
+        }
         
 
         await tick();
@@ -278,7 +281,7 @@
 </script>
 
 <div id="__hd_svelte_contextmenu" 
-    class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 shadow-md z-20 fixed min-w-[{min_width_px}px] w-max" 
+    class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 shadow-md z-30 fixed min-w-[{min_width_px}px] w-max" 
     style={`left:${x}px; top:${y}px; display:${display}`}
     bind:this={menu_root}>
 

@@ -1,6 +1,7 @@
 <script lang="ts">
     import Icon from '../icon.svelte'
-    import {context_items_store, auto_hide_sidebar} from '../../stores'
+    import {context_items_store, auto_hide_sidebar, context_toolbar_operations} from '../../stores'
+    import FaBars from 'svelte-icons/fa/FaBars.svelte'
 
     import {
         selectable as _selectable,
@@ -8,16 +9,20 @@
         editable as _editable,
         handle_select
     } from "../../utils";
+
+    import {show_menu} from '../menu'
     
     export let href :string;
     export let icon :any|undefined = undefined;
     export let active = false;
     export let selectable :any|undefined = undefined;
     export let editable :any|undefined = undefined;
+    export let operations :any|undefined = undefined;
 
     $: context_data = $context_items_store;
 
     let user_class = $$props.class ?? ""
+    let root;
 
     function selectable_if_needed(node, selectable)
     {
@@ -50,16 +55,70 @@
         e.stopPropagation();
     }
 
+    function on_contextmenu(e)
+    {
+        if(!operations)
+            return;
+
+        let operations_list = operations(root);
+        if(!operations_list)
+            return;
+        
+        if(operations_list.length == 0)
+            return;
+
+        show_menu(new DOMPoint(e.clientX, e.clientY), operations_list)
+
+        e.preventDefault();
+    }
+
+    function can_show_context_menu(itm, context_data)
+    {
+        if(!selected(itm, context_data))
+            return false;
+
+        if(!operations)
+            return false;
+
+        return true;
+    }
+
+    function on_show_menu(e)
+    {
+        let owner = e.target;
+        while(owner && owner.tagName != 'BUTTON')
+            owner = owner.parentElement
+
+        if(!owner)
+            return;
+
+        let rect = owner.getBoundingClientRect()
+
+        let operations_list = operations(root);
+        
+        if(!operations_list)
+            return;
+        
+        if(operations_list.length == 0)
+            return;
+
+        show_menu(rect, operations_list)
+    }
+
 </script>
 
-<li>
+<li bind:this={root}>
     <!--svelte-ignore a11y-click-events-have-key-events -->
     <div
         on:click
-        on:contextmenu
+        on:contextmenu={on_contextmenu}
         on:keydown
         on:keyup
-        class="p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 border-2 border-transparent {user_class}"
+        class="     p-2 border border-transparent rounded-lg
+                    text-base font-normal 
+                    text-gray-900 hover:bg-gray-100  
+                    dark:text-white dark:hover:bg-gray-700 {user_class}
+                    flex flex-row justify-between"
         class:bg-gray-200={active}
         class:dark:bg-gray-700={active}
         use:selectable_if_needed={selectable}
@@ -75,12 +134,18 @@
                     <slot/>
                 </span>
             </a>
+            
+            {#if can_show_context_menu(selectable, context_data)}
+                <button class="w-4 h-4 mt-1" on:click={on_show_menu}>
+                    <FaBars/>
+                </button>
+            {/if}
         </div>
 </li>
 
 
 <style lang="postcss">
     .selected{
-        @apply border-2 !border-blue-300
+        @apply border !border-blue-300
     }
 </style>

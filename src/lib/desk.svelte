@@ -17,7 +17,7 @@
     
     import { AuthorizedView} from '@humandialog/auth.svelte'
     import { handle_select, is_device_smaller_than } from './utils'
-	import { onMount } from 'svelte';
+	import { afterUpdate, onMount } from 'svelte';
     
     export let layout;
 
@@ -86,7 +86,7 @@
         }
         else
         {
-            main_side_panel_visibility = "lg:block"
+            main_side_panel_visibility = "fixed lg:block"
             lg_content_area_horizontal_dim = `lg:left-[360px] lg:w-[calc(100vw-360px)]`
         }      
     }
@@ -96,6 +96,7 @@
     let bottom_bar_visibility = "hidden"
     let bottom_bar_visible = false
     let lg_main_sidebar_height = ""
+    let fab_visibility = "hidden"
     let fab_bottom = "bottom-0"
                                 
     let content_top = ""
@@ -110,12 +111,10 @@
 
         if(tools_visible)
         {
-            tools_visibility = "fixed"
+            tools_visibility = "hidden sm:block sm:fixed"
+            fab_visibility = "fixed sm:hidden"
 
-            if(is_small)
-                content_top = `top-[80px] sm:top-[40px]`
-            else
-                content_top = `top-[80px] sm:top-[40px]`
+            content_top = 'top-[40px] sm:top-[40px]'
             
             if(bottom_bar_visible)
                 content_height = `h-[calc(100vh-320px)] sm:h-[calc(100vh-280px)]`    
@@ -149,11 +148,7 @@
         }
         
     }
-    
-    
-    
-   
-    
+
     //$: screen.width = innerWidth;  
 </script>
 
@@ -169,7 +164,7 @@
             <!--###########################################################-->
             <!--##  HORIZONTAL TOOLBAR (FOR PHONES)  ######################-->
             <!--###########################################################-->
-            <header class="fixed sm:hidden w-screen top-0 h-[40px] z-50  overflow-auto shadow  shadow-slate-900/5 dark:shadow-none" >
+            <header class="fixed sm:hidden w-screen top-0 h-[40px] z-20  overflow-auto shadow  shadow-slate-900/5 dark:shadow-none" >
                     <div class=" flex flex-row justify-between    bg-slate-900   text-gray-100 ">
                         <HorizontalToolbar app_config={layout}/>
                     <div>
@@ -191,12 +186,12 @@
             <!--#######################################################-->
             <!--##  MAIN SIDE BAR                    ##################-->
             <!--#######################################################-->
-            <div  class="{main_side_panel_visibility} fixed 
-                            left-0  sm:left-[40px]
+            <div  class="{main_side_panel_visibility}  
+                            left-[40px]  sm:left-[40px]
                             top-[40px]  sm:top-0 
                             h-[calc(100vh-40px)] sm:h-full {lg_main_sidebar_height}
-                            w-screen sm:w-[320px] 
-                            z-10 overflow-x-hidden">
+                            w-[calc(100vw-40px)] sm:w-[320px] 
+                            z-20 overflow-x-hidden">
 
                 <div class=" bg-slate-50 w-full h-full dark:bg-slate-800 overflow-y-auto py-4 px-0">
                     <Configurable config={layout.sidebar[visible_sidebar]}>
@@ -204,55 +199,59 @@
                     </Configurable>
                 </div>
             </div>    
-            <!--###########################################################-->
-            <!--##  HORIZONTAL TOOLS                 ######################-->
-            <!--###########################################################-->
 
-            <div  class="   {tools_visibility} 
-                            w-screen sm:w-[calc(100vw-40px)] 
-                            h-[40px] 
-                            left-0 sm:left-[40px]     
-                            top-[40px] sm:top-0
-                            {lg_content_area_horizontal_dim}
-                            z-0 overflow-hidden " >
+            <section on:click|capture={auto_hide_sidebar}>
 
-                <Operations/>
-            </div>
+                <!--###########################################################-->
+                <!--##  HORIZONTAL TOOLS                 ######################-->
+                <!--###########################################################-->
 
-            <div class="!hidden {tools_visibility} right-3 {fab_bottom} mb-1 cursor-pointer z-20">
-                <Fab/>
-            </div>
+                <div  class="   {tools_visibility} 
+                                w-screen sm:w-[calc(100vw-40px)] 
+                                h-[40px] 
+                                left-0 sm:left-[40px]     
+                                top-[40px] sm:top-0
+                                {lg_content_area_horizontal_dim}
+                                z-10 overflow-hidden " >
 
-            <!--#######################################################-->
-            <!--##  CONTENT                          ##################-->
-            <!--#######################################################-->
-            <div  class="fixed left-0  w-screen  
-                            sm:left-[40px]  sm:w-[calc(100vw-40px)]    
-                            {content_top}
-                            {content_height}
-                            {lg_content_area_horizontal_dim}
-                            z-0 overflow-x-hidden" 
-                            
-                            on:click={(e) => auto_hide_sidebar() } 
-                            on:keydown={(e) => auto_hide_sidebar()}>
-                    <Configurable config={layout.mainContent}>
-                        <div slot='alt'></div>
-                    </Configurable>
-            </div>    
+                    <Operations/>
+                </div>
+
+                <div class="{fab_visibility} right-3 {fab_bottom} mb-1 cursor-pointer z-10">
+                    <Fab/>
+                </div>
+
+                <!--#######################################################-->
+                <!--##  CONTENT                          ##################-->
+                <!--#######################################################-->
+                <div  class="fixed left-0  w-screen  
+                                sm:left-[40px]  sm:w-[calc(100vw-40px)]    
+                                {content_top}
+                                {content_height}
+                                {lg_content_area_horizontal_dim}
+                                z-0 overflow-x-hidden" 
+                                >
+                        <Configurable config={layout.mainContent}>
+                            <div slot='alt'></div>
+                        </Configurable>
+                </div>    
 
 
 
-            <!--###########################################################-->
-            <!--##  BOTTOM SIDEBAR          ###############################-->
-            <!--###########################################################-->
+                <!--###########################################################-->
+                <!--##  BOTTOM SIDEBAR          ###############################-->
+                <!--###########################################################-->
 
-            <div  class="{bottom_bar_visibility} left-0 bottom-0 w-screen h-[240px] z-10 overflow-y-hidden overflow-x-auto 
-                        sm:left-[40px] sm:w-[100vw-40px] " >
-                    <Configurable config={layout.selectionDetails} >
-                        <div slot="alt"></div>
-                    </Configurable>
-                
-            </div>    
+                <div  class="{bottom_bar_visibility} left-0 bottom-0 w-screen h-[240px] z-20 overflow-y-hidden overflow-x-auto 
+                            sm:left-[40px] sm:w-[100vw-40px] " >
+                        <Configurable config={layout.selectionDetails} >
+                            <div slot="alt"></div>
+                        </Configurable>
+                    
+                </div>    
+
+            </section>
+
         </div>
     </div>
 </AuthorizedView>

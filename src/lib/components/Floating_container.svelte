@@ -106,7 +106,7 @@
 </script>
 
 <div    id="__hd_svelte_floating_container"
-        class="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg shadow {display}"
+        class="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg shadow {display} z-30"
         style="left:{x}px; top:{y}px; width: max-content; height:max-content"
         bind:this={root_element}>
     <svelte:component this={toolbar} {...props} />

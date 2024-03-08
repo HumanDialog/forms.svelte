@@ -2,6 +2,7 @@
     import FaMoon from 'svelte-icons/fa/FaMoon.svelte'
     import FaSun from 'svelte-icons/fa/FaSun.svelte'
     import FaEllipsisH from 'svelte-icons/fa/FaEllipsisH.svelte'
+    import FaCog from 'svelte-icons/fa/FaCog.svelte'
     import FaTools from 'svelte-icons/fa/FaTools.svelte'
     import GoPrimitiveDot from 'svelte-icons/go/GoPrimitiveDot.svelte'
     import FaSignInAlt from 'svelte-icons/fa/FaSignInAlt.svelte'
@@ -172,27 +173,23 @@
 
 </script>
 
-<div class="mr-0 flex h-10">
+<div class="ml-auto flex h-10">        
+    <button
+        class="h-full w-10 px-0 flex justify-center items-center   text-slate-300 hover:text-slate-100"
+        on:click={show_options}>
+
+        <Icon size={4} component={FaCog} />
+    </button>
+</div>
+
+<div class="right-0 flex h-10">
     <button class="w-10 h-full flex justify-center items-center text-slate-300 hover:text-slate-100" on:click={toggle_navigator}>
         <Icon size={6} component={icon}/>
     </button>
 </div>
 
-<div class="ml-auto flex h-10">
-            
-    <button
-        class="h-full w-16 px-0 flex justify-center items-center   text-slate-300 hover:text-slate-100"
-        on:click={show_options}>
-
-        <Icon size={6} component={FaEllipsisH} />
-    </button>
-
-    
-   
-</div>
-
 {#if tabs.length > 1 &&  $main_sidebar_visible_store != "*"}
-    <div  class="block fixed left-0 top-[40px] w-[40px] h-screen z-20 inset-0   overflow-hidden">
+    <div  class="flex-none block fixed left-0 top-[40px] w-[40px] h-screen z-20 inset-0   overflow-hidden">
         <div class="sticky top-0 flex h-full w-10 bg-slate-900 flex-col items-center text-gray-100 shadow">
             <VerticalToolbar {app_config} mobile={true}/>
         </div>    
