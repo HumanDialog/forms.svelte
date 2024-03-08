@@ -98,8 +98,25 @@
         </button>
 
         {#if operations.length == 3}
-            <small>todo</small>
-        {:else}
+            {@const thrid_operation = operations[2]}
+            <button class=" bg-transparent
+                            w-[55px] h-[55px] 
+                            fixed m-0 absolute bottom-[70px] right-[0px]
+                            
+                            flex items-center justify-center
+                            disable-dbl-tap-zoom"
+                            on:click|stopPropagation={(e) => {on_click(e, thrid_operation)}} >
+                <div class="    w-10 h-10
+                            text-white bg-zinc-500 hover:bg-zinc-500 
+                            font-medium rounded-full text-sm text-center shadow-md
+                            dark:bg-zinc-500 dark:hover:bg-zinc-500
+                            flex items-center justify-center">
+                    <div class="w-5 h-5">
+                        <svelte:component this={thrid_operation.icon}/>
+                    </div>
+                </div>
+            </button>
+        {:else if operations.length > 3}
             <button class=" bg-transparent
                             w-[55px] h-[55px] 
                             fixed m-0 absolute bottom-[70px] right-[0px]

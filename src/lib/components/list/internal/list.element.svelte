@@ -139,6 +139,9 @@
                 n = n.parentElement;
             }
 
+            //temporary disable
+            can_show_context_menu = false;
+
             if(can_show_context_menu && context_menu)
             {
                 const pt = new DOMPoint(e.clientX, e.clientY)
@@ -299,7 +302,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 {#if item}
-<section    class="flex flex-row my-0  w-full text-sm text-slate-700 dark:text-slate-400 cursor-default rounded-md border-2 border-transparent {selected_class} {focused_class}"
+<section    class="flex flex-row my-0  w-full text-sm text-slate-700 dark:text-slate-400 cursor-default rounded-md border border-transparent {selected_class} {focused_class}"
             on:contextmenu={on_contextmenu}
             role="menu"
             tabindex="-1">
@@ -325,7 +328,7 @@
             <!--div class="flex flex-row justify-between text-xs flex-none w-1/2 sm:w-2/3"-->
             <div class="text-xs flex-none w-1/2 sm:w-2/3 grid-{definition.properties.length}">
                 {#each definition.properties as prop, prop_index}
-                    <p class="col-span-1 w-full mr-auto">
+                    <p class="col-span-1 w-full mr-auto mt-0.5">
                         {#if item[prop.a] || placeholder == prop.name}
                             <span role="gridcell" tabindex="0">
                                 {#if prop.type == rList_property_type.Date}
