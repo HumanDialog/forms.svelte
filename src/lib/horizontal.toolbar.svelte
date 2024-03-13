@@ -22,7 +22,14 @@
         tools_visible_store,
         bottom_bar_visible_store,
         previously_visible_sidebar,
-        main_sidebar_visible_store
+        main_sidebar_visible_store,
+        sidebar_left_pos,
+
+		page_title,
+
+		nav_titles
+
+
     } from "./stores.js";
     import Icon from './components/icon.svelte';
     import {session, signin_href, signout_href} from '@humandialog/auth.svelte'
@@ -62,10 +69,25 @@
         }
     }
 
+    let title = ''
+    $:{
+        if($main_sidebar_visible_store == '*')
+            title = $page_title;
+        else
+        {
+            let nav_title = $nav_titles[$main_sidebar_visible_store];
+            if(nav_title != undefined)
+                title = nav_title
+            else
+                title = ''
+        }
+    }
+
     function toggle_navigator(e)
     {
         if(tabs.length == 1)
         {
+            $sidebar_left_pos = 0;
             toggle_sidebar(tabs[0]);
         }
         else
@@ -79,6 +101,7 @@
                     sidebar = previously_visible_sidebar;
             }
 
+            $sidebar_left_pos = 40;
             toggle_sidebar(sidebar)
         }
     }
@@ -173,19 +196,27 @@
 
 </script>
 
-<div class="ml-auto flex h-10">        
-    <button
-        class="h-full w-10 px-0 flex justify-center items-center   text-slate-300 hover:text-slate-100"
-        on:click={show_options}>
+<div class="flex flex-row w-full">
+    <div class="flex-none left-0 flex h-10">
+        <button class="w-10 h-full flex justify-center items-center text-slate-300 hover:text-slate-100" on:click={toggle_navigator}>
+            <Icon size={6} component={icon}/>
+        </button>
+    </div>
 
-        <Icon size={4} component={FaCog} />
-    </button>
-</div>
+    <div class="grow">
+        
+        <div class="block sm:hidden mt-3 uppercase text-sm text-center">{@html title}</div>
+    </div>
 
-<div class="right-0 flex h-10">
-    <button class="w-10 h-full flex justify-center items-center text-slate-300 hover:text-slate-100" on:click={toggle_navigator}>
-        <Icon size={6} component={icon}/>
-    </button>
+    <div class="flex-none ml-auto flex h-10">        
+        <button
+            class="h-full w-10 px-0 flex justify-center items-center   text-slate-300 hover:text-slate-100"
+            on:click={show_options}>
+
+            <Icon size={4} component={FaCog} />
+        </button>
+    </div>
+
 </div>
 
 {#if tabs.length > 1 &&  $main_sidebar_visible_store != "*"}

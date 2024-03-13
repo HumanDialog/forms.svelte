@@ -12,6 +12,7 @@
     <li><a href="/table">Table</a> with context menu</li>
     <li><a href="/layout">Layout</a></li>
     <li><a href="/list">List</a></li>
+    <li><a href="/mini">Mini</a></li>
 </ul>
 
 <p>Create package using thease steps:</p>

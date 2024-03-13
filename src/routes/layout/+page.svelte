@@ -23,7 +23,7 @@
                     'TOC': {
                         icon: FaRegCompass,
                         component: Nav
-                    },
+                    }/*,
                     'FIND':{
                         icon: FaSearch,
                         component: Green
@@ -31,7 +31,7 @@
                     'DB':{
                         icon: FaDatabase,
                         component: Blue
-                    }
+                    }*/
                 },
                 mainContent : {
                     component: Main

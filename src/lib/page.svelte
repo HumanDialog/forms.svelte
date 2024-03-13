@@ -6,7 +6,8 @@
         context_types_store,
         context_info_store,
         context_toolbar_operations,
-        page_toolbar_operations     } from './stores.js'
+        page_toolbar_operations,
+        page_title     } from './stores.js'
     
     //import {chnages} from './utils.js'
 
@@ -21,6 +22,7 @@
     
     export let toolbar_operations = undefined;
     export let clears_context = '';
+    export let title = '';
 
     
     switch (c) {
@@ -36,12 +38,15 @@
 
     onMount(() => {
             if(toolbar_operations != undefined && Array.isArray(toolbar_operations))
-            {
                 $page_toolbar_operations = [...toolbar_operations]
-                return () => { $page_toolbar_operations = [] }
+
+            $page_title = title;
+
+            return () => 
+            { 
+                $page_toolbar_operations = [] 
+                $page_title = ''
             }
-            else
-                return () => {}
     })
 
     setContext('ctx', context)

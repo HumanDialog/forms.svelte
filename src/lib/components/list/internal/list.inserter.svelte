@@ -23,7 +23,7 @@
         <div class="h-4 w-4 mt-1.5 ml-2"></div>
     {/if}
 
-    <p  class="ml-3 py-1 font-bold whitespace-nowrap overflow-clip flex-none w-1/2 sm:w-1/3"
+    <p  class="ml-3 py-1 font-bold whitespace-nowrap overflow-clip flex-none w-1/2 sm:w-1/3" tabindex="0"
         bind:this={insertion_paragraph}
         use:editable={oninsert} >
     </p>

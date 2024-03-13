@@ -114,18 +114,17 @@
         on:contextmenu={on_contextmenu}
         on:keydown
         on:keyup
-        class="     p-2 border border-transparent rounded-lg
+        class="     border border-transparent rounded-lg
                     text-base font-normal 
-                    text-gray-900 hover:bg-gray-100  
-                    dark:text-white dark:hover:bg-gray-700 {user_class}
+                    text-gray-900 sm:hover:bg-gray-100  
+                    dark:text-white sm:dark:hover:bg-gray-700 {user_class}
                     flex flex-row justify-between"
         class:bg-gray-200={active}
         class:dark:bg-gray-700={active}
-        use:selectable_if_needed={selectable}
         class:selected={selected(selectable, context_data)}>
             <a  href={href} 
                 on:click={on_link_clicked} 
-                class="inline-flex items-center group">
+                class="flex-1 ml-2 my-2 inline-flex items-center group">
                 {#if icon}
                     <Icon size={5} component={icon}/>
                 {/if}
@@ -134,12 +133,15 @@
                     <slot/>
                 </span>
             </a>
-            
-            {#if can_show_context_menu(selectable, context_data)}
-                <button class="w-4 h-4 mt-1" on:click={on_show_menu}>
-                    <FaBars/>
-                </button>
-            {/if}
+
+            <section    class="flex-0 w-20 sm:w-12 h-10 flex-0 flex flex-row"
+                        use:selectable_if_needed={selectable}>
+                {#if can_show_context_menu(selectable, context_data)}
+                    <button class="w-4 h-4 mt-3 mr-2 ml-auto" on:click={on_show_menu}>
+                        <FaBars/>
+                    </button>
+                {/if}
+            </section>
         </div>
 </li>
 

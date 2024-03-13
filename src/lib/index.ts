@@ -69,7 +69,10 @@ export {
     handle_select
 }   from './utils'
 
-export { data_tick_store, has_selected_item, has_data_item } from "./stores";
+export {    data_tick_store, 
+            has_selected_item, 
+            has_data_item,
+            set_navigator_title } from "./stores";
 export { context_toolbar_operations, page_toolbar_operations, context_items_store, context_types_store } from './stores'   // tmp
 export { inform_modification, inform_item, push_changes } from './updates'   // tmp
 

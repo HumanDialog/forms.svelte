@@ -119,45 +119,60 @@
         activate_row(null, item);
     }
 
+    function edit_row_property(e, part)
+    {
+        if(!is_row_active)
+            return;
+
+        let click_on_empty_space = true;
+        let n = e.target;
+
+        while(n)
+        {
+            let is_in_cell = n.getAttribute("role") == "gridcell"
+            if(is_in_cell)
+            {
+                click_on_empty_space = false;
+                break;
+            }
+
+            n = n.parentElement;
+        }
+
+        //temporary disable
+        let can_show_context_menu = click_on_empty_space;
+        can_show_context_menu = false;
+
+        if(can_show_context_menu && context_menu)
+        {
+            const pt = new DOMPoint(e.clientX, e.clientY)
+
+            let context_operations = context_menu(item);
+            if(context_operations !== null)
+            {
+                if(typeof context_operations === 'object')
+                {
+                    if(Array.isArray(context_operations))
+                        show_menu(pt, context_operations);
+                    else if(context_operations.grid)
+                        show_grid_menu(pt, context_operations.grid); 
+                }
+            }
+        }
+        else if(click_on_empty_space)
+        {
+            if((part == 'top') && !definition.title_readonly)
+                force_editing('Title')
+            else if((part == 'bottom') && !definition.summary_readonly)
+                force_editing('Summary')
+        }
+    }
 
     function activate_row(e, item)
     {
         if(is_row_active)
         {
-            let can_show_context_menu = true;
-            let n = e.target;
-
-            while(n)
-            {
-                let is_in_cell = n.getAttribute("role") == "gridcell"
-                if(is_in_cell)
-                {
-                    can_show_context_menu = false;
-                    break;
-                }
-
-                n = n.parentElement;
-            }
-
-            //temporary disable
-            can_show_context_menu = false;
-
-            if(can_show_context_menu && context_menu)
-            {
-                const pt = new DOMPoint(e.clientX, e.clientY)
-
-                let context_operations = context_menu(item);
-                if(context_operations !== null)
-                {
-                    if(typeof context_operations === 'object')
-                    {
-                        if(Array.isArray(context_operations))
-                            show_menu(pt, context_operations);
-                        else if(context_operations.grid)
-                            show_grid_menu(pt, context_operations.grid); 
-                    }
-                }
-            }
+            
         }
 
         activate_item('props', item, toolbar_operations(item));
@@ -302,6 +317,8 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 {#if item}
+{@const element_title = item[title]}
+
 <section    class="flex flex-row my-0  w-full text-sm text-slate-700 dark:text-slate-400 cursor-default rounded-md border border-transparent {selected_class} {focused_class}"
             on:contextmenu={on_contextmenu}
             role="menu"
@@ -310,18 +327,20 @@
     <slot name="left" element={item}/>
     
     <div class="ml-3 w-full py-1" use:selectable={item} on:click={(e) => {activate_row(e, item)}} role="row" tabindex="0">
-        <div class="flex flex-row">
-            <p class="font-bold whitespace-nowrap overflow-clip flex-none w-1/2 sm:w-1/3">
+        <div class="flex flex-row" on:click={(e) => edit_row_property(e, 'top')}>
+            <p  class="font-bold whitespace-nowrap overflow-clip flex-none min-h-[1.25rem] w-1/2 sm:w-1/3">
                 {#if definition.title_readonly}
                 <span  id="__hd_list_ctrl_{item[item_key]}_Title" role="gridcell" tabindex="0"> 
-                    {item[title]}
+                    {element_title}
                 </span>
                 {:else}
+                    {#key item[title]} <!-- Wymusza pełne wyrenderowanie zwłasza po zmiane z pustego na tekst  -->
                     <span  id="__hd_list_ctrl_{item[item_key]}_Title" role="gridcell" tabindex="0"
                         use:editable={(text) => {change_name(text)}}
                         on:click={edit}> 
-                        {item[title]}
+                            {element_title}
                     </span>
+                    {/key}
                 {/if}
             </p>
 
@@ -367,7 +386,7 @@
 
         {#if summary && (item[summary] || placeholder=='Summary')}
             {@const element_id = `__hd_list_ctrl_${item[item_key]}_Summary`}
-            <p class="text-xs text-slate-400" style="min-height: 1rem;">
+            <p class="text-xs text-slate-400" style="min-height: 1rem;"  on:click={(e) => edit_row_property(e, 'bottom')}>
                 {#if definition.summary_readonly}
                     <span   id={element_id} role="gridcell" tabindex="0">
                         {item[summary]}

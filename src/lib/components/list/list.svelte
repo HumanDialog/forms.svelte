@@ -1,6 +1,6 @@
 <script lang="ts">
-    import {setContext, getContext, afterUpdate, tick} from 'svelte'
-    import {data_tick_store, context_items_store, context_types_store } from '../../stores'
+    import {setContext, getContext, afterUpdate, tick, onMount} from 'svelte'
+    import {data_tick_store, context_items_store, context_types_store, page_title } from '../../stores'
     import {activate_item, get_active, clear_active_item, parse_width_directive} from '../../utils' 
     
     import {rList_definition} from './List'
@@ -195,10 +195,11 @@
 
 
 {#if title}
-    <p class="mt-3 uppercase text-sm text-center">{title}</p>
-    <hr class="w-full">
+    <p class="hidden sm:block mt-3 uppercase text-sm text-center">{title}</p>
+    <hr class="hidden sm:block w-full">
 {/if}
 
+<!--div class="w-full h-full overflow-y-auto"-->
 
 {#if items && items.length > 0 && !!item_key }
     {#each items as element, i (element[item_key])}
@@ -227,4 +228,6 @@
                 icon={definition.inserter_icon}
                 bind:this={inserter}    />
 {/if}
+
+<!--/div-->
 

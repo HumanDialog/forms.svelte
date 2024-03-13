@@ -11,6 +11,7 @@
     let operations = [];
     function update(...args)
     {
+        //expanded = false;
         if($context_toolbar_operations && $context_toolbar_operations.length > 0)
             operations = $context_toolbar_operations;
         else
@@ -154,7 +155,7 @@
                                             disable-dbl-tap-zoom">
                                 <div class="    w-[55px] h-[55px]
                                                 text-white bg-zinc-500 group-hover:bg-zinc-500 
-                                                dark:bg-zinc-500 dark:group-hover:bg-blue-700
+                                                dark:bg-zinc-500 dark:group-hover:bg-zinc-500
                                                 font-medium rounded-full text-sm text-center shadow-md
                                                 flex items-center justify-center">
                                     <div class="w-5 h-5"><svelte:component this={operation.icon}/></div>

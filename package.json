@@ -1,9 +1,10 @@
 {
 	"name": "@humandialog/forms.svelte",
-	"version": "0.4.38",
+	"version": "0.4.43",
 	"description": "Basic Svelte UI components for Object Reef applications",
 	"scripts": {
 		"dev": "vite dev",
+		"devh": "vite dev --host",
 		"build": "svelte-kit sync && svelte-package",
 		"prepublishOnly": "echo 'Did you mean to publish `./package/`, instead of `./`?' && exit 1",
 		"test": "playwright test",

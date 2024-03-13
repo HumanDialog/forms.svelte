@@ -42,6 +42,8 @@
     let reef_users = [];
     let new_reef_user_id = 1;
 
+    let fake_users;
+
     async function init()
     {
         reef_users = [];
@@ -68,6 +70,9 @@
             })
         }
 
+        //fake_users = [];
+        //add_fake_users(fake_users);
+
         await fetch_details();
  
     }
@@ -84,7 +89,11 @@
 
             handled_no++;
             if(handled_no == reef_users.length)
+            {
+                
+                
                 list?.update_objects(reef_users);
+            }
         } )
     }
 
@@ -294,6 +303,74 @@
         return !!s;
     }
 
+    function add_fake_users(reef_users)
+    {
+        const names = [
+            "Evangeline Burnett",
+            "Veronica Shaffer",
+            "Evan Moyer",
+            "Maisey Knox",
+            "Princess Taylor",
+            "Lilli Brown",
+            "Celine Terrell",
+            "Alexander Simmons",
+            "Leslie Rowland",
+            "Amira Reeves",
+            "Remi Parks",
+            "Daniela Holder",
+            "Sonny Watkins",
+            "Kiran Patton",
+            "Nadia O'Brien",
+            "Aine Lyons",
+            "Arran Mccoy",
+            "Aliya Hart",
+            "Zara Ross",
+            "Chad Ramirez",
+            "Aron Briggs",
+            "Nicole Hall",
+            "Mitchell Hendricks",
+            "Lila Chandler",
+            "Carter Padilla",
+            "Christian Thompson",
+            "Ishaq Smith",
+            "Sofia Blanchard",
+            "Taha Kelly",
+            "Jensen Huber",
+            "Jaya Hewitt",
+            "Hari Nielsen",
+            "Celeste Higgins",
+            "Soraya Farrell",
+            "Jacob Copeland",
+            "Robbie Soto",
+            "Krishan Kelley",
+            "Erica Ferrell",
+            "Moshe Valenzuela",
+            "Ahmed Mathews",
+            "Emilie Moore",
+            "Anisa Gamble",
+            "Esmee Haines",
+            "Francesca Fischer",
+            "Md Mcdaniel",
+            "Saarah Zamora",
+            "Tomos Ponce",
+            "Sonia Barrera",
+            "Pedro Hogan",
+            "Connie Weeks"
+        ]
+        const how_many = 50
+        for(let i=0; i<how_many; i++)
+        {
+            reef_users.push(
+                {
+                    [name_attrib]: names[i],
+                    [email_attrib]: 'u@fake.com',
+                    [ref_attrib]: `./User/${1000+i}`,
+                    __hd_internal_item_id: 1000+i
+                }
+            )
+        }
+    }
+
     async function on_new_user_requested()
     {
         if(!name_input?.validate())
@@ -328,6 +405,8 @@
             list?.update_objects(reef_users);
         }
 
+
+
         new_user.name = '';
         new_user.email = '';
         new_user.maintainer = false;
@@ -345,10 +424,10 @@
 </script>
 
 <Page   self={data_item} 
-        cl="!bg-white dark:!bg-slate-900 w-full h-full flex flex-col overflow-y-hidden overflow-x-hidden py-1 px-1 border-0" 
+        cl="!bg-white dark:!bg-slate-900 w-full h-full flex flex-col overflow-y-auto overflow-x-hidden py-1 px-1 border-0" 
         toolbar_operations={page_operations}
         clears_context='props sel'>
-    <a href="/" class="underline text-sm font-semibold ml-3"> &lt; Back to root</a>
+    <!--a href="/" class="underline text-sm font-semibold ml-3"> &lt; Back to root</a-->
 
     {#if reef_users && reef_users.length > 0}
     <List       objects={reef_users} 

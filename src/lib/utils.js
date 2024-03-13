@@ -102,7 +102,8 @@ export function editable(node, action)
     const org_text = node.textContent;
     const blur_listener = async (e) =>
     {
-        await finish_editing(false, false);
+        let cancel = !node.textContent
+        await finish_editing(cancel, false);
     }
 
     const key_listener = async (e) =>
@@ -133,6 +134,8 @@ export function editable(node, action)
         let sel = window.getSelection();
         sel.removeAllRanges();
 
+        //console.log('cell_content', node.textContent)
+        
         if(cancel)
         {
             node.innerHTML = org_text;
@@ -156,16 +159,20 @@ export function editable(node, action)
 
     const edit_listener = async (e) =>
     {
-        //console.log('Edit event fired:', itm, "node", node)
         node.contentEditable = "true"
         node.addEventListener("blur", blur_listener);
         node.addEventListener("keydown", key_listener);
         
         node.focus();
-        
+
         await tick();
         let range = document.createRange();
         range.selectNodeContents(node);
+        let end_offset = range.endOffset;
+        let end_container = range.endContainer;
+        range.setStart(end_container, end_offset)
+        range.setEnd(end_container, end_offset)
+       // console.log('range rect: ', range.getBoundingClientRect())
         let sel = window.getSelection();
         sel.removeAllRanges();
         sel.addRange(range);
@@ -200,7 +207,7 @@ export function start_editing(element, finish_callback)
     {
         if(editable_node.contentEditable == "true")
             return;
-
+        
         if(finish_callback)
         {
             editable_node.addEventListener("finish", (e) => { finish_callback(e.detail) })

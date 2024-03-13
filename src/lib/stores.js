@@ -8,6 +8,15 @@ export const context_info_store = writable({data: '', sel: ''})
 export const context_types_store = writable({focused:'', data: null, sel: null})
 export const context_toolbar_operations = writable([]);
 export const page_toolbar_operations = writable([]);
+export const page_title = writable('');
+export const nav_titles = writable({});
+
+export function set_navigator_title(key, title)
+{
+    let titles = get(nav_titles);
+    titles[key] = title;
+    nav_titles.set(titles);
+}
 
 export function has_selected_item()
 {
@@ -46,6 +55,7 @@ export const main_sidebar_visible_store = writable((localStorage.main_sidebar_vi
 main_sidebar_visible_store.subscribe( (value) => { localStorage.main_sidebar_visible_store = value });
 
 export let previously_visible_sidebar = "";
+export let sidebar_left_pos = writable(0)
 
 let has_saved_tools_visible = false;
 function create_tools_visible_store()

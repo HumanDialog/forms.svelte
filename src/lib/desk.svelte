@@ -13,7 +13,8 @@
             dark_mode_store,
             data_tick_store,
             set_default_tools_visible,
-            set_dark_mode_default } from './stores.js'
+            set_dark_mode_default,
+            sidebar_left_pos } from './stores.js'
     
     import { AuthorizedView} from '@humandialog/auth.svelte'
     import { handle_select, is_device_smaller_than } from './utils'
@@ -186,19 +187,24 @@
             <!--#######################################################-->
             <!--##  MAIN SIDE BAR                    ##################-->
             <!--#######################################################-->
+            {#if true}
+            {@const sidebar_left = $sidebar_left_pos==0 ? "left-0" : "left-[40px]"}
+            {@const sidebar_small_width = $sidebar_left_pos==0 ? "w-full" : "w-[calc(100vw-40px)]"}
+
             <div  class="{main_side_panel_visibility}  
-                            left-[40px]  sm:left-[40px]
+                            {sidebar_left}  sm:left-[40px]
                             top-[40px]  sm:top-0 
                             h-[calc(100vh-40px)] sm:h-full {lg_main_sidebar_height}
-                            w-[calc(100vw-40px)] sm:w-[320px] 
+                            {sidebar_small_width} sm:w-[320px] 
                             z-20 overflow-x-hidden">
 
-                <div class=" bg-slate-50 w-full h-full dark:bg-slate-800 overflow-y-auto py-4 px-0">
+                <div class=" bg-slate-50 w-full h-full dark:bg-slate-800 overflow-y-auto py-0 px-0">
                     <Configurable config={layout.sidebar[visible_sidebar]}>
                         <div slot='alt'></div>
                     </Configurable>
                 </div>
             </div>    
+            {/if}
 
             <section on:click|capture={auto_hide_sidebar}>
 
