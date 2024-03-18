@@ -256,6 +256,14 @@
                     
                 </div>    
 
+                <!-- #########################################################-->
+                <!-- ## MODAL DIALOG #########################################-->
+                <!-- #########################################################-->
+                <div id="__hd_svelte_modal_root" class="z-30">
+                    <!-- after <Modal/> component is shown it's rettached to above div
+                        see: modal.svelte afterUpdate -->
+                </div>
+
             </section>
 
         </div>

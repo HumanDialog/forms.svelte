@@ -53,23 +53,23 @@
 
     let input_pt = 'pt-0.5'
     let input_pb = 'pb-1'
-    let font_size = 'text-sm'
-    let line_h = 'h-4'
+    let font_size = 'text-lg sm:text-sm'
+    let line_h = 'h-7 sm:h-5'
     
     switch (s)
     {
         case 'md':
             input_pt = 'pt-2.5'
             input_pb = 'pb-2.5';  
-            font_size = 'text-sm'       
-            line_h = 'h-5'        
+            font_size = 'text-lg sm:text-sm'       
+            line_h = 'h-7 sm:h-5'        
             break;
 
         case 'xs':
             input_pt = 'pt-0.5'
             input_pb = 'pb-0.5';
-            font_size = 'text-xs'           
-            line_h = 'h-4'
+            font_size = 'text-base sm:text-xs'           
+            line_h = 'h-6 sm:h-4'
             break;
     }
 

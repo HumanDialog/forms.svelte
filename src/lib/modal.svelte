@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Mouse } from '@playwright/test';
-    import Icon from './components/icon.svelte'
+	import { afterUpdate, onMount, tick } from 'svelte';
+	  import Icon from './components/icon.svelte'
     
     export let title :string = '';
     export let open :boolean = false;
@@ -23,6 +23,22 @@
         open = true;
         close_callback = on_close_callback;
     }
+
+    let root;
+    afterUpdate(
+      async () =>
+      {
+          if(!!root)
+          {
+              let modal_root = document.getElementById("__hd_svelte_modal_root")
+              if(!!modal_root && root.parentElement != modal_root)
+              {
+                await tick();
+                modal_root.appendChild(root)
+              }
+          }
+      }
+    )
 
     let close_callback :Function | undefined  = undefined;
 
@@ -52,7 +68,7 @@
 </script>
 
 {#if open}
-<div class="relative z-20" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+<div class="relative z-20" aria-labelledby="modal-title" role="dialog" aria-modal="true" bind:this={root}>
     <!--
       Background backdrop, show/hide based on modal state.
   
@@ -63,9 +79,9 @@
         From: "opacity-100"
         To: "opacity-0"
     -->
-    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+    <div class="fixed w-screen h-screen inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
   
-    <div class="fixed inset-0 z-20 w-screen overflow-y-auto">
+    <div class="fixed z-20 inset-0 w-screen overflow-y-auto">
       <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
         <!--
           Modal panel, show/hide based on modal state.
@@ -77,7 +93,8 @@
             From: "opacity-100 translate-y-0 sm:scale-100"
             To: "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
         -->
-        <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+        <div class=" transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all 
+                    sm:my-8 w-full sm:max-w-lg">
           <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
             <div class="sm:flex sm:items-start">
               <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">

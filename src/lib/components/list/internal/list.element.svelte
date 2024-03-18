@@ -328,7 +328,9 @@
     
     <div class="ml-3 w-full py-1" use:selectable={item} on:click={(e) => {activate_row(e, item)}} role="row" tabindex="0">
         <div class="flex flex-row" on:click={(e) => edit_row_property(e, 'top')}>
-            <p  class="font-bold whitespace-nowrap overflow-clip flex-none min-h-[1.25rem] w-1/2 sm:w-1/3">
+            <p  class=" text-lg font-semibold min-h-[1.75rem]
+                        sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
+                        whitespace-nowrap overflow-clip flex-none w-1/2 sm:w-1/3">
                 {#if definition.title_readonly}
                 <span  id="__hd_list_ctrl_{item[item_key]}_Title" role="gridcell" tabindex="0"> 
                     {element_title}
@@ -386,7 +388,10 @@
 
         {#if summary && (item[summary] || placeholder=='Summary')}
             {@const element_id = `__hd_list_ctrl_${item[item_key]}_Summary`}
-            <p class="text-xs text-slate-400" style="min-height: 1rem;"  on:click={(e) => edit_row_property(e, 'bottom')}>
+            <p class="  sm:text-xs sm:min-h-[1rem]
+                        text-base min-h-[1.5rem]
+                        text-slate-400 " 
+                    on:click={(e) => edit_row_property(e, 'bottom')}>
                 {#if definition.summary_readonly}
                     <span   id={element_id} role="gridcell" tabindex="0">
                         {item[summary]}

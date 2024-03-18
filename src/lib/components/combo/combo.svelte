@@ -63,16 +63,16 @@
             label_mb = 'mb-2';
             input_pt = 'pt-2.5'
             input_pb = 'pb-2.5';     
-            font_size = 'text-sm'      
-            line_h = 'h-5'
+            font_size = 'text-lg sm:text-sm'      
+            line_h = 'h-7 sm:h-5'
             break;
 
         case 'xs':
             label_mb = 'mb-0.5';
             input_pt = 'pt-0.5'
             input_pb = 'pb-0.5';
-            font_size = 'text-xs'           
-            line_h = 'h-4'
+            font_size = 'text-base sm:text-xs'           
+            line_h = 'h-6 sm:h-4'
             break;
     }
 
@@ -775,7 +775,7 @@
                 {#if _filtered_source.length > 0}
                     {#each _filtered_source as item (item.Key)}
                         <!-- svelte-ignore a11y-click-events-have-key-events -->
-                        <li class="rounded p-2 flex flex-row items-center" 
+                        <li class="rounded p-2 flex flex-row items-center {font_size}" 
                             class:bg-gray-100={highlighted_option == item}
                             class:dark:bg-gray-700={highlighted_option == item}
                             class:dark:hover:bg-gray-700={highlighted_option == item}
