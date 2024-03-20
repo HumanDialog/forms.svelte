@@ -162,7 +162,7 @@ export function editable(node, action)
         node.contentEditable = "true"
         node.addEventListener("blur", blur_listener);
         node.addEventListener("keydown", key_listener);
-        
+
         node.focus();
 
         await tick();
@@ -172,6 +172,8 @@ export function editable(node, action)
         let end_container = range.endContainer;
         range.setStart(end_container, end_offset)
         range.setEnd(end_container, end_offset)
+        //range.setStart(node, 0)
+        //range.setEnd(node, 0)
        // console.log('range rect: ', range.getBoundingClientRect())
         let sel = window.getSelection();
         sel.removeAllRanges();

@@ -1,4 +1,4 @@
-<script lang="ts">
+    <script lang="ts">
     import {getContext} from 'svelte'
     import {type rList_definition, rList_property_type, rList_property} from './List'
 

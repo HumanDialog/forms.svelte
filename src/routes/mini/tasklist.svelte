@@ -276,7 +276,7 @@
             <span slot="left" let:element>
                 <Icon component={element.Status == STATUS_CLOSED ? FaRegCheckCircle : FaRegCircle} 
                     on:click={(e) => finish_task(e, element)} 
-                    class="h-5 w-5 sm:w-4 sm:h-4 text-gray-500 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
+                    class="h-5 w-5 sm:w-4 sm:h-4 text-gray-500 dark:text-gray-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
             </span>
 
             

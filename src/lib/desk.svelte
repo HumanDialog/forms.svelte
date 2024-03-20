@@ -115,22 +115,22 @@
             tools_visibility = "hidden sm:block sm:fixed"
             fab_visibility = "fixed sm:hidden"
 
-            content_top = 'top-[40px] sm:top-[40px]'
+            content_top = 'top-[50px] sm:top-[40px]'
             
             if(bottom_bar_visible)
-                content_height = `h-[calc(100vh-320px)] sm:h-[calc(100vh-280px)]`    
+                content_height = `h-[calc(100vh-290px)] sm:h-[calc(100vh-280px)]`    
             else    
-                content_height = `h-[calc(100vh-80px)] sm:h-[calc(100vh-40px)]` 
+                content_height = `h-[calc(100vh-50px)] sm:h-[calc(100vh-40px)]` 
                
         }
         else
         {
             tools_visibility = "hidden"
-            content_top = `top-[40px] sm:top-0`
+            content_top = `top-[50px] sm:top-0`
             if(bottom_bar_visible)
-                content_height = `h-[calc(100vh-280px)] sm:h-[calc(100vh-240px)]`           
+                content_height = `h-[calc(100vh-290px)] sm:h-[calc(100vh-240px)]`           
             else
-                content_height = `h-[calc(100vh-40px)] sm:h-screen`
+                content_height = `h-[calc(100vh-50px)] sm:h-screen`
         }
         
         
@@ -165,8 +165,8 @@
             <!--###########################################################-->
             <!--##  HORIZONTAL TOOLBAR (FOR PHONES)  ######################-->
             <!--###########################################################-->
-            <header class="fixed sm:hidden w-screen top-0 h-[40px] z-20  overflow-auto shadow  shadow-slate-900/5 dark:shadow-none" >
-                    <div class=" flex flex-row justify-between    bg-slate-900   text-gray-100 ">
+            <header class="fixed sm:hidden w-screen top-0 h-[50px] sm:h-[40px] z-20  overflow-auto shadow  shadow-slate-900/5 dark:shadow-none" >
+                    <div class=" flex flex-row justify-between  h-full  bg-slate-900   text-gray-100 ">
                         <HorizontalToolbar app_config={layout}/>
                     <div>
             </header>        
@@ -176,7 +176,7 @@
             <!--#######################################################-->
             <!--##  VERTICAL TOOLBAR                 ##################-->
             <!--#######################################################-->
-            <div  class="hidden sm:block fixed left-0 top-0 w-[40px] h-screen z-20 inset-0   overflow-hidden">
+            <div  class="hidden sm:block fixed left-0 top-0 w-[50px] sm:w-[40px] h-screen z-20 inset-0   overflow-hidden">
                 <div class="sticky top-0 flex h-full w-10 bg-slate-900 flex-col items-center text-gray-100 shadow">
                     <VerticalToolbar app_config={layout}/>
                 </div>    
@@ -188,13 +188,13 @@
             <!--##  MAIN SIDE BAR                    ##################-->
             <!--#######################################################-->
             {#if true}
-            {@const sidebar_left = $sidebar_left_pos==0 ? "left-0" : "left-[40px]"}
-            {@const sidebar_small_width = $sidebar_left_pos==0 ? "w-full" : "w-[calc(100vw-40px)]"}
+            {@const sidebar_left = $sidebar_left_pos==0 ? "left-0" : "left-[50px]"}
+            {@const sidebar_small_width = $sidebar_left_pos==0 ? "w-full" : "w-[calc(100vw-50px)]"}
 
             <div  class="{main_side_panel_visibility}  
                             {sidebar_left}  sm:left-[40px]
-                            top-[40px]  sm:top-0 
-                            h-[calc(100vh-40px)] sm:h-full {lg_main_sidebar_height}
+                            top-[50px]  sm:top-0 
+                            h-[calc(100vh-50px)] sm:h-full {lg_main_sidebar_height}
                             {sidebar_small_width} sm:w-[320px] 
                             z-20 overflow-x-hidden">
 

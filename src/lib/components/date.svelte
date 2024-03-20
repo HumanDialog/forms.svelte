@@ -3,6 +3,7 @@
     import {data_tick_store, context_items_store, context_types_store} from '../stores.js' 
     import {inform_modification, push_changes} from '../updates.js'
     import { parse_width_directive, is_device_smaller_than} from '../utils.js'
+    import FaChevronDown from 'svelte-icons/fa/FaChevronDown.svelte'
 
     
     export let self = null;
@@ -77,14 +78,13 @@
     let   user_class = $$restProps.class ?? '';
     let   value :Date = null;
     let   rValue :string = '';
+    let   pretty_value :string = ''
 
     let ctx = context ? context : getContext('ctx');
     let cs = parse_width_directive(c);
     let style :string;
     let input_element :HTMLInputElement|undefined = undefined;
 
-    let background_class = is_compact ? "bg-slate-900/10 dark:bg-slate-100/10 rounded-lg" : ""
-    
     if(!is_compact)
     {
         style = `bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
@@ -161,8 +161,158 @@
                     */
 
         rValue = get_formatted_date(value);
+        pretty_value = get_pretty_value(value);
         
         
+    }
+
+    function get_pretty_value(d: Date) :string
+    {
+        if(!d)
+            return '';
+
+        let month = d.getMonth();
+        let day = d.getDate();
+        let year = d.getFullYear();
+
+        const now = new Date( Date.now())
+        let current_month = now.getMonth();
+        let current_day = now.getDate();
+        let current_year = now.getFullYear();
+
+        let is_far_date :boolean = true;
+        const far_date_threshold = 14*24*60*60*1000; // 14 days
+        if(Math.abs( now.getTime() - d.getTime()) < far_date_threshold)
+            is_far_date = false;
+
+        if(year != current_year)
+        {
+            if(is_far_date)
+                return `${day} ${month_name(month)} ${year}`
+            else
+                return `${day_name(d.getDay())}, ${day} ${month_name(month)}`
+        }
+
+        if(month != current_month)
+        {
+            if(is_far_date)
+                return `${day} ${month_name(month)}`   
+            else
+                return `${day_name(d.getDay())}, ${day} ${month_name(month)}`
+        }
+        else
+        {
+            let day_of_week = d.getDay() // 0 == Sunday
+            let current_day_of_week = now.getDay()
+
+            if(day_of_week == 0)
+                day_of_week = 7
+
+            if(current_day_of_week == 0)
+                current_day_of_week = 7;
+
+            
+            let days_diff = day - current_day;
+            if(days_diff == 0)
+                return 'Today';
+            else if(days_diff == 1)
+                return 'Tomorrow';
+            else if(days_diff == -1)
+                return 'Yesterday';
+            else if(days_diff > 0 && days_diff <= 7)
+            {
+                if(day_of_week > current_day_of_week)
+                    return day_name(day_of_week);
+                else
+                    return `${day_name(day_of_week)}, ${d.getDate()} ${month_name(d.getMonth())}`
+            }
+            else if(days_diff > 0)
+            {
+                if(is_far_date)
+                    return `${d.getDate()} ${month_name(d.getMonth())}`
+                else
+                    return `${day_name(day_of_week)}, ${d.getDate()} ${month_name(d.getMonth())}`
+            }
+            else if(days_diff < 0 && days_diff > -7)
+            {
+                if(day_of_week < current_day_of_week)
+                    return day_name(day_of_week);
+                else
+                    return `${day_name(day_of_week)}, ${d.getDate()} ${month_name(d.getMonth())}`
+            }
+            else
+            {
+                if(is_far_date)
+                    return `${d.getDate()} ${month_name(d.getMonth())}`
+                else
+                    return `${day_name(day_of_week)}, ${d.getDate()} ${month_name(d.getMonth())}`
+            }
+        }
+    }
+
+    function day_name(d: number) :string
+    {
+        switch(d)
+        {
+        case 0:
+            return 'Sun';
+        
+        case 1:
+            return 'Mon';
+
+        case 2:
+            return 'Tue';
+
+        case 3:
+            return 'Wed';
+
+        case 4:
+            return 'Thu';
+
+        case 5:
+            return 'Fri';
+
+        case 6:
+            return 'Sat';
+        
+        case 7:
+            return 'Sun';
+        }
+
+        return '';
+    }
+
+    function month_name(m :number)
+    {
+        switch(m)
+        {
+            case 0:
+                return "Jan";
+            case 1:
+                return "Feb";
+            case 2:
+                return "Mar";
+            case 3:
+                return "Apr";
+            case 4:
+                return "May";
+            case 5:
+                return "Jun";
+            case 6:
+                return "Jul";
+            case 7:
+                return "Aug";
+            case 8:
+                return "Sep";
+            case 9:
+                return "Oct";
+            case 10:
+                return "Nov";
+            case 11:
+                return "Dec";
+        }
+
+        return '';
     }
 
     function get_formatted_date(d :Date) :string
@@ -237,9 +387,16 @@
 
 {#if is_compact}
     <div class="inline-block relative {line_h}">
-        <span class="dark:text-white {font_size} truncate  px-2.5 {background_class}
+       <span class="dark:text-gray-300 {font_size} truncate  
+                    pl-2.5 pr-5
                     absolute left-0 top-0 h-full" >
-            {rValue}
+            {pretty_value}
+
+            {#if can_be_activated}
+                <div class="w-3 h-3 absolute right-0 top-1.5 sm:top-0.5 text-gray-700 dark:text-gray-300">
+                    <FaChevronDown/>
+                </div>
+            {/if}
         
             {#if can_be_activated}
                 {#if type == "datetime-local"}
@@ -256,13 +413,17 @@
                             bind:this={input_element}
                             on:blur={blur}>
                 {/if}
+
+                
             {/if}
         </span>
+
+        
     </div>
 
 {:else}
     {#if type == "datetime-local"}
-        <input  class=" dark:text-white {cs} {style}  {line_h} px-2.5 {background_class} {user_class}" 
+        <input  class=" dark:text-white {cs} {style}  {line_h} px-2.5 {user_class}" 
                 type="datetime-local" 
                 on:change={on_changed}
                 bind:value={rValue}

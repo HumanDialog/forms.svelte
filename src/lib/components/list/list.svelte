@@ -195,8 +195,8 @@
 
 
 {#if title}
-    <p class="hidden sm:block mt-3 uppercase text-sm text-center">{title}</p>
-    <hr class="hidden sm:block w-full">
+    <p class="hidden sm:block mt-3 ml-3 pb-5 text-lg text-left">{title}</p>
+    <!--hr class="hidden sm:block w-full"-->
 {/if}
 
 <!--div class="w-full h-full overflow-y-auto"-->

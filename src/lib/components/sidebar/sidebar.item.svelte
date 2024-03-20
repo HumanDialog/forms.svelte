@@ -115,7 +115,7 @@
         on:keydown
         on:keyup
         class="     border border-transparent rounded-lg
-                    text-base font-normal 
+                    text-lg sm:text-base font-normal 
                     text-gray-900 sm:hover:bg-gray-100  
                     dark:text-white sm:dark:hover:bg-gray-700 {user_class}
                     flex flex-row justify-between"
@@ -124,7 +124,7 @@
         class:selected={selected(selectable, context_data)}>
             <a  href={href} 
                 on:click={on_link_clicked} 
-                class="flex-1 ml-2 my-2 inline-flex items-center group">
+                class="flex-1 ml-2 my-3 sm:my-2 inline-flex items-center group">
                 {#if icon}
                     <Icon size={5} component={icon}/>
                 {/if}
@@ -137,7 +137,7 @@
             <section    class="flex-0 w-20 sm:w-12 h-10 flex-0 flex flex-row"
                         use:selectable_if_needed={selectable}>
                 {#if can_show_context_menu(selectable, context_data)}
-                    <button class="w-4 h-4 mt-3 mr-2 ml-auto" on:click={on_show_menu}>
+                    <button class="w-6 sm:w-4 h-6 sm:h-4 mt-3 mr-3 sm:mr-2 ml-auto" on:click={on_show_menu}>
                         <FaBars/>
                     </button>
                 {/if}

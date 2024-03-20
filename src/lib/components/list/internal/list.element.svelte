@@ -12,8 +12,9 @@
 
     import {show_grid_menu, show_menu} from '../../menu'
     import {push_changes, inform_modification} from '../../../updates'
-    import Combo from '../../combo/combo.svelte'
-    import DatePicker from '../../date.svelte'
+    import Summary from './list.element.summary.svelte'
+    import Properties from './list.element.props.svelte'
+    import { is_device_smaller_than } from '../../../utils'
                 
     import {rList_definition, rList_property_type} from '../List'
     
@@ -30,13 +31,15 @@
     //console.log(definition.properties, item)
 
     let placeholder :string = '';
-    let props = []
+    let props_sm;
+    let props_md;
     
     $: is_row_active = calculate_active(item, $context_items_store)
     $: is_row_selected = selected(item, $context_items_store)
 
     $: selected_class = is_row_selected ? "!border-blue-300" : "";
     $: focused_class = is_row_active ? "bg-gray-200 dark:bg-gray-700" : "";
+    $: is_small = is_device_smaller_than("sm")
 
     if(!typename)
     {
@@ -166,15 +169,17 @@
             else if((part == 'bottom') && !definition.summary_readonly)
                 force_editing('Summary')
         }
+        else
+        {
+            if((part == 'top') && !definition.title_readonly)
+                force_editing('Title')
+            else if((part == 'bottom') && !definition.summary_readonly)
+                force_editing('Summary')
+        }
     }
 
     function activate_row(e, item)
     {
-        if(is_row_active)
-        {
-            
-        }
-
         activate_item('props', item, toolbar_operations(item));
         
         if(e)
@@ -207,30 +212,7 @@
         e.preventDefault();
     }
 
-    function on_date_changed(value, a)
-    {
-        if(!value)
-            item[a] = "";    
-        else
-            item[a] = value.toJSON();
-    }
-
-    function on_combo_changed(key, name, prop)
-    {
-        if(prop.association)
-        {
-            let iname = prop.combo_definition.element_name ?? '$display'
-            item[prop.a] = {
-                $ref: key,
-                [iname]: name
-            }
-        }
-        else
-        {
-            let value = key ?? name;
-            item[prop.a] = value
-        }
-    }
+    
 
     export function edit_property(field :string)
     {
@@ -240,21 +222,10 @@
             force_editing('Summary')
         else
         {
-            let prop_idx = definition.properties.findIndex( p => p.name == field)
-            if(prop_idx < 0)
-                return;
-
-            let property = definition.properties[prop_idx];
-            switch(property.type)
-            {
-            case rList_property_type.Date:
-                edit_date(field, prop_idx);
-                break;
-
-            case rList_property_type.Combo:
-                edit_combo(field, prop_idx);
-                break;
-            }
+            if(is_device_smaller_than("sm"))
+                props_sm.edit_property(field);
+            else
+                props_md.edit_property(field);
         }
     }
 
@@ -279,47 +250,13 @@
 
         start_editing(element_node, () => { placeholder='' });
     }
-
-    async function edit_combo(field :string, prop_idx :number)
-    {
-        let combo = props[prop_idx];
-
-        if(!!combo)
-            combo.show();
-        else
-        {
-            placeholder = field;
-            await tick();
-            combo = props[prop_idx];
-            if(!!combo)
-                combo.show(undefined, () => {placeholder = ''});
-        }
-    }
-
-    async function edit_date(field :string, prop_idx :number)
-    {
-        let combo = props[prop_idx];
-
-        if(!!combo)
-            combo.show();
-        else
-        {
-            placeholder = field;
-            await tick();
-            combo = props[prop_idx];
-            if(!!combo)
-                combo.show(undefined, () => {placeholder = ''});
-        }
-    }
-
-
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 {#if item}
 {@const element_title = item[title]}
 
-<section    class="flex flex-row my-0  w-full text-sm text-slate-700 dark:text-slate-400 cursor-default rounded-md border border-transparent {selected_class} {focused_class}"
+<section    class="mt-3 flex flex-row my-0  w-full text-sm text-slate-700 dark:text-slate-300 cursor-default rounded-md border border-transparent {selected_class} {focused_class}"
             on:contextmenu={on_contextmenu}
             role="menu"
             tabindex="-1">
@@ -327,89 +264,51 @@
     <slot name="left" element={item}/>
     
     <div class="ml-3 w-full py-1" use:selectable={item} on:click={(e) => {activate_row(e, item)}} role="row" tabindex="0">
-        <div class="flex flex-row" on:click={(e) => edit_row_property(e, 'top')}>
-            <p  class=" text-lg font-semibold min-h-[1.75rem]
-                        sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
-                        whitespace-nowrap overflow-clip flex-none w-1/2 sm:w-1/3">
-                {#if definition.title_readonly}
-                <span  id="__hd_list_ctrl_{item[item_key]}_Title" role="gridcell" tabindex="0"> 
+        <div class="block sm:flex sm:flex-row" on:click={(e) => edit_row_property(e, 'top')}>
+           
+            {#if definition.title_readonly}
+                <p  class=" text-lg font-semibold min-h-[1.75rem]
+                            sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
+                            whitespace-nowrap overflow-clip w-full sm:flex-none sm:w-2/3"
+                    id="__hd_list_ctrl_{item[item_key]}_Title"> 
                     {element_title}
-                </span>
-                {:else}
-                    {#key item[title]} <!-- Wymusza pełne wyrenderowanie zwłasza po zmiane z pustego na tekst  -->
-                    <span  id="__hd_list_ctrl_{item[item_key]}_Title" role="gridcell" tabindex="0"
+                </p>
+            {:else}
+                {#key item[title]} <!-- Wymusza pełne wyrenderowanie zwłasza po zmiane z pustego na tekst  -->
+                    <p  class=" text-lg font-semibold min-h-[1.75rem]
+                                sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
+                                whitespace-nowrap overflow-clip w-full sm:flex-none sm:w-2/3"
+                        id="__hd_list_ctrl_{item[item_key]}_Title"
                         use:editable={(text) => {change_name(text)}}
                         on:click={edit}> 
                             {element_title}
-                    </span>
-                    {/key}
-                {/if}
-            </p>
-
-            <!--div class="flex flex-row justify-between text-xs flex-none w-1/2 sm:w-2/3"-->
-            <div class="text-xs flex-none w-1/2 sm:w-2/3 grid-{definition.properties.length}">
-                {#each definition.properties as prop, prop_index}
-                    <p class="col-span-1 w-full mr-auto mt-0.5">
-                        {#if item[prop.a] || placeholder == prop.name}
-                            <span role="gridcell" tabindex="0">
-                                {#if prop.type == rList_property_type.Date}
-                                    <DatePicker self={item} 
-                                                a={prop.a}
-                                                compact={true}
-                                                on_select={prop.on_select}
-                                                s="xs"
-                                                in_context="props sel"
-                                                bind:this={props[prop_index]}
-                                                changed={(value)=>{on_date_changed(value, prop.a)}}
-                                    />
-                                {:else if prop.type == rList_property_type.Combo}
-                                    <Combo  self={item} 
-                                            in_context="props sel" 
-                                            compact={true} 
-                                            a={prop.a}
-                                            on_select={prop.on_select}
-                                            is_association={prop.association}
-                                            icon={false} 
-                                            bind:this={props[prop_index]}
-                                            definition={prop.combo_definition}
-                                            changed={(key,name)=>{on_combo_changed(key, name, prop)}}
-                                            s='xs'/>
-                                {:else if prop.type == rList_property_type.Static}
-                                    <span class="dark:text-white text-gray-400 truncate px-2.5 bg-slate-900/10 dark:bg-slate-100/10 rounded-lg">
-                                        {item[prop.a]}
-                                    </span>
-                                {/if}
-                            </span>
-                        {/if}
                     </p>
-                {/each}
-            </div>
+                {/key}
+            {/if}
+           
+
+            <section class="hidden sm:block w-full sm:flex-none sm:w-1/3">
+                <Properties {definition} {item} {placeholder} bind:this={props_md}/>
+            </section>
         </div>
 
         {#if summary && (item[summary] || placeholder=='Summary')}
             {@const element_id = `__hd_list_ctrl_${item[item_key]}_Summary`}
-            <p class="  sm:text-xs sm:min-h-[1rem]
-                        text-base min-h-[1.5rem]
-                        text-slate-400 " 
-                    on:click={(e) => edit_row_property(e, 'bottom')}>
-                {#if definition.summary_readonly}
-                    <span   id={element_id} role="gridcell" tabindex="0">
-                        {item[summary]}
-                    </span>
-                {:else if item[summary]}
-                    <span   id={element_id} role="gridcell" tabindex="0"
-                            use:editable={(text) => {change_summary(text)}}
-                            on:click={edit}>
-                        {item[summary]}
-                    </span>
-                {:else if placeholder == 'Summary'}
-                    <span   id={element_id}
-                            use:editable={(text) => {change_summary(text)}}>
-                    </span>
-                {/if}
-                
-            </p>
+            <Summary
+                    id={element_id}
+                    on:click={(e) => edit_row_property(e, 'bottom')}
+                    text={item[summary]}
+                    readonly={definition.summary_readonly}
+                    placeholder={placeholder == 'Summary'}
+                    editable={(text) => {change_summary(text)}}
+                    click_edit={edit}
+                />
         {/if}
+
+        <section class="block sm:hidden w-full sm:flex-none sm:w-2/3">
+            <Properties {definition} {item} {placeholder} bind:this={props_sm}/>
+        </section>
+
     </div>
 </section>
 {/if}

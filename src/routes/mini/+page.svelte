@@ -17,8 +17,8 @@
     reef.configure( {
             mode: 'local',
             local: {
-                //api:    "http://127.0.0.1:1996/",
-                api:    "http://192.168.0.103:1996/",
+                api:    "http://127.0.0.1:1996/",
+                //api:    "http://192.168.0.102:1996/",
                 users:
                 [
                     "alice@example.com",

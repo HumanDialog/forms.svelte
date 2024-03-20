@@ -281,30 +281,35 @@
 </script>
 
 <div id="__hd_svelte_contextmenu" 
-    class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 shadow-md z-30 fixed min-w-[{min_width_px}px] w-max" 
+    class=" bg-white dark:bg-gray-700 text-slate-600 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-900 shadow-md 
+            z-30 fixed min-w-[{min_width_px}px] w-max" 
     style={`left:${x}px; top:${y}px; display:${display}`}
     bind:this={menu_root}>
 
     {#each operations as operation, index}
         {@const is_separator = operation.separator}
         {#if is_separator}
-            <hr class="my-1 mx-1">
+            <hr class="my-1 mx-0 border-1 dark:border-slate-900">
         {:else}
-            {@const icon_placeholder_size = operation.description ? 12 : 10}
+            {@const mobile = is_device_smaller_than("sm")}
+            {@const icon_placeholder_without_desc = mobile ? 12 : 10}
+            {@const icon_placeholder_with_desc = mobile ? 14 : 12}
+            {@const icon_placeholder_size = operation.description ? icon_placeholder_with_desc : icon_placeholder_without_desc}
             {@const menu_item_id = menu_items_id_prefix + index}
-            {@const active = focused_index == index ? 'bg-gray-200 dark:bg-gray-700' : ''}
+            {@const active = focused_index == index ? 'bg-gray-200 dark:bg-gray-600' : ''}
             {@const has_submenu = operation.menu !== undefined && operation.menu.length > 0}
             
-            <button class="font-medium m-0 p-2 text-sm w-full text-left flex flex-row cursor-context-menu {active} focus:outline-none"
+            <button class="font-medium m-0 p-2 text-lg sm:text-sm w-full text-left flex flex-row cursor-context-menu {active} focus:outline-none"
                     id={menu_item_id}
                     bind:this={menu_items[index]}
                     on:click|stopPropagation={(e) => { execute_action(operation, index) } } 
                     on:mouseenter = {(e) => {on_mouse_move(index)}}
                     on:keydown|stopPropagation={(e) => on_keydown(e, operation, index)}>
                     
-                <div class="flex items-center justify-center" style:width={`${icon_placeholder_size*0.25}rem`}>
+                <div class="flex items-center justify-center mt-1 sm:mt-0.5" style:width={`${icon_placeholder_size*0.25}rem`}>
                     {#if operation.icon}
-                        {@const icon_size = icon_placeholder_size - 6}
+                        {@const cc = mobile ? 7 : 6}
+                        {@const icon_size = icon_placeholder_size - cc}
                         <Icon size={icon_size} component={operation.icon}/>
                     {/if}
                 </div>
@@ -312,7 +317,7 @@
                     <p>{operation.caption}</p>
                     {#if operation.description}
                         {@const shortcut_width_px = operation.shortcut ? 80 : 0}
-                        <p  class="text-sm font-normal text-gray-400 dark:text-gray-500 truncate inline-block"
+                        <p  class="text-sm font-normal text-slate-900 dark:text-gray-500 truncate inline-block"
                             style:max-width={`calc(${width_px-shortcut_width_px} - 3rem)`} >{operation.description}</p>
                     {/if}
                 </div>

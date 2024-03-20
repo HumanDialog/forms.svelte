@@ -76,7 +76,7 @@
             break;
     }
 
-    let background_class = is_compact && !icon ? "bg-slate-900/10 dark:bg-slate-100/10 rounded-lg" : ""
+    let background_class = is_compact && !icon ? "" : ""; //bg-slate-900/10 dark:bg-slate-100/10 rounded-lg" : ""
 
     let appearance_class;
     if(is_compact)
@@ -177,12 +177,14 @@
         if(!can_be_activated)
             return;
         
+        
         if(!combo)
             return;
-
+ 
         if(is_dropdown_open)
             return;
 
+         
         if(event)
         {
             event.stopPropagation();
@@ -247,6 +249,8 @@
             if(show_above)
                 dropdown_position += ' transform: translate(0, -100%);'
         }
+
+        console.log('combo show pos', dropdown_position, 'rect', rect, 'client_rect', client_rect, 'combo', combo)
 
         /*console.log('dropdown_position', dropdown_position, rect, client_rect)
         console.log('preferred_palette_height', preferred_palette_height)
@@ -749,7 +753,7 @@
 
             
             <p  bind:this={textbox}
-                class="dark:text-white {line_h} truncate px-2.5 {background_class}"
+                class="dark:text-gray-300 {line_h} truncate sm:pl-2.5 pr-2.5 {background_class}"
                 class:ml-2={icon}
                 class:text-gray-400={ (!is_dropdown_open) && (!sel_item)}
                 class:text-gray-700={ is_dropdown_open || sel_item }
@@ -759,8 +763,8 @@
                 {combo_text}</p>
         </div>
         
-        {#if can_be_activated && !is_compact }
-            <Icon size={3} component={FaChevronDown} class="flex-none text-gray-700 dark:text-gray-200"/>
+        {#if can_be_activated }
+            <Icon size={3} component={FaChevronDown} class="flex-none text-gray-700 dark:text-gray-300"/>
         {/if}
     </div>
 

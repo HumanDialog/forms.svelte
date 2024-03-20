@@ -197,23 +197,23 @@
 </script>
 
 <div class="flex flex-row w-full">
-    <div class="flex-none left-0 flex h-10">
-        <button class="w-10 h-full flex justify-center items-center text-slate-300 hover:text-slate-100" on:click={toggle_navigator}>
-            <Icon size={6} component={icon}/>
+    <div class="flex-none left-0 flex h-12 sm:h-10">
+        <button class="w-12 sm:w-10 h-full flex justify-center items-center text-slate-300 hover:text-slate-100" on:click={toggle_navigator}>
+            <Icon class="w-8 sm:w-6 h-8 sm:h-6" component={icon}/>
         </button>
     </div>
 
     <div class="grow">
         
-        <div class="block sm:hidden mt-3 uppercase text-sm text-center">{@html title}</div>
+        <div class="block sm:hidden mt-4 sm:mt-3 uppercase text-sm text-center">{@html title}</div>
     </div>
 
-    <div class="flex-none ml-auto flex h-10">        
+    <div class="flex-none ml-auto flex h-12 sm:h-10">        
         <button
-            class="h-full w-10 px-0 flex justify-center items-center   text-slate-300 hover:text-slate-100"
+            class="h-full w-12 sm:w-10 px-0 flex justify-center items-center   text-slate-300 hover:text-slate-100"
             on:click={show_options}>
 
-            <Icon size={4} component={FaCog} />
+            <Icon class="w-5 sm:w-4 h-5 sm:h-4" component={FaCog} />
         </button>
     </div>
 
