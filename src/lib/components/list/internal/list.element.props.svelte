@@ -75,7 +75,7 @@
     {
         let combo = props[prop_idx];
 
-        console.log('edit_propery', field, combo)
+        //console.log('edit_propery', field, combo)
 
         if(!!combo)
             combo.show();

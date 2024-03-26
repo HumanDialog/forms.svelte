@@ -41,6 +41,8 @@ export class rList_definition
     public title_editable       :boolean = false;
     public on_title_changed     :Function | undefined = undefined;
     public title_readonly       :boolean = false;
+    public title_href           :string | undefined = undefined
+    public title_href_func      :Function | undefined = undefined;
 
     public summary              :string = '';
     public summary_editable     :boolean = false;

@@ -37,10 +37,15 @@
     }
 
     onMount(() => {
+            
             if(toolbar_operations != undefined && Array.isArray(toolbar_operations))
                 $page_toolbar_operations = [...toolbar_operations]
 
             $page_title = title;
+            
+            //clear_selection();
+            $context_toolbar_operations = [];
+            $data_tick_store = $data_tick_store + 1;
 
             return () => 
             { 

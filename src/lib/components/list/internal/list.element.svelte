@@ -17,6 +17,7 @@
     import { is_device_smaller_than } from '../../../utils'
                 
     import {rList_definition, rList_property_type} from '../List'
+	import { push } from 'svelte-spa-router';
     
     export let item     :object;
 
@@ -39,7 +40,7 @@
 
     $: selected_class = is_row_selected ? "!border-blue-300" : "";
     $: focused_class = is_row_active ? "bg-gray-200 dark:bg-gray-700" : "";
-    $: is_small = is_device_smaller_than("sm")
+    $: is_link_like = is_row_selected && (!!definition.title_href || !!definition.title_href_func)
 
     if(!typename)
     {
@@ -122,7 +123,7 @@
         activate_row(null, item);
     }
 
-    function edit_row_property(e, part)
+    function on_active_row_clicked(e, part)
     {
         if(!is_row_active)
             return;
@@ -164,17 +165,32 @@
         }
         else if(click_on_empty_space)
         {
-            if((part == 'top') && !definition.title_readonly)
-                force_editing('Title')
-            else if((part == 'bottom') && !definition.summary_readonly)
-                force_editing('Summary')
+            if(definition.title_href || definition.title_href_func)
+            {
+                let link: string = '';
+                if(definition.title_href)
+                    link = definition.title_href;
+                else if(definition.title_href_func)
+                    link = definition.title_href_func(item);
+
+                if(link)
+                    push(link);
+            }
+            else
+            {
+                if((part == 'top') && !definition.title_readonly)
+                    force_editing('Title')
+                else if((part == 'bottom') && !definition.summary_readonly)
+                    force_editing('Summary')
+            }
         }
         else
         {
-            if((part == 'top') && !definition.title_readonly)
+            /*if((part == 'top') && !definition.title_readonly)
                 force_editing('Title')
             else if((part == 'bottom') && !definition.summary_readonly)
                 force_editing('Summary')
+            */
         }
     }
 
@@ -263,8 +279,13 @@
 
     <slot name="left" element={item}/>
     
-    <div class="ml-3 w-full py-1" use:selectable={item} on:click={(e) => {activate_row(e, item)}} role="row" tabindex="0">
-        <div class="block sm:flex sm:flex-row" on:click={(e) => edit_row_property(e, 'top')}>
+    <div    class="ml-3 w-full py-1" 
+            class:sm:hover:cursor-pointer={is_link_like}
+            use:selectable={item} 
+            on:click={(e) => {activate_row(e, item)}} 
+            role="row" 
+            tabindex="0">
+        <div class="block sm:flex sm:flex-row" on:click={(e) => on_active_row_clicked(e, 'top')}>
            
             {#if definition.title_readonly}
                 <p  class=" text-lg font-semibold min-h-[1.75rem]
@@ -296,7 +317,7 @@
             {@const element_id = `__hd_list_ctrl_${item[item_key]}_Summary`}
             <Summary
                     id={element_id}
-                    on:click={(e) => edit_row_property(e, 'bottom')}
+                    on:click={(e) => on_active_row_clicked(e, 'bottom')}
                     text={item[summary]}
                     readonly={definition.summary_readonly}
                     placeholder={placeholder == 'Summary'}

@@ -126,6 +126,10 @@
                             border rounded border-gray-200 dark:border-gray-600 focus:outline-none
                             inline-flex items-center justify-center"
                             on:click={(e) => {execute_action(e, operation)}}>
+                
+                {#if operation.icon}
+                    <div class="w-3 h-3 mr-1"><svelte:component this={operation.icon}/></div>
+                {/if}
                 <div>{operation.caption}</div>
             </button>
         {/if}

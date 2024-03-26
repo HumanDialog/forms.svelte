@@ -18,10 +18,11 @@
     export let on_select = undefined;
     export let definition :rCombo_definition | null = null;
     export let changed = undefined;
+    export let on_new_item_created = undefined;
 
     export let icon :boolean = false;
 
-    export let placeholder = 'Choose wisely...';
+    export let placeholder = '';
 
     export  let s = 'sm'
     export  let c = ''
@@ -29,6 +30,7 @@
     export let compact :boolean = false;
     export let in_context :string = 'sel'   // in compact mode
     export let cached :boolean = false;
+    export let filtered: boolean = false;
     
 
     let is_compact :boolean = getContext('rIs-table-component') || compact;
@@ -54,8 +56,9 @@
     let label_mb = 'mb-1' //
     let input_pt = 'pt-0.5'
     let input_pb = 'pb-1'
-    let font_size = 'text-sm'
+    let font_size = 'text-lg sm:text-sm'
     let line_h = 'h-5'
+    let chevron_mt = 'mt-2 sm:mt-0'
     
     switch (s)
     {
@@ -65,6 +68,7 @@
             input_pb = 'pb-2.5';     
             font_size = 'text-lg sm:text-sm'      
             line_h = 'h-7 sm:h-5'
+            chevron_mt = 'mt-2 sm:mt-1'
             break;
 
         case 'xs':
@@ -73,6 +77,7 @@
             input_pb = 'pb-0.5';
             font_size = 'text-base sm:text-xs'           
             line_h = 'h-6 sm:h-4'
+            chevron_mt = ''
             break;
     }
 
@@ -250,8 +255,7 @@
                 dropdown_position += ' transform: translate(0, -100%);'
         }
 
-        console.log('combo show pos', dropdown_position, 'rect', rect, 'client_rect', client_rect, 'combo', combo)
-
+        
         /*console.log('dropdown_position', dropdown_position, rect, client_rect)
         console.log('preferred_palette_height', preferred_palette_height)
         console.log('bottom_space', bottom_space)
@@ -260,26 +264,27 @@
 
         is_dropdown_open = true;
         
-        if(!textbox)
-            return;
+        if(filtered)
+        {
+            if(!textbox)
+                return;
 
-        textbox.innerHTML = '';
-        tick_request_internal = tick_request_internal + 1;
+            textbox.innerHTML = '';
+            tick_request_internal = tick_request_internal + 1;
 
-        if(!mutation_observer)
-            mutation_observer = new MutationObserver( () => { on_input_change(); })
+            if(!mutation_observer)
+                mutation_observer = new MutationObserver( () => { on_input_change(); })
 
-        mutation_observer.observe(   textbox,  {
-                                    childList: true,
-                                    attributes: true,
-                                    characterData: true,
-                                    subtree: true } );
+            mutation_observer.observe(   textbox,  {
+                                        childList: true,
+                                        attributes: true,
+                                        characterData: true,
+                                        subtree: true } );
+        }
 
         
-        
-                                    
-        filtered_source = definition.source.map( e => e);
-        highlighted_option = filtered_source.length > 0 ? filtered_source[0] : null;
+        //filtered_source = definition.source.map( e => e);
+        //highlighted_option = filtered_source.length > 0 ? filtered_source[0] : null;
     }
 
     export function hide()
@@ -355,7 +360,7 @@
             if(found)
                 return found.Name ?? found.Key;
             else
-                return !is_compact ? placeholder : '';
+                return placeholder;
         }
         else
             return textbox.innerHTML;
@@ -368,7 +373,10 @@
 
         if(on_select)
         {
-            await on_select(item, itm.Key, itm.Name);
+            if(itm == new_item_option)
+                await on_new_item_created(itm.Key, itm.Name);
+            else
+                await on_select(item, itm.Key, itm.Name);
             tick_request_internal = tick_request_internal + 1;
  }
         else
@@ -535,17 +543,32 @@
         highlighted_option = filtered_source.length > 0 ? filtered_source[0] : null;
     }
     
+    let new_item_option: rCombo_item
+
     function get_filtered_source() :rCombo_item[]
     {
-        if(!textbox)
+        if(!textbox || !filtered)
             return definition.source;
         else if(textbox.innerHTML)
         {
-            return definition.source.filter( e =>
+            let result = definition.source.filter( e =>
             {
                 return  (e.Name && e.Name.toLowerCase().includes( textbox.innerHTML.toLowerCase())) ||
                         (e.Key  && e.Key.toString().toLowerCase().includes(textbox.innerHTML.toLowerCase()));
             });
+
+            if(on_new_item_created)
+            {
+                if(!new_item_option)
+                    new_item_option = new rCombo_item;
+                let new_name :string = textbox.innerHTML
+                new_item_option.Key = new_name;
+                new_item_option.Name = `Create '${new_name}'`
+
+                result = [new_item_option, ...result];
+            }
+
+            return result;
         }
         else
             return definition.source;
@@ -690,6 +713,9 @@
             definition.source.push(el);
         })
 
+        filtered_source = definition.source.map( e => e);
+        highlighted_option = filtered_source.length > 0 ? filtered_source[0] : null;
+
     }
 
     function setup_view(...args)
@@ -753,18 +779,21 @@
 
             
             <p  bind:this={textbox}
-                class="dark:text-gray-300 {line_h} truncate sm:pl-2.5 pr-2.5 {background_class}"
+                class="dark:text-gray-300 {line_h} truncate pl-0 pr-2.5 {background_class} min-w-[2.5rem]"
                 class:ml-2={icon}
                 class:text-gray-400={ (!is_dropdown_open) && (!sel_item)}
                 class:text-gray-700={ is_dropdown_open || sel_item }
                 class:w-10={!combo_text}
-                contenteditable={is_dropdown_open}
-                on:keydown={on_keydown}>
+                contenteditable={is_dropdown_open && filtered}
+                on:keydown={on_keydown}
+                tabindex="0">
                 {combo_text}</p>
         </div>
         
         {#if can_be_activated }
-            <Icon size={3} component={FaChevronDown} class="flex-none text-gray-700 dark:text-gray-300"/>
+            <div class="w-3 h-3 no-print flex-none text-gray-700 dark:text-gray-300 {chevron_mt}">
+                <FaChevronDown/>
+            </div>
         {/if}
     </div>
 
@@ -821,5 +850,12 @@
 [contenteditable]:focus {
     outline: 0px solid transparent;
 }
+
+@media print
+    {
+        .no-print, .no-print *{
+            display: none !important;
+        }
+    }
 
 </style>

@@ -196,7 +196,7 @@
 
 </script>
 
-<div class="flex flex-row w-full">
+<div class="print flex flex-row w-full">
     <div class="flex-none left-0 flex h-12 sm:h-10">
         <button class="w-12 sm:w-10 h-full flex justify-center items-center text-slate-300 hover:text-slate-100" on:click={toggle_navigator}>
             <Icon class="w-8 sm:w-6 h-8 sm:h-6" component={icon}/>
@@ -220,7 +220,7 @@
 </div>
 
 {#if tabs.length > 1 &&  $main_sidebar_visible_store != "*"}
-    <div  class="flex-none block fixed left-0 top-[40px] w-[40px] h-screen z-20 inset-0   overflow-hidden">
+    <div  class="print flex-none block fixed left-0 top-[40px] w-[40px] h-screen z-20 inset-0   overflow-hidden">
         <div class="sticky top-0 flex h-full w-10 bg-slate-900 flex-col items-center text-gray-100 shadow">
             <VerticalToolbar {app_config} mobile={true}/>
         </div>    
@@ -228,3 +228,12 @@
 {/if}
 
 <!--Menu bind:this={menu}/-->
+
+<style>
+    @media print
+    {
+        .no-print, .no-print *{
+            display: none !important;
+        }
+    }
+</style>

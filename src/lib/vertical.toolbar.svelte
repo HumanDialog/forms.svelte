@@ -167,7 +167,7 @@
 </script>
 
 
-    <div class="px-0 w-10">
+    <div class="no-print px-0 w-10">
         {#each tabs as tab}
             {@const is_selected = $main_sidebar_visible_store == tab.key}
             <button
@@ -182,7 +182,7 @@
 
     {#if !mobile}
     
-        <div class="mt-auto h-auto items-center w-full">
+        <div class="no-print mt-auto h-auto items-center w-full">
             
             <button
                 class="h-16 px-0 flex justify-center items-center w-full text-slate-300 hover:text-slate-100"
@@ -196,3 +196,12 @@
 
 
     <!--Menu bind:this={menu}/-->
+
+<style>
+    @media print
+    {
+        .no-print, .no-print *{
+            display: none !important;
+        }
+    }
+</style>

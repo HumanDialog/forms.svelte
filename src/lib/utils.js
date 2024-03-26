@@ -97,52 +97,94 @@ export function get_active(context_level)
         return null;
 }
 
-export function editable(node, action)
+export function editable(node, params)
 {
+    let action;
+    let active = false;
+    let onRemove = undefined;
+    if(params instanceof Object)
+    {
+        action = params.action ?? params;
+        active = params.active ?? false;
+        onRemove = params.remove ?? undefined
+    }
+    else
+        action = params;
+
+    let observer = null;
+    let has_changed = false;
+
     const org_text = node.textContent;
     const blur_listener = async (e) =>
     {
         let cancel = !node.textContent
+        if(observer)
+            observer.disconnect();
+
         await finish_editing(cancel, false);
     }
 
     const key_listener = async (e) =>
     {
+        //e.ctrlKey
         switch(e.key)
         {
         case 'Esc':
         case 'Escape':
-            await finish_editing(true, false);
-            e.stopPropagation();
-            e.preventDefault();
+            if(!active)
+            {
+                e.stopPropagation();
+                e.preventDefault();
+
+                await finish_editing(true, false);
+            }
             break;
 
         case 'Enter':
-            await finish_editing(false, true);
             e.stopPropagation();
             e.preventDefault();
+
+            await finish_editing(false, true);
             break;
-        }
+
+        case 'Backspace':
+            if(onRemove && node.textContent.length == 0)
+            {
+                e.stopPropagation();
+                e.preventDefault();
+                //await finish_editing(false, false);
+                onRemove();
+            }
+            break;
+         }
     }
 
     const finish_editing = async (cancel, incremental) =>
     {
-        node.removeEventListener("blur", blur_listener);
-        node.removeEventListener("keydown", key_listener);
-        node.contentEditable = "false"
+       if(!active)
+       {
+            node.removeEventListener("blur", blur_listener);
+            node.removeEventListener("keydown", key_listener);
+            node.contentEditable = "false"
+       
+            let sel = window.getSelection();
+            sel.removeAllRanges();
+       }
 
-        let sel = window.getSelection();
-        sel.removeAllRanges();
-
-        //console.log('cell_content', node.textContent)
-        
         if(cancel)
         {
             node.innerHTML = org_text;
         }
         else if(action)
         {
-            await action(node.textContent)
+            if(active)
+            {
+                if(has_changed)
+                    await action(node.textContent)
+            }
+            else
+                await action(node.textContent)
+            
         }
 
         const finish_event  = new CustomEvent("finish", {
@@ -154,7 +196,9 @@ export function editable(node, action)
                             });
 
         node.dispatchEvent(finish_event);
-        node.removeEventListener("finish", (e) => {});
+
+        if(!active)
+            node.removeEventListener("finish", (e) => {});
     }
 
     const edit_listener = async (e) =>
@@ -181,15 +225,39 @@ export function editable(node, action)
         
     }
 
-    node.addEventListener("edit", edit_listener);
+    const focus_listener = async (e) =>
+    {
+        node.addEventListener("blur", blur_listener);
+        node.addEventListener("keydown", key_listener);
+        has_changed = false;
+        
+        observer = new MutationObserver(() => { has_changed = true; });
+        observer.observe(   node,  {
+                                childList: true,
+                                attributes: true,
+                                characterData: true,
+                                subtree: true } );
+    }
+
     node.classList.add("editable")
     node.classList.add("focus:outline-none")
-    return {
-        destroy() {
-            node.removeEventListener("edit", edit_listener)
-            node.classList.remove("editable")
-            node.contentEditable = "false"
-        }};
+
+    if(active)
+    {
+        node.contentEditable = "true"
+        node.addEventListener('focus', focus_listener);
+    }
+    else
+    {
+        node.addEventListener("edit", edit_listener);
+        
+        return {
+            destroy() {
+                node.removeEventListener("edit", edit_listener)
+                node.classList.remove("editable")
+                node.contentEditable = "false"
+            }};
+    }
 }
 
 export function start_editing(element, finish_callback)

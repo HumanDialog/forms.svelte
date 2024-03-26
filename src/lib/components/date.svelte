@@ -56,6 +56,7 @@
     let input_pb = 'pb-1'
     let font_size = 'text-lg sm:text-sm'
     let line_h = 'h-7 sm:h-5'
+    let chevron_mt = 'mt-2 sm:mt-1' 
     
     switch (s)
     {
@@ -63,7 +64,8 @@
             input_pt = 'pt-2.5'
             input_pb = 'pb-2.5';  
             font_size = 'text-lg sm:text-sm'       
-            line_h = 'h-7 sm:h-5'        
+            line_h = 'h-7 sm:h-5'  
+            chevron_mt = 'mt-2 sm:mt-1'      
             break;
 
         case 'xs':
@@ -71,6 +73,7 @@
             input_pb = 'pb-0.5';
             font_size = 'text-base sm:text-xs'           
             line_h = 'h-6 sm:h-4'
+            chevron_mt = 'mt-1.5 sm:mt-0.5' 
             break;
     }
 
@@ -387,13 +390,15 @@
 
 {#if is_compact}
     <div class="inline-block relative {line_h}">
-       <span class="dark:text-gray-300 {font_size} truncate  
-                    pl-2.5 pr-5
-                    absolute left-0 top-0 h-full" >
-            {pretty_value}
+       <div class="dark:text-gray-300 {font_size} truncate  
+                    pl-0 pr-0
+                    h-full flex flex-row" >
+            <div class="grow-1 pr-2.5">
+                {pretty_value}
+            </div>
 
             {#if can_be_activated}
-                <div class="w-3 h-3 absolute right-0 top-1.5 sm:top-0.5 text-gray-700 dark:text-gray-300">
+                <div class="no-print ml-auto w-3 h-3 {chevron_mt} text-gray-700 dark:text-gray-300">
                     <FaChevronDown/>
                 </div>
             {/if}
@@ -402,12 +407,14 @@
                 {#if type == "datetime-local"}
                     <input  type="datetime-local" 
                             class="datepicker-input"
+                            tabindex="-1"
                             on:change={on_changed}
                             bind:value={rValue}
                             bind:this={input_element}>
                 {:else}
                     <input  type="date" 
                             class="datepicker-input"
+                            tabindex="-1"
                             on:change={on_changed}
                             bind:value={rValue}
                             bind:this={input_element}
@@ -416,7 +423,7 @@
 
                 
             {/if}
-        </span>
+        </div>
 
         
     </div>
@@ -470,5 +477,11 @@
         cursor: pointer;
     }
 
+    @media print
+    {
+        .no-print, .no-print *{
+            display: none !important;
+        }
+    }
 </style>
 

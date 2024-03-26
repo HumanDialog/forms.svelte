@@ -30,7 +30,9 @@
         if(rect.height == 0)
             return;
 
-        let container_rect :DOMRect = new DOMRect(0, 0, window.innerWidth, window.innerHeight)
+        const m = 15;
+        let container_rect :DOMRect = new DOMRect(m, 0, window.innerWidth-2*m, window.innerHeight)
+        
         //console.log('beforeUpdate', rect, ' in ', container_rect)
                 
         if(rect.right > container_rect.right)

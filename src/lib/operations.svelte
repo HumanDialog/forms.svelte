@@ -48,26 +48,47 @@
             show_grid_menu(rect, operation.grid)
 
     }
+
+    function mousedown(e)
+    {
+        // preventDefault on mousedown avoids focusing the button
+        // so it keeps focus (and text selection) 
+        e.preventDefault()
+    }
 </script>
 
-<div    class="bg-slate-100 w-full h-10 dark:bg-slate-800 overflow-x-clip overflow-y-hidden py-0 text-xs flex flex-row"
+<div    class="no-print bg-slate-100 w-full h-10 dark:bg-slate-800 overflow-x-clip overflow-y-hidden py-0 text-xs flex flex-row"
         class:flex-row-reverse={mobile}>
     
     {#each operations as operation}
-        <button type="button" 
-                class="py-2.5 px-5 
-                text-xs font-medium text-gray-900 dark:text-gray-400 dark:hover:text-white 
-                bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 active:bg-slate-300 dark:active:bg-gray-600
-                border-gray-200 focus:outline-none dark:border-gray-600
-                inline-flex items-center"
-                class:border-r={!mobile}
-                class:border-l={mobile}
-                on:click={(e) => {on_click(e, operation)}}>
-            <div class="w-3 h-3"><svelte:component this={operation.icon}/></div>
-            <span class="ml-1">{operation.caption}</span>
-        </button>    
+        {#if !operation.separator}
+
+            <button type="button" 
+                    class="py-2.5 px-5 
+                    text-xs font-medium text-gray-900 dark:text-gray-400 dark:hover:text-white 
+                    bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 active:bg-slate-300 dark:active:bg-gray-600
+                    border-gray-200 focus:outline-none dark:border-gray-600
+                    inline-flex items-center"
+                    class:border-r={!mobile}
+                    class:border-l={mobile}
+                    on:click={(e) => {on_click(e, operation)}}
+                    on:mousedown={mousedown}>
+                {#if operation.icon}
+                    <div class="w-3 h-3 mr-1"><svelte:component this={operation.icon}/></div>
+                {/if}
+                {#if operation.caption}
+                    <span>{operation.caption}</span>
+                {/if}
+            </button>    
+        {/if}
     {/each}
-
-    
-
 </div>
+
+<style>
+    @media print
+    {
+        .no-print, .no-print *{
+            display: none !important;
+        }
+    }
+</style>
