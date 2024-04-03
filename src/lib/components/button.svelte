@@ -1,7 +1,7 @@
 <script lang="ts">
     import {Button} from 'flowbite-svelte'
     import {getContext} from 'svelte'
-    import {data_tick_store, context_items_store, context_types_store} from '../stores.js' 
+    import {data_tick_store, contextItemsStore, contextTypesStore} from '../stores.js' 
     import { reef } from '@humandialog/auth.svelte/dist/index.js';
 
     export let self = null;
@@ -31,16 +31,16 @@
 
         if(!action)
         {
-            item = self ?? $context_items_store[ctx];
+            item = self ?? $contextItemsStore[ctx];
                 
             if(!typename)
-                typename = $context_types_store[ctx];
+                typename = $contextTypesStore[ctx];
         }
         
 
         if(is_table_component)
         {
-            if($context_items_store['sel'] != self)
+            if($contextItemsStore['sel'] != self)
                 can_be_activated = false;
             else
                 can_be_activated = true;

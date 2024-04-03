@@ -3,7 +3,7 @@
                 FaCaretUp,
                 FaCaretDown} from 'svelte-icons/fa'
 
-    import { context_items_store, page_toolbar_operations } from '$lib';
+    import { contextItemsStore, pageToolbarOperations } from '$lib';
 	import { onMount } from 'svelte';
     import Add from './add.svelte';
 
@@ -119,15 +119,15 @@
     }
 
     onMount(() => {
-        $page_toolbar_operations = [...operations]
+        $pageToolbarOperations = [...operations]
 
-        $context_items_store['props'] = focused_item;
-        $context_items_store.focused = 'props';
-        $context_items_store = {...$context_items_store}
+        $contextItemsStore['props'] = focused_item;
+        $contextItemsStore.focused = 'props';
+        $contextItemsStore = {...$contextItemsStore}
 
         return () => 
         {
-            $page_toolbar_operations = []
+            $pageToolbarOperations = []
         }
     })
 

@@ -1,6 +1,6 @@
 import { getContext, tick } from "svelte";
 import {get} from 'svelte/store'
-import { context_items_store, context_toolbar_operations, data_tick_store } from "./stores";
+import { contextItemsStore, contextToolbarOperations, data_tick_store } from "./stores";
 
 export let icons = {symbols :null}
 
@@ -11,7 +11,7 @@ export const SCREEN_SIZES = {
     xl: 1280, //px	@media (min-width: 1280px) { ... }
 }
 
-export function is_device_smaller_than(br)
+export function isDeviceSmallerThan(br)
 {
     return window.innerWidth < SCREEN_SIZES[br]
 }
@@ -20,12 +20,12 @@ export function is_device_smaller_than(br)
 //    just_changed_context: false
 //}
 
-export function select_item(itm)
+export function selectItem(itm)
 {
-    let data_context = get(context_items_store);
+    let data_context = get(contextItemsStore);
     data_context['sel'] = itm;
     data_context.focused = 'sel';
-    context_items_store.set( {...data_context} )
+    contextItemsStore.set( {...data_context} )
 
     let ticket = get(data_tick_store)
     ticket++;
@@ -35,13 +35,13 @@ export function select_item(itm)
 
 }
 
-export function activate_item(context_level, itm, operations=null)
+export function activateItem(context_level, itm, operations=null)
 {
-    let data_context = get(context_items_store);
+    let data_context = get(contextItemsStore);
     data_context['sel'] = itm; //null;
     data_context[context_level] = itm;
     data_context.focused = context_level;
-    context_items_store.set( {...data_context} )
+    contextItemsStore.set( {...data_context} )
 
     let ticket = get(data_tick_store)
     ticket++;
@@ -50,15 +50,15 @@ export function activate_item(context_level, itm, operations=null)
     //chnages.just_changed_context = true;
 
     if(operations && Array.isArray(operations))
-        context_toolbar_operations.set( [...operations] )
+        contextToolbarOperations.set( [...operations] )
 }
 
-export function clear_active_item(context_level)
+export function clearActiveItem(context_level)
 {
-    let data_context = get(context_items_store);
+    let data_context = get(contextItemsStore);
     data_context[context_level] = null;
     data_context.focused = context_level;
-    context_items_store.set( {...data_context} )
+    contextItemsStore.set( {...data_context} )
 
     let ticket = get(data_tick_store)
     ticket++;
@@ -66,12 +66,12 @@ export function clear_active_item(context_level)
 
     //chnages.just_changed_context = true;
 
-    context_toolbar_operations.set( [] )
+    contextToolbarOperations.set( [] )
 }
 
-export function is_selected(itm)
+export function isSelected(itm)
 {
-    let data_context = get(context_items_store);
+    let data_context = get(contextItemsStore);
     if(!!data_context && !!data_context['sel'] && data_context['sel'] == itm)
         return true;
     else
@@ -79,18 +79,18 @@ export function is_selected(itm)
 }
 
 
-export function is_active(context_level, itm)
+export function isActive(context_level, itm)
 {
-    let data_context = get(context_items_store);
+    let data_context = get(contextItemsStore);
     if(data_context != undefined && data_context[context_level] != undefined && data_context[context_level] == itm)
         return true;
     else
         return false;
 }
 
-export function get_active(context_level)
+export function getActive(context_level)
 {
-    let data_context = get(context_items_store);
+    let data_context = get(contextItemsStore);
     if(data_context != undefined)
         return data_context[context_level]
     else
@@ -260,7 +260,7 @@ export function editable(node, params)
     }
 }
 
-export function start_editing(element, finish_callback)
+export function startEditing(element, finish_callback)
 {
     let editable_node = null;
     
@@ -292,7 +292,7 @@ export function selectable(node, itm)
 {
     const select_listener = (e) =>
     {
-        select_item(itm);
+        selectItem(itm);
     }
 
     node.setAttribute("selectable", "true")
@@ -311,12 +311,12 @@ export function selectable(node, itm)
     }};
 }
 
-export function handle_select(e)
+export function handleSelect(e)
 {
     let node = e.target;
     if(!node)
     {
-        select_item(null);
+        selectItem(null);
         return;
     }
 
@@ -336,12 +336,12 @@ export function handle_select(e)
     if(selection_node)
         selection_node.dispatchEvent(new Event("select"))
     else
-        select_item(null);
+        selectItem(null);
 }
 
 
 
-export function parse_width_directive(c)
+export function parseWidthDirective(c)
 {   
     let cs = '';
     switch (c)
@@ -383,7 +383,7 @@ export function parse_width_directive(c)
     return cs;
 }
 
-export function should_be_comapact()
+export function shouldBeComapact()
 {
     let is_in_table = getContext('rTable-definition');
     return !!is_in_table;

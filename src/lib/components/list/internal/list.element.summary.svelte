@@ -9,7 +9,7 @@ import {
     export let placeholder :boolean = false;
 
     export let editable :any;
-    export let click_edit :any;
+    export let clickEdit :any;
 
     let user_class = $$props.class ?? "";
 

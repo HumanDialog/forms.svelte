@@ -1,7 +1,7 @@
 <script lang="ts">
     import {getContext, afterUpdate, tick} from 'svelte'
-    import {data_tick_store, context_items_store, context_types_store} from '../../../stores'
-    import {get_active, activate_item } from '../../../utils.js'
+    import {data_tick_store, contextItemsStore, contextTypesStore} from '../../../stores'
+    import {getActive, activateItem } from '../../../utils.js'
     import Card from './kanban.card.svelte'
     import {KanbanColumnTop, KanbanColumnBottom} from '../Kanban'
     import Inserter from './kanban.inserter.svelte'
@@ -20,7 +20,7 @@
     export let scrollViewToCard: Function | undefined = undefined;
 
     let column_element: HTMLElement;
-    export function get_height()
+    export function getHeight()
     {
         return column_element.getBoundingClientRect().height
     }
@@ -29,7 +29,7 @@
     export const SET_RIGHT = 1;
     export const CLEAR_LEFT = 2;
     export const CLEAR_RIGHT = 3;
-    export function set_border(what_to_do: number)
+    export function setBorder(what_to_do: number)
     {
         switch(what_to_do)
         {
@@ -59,13 +59,13 @@
 
     let width_class = width ? `w-11/12 sm:${width}` : 'w-11/12 sm:w-[240px]'
 
-    $: setup($data_tick_store, $context_items_store);
+    $: setup($data_tick_store, $contextItemsStore);
 
     function setup(...args)
     {
         //console.log('list setup', objects)
         last_tick = $data_tick_store            
-        item = self ?? $context_items_store[ctx];
+        item = self ?? $contextItemsStore[ctx];
         
         items = undefined;
 
@@ -127,9 +127,9 @@
         if(activateAfterDomUpdate)
             activateAfterDomUpdate = null;
 
-        lastActivatedElement = get_active('props');
+        lastActivatedElement = getActive('props');
         let fakeItem = {};
-        activate_item('props', fakeItem)
+        activateItem('props', fakeItem)
 
         await tick();
 
@@ -145,7 +145,7 @@
             {
                 if(detail.incremental)
                 {
-                    let currentActive = activateAfterDomUpdate ?? get_active('props');
+                    let currentActive = activateAfterDomUpdate ?? getActive('props');
                     await add(currentActive);
                 }
             }
@@ -187,7 +187,7 @@
     </header>
     <ul class="w-full border-stone-700" bind:this={column_element}>
         {#if showInserterAfter === KanbanColumnTop}
-            <Inserter   oninsert={async (text) => {await insert(text, KanbanColumnTop)}}
+            <Inserter   onInsert={async (text) => {await insert(text, KanbanColumnTop)}}
                         bind:this={inserter} />
         {/if}
 
@@ -212,14 +212,14 @@
                 </Card>
 
                 {#if showInserterAfter == element}
-                    <Inserter   oninsert={async (text) => {await insert(text, showInserterAfter)}}
+                    <Inserter   onInsert={async (text) => {await insert(text, showInserterAfter)}}
                                 bind:this={inserter} />
                 {/if}
             {/each}
         {/if}
 
         {#if showInserterAfter === KanbanColumnBottom}
-            <Inserter   oninsert={async (text) => {await insert(text, KanbanColumnBottom)}}
+            <Inserter   onInsert={async (text) => {await insert(text, KanbanColumnBottom)}}
                         bind:this={inserter} />
         {/if}
 

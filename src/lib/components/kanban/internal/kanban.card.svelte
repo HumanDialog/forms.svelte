@@ -1,12 +1,12 @@
 <script lang="ts">
 	import {getContext} from 'svelte'
-    import {    context_items_store, 
-                is_active, 
-                is_selected, 
-                activate_item, 
+    import {    contextItemsStore, 
+                isActive, 
+                isSelected, 
+                activateItem, 
                 selectable,
                 editable,
-				show_floating_toolbar} from '$lib'
+				showFloatingToolbar} from '$lib'
     import {FaArrowsAlt, FaTrash, FaPlus, FaAlignLeft} from 'svelte-icons/fa'
     import MoveOperations from './kanban.move.menu.svelte'
 
@@ -18,20 +18,20 @@
 
     let definition = getContext("rKanban-definition");
 
-    $: is_row_active = calculate_active(item, $context_items_store)
-    $: is_row_selected = selected(item, $context_items_store)
+    $: is_row_active = calculate_active(item, $contextItemsStore)
+    $: is_row_selected = selected(item, $contextItemsStore)
 
     $: selected_class = is_row_selected ? "!border-blue-300" : "";
     $: focused_class = is_row_active ? "bg-stone-100 dark:bg-stone-700" : "";
 
     function calculate_active(...args)
     {
-        return is_active('props', item)
+        return isActive('props', item)
     }
 
     function selected(...args)
     {
-        return is_selected(item)
+        return isSelected(item)
     }
 
     export function activate(e)
@@ -39,12 +39,12 @@
         if(e)
             e.stopPropagation();
 
-        if(is_active('props', item))
+        if(isActive('props', item))
         {
             return;
         }
 
-        activate_item('props', item, operations);
+        activateItem('props', item, operations);
     }
 
     let operations = [
@@ -76,7 +76,7 @@
     {
         let rect = moveButton.getBoundingClientRect()
 
-        show_floating_toolbar(rect, MoveOperations, 
+        showFloatingToolbar(rect, MoveOperations, 
                                 {
                                     definition: definition,
                                     item: item,

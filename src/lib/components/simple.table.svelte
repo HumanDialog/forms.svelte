@@ -1,5 +1,5 @@
 <script>
-    import {data_tick_store, context_items_store, context_info_store } from '../stores.js'
+    import {data_tick_store, contextItemsStore, context_info_store } from '../stores.js'
     import {getContext} from 'svelte';
 
     export let context = ""
@@ -18,7 +18,7 @@
         
     let item = null 
     if(self == null)
-        item = $context_items_store[ctx];
+        item = $contextItemsStore[ctx];
     else
         item = self    
 
@@ -35,7 +35,7 @@
         {
             last_tick = t            
             if(self == null)
-                item = $context_items_store[ctx];
+                item = $contextItemsStore[ctx];
             else
                 item = self    
 
@@ -50,19 +50,19 @@
     
 
     
-    const select_item = (itm, cinfo) => () => {
+    const selectItem = (itm, cinfo) => () => {
        
-        $context_items_store[select] = itm;
+        $contextItemsStore[select] = itm;
         $context_info_store[select] = cinfo;
         
         if(focus)
-            $context_items_store.focused = select
+            $contextItemsStore.focused = select
         if(nav)
             $data_tick_store = $data_tick_store + 1;
     };
     
-    let selected_item = $context_items_store[select]
-    $: selected_item = $context_items_store[select]
+    let selected_item = $contextItemsStore[select]
+    $: selected_item = $contextItemsStore[select]
 </script>
 
 
@@ -93,7 +93,7 @@
                         {/each}
                     </tr>
                     {:else}
-                    <tr on:click={select_item(item, cinfo)}>
+                    <tr on:click={selectItem(item, cinfo)}>
                         {#each fields as field}
                             <td class="px-4 py-1 whitespace-nowrap text-sm font-normal text-stone-900">{item[field]}</td>
                         {/each}

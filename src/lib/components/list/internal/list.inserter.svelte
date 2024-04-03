@@ -1,13 +1,13 @@
 <script lang="ts">
-    import {editable, start_editing} from '../../../utils'
+    import {editable, startEditing} from '../../../utils'
     import Icon from '../../icon.svelte'
     import { FaPlus } from 'svelte-icons/fa'
     
-    export let oninsert;
+    export let onInsert;
     export let icon = false;
     export function run(onclose)
     {
-        start_editing(insertion_paragraph, onclose)
+        startEditing(insertion_paragraph, onclose)
     }
 
     let insertion_paragraph;
@@ -25,6 +25,6 @@
 
     <p  class="ml-3 py-1 font-semibold sm:font-bold whitespace-nowrap overflow-clip flex-none w-1/2 sm:w-1/3" tabindex="0"
         bind:this={insertion_paragraph}
-        use:editable={oninsert} >
+        use:editable={onInsert} >
     </p>
 </section>

@@ -1,8 +1,8 @@
 <script lang="ts">
     import { getContext } from "svelte";
-    import {data_tick_store, context_items_store, context_types_store} from '../stores.js' 
-    import {inform_modification, push_changes} from '../updates.js'
-    import { parse_width_directive} from '../utils.js'
+    import {data_tick_store, contextItemsStore, contextTypesStore} from '../stores.js' 
+    import {informModification, pushChanges} from '../updates.js'
+    import { parseWidthDirective} from '../utils.js'
 
     export let checked :boolean | undefined = undefined;
     export let disabled:boolean  = false;
@@ -19,7 +19,7 @@
     let   value :boolean = false;
 
     let ctx = context ? context : getContext('ctx');
-    let cs = parse_width_directive(c);
+    let cs = parseWidthDirective(c);
     let color_style = disabled ? 'text-stone-400 dark:text-stone-500' : 'text-stone-900 dark:text-stone-300';
     
     let  last_tick = -1;    
@@ -34,10 +34,10 @@
 
         if(checked === undefined)
         {
-            item = self ?? $context_items_store[ctx];
+            item = self ?? $contextItemsStore[ctx];
                 
             if(!typename)
-                typename = $context_types_store[ctx];
+                typename = $contextTypesStore[ctx];
             
             value = (item && a) ? (!!item[a]) : false;
         }
@@ -53,10 +53,10 @@
             
             if(typename)
             {
-                inform_modification(item, a, typename);
+                informModification(item, a, typename);
                 
                 $data_tick_store = $data_tick_store + 1;
-                push_changes();
+                pushChanges();
             }
         }
     }

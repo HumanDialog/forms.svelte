@@ -1,9 +1,9 @@
 <script lang="ts">
-    import {data_tick_store, context_items_store, context_info_store, context_types_store, context_toolbar_operations} from '../../stores.js'
+    import {data_tick_store, contextItemsStore, context_info_store, contextTypesStore, contextToolbarOperations} from '../../stores.js'
     import {getContext, setContext, onDestroy} from 'svelte';
     import { rTable_definition } from './table';
-    import {parse_width_directive} from '../../utils.js'
-    import {show_menu} from '../menu'
+    import {parseWidthDirective} from '../../utils.js'
+    import {showMenu} from '../menu'
 
     export let context = ""
     export let collection = ""
@@ -17,8 +17,8 @@
     export let nav = true
     export let c = '';
     export let typename = '';
-    export let toolbar_operations = [];
-    export let menu_operations = [];
+    export let toolbarOperations = [];
+    export let menuOperations = [];
     
     let definition :rTable_definition = new rTable_definition;
     setContext('rTable-definition', definition);
@@ -30,7 +30,7 @@
     let last_tick   :number = -1
     let selected_item;
 
-    let cs =  c ? parse_width_directive(c) : 'w-full min-w-full';
+    let cs =  c ? parseWidthDirective(c) : 'w-full min-w-full';
     
     $:{ 
         if($data_tick_store > last_tick)
@@ -38,16 +38,16 @@
     }
 
     
-    $: selected_item = $context_items_store[select]
+    $: selected_item = $contextItemsStore[select]
 
     onDestroy( () => {
-        select_item(null, null);
+        selectItem(null, null);
     });
 
     export function refresh()
     {
         last_tick = $data_tick_store            
-        item = self ?? $context_items_store[ctx];
+        item = self ?? $contextItemsStore[ctx];
         
         if(objects)
             items = objects;
@@ -57,39 +57,39 @@
             items = [];
 
         if(!typename)
-            typename = $context_types_store[ctx];
+            typename = $contextTypesStore[ctx];
 
         //if(definition)
         //    definition.items = null;
     }
 
-    export function update_objects(_objects)
+    export function updateObjects(_objects)
     {
         objects = _objects;
         refresh();
     }
     
-    export function update_self(_self)
+    export function updateSelf(_self)
     {
         self = _self;
         refresh();
     }
     
-    export function select_item(itm, cinfo)
+    export function selectItem(itm, cinfo)
     {
-        $context_items_store[select] = itm;
+        $contextItemsStore[select] = itm;
         $context_info_store[select] = cinfo;
 
         if(itm && itm.oclType)
-            $context_types_store[select] = itm.oclType; 
+            $contextTypesStore[select] = itm.oclType; 
         
         if(focus)
-            $context_items_store.focused = select
+            $contextItemsStore.focused = select
 
         if(itm)
-            $context_toolbar_operations = [...toolbar_operations];    
+            $contextToolbarOperations = [...toolbarOperations];    
         else
-            $context_toolbar_operations = [];
+            $contextToolbarOperations = [];
         
         if(nav)
             $data_tick_store = $data_tick_store + 1;
@@ -114,16 +114,16 @@
 
     function show_context_menu(e, itm, cinfo)
     {
-        if(!menu_operations)
+        if(!menuOperations)
             return;
 
-        if(menu_operations.length == 0)
+        if(menuOperations.length == 0)
             return;
 
         e.stopPropagation();
         e.preventDefault();
 
-        show_menu(new DOMPoint(e.clientX, e.clientY), menu_operations);
+        showMenu(new DOMPoint(e.clientX, e.clientY), menuOperations);
     }
 
 </script>
@@ -155,8 +155,8 @@
             <tbody class="bg-white dark:bg-stone-900">
                 {#each items as item}
                     {#if (item != null )}
-                        <tr on:click={ (e) => { e.stopPropagation(); e.preventDefault(); select_item(item, cinfo);} }
-                            on:contextmenu={ (e) => {select_item(item, cinfo); show_context_menu(e, item, cinfo)} }
+                        <tr on:click={ (e) => { e.stopPropagation(); e.preventDefault(); selectItem(item, cinfo);} }
+                            on:contextmenu={ (e) => {selectItem(item, cinfo); show_context_menu(e, item, cinfo)} }
                             class="whitespace-nowrap text-sm font-normal text-stone-900 dark:text-stone-300"
                             class:bg-stone-100={item==selected_item}
                             class:dark:bg-stone-700={item==selected_item}>

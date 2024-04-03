@@ -22,12 +22,12 @@
     // ==============================================================================
 
     export let users = undefined;
-    export let name_attrib = "Name";
-    export let email_attrib = "login";
-    export let ref_attrib = "$ref";
-    export let show_files = false;
+    export let nameAttrib = "Name";
+    export let emailAttrib = "login";
+    export let refAttrib = "$ref";
+    export let showFiles = false;
     //export let show_admin = true;
-    export let app_groups = undefined;
+    export let appGroups = undefined;
 
     // ===============================================================================
   
@@ -53,9 +53,9 @@
             {
                 reef_users.push(
                     {
-                        [name_attrib]: u[name_attrib],
-                        [email_attrib]: u[email_attrib],
-                        [ref_attrib]: u[ref_attrib],
+                        [nameAttrib]: u[nameAttrib],
+                        [emailAttrib]: u[emailAttrib],
+                        [refAttrib]: u[refAttrib],
                         auth_group: 0,
                         files_group :0,
                         app_group: 0,
@@ -84,7 +84,7 @@
         let handled_no = 0;
         reef_users.forEach(async ru =>
         {
-            let details = await reef.get(`/sys/user_details?email=${ru[email_attrib]}`)
+            let details = await reef.get(`/sys/user_details?email=${ru[emailAttrib]}`)
             set_user_info(ru, details);
 
             handled_no++;
@@ -92,7 +92,7 @@
             {
                 
                 
-                list?.update_objects(reef_users);
+                list?.updateObjects(reef_users);
             }
         } )
     }
@@ -136,12 +136,12 @@
 
     async function delete_user(user)
     {
-        let email = user[email_attrib];
+        let email = user[emailAttrib];
         
         let removed_user_details = await reef.get('/sys/kick_out_user?email=' + email);
         if(removed_user_details)
         {
-            //let removed_user = reef_users.find( u => u[email_attrib] == user[email_attrib])
+            //let removed_user = reef_users.find( u => u[emailAttrib] == user[emailAttrib])
             set_user_info(user, removed_user_details);
             list?.refresh();
         }
@@ -151,13 +151,13 @@
     {
         user[property] = name;
 
-        let user_path = user[ref_attrib];
+        let user_path = user[refAttrib];
         if(!user_path)
             return;
 
         await reef.post(`${user_path}/set`,
                     {
-                        [name_attrib]: name
+                        [nameAttrib]: name
                     }); 
     }
 
@@ -165,7 +165,7 @@
     {
         if(user.auth_group != flags)
         {
-            let email = user[email_attrib];
+            let email = user[emailAttrib];
             let info = await reef.get(`sys/set_user_details?email=${email}&auth_group=${flags}`)
             if(info)
             {
@@ -183,7 +183,7 @@
         {
             user.files_group = flags;
             
-            let email = user[email_attrib];
+            let email = user[emailAttrib];
             let info = await reef.get(`sys/set_user_details?email=${email}&files_group=${flags}`)
             if(info)
             {
@@ -210,15 +210,15 @@
     {
         let operations = [
             {
-                caption: name_attrib,
-                action: (focused) =>  { list.edit(user, name_attrib) }
+                caption: nameAttrib,
+                action: (focused) =>  { list.edit(user, nameAttrib) }
             },
             {
                 caption: 'Privileges',
                 action: (focused) => { list.edit(user, 'Privileges') }
             }];
 
-        if(show_files)
+        if(showFiles)
         {
             operations.push({
                 caption: 'Files',
@@ -362,9 +362,9 @@
         {
             reef_users.push(
                 {
-                    [name_attrib]: names[i],
-                    [email_attrib]: 'u@fake.com',
-                    [ref_attrib]: `./User/${1000+i}`,
+                    [nameAttrib]: names[i],
+                    [emailAttrib]: 'u@fake.com',
+                    [refAttrib]: `./User/${1000+i}`,
                     __hd_internal_item_id: 1000+i
                 }
             )
@@ -385,24 +385,24 @@
                             admin: new_user.maintainer,
                             set:
                             {
-                                [name_attrib]: new_user.name,
-                                [email_attrib]: new_user.email
+                                [nameAttrib]: new_user.name,
+                                [emailAttrib]: new_user.email
                             }
                         })
         if(result)
         {
             let created_user = result.User;
             let new_reef_user = {
-                [name_attrib]: created_user[name_attrib],
-                [email_attrib]: created_user[email_attrib],
-                [ref_attrib]: created_user[ref_attrib]
+                [nameAttrib]: created_user[nameAttrib],
+                [emailAttrib]: created_user[emailAttrib],
+                [refAttrib]: created_user[refAttrib]
             }
 
-            let details = await reef.get(`/sys/user_details?email=${new_reef_user[email_attrib]}`)
+            let details = await reef.get(`/sys/user_details?email=${new_reef_user[emailAttrib]}`)
             set_user_info(new_reef_user, details);
 
             reef_users = [...reef_users, new_reef_user]
-            list?.update_objects(reef_users);
+            list?.updateObjects(reef_users);
         }
 
 
@@ -425,31 +425,31 @@
 
 <Page   self={data_item} 
         cl="!bg-white dark:!bg-stone-900 w-full h-full flex flex-col overflow-y-auto overflow-x-hidden py-1 px-1 border-0" 
-        toolbar_operations={page_operations}
+        toolbarOperations={page_operations}
         clears_context='props sel'>
     <!--a href="/" class="underline text-sm font-semibold ml-3"> &lt; Back to root</a-->
 
     {#if reef_users && reef_users.length > 0}
     <List       objects={reef_users} 
                 title='Members' 
-                toolbar_operations={user_operations} 
-                context_menu={user_context_menu}
+                toolbarOperations={user_operations} 
+                contextMenu={user_context_menu}
                 key='__hd_internal_item_id'
                 bind:this={list}>
-            <ListTitle a={name_attrib} on_change={on_name_changed}/>
-            <ListSummary a={email_attrib} readonly/>
+            <ListTitle a={nameAttrib} onChange={on_name_changed}/>
+            <ListSummary a={emailAttrib} readonly/>
 
             <ListStaticProperty name="Membership" a="membership_tag"/>
             
-            <ListComboProperty name='Privileges' a='auth_group' on_select={on_change_privileges}>
+            <ListComboProperty name='Privileges' a='auth_group' onSelect={on_change_privileges}>
                 <ComboItem name='None'       key={0}  />
                 <ComboItem name='Can See'    key={1}  />
                 <ComboItem name='Can Invite' key={3}  />
                 <ComboItem name='Maintainer' key={7}  />
             </ListComboProperty>
 
-            {#if show_files}
-            <ListComboProperty name='Files' a='files_group' on_select={on_change_files_access}>
+            {#if showFiles}
+            <ListComboProperty name='Files' a='files_group' onSelect={on_change_files_access}>
                 <ComboItem name='None'      key={0}  />
                 <ComboItem name='Read'      key={1}  />
                 <ComboItem name='Write'     key={2}  />
@@ -465,22 +465,22 @@
 
 <Modal  bind:open={create_new_user_enabled}
         title='Invite someone'
-        ok_caption='Invite'
-        on_ok_callback={on_new_user_requested}
-        on_cancel_callback={on_new_user_canceled}
+        okCaption='Invite'
+        onOkCallback={on_new_user_requested}
+        onCancelCallback={on_new_user_canceled}
         icon={FaUserPlus}>
             <Input  label='Name' 
                     placeholder='' 
                     self={new_user} 
                     a="name"
-                    validate_cb={is_valid_name}
+                    validateCb={is_valid_name}
                     bind:this={name_input}/>
             
             <Input  label='E-mail' 
                     placeholder='' 
                     self={new_user} 
                     a="email" 
-                    validate_cb={is_valid_email_address}
+                    validateCb={is_valid_email_address}
                     bind:this={email_input}/>
 
             <Checkbox class="mt-2 text-xs font-normal" self={new_user} a="maintainer">

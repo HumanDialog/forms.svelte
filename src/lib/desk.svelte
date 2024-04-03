@@ -9,7 +9,7 @@
             tools_visible_store, 
             bottom_bar_visible_store, 
             auto_hide_sidebar,
-            has_selected_item,
+            hasSelectedItem,
             dark_mode_store,
             data_tick_store,
             set_default_tools_visible,
@@ -17,7 +17,7 @@
             sidebar_left_pos } from './stores.js'
     
     import { AuthorizedView} from '@humandialog/auth.svelte'
-    import { handle_select, is_device_smaller_than } from './utils'
+    import { handleSelect, isDeviceSmallerThan } from './utils'
 	import { afterUpdate, onMount } from 'svelte';
     
     export let layout;
@@ -53,7 +53,7 @@
     const media_break_2xl = 1536; //px
     let test = "ala\n    ma\n\tkota"
 
-    $: is_small = is_device_smaller_than("sm")
+    $: is_small = isDeviceSmallerThan("sm")
     
     let main_side_panel_visibility = "hidden"
     let lg_content_area_horizontal_dim = ""
@@ -107,7 +107,7 @@
         bottom_bar_visible = $bottom_bar_visible_store
         let dts = $data_tick_store;
 
-        if(!has_selected_item())
+        if(!hasSelectedItem())
             bottom_bar_visible = false;
 
         if(tools_visible)
@@ -158,8 +158,8 @@
 <AuthorizedView>
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div    id="__hd_svelte_layout_root" class="{$dark_mode_store}"
-            on:click={handle_select} 
-            on:contextmenu={handle_select}>
+            on:click={handleSelect} 
+            on:contextmenu={handleSelect}>
 
         <div class="bg-white dark:bg-stone-900 dark:text-white      min-h-screen h-screen">    
             <!--###########################################################-->
@@ -167,7 +167,7 @@
             <!--###########################################################-->
             <header class="fixed sm:hidden w-screen top-0 h-[50px] sm:h-[40px] z-20  overflow-auto shadow  shadow-stone-900/5 dark:shadow-none" >
                     <div class=" flex flex-row justify-between  h-full  bg-stone-950   text-stone-100 ">
-                        <HorizontalToolbar app_config={layout}/>
+                        <HorizontalToolbar appConfig={layout}/>
                     <div>
             </header>        
 
@@ -178,7 +178,7 @@
             <!--#######################################################-->
             <div  class="hidden sm:block fixed left-0 top-0 w-[50px] sm:w-[40px] h-screen z-20 inset-0   overflow-hidden">
                 <div class="sticky top-0 flex h-full w-10 bg-stone-800 dark:bg-stone-950 flex-col items-center text-stone-100 shadow">
-                    <VerticalToolbar app_config={layout}/>
+                    <VerticalToolbar appConfig={layout}/>
                 </div>    
             </div>
 

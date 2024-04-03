@@ -60,8 +60,8 @@
                     <ComboItem name='Never'    key={0}     color='rgb(50, 50, 150)' />
                 </Combo>
 
-                <Combo c=3 a="Responsible" icon={true} on_select={async (task, sel_key, sel_name) => {await on_user_select(task, sel_key, sel_name)}}>
-                    <ComboSource on_collect={on_users_combo_source} key="$ref" name='Name'/>
+                <Combo c=3 a="Responsible" icon={true} onSelect={async (task, sel_key, sel_name) => {await on_user_select(task, sel_key, sel_name)}}>
+                    <ComboSource onCollect={on_users_combo_source} key="$ref" name='Name'/>
                     
                 </Combo>
             </Box>

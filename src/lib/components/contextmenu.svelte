@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { afterUpdate, tick} from 'svelte';
     import Icon from './icon.svelte'
-    import {context_items_store} from '../stores'
-    import {is_device_smaller_than} from '../utils'
-    import {hide_whole_context_menu} from './menu'
+    import {contextItemsStore} from '../stores'
+    import {isDeviceSmallerThan} from '../utils'
+    import {hideWholeContextMenu} from './menu'
 
-    export let width_px     :number = 400;
+    export let widthPx     :number = 400;
 
     export let menu_items_id_prefix :string = '__hd_svelte_menuitem_'
     export let owner_menu_item :HTMLElement | undefined = undefined;
@@ -88,7 +88,7 @@
         
     }
 
-    export function is_visible()
+    export function isVisible()
     {
         return visible;
     }
@@ -101,7 +101,7 @@
         menu_root.removeEventListener('click', on_before_container_click, true);
     }
 
-    export function get_rendered_rect() :DOMRect | undefined
+    export function getRenderedRect() :DOMRect | undefined
     {
         if(menu_root)
             return menu_root.getBoundingClientRect();
@@ -135,7 +135,7 @@
         {
         case 'Esc':
         case 'Escape':
-            hide_whole_context_menu();
+            hideWholeContextMenu();
             break;
 
         case 'ArrowDown':
@@ -189,7 +189,7 @@
 
     function on_change_focus(e)
     {
-        if(!is_device_smaller_than("sm"))
+        if(!isDeviceSmallerThan("sm"))
         {
             if(e.relatedTarget && e.relatedTarget.id.startsWith(menu_items_id_prefix))
                 return;
@@ -211,7 +211,7 @@
             return;
         }
 
-        hide_whole_context_menu();
+        hideWholeContextMenu();
 
         if(!operation)
             return;
@@ -220,8 +220,8 @@
             return;
 
         let context_item = null
-        if($context_items_store.focused)
-            context_item = $context_items_store[$context_items_store.focused]
+        if($contextItemsStore.focused)
+            context_item = $contextItemsStore[$contextItemsStore.focused]
         
         
         operation.action(context_item);
@@ -244,7 +244,7 @@
                 let _y = rect.top;
 
                 let submenu_width = min_width_px;
-                let rendered_rect = submenus[focused_index].get_rendered_rect();
+                let rendered_rect = submenus[focused_index].getRenderedRect();
                 if(rendered_rect && rendered_rect.width > 0)
                     submenu_width = rendered_rect.width;
 
@@ -293,7 +293,7 @@
         {#if is_separator}
             <hr class="my-1 mx-0 border-1 dark:border-stone-900">
         {:else}
-            {@const mobile = is_device_smaller_than("sm")}
+            {@const mobile = isDeviceSmallerThan("sm")}
             {@const icon_placeholder_without_desc = mobile ? 12 : 10}
             {@const icon_placeholder_with_desc = mobile ? 14 : 12}
             {@const icon_placeholder_size = operation.description ? icon_placeholder_with_desc : icon_placeholder_without_desc}

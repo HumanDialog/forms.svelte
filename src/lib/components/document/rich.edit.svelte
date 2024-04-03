@@ -4,9 +4,9 @@
     import { getContext, onDestroy, onMount} from 'svelte'
     import { Selection_range, Selection_edge} from './internal/Selection_range';
     //import { createEventDispatcher } from 'svelte';
-    import {data_tick_store, context_items_store, context_types_store} from '../../stores.js'
-    import {inform_modification, push_changes} from '../../updates.js'
-    import {parse_width_directive} from '../../utils.js'
+    import {data_tick_store, contextItemsStore, contextTypesStore} from '../../stores.js'
+    import {informModification, pushChanges} from '../../updates.js'
+    import {parseWidthDirective} from '../../utils.js'
     import Palette from './internal/palette.svelte'
 
     import FaFont from 'svelte-icons/fa/FaFont.svelte'
@@ -70,7 +70,7 @@
     let palette_focused_string_end :number;
 
     let ctx = context ? context : getContext('ctx');
-    let cs = parse_width_directive(c);
+    let cs = parseWidthDirective(c);
 
     let appearance_class :string;
     if(compact)
@@ -98,10 +98,10 @@
             if(self)
                 item = self   
             else
-                item = $context_items_store[ctx];
+                item = $contextItemsStore[ctx];
                 
             if(!typename)
-                typename = $context_types_store[ctx];
+                typename = $contextTypesStore[ctx];
             
             if(item != null)
                 value = item[a]
@@ -1347,8 +1347,8 @@
 
             if(typename)
             {
-                inform_modification(item, a, typename);
-                push_changes();
+                informModification(item, a, typename);
+                pushChanges();
             }
 
             last_tick = $data_tick_store + 1;

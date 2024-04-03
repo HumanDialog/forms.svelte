@@ -5,7 +5,7 @@ import Grid from './Grid.menu.svelte'
 let menu_comopnent :Menu|null = null;
 let toolbar_component :Floating_container|null = null;
 
-export function show_menu(around :DOMRect|DOMPoint, operations)
+export function showMenu(around :DOMRect|DOMPoint, operations)
 {
     let menu_element =  document.getElementById("__hd_svelte_contextmenu");
     if(!menu_element)
@@ -22,7 +22,7 @@ export function show_menu(around :DOMRect|DOMPoint, operations)
     }
     else if(menu_comopnent)
     {
-        if(menu_comopnent.is_visible())
+        if(menu_comopnent.isVisible())
             menu_comopnent.hide();
         else
             menu_comopnent.show(around, operations);
@@ -32,16 +32,16 @@ export function show_menu(around :DOMRect|DOMPoint, operations)
 
 }
 
-export function hide_whole_context_menu()
+export function hideWholeContextMenu()
 {
     if(menu_comopnent)
     {
-        if(menu_comopnent.is_visible())
+        if(menu_comopnent.isVisible())
             menu_comopnent.hide();
     }
 }
 
-export function show_floating_toolbar(around :DOMRect|DOMPoint, toolbar, props = {})
+export function showFloatingToolbar(around :DOMRect|DOMPoint, toolbar, props = {})
 {
     let floating_container =  document.getElementById("__hd_svelte_floating_container");
     if(!floating_container)
@@ -58,7 +58,7 @@ export function show_floating_toolbar(around :DOMRect|DOMPoint, toolbar, props =
     }
     else if(toolbar_component)
     {
-        //if(toolbar_component.is_visible())
+        //if(toolbar_component.isVisible())
         //{
         //    toolbar_component.hide();
         //}
@@ -71,7 +71,7 @@ export function show_floating_toolbar(around :DOMRect|DOMPoint, toolbar, props =
         console.error('what now?')
 }
 
-export function show_grid_menu(around :DOMRect|DOMPoint, operations)
+export function showGridMenu(around :DOMRect|DOMPoint, operations)
 {
-    show_floating_toolbar(around, Grid, {operations: operations})
+    showFloatingToolbar(around, Grid, {operations: operations})
 }

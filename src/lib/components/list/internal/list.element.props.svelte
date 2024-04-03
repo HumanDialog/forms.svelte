@@ -10,7 +10,7 @@
 
     let props = []
 
-    export function edit_property(field :string)
+    export function editProperty(field :string)
     {
         let prop_idx = definition.properties.findIndex( p => p.name == field)
         if(prop_idx < 0)
@@ -100,19 +100,19 @@
                         <DatePicker self={item} 
                                     a={prop.a}
                                     compact={true}
-                                    on_select={prop.on_select}
+                                    onSelect={prop.onSelect}
                                     s="xs"
-                                    in_context="props sel"
+                                    inContext="props sel"
                                     bind:this={props[prop_index]}
                                     changed={(value)=>{on_date_changed(value, prop.a)}}
                         />
                     {:else if prop.type == rList_property_type.Combo}
                         <Combo  self={item} 
-                                in_context="props sel" 
+                                inContext="props sel" 
                                 compact={true} 
                                 a={prop.a}
-                                on_select={prop.on_select}
-                                is_association={prop.association}
+                                onSelect={prop.onSelect}
+                                isAssociation={prop.association}
                                 icon={false} 
                                 bind:this={props[prop_index]}
                                 definition={prop.combo_definition}

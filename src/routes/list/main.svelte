@@ -18,5 +18,5 @@
   </script>
 
 {#if users && users.length > 0}
-  <MembersPage {users} name_attrib="Name" email_attrib="login" ref_attrib="$ref"/>
+  <MembersPage {users} nameAttrib="Name" emailAttrib="login" refAttrib="$ref"/>
 {/if}

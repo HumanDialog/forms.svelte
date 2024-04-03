@@ -61,7 +61,7 @@
         }
     ]
 
-    let menu_operations = [
+    let menuOperations = [
         {
             caption: 'Finish',
             icon: FaRegCheckCircle,
@@ -135,10 +135,10 @@
 
 
 <Page   self={current_list} cl="!bg-white dark:!bg-stone-900 w-full h-full flex flex-col overflow-y-hidden overflow-x-hidden py-1 px-1 border-0" 
-        toolbar_operations={page_operations}
+        toolbarOperations={page_operations}
         clears_context='sel'>
     
-    <Table collection='Tasks' bind:this={table} toolbar_operations={task_operations} {menu_operations}>
+    <Table collection='Tasks' bind:this={table} toolbarOperations={task_operations} {menuOperations}>
         <TableColumn size={5}/>
             <Icon   slot='c0' 
                     let:item 

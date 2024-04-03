@@ -138,7 +138,7 @@
     {#each tagsTable as tag}
         {#if onRemove}
             <Tag name={tag.label} color={tag.color} {s}
-                 onremove={(e) => {onRemove(tag.label)}}/>
+                 onRemove={(e) => {onRemove(tag.label)}}/>
         {:else}
             <Tag name={tag.label} color={tag.color} {s}/>
         {/if}
@@ -154,9 +154,9 @@
             {/if}
         {:else}
             <Combo  compact={true} 
-                    in_context='data'
-                    on_select={onSelectedTagFromList}
-                    on_new_item_created={onNewTagCreated}
+                    inContext='data'
+                    onSelect={onSelectedTagFromList}
+                    onNewItemCreated={onNewTagCreated}
                     s={s}
                     filtered
                     bind:this={addCombo}>

@@ -1,16 +1,16 @@
 <script lang="ts">
     import Icon from '../icon.svelte'
-    import {context_items_store, auto_hide_sidebar, context_toolbar_operations} from '../../stores'
+    import {contextItemsStore, auto_hide_sidebar, contextToolbarOperations} from '../../stores'
     import FaBars from 'svelte-icons/fa/FaBars.svelte'
 
     import {
         selectable as _selectable,
-        is_selected,
+        isSelected,
         editable as _editable,
-        handle_select
+        handleSelect
     } from "../../utils";
 
-    import {show_menu} from '../menu'
+    import {showMenu} from '../menu'
     
     export let href :string;
     export let icon :any|undefined = undefined;
@@ -19,7 +19,7 @@
     export let editable :any|undefined = undefined;
     export let operations :any|undefined = undefined;
 
-    $: context_data = $context_items_store;
+    $: context_data = $contextItemsStore;
 
     let user_class = $$props.class ?? ""
     let root;
@@ -32,7 +32,7 @@
 
     function selected(itm, context_data)
     {
-        if(is_selected(itm))
+        if(isSelected(itm))
             return true;
         else
             return false;
@@ -49,7 +49,7 @@
         auto_hide_sidebar();
         
         if(selectable)
-            handle_select(e);
+            handleSelect(e);
 
 
         e.stopPropagation();
@@ -67,7 +67,7 @@
         if(operations_list.length == 0)
             return;
 
-        show_menu(new DOMPoint(e.clientX, e.clientY), operations_list)
+        showMenu(new DOMPoint(e.clientX, e.clientY), operations_list)
 
         e.preventDefault();
     }
@@ -102,7 +102,7 @@
         if(operations_list.length == 0)
             return;
 
-        show_menu(rect, operations_list)
+        showMenu(rect, operations_list)
     }
 
 </script>

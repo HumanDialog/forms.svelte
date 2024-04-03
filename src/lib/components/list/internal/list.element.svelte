@@ -1,20 +1,20 @@
 <script lang="ts">
     import {tick, getContext} from 'svelte'
-    import {context_items_store} from '../../../stores'
+    import {contextItemsStore} from '../../../stores'
     import {
-            is_selected, 
+            isSelected, 
             selectable, 
-            activate_item, 
-            is_active, 
+            activateItem, 
+            isActive, 
             editable, 
-            start_editing, 
+            startEditing, 
     } from '../../../utils'
 
-    import {show_grid_menu, show_menu} from '../../menu'
-    import {push_changes, inform_modification} from '../../../updates'
+    import {showGridMenu, showMenu} from '../../menu'
+    import {pushChanges, informModification} from '../../../updates'
     import Summary from './list.element.summary.svelte'
     import Properties from './list.element.props.svelte'
-    import { is_device_smaller_than } from '../../../utils'
+    import { isDeviceSmallerThan } from '../../../utils'
                 
     import {rList_definition, rList_property_type} from '../List'
 	import { push } from 'svelte-spa-router';
@@ -25,8 +25,8 @@
     export let summary  :string = '';
     
     export let typename :string | undefined = undefined;
-    export let toolbar_operations;
-    export let context_menu;
+    export let toolbarOperations;
+    export let contextMenu;
 
     let definition :rList_definition = getContext("rList-definition");
     //console.log(definition.properties, item)
@@ -35,8 +35,8 @@
     let props_sm;
     let props_md;
     
-    $: is_row_active = calculate_active(item, $context_items_store)
-    $: is_row_selected = selected(item, $context_items_store)
+    $: is_row_active = calculate_active(item, $contextItemsStore)
+    $: is_row_selected = selected(item, $contextItemsStore)
 
     $: selected_class = is_row_selected ? "!border-blue-300" : "";
     $: focused_class = is_row_active ? "bg-stone-200 dark:bg-stone-700" : "";
@@ -73,12 +73,12 @@
 
     function calculate_active(...args)
     {
-        return is_active('props', item)
+        return isActive('props', item)
     }
 
     function selected(...args)
     {
-        return is_selected(item)
+        return isSelected(item)
     }
 
     
@@ -91,8 +91,8 @@
         else
         {
             item[title] = text;
-            inform_modification(item, title, typename);
-            push_changes();
+            informModification(item, title, typename);
+            pushChanges();
         }
     }
 
@@ -105,8 +105,8 @@
         else
         {
             item[summary] = text;
-            inform_modification(item, summary, typename);
-            push_changes();
+            informModification(item, summary, typename);
+            pushChanges();
         }
     }
 
@@ -115,7 +115,7 @@
         if(!is_row_active)
             return;
 
-        start_editing(e.target);
+        startEditing(e.target);
     }
 
     export function activate()
@@ -147,19 +147,19 @@
         let can_show_context_menu = click_on_empty_space;
         can_show_context_menu = false;
 
-        if(can_show_context_menu && context_menu)
+        if(can_show_context_menu && contextMenu)
         {
             const pt = new DOMPoint(e.clientX, e.clientY)
 
-            let context_operations = context_menu(item);
+            let context_operations = contextMenu(item);
             if(context_operations !== null)
             {
                 if(typeof context_operations === 'object')
                 {
                     if(Array.isArray(context_operations))
-                        show_menu(pt, context_operations);
+                        showMenu(pt, context_operations);
                     else if(context_operations.grid)
-                        show_grid_menu(pt, context_operations.grid); 
+                        showGridMenu(pt, context_operations.grid); 
                 }
             }
         }
@@ -196,7 +196,7 @@
 
     function activate_row(e, item)
     {
-        activate_item('props', item, toolbar_operations(item));
+        activateItem('props', item, toolbarOperations(item));
         
         if(e)
             e.stopPropagation();
@@ -208,20 +208,20 @@
 
     function on_contextmenu(e)
     {
-        if(!context_menu)
+        if(!contextMenu)
             return;
 
         const pt = new DOMPoint(e.clientX, e.clientY)
 
-        let context_operations = context_menu(item);
+        let context_operations = contextMenu(item);
         if(context_operations !== null)
         {
             if(typeof context_operations === 'object')
             {
                 if(Array.isArray(context_operations))
-                    show_menu(pt, context_operations);
+                    showMenu(pt, context_operations);
                 else if(context_operations.grid)
-                    show_grid_menu(pt, context_operations.grid); 
+                    showGridMenu(pt, context_operations.grid); 
             }
         }
         
@@ -230,7 +230,7 @@
 
     
 
-    export function edit_property(field :string)
+    export function editProperty(field :string)
     {
         if(field == title)
             force_editing('Title')
@@ -238,10 +238,10 @@
             force_editing('Summary')
         else
         {
-            if(is_device_smaller_than("sm"))
-                props_sm.edit_property(field);
+            if(isDeviceSmallerThan("sm"))
+                props_sm.editProperty(field);
             else
-                props_md.edit_property(field);
+                props_md.editProperty(field);
         }
     }
 
@@ -264,7 +264,7 @@
             return; //todo
         }
 
-        start_editing(element_node, () => { placeholder='' });
+        startEditing(element_node, () => { placeholder='' });
     }
 </script>
 
@@ -322,7 +322,7 @@
                     readonly={definition.summary_readonly}
                     placeholder={placeholder == 'Summary'}
                     editable={(text) => {change_summary(text)}}
-                    click_edit={edit}
+                    clickEdit={edit}
                 />
         {/if}
 

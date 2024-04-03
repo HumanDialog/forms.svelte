@@ -6,10 +6,10 @@
             ComboSource,
             DatePicker,
             editable,
-			start_editing,
-			activate_item,
-			is_active,
-			clear_active_item} from '$lib'
+			startEditing,
+			activateItem,
+			isActive,
+			clearActiveItem} from '$lib'
 	import { onMount, tick } from 'svelte';
     import {querystring} from 'svelte-spa-router'
     import TaskSteps from './task.steps.svelte'
@@ -202,7 +202,7 @@
                     {  
                         step.checked = false
                         task.steps = [...task.steps]
-                        activate_item('props', step, get_page_operations_with_step_tools(step))
+                        activateItem('props', step, get_page_operations_with_step_tools(step))
                     }
                 }
             )
@@ -216,7 +216,7 @@
                     {  
                         step.checked = true
                         task.steps = [...task.steps]
-                        activate_item('props', step, get_page_operations_with_step_tools(step))
+                        activateItem('props', step, get_page_operations_with_step_tools(step))
                     }
                 }
             )
@@ -227,14 +227,14 @@
     function onSelectStep(idx: number)
     {
         let step = task.steps[idx];
-        activate_item('props', step, get_page_operations_with_step_tools(step))
+        activateItem('props', step, get_page_operations_with_step_tools(step))
     }
 
     function onUnselectStep(idx: number)
     {
         let step = task.steps[idx];
-        if(is_active('props', step))
-            clear_active_item('props')
+        if(isActive('props', step))
+            clearActiveItem('props')
     }
 
     let summary;
@@ -401,15 +401,15 @@
     function activate_formatting_tools(e)
     {
         console.log('activate_formatting_tools')
-        activate_item('props', description_active, get_page_operations_with_formatting_tools())
+        activateItem('props', description_active, get_page_operations_with_formatting_tools())
     }
 
     function deactivate_formatting_tools_if_needed(e)
     {
         console.log('deactivate_formatting_tools_if_needed')
         
-        if(is_active('props', description_active))
-            clear_active_item('props')
+        if(isActive('props', description_active))
+            clearActiveItem('props')
     }
 
 </script>
@@ -420,7 +420,7 @@
 <!-- svelte-ignore a11y-no-noninteractive-tabindex-->
 <Page   self={task} 
             cl="!bg-white dark:!bg-stone-900 w-full h-full flex flex-col overflow-y-auto overflow-x-hidden py-1 px-1 border-0" 
-            toolbar_operations={page_operations}
+            toolbarOperations={page_operations}
             clears_context=''
             title={task.title}>
     <section class="w-full flex justify-center">
@@ -432,15 +432,15 @@
                     <div>
                         {#if task.OnList || onListPlaceholder}
                             <Combo  compact={true} 
-                                    in_context='data'
+                                    inContext='data'
                                     a='OnList'
-                                    is_association
+                                    isAssociation
                                     icon={false}
                                     placeholder='List'
                                     changed={(key,name)=>{on_list_changed(key, name)}}
                                     s='sm'
                                     bind:this={onList}>
-                                <ComboSource    on_collect={() => reef.get('/app/Lists?fields=$ref,Name')} 
+                                <ComboSource    onCollect={() => reef.get('/app/Lists?fields=$ref,Name')} 
                                                 key="$ref" 
                                                 name='Name'/>
                             </Combo>
@@ -451,7 +451,7 @@
                             <DatePicker     a='DueDate'
                                             compact={true}
                                             s="sm"
-                                            in_context="data"
+                                            inContext="data"
                                             changed={(value)=>{on_date_changed(value)}}
                                             bind:this={dueDate}
                                 />
@@ -471,15 +471,15 @@
                     <div class="grow-0">
                         {#if task.Responsible || responsiblePlaceholder}
                             <Combo  compact={true} 
-                                    in_context='data'
+                                    inContext='data'
                                     a='Responsible'
-                                    is_association
+                                    isAssociation
                                     icon={false}
                                     placeholder='Responsible'
                                     changed={(key,name)=>{on_responsible_changed(key, name)}}
                                     s='sm'
                                     bind:this={responsible}>
-                                <ComboSource    on_collect={() => reef.get('/app/Users?fields=$ref,Name')} 
+                                <ComboSource    onCollect={() => reef.get('/app/Users?fields=$ref,Name')} 
                                                 key="$ref" 
                                                 name='Name'/>
                             </Combo>

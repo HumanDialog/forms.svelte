@@ -3,7 +3,7 @@ import {reef} from '@humandialog/auth.svelte/dist/index'
 
 
 const modified_item_store = writable(null);
-export function inform_modification(itm, field_name, type_name)
+export function informModification(itm, field_name, type_name)
 {
     let item_entry = {
         Id: [type_name] + itm.Id,
@@ -18,7 +18,7 @@ export function inform_modification(itm, field_name, type_name)
     modified_item_store.set(item_entry);
 };
 
-export function inform_item(itm, type_name)
+export function informItem(itm, type_name)
 {
     let item_entry = {
         Id: [type_name] + itm.Id,
@@ -32,7 +32,7 @@ export function inform_item(itm, type_name)
 
 const update_request_ticket = writable(0);
 let last_update_ticket = 0;
-export function push_changes()
+export function pushChanges()
 {
     update_request_ticket.update(n => n + 1);
 }

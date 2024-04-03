@@ -37,7 +37,7 @@ export { default as RichEdit} from './components/document/rich.edit.svelte'
 
 export { default as Spinner} from './components/delayed.spinner.svelte'
 //export { default as Menu } from './components/contextmenu.svelte'
-export { show_menu, show_grid_menu, show_floating_toolbar } from './components/menu'
+export { showMenu, showGridMenu, showFloatingToolbar } from './components/menu'
 
 export { default as Fab } from './components/Fab.svelte'
 export { default as Sidebar } from './components/sidebar/sidebar.svelte'
@@ -64,24 +64,24 @@ export {default as KanbanCallckacks} from './components/kanban/kanban.callbacks.
 export {KanbanColumnTop, KanbanColumnBottom} from './components/kanban/Kanban'
 
 export {
-    select_item,
-    activate_item,
-    clear_active_item,
-    is_active,
-    is_selected,
-    get_active,
+    selectItem,
+    activateItem,
+    clearActiveItem,
+    isActive,
+    isSelected,
+    getActive,
     editable,
-    start_editing,
+    startEditing,
     selectable,
-    handle_select
+    handleSelect
 }   from './utils'
 
-export {    data_tick_store, 
-            has_selected_item, 
-            has_data_item,
-            set_navigator_title } from "./stores";
-export { context_toolbar_operations, page_toolbar_operations, context_items_store, context_types_store } from './stores'   // tmp
-export { inform_modification, inform_item, push_changes } from './updates'   // tmp
+export {    data_tick_store,    // tmp
+            hasSelectedItem, 
+            hasDataItem,
+            setNavigatorTitle } from "./stores";
+export { contextToolbarOperations, pageToolbarOperations, contextItemsStore, contextTypesStore } from './stores'   // tmp
+export { informModification, informItem, pushChanges } from './updates'   // tmp
 
 
 

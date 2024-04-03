@@ -1,7 +1,7 @@
 <script lang="ts">
-    import {data_tick_store, context_items_store, context_types_store} from '../../stores.js' 
-    import {inform_modification, push_changes} from '../../updates.js'
-    import {parse_width_directive,should_be_comapact} from '../../utils.js'
+    import {data_tick_store, contextItemsStore, contextTypesStore} from '../../stores.js' 
+    import {informModification, pushChanges} from '../../updates.js'
+    import {parseWidthDirective,shouldBeComapact} from '../../utils.js'
     import {afterUpdate, getContext, onMount, setContext} from 'svelte';
     import {rCombo_definition, rCombo_item, cached_sources} from './combo'
     import FaChevronDown from 'svelte-icons/fa/FaChevronDown.svelte'
@@ -11,14 +11,14 @@
     export let label = ''
     export let self = null;
     export let a = '';
-    export let is_association = false;
+    export let isAssociation = false;
     export let context = ""
     export let typename = '';
-    export let choice_callback = '';
-    export let on_select = undefined;
+    export let choiceCallback = '';
+    export let onSelect = undefined;
     export let definition :rCombo_definition | null = null;
     export let changed = undefined;
-    export let on_new_item_created = undefined;
+    export let onNewItemCreated = undefined;
 
     export let icon :boolean = false;
 
@@ -28,7 +28,7 @@
     export  let c = ''
 
     export let compact :boolean = false;
-    export let in_context :string = 'sel'   // in compact mode
+    export let inContext :string = 'sel'   // in compact mode
     export let cached :boolean = false;
     export let filtered: boolean = false;
     
@@ -92,13 +92,13 @@
                                 dark:border-stone-600 dark:placeholder-stone-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500`;
 
    
-    let cs =  c ? parse_width_directive(c) : 'col-span-1';
+    let cs =  c ? parseWidthDirective(c) : 'col-span-1';
     let ctx = context ? context : getContext('ctx');
     let can_be_activated :boolean  =true;
     
     let  last_tick = -1    
 
-    $: setup($data_tick_store, $context_items_store);
+    $: setup($data_tick_store, $contextItemsStore);
 
 
     function setup(...args)
@@ -107,10 +107,10 @@
         //    return;
 
         last_tick = $data_tick_store;
-        item = self ?? $context_items_store[ctx];    
+        item = self ?? $contextItemsStore[ctx];    
 
         if(!typename)
-            typename = $context_types_store[ctx];
+            typename = $contextTypesStore[ctx];
 
         //if(item && a)    
         //    val = item[a]
@@ -124,10 +124,10 @@
         {
             can_be_activated = false;
 
-            let contexts = in_context.split(' ');
+            let contexts = inContext.split(' ');
             contexts.forEach(ctx => 
             {
-                if($context_items_store[ctx] == item)
+                if($contextItemsStore[ctx] == item)
                     can_be_activated = true;
             } )
         }
@@ -137,8 +137,8 @@
 
     onMount( () => {
 
-        if(definition.on_collect)
-            definition.on_collect().then( (source) => source_fetched(source)  )
+        if(definition.onCollect)
+            definition.onCollect().then( (source) => source_fetched(source)  )
         else if(definition.collection_expr)
             fetch_source_from_association().then((source) => source_fetched(source) )
         else if(definition.collection_path)
@@ -371,19 +371,19 @@
         //console.log('on_choose')
         hide();
 
-        if(on_select)
+        if(onSelect)
         {
             if(itm == new_item_option)
-                await on_new_item_created(itm.Key, itm.Name);
+                await onNewItemCreated(itm.Key, itm.Name);
             else
-                await on_select(item, itm.Key, itm.Name);
+                await onSelect(item, itm.Key, itm.Name);
             tick_request_internal = tick_request_internal + 1;
  }
         else
         {
-            if( is_association )
+            if( isAssociation )
             {
-                if(choice_callback)
+                if(choiceCallback)
                 {
                     let body = {
                         choice :  itm.Key
@@ -391,9 +391,9 @@
 
                     let path :string;
                     if(item.$ref)
-                        path = `${item.$ref}/${choice_callback}`;
+                        path = `${item.$ref}/${choiceCallback}`;
                     else
-                        path = `${typename}/${item.Id}/${choice_callback}`;
+                        path = `${typename}/${item.Id}/${choiceCallback}`;
 
                     let fields = calc_path_fields_param();
                     if(fields)
@@ -440,13 +440,13 @@
             }
             else    // or simple property
             {
-                if(choice_callback)
+                if(choiceCallback)
                 {
                     let path :string;
                     if(item.$ref)
-                        path = `/${item.$ref}/${choice_callback}`;
+                        path = `/${item.$ref}/${choiceCallback}`;
                     else
-                        path = `/${typename}/${item.Id}/${choice_callback}`;
+                        path = `/${typename}/${item.Id}/${choiceCallback}`;
 
                     let fields = calc_path_fields_param();
                     if(fields)
@@ -468,8 +468,8 @@
 
                     if(item && a && typename)
                     {
-                        inform_modification(item, a, typename);
-                        push_changes();
+                        informModification(item, a, typename);
+                        pushChanges();
                     }
                 }
             }
@@ -557,7 +557,7 @@
                         (e.Key  && e.Key.toString().toLowerCase().includes(textbox.innerHTML.toLowerCase()));
             });
 
-            if(on_new_item_created)
+            if(onNewItemCreated)
             {
                 if(!new_item_option)
                     new_item_option = new rCombo_item;

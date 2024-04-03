@@ -1,7 +1,7 @@
 <script lang="ts">
     import {setContext, getContext, afterUpdate, tick, onMount} from 'svelte'
-    import {data_tick_store, context_items_store, context_types_store, page_title } from '../../stores'
-    import {activate_item, get_active, clear_active_item, parse_width_directive} from '../../utils' 
+    import {data_tick_store, contextItemsStore, contextTypesStore, page_title } from '../../stores'
+    import {activateItem, getActive, clearActiveItem, parseWidthDirective} from '../../utils' 
     
     import {rList_definition} from './List'
     import List_element from './internal/list.element.svelte'
@@ -18,8 +18,8 @@
     export let typename :string = '';
     export let c = '';
 
-    export let toolbar_operations;
-    export let context_menu;
+    export let toolbarOperations;
+    export let contextMenu;
 
     export let key: string = '';
 
@@ -33,7 +33,7 @@
     let     items :object[] | undefined = undefined;
     let     ctx   :string = context ? context : getContext('ctx');
 
-    let     cs =  c ? parse_width_directive(c) : 'w-full min-w-full';
+    let     cs =  c ? parseWidthDirective(c) : 'w-full min-w-full';
 
     let show_insertion_row_after_element :object | null = null;
     const END_OF_LIST = {}
@@ -44,16 +44,16 @@
     let inserter;
     let item_key :string = '';
 
-    clear_active_item('props')
+    clearActiveItem('props')
 
     let  last_tick = -1   
-    $: setup($data_tick_store, $context_items_store);
+    $: setup($data_tick_store, $contextItemsStore);
 
     function setup(...args)
     {
         //console.log('list setup', objects)
         last_tick = $data_tick_store            
-        item = self ?? $context_items_store[ctx];
+        item = self ?? $contextItemsStore[ctx];
         
         items = undefined;
 
@@ -84,7 +84,7 @@
         }
 
         if(!typename)
-            typename = $context_types_store[ctx];
+            typename = $contextTypesStore[ctx];
     }
 
     afterUpdate(() => {
@@ -104,14 +104,14 @@
         setup();
     }
 
-    export function update_objects(_objects :object[])
+    export function updateObjects(_objects :object[])
     {
         objects = _objects;
 
         setup();
     }
     
-    export function update_self(_self :object)
+    export function updateSelf(_self :object)
     {
         self = _self;
         setup();
@@ -125,9 +125,9 @@
         
         show_insertion_row_after_element = after ?? END_OF_LIST;
 
-        last_activated_element = get_active('props');
+        last_activated_element = getActive('props');
         let fake_item = {};
-        activate_item('props', fake_item)
+        activateItem('props', fake_item)
 
         await tick();
 
@@ -143,7 +143,7 @@
             {
                 if(detail.incremental)
                 {
-                    let current_active = get_active('props');
+                    let current_active = getActive('props');
                     await add(current_active);
                 }
             }
@@ -152,7 +152,7 @@
 
     async function insert(title :string, after :object | null)
     {
-        let new_element = await definition.oninsert(title, after);
+        let new_element = await definition.onInsert(title, after);
         if(!new_element)
             return;
 
@@ -167,14 +167,14 @@
         if(removing_idx < 0)
             return;
 
-        let active_element = get_active('props');
+        let active_element = getActive('props');
         
         if(active_element == element)
         {
             if(removing_idx + 1 < items.length)
                 rows[removing_idx+1].activate();
             else
-                activate_item('props', null, []);
+                activateItem('props', null, []);
         }
 
         items = items.filter( t => t != element)
@@ -186,7 +186,7 @@
         if(editing_idx < 0)
             return;
         
-        rows[editing_idx].edit_property(property_name);
+        rows[editing_idx].editProperty(property_name);
     }
 
 </script>
@@ -205,8 +205,8 @@
     {#each items as element, i (element[item_key])}
         
         <List_element   item={element} 
-                        {toolbar_operations}
-                        {context_menu}
+                        {toolbarOperations}
+                        {contextMenu}
                         bind:this={rows[i]}
                         >
           
@@ -216,7 +216,7 @@
         </List_element>
         
         {#if show_insertion_row_after_element == element}
-            <Inserter   oninsert={async (text) => {await insert(text, show_insertion_row_after_element)}}
+            <Inserter   onInsert={async (text) => {await insert(text, show_insertion_row_after_element)}}
                         icon={definition.inserter_icon}
                         bind:this={inserter}    />
         {/if}
@@ -224,7 +224,7 @@
 {/if}
 
 {#if show_insertion_row_after_element == END_OF_LIST}
-    <Inserter   oninsert={async (text) => {await insert(text, null)}}
+    <Inserter   onInsert={async (text) => {await insert(text, null)}}
                 icon={definition.inserter_icon}
                 bind:this={inserter}    />
 {/if}

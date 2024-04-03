@@ -1,12 +1,12 @@
 <script lang='ts'>
     import { afterUpdate, getContext } from "svelte";
-    import {data_tick_store, context_items_store, context_types_store} from '../stores.js' 
-    import {inform_modification, push_changes} from '../updates.js'
-    import { parse_width_directive, should_be_comapact} from '../utils.js'
+    import {data_tick_store, contextItemsStore, contextTypesStore} from '../stores.js' 
+    import {informModification, pushChanges} from '../updates.js'
+    import { parseWidthDirective, shouldBeComapact} from '../utils.js'
 
     export let value = '';
     export let placeholder = '';
-    export let on_enter = null;
+    export let onEnter = null;
 
     export let self = null;
     export let a = '';
@@ -41,7 +41,7 @@
     });
 
     let ctx = context ? context : getContext('ctx');
-    let cs = parse_width_directive(c);
+    let cs = parseWidthDirective(c);
     
     let  last_tick = -1;    
     $: setup($data_tick_store)
@@ -52,10 +52,10 @@
             return;
 
         last_tick = data_tick_store            
-        item = self ?? $context_items_store[ctx];
+        item = self ?? $contextItemsStore[ctx];
             
         if(!typename)
-            typename = $context_types_store[ctx];
+            typename = $contextTypesStore[ctx];
 
         if(a)
         {
@@ -71,7 +71,7 @@
     {
         if( (!input_box_is_active) && 
             ( 
-                ( is_table_component &&  ($context_items_store['sel'] == self)) || 
+                ( is_table_component &&  ($contextItemsStore['sel'] == self)) || 
                 (!is_table_component)
             ))
         {
@@ -97,8 +97,8 @@
             try
             {
                 let success = false;
-                if(on_enter)
-                    success = on_enter(value);
+                if(onEnter)
+                    success = onEnter(value);
                 else
                 {
                     success = value_changed();
@@ -155,7 +155,7 @@
             item[a] = value
             
             if(typename)
-                inform_modification(item, a, typename);
+                informModification(item, a, typename);
         }
 
         return true;
@@ -164,7 +164,7 @@
     function accept_change()
     {
         $data_tick_store = $data_tick_store + 1;
-        push_changes();
+        pushChanges();
             
     }
 

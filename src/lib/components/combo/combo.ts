@@ -15,7 +15,7 @@ export class rCombo_definition
     public collection_expr  :string | undefined;
     public collection_path  :string | undefined;
     public collection       :object[] | undefined;
-    public on_collect       = undefined;
+    public onCollect       = undefined;
     
     public element_key      :string | undefined;
     public element_name     :string | undefined;

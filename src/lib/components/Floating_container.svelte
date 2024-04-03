@@ -35,7 +35,7 @@
         toolbar = _toolbar;
         props = _props;
 
-        props.onhide = () => {hide()};
+        props.onHide = () => {hide()};
 
         hide_window_indicator = 0;
         window.addEventListener('click', on_before_window_click, true);
@@ -46,7 +46,7 @@
             root_element.addEventListener('click', on_before_container_click, true);
     }
 
-    export function is_visible()
+    export function isVisible()
     {
         return visible;
     }

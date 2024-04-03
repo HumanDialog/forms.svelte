@@ -1,7 +1,7 @@
 <script>
-    import {data_tick_store, context_items_store, context_types_store} from '../stores.js' 
-    import {inform_modification, push_changes} from '../updates.js'
-    import {parse_width_directive} from '../utils.js'
+    import {data_tick_store, contextItemsStore, contextTypesStore} from '../stores.js' 
+    import {informModification, pushChanges} from '../updates.js'
+    import {parseWidthDirective} from '../utils.js'
     import {getContext} from 'svelte';
     import Rich_edit from './document/rich.edit.svelte'
     
@@ -21,16 +21,16 @@
 
     export  let s = 'sm'
     export  let c = ''
-    export  let validate_cb = undefined;
+    export  let validateCb = undefined;
     export function validate()
     {
-        if(!validate_cb)
+        if(!validateCb)
         {
             invalid = false;
             return true;
         }
 
-        invalid = !validate_cb(val);
+        invalid = !validateCb(val);
         return !invalid;
     } 
 
@@ -50,7 +50,7 @@
             break;
     }
    
-    let cs =  c ? parse_width_directive(c) : 'col-span-1';
+    let cs =  c ? parseWidthDirective(c) : 'col-span-1';
     let ctx = context ? context : getContext('ctx');
         
     let  last_tick = -1    
@@ -64,10 +64,10 @@
     function setup()
     {
         last_tick = $data_tick_store;
-        item = self ?? $context_items_store[ctx];    
+        item = self ?? $contextItemsStore[ctx];    
 
         if(!typename)
-            typename = $context_types_store[ctx];
+            typename = $contextTypesStore[ctx];
 
         if(item && a)    
             val = item[a]
@@ -86,14 +86,14 @@
             item[a] = val
             
             if(typename)
-                inform_modification(item, a, typename);
+                informModification(item, a, typename);
         }
     }
 
     function accept_change()
     {
         $data_tick_store = $data_tick_store + 1;
-        push_changes();
+        pushChanges();
             
     }
 

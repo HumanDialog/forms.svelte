@@ -1,18 +1,18 @@
 <script lang="ts">
-	import { show_floating_toolbar, show_menu, show_grid_menu } from './components/menu.js';
-    import {context_toolbar_operations, page_toolbar_operations, context_items_store} from './stores.js'
+	import { showFloatingToolbar, showMenu, showGridMenu } from './components/menu.js';
+    import {contextToolbarOperations, pageToolbarOperations, contextItemsStore} from './stores.js'
 
     export let mobile :boolean = false
 
-    $: update($page_toolbar_operations, $context_toolbar_operations);
+    $: update($pageToolbarOperations, $contextToolbarOperations);
 
     let operations = [];
     function update(...args)
     {
-        if($context_toolbar_operations && $context_toolbar_operations.length > 0)
-            operations = $context_toolbar_operations;
+        if($contextToolbarOperations && $contextToolbarOperations.length > 0)
+            operations = $contextToolbarOperations;
         else
-            operations = $page_toolbar_operations;
+            operations = $pageToolbarOperations;
     }
 
     function on_click(e, operation)
@@ -23,8 +23,8 @@
         if(operation.action)
         {
             let focused_item = null
-            if($context_items_store.focused)
-                focused_item = $context_items_store[$context_items_store.focused]
+            if($contextItemsStore.focused)
+                focused_item = $contextItemsStore[$contextItemsStore.focused]
             
             operation.action(focused_item)
             return;
@@ -41,11 +41,11 @@
 
 
         if(operation.menu)
-            show_menu(rect, operation.menu)
+            showMenu(rect, operation.menu)
         else if(operation.toolbar)
-            show_floating_toolbar(rect, operation.toolbar, operation.props ?? {} )
+            showFloatingToolbar(rect, operation.toolbar, operation.props ?? {} )
         else if(operation.grid)
-            show_grid_menu(rect, operation.grid)
+            showGridMenu(rect, operation.grid)
 
     }
 

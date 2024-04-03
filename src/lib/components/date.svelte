@@ -1,8 +1,8 @@
 <script lang='ts'>
     import { getContext } from "svelte";
-    import {data_tick_store, context_items_store, context_types_store} from '../stores.js' 
-    import {inform_modification, push_changes} from '../updates.js'
-    import { parse_width_directive, is_device_smaller_than} from '../utils.js'
+    import {data_tick_store, contextItemsStore, contextTypesStore} from '../stores.js' 
+    import {informModification, pushChanges} from '../updates.js'
+    import { parseWidthDirective, isDeviceSmallerThan} from '../utils.js'
     import FaChevronDown from 'svelte-icons/fa/FaChevronDown.svelte'
 
     
@@ -11,7 +11,7 @@
     export let context = '';
     export let typename = '';
     export let date :Date  = null;
-    export let on_select = undefined;
+    export let onSelect = undefined;
     export let type = "date";   // datetime-local
     export let changed = undefined;
 
@@ -19,7 +19,7 @@
     export let c=''
 
     export let compact :boolean = false;
-    export let in_context :string = 'sel'   // in compact mode
+    export let inContext :string = 'sel'   // in compact mode
 
     let on_hide_callback = undefined;
     export function show(event, hide_callback)
@@ -39,7 +39,7 @@
         {
             input_element.focus();
 
-            if(is_device_smaller_than("sm"))
+            if(isDeviceSmallerThan("sm"))
             {
                 input_element.click();
             }
@@ -84,7 +84,7 @@
     let   pretty_value :string = ''
 
     let ctx = context ? context : getContext('ctx');
-    let cs = parse_width_directive(c);
+    let cs = parseWidthDirective(c);
     let style :string;
     let input_element :HTMLInputElement|undefined = undefined;
 
@@ -102,7 +102,7 @@
     let can_be_activated :boolean = true;
 
     let  last_tick = -1;    
-    $: setup($data_tick_store, $context_items_store);
+    $: setup($data_tick_store, $contextItemsStore);
 
     function setup(...args)
     {   
@@ -113,10 +113,10 @@
 
         if(!date)
         {
-            item = self ?? $context_items_store[ctx];
+            item = self ?? $contextItemsStore[ctx];
                 
             if(!typename)
-                typename = $context_types_store[ctx];
+                typename = $contextTypesStore[ctx];
 
             if(!typename)
             {
@@ -141,10 +141,10 @@
         {
             can_be_activated = false;
 
-            let contexts = in_context.split(' ');
+            let contexts = inContext.split(' ');
             contexts.forEach(ctx => 
             {
-                if($context_items_store[ctx] == item)
+                if($contextItemsStore[ctx] == item)
                     can_be_activated = true;
             } )
         }
@@ -356,9 +356,9 @@
 
         //console.log('rValue', rValue, 'value', value)
         
-        if(on_select)
+        if(onSelect)
         {
-            await on_select(value)
+            await onSelect(value)
         }
         else if(item != null)
         {
@@ -369,10 +369,10 @@
             
             if(typename)
             {
-                inform_modification(item, a, typename);
+                informModification(item, a, typename);
 
                 $data_tick_store = $data_tick_store + 1;
-                push_changes();
+                pushChanges();
             }
 
             if(!!changed)

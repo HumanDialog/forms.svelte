@@ -19,7 +19,7 @@ export class rList_property
     public type         :rList_property_type = rList_property_type.Hidden;
     public name         :string = '';
     public a            :string = '';
-    public on_select    :Function | undefined = undefined;
+    public onSelect    :Function | undefined = undefined;
 }
 
 export class rList_property_combo extends rList_property
@@ -50,7 +50,7 @@ export class rList_definition
     public summary_readonly     :boolean = false;
 
     public can_insert           :boolean = false;
-    public oninsert             :Function | undefined = undefined;
+    public onInsert             :Function | undefined = undefined;
     public inserter_icon        :boolean = false;
 
     public properties           :rList_property[] = [];

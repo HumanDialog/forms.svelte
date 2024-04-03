@@ -5,7 +5,7 @@
     export let association :string | undefined = undefined;
     export let path :string | undefined = undefined;
     export let objects :object[] | undefined = undefined;
-    export let on_collect = undefined;
+    export let onCollect = undefined;
 
     export let key :string = '';
     export let name :string = ''; 
@@ -16,7 +16,7 @@
     definition.collection_expr = association;
     definition.collection_path = path;
     definition.collection = objects;
-    definition.on_collect = on_collect;
+    definition.onCollect = onCollect;
     definition.element_key = key;
     definition.element_name = name;
     definition.element_avatar = avatar;

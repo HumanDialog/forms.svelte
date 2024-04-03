@@ -1,132 +1,118 @@
 <script>
-    import { setContext, onMount } from 'svelte';
-    import {
-        context_items_store,
-        data_tick_store,
-        context_types_store,
-        context_info_store,
-        context_toolbar_operations,
-        page_toolbar_operations,
-        page_title     } from './stores.js'
-    
-    //import {chnages} from './utils.js'
+	import { setContext, onMount } from 'svelte';
+	import {
+		contextItemsStore,
+		data_tick_store,
+		contextTypesStore,
+		context_info_store,
+		contextToolbarOperations,
+		pageToolbarOperations,
+		page_title
+	} from './stores.js';
 
-    export let context = "data"
-    export let self = null
-    export let typename = '';
-    export let focused_only = false
-    export let in_context = ''
-    export let cl =
-        "w-full h-full flex flex-col dark:bg-stone-800  overflow-y-hidden  overflow-x-hidden py-1 px-1 border-0" // border-green-500
-    export let c = ''
-    
-    export let toolbar_operations = undefined;
-    export let clears_context = '';
-    export let title = '';
+	//import {chnages} from './utils.js'
 
-    
-    switch (c) {
-        case 'main':
-            cl = "w-full h-full flex flex-col dark:bg-stone-800  overflow-y-hidden  overflow-x-hidden py-1 px-1 border-0"
-            break;
-        case 'main-d':
-            cl = "bg-stone-800 w-full h-full flex flex-col dark:bg-stone-800  overflow-y-hidden  overflow-x-hidden py-1 px-1 border-0"
-            break;
-        default:
-            //NOP    
-    }
+	export let context = 'data';
+	export let self = null;
+	export let typename = '';
+	export let focused_only = false;
+	export let inContext = '';
+	export let cl =
+		'w-full h-full flex flex-col dark:bg-stone-800  overflow-y-hidden  overflow-x-hidden py-1 px-1 border-0'; // border-green-500
+	export let c = '';
 
-    onMount(() => {
-            
-            if(toolbar_operations != undefined && Array.isArray(toolbar_operations))
-                $page_toolbar_operations = [...toolbar_operations]
+	export let toolbarOperations = undefined;
+	export let clears_context = '';
+	export let title = '';
 
-            $page_title = title;
-            
-            //clear_selection();
-            $context_toolbar_operations = [];
-            $data_tick_store = $data_tick_store + 1;
+	switch (c) {
+		case 'main':
+			cl =
+				'w-full h-full flex flex-col dark:bg-stone-800  overflow-y-hidden  overflow-x-hidden py-1 px-1 border-0';
+			break;
+		case 'main-d':
+			cl =
+				'bg-stone-800 w-full h-full flex flex-col dark:bg-stone-800  overflow-y-hidden  overflow-x-hidden py-1 px-1 border-0';
+			break;
+		default:
+		//NOP
+	}
 
-            return () => 
-            { 
-                $page_toolbar_operations = [] 
-                $page_title = ''
-            }
-    })
+	onMount(() => {
+		if (toolbarOperations != undefined && Array.isArray(toolbarOperations))
+			$pageToolbarOperations = [...toolbarOperations];
 
-    setContext('ctx', context)
-    let item = null;
-    let visibilty = "hidden"
-    if (in_context == '')
-        in_context = context;
-    let last_tick = 0
-    if (self != null)
-        $context_items_store[context] = self
-    
-    if(typename)
-        $context_types_store[context] = typename;
+		$page_title = title;
 
-    item = $context_items_store[context]
-    visibilty = "hidden";
-    if (item != null) {
-        if (focused_only) {
-            if ($context_items_store.focused == in_context)
-                visibilty = "";
-        } else
-            visibilty = "";
-    }
-    let t = 0
-    $: {
-        t = $data_tick_store
-        //chnages.just_changed_context = false;
+		//clear_selection();
+		$contextToolbarOperations = [];
+		$data_tick_store = $data_tick_store + 1;
 
-        if (t > last_tick) {
-            last_tick = t
-            if (self != null)
-                $context_items_store[context] = self
-            
-            if(typename)
-                $context_types_store[context] = typename;
+		return () => {
+			$pageToolbarOperations = [];
+			$page_title = '';
+		};
+	});
 
-            item = $context_items_store[context]
-            visibilty = "hidden";
-            if (item != null) {
-                if (focused_only) {
-                    if ($context_items_store.focused == in_context)
-                        visibilty = "";
-                } else
-                    visibilty = "";
-            }
-            //console.log("$page[" + in_context + ", " + context + "]: " + visibilty)
-            //console.log(item)  
-            //console.log("--------------")
-        }
-    }
+	setContext('ctx', context);
+	let item = null;
+	let visibilty = 'hidden';
+	if (inContext == '') inContext = context;
+	let last_tick = 0;
+	if (self != null) $contextItemsStore[context] = self;
 
-    function clear_selection(e)
-    {
-        //console.log('page click', chnages.just_changed_context)
-        if(!clears_context)
-            return;
+	if (typename) $contextTypesStore[context] = typename;
 
-       
+	item = $contextItemsStore[context];
+	visibilty = 'hidden';
+	if (item != null) {
+		if (focused_only) {
+			if ($contextItemsStore.focused == inContext) visibilty = '';
+		} else visibilty = '';
+	}
+	let t = 0;
+	$: {
+		t = $data_tick_store;
+		//chnages.just_changed_context = false;
 
-        let contexts = clears_context.split(' ');
-        contexts.forEach(c => 
-        {
-            $context_items_store[c] = null;
-            $context_info_store[c] = '';
-        })
+		if (t > last_tick) {
+			last_tick = t;
+			if (self != null) $contextItemsStore[context] = self;
 
-        //e.stopPropagation();
-    
-        $context_toolbar_operations = [];
-        $data_tick_store = $data_tick_store + 1;
-    }
+			if (typename) $contextTypesStore[context] = typename;
+
+			item = $contextItemsStore[context];
+			visibilty = 'hidden';
+			if (item != null) {
+				if (focused_only) {
+					if ($contextItemsStore.focused == inContext) visibilty = '';
+				} else visibilty = '';
+			}
+			//console.log("$page[" + inContext + ", " + context + "]: " + visibilty)
+			//console.log(item)
+			//console.log("--------------")
+		}
+	}
+
+	function clear_selection(e) {
+		//console.log('page click', chnages.just_changed_context)
+		if (!clears_context) return;
+
+		let contexts = clears_context.split(' ');
+		contexts.forEach((c) => {
+			$contextItemsStore[c] = null;
+			$context_info_store[c] = '';
+		});
+
+		//e.stopPropagation();
+
+		$contextToolbarOperations = [];
+		$data_tick_store = $data_tick_store + 1;
+	}
 </script>
 
 <div class="bg-stone-100 dark:bg-stone-800 {visibilty} {cl}" on:click={clear_selection}>
-    {#if visibilty == "" }
-        <slot/>
-    {/if}
+	{#if visibilty == ''}
+		<slot />
+	{/if}
 </div>

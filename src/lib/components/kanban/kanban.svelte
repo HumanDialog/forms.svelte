@@ -1,8 +1,8 @@
 <script lang="ts">
     import {setContext, getContext, afterUpdate} from 'svelte'
     import {rKanban_definition} from './Kanban'
-    import {parse_width_directive, clear_active_item} from '../../utils' 
-    import {data_tick_store, context_items_store, context_types_store } from '../../stores'
+    import {parseWidthDirective, clearActiveItem} from '../../utils' 
+    import {data_tick_store, contextItemsStore, contextTypesStore } from '../../stores'
     import Column from './internal/kanban.column.svelte'
     
 
@@ -25,21 +25,21 @@
     let     item  :object | null = null
     let     ctx   :string = context ? context : getContext('ctx');
 
-    let     cs =  c ? parse_width_directive(c) : 'w-full min-w-full';
+    let     cs =  c ? parseWidthDirective(c) : 'w-full min-w-full';
 
-    clear_active_item('props')
+    clearActiveItem('props')
 
     let  last_tick = -1   
-    $: setup($data_tick_store, $context_items_store);
+    $: setup($data_tick_store, $contextItemsStore);
 
     function setup(...args)
     {
         last_tick = $data_tick_store   
         if(self && ctx)         
-            $context_items_store[ctx] = self;
+            $contextItemsStore[ctx] = self;
         
         if(!typename)
-            typename = $context_types_store[ctx];
+            typename = $contextTypesStore[ctx];
     }
 
     export function refresh()
@@ -47,7 +47,7 @@
         setup();
     }
 
-    export function update_self(_self :object)
+    export function updateSelf(_self :object)
     {
         self = _self;
         setup();
@@ -73,17 +73,17 @@
         {
             let left_column = columns[i-1];
             let right_column = columns[i];
-            const left_column_height = left_column.get_height()
-            const right_column_height = right_column.get_height()
+            const left_column_height = left_column.getHeight()
+            const right_column_height = right_column.getHeight()
             if(left_column_height > right_column_height)
             {
-                left_column.set_border(left_column.SET_RIGHT)
-                right_column.set_border(right_column.CLEAR_LEFT)
+                left_column.setBorder(left_column.SET_RIGHT)
+                right_column.setBorder(right_column.CLEAR_LEFT)
             }
             else
             {
-                left_column.set_border(left_column.CLEAR_RIGHT)
-                right_column.set_border(right_column.SET_LEFT)
+                left_column.setBorder(left_column.CLEAR_RIGHT)
+                right_column.setBorder(right_column.SET_LEFT)
             }
 
         }

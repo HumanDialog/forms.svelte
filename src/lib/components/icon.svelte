@@ -4,7 +4,7 @@
 
     // use one of those
     export let component = null;                            // svelte component
-    export let module_name :string = "fa/FaQuestion";       // name of module file with icon component -> icon will be loaded dynamically
+    export let moduleName :string = "fa/FaQuestion";       // name of module file with icon component -> icon will be loaded dynamically
     export let img :string = '';                            // url to img like png or jpg
     export let label :string = '';                           // initials will be shown generated from 'label' string
     export let symbol :string = '';                         // predefined html particle from icons app map

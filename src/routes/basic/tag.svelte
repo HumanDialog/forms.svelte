@@ -3,10 +3,10 @@
 
     export let name: string;
     export let color: string;
-    export let onremove: any|undefined = undefined;
+    export let onRemove: any|undefined = undefined;
     export let s: string = 'sm'
 
-    let pr = onremove ? 'pr-1' : 'pr-2';
+    let pr = onRemove ? 'pr-1' : 'pr-2';
 
     let font;
     let x_size;
@@ -32,9 +32,9 @@
 
 <div class="mt-1 pl-2 {pr} rounded text-white flex flex-row" style="background-color:{color}">
     <div class="{font}">{name}</div>
-    {#if onremove}
+    {#if onRemove}
         <div class="no-print ml-1 inline-block {x_size} hover:cursor-pointer" 
-            on:click={onremove}><FaTimes/></div>
+            on:click={onRemove}><FaTimes/></div>
     {/if}
 </div>
 

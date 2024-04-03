@@ -12,11 +12,11 @@
     export const Custom = 2;
     export let mode = OKCancel; 
 
-    export let ok_caption :string = 'OK';
-    export let cancel_caption :string = 'Cancel'
+    export let okCaption :string = 'OK';
+    export let cancelCaption :string = 'Cancel'
 
-    export let on_ok_callback :Function | undefined = undefined;
-    export let on_cancel_callback :Function | undefined = undefined;
+    export let onOkCallback :Function | undefined = undefined;
+    export let onCancelCallback :Function | undefined = undefined;
 
     export function show( on_close_callback :Function|undefined = undefined)
     {
@@ -47,8 +47,8 @@
     {
         //open = false;
         
-        if(on_ok_callback)
-            on_ok_callback();
+        if(onOkCallback)
+            onOkCallback();
 
         if(close_callback)
             close_callback('OK');
@@ -58,8 +58,8 @@
     {
         open = false;
 
-        if(on_cancel_callback)
-            on_cancel_callback();
+        if(onCancelCallback)
+            onCancelCallback();
 
         if(close_callback)
             close_callback('Cancel');
@@ -118,14 +118,14 @@
             {#if mode == OK}
                 <button type="button" class="inline-flex w-full justify-center rounded-md bg-blue-700 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-800 sm:ml-3 sm:w-auto"
                         on:click={on_ok}>
-                        {ok_caption}</button>
+                        {okCaption}</button>
             {:else if mode == OKCancel}
                 <button type="button" class="inline-flex w-full justify-center rounded-md bg-blue-700 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-800 sm:ml-3 sm:w-auto"
                         on:click={on_ok}>
-                        {ok_caption}</button>
+                        {okCaption}</button>
                 <button type="button" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-stone-900 shadow-sm ring-1 ring-inset ring-stone-300 hover:bg-stone-50 sm:mt-0 sm:w-auto"
                         on:click={on_cancel}>
-                        {cancel_caption}</button>
+                        {cancelCaption}</button>
             {:else if mode == Custom}
                 <slot name="footer"/>
             {/if}

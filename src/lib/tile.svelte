@@ -1,7 +1,7 @@
 
 
 <script>
-    import {data_tick_store, context_items_store} from './stores.js' 
+    import {data_tick_store, contextItemsStore} from './stores.js' 
     import { setContext } from 'svelte';
     export let c = ''   
     export let cl = 'col-span-1'
@@ -13,7 +13,7 @@
     {    
         setContext('ctx', context) 
         if(self != null)
-            context_items_store[context] = self 
+            contextItemsStore[context] = self 
     }
 
     

@@ -4,7 +4,7 @@
 
     export let name     :string;
     export let a        :string = '';
-    export let on_select = undefined;
+    export let onSelect = undefined;
     
     let definition :rList_definition = getContext("rList-definition");
     
@@ -15,7 +15,7 @@
     if(!date_property.a)
         date_property.a = date_property.name;
 
-    date_property.on_select = on_select
+    date_property.onSelect = onSelect
 
     definition.properties.push(date_property)
 

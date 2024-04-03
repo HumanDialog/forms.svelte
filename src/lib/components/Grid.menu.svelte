@@ -1,8 +1,8 @@
 <script>
-    import {context_items_store} from '../stores.js'
+    import {contextItemsStore} from '../stores.js'
 
     export let operations = []
-    export let onhide = undefined;
+    export let onHide = undefined;
     
     $: grid_cols = init(operations);
 
@@ -94,8 +94,8 @@
 
     function execute_action(e, operation)
     {
-        if(!!onhide)
-            onhide();
+        if(!!onHide)
+            onHide();
 
         e.stopPropagation();
 
@@ -106,8 +106,8 @@
             return;
 
         let context_item = null
-        if($context_items_store.focused)
-            context_item = $context_items_store[$context_items_store.focused]
+        if($contextItemsStore.focused)
+            context_item = $contextItemsStore[$contextItemsStore.focused]
         
         operation.action(context_item);
     }

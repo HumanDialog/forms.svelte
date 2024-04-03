@@ -1,5 +1,5 @@
 <script >
-    import {Spinner, show_menu, start_editing, Sidebar, SidebarBrand, SidebarGroup, SidebarItem} from '$lib'
+    import {Spinner, showMenu, startEditing, Sidebar, SidebarBrand, SidebarGroup, SidebarItem} from '$lib'
     import {FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash} from 'svelte-icons/fa'
     import { onMount, afterUpdate } from "svelte";
     
@@ -98,23 +98,23 @@
     
     function get_user_list_operations(dom_node, data_item)
     {
-        let menu_operations = [];
+        let menuOperations = [];
         
-        menu_operations.push({
+        menuOperations.push({
             caption: 'Finish all',
             icon: FaRegCheckCircle,
             action: (focused) => finish_all_my_tasks()
         });
 
-        return menu_operations;
+        return menuOperations;
     }
 
     function get_task_list_operations(dom_node, data_item)
     {
-        let menu_operations = [
+        let menuOperations = [
             {
                 caption: 'Rename',
-                action: (focused) => start_editing(dom_node)
+                action: (focused) => startEditing(dom_node)
             },
             {
                 caption: 'Finish all',
@@ -141,7 +141,7 @@
                 action: (focused) => delete_list(data_item)
             }
         ]
-        return menu_operations;
+        return menuOperations;
     }
 
    
@@ -153,25 +153,25 @@
     </SidebarBrand>
         
         {#if tasklists && tasklists.length > 0}
-            {@const is_active=false}
+            {@const isActive=false}
         
         <SidebarGroup>
             <SidebarItem   href="#/mytasks"
                             icon={FaList}
-                            active={is_active}
+                            active={isActive}
                             operations={(node) => get_user_list_operations(node, user)}
                             selectable={user}>
                 My Tasks
             </SidebarItem>
         </SidebarGroup>
 
-        <SidebarGroup border inserter={add_list} inserter_placeholder='New list'>
+        <SidebarGroup border inserter={add_list} inserterPlaceholder='New list'>
             {#each tasklists as list (list.Id)}
                 {@const href = `#/tasklist/${list.Id}`}
-                {@const is_active = false}
+                {@const isActive = false}
                 <SidebarItem   {href}
                                 icon={FaList}
-                                active={is_active}
+                                active={isActive}
                                 operations={(node) => get_task_list_operations(node, list)}
                                 selectable={list}
                                 editable={(text) => {change_name(list, text)}}>

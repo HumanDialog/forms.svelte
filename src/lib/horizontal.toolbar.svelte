@@ -10,7 +10,7 @@
     import FaBars from 'svelte-icons/fa/FaBars.svelte'
     import FaToggleOn from 'svelte-icons/fa/FaToggleOn.svelte'
     import FaToggleOff from 'svelte-icons/fa/FaToggleOff.svelte'
-    import {show_menu} from '$lib/components/menu'
+    import {showMenu} from '$lib/components/menu'
     import {push} from 'svelte-spa-router'
     //import Menu from '$lib/components/contextmenu.svelte'
 
@@ -37,7 +37,7 @@
     import VerticalToolbar from '$lib/vertical.toolbar.svelte'
     
 
-    export let app_config;
+    export let appConfig;
     
     let config = null;
     let has_selection_details = false;
@@ -52,19 +52,19 @@
 
     $:
     {
-        config = app_config.mainToolbar;
-        has_selection_details = app_config.selectionDetails;
+        config = appConfig.mainToolbar;
+        has_selection_details = appConfig.selectionDetails;
         is_logged_in = $session.is_active;
         show_sign_in_out_icons = config.signin ? true : false;
         sign_in_href = $signin_href;
         sign_out_href = $signout_href;
 
-        tabs = Object.keys(app_config.sidebar);
+        tabs = Object.keys(appConfig.sidebar);
         if(tabs.length > 1)
             icon = FaBars;
         else    
         {
-            let first_tab = app_config.sidebar[tabs[0]];
+            let first_tab = appConfig.sidebar[tabs[0]];
             icon = first_tab.icon;
         }
     }
@@ -96,7 +96,7 @@
             if(sidebar == "*")
             {
                 if((!previously_visible_sidebar) || previously_visible_sidebar === '*')
-                    sidebar = Object.keys(app_config.sidebar)[0];
+                    sidebar = Object.keys(appConfig.sidebar)[0];
                 else
                     sidebar = previously_visible_sidebar;
             }
@@ -191,7 +191,7 @@
         }
         
         let pt = new DOMPoint(rect.left, rect.bottom)
-        show_menu(pt, options);    
+        showMenu(pt, options);    
     }
 
 </script>
@@ -222,7 +222,7 @@
 {#if tabs.length > 1 &&  $main_sidebar_visible_store != "*"}
     <div  class="print flex-none block fixed left-0 top-[40px] w-[40px] h-screen z-20 inset-0   overflow-hidden">
         <div class="sticky top-0 flex h-full w-10 bg-stone-900 flex-col items-center text-stone-100 shadow">
-            <VerticalToolbar {app_config} mobile={true}/>
+            <VerticalToolbar {appConfig} mobile={true}/>
         </div>    
     </div>    
 {/if}

@@ -252,17 +252,17 @@
 {#if current_list}
     <Page   self={current_list} 
             cl="!bg-white dark:!bg-stone-900 w-full h-full flex flex-col overflow-y-auto overflow-x-hidden py-1 px-1 border-0" 
-            toolbar_operations={page_operations}
+            toolbarOperations={page_operations}
             clears_context='props sel'
             title={current_list.Name}>
 
         <List   self={current_list} 
                 a='Tasks' 
                 title={current_list.Name} 
-                toolbar_operations={task_operations} 
-                context_menu={task_context_menu}
+                toolbarOperations={task_operations} 
+                contextMenu={task_context_menu}
                 bind:this={list_component}>
-            <ListTitle a='Title' href_func={(itm) => { return `#/task?ref=${itm.$ref}` }}/>
+            <ListTitle a='Title' hrefFunc={(itm) => { return `#/task?ref=${itm.$ref}` }}/>
             <ListSummary a='Summary'/>
             <ListInserter action={add_task_after} icon/>
 

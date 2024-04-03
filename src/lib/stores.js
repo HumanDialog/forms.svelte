@@ -3,30 +3,30 @@ import {writable, get} from 'svelte/store';
 import {SCREEN_SIZES} from './utils.js'
 
 export const data_tick_store = writable(1);
-export const context_items_store = writable({focused:'', data: null, sel: null})
+export const contextItemsStore = writable({focused:'', data: null, sel: null})
 export const context_info_store = writable({data: '', sel: ''})
-export const context_types_store = writable({focused:'', data: null, sel: null})
-export const context_toolbar_operations = writable([]);
-export const page_toolbar_operations = writable([]);
+export const contextTypesStore = writable({focused:'', data: null, sel: null})
+export const contextToolbarOperations = writable([]);
+export const pageToolbarOperations = writable([]);
 export const page_title = writable('');
 export const nav_titles = writable({});
 
-export function set_navigator_title(key, title)
+export function setNavigatorTitle(key, title)
 {
     let titles = get(nav_titles);
     titles[key] = title;
     nav_titles.set(titles);
 }
 
-export function has_selected_item()
+export function hasSelectedItem()
 {
-    let itm = get(context_items_store).sel
+    let itm = get(contextItemsStore).sel
     return itm !== null && itm !== undefined;
 }
 
-export function has_data_item()
+export function hasDataItem()
 {
-    let itm = get(context_items_store).data
+    let itm = get(contextItemsStore).data
     return itm !== null && itm !== undefined;
 }
 

@@ -166,7 +166,7 @@
 	<Page
 		self={currentList}
 		cl="!bg-white dark:!bg-stone-900 w-full h-full flex flex-col overflow-y-auto overflow-x-hidden py-1 px-1 border-0"
-		toolbar_operations={pageOperations}
+		toolbarOperations={pageOperations}
 		clears_context="props sel"
 		title={currentList.Name}
 	>
@@ -199,7 +199,7 @@
 						a="DueDate"
 						compact={true}
 						s="xs"
-						in_context="props"
+						inContext="props"
 						changed={(value) => {
 							onDateChanged(value, item);
 						}}
@@ -213,10 +213,10 @@
 				{#if item.Responsible || responsiblePlaceholder}
 					<Combo
 						compact={true}
-						in_context="props"
+						inContext="props"
 						self={item}
 						a="Responsible"
-						is_association
+						isAssociation
 						icon={false}
 						changed={(key, name) => {
 							onResponsibleChanged(key, name, item);
