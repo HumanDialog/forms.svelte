@@ -424,7 +424,7 @@
 </script>
 
 <Page   self={data_item} 
-        cl="!bg-white dark:!bg-slate-900 w-full h-full flex flex-col overflow-y-auto overflow-x-hidden py-1 px-1 border-0" 
+        cl="!bg-white dark:!bg-stone-900 w-full h-full flex flex-col overflow-y-auto overflow-x-hidden py-1 px-1 border-0" 
         toolbar_operations={page_operations}
         clears_context='props sel'>
     <!--a href="/" class="underline text-sm font-semibold ml-3"> &lt; Back to root</a-->
@@ -486,7 +486,7 @@
             <Checkbox class="mt-2 text-xs font-normal" self={new_user} a="maintainer">
                 <div class="flex flex-row items-center">
                     <span class="">Maintainer</span>
-                    <Icon id="b1" size={4} component={FaInfoCircle} class="text-slate-400 ml-5 pt-0 mt-1"/>
+                    <Icon id="b1" size={4} component={FaInfoCircle} class="text-stone-400 ml-5 pt-0 mt-1"/>
                     <Popover class="w-64 text-sm font-light " title="Maintainer" triggeredBy="#b1">
                         Means that the invited user will be able to add and remove others and manage permissions in this organization.
                     </Popover>

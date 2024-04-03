@@ -54,7 +54,7 @@
     let ctx = context ? context : getContext('ctx');
         
     let  last_tick = -1    
-    let border_style = "border-gray-300  dark:border-gray-600"
+    let border_style = "border-stone-300  dark:border-stone-600"
 
     $:{ 
         if($data_tick_store > last_tick)
@@ -107,9 +107,9 @@
 </script>    
 
 {#if itype == 'text'}
-    {@const border_style = invalid ? "border-red-300 dark:border-red-600" : "border-gray-300 dark:border-gray-600" }
+    {@const border_style = invalid ? "border-red-300 dark:border-red-600" : "border-stone-300 dark:border-stone-600" }
     <div class={cs}>
-        <label for="name" class="block {label_mb} text-xs font-small text-gray-900 dark:text-white">{label}</label>
+        <label for="name" class="block {label_mb} text-xs font-small text-stone-900 dark:text-white">{label}</label>
         
         <input  type=text name="name" id="name" 
                 bind:value={val} 
@@ -117,12 +117,12 @@
                 on:blur={() => { accept_change();} }
                 on:keydown={(e)=>{check_validity();}}
                 
-                class="     bg-gray-50 dark:bg-gray-700
+                class="     bg-stone-50 dark:bg-stone-700
                             border {border_style} rounded-lg 
                             focus:ring-primary-600 focus:border-primary-600 dark:focus:ring-primary-500 dark:focus:border-primary-500
-                            text-gray-900 dark:text-white text-sm  
+                            text-stone-900 dark:text-white text-sm  
                             block w-full {input_pb} {input_pt} px-2.5 
-                            dark:placeholder-gray-400" 
+                            dark:placeholder-stone-400" 
                 
                 placeholder={placeholder}>
     </div>

@@ -86,7 +86,8 @@
         if(rect.height == 0)
             return;
 
-        let container_rect :DOMRect = new DOMRect(0, 0, window.innerWidth, window.innerHeight)
+        const m = 15;
+        let container_rect :DOMRect = new DOMRect(m, 0, window.innerWidth-2*m, window.innerHeight)
                         
         if(rect.right > container_rect.right)
             x = container_rect.right - rect.width;
@@ -106,7 +107,7 @@
 </script>
 
 <div    id="__hd_svelte_floating_container"
-        class="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg shadow {display} z-30"
+        class="p-2 bg-stone-100 dark:bg-stone-800 rounded-lg shadow {display} z-30"
         style="left:{x}px; top:{y}px; width: max-content; height:max-content"
         bind:this={root_element}>
     <svelte:component this={toolbar} {...props} />

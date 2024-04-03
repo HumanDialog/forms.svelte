@@ -131,20 +131,20 @@
 {#if true}
     <slot/> <!-- let definition execute -->
     
-    <table class="{cs} h-auto divide-gray-200 cursor-default">
-        <thead class="bg-gray-50 sticky">
+    <table class="{cs} h-auto divide-stone-200 cursor-default">
+        <thead class="bg-stone-50 sticky">
             <tr>
                 {#if definition || headers.length }
                     {@const lheaders = headers.length ? headers : definition.columns.map( v => v.header )}
                     {#if lheaders.length && lheaders.some(s => s.length > 0)}
                         {#each lheaders as header}
-                            <th scope="col" class="py-1 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" class="py-1 px-4 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
                                 {header}
                             </th>
                         {/each}    
                     {/if}
                 {:else}
-                    <th scope="col" class="py-1 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" class="py-1 px-4 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
                         No headers... 
                     </th>
                 {/if}
@@ -152,14 +152,14 @@
         </thead>
         {#if (items != null) && (items.length > 0)}
             {@const lfields = fields.length ? fields : definition.columns.map( v => v.field )}
-            <tbody class="bg-white dark:bg-slate-900">
+            <tbody class="bg-white dark:bg-stone-900">
                 {#each items as item}
                     {#if (item != null )}
                         <tr on:click={ (e) => { e.stopPropagation(); e.preventDefault(); select_item(item, cinfo);} }
                             on:contextmenu={ (e) => {select_item(item, cinfo); show_context_menu(e, item, cinfo)} }
-                            class="whitespace-nowrap text-sm font-normal text-gray-900 dark:text-gray-300"
-                            class:bg-slate-100={item==selected_item}
-                            class:dark:bg-slate-700={item==selected_item}>
+                            class="whitespace-nowrap text-sm font-normal text-stone-900 dark:text-stone-300"
+                            class:bg-stone-100={item==selected_item}
+                            class:dark:bg-stone-700={item==selected_item}>
                             {#each lfields as field, i}
                                 {@const cc = `c${i}`}
                                 {@const column = definition.columns[i]}

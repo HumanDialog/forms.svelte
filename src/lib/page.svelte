@@ -17,7 +17,7 @@
     export let focused_only = false
     export let in_context = ''
     export let cl =
-        "w-full h-full flex flex-col dark:bg-slate-800  overflow-y-hidden  overflow-x-hidden py-1 px-1 border-0" // border-green-500
+        "w-full h-full flex flex-col dark:bg-stone-800  overflow-y-hidden  overflow-x-hidden py-1 px-1 border-0" // border-green-500
     export let c = ''
     
     export let toolbar_operations = undefined;
@@ -27,10 +27,10 @@
     
     switch (c) {
         case 'main':
-            cl = "w-full h-full flex flex-col dark:bg-slate-800  overflow-y-hidden  overflow-x-hidden py-1 px-1 border-0"
+            cl = "w-full h-full flex flex-col dark:bg-stone-800  overflow-y-hidden  overflow-x-hidden py-1 px-1 border-0"
             break;
         case 'main-d':
-            cl = "bg-slate-800 w-full h-full flex flex-col dark:bg-slate-800  overflow-y-hidden  overflow-x-hidden py-1 px-1 border-0"
+            cl = "bg-stone-800 w-full h-full flex flex-col dark:bg-stone-800  overflow-y-hidden  overflow-x-hidden py-1 px-1 border-0"
             break;
         default:
             //NOP    
@@ -125,7 +125,7 @@
     }
 </script>
 
-<div class="bg-slate-100 dark:bg-slate-800 {visibilty} {cl}" on:click={clear_selection}>
+<div class="bg-stone-100 dark:bg-stone-800 {visibilty} {cl}" on:click={clear_selection}>
     {#if visibilty == "" }
         <slot/>
     {/if}

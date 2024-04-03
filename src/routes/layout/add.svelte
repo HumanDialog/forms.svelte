@@ -14,6 +14,6 @@
 <style lang="postcss">
     .button
     {
-        @apply py-2.5 px-5 text-xs font-medium text-gray-900 bg-slate-100 hover:bg-slate-200 border rounded border-gray-200 focus:outline-none dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 inline-flex items-center justify-center
+        @apply py-2.5 px-5 text-xs font-medium text-stone-900 bg-stone-100 hover:bg-stone-200 border rounded border-stone-200 focus:outline-none dark:bg-stone-800 dark:text-stone-400 dark:border-stone-600 dark:hover:text-white dark:hover:bg-stone-700 inline-flex items-center justify-center
     }
 </style>

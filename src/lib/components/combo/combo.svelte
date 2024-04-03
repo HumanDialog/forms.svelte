@@ -81,15 +81,15 @@
             break;
     }
 
-    let background_class = is_compact && !icon ? "" : ""; //bg-slate-900/10 dark:bg-slate-100/10 rounded-lg" : ""
+    let background_class = is_compact && !icon ? "" : ""; //bg-stone-900/10 dark:bg-stone-100/10 rounded-lg" : ""
 
     let appearance_class;
     if(is_compact)
         appearance_class = `${font_size}`;
     else
-        appearance_class = `   bg-gray-50 border border-gray-300 text-gray-900 ${font_size} rounded-lg 
-                                focus:ring-primary-600 focus:border-primary-600 block w-full  ${input_pb} ${input_pt} px-2.5 dark:bg-gray-700 
-                                dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500`;
+        appearance_class = `   bg-stone-50 border border-stone-300 text-stone-900 ${font_size} rounded-lg 
+                                focus:ring-primary-600 focus:border-primary-600 block w-full  ${input_pb} ${input_pt} px-2.5 dark:bg-stone-700 
+                                dark:border-stone-600 dark:placeholder-stone-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500`;
 
    
     let cs =  c ? parse_width_directive(c) : 'col-span-1';
@@ -757,7 +757,7 @@
     on:focusout={on_focus_out}
     bind:this={root_element}>
     {#if !is_compact}
-        <label for="name" class="block {label_mb} text-xs font-small text-gray-900 dark:text-white">{label}</label>
+        <label for="name" class="block {label_mb} text-xs font-small text-stone-900 dark:text-white">{label}</label>
     {/if}
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div    bind:this={combo}    
@@ -779,10 +779,10 @@
 
             
             <p  bind:this={textbox}
-                class="dark:text-gray-300 {line_h} truncate pl-0 pr-2.5 {background_class} min-w-[2.5rem]"
+                class="dark:text-stone-300 {line_h} truncate pl-0 pr-2.5 {background_class} min-w-[2.5rem]"
                 class:ml-2={icon}
-                class:text-gray-400={ (!is_dropdown_open) && (!sel_item)}
-                class:text-gray-700={ is_dropdown_open || sel_item }
+                class:text-stone-400={ (!is_dropdown_open) && (!sel_item)}
+                class:text-stone-700={ is_dropdown_open || sel_item }
                 class:w-10={!combo_text}
                 contenteditable={is_dropdown_open && filtered}
                 on:keydown={on_keydown}
@@ -791,14 +791,14 @@
         </div>
         
         {#if can_be_activated }
-            <div class="w-3 h-3 no-print flex-none text-gray-700 dark:text-gray-300 {chevron_mt}">
+            <div class="w-3 h-3 no-print flex-none text-stone-700 dark:text-stone-300 {chevron_mt}">
                 <FaChevronDown/>
             </div>
         {/if}
     </div>
 
     <div    hidden={!is_dropdown_open} 
-            class="{cs} bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 shadow-md overflow-y-auto cursor-pointer z-30"
+            class="{cs} bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md overflow-y-auto cursor-pointer z-30"
             style={dropdown_position}
             use:dropdown_action>
         <ul class="py-1">
@@ -809,9 +809,9 @@
                     {#each _filtered_source as item (item.Key)}
                         <!-- svelte-ignore a11y-click-events-have-key-events -->
                         <li class="rounded p-2 flex flex-row items-center {font_size}" 
-                            class:bg-gray-100={highlighted_option == item}
-                            class:dark:bg-gray-700={highlighted_option == item}
-                            class:dark:hover:bg-gray-700={highlighted_option == item}
+                            class:bg-stone-100={highlighted_option == item}
+                            class:dark:bg-stone-700={highlighted_option == item}
+                            class:dark:hover:bg-stone-700={highlighted_option == item}
                             on:mousemove={() => on_mouse_move(item)}
                             on:click|preventDefault|stopPropagation={async () => await on_choose(item)}
                             tabindex="-1">

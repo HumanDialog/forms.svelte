@@ -12,6 +12,8 @@
     export let onRemove: any|undefined = undefined
     export let isCompact: boolean = true;
 
+    export let s: string = 'sm'
+
     let userClass = $$props.class ?? '';
 
     let tagsTable = []
@@ -58,6 +60,9 @@
     function decomposeTags(tags: string, referenceTable=undefined)
     {
         let table = [];
+
+        if(!tags)
+            return table;
 
         let names = tags.split('#');
 
@@ -111,22 +116,38 @@
         return result;
     }
 
+    let gap = 'gap-2';
+    switch(s)
+    {
+    case 'md':
+        gap = 'gap-2'
+        break;
+
+    case 'sm':
+        gap = 'gap-2'
+        break;
+
+    case 'xs':
+        gap = 'gap-1'
+        break;
+    }
+
 </script>
 
-<div class="{userClass} flex flex-row gap-2 mr-1 sm:mr-0">
+<div class="{userClass} flex flex-row {gap} flex-wrap mr-1 sm:mr-0">
     {#each tagsTable as tag}
         {#if onRemove}
-            <Tag name={tag.label} color={tag.color}
+            <Tag name={tag.label} color={tag.color} {s}
                  onremove={(e) => {onRemove(tag.label)}}/>
         {:else}
-            <Tag name={tag.label} color={tag.color}/>
+            <Tag name={tag.label} color={tag.color} {s}/>
         {/if}
     {/each}
 
     {#if onSelect}
         {#if !addComboVisible}
             {#if !isCompact}
-                <button    class="mt-1 pl-0 pr-1 rounded text-slate-500 flex flex-row border-slate-500 border hover:cursor-pointer"
+                <button    class="mt-1 pl-0 pr-1 rounded text-stone-500 flex flex-row border-stone-500 border hover:cursor-pointer"
                         on:click={(e) => { show(e, undefined)} }>
                     <div class="ml-1 mt-1 w-3 h-3"><FaPlus/></div>
                 </button>
@@ -136,7 +157,7 @@
                     in_context='data'
                     on_select={onSelectedTagFromList}
                     on_new_item_created={onNewTagCreated}
-                    s='sm'
+                    s={s}
                     filtered
                     bind:this={addCombo}>
                 {@const not_used_tags = getNotUsedTags()}

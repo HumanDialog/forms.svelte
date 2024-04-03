@@ -19,7 +19,7 @@ import {
 {#if readonly}
     <p {id} class="  sm:text-xs sm:min-h-[1rem]
                     text-base min-h-[1.5rem]
-                    text-slate-400 
+                    text-stone-400 
                     {user_class}"
                     on:click>
         {text}
@@ -27,7 +27,7 @@ import {
 {:else if text}
     <p {id} class=" sm:text-xs sm:min-h-[1rem]
                     text-base min-h-[1.5rem]
-                    text-slate-400 
+                    text-stone-400 
                     {user_class}"
             use:_editable={editable}
             on:click>
@@ -36,7 +36,7 @@ import {
 {:else if placeholder}
     <p   {id} class="sm:text-xs sm:min-h-[1rem]
                      text-base min-h-[1.5rem]
-                     text-slate-400 
+                     text-stone-400 
                      {user_class}"
             use:_editable={editable}
             on:click>

@@ -30,8 +30,8 @@
 
 {#if i!= null}
 <input  type=text value={value} on:input={()=> ($data_tick_store = $data_tick_store + 1)}
-class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
-focus:ring-primary-600 focus:border-primary-600 block w-full  {input_pb} {input_pt} px-2.5 dark:bg-gray-700
-dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" 
+class="bg-stone-50 border border-stone-300 text-stone-900 text-sm rounded-lg 
+focus:ring-primary-600 focus:border-primary-600 block w-full  {input_pb} {input_pt} px-2.5 dark:bg-stone-700
+dark:border-stone-600 dark:placeholder-stone-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" 
 placeholder={placeholder}>
 {/if}

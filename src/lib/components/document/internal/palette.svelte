@@ -161,7 +161,7 @@
     
 </script>
 
-<div    class="not-prose bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 shadow-md z-30" 
+<div    class="not-prose bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md z-30" 
         hidden={!visible}
         style={css_style}>
     {#if filtered_commands && filtered_commands.length}
@@ -176,7 +176,7 @@
                             />
         {/each}
     {:else}
-        <p class="text-sm text-gray-500">No results</p>
+        <p class="text-sm text-stone-500">No results</p>
     {/if}
 
 </div>

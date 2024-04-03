@@ -15,7 +15,7 @@
     
 </script>
 
-<section    class="flex flex-row my-0  w-full text-lg sm:text-sm text-slate-700 dark:text-slate-400 cursor-default rounded-md border-2 border-transparent bg-gray-200 dark:bg-gray-700">
+<section    class="flex flex-row my-0  w-full text-lg sm:text-sm text-stone-700 dark:text-stone-400 cursor-default rounded-md border-2 border-transparent bg-stone-200 dark:bg-stone-700">
     {#if icon}
         <!--Icon   size={3} 
                 component={FaPlus}  

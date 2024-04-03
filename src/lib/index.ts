@@ -56,6 +56,13 @@ export { default as ListStaticProperty} from './components/list/list.static.svel
 export { default as Modal} from './modal.svelte'
 export { default as MembersPage} from './tenant.members.svelte'
 
+export {default as Kanban} from './components/kanban/kanban.svelte'
+export {default as KanbanColumn} from './components/kanban/kanban.column.svelte'
+export {default as KanbanTitle} from './components/kanban/kanban.title.svelte'
+export {default as KanbanSummary} from './components/kanban/kanban.summary.svelte'
+export {default as KanbanCallckacks} from './components/kanban/kanban.callbacks.svelte'
+export {KanbanColumnTop, KanbanColumnBottom} from './components/kanban/Kanban'
+
 export {
     select_item,
     activate_item,

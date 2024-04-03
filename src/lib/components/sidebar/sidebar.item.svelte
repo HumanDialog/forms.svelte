@@ -116,11 +116,11 @@
         on:keyup
         class="     border border-transparent rounded-lg
                     text-lg sm:text-base font-normal 
-                    text-gray-900 sm:hover:bg-gray-100  
-                    dark:text-white sm:dark:hover:bg-gray-700 {user_class}
+                    text-stone-900 sm:hover:bg-stone-100  
+                    dark:text-white sm:dark:hover:bg-stone-700 {user_class}
                     flex flex-row justify-between"
-        class:bg-gray-200={active}
-        class:dark:bg-gray-700={active}
+        class:bg-stone-200={active}
+        class:dark:bg-stone-700={active}
         class:selected={selected(selectable, context_data)}>
             <a  href={href} 
                 on:click={on_link_clicked} 

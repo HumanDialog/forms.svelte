@@ -121,9 +121,9 @@
             {@const col=col_span(operation.columns ?? 1)}
             
             <button class=" py-2.5 px-5 {col}
-                            text-base sm:text-xs font-medium text-gray-900 dark:text-gray-400 dark:hover:text-white
-                            bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 active:bg-slate-300 dark:active:bg-gray-600
-                            border rounded border-gray-200 dark:border-gray-600 focus:outline-none
+                            text-base sm:text-xs font-medium text-stone-900 dark:text-stone-400 dark:hover:text-white
+                            bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 active:bg-stone-300 dark:active:bg-stone-600
+                            border rounded border-stone-200 dark:border-stone-600 focus:outline-none
                             inline-flex items-center justify-center"
                             on:click={(e) => {execute_action(e, operation)}}>
                 

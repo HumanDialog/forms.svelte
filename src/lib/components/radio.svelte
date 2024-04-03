@@ -19,7 +19,7 @@
     
     let ctx = context ? context : getContext('ctx');
     let cs = parse_width_directive(c);
-    let color_style = disabled ? 'text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-gray-300';
+    let color_style = disabled ? 'text-stone-400 dark:text-stone-500' : 'text-stone-900 dark:text-stone-300';
     
     let name;
 
@@ -64,7 +64,7 @@
             {name}
             on:change={on_changed}
             {disabled} 
-            class="w-4 h-4 bg-gray-100 border-gray-300 dark:ring-offset-gray-800 focus:ring-2 mr-2 dark:bg-gray-700 dark:border-gray-600 rounded text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600"/>
+            class="w-4 h-4 bg-stone-100 border-stone-300 dark:ring-offset-stone-800 focus:ring-2 mr-2 dark:bg-stone-700 dark:border-stone-600 rounded text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600"/>
     <span class="text-sm font-medium ml-1">
         <slot/>
     </span>

@@ -36,6 +36,6 @@
  </script>    
  
 
-<div class=" {cl} bg-slate-100 dark:bg-slate-800 shadow rounded-lg p-2 flex flex-col">
+<div class=" {cl} bg-stone-100 dark:bg-stone-800 shadow rounded-lg p-2 flex flex-col">
    <slot/> 
 </div>

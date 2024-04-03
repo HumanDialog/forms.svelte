@@ -43,7 +43,7 @@
         if(operation.menu)
             show_menu(rect, operation.menu)
         else if(operation.toolbar)
-            show_floating_toolbar(rect, operation.toolbar)
+            show_floating_toolbar(rect, operation.toolbar, operation.props ?? {} )
         else if(operation.grid)
             show_grid_menu(rect, operation.grid)
 
@@ -57,7 +57,7 @@
     }
 </script>
 
-<div    class="no-print bg-slate-100 w-full h-10 dark:bg-slate-800 overflow-x-clip overflow-y-hidden py-0 text-xs flex flex-row"
+<div    class="no-print w-full h-10 bg-stone-600 dark:bg-stone-950 overflow-x-clip overflow-y-hidden py-0 text-xs flex flex-row"
         class:flex-row-reverse={mobile}>
     
     {#each operations as operation}
@@ -65,12 +65,10 @@
 
             <button type="button" 
                     class="py-2.5 px-5 
-                    text-xs font-medium text-gray-900 dark:text-gray-400 dark:hover:text-white 
-                    bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 active:bg-slate-300 dark:active:bg-gray-600
-                    border-gray-200 focus:outline-none dark:border-gray-600
+                    text-xs font-medium text-stone-100 dark:text-stone-300 dark:hover:text-white 
+                    hover:bg-stone-700 dark:hover:bg-stone-800 active:bg-stone-300 dark:active:bg-stone-600
+                    border-stone-200 focus:outline-none dark:border-stone-600
                     inline-flex items-center"
-                    class:border-r={!mobile}
-                    class:border-l={mobile}
                     on:click={(e) => {on_click(e, operation)}}
                     on:mousedown={mousedown}>
                 {#if operation.icon}

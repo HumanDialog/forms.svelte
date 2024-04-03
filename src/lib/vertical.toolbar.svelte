@@ -171,7 +171,7 @@
         {#each tabs as tab}
             {@const is_selected = $main_sidebar_visible_store == tab.key}
             <button
-                class="h-16 px-0 flex justify-center items-center w-full text-slate-300 hover:text-slate-100"
+                class="h-16 px-0 flex justify-center items-center w-full text-stone-300 hover:text-stone-100"
                 class:bg-orange-500={is_selected}
                 on:click={()=> (on_tab_clicked(tab.key))}>
                 
@@ -185,7 +185,7 @@
         <div class="no-print mt-auto h-auto items-center w-full">
             
             <button
-                class="h-16 px-0 flex justify-center items-center w-full text-slate-300 hover:text-slate-100"
+                class="h-16 px-0 flex justify-center items-center w-full text-stone-300 hover:text-stone-100"
                 on:click={show_options}>
 
                 <Icon size={4} component={FaCog} />

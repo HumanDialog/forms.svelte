@@ -76,8 +76,8 @@
     if(compact)
         appearance_class = "";
     else
-        appearance_class = `bg-gray-50 border border-gray-300 rounded-md 
-                            dark:bg-gray-700 dark:border-gray-600 
+        appearance_class = `bg-stone-50 border border-stone-300 rounded-md 
+                            dark:bg-stone-700 dark:border-stone-600 
                             px-2.5`;
     
     let  last_tick = -1;

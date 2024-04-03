@@ -19,7 +19,7 @@
     }
  </script>    
  
- <div class="{cl} mt-4 gap-4 bg-slate-500">
+ <div class="{cl} mt-4 gap-4 bg-stone-500">
      <slot/>
  </div>
  

@@ -161,12 +161,12 @@
             on:click={handle_select} 
             on:contextmenu={handle_select}>
 
-        <div class="bg-white dark:bg-gray-900 dark:text-white      min-h-screen h-screen">    
+        <div class="bg-white dark:bg-stone-900 dark:text-white      min-h-screen h-screen">    
             <!--###########################################################-->
             <!--##  HORIZONTAL TOOLBAR (FOR PHONES)  ######################-->
             <!--###########################################################-->
-            <header class="fixed sm:hidden w-screen top-0 h-[50px] sm:h-[40px] z-20  overflow-auto shadow  shadow-slate-900/5 dark:shadow-none" >
-                    <div class=" flex flex-row justify-between  h-full  bg-slate-900   text-gray-100 ">
+            <header class="fixed sm:hidden w-screen top-0 h-[50px] sm:h-[40px] z-20  overflow-auto shadow  shadow-stone-900/5 dark:shadow-none" >
+                    <div class=" flex flex-row justify-between  h-full  bg-stone-950   text-stone-100 ">
                         <HorizontalToolbar app_config={layout}/>
                     <div>
             </header>        
@@ -177,7 +177,7 @@
             <!--##  VERTICAL TOOLBAR                 ##################-->
             <!--#######################################################-->
             <div  class="hidden sm:block fixed left-0 top-0 w-[50px] sm:w-[40px] h-screen z-20 inset-0   overflow-hidden">
-                <div class="sticky top-0 flex h-full w-10 bg-slate-900 flex-col items-center text-gray-100 shadow">
+                <div class="sticky top-0 flex h-full w-10 bg-stone-800 dark:bg-stone-950 flex-col items-center text-stone-100 shadow">
                     <VerticalToolbar app_config={layout}/>
                 </div>    
             </div>
@@ -198,7 +198,7 @@
                             {sidebar_small_width} sm:w-[320px] 
                             z-20 overflow-x-hidden">
 
-                <div class=" bg-slate-50 w-full h-full dark:bg-slate-800 overflow-y-auto py-0 px-0">
+                <div class=" bg-stone-50 w-full h-full dark:bg-stone-800 overflow-y-auto py-0 px-0">
                     <Configurable config={layout.sidebar[visible_sidebar]}>
                         <div slot='alt'></div>
                     </Configurable>

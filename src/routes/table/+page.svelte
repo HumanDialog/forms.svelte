@@ -134,7 +134,7 @@
 </div>
 
 
-<Page   self={current_list} cl="!bg-white dark:!bg-slate-900 w-full h-full flex flex-col overflow-y-hidden overflow-x-hidden py-1 px-1 border-0" 
+<Page   self={current_list} cl="!bg-white dark:!bg-stone-900 w-full h-full flex flex-col overflow-y-hidden overflow-x-hidden py-1 px-1 border-0" 
         toolbar_operations={page_operations}
         clears_context='sel'>
     
@@ -149,7 +149,7 @@
 
         <TableColumn field='Name' />
         <TableColumn />
-            <div slot='c2' class="bg-slate-100">
+            <div slot='c2' class="bg-stone-100">
                 ala
             </div>
 

@@ -119,7 +119,7 @@
                                 changed={(key,name)=>{on_combo_changed(key, name, prop)}}
                                 s='xs'/>
                     {:else if prop.type == rList_property_type.Static}
-                        <span class="dark:text-white text-gray-400 truncate px-2.5 bg-slate-900/10 dark:bg-slate-100/10 rounded-lg">
+                        <span class="dark:text-white text-stone-400 truncate px-2.5 bg-stone-900/10 dark:bg-stone-100/10 rounded-lg">
                             {item[prop.a]}
                         </span>
                     {/if}

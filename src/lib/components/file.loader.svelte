@@ -113,5 +113,5 @@
 {/if}
 
 {#if state!=Empty}
-    <span class="h-4 w-4 text-slate-700"><FaTimes on:click={clear}/></span>
+    <span class="h-4 w-4 text-stone-700"><FaTimes on:click={clear}/></span>
 {/if}

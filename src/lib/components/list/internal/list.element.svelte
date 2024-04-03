@@ -39,7 +39,7 @@
     $: is_row_selected = selected(item, $context_items_store)
 
     $: selected_class = is_row_selected ? "!border-blue-300" : "";
-    $: focused_class = is_row_active ? "bg-gray-200 dark:bg-gray-700" : "";
+    $: focused_class = is_row_active ? "bg-stone-200 dark:bg-stone-700" : "";
     $: is_link_like = is_row_selected && (!!definition.title_href || !!definition.title_href_func)
 
     if(!typename)
@@ -272,7 +272,7 @@
 {#if item}
 {@const element_title = item[title]}
 
-<section    class="mt-3 flex flex-row my-0  w-full text-sm text-slate-700 dark:text-slate-300 cursor-default rounded-md border border-transparent {selected_class} {focused_class}"
+<section    class="mt-3 flex flex-row my-0  w-full text-sm text-stone-700 dark:text-stone-300 cursor-default rounded-md border border-transparent {selected_class} {focused_class}"
             on:contextmenu={on_contextmenu}
             role="menu"
             tabindex="-1">

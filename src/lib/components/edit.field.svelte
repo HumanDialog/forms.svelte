@@ -175,15 +175,15 @@
     <slot></slot>
     
     {#if input_box_is_active}
-        <input bind:this={inputbox} bind:value={value} on:keydown={on_key_down} on:blur={on_blur} class="w-full border-0 bg-transparent text-gray-900 dark:text-gray-300"/>
+        <input bind:this={inputbox} bind:value={value} on:keydown={on_key_down} on:blur={on_blur} class="w-full border-0 bg-transparent text-stone-900 dark:text-stone-300"/>
     {:else if value}
         {#if is_table_component}
             <span>{value}</span>
         {:else}
-            <span class="w-full text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300 cursor-text">{value}</span>
+            <span class="w-full text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-300 cursor-text">{value}</span>
         {/if}
     {:else if !is_table_component}
-        <span class="w-full text-gray-500 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-400 cursor-text">{placeholder}</span>
+        <span class="w-full text-stone-500 hover:text-stone-700 dark:text-stone-500 dark:hover:text-stone-400 cursor-text">{placeholder}</span>
     {/if}
 </div>
 

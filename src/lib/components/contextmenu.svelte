@@ -283,7 +283,7 @@
 </script>
 
 <div id="__hd_svelte_contextmenu" 
-    class=" bg-white dark:bg-gray-700 text-slate-600 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-900 shadow-md 
+    class=" bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-900 shadow-md 
             z-30 fixed min-w-[{min_width_px}px] w-max" 
     style={`left:${x}px; top:${y}px; display:${display}`}
     bind:this={menu_root}>
@@ -291,14 +291,14 @@
     {#each operations as operation, index}
         {@const is_separator = operation.separator}
         {#if is_separator}
-            <hr class="my-1 mx-0 border-1 dark:border-slate-900">
+            <hr class="my-1 mx-0 border-1 dark:border-stone-900">
         {:else}
             {@const mobile = is_device_smaller_than("sm")}
             {@const icon_placeholder_without_desc = mobile ? 12 : 10}
             {@const icon_placeholder_with_desc = mobile ? 14 : 12}
             {@const icon_placeholder_size = operation.description ? icon_placeholder_with_desc : icon_placeholder_without_desc}
             {@const menu_item_id = menu_items_id_prefix + index}
-            {@const active = focused_index == index ? 'bg-gray-200 dark:bg-gray-600' : ''}
+            {@const active = focused_index == index ? 'bg-stone-200 dark:bg-stone-600' : ''}
             {@const has_submenu = operation.menu !== undefined && operation.menu.length > 0}
             
             <button class="font-medium m-0 p-2 text-lg sm:text-sm w-full text-left flex flex-row cursor-context-menu {active} focus:outline-none"
@@ -319,12 +319,12 @@
                     <p>{operation.caption}</p>
                     {#if operation.description}
                         {@const shortcut_width_px = operation.shortcut ? 80 : 0}
-                        <p  class="text-sm font-normal text-slate-900 dark:text-gray-500 truncate inline-block"
+                        <p  class="text-sm font-normal text-stone-900 dark:text-stone-500 truncate inline-block"
                             style:max-width={`calc(${width_px-shortcut_width_px} - 3rem)`} >{operation.description}</p>
                     {/if}
                 </div>
                 {#if has_submenu}
-                    <p class="ms-auto pr-1 text-sm font-mono text-gray-500">&rarr;</p>
+                    <p class="ms-auto pr-1 text-sm font-mono text-stone-500">&rarr;</p>
                     <svelte:self bind:this={submenus[index]} menu_items_id_prefix={`${menu_item_id}_`} owner_menu_item={menu_items[index]}/>
                 {/if}
             </button>

@@ -198,7 +198,7 @@
 
 <div class="print flex flex-row w-full">
     <div class="flex-none left-0 flex h-12 sm:h-10">
-        <button class="w-12 sm:w-10 h-full flex justify-center items-center text-slate-300 hover:text-slate-100" on:click={toggle_navigator}>
+        <button class="w-12 sm:w-10 h-full flex justify-center items-center text-stone-300 hover:text-stone-100" on:click={toggle_navigator}>
             <Icon class="w-8 sm:w-6 h-8 sm:h-6" component={icon}/>
         </button>
     </div>
@@ -210,7 +210,7 @@
 
     <div class="flex-none ml-auto flex h-12 sm:h-10">        
         <button
-            class="h-full w-12 sm:w-10 px-0 flex justify-center items-center   text-slate-300 hover:text-slate-100"
+            class="h-full w-12 sm:w-10 px-0 flex justify-center items-center   text-stone-300 hover:text-stone-100"
             on:click={show_options}>
 
             <Icon class="w-5 sm:w-4 h-5 sm:h-4" component={FaCog} />
@@ -221,7 +221,7 @@
 
 {#if tabs.length > 1 &&  $main_sidebar_visible_store != "*"}
     <div  class="print flex-none block fixed left-0 top-[40px] w-[40px] h-screen z-20 inset-0   overflow-hidden">
-        <div class="sticky top-0 flex h-full w-10 bg-slate-900 flex-col items-center text-gray-100 shadow">
+        <div class="sticky top-0 flex h-full w-10 bg-stone-900 flex-col items-center text-stone-100 shadow">
             <VerticalToolbar {app_config} mobile={true}/>
         </div>    
     </div>    

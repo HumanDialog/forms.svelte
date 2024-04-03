@@ -252,7 +252,7 @@
 
 {#if current_list}
     <Page   self={current_list} 
-            cl="!bg-white dark:!bg-slate-900 w-full h-full flex flex-col overflow-y-auto overflow-x-hidden py-1 px-1 border-0" 
+            cl="!bg-white dark:!bg-stone-900 w-full h-full flex flex-col overflow-y-auto overflow-x-hidden py-1 px-1 border-0" 
             toolbar_operations={page_operations}
             clears_context='props sel'
             title={current_list.Name}>
@@ -276,7 +276,7 @@
             <span slot="left" let:element>
                 <Icon component={element.Status == STATUS_CLOSED ? FaRegCheckCircle : FaRegCircle} 
                     on:click={(e) => finish_task(e, element)} 
-                    class="h-5 w-5 sm:w-4 sm:h-4 text-gray-500 dark:text-gray-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
+                    class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
             </span>
 
             

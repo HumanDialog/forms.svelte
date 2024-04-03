@@ -50,5 +50,5 @@
 }
 </script>
 
-<p class="{cs} text-gray-900 dark:text-white {$$restProps['class']}">{_label}</p>
+<p class="{cs} text-stone-900 dark:text-white {$$restProps['class']}">{_label}</p>
 

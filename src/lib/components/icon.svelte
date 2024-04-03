@@ -125,7 +125,7 @@
     {#if component != null}
         <svelte:component this={component} />
     {:else if txt}
-        <div   class="m-0 p-0 font-sans font-bold flex flex-col justify-center text-center w-full h-full text-slate-900"
+        <div   class="m-0 p-0 font-sans font-bold flex flex-col justify-center text-center w-full h-full text-stone-900"
                style:font-size={`${size/8}rem`}
                >
             <div>{txt}</div>

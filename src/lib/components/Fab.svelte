@@ -53,7 +53,7 @@
         if(operation.menu)
             show_menu(rect, operation.menu)
         else if(operation.toolbar)
-            show_floating_toolbar(rect, operation.toolbar)
+            show_floating_toolbar(rect, operation.toolbar, operation.props ?? {})
         else if(operation.grid)
             show_menu(rect, operation.grid)     // mobile screen too small
             //show_grid_menu(rect, operation.grid)
@@ -163,7 +163,7 @@
                                 on:click|stopPropagation={(e) => {on_click(e, operation)}}
                                 on:mousedown={mousedown}>
                                 <div>
-                                    <span class="block whitespace-nowrap text-sm mt-3 font-semibold text-white mr-3     select-none bg-slate-700 group-hover:bg-slate-800 px-1 shadow-lg rounded">{operation.caption}</span>
+                                    <span class="block whitespace-nowrap text-sm mt-3 font-semibold text-white mr-3     select-none bg-stone-700 group-hover:bg-stone-800 px-1 shadow-lg rounded">{operation.caption}</span>
                                 </div>
                                 <button class=" bg-transparent
                                                 mx-0 mb-4 w-[55px] h-[55px] 

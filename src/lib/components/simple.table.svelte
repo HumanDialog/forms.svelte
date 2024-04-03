@@ -66,17 +66,17 @@
 </script>
 
 
-    <table class="min-w-full h-auto divide-gray-200">
-        <thead class="bg-gray-50 sticky">
+    <table class="min-w-full h-auto divide-stone-200">
+        <thead class="bg-stone-50 sticky">
             <tr>
                 {#if headers != null}
                     {#each headers as header}
-                        <th scope="col" class="py-1 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th scope="col" class="py-1 px-4 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
                             {header}
                         </th>
                     {/each}    
                 {:else}
-                    <th scope="col" class="py-1 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" class="py-1 px-4 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
                         No headers... 
                     </th>
                 {/if}
@@ -89,13 +89,13 @@
                     {#if item == selected_item}
                     <tr >
                         {#each fields as field}
-                            <td class="px-4 py-1 bg-slate-100 whitespace-nowrap text-sm font-normal text-gray-900">{item[field]}</td>
+                            <td class="px-4 py-1 bg-stone-100 whitespace-nowrap text-sm font-normal text-stone-900">{item[field]}</td>
                         {/each}
                     </tr>
                     {:else}
                     <tr on:click={select_item(item, cinfo)}>
                         {#each fields as field}
-                            <td class="px-4 py-1 whitespace-nowrap text-sm font-normal text-gray-900">{item[field]}</td>
+                            <td class="px-4 py-1 whitespace-nowrap text-sm font-normal text-stone-900">{item[field]}</td>
                         {/each}
                     </tr>
                     {/if}
