@@ -122,11 +122,12 @@
 
     async function addTask(newTaskAttribs)
     {
-        let newTask = await reef.post(`/app/Lists/${currentList.Id}/Tasks/new`, newTaskAttribs)
-        if(!newTask)
+        let res = await reef.post(`/app/Lists/${currentList.Id}/Tasks/new`, newTaskAttribs)
+        if(!res)
             return null;
 
-        return newTask.Task[0];
+        let newTask = res.Task[0];
+        await reloadTasks(newTask.Id)
     }
 
     let pageOperations = [

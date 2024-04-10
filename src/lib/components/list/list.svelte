@@ -55,8 +55,6 @@
     let activate_after_dom_update :object | null =null;
 
     let inserter;
-    let item_key :string = '';
-    let item_type: string = '';
 
     clearActiveItem('props')
 
@@ -65,7 +63,6 @@
 
     function setup(...args)
     {
-        //console.log('list setup', objects)
         last_tick = $data_tick_store            
         item = self ?? $contextItemsStore[ctx];
         
@@ -81,24 +78,20 @@
         if(items == undefined)
             items = [];
 
-        if(items.length > 0)
-        {
-            let first_element = items[0];
-            let keys = Object.keys(first_element);
-            if(key)
-                item_key = key;
-            else if(keys.includes('Id'))
-                item_key = 'Id';
-            else if(keys.includes('$ref'))
-                item_key = '$ref';
-            else if(keys.length > 0)
-                item_key = keys[0];
-            else
-                item_key = '';
-        }
-
         if(!typename)
             typename = $contextTypesStore[ctx];
+    }
+
+    function getItemKey(item: object): string | number
+    {
+        if(key)
+            return item[key];
+        else if(item.Id)
+            return item.Id;
+        else if(item.$ref)
+            return item.$ref;
+        else 
+            return 0;
     }
 
     afterUpdate(() => {
@@ -108,7 +101,8 @@
             activate_after_dom_update = null;
             if(row_to_activate_idx >= 0)
             {
-                rows[row_to_activate_idx].activate();
+                let row = rows[row_to_activate_idx];
+                row?.activate();
             }
         }
     })
@@ -123,6 +117,7 @@
         let currentSelectedItem = getActive('props');
         let selectElementId = 0;
         let altSelectElementId = 0;
+
         switch(selectElement)
         {
         case CLEAR_SELECTION:
@@ -135,7 +130,7 @@
             if(currentSelectedItem)
             {
                 const selectedItemIdx = items?.findIndex(e => e == currentSelectedItem)
-                if(selectedItemIdx && selectedItemIdx > 0)
+                if(selectedItemIdx!= undefined && selectedItemIdx > 0)
                     selectElementId = items[selectedItemIdx-1].Id ?? 0;
             }
             break;
@@ -144,7 +139,7 @@
             if(currentSelectedItem)
             {
                 const selectedItemIdx = items?.findIndex(e => e == currentSelectedItem)
-                if(selectedItemIdx && selectedItemIdx < items.length-1)
+                if(selectedItemIdx != undefined && selectedItemIdx >= 0 && selectedItemIdx < items.length-1)
                     selectElementId = items[selectedItemIdx+1].Id ?? 0;
             }
             break;
@@ -155,7 +150,7 @@
                 if(currentSelectedItem)
                 {
                     const selectedItemIdx = items?.findIndex(e => e == currentSelectedItem)
-                    if(selectedItemIdx && selectedItemIdx < items.length-1)
+                    if(selectedItemIdx != undefined && selectedItemIdx >= 0 && selectedItemIdx < items.length-1)
                         altSelectElementId = items[selectedItemIdx+1].Id ?? 0;
                 }
                 
@@ -300,8 +295,6 @@
 
     function reorderElements(items: object[], from :object | null = null)
     {
-        console.log(from)
-
         let fromIdx;
         let fromOrder;
         if(from)
@@ -315,18 +308,14 @@
             fromIdx = 0;
         }
 
-        console.log('reorder: ', fromOrder, fromIdx, items)
-
         let order = fromOrder;
         for(let i=fromIdx; i<items.length; i++)
         {
             let el = items[i];
-            console.log('reoder el: ', el, order, i)
-
+            
             el[orderAttrib] = order;
             informModification(el, orderAttrib)
             
-
             order += ORDER_STEP;
         }
 
@@ -371,18 +360,38 @@
                 newElement[orderAttrib] = MIN_ORDER;
         }
 
+        await definition.onInsert(newElement);
+        return;
         let insertedElement = await definition.onInsert(newElement);
         if(!insertedElement)
             return;
 
         if(after)
-            insertAfter(items, after, insertedElement)
+            items = insertAfter(items, after, insertedElement)
         else
-            items.push(insertedElement)
+            items = [...items, insertedElement];
 
+       
+        /*if(objects)
+        {
+            if(after)
+                insertAfter(objects, after, insertedElement)
+            else
+                objects.push(insertedElement);
+        }
+        else if(item && a )
+        {
+            item = self ?? $contextItemsStore[ctx];
+            if(after)
+                insertAfter(item[a], after, insertedElement)
+            else
+                item[a].push(insertedElement);
+        }
+        */
+        
         activate_after_dom_update = insertedElement;
         
-        rereder();
+        //rereder();
     }
 
 </script>
@@ -397,8 +406,8 @@
 
 <!--div class="w-full h-full overflow-y-auto"-->
 
-{#if items && items.length > 0 && !!item_key }
-    {#each items as element, i (element[item_key])}
+{#if items && items.length > 0 }
+    {#each items as element, i (getItemKey(element))}
         
         <List_element   item={element} 
                         {toolbarOperations}
