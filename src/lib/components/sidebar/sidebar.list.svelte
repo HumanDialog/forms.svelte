@@ -80,7 +80,9 @@
 </script>
 
 {#each objects as item (item.Id)}
-    <slot {item}/>
+    {#key item}             <!-- Forces to fully rerender when item changed to fire use: callbacks again -->
+        <slot {item}/>
+    {/key}
 {/each }
 
 {#if inserter}
