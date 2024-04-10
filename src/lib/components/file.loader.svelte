@@ -63,7 +63,7 @@
         data = null;
     }
 
-    export function get_name() :string
+    export function getName() :string
     {
         if(file)
             return file.name;
@@ -71,7 +71,7 @@
             return "";
     }
 
-    export function get_size() :number
+    export function getSize() :number
     {
         if(file)
             return file.size;
@@ -79,7 +79,7 @@
             return -1;
     }
 
-    export function get_type() :string
+    export function getType() :string
     {
         if(file)
             return file.type;
@@ -87,12 +87,12 @@
             return "";
     }
 
-    export function get_data() :ArrayBuffer
+    export function getData() :ArrayBuffer
     {
         return data;
     }
 
-    export function is_selected() :boolean
+    export function isSelected() :boolean
     {
         if((state == Success) && (data != null))
             return true;
@@ -113,5 +113,5 @@
 {/if}
 
 {#if state!=Empty}
-    <span class="h-4 w-4 text-slate-700"><FaTimes on:click={clear}/></span>
+    <span class="h-4 w-4 text-stone-700"><FaTimes on:click={clear}/></span>
 {/if}

@@ -5,7 +5,7 @@
 
     export let name     :string;
     export let a        :string = '';
-    export let on_select = undefined;
+    export let onSelect = undefined;
     export let association :boolean = false;
     
     let definition :rList_definition = getContext("rList-definition");
@@ -17,7 +17,7 @@
     if(!combo_property.a)
         combo_property.a = combo_property.name;
 
-    combo_property.on_select = on_select
+    combo_property.onSelect = onSelect
     combo_property.association = association;
 
     definition.properties.push(combo_property)

@@ -1,0 +1,95 @@
+<script lang="ts">
+    import Icon from '../icon.svelte'
+    import Edit from '../edit.field.svelte'
+    import {FaPlus} from 'svelte-icons/fa'
+	import { getPrev, getNext, swapElements, getLast } from '$lib/utils';
+	import { informModification, pushChanges } from '$lib/updates';
+
+    export let objects: object[];
+    export let orderAttrib: string | undefined = undefined;
+    
+    export let inserter: Function | undefined = undefined;
+    export let inserterPlaceholder = 'New'
+
+    export const ORDER_STEP = 64;
+    export const MIN_ORDER = 0;
+
+    export function reload(_objects: object[])
+    {
+        objects = _objects;
+    }
+
+    export function moveUp(element: object)
+    {
+        if(!orderAttrib)
+            return;
+
+        let prev = getPrev(objects, element)
+        if(prev)
+        {
+            objects = swapElements(objects, element, prev)
+            
+            const tmp = element[orderAttrib]
+            element[orderAttrib] = prev[orderAttrib]
+            prev[orderAttrib] = tmp;
+
+            informModification(element, orderAttrib)
+            informModification(prev, orderAttrib)
+            pushChanges();
+        }
+    }
+
+    export function moveDown(element: object)
+    {
+        if(!orderAttrib)
+            return;
+
+        let next = getNext(objects, element)
+        if(next)
+        {
+            objects = swapElements(objects, element, next);
+
+            const tmp = element[orderAttrib]
+            element[orderAttrib] = next[orderAttrib]
+            next[orderAttrib] = tmp;
+
+            informModification(element, orderAttrib)
+            informModification(next, orderAttrib)
+            pushChanges();
+        }
+    }
+
+    function onNewElement(text: string)
+    {
+        if(orderAttrib)
+        {
+            let newElementOrder;
+
+            const last = getLast(objects);
+            if(last)
+                newElementOrder = last[orderAttrib] + ORDER_STEP;
+            else
+                newElementOrder = MIN_ORDER;
+            
+            inserter(text, newElementOrder)
+        }
+        else
+            inserter(text)
+    }
+
+</script>
+
+{#each objects as item (item.Id)}
+    {#key item}             <!-- Forces to fully rerender when item changed to fire use: callbacks again -->
+        <slot {item}/>
+    {/key}
+{/each }
+
+{#if inserter}
+    <Edit   class="p-3 sm:p-2 text-lg sm:text-base font-normal text-stone-500 rounded-lg dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700" 
+            onEnter={onNewElement} 
+            placeholder={inserterPlaceholder} 
+            inserter={true}>
+        <Icon size={5} component={FaPlus} class="mr-3"/>
+    </Edit>
+{/if}

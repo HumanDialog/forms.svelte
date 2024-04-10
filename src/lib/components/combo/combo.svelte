@@ -1,7 +1,7 @@
 <script lang="ts">
-    import {data_tick_store, context_items_store, context_types_store} from '../../stores.js' 
-    import {inform_modification, push_changes} from '../../updates.js'
-    import {parse_width_directive,should_be_comapact} from '../../utils.js'
+    import {data_tick_store, contextItemsStore, contextTypesStore} from '../../stores.js' 
+    import {informModification, pushChanges} from '../../updates.js'
+    import {parseWidthDirective,shouldBeComapact} from '../../utils.js'
     import {afterUpdate, getContext, onMount, setContext} from 'svelte';
     import {rCombo_definition, rCombo_item, cached_sources} from './combo'
     import FaChevronDown from 'svelte-icons/fa/FaChevronDown.svelte'
@@ -11,24 +11,28 @@
     export let label = ''
     export let self = null;
     export let a = '';
-    export let is_association = false;
+    export let isAssociation = false;
     export let context = ""
     export let typename = '';
-    export let choice_callback = '';
-    export let on_select = undefined;
+    export let choiceCallback = '';
+    export let onSelect = undefined;
     export let definition :rCombo_definition | null = null;
     export let changed = undefined;
+    export let onNewItemCreated = undefined;
 
     export let icon :boolean = false;
 
-    export let placeholder = 'Choose wisely...';
+    export let placeholder = '';
 
     export  let s = 'sm'
     export  let c = ''
 
     export let compact :boolean = false;
-    export let in_context :string = 'sel'   // in compact mode
+    export let inContext :string = 'sel'   // in compact mode
     export let cached :boolean = false;
+    export let filtered: boolean = false;
+    
+    export let pushChangesImmediately: boolean = true;
     
 
     let is_compact :boolean = getContext('rIs-table-component') || compact;
@@ -54,8 +58,9 @@
     let label_mb = 'mb-1' //
     let input_pt = 'pt-0.5'
     let input_pb = 'pb-1'
-    let font_size = 'text-sm'
+    let font_size = 'text-lg sm:text-sm'
     let line_h = 'h-5'
+    let chevron_mt = 'mt-2 sm:mt-0'
     
     switch (s)
     {
@@ -63,37 +68,39 @@
             label_mb = 'mb-2';
             input_pt = 'pt-2.5'
             input_pb = 'pb-2.5';     
-            font_size = 'text-sm'      
-            line_h = 'h-5'
+            font_size = 'text-lg sm:text-sm'      
+            line_h = 'h-7 sm:h-5'
+            chevron_mt = 'mt-2 sm:mt-1'
             break;
 
         case 'xs':
             label_mb = 'mb-0.5';
             input_pt = 'pt-0.5'
             input_pb = 'pb-0.5';
-            font_size = 'text-xs'           
-            line_h = 'h-4'
+            font_size = 'text-base sm:text-xs'           
+            line_h = 'h-6 sm:h-4'
+            chevron_mt = ''
             break;
     }
 
-    let background_class = is_compact && !icon ? "bg-slate-900/10 dark:bg-slate-100/10 rounded-lg" : ""
+    let background_class = is_compact && !icon ? "" : ""; //bg-stone-900/10 dark:bg-stone-100/10 rounded-lg" : ""
 
     let appearance_class;
     if(is_compact)
         appearance_class = `${font_size}`;
     else
-        appearance_class = `   bg-gray-50 border border-gray-300 text-gray-900 ${font_size} rounded-lg 
-                                focus:ring-primary-600 focus:border-primary-600 block w-full  ${input_pb} ${input_pt} px-2.5 dark:bg-gray-700 
-                                dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500`;
+        appearance_class = `   bg-stone-50 border border-stone-300 text-stone-900 ${font_size} rounded-lg 
+                                focus:ring-primary-600 focus:border-primary-600 block w-full  ${input_pb} ${input_pt} px-2.5 dark:bg-stone-700 
+                                dark:border-stone-600 dark:placeholder-stone-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500`;
 
    
-    let cs =  c ? parse_width_directive(c) : 'col-span-1';
+    let cs =  c ? parseWidthDirective(c) : 'col-span-1';
     let ctx = context ? context : getContext('ctx');
     let can_be_activated :boolean  =true;
     
     let  last_tick = -1    
 
-    $: setup($data_tick_store, $context_items_store);
+    $: setup($data_tick_store, $contextItemsStore);
 
 
     function setup(...args)
@@ -102,10 +109,10 @@
         //    return;
 
         last_tick = $data_tick_store;
-        item = self ?? $context_items_store[ctx];    
+        item = self ?? $contextItemsStore[ctx];    
 
         if(!typename)
-            typename = $context_types_store[ctx];
+            typename = $contextTypesStore[ctx];
 
         //if(item && a)    
         //    val = item[a]
@@ -119,10 +126,10 @@
         {
             can_be_activated = false;
 
-            let contexts = in_context.split(' ');
+            let contexts = inContext.split(' ');
             contexts.forEach(ctx => 
             {
-                if($context_items_store[ctx] == item)
+                if($contextItemsStore[ctx] == item)
                     can_be_activated = true;
             } )
         }
@@ -132,8 +139,8 @@
 
     onMount( () => {
 
-        if(definition.on_collect)
-            definition.on_collect().then( (source) => source_fetched(source)  )
+        if(definition.onCollect)
+            definition.onCollect().then( (source) => source_fetched(source)  )
         else if(definition.collection_expr)
             fetch_source_from_association().then((source) => source_fetched(source) )
         else if(definition.collection_path)
@@ -177,12 +184,14 @@
         if(!can_be_activated)
             return;
         
+        
         if(!combo)
             return;
-
+ 
         if(is_dropdown_open)
             return;
 
+         
         if(event)
         {
             event.stopPropagation();
@@ -248,6 +257,7 @@
                 dropdown_position += ' transform: translate(0, -100%);'
         }
 
+        
         /*console.log('dropdown_position', dropdown_position, rect, client_rect)
         console.log('preferred_palette_height', preferred_palette_height)
         console.log('bottom_space', bottom_space)
@@ -256,26 +266,27 @@
 
         is_dropdown_open = true;
         
-        if(!textbox)
-            return;
+        if(filtered)
+        {
+            if(!textbox)
+                return;
 
-        textbox.innerHTML = '';
-        tick_request_internal = tick_request_internal + 1;
+            textbox.innerHTML = '';
+            tick_request_internal = tick_request_internal + 1;
 
-        if(!mutation_observer)
-            mutation_observer = new MutationObserver( () => { on_input_change(); })
+            if(!mutation_observer)
+                mutation_observer = new MutationObserver( () => { on_input_change(); })
 
-        mutation_observer.observe(   textbox,  {
-                                    childList: true,
-                                    attributes: true,
-                                    characterData: true,
-                                    subtree: true } );
+            mutation_observer.observe(   textbox,  {
+                                        childList: true,
+                                        attributes: true,
+                                        characterData: true,
+                                        subtree: true } );
+        }
 
         
-        
-                                    
-        filtered_source = definition.source.map( e => e);
-        highlighted_option = filtered_source.length > 0 ? filtered_source[0] : null;
+        //filtered_source = definition.source.map( e => e);
+        //highlighted_option = filtered_source.length > 0 ? filtered_source[0] : null;
     }
 
     export function hide()
@@ -351,7 +362,7 @@
             if(found)
                 return found.Name ?? found.Key;
             else
-                return !is_compact ? placeholder : '';
+                return placeholder;
         }
         else
             return textbox.innerHTML;
@@ -362,16 +373,19 @@
         //console.log('on_choose')
         hide();
 
-        if(on_select)
+        if(onSelect)
         {
-            await on_select(item, itm.Key, itm.Name);
+            if(itm == new_item_option)
+                await onNewItemCreated(itm.Key, itm.Name);
+            else
+                await onSelect(item, itm.Key, itm.Name);
             tick_request_internal = tick_request_internal + 1;
  }
         else
         {
-            if( is_association )
+            if( isAssociation )
             {
-                if(choice_callback)
+                if(choiceCallback)
                 {
                     let body = {
                         choice :  itm.Key
@@ -379,9 +393,9 @@
 
                     let path :string;
                     if(item.$ref)
-                        path = `${item.$ref}/${choice_callback}`;
+                        path = `${item.$ref}/${choiceCallback}`;
                     else
-                        path = `${typename}/${item.Id}/${choice_callback}`;
+                        path = `${typename}/${item.Id}/${choiceCallback}`;
 
                     let fields = calc_path_fields_param();
                     if(fields)
@@ -428,13 +442,13 @@
             }
             else    // or simple property
             {
-                if(choice_callback)
+                if(choiceCallback)
                 {
                     let path :string;
                     if(item.$ref)
-                        path = `/${item.$ref}/${choice_callback}`;
+                        path = `/${item.$ref}/${choiceCallback}`;
                     else
-                        path = `/${typename}/${item.Id}/${choice_callback}`;
+                        path = `/${typename}/${item.Id}/${choiceCallback}`;
 
                     let fields = calc_path_fields_param();
                     if(fields)
@@ -456,8 +470,10 @@
 
                     if(item && a && typename)
                     {
-                        inform_modification(item, a, typename);
-                        push_changes();
+                        informModification(item, a, typename);
+                        
+                        if(pushChangesImmediately)
+                            pushChanges();
                     }
                 }
             }
@@ -531,17 +547,32 @@
         highlighted_option = filtered_source.length > 0 ? filtered_source[0] : null;
     }
     
+    let new_item_option: rCombo_item
+
     function get_filtered_source() :rCombo_item[]
     {
-        if(!textbox)
+        if(!textbox || !filtered)
             return definition.source;
         else if(textbox.innerHTML)
         {
-            return definition.source.filter( e =>
+            let result = definition.source.filter( e =>
             {
                 return  (e.Name && e.Name.toLowerCase().includes( textbox.innerHTML.toLowerCase())) ||
                         (e.Key  && e.Key.toString().toLowerCase().includes(textbox.innerHTML.toLowerCase()));
             });
+
+            if(onNewItemCreated)
+            {
+                if(!new_item_option)
+                    new_item_option = new rCombo_item;
+                let new_name :string = textbox.innerHTML
+                new_item_option.Key = new_name;
+                new_item_option.Name = `Create '${new_name}'`
+
+                result = [new_item_option, ...result];
+            }
+
+            return result;
         }
         else
             return definition.source;
@@ -686,6 +717,9 @@
             definition.source.push(el);
         })
 
+        filtered_source = definition.source.map( e => e);
+        highlighted_option = filtered_source.length > 0 ? filtered_source[0] : null;
+
     }
 
     function setup_view(...args)
@@ -727,7 +761,7 @@
     on:focusout={on_focus_out}
     bind:this={root_element}>
     {#if !is_compact}
-        <label for="name" class="block {label_mb} text-xs font-small text-gray-900 dark:text-white">{label}</label>
+        <label for="name" class="block {label_mb} text-xs font-small text-stone-900 dark:text-white">{label}</label>
     {/if}
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div    bind:this={combo}    
@@ -749,23 +783,26 @@
 
             
             <p  bind:this={textbox}
-                class="dark:text-white {line_h} truncate px-2.5 {background_class}"
+                class="dark:text-stone-300 {line_h} truncate pl-0 pr-2.5 {background_class} min-w-[2.5rem]"
                 class:ml-2={icon}
-                class:text-gray-400={ (!is_dropdown_open) && (!sel_item)}
-                class:text-gray-700={ is_dropdown_open || sel_item }
+                class:text-stone-400={ (!is_dropdown_open) && (!sel_item)}
+                class:text-stone-700={ is_dropdown_open || sel_item }
                 class:w-10={!combo_text}
-                contenteditable={is_dropdown_open}
-                on:keydown={on_keydown}>
+                contenteditable={is_dropdown_open && filtered}
+                on:keydown={on_keydown}
+                tabindex="0">
                 {combo_text}</p>
         </div>
         
-        {#if can_be_activated && !is_compact }
-            <Icon size={3} component={FaChevronDown} class="flex-none text-gray-700 dark:text-gray-200"/>
+        {#if can_be_activated }
+            <div class="w-3 h-3 no-print flex-none text-stone-700 dark:text-stone-300 {chevron_mt}">
+                <FaChevronDown/>
+            </div>
         {/if}
     </div>
 
     <div    hidden={!is_dropdown_open} 
-            class="{cs} bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 shadow-md overflow-y-auto cursor-pointer z-20"
+            class="{cs} bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md overflow-y-auto cursor-pointer z-30"
             style={dropdown_position}
             use:dropdown_action>
         <ul class="py-1">
@@ -775,10 +812,10 @@
                 {#if _filtered_source.length > 0}
                     {#each _filtered_source as item (item.Key)}
                         <!-- svelte-ignore a11y-click-events-have-key-events -->
-                        <li class="rounded p-2 flex flex-row items-center" 
-                            class:bg-gray-100={highlighted_option == item}
-                            class:dark:bg-gray-700={highlighted_option == item}
-                            class:dark:hover:bg-gray-700={highlighted_option == item}
+                        <li class="rounded p-2 flex flex-row items-center {font_size}" 
+                            class:bg-stone-100={highlighted_option == item}
+                            class:dark:bg-stone-700={highlighted_option == item}
+                            class:dark:hover:bg-stone-700={highlighted_option == item}
                             on:mousemove={() => on_mouse_move(item)}
                             on:click|preventDefault|stopPropagation={async () => await on_choose(item)}
                             tabindex="-1">
@@ -817,5 +854,12 @@
 [contenteditable]:focus {
     outline: 0px solid transparent;
 }
+
+@media print
+    {
+        .no-print, .no-print *{
+            display: none !important;
+        }
+    }
 
 </style>

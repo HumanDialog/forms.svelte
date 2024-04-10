@@ -61,7 +61,7 @@
         }
     ]
 
-    let menu_operations = [
+    let menuOperations = [
         {
             caption: 'Finish',
             icon: FaRegCheckCircle,
@@ -129,16 +129,16 @@
     <Operations/>
 </div>
 
-<div class="fixed right-3 bottom-0 mb-1 cursor-pointer z-20">
+<div class="fixed right-3 bottom-0 mb-1 cursor-pointer z-10">
     <Fab/>
 </div>
 
 
-<Page   self={current_list} cl="!bg-white dark:!bg-slate-900 w-full h-full flex flex-col overflow-y-hidden overflow-x-hidden py-1 px-1 border-0" 
-        toolbar_operations={page_operations}
+<Page   self={current_list} cl="!bg-white dark:!bg-stone-900 w-full h-full flex flex-col overflow-y-hidden overflow-x-hidden py-1 px-1 border-0" 
+        toolbarOperations={page_operations}
         clears_context='sel'>
     
-    <Table collection='Tasks' bind:this={table} toolbar_operations={task_operations} {menu_operations}>
+    <Table collection='Tasks' bind:this={table} toolbarOperations={task_operations} {menuOperations}>
         <TableColumn size={5}/>
             <Icon   slot='c0' 
                     let:item 
@@ -149,7 +149,7 @@
 
         <TableColumn field='Name' />
         <TableColumn />
-            <div slot='c2' class="bg-slate-100">
+            <div slot='c2' class="bg-stone-100">
                 ala
             </div>
 

@@ -1,12 +1,12 @@
 <script lang='ts'>
     import { afterUpdate, getContext } from "svelte";
-    import {data_tick_store, context_items_store, context_types_store} from '../stores.js' 
-    import {inform_modification, push_changes} from '../updates.js'
-    import { parse_width_directive, should_be_comapact} from '../utils.js'
+    import {data_tick_store, contextItemsStore, contextTypesStore} from '../stores.js' 
+    import {informModification, pushChanges} from '../updates.js'
+    import { parseWidthDirective, shouldBeComapact} from '../utils.js'
 
     export let value = '';
     export let placeholder = '';
-    export let on_enter = null;
+    export let onEnter = null;
 
     export let self = null;
     export let a = '';
@@ -16,6 +16,7 @@
     export let inserter = false;
     
     export let c=''
+    export let pushChangesImmediately: boolean = true;
 
     let is_table_component :boolean = getContext('rIs-table-component');
     
@@ -41,7 +42,7 @@
     });
 
     let ctx = context ? context : getContext('ctx');
-    let cs = parse_width_directive(c);
+    let cs = parseWidthDirective(c);
     
     let  last_tick = -1;    
     $: setup($data_tick_store)
@@ -52,10 +53,10 @@
             return;
 
         last_tick = data_tick_store            
-        item = self ?? $context_items_store[ctx];
+        item = self ?? $contextItemsStore[ctx];
             
         if(!typename)
-            typename = $context_types_store[ctx];
+            typename = $contextTypesStore[ctx];
 
         if(a)
         {
@@ -71,7 +72,7 @@
     {
         if( (!input_box_is_active) && 
             ( 
-                ( is_table_component &&  ($context_items_store['sel'] == self)) || 
+                ( is_table_component &&  ($contextItemsStore['sel'] == self)) || 
                 (!is_table_component)
             ))
         {
@@ -97,8 +98,8 @@
             try
             {
                 let success = false;
-                if(on_enter)
-                    success = on_enter(value);
+                if(onEnter)
+                    success = onEnter(value);
                 else
                 {
                     success = value_changed();
@@ -155,7 +156,7 @@
             item[a] = value
             
             if(typename)
-                inform_modification(item, a, typename);
+                informModification(item, a, typename);
         }
 
         return true;
@@ -164,7 +165,9 @@
     function accept_change()
     {
         $data_tick_store = $data_tick_store + 1;
-        push_changes();
+
+        if(pushChangesImmediately)
+                pushChanges();
             
     }
 
@@ -175,15 +178,15 @@
     <slot></slot>
     
     {#if input_box_is_active}
-        <input bind:this={inputbox} bind:value={value} on:keydown={on_key_down} on:blur={on_blur} class="w-full border-0 bg-transparent text-gray-900 dark:text-gray-300"/>
+        <input bind:this={inputbox} bind:value={value} on:keydown={on_key_down} on:blur={on_blur} class="w-full border-0 bg-transparent text-stone-900 dark:text-stone-300"/>
     {:else if value}
         {#if is_table_component}
             <span>{value}</span>
         {:else}
-            <span class="w-full text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300 cursor-text">{value}</span>
+            <span class="w-full text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-300 cursor-text">{value}</span>
         {/if}
     {:else if !is_table_component}
-        <span class="w-full text-gray-500 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-400 cursor-text">{placeholder}</span>
+        <span class="w-full text-stone-500 hover:text-stone-700 dark:text-stone-500 dark:hover:text-stone-400 cursor-text">{placeholder}</span>
     {/if}
 </div>
 

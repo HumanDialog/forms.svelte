@@ -9,15 +9,16 @@
             tools_visible_store, 
             bottom_bar_visible_store, 
             auto_hide_sidebar,
-            has_selected_item,
+            hasSelectedItem,
             dark_mode_store,
             data_tick_store,
             set_default_tools_visible,
-            set_dark_mode_default } from './stores.js'
+            set_dark_mode_default,
+            sidebar_left_pos } from './stores.js'
     
     import { AuthorizedView} from '@humandialog/auth.svelte'
-    import { handle_select, is_device_smaller_than } from './utils'
-	import { onMount } from 'svelte';
+    import { handleSelect, isDeviceSmallerThan } from './utils'
+	import { afterUpdate, onMount } from 'svelte';
     
     export let layout;
 
@@ -52,7 +53,7 @@
     const media_break_2xl = 1536; //px
     let test = "ala\n    ma\n\tkota"
 
-    $: is_small = is_device_smaller_than("sm")
+    $: is_small = isDeviceSmallerThan("sm")
     
     let main_side_panel_visibility = "hidden"
     let lg_content_area_horizontal_dim = ""
@@ -86,7 +87,7 @@
         }
         else
         {
-            main_side_panel_visibility = "lg:block"
+            main_side_panel_visibility = "fixed lg:block"
             lg_content_area_horizontal_dim = `lg:left-[360px] lg:w-[calc(100vw-360px)]`
         }      
     }
@@ -96,6 +97,7 @@
     let bottom_bar_visibility = "hidden"
     let bottom_bar_visible = false
     let lg_main_sidebar_height = ""
+    let fab_visibility = "hidden"
     let fab_bottom = "bottom-0"
                                 
     let content_top = ""
@@ -105,32 +107,30 @@
         bottom_bar_visible = $bottom_bar_visible_store
         let dts = $data_tick_store;
 
-        if(!has_selected_item())
+        if(!hasSelectedItem())
             bottom_bar_visible = false;
 
         if(tools_visible)
         {
-            tools_visibility = "fixed"
+            tools_visibility = "hidden sm:block sm:fixed"
+            fab_visibility = "fixed sm:hidden"
 
-            if(is_small)
-                content_top = `top-[80px] sm:top-[40px]`
-            else
-                content_top = `top-[80px] sm:top-[40px]`
+            content_top = 'top-[50px] sm:top-[40px]'
             
             if(bottom_bar_visible)
-                content_height = `h-[calc(100vh-320px)] sm:h-[calc(100vh-280px)]`    
+                content_height = `h-[calc(100vh-290px)] sm:h-[calc(100vh-280px)]`    
             else    
-                content_height = `h-[calc(100vh-80px)] sm:h-[calc(100vh-40px)]` 
+                content_height = `h-[calc(100vh-50px)] sm:h-[calc(100vh-40px)]` 
                
         }
         else
         {
             tools_visibility = "hidden"
-            content_top = `top-[40px] sm:top-0`
+            content_top = `top-[50px] sm:top-0`
             if(bottom_bar_visible)
-                content_height = `h-[calc(100vh-280px)] sm:h-[calc(100vh-240px)]`           
+                content_height = `h-[calc(100vh-290px)] sm:h-[calc(100vh-240px)]`           
             else
-                content_height = `h-[calc(100vh-40px)] sm:h-screen`
+                content_height = `h-[calc(100vh-50px)] sm:h-screen`
         }
         
         
@@ -149,11 +149,7 @@
         }
         
     }
-    
-    
-    
-   
-    
+
     //$: screen.width = innerWidth;  
 </script>
 
@@ -162,16 +158,16 @@
 <AuthorizedView>
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div    id="__hd_svelte_layout_root" class="{$dark_mode_store}"
-            on:click={handle_select} 
-            on:contextmenu={handle_select}>
+            on:click={handleSelect} 
+            on:contextmenu={handleSelect}>
 
-        <div class="bg-white dark:bg-gray-900 dark:text-white      min-h-screen h-screen">    
+        <div class="bg-white dark:bg-stone-900 dark:text-white      min-h-screen h-screen">    
             <!--###########################################################-->
             <!--##  HORIZONTAL TOOLBAR (FOR PHONES)  ######################-->
             <!--###########################################################-->
-            <header class="fixed sm:hidden w-screen top-0 h-[40px] z-50  overflow-auto shadow  shadow-slate-900/5 dark:shadow-none" >
-                    <div class=" flex flex-row justify-between    bg-slate-900   text-gray-100 ">
-                        <HorizontalToolbar app_config={layout}/>
+            <header class="fixed sm:hidden w-screen top-0 h-[50px] sm:h-[40px] z-20  overflow-auto shadow  shadow-stone-900/5 dark:shadow-none" >
+                    <div class=" flex flex-row justify-between  h-full  bg-stone-950   text-stone-100 ">
+                        <HorizontalToolbar appConfig={layout}/>
                     <div>
             </header>        
 
@@ -180,9 +176,9 @@
             <!--#######################################################-->
             <!--##  VERTICAL TOOLBAR                 ##################-->
             <!--#######################################################-->
-            <div  class="hidden sm:block fixed left-0 top-0 w-[40px] h-screen z-20 inset-0   overflow-hidden">
-                <div class="sticky top-0 flex h-full w-10 bg-slate-900 flex-col items-center text-gray-100 shadow">
-                    <VerticalToolbar app_config={layout}/>
+            <div  class="hidden sm:block fixed left-0 top-0 w-[50px] sm:w-[40px] h-screen z-20 inset-0   overflow-hidden">
+                <div class="sticky top-0 flex h-full w-10 bg-stone-800 dark:bg-stone-950 flex-col items-center text-stone-100 shadow">
+                    <VerticalToolbar appConfig={layout}/>
                 </div>    
             </div>
 
@@ -191,68 +187,85 @@
             <!--#######################################################-->
             <!--##  MAIN SIDE BAR                    ##################-->
             <!--#######################################################-->
-            <div  class="{main_side_panel_visibility} fixed 
-                            left-0  sm:left-[40px]
-                            top-[40px]  sm:top-0 
-                            h-[calc(100vh-40px)] sm:h-full {lg_main_sidebar_height}
-                            w-screen sm:w-[320px] 
-                            z-10 overflow-x-hidden">
+            {#if true}
+            {@const sidebar_left = $sidebar_left_pos==0 ? "left-0" : "left-[50px]"}
+            {@const sidebar_small_width = $sidebar_left_pos==0 ? "w-full" : "w-[calc(100vw-50px)]"}
 
-                <div class=" bg-slate-50 w-full h-full dark:bg-slate-800 overflow-y-auto py-4 px-0">
+            <div  class="{main_side_panel_visibility}  
+                            {sidebar_left}  sm:left-[40px]
+                            top-[50px]  sm:top-0 
+                            h-[calc(100vh-50px)] sm:h-full {lg_main_sidebar_height}
+                            {sidebar_small_width} sm:w-[320px] 
+                            z-20 overflow-x-hidden">
+
+                <div class=" bg-stone-50 w-full h-full dark:bg-stone-800 overflow-y-auto py-0 px-0">
                     <Configurable config={layout.sidebar[visible_sidebar]}>
                         <div slot='alt'></div>
                     </Configurable>
                 </div>
             </div>    
-            <!--###########################################################-->
-            <!--##  HORIZONTAL TOOLS                 ######################-->
-            <!--###########################################################-->
+            {/if}
 
-            <div  class="   {tools_visibility} 
-                            w-screen sm:w-[calc(100vw-40px)] 
-                            h-[40px] 
-                            left-0 sm:left-[40px]     
-                            top-[40px] sm:top-0
-                            {lg_content_area_horizontal_dim}
-                            z-0 overflow-hidden " >
+            <section on:click|capture={auto_hide_sidebar}>
 
-                <Operations/>
-            </div>
+                <!--###########################################################-->
+                <!--##  HORIZONTAL TOOLS                 ######################-->
+                <!--###########################################################-->
 
-            <div class="!hidden {tools_visibility} right-3 {fab_bottom} mb-1 cursor-pointer z-20">
-                <Fab/>
-            </div>
+                <div  class="   {tools_visibility} 
+                                w-screen sm:w-[calc(100vw-40px)] 
+                                h-[40px] 
+                                left-0 sm:left-[40px]     
+                                top-[40px] sm:top-0
+                                {lg_content_area_horizontal_dim}
+                                z-10 overflow-hidden " >
 
-            <!--#######################################################-->
-            <!--##  CONTENT                          ##################-->
-            <!--#######################################################-->
-            <div  class="fixed left-0  w-screen  
-                            sm:left-[40px]  sm:w-[calc(100vw-40px)]    
-                            {content_top}
-                            {content_height}
-                            {lg_content_area_horizontal_dim}
-                            z-0 overflow-x-hidden" 
-                            
-                            on:click={(e) => auto_hide_sidebar() } 
-                            on:keydown={(e) => auto_hide_sidebar()}>
-                    <Configurable config={layout.mainContent}>
-                        <div slot='alt'></div>
-                    </Configurable>
-            </div>    
+                    <Operations/>
+                </div>
+
+                <div class="{fab_visibility} right-3 {fab_bottom} mb-1 cursor-pointer z-10">
+                    <Fab/>
+                </div>
+
+                <!--#######################################################-->
+                <!--##  CONTENT                          ##################-->
+                <!--#######################################################-->
+                <div  class="fixed left-0  w-screen  
+                                sm:left-[40px]  sm:w-[calc(100vw-40px)]    
+                                {content_top}
+                                {content_height}
+                                {lg_content_area_horizontal_dim}
+                                z-0 overflow-x-hidden" 
+                                >
+                        <Configurable config={layout.mainContent}>
+                            <div slot='alt'></div>
+                        </Configurable>
+                </div>    
 
 
 
-            <!--###########################################################-->
-            <!--##  BOTTOM SIDEBAR          ###############################-->
-            <!--###########################################################-->
+                <!--###########################################################-->
+                <!--##  BOTTOM SIDEBAR          ###############################-->
+                <!--###########################################################-->
 
-            <div  class="{bottom_bar_visibility} left-0 bottom-0 w-screen h-[240px] z-10 overflow-y-hidden overflow-x-auto 
-                        sm:left-[40px] sm:w-[100vw-40px] " >
-                    <Configurable config={layout.selectionDetails} >
-                        <div slot="alt"></div>
-                    </Configurable>
-                
-            </div>    
+                <div  class="{bottom_bar_visibility} left-0 bottom-0 w-screen h-[240px] z-20 overflow-y-hidden overflow-x-auto 
+                            sm:left-[40px] sm:w-[100vw-40px] " >
+                        <Configurable config={layout.selectionDetails} >
+                            <div slot="alt"></div>
+                        </Configurable>
+                    
+                </div>    
+
+                <!-- #########################################################-->
+                <!-- ## MODAL DIALOG #########################################-->
+                <!-- #########################################################-->
+                <div id="__hd_svelte_modal_root" class="z-30">
+                    <!-- after <Modal/> component is shown it's rettached to above div
+                        see: modal.svelte afterUpdate -->
+                </div>
+
+            </section>
+
         </div>
     </div>
 </AuthorizedView>

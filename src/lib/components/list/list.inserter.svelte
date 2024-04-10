@@ -9,6 +9,6 @@
     let definition :rList_definition = getContext("rList-definition");
     
     definition.can_insert = true
-    definition.oninsert = action;
+    definition.onInsert = action;
     definition.inserter_icon = icon;
 </script>

@@ -1,7 +1,7 @@
 <script>
     import {getContext} from 'svelte';
-    import {data_tick_store, context_items_store} from '../stores.js' 
-    import { parse_width_directive} from '../utils.js'
+    import {data_tick_store, contextItemsStore} from '../stores.js' 
+    import { parseWidthDirective} from '../utils.js'
    
     export let label = "Label"
     export let a = '';
@@ -10,7 +10,7 @@
     let _label = label;
 
 
-    let cs = parse_width_directive(c);
+    let cs = parseWidthDirective(c);
     
     let     item = null
     let     ctx = ''
@@ -24,7 +24,7 @@
     }
     else if(a != '')
     {
-        item = $context_items_store[ctx];
+        item = $contextItemsStore[ctx];
         if(item != null)
             _label = item[a]
     }
@@ -40,7 +40,7 @@
                 _label = label;
             else
             {
-                item = $context_items_store[ctx];
+                item = $contextItemsStore[ctx];
                 if(item != null)
                     _label = item[a]
             }
@@ -50,5 +50,5 @@
 }
 </script>
 
-<p class="{cs} text-gray-900 dark:text-white {$$restProps['class']}">{_label}</p>
+<p class="{cs} text-stone-900 dark:text-white {$$restProps['class']}">{_label}</p>
 

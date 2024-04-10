@@ -1,0 +1,149 @@
+<script lang="ts">
+    import {FaAngleUp, FaAngleDown, FaAngleDoubleUp, FaAngleDoubleDown} from 'svelte-icons/fa'
+    import {KanbanColumnTop, KanbanColumnBottom, rKanban_definition} from '../Kanban'
+    
+    export let definition :rKanban_definition;
+    export let item :object;
+    export let afterActionOperation : Function | undefined = undefined;
+
+    function replaceMenu()
+    {
+        if(afterActionOperation)
+            setTimeout(() => { afterActionOperation(item) }, 0)
+    }
+
+</script>
+
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+
+<menu class="hidden sm:flex flex-row gap-3">
+    <section class="flex flex-col gap-1">
+        <p class="text-xs h-4 w-[100px] truncate"></p>
+        <button class=" h-8 w-full
+                        text-xs font-medium text-stone-900 dark:text-stone-400 dark:hover:text-white
+                        bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 active:bg-stone-300 dark:active:bg-stone-600
+                        border rounded border-stone-200 dark:border-stone-600 focus:outline-none
+                        inline-flex items-center justify-center"
+                        on:click={(e) => { definition.onUp(item); replaceMenu()}}>
+            <div class="w-3 h-3"><FaAngleUp/></div>
+        </button>
+
+        <button class=" h-8 w-full
+                        text-xs font-medium text-stone-900 dark:text-stone-400 dark:hover:text-white
+                        bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 active:bg-stone-300 dark:active:bg-stone-600
+                        border rounded border-stone-200 dark:border-stone-600 focus:outline-none
+                        inline-flex items-center justify-center"
+                        on:click={(e) => { definition.onDown(item); replaceMenu()}}>
+            <div class="w-3 h-3"><FaAngleDown/></div>
+        </button>
+    </section>
+
+    {#if definition && definition.columns && definition.columns.length > 0}
+    {#each definition.columns as column, idx}
+        <section class="flex flex-col gap-1">
+            <p class="text-xs h-4 w-[100px] ml-1 truncate">{column.title}</p>
+            <button class=" h-8 w-full
+                            text-base font-medium text-stone-900 dark:text-stone-400 dark:hover:text-white
+                            bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 active:bg-stone-300 dark:active:bg-stone-600
+                            border rounded border-stone-200 dark:border-stone-600 focus:outline-none
+                            inline-flex items-center justify-center"
+                            on:click={(e) => { definition.onReplace(item, idx, KanbanColumnTop); replaceMenu()}}>
+                <div class="w-3 h-3"><FaAngleDoubleUp/></div>
+            </button>
+
+            <button class=" h-8 w-full
+                            text-base font-medium text-stone-900 dark:text-stone-400 dark:hover:text-white
+                            bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 active:bg-stone-300 dark:active:bg-stone-600
+                            border rounded border-stone-200 dark:border-stone-600 focus:outline-none
+                            inline-flex items-center justify-center"
+                            on:click={(e) => { definition.onReplace(item, idx, KanbanColumnBottom); replaceMenu()}}>
+                <div class="w-3 h-3"><FaAngleDoubleDown/></div>
+            </button>
+        </section>
+    {/each}
+    {/if}
+</menu>
+
+<menu class="flex sm:hidden flex-col gap-3">
+    <section class="flex flex-row">
+        <p class="text-base truncate "></p>
+        <div class="flex flex-row ml-auto gap-3">
+            <button class=" bg-transparent
+                            w-[55px] h-[55px] 
+                            m-0
+                            flex items-center justify-center
+                            disable-dbl-tap-zoom"
+                            on:click={(e) => { definition.onUp(item); replaceMenu()}}>
+                <div class="    w-10 h-10
+                                text-white bg-zinc-500 hover:bg-zinc-500 
+                                font-medium rounded-full text-sm text-center shadow-md
+                                dark:bg-zinc-500 dark:hover:bg-zinc-500
+                                flex items-center justify-center">
+                    <div class="w-5 h-5">
+                        <FaAngleUp/>
+                    </div>
+                </div>
+            </button>
+
+            <button class=" bg-transparent
+                            w-[55px] h-[55px] 
+                            m-0
+                            flex items-center justify-center
+                            disable-dbl-tap-zoom"
+                            on:click={(e) => { definition.onDown(item); replaceMenu()}}>
+                <div class="    w-10 h-10
+                                text-white bg-zinc-500 hover:bg-zinc-500 
+                                font-medium rounded-full text-sm text-center shadow-md
+                                dark:bg-zinc-500 dark:hover:bg-zinc-500
+                                flex items-center justify-center">
+                    <div class="w-5 h-5">
+                        <FaAngleDown/>
+                    </div>
+                </div>
+            </button>
+        </div>
+    </section>
+
+    {#if definition && definition.columns && definition.columns.length > 0}
+    {#each definition.columns as column, idx}
+        <section class="flex flex-row">
+            <p class="text-base mt-4 truncate w-[120px]">{column.title}</p>
+            <div class="flex flex-row ml-auto gap-3">
+                <button class=" bg-transparent
+                                w-[55px] h-[55px] 
+                                m-0
+                                flex items-center justify-center
+                                disable-dbl-tap-zoom"
+                                on:click={(e) => { definition.onReplace(item, idx, KanbanColumnTop); replaceMenu()}}>
+                    <div class="    w-10 h-10
+                                    text-white bg-zinc-500 hover:bg-zinc-500 
+                                    font-medium rounded-full text-sm text-center shadow-md
+                                    dark:bg-zinc-500 dark:hover:bg-zinc-500
+                                    flex items-center justify-center">
+                        <div class="w-5 h-5">
+                            <FaAngleDoubleUp/>
+                        </div>
+                    </div>
+                </button>
+
+                <button class=" bg-transparent
+                                w-[55px] h-[55px] 
+                                m-0
+                                flex items-center justify-center
+                                disable-dbl-tap-zoom"
+                                on:click={(e) => { definition.onReplace(item, idx, KanbanColumnBottom); replaceMenu()}}>
+                    <div class="    w-10 h-10
+                                    text-white bg-zinc-500 hover:bg-zinc-500 
+                                    font-medium rounded-full text-sm text-center shadow-md
+                                    dark:bg-zinc-500 dark:hover:bg-zinc-500
+                                    flex items-center justify-center">
+                        <div class="w-5 h-5">
+                            <FaAngleDoubleDown/>
+                        </div>
+                    </div>
+                </button>
+            </div>
+        </section>
+    {/each}
+    {/if}
+</menu>

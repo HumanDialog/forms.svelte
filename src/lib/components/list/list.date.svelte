@@ -1,10 +1,10 @@
-<script lang="ts">
+    <script lang="ts">
     import {getContext} from 'svelte'
     import {type rList_definition, rList_property_type, rList_property} from './List'
 
     export let name     :string;
     export let a        :string = '';
-    export let on_select = undefined;
+    export let onSelect = undefined;
     
     let definition :rList_definition = getContext("rList-definition");
     
@@ -15,7 +15,7 @@
     if(!date_property.a)
         date_property.a = date_property.name;
 
-    date_property.on_select = on_select
+    date_property.onSelect = onSelect
 
     definition.properties.push(date_property)
 

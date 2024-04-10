@@ -3,22 +3,39 @@ import {writable, get} from 'svelte/store';
 import {SCREEN_SIZES} from './utils.js'
 
 export const data_tick_store = writable(1);
-export const context_items_store = writable({focused:'', data: null, sel: null})
+export const contextItemsStore = writable({focused:'', data: null, sel: null})
 export const context_info_store = writable({data: '', sel: ''})
-export const context_types_store = writable({focused:'', data: null, sel: null})
-export const context_toolbar_operations = writable([]);
-export const page_toolbar_operations = writable([]);
+export const contextTypesStore = writable({focused:'', data: null, sel: null})
+export const contextToolbarOperations = writable([]);
+export const pageToolbarOperations = writable([]);
+export const page_title = writable('');
+export const nav_titles = writable({});
+export const mainViewReloader = writable(1);
 
-export function has_selected_item()
+export function setNavigatorTitle(key, title)
 {
-    let itm = get(context_items_store).sel
+    let titles = get(nav_titles);
+    titles[key] = title;
+    nav_titles.set(titles);
+}
+
+export function hasSelectedItem()
+{
+    let itm = get(contextItemsStore).sel
     return itm !== null && itm !== undefined;
 }
 
-export function has_data_item()
+export function hasDataItem()
 {
-    let itm = get(context_items_store).data
+    let itm = get(contextItemsStore).data
     return itm !== null && itm !== undefined;
+}
+
+export function reloadMainView()
+{
+    let val = get(mainViewReloader);
+    val += 1;
+    mainViewReloader.set(val);
 }
 
 
@@ -46,6 +63,7 @@ export const main_sidebar_visible_store = writable((localStorage.main_sidebar_vi
 main_sidebar_visible_store.subscribe( (value) => { localStorage.main_sidebar_visible_store = value });
 
 export let previously_visible_sidebar = "";
+export let sidebar_left_pos = writable(0)
 
 let has_saved_tools_visible = false;
 function create_tools_visible_store()

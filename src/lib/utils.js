@@ -1,6 +1,6 @@
 import { getContext, tick } from "svelte";
 import {get} from 'svelte/store'
-import { context_items_store, context_toolbar_operations, data_tick_store } from "./stores";
+import { contextItemsStore, contextToolbarOperations, data_tick_store } from "./stores";
 
 export let icons = {symbols :null}
 
@@ -11,7 +11,7 @@ export const SCREEN_SIZES = {
     xl: 1280, //px	@media (min-width: 1280px) { ... }
 }
 
-export function is_device_smaller_than(br)
+export function isDeviceSmallerThan(br)
 {
     return window.innerWidth < SCREEN_SIZES[br]
 }
@@ -20,12 +20,12 @@ export function is_device_smaller_than(br)
 //    just_changed_context: false
 //}
 
-export function select_item(itm)
+export function selectItem(itm)
 {
-    let data_context = get(context_items_store);
+    let data_context = get(contextItemsStore);
     data_context['sel'] = itm;
     data_context.focused = 'sel';
-    context_items_store.set( {...data_context} )
+    contextItemsStore.set( {...data_context} )
 
     let ticket = get(data_tick_store)
     ticket++;
@@ -35,13 +35,13 @@ export function select_item(itm)
 
 }
 
-export function activate_item(context_level, itm, operations=null)
+export function activateItem(context_level, itm, operations=null)
 {
-    let data_context = get(context_items_store);
+    let data_context = get(contextItemsStore);
     data_context['sel'] = itm; //null;
     data_context[context_level] = itm;
     data_context.focused = context_level;
-    context_items_store.set( {...data_context} )
+    contextItemsStore.set( {...data_context} )
 
     let ticket = get(data_tick_store)
     ticket++;
@@ -50,15 +50,15 @@ export function activate_item(context_level, itm, operations=null)
     //chnages.just_changed_context = true;
 
     if(operations && Array.isArray(operations))
-        context_toolbar_operations.set( [...operations] )
+        contextToolbarOperations.set( [...operations] )
 }
 
-export function clear_active_item(context_level)
+export function clearActiveItem(context_level)
 {
-    let data_context = get(context_items_store);
+    let data_context = get(contextItemsStore);
     data_context[context_level] = null;
     data_context.focused = context_level;
-    context_items_store.set( {...data_context} )
+    contextItemsStore.set( {...data_context} )
 
     let ticket = get(data_tick_store)
     ticket++;
@@ -66,12 +66,12 @@ export function clear_active_item(context_level)
 
     //chnages.just_changed_context = true;
 
-    context_toolbar_operations.set( [] )
+    contextToolbarOperations.set( [] )
 }
 
-export function is_selected(itm)
+export function isSelected(itm)
 {
-    let data_context = get(context_items_store);
+    let data_context = get(contextItemsStore);
     if(!!data_context && !!data_context['sel'] && data_context['sel'] == itm)
         return true;
     else
@@ -79,59 +79,97 @@ export function is_selected(itm)
 }
 
 
-export function is_active(context_level, itm)
+export function isActive(context_level, itm)
 {
-    let data_context = get(context_items_store);
+    let data_context = get(contextItemsStore);
     if(data_context != undefined && data_context[context_level] != undefined && data_context[context_level] == itm)
         return true;
     else
         return false;
 }
 
-export function get_active(context_level)
+export function getActive(context_level)
 {
-    let data_context = get(context_items_store);
+    let data_context = get(contextItemsStore);
     if(data_context != undefined)
         return data_context[context_level]
     else
         return null;
 }
 
-export function editable(node, action)
+export function editable(node, params)
 {
+    let action;
+    let active = false;
+    let onRemove = undefined;
+    if(params instanceof Object)
+    {
+        action = params.action ?? params;
+        active = params.active ?? false;
+        onRemove = params.remove ?? undefined
+    }
+    else
+        action = params;
+
+    let observer = null;
+    let has_changed = false;
+
     const org_text = node.textContent;
     const blur_listener = async (e) =>
     {
-        await finish_editing(false, false);
+        let cancel = !node.textContent
+        if(observer)
+            observer.disconnect();
+
+        await finish_editing(cancel, false);
     }
 
     const key_listener = async (e) =>
     {
+        //e.ctrlKey
         switch(e.key)
         {
         case 'Esc':
         case 'Escape':
-            await finish_editing(true, false);
-            e.stopPropagation();
-            e.preventDefault();
+            if(!active)
+            {
+                e.stopPropagation();
+                e.preventDefault();
+
+                await finish_editing(true, false);
+            }
             break;
 
         case 'Enter':
-            await finish_editing(false, true);
             e.stopPropagation();
             e.preventDefault();
+
+            await finish_editing(false, true);
             break;
-        }
+
+        case 'Backspace':
+            if(onRemove && node.textContent.length == 0)
+            {
+                e.stopPropagation();
+                e.preventDefault();
+                //await finish_editing(false, false);
+                onRemove();
+            }
+            break;
+         }
     }
 
     const finish_editing = async (cancel, incremental) =>
     {
-        node.removeEventListener("blur", blur_listener);
-        node.removeEventListener("keydown", key_listener);
-        node.contentEditable = "false"
-
-        let sel = window.getSelection();
-        sel.removeAllRanges();
+       if(!active)
+       {
+            node.removeEventListener("blur", blur_listener);
+            node.removeEventListener("keydown", key_listener);
+            node.contentEditable = "false"
+       
+            let sel = window.getSelection();
+            sel.removeAllRanges();
+       }
 
         if(cancel)
         {
@@ -139,7 +177,14 @@ export function editable(node, action)
         }
         else if(action)
         {
-            await action(node.textContent)
+            if(active)
+            {
+                if(has_changed)
+                    await action(node.textContent)
+            }
+            else
+                await action(node.textContent)
+            
         }
 
         const finish_event  = new CustomEvent("finish", {
@@ -151,39 +196,71 @@ export function editable(node, action)
                             });
 
         node.dispatchEvent(finish_event);
-        node.removeEventListener("finish", (e) => {});
+
+        if(!active)
+            node.removeEventListener("finish", (e) => {});
     }
 
     const edit_listener = async (e) =>
     {
-        //console.log('Edit event fired:', itm, "node", node)
         node.contentEditable = "true"
         node.addEventListener("blur", blur_listener);
         node.addEventListener("keydown", key_listener);
-        
+
         node.focus();
-        
+
         await tick();
         let range = document.createRange();
         range.selectNodeContents(node);
+        let end_offset = range.endOffset;
+        let end_container = range.endContainer;
+        range.setStart(end_container, end_offset)
+        range.setEnd(end_container, end_offset)
+        //range.setStart(node, 0)
+        //range.setEnd(node, 0)
+       // console.log('range rect: ', range.getBoundingClientRect())
         let sel = window.getSelection();
         sel.removeAllRanges();
         sel.addRange(range);
         
     }
 
-    node.addEventListener("edit", edit_listener);
+    const focus_listener = async (e) =>
+    {
+        node.addEventListener("blur", blur_listener);
+        node.addEventListener("keydown", key_listener);
+        has_changed = false;
+        
+        observer = new MutationObserver(() => { has_changed = true; });
+        observer.observe(   node,  {
+                                childList: true,
+                                attributes: true,
+                                characterData: true,
+                                subtree: true } );
+    }
+
     node.classList.add("editable")
     node.classList.add("focus:outline-none")
-    return {
-        destroy() {
-            node.removeEventListener("edit", edit_listener)
-            node.classList.remove("editable")
-            node.contentEditable = "false"
-        }};
+
+    if(active)
+    {
+        node.contentEditable = "true"
+        node.addEventListener('focus', focus_listener);
+    }
+    else
+    {
+        node.addEventListener("edit", edit_listener);
+        
+        return {
+            destroy() {
+                node.removeEventListener("edit", edit_listener)
+                node.classList.remove("editable")
+                node.contentEditable = "false"
+            }};
+    }
 }
 
-export function start_editing(element, finish_callback)
+export function startEditing(element, finish_callback)
 {
     let editable_node = null;
     
@@ -200,7 +277,7 @@ export function start_editing(element, finish_callback)
     {
         if(editable_node.contentEditable == "true")
             return;
-
+        
         if(finish_callback)
         {
             editable_node.addEventListener("finish", (e) => { finish_callback(e.detail) })
@@ -215,7 +292,7 @@ export function selectable(node, itm)
 {
     const select_listener = (e) =>
     {
-        select_item(itm);
+        selectItem(itm);
     }
 
     node.setAttribute("selectable", "true")
@@ -234,12 +311,12 @@ export function selectable(node, itm)
     }};
 }
 
-export function handle_select(e)
+export function handleSelect(e)
 {
     let node = e.target;
     if(!node)
     {
-        select_item(null);
+        selectItem(null);
         return;
     }
 
@@ -259,12 +336,12 @@ export function handle_select(e)
     if(selection_node)
         selection_node.dispatchEvent(new Event("select"))
     else
-        select_item(null);
+        selectItem(null);
 }
 
 
 
-export function parse_width_directive(c)
+export function parseWidthDirective(c)
 {   
     let cs = '';
     switch (c)
@@ -306,8 +383,88 @@ export function parse_width_directive(c)
     return cs;
 }
 
-export function should_be_comapact()
+export function shouldBeComapact()
 {
     let is_in_table = getContext('rTable-definition');
     return !!is_in_table;
+}
+
+    
+
+export function insertAt(array, index, element)
+{
+    array.splice(index, 0, element);
+    return array;
+}
+
+export function insertAfter(array, after, element)
+{
+    let after_idx = array.findIndex((t) => t == after);
+
+    if(after_idx == array.length - 1)
+    {
+        array.push(element)
+        return array;
+    }
+    else
+    {
+        return insertAt(array, after_idx+1, element)
+    }
+}
+
+export function getPrev(array, element)
+{
+    let idx = array.findIndex((t) => t == element);
+    if(idx < 1)
+        return null;
+    else
+        return array[idx-1];
+}
+
+export function getNext(array, element)
+{
+    let idx = array.findIndex((t) => t == element);
+    if(idx >= array.length-1)
+        return null;
+    else
+        return array[idx+1];
+}
+
+export function getFirst(array)
+{
+    if(array.length > 0)
+        return array[0];
+    else
+        return null;
+}
+
+export function getLast(array)
+{
+    if(array.length > 0)
+        return array[array.length-1];
+    else
+        return null;
+}
+
+export function removeAt(array, index)
+{
+    array.splice(index, 1)
+    return array;
+}
+
+export function remove(array, element)
+{
+    let idx = array.findIndex((t) => t == element);
+    return array.removeAt(idx);
+}
+
+export function swapElements(array, e1, e2)
+{
+    let idx1 = array.findIndex((t) => t == e1);
+    let idx2 = array.findIndex((t) => t == e2);
+
+    array[idx1] = e2;
+    array[idx2] = e1;
+
+    return array;
 }

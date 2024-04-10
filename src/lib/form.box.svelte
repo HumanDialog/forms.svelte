@@ -1,6 +1,6 @@
 <script>
    import { writable } from 'svelte/store'; 
-   import {data_tick_store, context_items_store} from './stores.js' 
+   import {data_tick_store, contextItemsStore} from './stores.js' 
    import { setContext } from 'svelte';
 
     export let context = ""
@@ -14,7 +14,7 @@
     {    
         setContext('ctx', context) 
         if(self != null)
-            context_items_store[context] = self 
+            contextItemsStore[context] = self 
     }
 
     let in_tile_flex_behaviour = fit ? "flex-1" : "flex-none"

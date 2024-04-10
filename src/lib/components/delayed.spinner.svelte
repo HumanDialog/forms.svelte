@@ -36,7 +36,7 @@
 
     const colors = {
         blue: 'fill-blue-600',
-        gray: 'fill-gray-600 dark:fill-gray-300',
+        stone: 'fill-stone-600 dark:fill-stone-300',
         green: 'fill-green-500',
         red: 'fill-red-600',
         yellow: 'fill-yellow-400',
@@ -66,7 +66,7 @@
 {#if visible}
     <svg
         role="status"
-        class='inline -mt-px animate-spin dark:text-gray-600 {iconsize} text-gray-300 {fillColorClass} {user_class}'
+        class='inline -mt-px animate-spin dark:text-stone-600 {iconsize} text-stone-300 {fillColorClass} {user_class}'
         viewBox="0 0 100 101"
         fill="none"
         xmlns="http://www.w3.org/2000/svg">

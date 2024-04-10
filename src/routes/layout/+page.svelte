@@ -2,11 +2,12 @@
     import Layout from '$lib/desk.svelte'
     import {reef} from '@humandialog/auth.svelte'
 
-    import Empty from './main.svelte';
+    import Main from './main.svelte';
     import Red from './red.svelte';
     import Green from './green.svelte';
     import Blue from './blue.svelte';
     import Orange from './orange.svelte';
+    import Nav from './nav.svelte'
     
 
     import {    FaRegCompass, 
@@ -21,8 +22,8 @@
                 sidebar : {
                     'TOC': {
                         icon: FaRegCompass,
-                        component: Red
-                    },
+                        component: Nav
+                    }/*,
                     'FIND':{
                         icon: FaSearch,
                         component: Green
@@ -30,10 +31,10 @@
                     'DB':{
                         icon: FaDatabase,
                         component: Blue
-                    }
+                    }*/
                 },
                 mainContent : {
-                    component: Empty
+                    component: Main
                 },
                 selectionDetails : { 
                     component: Orange
@@ -44,7 +45,7 @@
                 dark:
                 {
                     optional: true,
-                    default: false
+                    default: true
                 },
                 operations:
                 {

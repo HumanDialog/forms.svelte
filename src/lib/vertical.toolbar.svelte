@@ -2,11 +2,12 @@
     import FaToggleOn from 'svelte-icons/fa/FaToggleOn.svelte'
     import FaToggleOff from 'svelte-icons/fa/FaToggleOff.svelte'
     import FaEllipsisH from 'svelte-icons/fa/FaEllipsisH.svelte'
+    import FaCog from 'svelte-icons/fa/FaCog.svelte'
     import FaTools from 'svelte-icons/fa/FaTools.svelte'
     import GoPrimitiveDot from 'svelte-icons/go/GoPrimitiveDot.svelte'
     import FaSignInAlt from 'svelte-icons/fa/FaSignInAlt.svelte'
     import FaSignOutAlt from 'svelte-icons/fa/FaSignOutAlt.svelte'
-    import {show_menu} from '$lib/components/menu'
+    import {showMenu} from '$lib/components/menu'
     //import Menu from '$lib/components/contextmenu.svelte'
 
     import {dark_mode_store, 
@@ -18,10 +19,10 @@
             right_sidebar_visible_store,
             main_sidebar_visible_store} from "./stores.js";     
     import Icon from './components/icon.svelte';
-    import {session, signin_href, signout_href} from '@humandialog/auth.svelte'
+    import {session, signInHRef, signOutHRef} from '@humandialog/auth.svelte'
 	import { push } from 'svelte-spa-router';
 
-    export let app_config;
+    export let appConfig;
     export let mobile=false;
     
     
@@ -35,18 +36,18 @@
     let sign_out_href = '';
 
     $:{
-        config = app_config.mainToolbar;
-        has_selection_details = app_config.selectionDetails;
-        is_logged_in = $session.is_active;
+        config = appConfig.mainToolbar;
+        has_selection_details = appConfig.selectionDetails;
+        is_logged_in = $session.isActive;
         show_sign_in_out_icons = config.signin ? true : false;
-        sign_in_href = $signin_href;
-        sign_out_href = $signout_href;
+        sign_in_href = $signInHRef;
+        sign_out_href = $signOutHRef;
 
         tabs = new Array();
 
-        Object.keys(app_config.sidebar).forEach( (key) =>    
+        Object.keys(appConfig.sidebar).forEach( (key) =>    
             { 
-                const ctab = app_config.sidebar[key];
+                const ctab = appConfig.sidebar[key];
                 const can_show = (ctab.authorized && is_logged_in) || (!ctab.authorized)
                 if(can_show)
                     tabs.push({key: key, icon: ctab.icon}); 
@@ -160,18 +161,18 @@
         }
         
         let pt = new DOMPoint(rect.right, rect.top)
-        show_menu(pt, options);    
+        showMenu(pt, options);    
     }
     
 </script>
 
 
-    <div class="px-0 w-10">
+    <div class="no-print px-0 w-10">
         {#each tabs as tab}
-            {@const is_selected = $main_sidebar_visible_store == tab.key}
+            {@const isSelected = $main_sidebar_visible_store == tab.key}
             <button
-                class="h-16 px-0 flex justify-center items-center w-full text-slate-300 hover:text-slate-100"
-                class:bg-orange-500={is_selected}
+                class="h-16 px-0 flex justify-center items-center w-full text-stone-300 hover:text-stone-100"
+                class:bg-orange-500={isSelected}
                 on:click={()=> (on_tab_clicked(tab.key))}>
                 
                 <Icon size={6} component={tab.icon}/>
@@ -181,13 +182,13 @@
 
     {#if !mobile}
     
-        <div class="mt-auto h-auto items-center w-full">
+        <div class="no-print mt-auto h-auto items-center w-full">
             
             <button
-                class="h-16 px-0 flex justify-center items-center w-full text-slate-300 hover:text-slate-100"
+                class="h-16 px-0 flex justify-center items-center w-full text-stone-300 hover:text-stone-100"
                 on:click={show_options}>
 
-                <Icon size={6} component={FaEllipsisH} />
+                <Icon size={4} component={FaCog} />
             </button>
 
         </div>
@@ -195,3 +196,12 @@
 
 
     <!--Menu bind:this={menu}/-->
+
+<style>
+    @media print
+    {
+        .no-print, .no-print *{
+            display: none !important;
+        }
+    }
+</style>

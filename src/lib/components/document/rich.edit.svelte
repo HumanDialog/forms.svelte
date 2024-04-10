@@ -4,9 +4,9 @@
     import { getContext, onDestroy, onMount} from 'svelte'
     import { Selection_range, Selection_edge} from './internal/Selection_range';
     //import { createEventDispatcher } from 'svelte';
-    import {data_tick_store, context_items_store, context_types_store} from '../../stores.js'
-    import {inform_modification, push_changes} from '../../updates.js'
-    import {parse_width_directive} from '../../utils.js'
+    import {data_tick_store, contextItemsStore, contextTypesStore} from '../../stores.js'
+    import {informModification, pushChanges} from '../../updates.js'
+    import {parseWidthDirective} from '../../utils.js'
     import Palette from './internal/palette.svelte'
 
     import FaFont from 'svelte-icons/fa/FaFont.svelte'
@@ -25,8 +25,32 @@
     export let a = '';
     export let context = '';
     export let typename = '';
+    export let compact = false;
 
     export let c='';
+    export let pushChangesImmediately: boolean = true;
+
+    let onBlur = undefined;
+    export function run(onStop=undefined)
+    {
+        onBlur = onStop;
+        editable_div?.focus();
+    }
+
+    export function get_formatting_operations()
+    {
+        let result = [];
+        commands.forEach( c => {
+            result.push({
+                caption: '',//c.caption,
+                icon: c.icon,
+                action: c.on_choice
+            })
+        })
+        
+        return result;
+    }
+
     
     let   item = null;
     let   changed_value :string;
@@ -47,7 +71,15 @@
     let palette_focused_string_end :number;
 
     let ctx = context ? context : getContext('ctx');
-    let cs = parse_width_directive(c);
+    let cs = parseWidthDirective(c);
+
+    let appearance_class :string;
+    if(compact)
+        appearance_class = "";
+    else
+        appearance_class = `bg-stone-50 border border-stone-300 rounded-md 
+                            dark:bg-stone-700 dark:border-stone-600 
+                            px-2.5`;
     
     let  last_tick = -1;
 
@@ -67,17 +99,17 @@
             if(self)
                 item = self   
             else
-                item = $context_items_store[ctx];
+                item = $contextItemsStore[ctx];
                 
             if(!typename)
-                typename = $context_types_store[ctx];
+                typename = $contextTypesStore[ctx];
             
             if(item != null)
                 value = item[a]
         }
 
         if(!value)
-            value = '<div>\u200B</div>';
+            value = '<p>\u200B</p>';
 
         has_changed_value = false;
     }   
@@ -260,9 +292,42 @@
             case 'Backspace':
                 if(is_range_selected())
                 {
-                    event.cancelBubble = true;
-                    event.preventDefault();
-                    console.log("Unsupported");
+                    if(is_multi_range_selection())
+                    {
+                        event.cancelBubble = true;
+                        event.preventDefault();
+                        console.log("Unsupported");
+                    }
+                    else
+                    {
+                        event.cancelBubble = true;
+                        event.preventDefault();
+
+                        if(is_selection_within_single_paragraph())
+                        {
+                            if(is_whole_parapraph_selected())
+                            {
+                                if(is_focused_paragraph_last_in_document())     // last or single
+                                {
+                                    make_focused_paragraph_empty(true);
+                                }
+                                else
+                                {
+                                    let next_paragraph :Node;
+                                    next_paragraph = remove_focused_paragraph(true);
+                                    set_caret_at_begin_of_paragraph(next_paragraph);
+                                }
+                            }
+                            else
+                            {
+                                cut_selected_text_in_focused_paragraph();
+                            }
+                        }
+                        else
+                        {
+                            cut_selected_paragraphs();
+                        }
+                    }
                 }
                 else 
                 {
@@ -283,9 +348,23 @@
                                 prev_paragraph = remove_focused_paragraph(false);
                                 set_caret_at_end_of_paragraph(prev_paragraph);
                             }
+                            else
+                                ; // do nothing, it's beginning of document
                         }
                         else
                             make_focused_paragraph_empty(true);
+                    }
+                    else if(is_caret_at_beginning_of_paragraph())
+                    {
+                        event.cancelBubble = true;
+                        event.preventDefault();
+
+                        if(!is_focused_paragraph_first_in_document())
+                        {
+                            merge_focused_paragraph_with_previous()
+                        }
+                        else
+                            ; // do nothing, it's beginning of document
                     }
 
                     if(hide_commands_palette)
@@ -296,9 +375,42 @@
             case 'Delete':
                 if(is_range_selected())
                 {
-                    event.cancelBubble = true;
-                    event.preventDefault();
-                    console.log("Unsupported");
+                    if(is_multi_range_selection())
+                    {
+                        event.cancelBubble = true;
+                        event.preventDefault();
+                        console.log("Unsupported");
+                    }
+                    else
+                    {
+                        event.cancelBubble = true;
+                        event.preventDefault();
+
+                        if(is_selection_within_single_paragraph())
+                        {
+                            if(is_whole_parapraph_selected())
+                            {
+                                if(is_focused_paragraph_last_in_document())     // last or single
+                                {
+                                    make_focused_paragraph_empty(true);
+                                }
+                                else
+                                {
+                                    let next_paragraph :Node;
+                                    next_paragraph = remove_focused_paragraph(true);
+                                    set_caret_at_begin_of_paragraph(next_paragraph);
+                                }
+                            }
+                            else
+                            {
+                                cut_selected_text_in_focused_paragraph();
+                            }
+                        }
+                        else
+                        {
+                            cut_selected_paragraphs();
+                        }
+                    }
                 }
                 else if(is_last_character_after_caret())
                 {
@@ -317,7 +429,22 @@
                         next_paragraph = remove_focused_paragraph(true);
                         set_caret_at_begin_of_paragraph(next_paragraph);
                     }
+                    else
+                        ; // do nothing, it's ending of document
                 }
+                else if(is_caret_at_ending_of_paragraph())
+                {
+                    event.cancelBubble = true;
+                    event.preventDefault();
+
+                    if(!is_focused_paragraph_last_in_document())
+                    {
+                        merge_focused_paragraph_with_next()
+                    }
+                    else
+                        ; // do nothing, it's ending of document
+                }
+                
                 break;
 
             case 'Esc':
@@ -455,6 +582,255 @@
         return false;
     }
 
+    function is_caret_at_beginning_of_paragraph() :boolean
+    {
+        let sel :Selection;
+        sel = window.getSelection();
+
+        if(sel.focusNode.textContent && sel.focusNode.nodeType !== sel.focusNode.COMMENT_NODE)
+        {
+            if(sel.focusOffset == 0)
+                return true;
+        }
+        return false;
+    }
+
+    function is_caret_at_ending_of_paragraph() :boolean
+    {
+        let sel :Selection;
+        sel = window.getSelection();
+        
+        if(sel.focusNode.textContent && sel.focusNode.nodeType !== sel.focusNode.COMMENT_NODE)
+        {
+            if(sel.focusOffset == sel.focusNode.textContent.length)
+                return true;
+        }
+        return false;
+    }
+
+    function merge_focused_paragraph_with_previous()
+    {
+        let sel :Selection;
+        sel = window.getSelection();
+
+        let merged_text :string = sel.focusNode.textContent;
+        let prev_paragraph = remove_focused_paragraph(false);
+        
+        let text_node :Node = prev_paragraph.childNodes[0];
+        let merging_text :string = text_node.textContent;
+        text_node.textContent = merging_text +  merged_text;
+
+        let pos :number = merging_text.length + 0; // space
+        let range :Range = new Range;
+        range.collapse(true);
+        range.setStart(text_node, pos);
+        range.setEnd(text_node, pos);
+        set_selection(range);
+    }
+
+    function merge_focused_paragraph_with_next()
+    {
+        let sel :Selection;
+        sel = window.getSelection();
+
+        let focus_node :Node = sel.focusNode;
+
+        let merging_text :string = focus_node.textContent;
+
+        let focused_paragraph :Node = focus_node.parentNode
+        let next_paragraph :Node = focused_paragraph.nextSibling;
+        while(next_paragraph.nodeType != Node.ELEMENT_NODE)
+            next_paragraph = next_paragraph.nextSibling;
+
+        let text_node :Node = next_paragraph.childNodes[0];
+        let merged_text :string = text_node.textContent;
+
+        let root :Node = focused_paragraph.parentNode;
+        root.removeChild(next_paragraph);
+
+        focus_node.textContent =  merging_text +  merged_text;
+
+        let pos :number = merging_text.length;
+        let range :Range = new Range;
+        range.collapse(true);
+        range.setStart(focus_node, pos);
+        range.setEnd(focus_node, pos);
+        set_selection(range);
+    }
+
+    function cut_selected_text_in_focused_paragraph()
+    {
+        let sel :Selection;
+        sel = window.getSelection();
+        const focus_node: Node = sel.focusNode;
+        const whole_text: string = focus_node.textContent;
+        const left_idx = Math.min(sel.focusOffset, sel.anchorOffset)
+        const right_idx = Math.max(sel.focusOffset, sel.anchorOffset)
+
+        let left_part: string = whole_text.substring(0, left_idx)
+        let right_part :string = whole_text.substring(right_idx)
+
+        focus_node.textContent = left_part + right_part;
+        let pos :number = left_part.length;
+        let range :Range = new Range;
+        range.collapse(true);
+        range.setStart(focus_node, pos);
+        range.setEnd(focus_node, pos);
+        set_selection(range);
+    }
+
+    function cut_selected_paragraphs()
+    {
+        let sel: Selection = window.getSelection()
+
+        let first_paragraph;
+        let first_offset ;
+        let last_paragraph ;
+        let last_offset ;
+        
+        let cmp = sel.anchorNode?.compareDocumentPosition(sel.focusNode)
+        switch(cmp)
+        {
+        case Node.DOCUMENT_POSITION_PRECEDING:
+        case Node.DOCUMENT_POSITION_CONTAINS:
+            // focus before anchor
+            first_paragraph = sel.focusNode.parentNode
+            first_offset = sel.focusOffset
+            last_paragraph = sel.anchorNode.parentNode
+            last_offset = sel.anchorOffset
+            break;
+
+        case Node.DOCUMENT_POSITION_FOLLOWING:
+        case Node.DOCUMENT_POSITION_CONTAINED_BY:
+            // anchor before focus
+            first_paragraph = sel.anchorNode.parentNode
+            first_offset = sel.anchorOffset
+            last_paragraph = sel.focusNode.parentNode
+            last_offset = sel.focusOffset
+            break;
+
+        default:
+            return;
+        }
+        
+        
+
+        let in_selection :boolean = false
+        let paragraphs_to_remove :Node[] = [];
+
+        let root = first_paragraph.parentNode;
+        const siblings_no = root.childNodes.length
+        for(let i=0; i<siblings_no; i++)
+        {
+            let n :Node = root.childNodes[i];
+            if(in_selection)
+            {
+                if(n == last_paragraph)
+                {
+                    // handle last p
+                    let text_node :Node = n.childNodes[0]
+                    let text_in_node :string = text_node.textContent
+                    text_in_node = text_in_node.substring(last_offset)
+                    if(text_in_node)
+                    {
+                        text_node.textContent = text_in_node;
+                    }
+                    else
+                    {
+                        text_node.textContent = '\u200B';   // empty paragraph
+                    }
+                    
+                    in_selection = false
+                    break;
+                }
+                else
+                {
+                    paragraphs_to_remove.push(n)
+                }
+            }
+            else if(n == first_paragraph)
+            {
+                // handle first p
+                let text_node :Node = n.childNodes[0]
+                let text_in_node :string = text_node.textContent
+                text_in_node = text_in_node.substring(0, first_offset)
+                if(text_in_node)
+                {
+                    text_node.textContent = text_in_node;
+                }
+                else
+                {
+                    if(n == last_paragraph)
+                        text_node.textContent = '\u200B';
+                    else
+                    {
+                        paragraphs_to_remove.push(n)
+                        first_paragraph = null;
+                    }
+                }
+
+                in_selection = true;
+            }
+            
+        }
+
+        if(first_paragraph)
+        {
+            let last_node = last_paragraph.childNodes[0];
+            let merged_text = last_node.textContent;
+            
+            let text_node = first_paragraph.childNodes[0];
+            let merging_text = text_node.textContent;
+
+            text_node.textContent = merging_text + merged_text;
+            
+            paragraphs_to_remove.push(last_paragraph)
+
+            let pos = merging_text.length
+            let range :Range = new Range;
+            range.collapse(true);
+            range.setStart(text_node, pos);
+            range.setEnd(text_node, pos);
+            set_selection(range);
+        }
+        else
+        {
+            let text_node = last_paragraph.childNodes[0];
+            let range :Range = new Range;
+            range.collapse(true);
+            range.setStart(text_node, 0);
+            range.setEnd(text_node, 0);
+            set_selection(range);
+        }
+
+        paragraphs_to_remove.forEach( c =>
+        {
+            root.removeChild(c)
+        })
+    }
+
+    function is_selection_within_single_paragraph() :boolean
+    {
+        let sel :Selection;
+        sel = window.getSelection();
+        return sel.focusNode == sel.anchorNode
+    }
+
+    function is_whole_parapraph_selected() :boolean
+    {
+        let sel: Selection = window.getSelection()
+        const selected_chanacters_no = Math.abs(sel.focusOffset - sel.anchorOffset);
+        const node_characters_no = sel.focusNode?.textContent?.length
+        return (selected_chanacters_no == node_characters_no);
+    }
+
+
+    function is_multi_range_selection() :boolean
+    {
+        let sel :Selection = window.getSelection()
+        return sel.rangeCount > 1
+    }
+
     function is_range_selected() :boolean
     {
         let sel :Selection;
@@ -533,9 +909,17 @@
         let focused_div :Node = text_node.parentNode;
         let result :Node;
         if(!return_next_sibling)
+        {
            	result = focused_div.previousSibling;
+            while(result && result.nodeType != Node.ELEMENT_NODE)
+                result = result.previousSibling;
+        }
         else
+        {
             result = focused_div.nextSibling;
+            while(result && result.nodeType != Node.ELEMENT_NODE)
+                result = result.nextSibling;
+        }
 
         let root :Node = focused_div.parentNode;
         root.removeChild(focused_div);
@@ -757,7 +1141,7 @@
     {
         const elem = editable_div;
         const editableElem = editable_div;
-        const tag = 'div';
+        const tag = 'p';
         let inTheMiddle: boolean;
         if (editableElem) 
         {
@@ -894,6 +1278,18 @@
             y = rect.y;
             show_above = true;
         }
+        else if(rect.x  > preferred_palette_width)
+        {
+            // left side of cursor
+            x = rect.x - preferred_palette_width - 5
+            y = rect.y - (preferred_palette_height - bottom_space)
+        }
+        else if(rect.x + preferred_palette_width < client_rect.width)
+        {
+            // right side of cursor
+            x = rect.x + 5;
+            y = rect.y - (preferred_palette_height - bottom_space)
+        }
         else 
             show_fullscreen = true;
 
@@ -937,7 +1333,13 @@
     function on_blur()
     {
         let active_range : Selection_range = Selection_helper.get_selection(editable_div);
-        
+
+        if(onBlur)
+        {
+            onBlur();
+            onBlur = undefined
+        }
+
         if(item && a && has_changed_value)
         {
             item[a] = changed_value;
@@ -946,8 +1348,9 @@
 
             if(typename)
             {
-                inform_modification(item, a, typename);
-                push_changes();
+                informModification(item, a, typename);
+                if(pushChangesImmediately)
+                    pushChanges();
             }
 
             last_tick = $data_tick_store + 1;
@@ -957,18 +1360,22 @@
 
     
     let commands         :Document_command[] = [
-               {   caption: 'Normal',       description: 'This is normal text style',      tags: 'text',    icon: FaFont,                       on_choice: () => { do_format('div', '') } } ,
+               {   caption: 'Normal',       description: 'This is normal text style',      tags: 'text',    icon: FaFont,                       on_choice: () => { do_format('p', '') } } ,
                
-               {   caption: 'Heading 1',    description: 'Big section heading',            tags: 'h1',      icon: FaHead,    icon_size: 6,      on_choice: () => { do_format('h2', '') } } ,
-               {   caption: 'Heading 2',    description: 'Medium section heading',         tags: 'h2',      icon: FaHead,    icon_size: 5,      on_choice: () => { do_format('h3', '') } } ,
-               {   caption: 'Heading 3',    description: 'Small section heading',          tags: 'h3',      icon: FaHead,    icon_size: 4,      on_choice: () => { do_format('h4', '') } } ,
+            //   {   caption: 'Heading 1',    description: 'Big section heading',            tags: 'h1',      icon: FaHead,    icon_size: 6,      on_choice: () => { do_format('h2', '') } } ,
+            //   {   caption: 'Heading 2',    description: 'Medium section heading',         tags: 'h2',      icon: FaHead,    icon_size: 5,      on_choice: () => { do_format('h3', '') } } ,
+            //   {   caption: 'Heading 3',    description: 'Small section heading',          tags: 'h3',      icon: FaHead,    icon_size: 4,      on_choice: () => { do_format('h4', '') } } ,
+               {   caption: 'Heading',      description: 'Description heading',            tags: 'h2',      icon: FaHead,    icon_size: 6,      on_choice: () => { do_format('h2', '') } } ,
+            //   {   caption: 'Heading 2',      description: 'Medium description heading',     tags: 'h3',      icon: FaHead,    icon_size: 5,      on_choice: () => { do_format('h3', '') } } ,
+            //   {   caption: 'Heading 3',      description: 'Small description heading',      tags: 'h4',      icon: FaHead,    icon_size: 4,      on_choice: () => { do_format('h4', '') } } ,
                
-               {   caption: 'Code',         description: 'Source code monospace text',                      icon: FaCode,                       on_choice: () => { do_format('div', 'ml-6 text-sm font-mono break-normal text-pink-700 dark:text-pink-600') } } ,
-               {   caption: 'Comment',      description: 'With this you can comment the above paragraph',   icon: FaComments,                   on_choice: () => { do_format('div', 'ml-6 text-sm italic text-lime-700 dark:text-lime-600') } } ,
+               {   caption: 'Code',         description: 'Source code monospace text',                      icon: FaCode,                       on_choice: () => { do_format('p', 'ml-6 text-sm font-mono break-normal text-pink-700 dark:text-pink-600') } } ,
+               {   caption: 'Comment',      description: 'With this you can comment the above paragraph',   icon: FaComments,                   on_choice: () => { do_format('p', 'ml-6 text-sm italic text-lime-700 dark:text-lime-600') } } ,
                {   caption: 'Quote',        description: 'To quote someone',                                icon: FaQuote,                      on_choice: () => { do_format('blockquote', '') } } ,
-               {   caption: 'Warning',      description: 'An important warning to above paragraph',         icon: FaWarn,                       on_choice: () => { do_format('div', 'ml-6 px-3 py-1 border-l-2 rounded-md border-orange-500 bg-orange-100 dark:bg-orange-900') } } ,
-               {   caption: 'Info',         description: 'An important info about above paragraph',         icon: FaInfo,                       on_choice: () => { do_format('div', 'ml-6 px-3 py-1 border-l-2 rounded-md border-blue-500 bg-blue-100 dark:bg-blue-900') } } 
+               {   caption: 'Warning',      description: 'An important warning to above paragraph',         icon: FaWarn,                       on_choice: () => { do_format('p', 'ml-6 px-3 py-1 border-l-2 rounded-md border-orange-500 bg-orange-100 dark:bg-orange-900') } } ,
+               {   caption: 'Info',         description: 'An important info about above paragraph',         icon: FaInfo,                       on_choice: () => { do_format('p', 'ml-6 px-3 py-1 border-l-2 rounded-md border-blue-500 bg-blue-100 dark:bg-blue-900') } } 
             ];
+    
     
 
 </script>
@@ -978,10 +1385,11 @@
         on:keyup={on_keyup}
         on:keydown={on_keydown}
         on:mouseup={on_mouseup}
-        class="{cs}     bg-gray-50 border border-gray-300 text-sm rounded-md 
-                         px-2.5 dark:bg-gray-700 dark:border-gray-600 
-                        prose prose-sm sm:prose-base dark:prose-invert {additional_class} overflow-y-auto"
+        class="{cs}     {appearance_class} 
+                        prose prose-base sm:prose-base dark:prose-invert {additional_class} overflow-y-auto"
         on:blur={on_blur}
+        on:focus
+        on:blur
         >
    {@html value}
 </div>

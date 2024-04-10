@@ -13,7 +13,7 @@
     
     let cl = $$props.class ? $$props.class : '';
     
-    $: active_class = is_highlighted ? 'bg-gray-200 dark:bg-gray-700': '';
+    $: active_class = is_highlighted ? 'bg-stone-200 dark:bg-stone-700': '';
 
 </script>
 
@@ -28,12 +28,12 @@
         <p>{cmd.caption}</p>
         {#if cmd.description}
             {@const shortcut_width_px = cmd.shortcut ? 80 : 0}
-            <p  class="text-sm font-normal text-gray-400 dark:text-gray-500 truncate inline-block"
+            <p  class="text-sm font-normal text-stone-400 dark:text-stone-500 truncate inline-block"
                 style:max-width={`calc(${width_px-shortcut_width_px} - 3rem)`} >{cmd.description}</p>
         {/if}
     </div>
     {#if cmd.shortcut}
-        <div class="pr-1 text-sm font-mono text-gray-500" 
+        <div class="pr-1 text-sm font-mono text-stone-500" 
              style:width={"80px"} >{cmd.shortcut}</div>
     {/if}
 </div>

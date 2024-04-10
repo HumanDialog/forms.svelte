@@ -1,7 +1,7 @@
 <script>
-    import {data_tick_store, context_items_store, context_types_store} from '../stores.js' 
-    import {inform_modification, push_changes} from '../updates.js'
-    import {parse_width_directive} from '../utils.js'
+    import {data_tick_store, contextItemsStore, contextTypesStore} from '../stores.js' 
+    import {informModification, pushChanges} from '../updates.js'
+    import {parseWidthDirective} from '../utils.js'
     import {getContext} from 'svelte';
     import Rich_edit from './document/rich.edit.svelte'
     
@@ -18,19 +18,20 @@
     export let val = ''
         
     export let placeholder = 'pl'
+    export let pushChangesImmediately = true;
 
     export  let s = 'sm'
     export  let c = ''
-    export  let validate_cb = undefined;
+    export  let validateCb = undefined;
     export function validate()
     {
-        if(!validate_cb)
+        if(!validateCb)
         {
             invalid = false;
             return true;
         }
 
-        invalid = !validate_cb(val);
+        invalid = !validateCb(val);
         return !invalid;
     } 
 
@@ -50,11 +51,11 @@
             break;
     }
    
-    let cs =  c ? parse_width_directive(c) : 'col-span-1';
+    let cs =  c ? parseWidthDirective(c) : 'col-span-1';
     let ctx = context ? context : getContext('ctx');
         
     let  last_tick = -1    
-    let border_style = "border-gray-300  dark:border-gray-600"
+    let border_style = "border-stone-300  dark:border-stone-600"
 
     $:{ 
         if($data_tick_store > last_tick)
@@ -64,10 +65,10 @@
     function setup()
     {
         last_tick = $data_tick_store;
-        item = self ?? $context_items_store[ctx];    
+        item = self ?? $contextItemsStore[ctx];    
 
         if(!typename)
-            typename = $context_types_store[ctx];
+            typename = $contextTypesStore[ctx];
 
         if(item && a)    
             val = item[a]
@@ -86,14 +87,15 @@
             item[a] = val
             
             if(typename)
-                inform_modification(item, a, typename);
+                informModification(item, a, typename);
         }
     }
 
     function accept_change()
     {
         $data_tick_store = $data_tick_store + 1;
-        push_changes();
+        if(pushChangesImmediately)
+            pushChanges();
             
     }
 
@@ -107,9 +109,9 @@
 </script>    
 
 {#if itype == 'text'}
-    {@const border_style = invalid ? "border-red-300 dark:border-red-600" : "border-gray-300 dark:border-gray-600" }
+    {@const border_style = invalid ? "border-red-300 dark:border-red-600" : "border-stone-300 dark:border-stone-600" }
     <div class={cs}>
-        <label for="name" class="block {label_mb} text-xs font-small text-gray-900 dark:text-white">{label}</label>
+        <label for="name" class="block {label_mb} text-xs font-small text-stone-900 dark:text-white">{label}</label>
         
         <input  type=text name="name" id="name" 
                 bind:value={val} 
@@ -117,12 +119,12 @@
                 on:blur={() => { accept_change();} }
                 on:keydown={(e)=>{check_validity();}}
                 
-                class="     bg-gray-50 dark:bg-gray-700
+                class="     bg-stone-50 dark:bg-stone-700
                             border {border_style} rounded-lg 
                             focus:ring-primary-600 focus:border-primary-600 dark:focus:ring-primary-500 dark:focus:border-primary-500
-                            text-gray-900 dark:text-white text-sm  
+                            text-stone-900 dark:text-white text-sm  
                             block w-full {input_pb} {input_pt} px-2.5 
-                            dark:placeholder-gray-400" 
+                            dark:placeholder-stone-400" 
                 
                 placeholder={placeholder}>
     </div>

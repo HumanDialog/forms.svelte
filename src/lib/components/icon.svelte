@@ -4,13 +4,13 @@
 
     // use one of those
     export let component = null;                            // svelte component
-    export let module_name :string = "fa/FaQuestion";       // name of module file with icon component -> icon will be loaded dynamically
+    export let moduleName :string = "fa/FaQuestion";       // name of module file with icon component -> icon will be loaded dynamically
     export let img :string = '';                            // url to img like png or jpg
     export let label :string = '';                           // initials will be shown generated from 'label' string
     export let symbol :string = '';                         // predefined html particle from icons app map
     export let color:string = '';
 
-    export let size :number = 5;                            
+    export let size :number|undefined = undefined;                            
     export let bg :string = '';                             // In case of initials mode it can be automatically generated from 'label' hash
     export let circle :boolean = false;                     
     
@@ -21,8 +21,6 @@
     let txt :string = '';
     let symbol_html :string = '';
 
-    let icon_size :string = `${size*0.25}rem`;
-    
     $:
     {   
         if(symbol)
@@ -86,11 +84,32 @@
         else
             component = component
     }
+
+    let style;
+    $: {
+
+        if(size == undefined)
+        {
+            if(!additional_class)
+            {
+                size = 5
+                let icon_size :string = `${size*0.25}rem`;
+                style = `width: ${icon_size}; height: ${icon_size}`;
+            }
+            else    
+                style = '';
+        }
+        else
+        {
+            let icon_size :string = `${size*0.25}rem`;
+            style = `width: ${icon_size}; height: ${icon_size}`;
+        }
+    }
+
 </script>
 
 <div class=" {additional_class}"
-    style:width={icon_size} 
-    style:height={icon_size} 
+    style="{style}"
     style:background-color={_bg}
     style:border-radius={ circle ? '50%' : ''}
     {id}
@@ -106,7 +125,7 @@
     {#if component != null}
         <svelte:component this={component} />
     {:else if txt}
-        <div   class="m-0 p-0 font-sans font-bold flex flex-col justify-center text-center w-full h-full text-slate-900"
+        <div   class="m-0 p-0 font-sans font-bold flex flex-col justify-center text-center w-full h-full text-stone-900"
                style:font-size={`${size/8}rem`}
                >
             <div>{txt}</div>
