@@ -44,6 +44,7 @@ export { default as Sidebar } from './components/sidebar/sidebar.svelte'
 export { default as SidebarBrand } from './components/sidebar/sidebar.brand.svelte'
 export { default as SidebarGroup } from './components/sidebar/sidebar.group.svelte'
 export { default as SidebarItem } from './components/sidebar/sidebar.item.svelte'
+export { default as SidebarList } from './components/sidebar/sidebar.list.svelte'
 
 export { default as List} from './components/list/list.svelte'
 export { default as ListTitle} from './components/list/list.title.svelte'
@@ -75,6 +76,10 @@ export {
     selectable,
     handleSelect
 }   from './utils'
+
+export {
+            mainViewReloader,
+            reloadMainView } from './stores.js'
 
 export {    data_tick_store,    // tmp
             hasSelectedItem, 

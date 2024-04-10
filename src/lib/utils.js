@@ -388,3 +388,83 @@ export function shouldBeComapact()
     let is_in_table = getContext('rTable-definition');
     return !!is_in_table;
 }
+
+    
+
+export function insertAt(array, index, element)
+{
+    array.splice(index, 0, element);
+    return array;
+}
+
+export function insertAfter(array, after, element)
+{
+    let after_idx = array.findIndex((t) => t == after);
+
+    if(after_idx == array.length - 1)
+    {
+        array.push(element)
+        return array;
+    }
+    else
+    {
+        return insertAt(array, after_idx+1, element)
+    }
+}
+
+export function getPrev(array, element)
+{
+    let idx = array.findIndex((t) => t == element);
+    if(idx < 1)
+        return null;
+    else
+        return array[idx-1];
+}
+
+export function getNext(array, element)
+{
+    let idx = array.findIndex((t) => t == element);
+    if(idx >= array.length-1)
+        return null;
+    else
+        return array[idx+1];
+}
+
+export function getFirst(array)
+{
+    if(array.length > 0)
+        return array[0];
+    else
+        return null;
+}
+
+export function getLast(array)
+{
+    if(array.length > 0)
+        return array[array.length-1];
+    else
+        return null;
+}
+
+export function removeAt(array, index)
+{
+    array.splice(index, 1)
+    return array;
+}
+
+export function remove(array, element)
+{
+    let idx = array.findIndex((t) => t == element);
+    return array.removeAt(idx);
+}
+
+export function swapElements(array, e1, e2)
+{
+    let idx1 = array.findIndex((t) => t == e1);
+    let idx2 = array.findIndex((t) => t == e2);
+
+    array[idx1] = e2;
+    array[idx2] = e1;
+
+    return array;
+}

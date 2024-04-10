@@ -1,5 +1,5 @@
 <script>
-    import {reef} from '@humandialog/auth.svelte'
+    import {reef, session} from '@humandialog/auth.svelte'
     import {    Spinner, 
                 Page, 
                 Icon, 
@@ -12,95 +12,83 @@
                 ListComboProperty,
 				mainViewReloader} from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen} from 'svelte-icons/fa'
-    import {location} from 'svelte-spa-router'
-
+    
     export let params = {}
 
-    let currentList = null;
-    let dataPath;
+    let user = null;
     let listComponent;
 
-    let users = [];
-
+    let lists = [];
     const STATUS_CLOSED = 2;
-    
-    $: onParamsChanged($location, $mainViewReloader);
+
+    $: onParamsChanged($session, $mainViewReloader);
     
     async function onParamsChanged(...args)
     {
-        const segments = $location.split('/');
-        const foundIdx = segments.findIndex( s => s == 'tasklist');
-        if(foundIdx < 0)
-            return;
-
-        if(users.length == 0)
+        if(!$session.isActive)
         {
-            let res = await reef.get('/app/Users')
+            user = null;
+            return;
+        }
+
+        if(lists.length == 0)
+        {
+            let res = await reef.get('/app/Lists')
             if(res)
-                users = res.User;
+                lists = res.TaskList;
         }
         
         
-        let listId;
-        if(!segments.length)
-            listId = 'first';
-        else
-            listId = segments[segments.length-1]
-        
-        currentList = null
-
-        dataPath = `/app/Lists/${listId}/query`;
         await fetchData()
     }
 
     async function fetchData()
     {
-        let res = await reef.post(dataPath,
-                            {
-                                Id: 1,
-                                Name: "collector",
-                                ExpandLevel: 3,
-                                Tree:
-                                [
-                                    {
-                                        Id: 1,
-                                        Association: '',
-                                        Expressions:['Id','Name'],
-                                        SubTree:
-                                        [
-                                            {
-                                                Id: 2,
-                                                Association: 'Tasks',
-                                                Filter: 'Status <> STATUS_CLOSED',
-                                                Sort: 'ListOrder',
-                                                //ShowReferences: true,
-                                                SubTree:[
-                                                    {
-                                                        Id: 3,
-                                                        Association: 'Actor',
-                                                        Expressions:['$ref', 'Name']
-                                                    },
-                                                    {
-                                                        Id: 4,
-                                                        Association: 'TaskList',
-                                                        Expressions:['$ref', 'Name']
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    }
-                                ]
-                            });
+        let res = await reef.post(`/user/query`,
+                                {
+                                    Id: 1,
+                                    Name: "collector",
+                                    ExpandLevel: 3,
+                                    Tree:
+                                    [
+                                        {
+                                            Id: 1,
+                                            Association: '',
+                                            Expressions:['Id','Name'],
+                                            SubTree:
+                                            [
+                                                {
+                                                    Id: 2,
+                                                    Association: 'MyTasks',
+                                                    Filter: 'Status <> STATUS_CLOSED',
+                                                    Sort: "UserOrder",
+                                                    SubTree:[
+                                                        {
+                                                            Id: 3,
+                                                            Association: 'Actor',
+                                                            Expressions:['$ref', 'Name']
+                                                        },
+                                                        {
+                                                            Id: 4,
+                                                            Association: 'TaskList',
+                                                            Expressions:['$ref', 'Name']
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]   
+                                });
         if(res)
-            currentList = res.TaskList;
+            user = res.User;
         else
-            currentList = null
+            user = null
     }
 
     async function reloadTasks(selectRecommendation)
     {
         await fetchData();
-        listComponent.reload(currentList, selectRecommendation);
+        listComponent.reload(user, selectRecommendation);
     }
     
 
@@ -122,7 +110,7 @@
 
     async function addTask(newTaskAttribs)
     {
-        let newTask = await reef.post(`/app/Lists/${currentList.Id}/Tasks/new`, newTaskAttribs)
+        let newTask = await reef.post(`/user/MyTasks/new`, newTaskAttribs)
         if(!newTask)
             return null;
 
@@ -152,8 +140,8 @@
                 separator: true
             },
             {
-                caption: 'Responsible',
-                action: (focused) => { listComponent.edit(task, 'Actor') }
+                caption: 'List',
+                action: (focused) => { listComponent.edit(task, 'TaskList') }
             },
             {
                 caption: 'Due Date',
@@ -204,26 +192,24 @@
 </script>
 
 
-{#if currentList}
-    <Page   self={currentList} 
+{#if user}
+    <Page   self={user} 
             cl="!bg-white dark:!bg-stone-900 w-full h-full flex flex-col overflow-y-auto overflow-x-hidden py-1 px-1 border-0" 
             toolbarOperations={pageOperations}
-            clears_context='props sel'
-            title={currentList.Name}>
+            clears_context='props sel'>
 
-        <List   self={currentList} 
-                a='Tasks' 
-                title={currentList.Name} 
+        <List   self={user} 
+                a='MyTasks' 
                 toolbarOperations={taskOperations} 
                 contextMenu={taskContextMenu}
-                orderAttrib='ListOrder'
+                orderAttrib='UserOrder'
                 bind:this={listComponent}>
             <ListTitle a='Title'/>
             <ListSummary a='Summary'/>
             <ListInserter action={addTask} icon/>
 
-            <ListComboProperty  name="Actor" association>
-                <ComboSource objects={users} key="$ref" name='Name'/>
+            <ListComboProperty  name="TaskList" association>
+                <ComboSource objects={lists} key="$ref" name='Name'/>
             </ListComboProperty>
 
             <ListDateProperty name="DueDate"/>

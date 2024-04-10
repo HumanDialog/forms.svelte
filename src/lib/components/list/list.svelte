@@ -1,11 +1,12 @@
 <script lang="ts">
     import {setContext, getContext, afterUpdate, tick, onMount} from 'svelte'
     import {data_tick_store, contextItemsStore, contextTypesStore, page_title } from '../../stores'
-    import {activateItem, getActive, clearActiveItem, parseWidthDirective} from '../../utils' 
+    import {activateItem, getActive, clearActiveItem, parseWidthDirective, getPrev, getNext, swapElements, getLast, insertAfter} from '../../utils' 
     
     import {rList_definition} from './List'
     import List_element from './internal/list.element.svelte'
     import Inserter from './internal/list.inserter.svelte'
+	import { informModification, pushChanges } from '$lib/updates';
     
     export let title    :string = ''
     
@@ -13,6 +14,8 @@
     export let a        :string = '';
 
     export let objects  :object[] | undefined = undefined;
+
+    export let orderAttrib: string | undefined = undefined;
 
     export let context  :string = ""
     export let typename :string = '';
@@ -22,6 +25,16 @@
     export let contextMenu;
 
     export let key: string = '';
+
+    // reload selection parameter
+    export const CLEAR_SELECTION = 0;
+    export const KEEP_SELECTION = -1;
+    export const SELECT_PREVIOUS = -2;
+    export const SELECT_NEXT = -3;
+    export const KEEP_OR_SELECT_NEXT = -4;
+
+    export const ORDER_STEP = 64;
+    export const MIN_ORDER = 0;
 
 
     let definition :rList_definition = new rList_definition;
@@ -43,6 +56,7 @@
 
     let inserter;
     let item_key :string = '';
+    let item_type: string = '';
 
     clearActiveItem('props')
 
@@ -99,26 +113,130 @@
         }
     })
 
-    export function refresh()
+    export function rereder()
     {
         setup();
     }
 
-    export function updateObjects(_objects :object[])
+    export function reload(data: object|object[], selectElement=KEEP_SELECTION)
     {
-        objects = _objects;
+        let currentSelectedItem = getActive('props');
+        let selectElementId = 0;
+        let altSelectElementId = 0;
+        switch(selectElement)
+        {
+        case CLEAR_SELECTION:
+            selectElementId = 0;
+            break;
+        case KEEP_SELECTION:
+            selectElementId = currentSelectedItem.Id ?? 0;
+            break;
+        case SELECT_PREVIOUS:
+            if(currentSelectedItem)
+            {
+                const selectedItemIdx = items?.findIndex(e => e == currentSelectedItem)
+                if(selectedItemIdx && selectedItemIdx > 0)
+                    selectElementId = items[selectedItemIdx-1].Id ?? 0;
+            }
+            break;
 
-        setup();
+        case SELECT_NEXT:
+            if(currentSelectedItem)
+            {
+                const selectedItemIdx = items?.findIndex(e => e == currentSelectedItem)
+                if(selectedItemIdx && selectedItemIdx < items.length-1)
+                    selectElementId = items[selectedItemIdx+1].Id ?? 0;
+            }
+            break;
+
+        case KEEP_OR_SELECT_NEXT:
+            {
+                selectElementId = currentSelectedItem.Id ?? 0;
+                if(currentSelectedItem)
+                {
+                    const selectedItemIdx = items?.findIndex(e => e == currentSelectedItem)
+                    if(selectedItemIdx && selectedItemIdx < items.length-1)
+                        altSelectElementId = items[selectedItemIdx+1].Id ?? 0;
+                }
+                
+            }
+            break;
+
+        default:
+            if( typeof selectElement === 'object' &&
+                !Array.isArray(selectElement) &&
+                selectElement !== null)
+                selectElementId = selectElement.Id;
+            else
+                selectElementId = selectElement;
+        }
+
+        if(Array.isArray(data))
+            objects = data;
+        else
+            self = data;
+
+        rereder();
+
+        if(selectElementId > 0)
+        {
+            let itemToActivate = items?.find(e => e.Id == selectElementId);
+            if(itemToActivate)
+            {
+                activate_after_dom_update = itemToActivate;
+            }
+            else if(altSelectElementId > 0)
+            {
+                itemToActivate = items?.find(e => e.Id == altSelectElementId);
+                if(itemToActivate)
+                {
+                    activate_after_dom_update = itemToActivate;
+                }
+            }       
+        }
+
+        if(!activate_after_dom_update)
+            activateItem('props', null, [])
     }
-    
-    export function updateSelf(_self :object)
+
+    export function moveUp(element: object)
     {
-        self = _self;
-        setup();
+        if(!orderAttrib)
+            return;
+
+        let prev = getPrev(items, element);
+        if(!prev)
+            return;
+
+        items = swapElements(items, element, prev);
+        
+        [element[orderAttrib], prev[orderAttrib]] = [prev[orderAttrib], element[orderAttrib]]
+
+        informModification(element, orderAttrib)
+        informModification(prev, orderAttrib)
+        pushChanges()
+    }
+
+    export function moveDown(element: object)
+    {
+        if(!orderAttrib)
+            return;
+        
+        let next = getNext(items, element);
+        if(!next)
+            return;
+
+        items = swapElements(items, element, next);
+        
+        [element[orderAttrib], next[orderAttrib]] = [next[orderAttrib], element[orderAttrib]]
+
+        informModification(element, orderAttrib)
+        informModification(next, orderAttrib)
+        pushChanges();
     }
 
     let last_activated_element :object | null = null;
-    export async function add(after :object|null = null)
+    export async function addRowAfter(after :object|null = null)
     {
         if(!definition.can_insert)
             return;
@@ -144,22 +262,13 @@
                 if(detail.incremental)
                 {
                     let current_active = getActive('props');
-                    await add(current_active);
+                    await addRowAfter(current_active);
                 }
             }
         } );
     }
 
-    async function insert(title :string, after :object | null)
-    {
-        let new_element = await definition.onInsert(title, after);
-        if(!new_element)
-            return;
-
-        activate_after_dom_update = new_element;
-        
-        refresh();
-    }
+    
 
     export function remove(element :object)
     {
@@ -187,6 +296,93 @@
             return;
         
         rows[editing_idx].editProperty(property_name);
+    }
+
+    function reorderElements(items: object[], from :object | null = null)
+    {
+        console.log(from)
+
+        let fromIdx;
+        let fromOrder;
+        if(from)
+        {
+            fromOrder = from[orderAttrib];
+            fromIdx = items.findIndex(e => e == from);
+        }
+        else
+        {
+            fromOrder = MIN_ORDER;
+            fromIdx = 0;
+        }
+
+        console.log('reorder: ', fromOrder, fromIdx, items)
+
+        let order = fromOrder;
+        for(let i=fromIdx; i<items.length; i++)
+        {
+            let el = items[i];
+            console.log('reoder el: ', el, order, i)
+
+            el[orderAttrib] = order;
+            informModification(el, orderAttrib)
+            
+
+            order += ORDER_STEP;
+        }
+
+        pushChanges();
+    }
+
+    async function insert(title :string, after :object | null)
+    {
+        let newElement = {
+            [definition.title]: title
+        }
+
+        if(after && orderAttrib)
+        {
+            const leftElement = after;
+            const leftOrder = leftElement[orderAttrib];
+            const rightElement = getNext(items, leftElement)
+            if(rightElement)
+            {
+                let rightOrder = rightElement[orderAttrib];
+                if(rightOrder - leftOrder >= 2)
+                    newElement[orderAttrib] = leftOrder + Math.floor((rightOrder - leftOrder)/2);
+                else
+                {
+                    reorderElements(items, leftElement)
+                    rightOrder = rightElement[orderAttrib];
+                    newElement[orderAttrib] = leftOrder + Math.floor((rightOrder - leftOrder)/2);
+                }
+            }
+            else
+                newElement[orderAttrib] = leftOrder + ORDER_STEP;
+        }
+        else if(orderAttrib)
+        {
+            const lastElement = getLast(items)
+            if(lastElement)
+            {
+                const lastOrder = lastElement[orderAttrib];
+                newElement[orderAttrib] = lastOrder + ORDER_STEP;
+            }
+            else 
+                newElement[orderAttrib] = MIN_ORDER;
+        }
+
+        let insertedElement = await definition.onInsert(newElement);
+        if(!insertedElement)
+            return;
+
+        if(after)
+            insertAfter(items, after, insertedElement)
+        else
+            items.push(insertedElement)
+
+        activate_after_dom_update = insertedElement;
+        
+        rereder();
     }
 
 </script>

@@ -20,6 +20,7 @@
 
     export let compact :boolean = false;
     export let inContext :string = 'sel'   // in compact mode
+    export let pushChangesImmediately: boolean = true;
 
     let on_hide_callback = undefined;
     export function show(event, hide_callback)
@@ -372,7 +373,8 @@
                 informModification(item, a, typename);
 
                 $data_tick_store = $data_tick_store + 1;
-                pushChanges();
+                if(pushChangesImmediately)
+                    pushChanges();
             }
 
             if(!!changed)

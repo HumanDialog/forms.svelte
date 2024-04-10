@@ -21,7 +21,7 @@
                     "alice@example.com",
                     "bob@example.com"
                 ],
-                api_version: "v001"}
+                apiVersion: "v001"}
             });
 
     const layout = {

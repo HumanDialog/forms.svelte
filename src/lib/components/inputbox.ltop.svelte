@@ -18,6 +18,7 @@
     export let val = ''
         
     export let placeholder = 'pl'
+    export let pushChangesImmediately = true;
 
     export  let s = 'sm'
     export  let c = ''
@@ -93,7 +94,8 @@
     function accept_change()
     {
         $data_tick_store = $data_tick_store + 1;
-        pushChanges();
+        if(pushChangesImmediately)
+            pushChanges();
             
     }
 

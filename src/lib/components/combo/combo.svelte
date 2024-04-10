@@ -32,6 +32,8 @@
     export let cached :boolean = false;
     export let filtered: boolean = false;
     
+    export let pushChangesImmediately: boolean = true;
+    
 
     let is_compact :boolean = getContext('rIs-table-component') || compact;
     
@@ -469,7 +471,9 @@
                     if(item && a && typename)
                     {
                         informModification(item, a, typename);
-                        pushChanges();
+                        
+                        if(pushChangesImmediately)
+                            pushChanges();
                     }
                 }
             }

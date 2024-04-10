@@ -10,6 +10,7 @@ export const contextToolbarOperations = writable([]);
 export const pageToolbarOperations = writable([]);
 export const page_title = writable('');
 export const nav_titles = writable({});
+export const mainViewReloader = writable(1);
 
 export function setNavigatorTitle(key, title)
 {
@@ -28,6 +29,13 @@ export function hasDataItem()
 {
     let itm = get(contextItemsStore).data
     return itm !== null && itm !== undefined;
+}
+
+export function reloadMainView()
+{
+    let val = get(mainViewReloader);
+    val += 1;
+    mainViewReloader.set(val);
 }
 
 

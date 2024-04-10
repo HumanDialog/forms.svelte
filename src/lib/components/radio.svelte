@@ -13,6 +13,7 @@
     export let typename = '';
 
     export let c=''
+    export let pushChangesImmediately: boolean = true;
 
     let   item = null
     let   additional_class = $$restProps.class ?? '';
@@ -50,7 +51,9 @@
                 informModification(item, a, typename);
                 
                 $data_tick_store = $data_tick_store + 1;
-                pushChanges();
+                
+                if(pushChangesImmediately)
+                    pushChanges();
             }
         }
     }

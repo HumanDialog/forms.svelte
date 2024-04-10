@@ -16,6 +16,7 @@
     export let inserter = false;
     
     export let c=''
+    export let pushChangesImmediately: boolean = true;
 
     let is_table_component :boolean = getContext('rIs-table-component');
     
@@ -164,7 +165,9 @@
     function accept_change()
     {
         $data_tick_store = $data_tick_store + 1;
-        pushChanges();
+
+        if(pushChangesImmediately)
+                pushChanges();
             
     }
 

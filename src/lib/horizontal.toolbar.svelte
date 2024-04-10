@@ -32,7 +32,7 @@
 
     } from "./stores.js";
     import Icon from './components/icon.svelte';
-    import {session, signin_href, signout_href} from '@humandialog/auth.svelte'
+    import {session, signInHRef, signOutHRef} from '@humandialog/auth.svelte'
 
     import VerticalToolbar from '$lib/vertical.toolbar.svelte'
     
@@ -54,10 +54,10 @@
     {
         config = appConfig.mainToolbar;
         has_selection_details = appConfig.selectionDetails;
-        is_logged_in = $session.is_active;
+        is_logged_in = $session.isActive;
         show_sign_in_out_icons = config.signin ? true : false;
-        sign_in_href = $signin_href;
-        sign_out_href = $signout_href;
+        sign_in_href = $signInHRef;
+        sign_out_href = $signOutHRef;
 
         tabs = Object.keys(appConfig.sidebar);
         if(tabs.length > 1)

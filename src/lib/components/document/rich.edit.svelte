@@ -28,6 +28,7 @@
     export let compact = false;
 
     export let c='';
+    export let pushChangesImmediately: boolean = true;
 
     let onBlur = undefined;
     export function run(onStop=undefined)
@@ -1348,7 +1349,8 @@
             if(typename)
             {
                 informModification(item, a, typename);
-                pushChanges();
+                if(pushChangesImmediately)
+                    pushChanges();
             }
 
             last_tick = $data_tick_store + 1;
