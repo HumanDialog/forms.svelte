@@ -58,6 +58,7 @@ export { default as Modal} from './modal.svelte'
 export { default as MembersPage} from './tenant.members.svelte'
 
 export {default as Kanban} from './components/kanban/kanban.svelte'
+export {default as KanbanSource} from './components/kanban/kanban.source.svelte'
 export {default as KanbanColumn} from './components/kanban/kanban.column.svelte'
 export {default as KanbanTitle} from './components/kanban/kanban.title.svelte'
 export {default as KanbanSummary} from './components/kanban/kanban.summary.svelte'

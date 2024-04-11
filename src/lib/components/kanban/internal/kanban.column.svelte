@@ -6,18 +6,18 @@
     import {KanbanColumnTop, KanbanColumnBottom} from '../Kanban'
     import Inserter from './kanban.inserter.svelte'
     import {FaPlus} from 'svelte-icons/fa'
+    import type{rKanban_definition, rKanban_column } from '../Kanban'
+    import {getNext, getPrev, getFirst, getLast, swapElements} from '../../../utils.js'
+    import {informModification, pushChanges} from '../../../updates.js'
 
-    export let title:      string = '';
-    export let width:      string = 'w-[240px]';
-    export let self:       object|undefined = undefined;
-    export let a:          string = '';
-    export let objects:    object[]|undefined = undefined;
-    export let context:    string = ''
-    export let key:        string = ''
+
     export let currentColumnIdx :number
     
     export let showMoveOperationsForItem: Function | undefined = undefined;
     export let scrollViewToCard: Function | undefined = undefined;
+    export let onReplace: Function;
+    export let onMoveUp: Function;
+    export let onMoveDown: Function;
 
     let column_element: HTMLElement;
     export function getHeight()
@@ -48,53 +48,32 @@
         }
     }
 
-    let definition = getContext("rKanban-definition");
+    let definition :rKanban_definition = getContext("rKanban-definition");
+    let column_def: rKanban_column = definition.columns[currentColumnIdx];
 
-    let     item  :object | null = null
-    let     items :object[] | undefined = undefined;
-    let     ctx   :string = context ? context : getContext('ctx');
+    let     column_items :object[] | undefined = undefined;
+    
+    let width_class = column_def.width ? `w-11/12 sm:${column_def.width}` : 'w-11/12 sm:w-[240px]'
 
-    let     last_tick = -1   
-    let     item_key :string = '';
+    $: setup_data();
+    $: force_rerender($data_tick_store, $contextItemsStore)
 
-    let width_class = width ? `w-11/12 sm:${width}` : 'w-11/12 sm:w-[240px]'
-
-    $: setup($data_tick_store, $contextItemsStore);
-
-    function setup(...args)
+    export function reload()
     {
-        //console.log('list setup', objects)
-        last_tick = $data_tick_store            
-        item = self ?? $contextItemsStore[ctx];
-        
-        items = undefined;
-
-        if(objects)
-        {
-            items = objects;
-        }
-        else if(item && a )
-            items = item[a];
-
-        if(items == undefined)
-            items = [];
-
-        if(items.length > 0)
-        {
-            let first_element = items[0];
-            let keys = Object.keys(first_element);
-            if(key)
-                item_key = key;
-            else if(keys.includes('Id'))
-                item_key = 'Id';
-            else if(keys.includes('$ref'))
-                item_key = '$ref';
-            else if(keys.length > 0)
-                item_key = keys[0];
-            else
-                item_key = '';
-        }
+        if(definition.stateAttrib)
+            column_items = definition.getItems().filter( e => e[definition.stateAttrib] == column_def.state)
     }
+
+    function setup_data(...args)
+    {
+        reload();
+    }
+
+    function force_rerender(...args)
+    {
+        column_items = [...column_items];
+    }
+
 
     let cards = [];
     export function findCardByItem(item: object): any
@@ -102,7 +81,7 @@
         if(!cards)
             return null;
 
-        const item_idx = items?.findIndex( i => i == item)
+        const item_idx = column_items?.findIndex( i => i == item)
         if(item_idx >= 0)
         {
             return cards[item_idx]
@@ -110,6 +89,8 @@
         else
             return null;
     }
+
+    
 
     let inserter;
     const None = 0
@@ -164,7 +145,7 @@
     afterUpdate(() => {
         if(activateAfterDomUpdate)
         {
-            let activateAfterDomUpdateIdx = items.findIndex( e => e == activateAfterDomUpdate);
+            let activateAfterDomUpdateIdx = column_items.findIndex( e => e == activateAfterDomUpdate);
             activateAfterDomUpdate = null;
             if(activateAfterDomUpdateIdx >= 0)
             {
@@ -172,13 +153,25 @@
             }
         }
     })
+
+    function getItemKey(item: object): string | number
+    {
+        if(definition.key)
+            return item[definition.key];
+        else if(item.Id)
+            return item.Id;
+        else if(item.$ref)
+            return item.$ref;
+        else 
+            return 0;
+    }
     
 </script>
 
 
 <section class="flex-none sm:flex-1 sm:min-w-[180px] sm:max-w-[240px] {width_class}">
     <header>
-        <h2 class="mb-2 text-lg sm:text-xs uppercase w-full text-center whitespace-nowrap relative">{title}
+        <h2 class="mb-2 text-lg sm:text-xs uppercase w-full text-center whitespace-nowrap relative">{column_def.title}
             <button class="absolute right-2 w-4 sm:w-2.5"
                     on:click={(e) => add(KanbanColumnTop)}>
                 <FaPlus/>
@@ -191,11 +184,14 @@
                         bind:this={inserter} />
         {/if}
 
-        {#if items && items.length > 0}
-            {#each items as element, item_idx (element[item_key])}
+        {#if column_items && column_items.length > 0}
+            {#each column_items as element, item_idx (getItemKey(element))}
                 <Card   item={element} 
                         {showMoveOperationsForItem}
                         {scrollViewToCard}
+                        {onMoveUp}
+                        {onMoveDown}
+                        {onReplace}
                         runInserter={add}
                         bind:this={cards[item_idx]}>
                     <svelte:fragment slot="kanbanCardTopProps" let:element>

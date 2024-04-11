@@ -7,7 +7,7 @@
     
 	import Tasklist from './tasklist.svelte';
     import Task from './task.svelte'
-    import Board from './board.svelte';
+    import Board from './list.board.svelte';
 
    
 
@@ -38,7 +38,8 @@
                         '/tasklist/*':  { component: Tasklist},
                         '/task' :       { component: Task },
                         '/task/*' :     { component: Task },
-                        '/board' :      { component: Board}
+                        '/listboard' :  { component: Board},
+                        '/listboard/*' :  { component: Board}
                     }
                 },
                 mainToolbar : {

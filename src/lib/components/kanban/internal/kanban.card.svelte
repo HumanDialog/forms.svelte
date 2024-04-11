@@ -16,6 +16,10 @@
     export let scrollViewToCard: Function | undefined = undefined;
     export let runInserter: Function | undefined = undefined;
 
+    export let onMoveUp: Function;
+    export let onMoveDown: Function;
+    export let onReplace: Function;
+
     let definition = getContext("rKanban-definition");
 
     $: is_row_active = calculate_active(item, $contextItemsStore)
@@ -60,7 +64,10 @@
             props: {
                     definition: definition,
                     item: item,
-                    afterActionOperation: scrollViewToCard
+                    afterActionOperation: scrollViewToCard,
+                    onMoveUp: onMoveUp,
+                    onMoveDown: onMoveDown,
+                    onReplace: onReplace
             },
         },
         {
@@ -80,7 +87,10 @@
                                 {
                                     definition: definition,
                                     item: item,
-                                    afterActionOperation: showMoveOperationsForItem
+                                    afterActionOperation: showMoveOperationsForItem,
+                                    onMoveUp: onMoveUp,
+                                    onMoveDown: onMoveDown,
+                                    onReplace: onReplace
                                 })
     }
 

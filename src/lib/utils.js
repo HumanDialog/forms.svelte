@@ -455,7 +455,7 @@ export function removeAt(array, index)
 export function remove(array, element)
 {
     let idx = array.findIndex((t) => t == element);
-    return array.removeAt(idx);
+    return removeAt(array, idx);
 }
 
 export function swapElements(array, e1, e2)

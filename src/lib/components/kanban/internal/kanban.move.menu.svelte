@@ -5,6 +5,9 @@
     export let definition :rKanban_definition;
     export let item :object;
     export let afterActionOperation : Function | undefined = undefined;
+    export let onMoveUp: Function;
+    export let onMoveDown: Function;
+    export let onReplace: Function;
 
     function replaceMenu()
     {
@@ -24,7 +27,7 @@
                         bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 active:bg-stone-300 dark:active:bg-stone-600
                         border rounded border-stone-200 dark:border-stone-600 focus:outline-none
                         inline-flex items-center justify-center"
-                        on:click={(e) => { definition.onUp(item); replaceMenu()}}>
+                        on:click={(e) => { onMoveUp(item); replaceMenu()}}>
             <div class="w-3 h-3"><FaAngleUp/></div>
         </button>
 
@@ -33,7 +36,7 @@
                         bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 active:bg-stone-300 dark:active:bg-stone-600
                         border rounded border-stone-200 dark:border-stone-600 focus:outline-none
                         inline-flex items-center justify-center"
-                        on:click={(e) => { definition.onDown(item); replaceMenu()}}>
+                        on:click={(e) => { onMoveDown(item); replaceMenu()}}>
             <div class="w-3 h-3"><FaAngleDown/></div>
         </button>
     </section>
@@ -47,7 +50,7 @@
                             bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 active:bg-stone-300 dark:active:bg-stone-600
                             border rounded border-stone-200 dark:border-stone-600 focus:outline-none
                             inline-flex items-center justify-center"
-                            on:click={(e) => { definition.onReplace(item, idx, KanbanColumnTop); replaceMenu()}}>
+                            on:click={(e) => { onReplace(item, idx, KanbanColumnTop); replaceMenu()}}>
                 <div class="w-3 h-3"><FaAngleDoubleUp/></div>
             </button>
 
@@ -56,7 +59,7 @@
                             bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 active:bg-stone-300 dark:active:bg-stone-600
                             border rounded border-stone-200 dark:border-stone-600 focus:outline-none
                             inline-flex items-center justify-center"
-                            on:click={(e) => { definition.onReplace(item, idx, KanbanColumnBottom); replaceMenu()}}>
+                            on:click={(e) => { onReplace(item, idx, KanbanColumnBottom); replaceMenu()}}>
                 <div class="w-3 h-3"><FaAngleDoubleDown/></div>
             </button>
         </section>
@@ -114,7 +117,7 @@
                                 m-0
                                 flex items-center justify-center
                                 disable-dbl-tap-zoom"
-                                on:click={(e) => { definition.onReplace(item, idx, KanbanColumnTop); replaceMenu()}}>
+                                on:click={(e) => { onReplace(item, idx, KanbanColumnTop); replaceMenu()}}>
                     <div class="    w-10 h-10
                                     text-white bg-zinc-500 hover:bg-zinc-500 
                                     font-medium rounded-full text-sm text-center shadow-md
@@ -131,7 +134,7 @@
                                 m-0
                                 flex items-center justify-center
                                 disable-dbl-tap-zoom"
-                                on:click={(e) => { definition.onReplace(item, idx, KanbanColumnBottom); replaceMenu()}}>
+                                on:click={(e) => { onReplace(item, idx, KanbanColumnBottom); replaceMenu()}}>
                     <div class="    w-10 h-10
                                     text-white bg-zinc-500 hover:bg-zinc-500 
                                     font-medium rounded-full text-sm text-center shadow-md
