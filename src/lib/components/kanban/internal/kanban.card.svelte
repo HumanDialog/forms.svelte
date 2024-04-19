@@ -1,32 +1,35 @@
 <script lang="ts">
-	import {getContext} from 'svelte'
+	import {getContext, tick} from 'svelte'
     import {    contextItemsStore, 
                 isActive, 
                 isSelected, 
                 activateItem, 
                 selectable,
                 editable,
-				showFloatingToolbar} from '$lib'
-    import {FaArrowsAlt, FaTrash, FaPlus, FaAlignLeft} from 'svelte-icons/fa'
+				showFloatingToolbar,
+				informModification,
+                pushChanges} from '$lib'
+    import {FaArrowsAlt, FaTrash, FaPlus, FaExternalLinkAlt} from 'svelte-icons/fa'
     import MoveOperations from './kanban.move.menu.svelte'
-
-
+    import Properties from './kanban.props.svelte'
+    import {KanbanCardTop, KanbanCardMiddle, KanbanCardBottom} from '../Kanban'
+    
     export let item: object;
-    export let showMoveOperationsForItem: Function | undefined = undefined;
-    export let scrollViewToCard: Function | undefined = undefined;
-    export let runInserter: Function | undefined = undefined;
+   // export let showMoveOperationsForItem: Function | undefined = undefined;
+   // export let scrollViewToCard: Function | undefined = undefined;
+   // export let runInserter: Function | undefined = undefined;
 
-    export let onMoveUp: Function;
-    export let onMoveDown: Function;
-    export let onReplace: Function;
-
+    //export let onMoveUp: Function;
+    //export let onMoveDown: Function;
+    //export let onReplace: Function;
+    
     let definition = getContext("rKanban-definition");
 
-    $: is_row_active = calculate_active(item, $contextItemsStore)
-    $: is_row_selected = selected(item, $contextItemsStore)
+    $: isCardActive = calculate_active(item, $contextItemsStore)
+    $: isCardSelected = selected(item, $contextItemsStore)
 
-    $: selected_class = is_row_selected ? "!border-blue-300" : "";
-    $: focused_class = is_row_active ? "bg-stone-100 dark:bg-stone-700" : "";
+    $: selectedClass = isCardSelected ? "!border-blue-300" : "";
+    $: focusedClass = isCardActive ? "bg-stone-100 dark:bg-stone-700" : "";
 
     function calculate_active(...args)
     {
@@ -48,38 +51,28 @@
             return;
         }
 
+        let operations = getOperations();
         activateItem('props', item, operations);
     }
 
-    let operations = [
+    function getOperations()
+    {
+        let operations = []
+        
+        const getCustomOperations = definition.getCardOperations;
+        if(getCustomOperations)
         {
-            caption: '',
-            icon: FaPlus,
-            action: (f) => { if(runInserter) runInserter(item) }
-        },
-        {
-            caption: '',
-            icon: FaArrowsAlt,
-            toolbar: MoveOperations,
-            props: {
-                    definition: definition,
-                    item: item,
-                    afterActionOperation: scrollViewToCard,
-                    onMoveUp: onMoveUp,
-                    onMoveDown: onMoveDown,
-                    onReplace: onReplace
-            },
-        },
-        {
-            caption: '',
-            icon: FaTrash,
-            action: (f) => definition.onRemove(item)
+            const cutomOperations = getCustomOperations(item)
+            cutomOperations.forEach( o => operations.push(o))
         }
-    ]
 
-    let moveButton;
+
+        return operations;
+    }
+
+    //let moveButton;
     let card;
-    export function showMoveOperations()
+    /*export function showMoveOperations()
     {
         let rect = moveButton.getBoundingClientRect()
 
@@ -92,7 +85,7 @@
                                     onMoveDown: onMoveDown,
                                     onReplace: onReplace
                                 })
-    }
+    }*/
 
     export function _scrollViewToCard()
     {
@@ -105,13 +98,106 @@
         )
     }
 
+    function onTitleChanged(text)
+    {
+        if(definition.titleOnChange)
+            definition.titleOnChange(text, item)
+        else
+        {
+            item[definition.titleAttrib] = text;
+            informModification(item, definition.titleAttrib);
+            pushChanges();
+        }
+    }
+
+    function onSummaryChanged(text)
+    {
+        if(definition.summaryOnChange)
+            definition.summaryOnChange(text, item)
+        else
+        {
+            item[definition.summaryAttrib] = text;
+            informModification(item, definition.summaryAttrib);
+            pushChanges();
+        }
+    }
+
+    function setSelectionAtEnd(element: HTMLElement)
+    {
+        const textNode = element.childNodes[0]
+        const text = textNode.textContent;
+
+        let range = document.createRange();
+        let end_offset = text.length;
+        let end_container = textNode;
+        range.setStart(end_container, end_offset)
+        range.setEnd(end_container, end_offset)
+        let sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
     
+    let topProps :any;
+    let middleProps :any;
+    let bottomProps :any;
+    let titleElement: any;
+    let summaryElement: any;
+    let summaryPlaceholder: boolean = false;
+    export async function editProperty(field: string)
+    {
+        if(field == "Title")
+        {
+            titleElement.focus();
+            
+            await tick();
+            setSelectionAtEnd(titleElement)
+        }
+        else if(field == "Summary")
+        {
+            if(!!summaryElement)
+            {
+                summaryElement.focus();
+                await tick();
+                setSelectionAtEnd(summaryElement)
+            }
+            else
+            {
+                summaryPlaceholder = true;
+                await tick();
+                if(!!summaryElement)
+                    summaryElement.focus();
+            }
+        }
+        else
+        {
+
+            const property = definition.properties.find(p => p.name == field)
+            if(!property)
+                return;
+
+            switch(property.position)
+            {
+            case KanbanCardTop:
+                topProps.editProperty(field)
+                break;
+
+            case KanbanCardMiddle:
+                middleProps.editProperty(field)
+                break;
+
+            case KanbanCardBottom:
+                bottomProps.editProperty(field)
+                break;
+            }
+        }
+    }
+
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 
-<li class="mx-2 pt-2 pb-4 px-1 rounded-md border border-transparent {selected_class} {focused_class}"
-     class:cursor-pointer={!is_row_active}
+<li class="mx-2 pt-2 pb-4 px-1 rounded-md border border-transparent {selectedClass} {focusedClass}"
+     class:cursor-pointer={!isCardActive}
      on:click={activate}
      use:selectable={item} 
      bind:this={card}>
@@ -119,7 +205,7 @@
     <!--  -->
     <!--section class="h-6 w-full flex flex-row ">
         <button class="h-3 w-3"
-                class:hidden={!is_row_active}
+                class:hidden={!isCardActive}
                 on:click={(e) => showMoveOperations()}
                 bind:this={moveButton}>
             <FaArrowsAlt/>
@@ -137,25 +223,39 @@
             <slot name="kanbanCardTopProps" element={item}/>
         </section>
     {/if}
+    <Properties position={KanbanCardTop} {item} bind:this={topProps}/>
     
 
-    <h3  class=" text-lg font-semibold min-h-[1.75rem]
-                sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
-                whitespace-nowrap overflow-clip truncate w-full sm:flex-none
-                relative"
-                use:editable={{
-                    action: (text) => definition.titleOnChange(text, item), 
-                    active: true}}>
-        {item[definition.titleAttrib]}
-        
+    {#if isCardActive}
+        <h3  class=" text-lg font-semibold min-h-[1.75rem]
+                    sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
+                    whitespace-nowrap overflow-clip truncate w-full sm:flex-none
+                    relative"
+                    use:editable={{
+                        action: (text) => onTitleChanged(text), 
+                        active: true,
+                        readonly: definition.titleReadOnly,
+                        onFinish: (d) => {titleElement.blur()}}}
+                    bind:this={titleElement}>
+            {item[definition.titleAttrib]}
+
         {#if definition.onOpen}
             <button class="absolute top-1 right-0 w-5 h-5 sm:w-3 sm:h-3"
-                    class:hidden={!is_row_active}
                     on:click={(e) => definition.onOpen(item)}>
-                <FaAlignLeft/>
+                <FaExternalLinkAlt/>
             </button>
         {/if}
-    </h3>
+        </h3>
+    {:else}
+        <h3  class=" text-lg font-semibold min-h-[1.75rem]
+                    sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
+                    whitespace-nowrap overflow-clip truncate w-full sm:flex-none
+                    relative">
+            {item[definition.titleAttrib]}
+
+        </h3>
+    {/if}
+
 
     {#if $$slots.kanbanCardMiddleProps}
         <section class="w-full flex flex-row">
@@ -163,17 +263,39 @@
         </section>
     {/if}
 
-    {#if item[definition.summaryAttrib]}
-        <summary class="  sm:text-xs sm:min-h-[1rem]
-                    text-base min-h-[1.5rem]
-                    text-stone-400
-                    max-h-[75px] sm:max-h-[64px]
-                    text-ellipsis overflow-hidden">
-            {item[definition.summaryAttrib]}
-        </summary>
+    <Properties position={KanbanCardMiddle} {item} bind:this={middleProps}/>
+
+    {#if item[definition.summaryAttrib] || summaryPlaceholder}
+        {#key item[definition.summaryAttrib]}
+            {#if isCardActive}
+                <summary class="  sm:text-xs sm:min-h-[1rem]
+                            text-base min-h-[1.5rem]
+                            text-stone-400
+                            max-h-[75px] sm:max-h-[64px]
+                            overflow-hidden"
+                            use:editable={{
+                                action: (text) => onSummaryChanged(text), 
+                                active: true,
+                                readonly: definition.summaryReadOnly,
+                                onFinish: (d) => {summaryPlaceholder = false}}}
+                            bind:this={summaryElement}>
+                    {item[definition.summaryAttrib]}
+                </summary>
+            {:else}
+                <summary class="  sm:text-xs sm:min-h-[1rem]
+                                text-base min-h-[1.5rem]
+                                text-stone-400
+                                max-h-[75px] sm:max-h-[64px]
+                                overflow-hidden">
+                    {item[definition.summaryAttrib]}
+                </summary>
+            {/if}
+        {/key}
     {/if}
 
     {#if $$slots.kanbanCardBottomProps}
         <slot name="kanbanCardBottomProps" element={item} />
     {/if}
+
+    <Properties position={KanbanCardBottom} {item} bind:this={bottomProps}/>
 </li>

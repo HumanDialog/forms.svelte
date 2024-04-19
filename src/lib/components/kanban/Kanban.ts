@@ -1,10 +1,18 @@
+import type { rList_property } from "../list/List";
+
+export const KanbanCardTop = 1;
+export const KanbanCardMiddle = 2;
+export const KanbanCardBottom = 3;
 
 export class rKanban_column
 {
     public  id:         number;
     public  title:      string = '';
     public  width:      string = 'w-[240px]';
-    public  state:      any = ''
+    public  state:      any = '';
+    public  finishing:  boolean = false
+    public  operations: object[]|undefined = undefined;
+    public  onTitleChanged: Function|undefined = undefined;
 
 }
 
@@ -17,6 +25,8 @@ export class rKanban_definition
     public  summaryAttrib: string = '';
     public  summaryOnChange: Function | undefined = undefined;
     public  summaryReadOnly: boolean = false;
+
+    public properties           :rList_property[] = [];
 
     public  self:       object|undefined = undefined;
     public  a:          string = '';
@@ -34,7 +44,9 @@ export class rKanban_definition
     public  onRemove: Function | undefined = undefined;
     public  onReplace: Function | undefined = undefined;
     public  onOpen: Function | undefined = undefined;
-
+   
+    public  getCardOperations: Function | undefined = undefined;
+    
     private  items: object[] | null = null;
     public   getItems() : object[]
     {
@@ -52,6 +64,37 @@ export class rKanban_definition
                 this.items = [];
         }
         return this.items;
+    }
+
+    public clear() 
+    {
+        this.columns = [];
+        this.titleAttrib = '';
+        this.titleOnChange = undefined;
+        this.titleReadOnly = false;
+        this.summaryAttrib = '';
+        this.summaryOnChange = undefined;
+        this.summaryReadOnly = false;
+        this.properties = [];
+        this.self = undefined;
+        this.a = '';
+        this.objects = undefined;
+        this.context = ''
+        this.key = ''
+        this.typename = ''
+
+        this.stateAttrib = '';
+        this.orderAttrib = ''
+
+        this.onUp = undefined;
+        this.onDown = undefined;
+        this.onAdd = undefined;
+        this.onRemove = undefined;
+        this.onReplace = undefined;
+        this.onOpen = undefined;
+
+        this.getCardOperations = undefined;
+        this.items = null;
     }
 
 }

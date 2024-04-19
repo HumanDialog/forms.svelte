@@ -34,6 +34,22 @@ export function informModification(itm, field_name, type_name=undefined)
     return true;
 };
 
+export function informModificationEx(typeName, itemId, attribName, attribValue)
+{
+    let item_entry = {
+        Id: [typeName] + itemId,
+        type_name: typeName,
+        item: { [typeName]: 
+                {
+                    Id: itemId,
+                    [attribName]: attribValue
+                } },
+    };
+    
+    modified_item_store.set(item_entry);
+    return true;
+}
+
 export function informItem(itm, type_name=undefined)
 {
     if(type_name == undefined)

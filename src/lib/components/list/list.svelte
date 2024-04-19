@@ -146,9 +146,9 @@
 
         case KEEP_OR_SELECT_NEXT:
             {
-                selectElementId = currentSelectedItem.Id ?? 0;
                 if(currentSelectedItem)
                 {
+                    selectElementId = currentSelectedItem.Id ?? 0;
                     const selectedItemIdx = items?.findIndex(e => e == currentSelectedItem)
                     if(selectedItemIdx != undefined && selectedItemIdx >= 0 && selectedItemIdx < items.length-1)
                         altSelectElementId = items[selectedItemIdx+1].Id ?? 0;

@@ -10,13 +10,13 @@
 		DatePicker,
 		Combo,
 		ComboSource,
-		KanbanCallckacks,
+		KanbanCallbacks,
 		KanbanColumnTop,
-		KanbanColumnBottom
+		KanbanColumnBottom,
+        Tags
 	} from '$lib';
 	import { list, global_tags } from './board.data.js';
 	import { reef } from '@humandialog/auth.svelte';
-	import Tags from './tags.svelte';
 
 	let currentList = null;
 	let columnData = [];
@@ -153,10 +153,7 @@
         console.log('open task', item)
     }
 
-	let dueDate;
 	let dueDatePlaceholder = false;
-
-	let responsible;
 	let responsiblePlaceholder = false;
 
 	let kanban;
@@ -167,7 +164,7 @@
 		self={currentList}
 		cl="!bg-white dark:!bg-stone-900 w-full h-full flex flex-col overflow-y-auto overflow-x-hidden py-1 px-1 border-0"
 		toolbarOperations={pageOperations}
-		clears_context="props sel"
+		clearsContext="props sel"
 		title={currentList.Name}
 	>
 		<Kanban class="grow-0" self={currentList} bind:this={kanban}>
@@ -175,7 +172,7 @@
 			<KanbanColumn title="Wykonywane" objects={columnData[1]} />
 			<KanbanColumn title="Do przemyślenia" objects={columnData[2]} />
 
-			<KanbanCallckacks {onUp} {onDown} {onAdd} {onRemove} {onReplace} {onOpen}/>
+			<KanbanCallbacks {onUp} {onDown} {onAdd} {onRemove} {onReplace} {onOpen}/>
 
 			<KanbanTitle a="title" onChange={(text, item) => onTitleChanged(text, item)} />
 			<KanbanSummary a="summary" />

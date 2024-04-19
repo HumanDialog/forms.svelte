@@ -37,7 +37,7 @@
         editable_div?.focus();
     }
 
-    export function get_formatting_operations()
+    export function getFormattingOperations()
     {
         let result = [];
         commands.forEach( c => {
@@ -1330,9 +1330,28 @@
         //console.log('Editor store selection', id, range.begin.absolute_index, range.end.absolute_index);
     }
 
+    let intervalId = 0;
+    function on_focus()
+    {
+        if(pushChangesImmediately)
+        {
+            intervalId = setInterval(() =>
+            {
+                saveData();
+            },
+            2000);
+        }
+    }
+
     function on_blur()
     {
         let active_range : Selection_range = Selection_helper.get_selection(editable_div);
+
+        if(intervalId)
+        {
+            clearInterval(intervalId)
+            intervalId = 0;
+        }
 
         if(onBlur)
         {
@@ -1340,6 +1359,15 @@
             onBlur = undefined
         }
 
+        if(saveData())
+        {
+            last_tick = $data_tick_store + 1;
+            $data_tick_store = last_tick;
+        }
+    }
+
+    function saveData()
+    {
         if(item && a && has_changed_value)
         {
             item[a] = changed_value;
@@ -1347,15 +1375,16 @@
             has_changed_value = false;
 
             if(typename)
-            {
                 informModification(item, a, typename);
-                if(pushChangesImmediately)
-                    pushChanges();
-            }
+            else
+                informModification(item, a);
+            
+            if(pushChangesImmediately)
+                pushChanges();
 
-            last_tick = $data_tick_store + 1;
-            $data_tick_store = last_tick;
+            return true;
         }
+        return false;
     }
 
     
@@ -1388,6 +1417,7 @@
         class="{cs}     {appearance_class} 
                         prose prose-base sm:prose-base dark:prose-invert {additional_class} overflow-y-auto"
         on:blur={on_blur}
+        on:focus={on_focus}
         on:focus
         on:blur
         >

@@ -17,13 +17,20 @@
             tools_visible_store,
             bottom_bar_visible_store, 
             right_sidebar_visible_store,
-            main_sidebar_visible_store} from "./stores.js";     
+            main_sidebar_visible_store,
+            contextItemsStore,
+            context_info_store,
+            contextToolbarOperations,
+            data_tick_store
+        } from "./stores.js";     
     import Icon from './components/icon.svelte';
     import {session, signInHRef, signOutHRef} from '@humandialog/auth.svelte'
 	import { push } from 'svelte-spa-router';
+    
 
     export let appConfig;
     export let mobile=false;
+    export let clearsContext = 'sel props'
     
     
     let tabs = new Array();
@@ -163,17 +170,35 @@
         let pt = new DOMPoint(rect.right, rect.top)
         showMenu(pt, options);    
     }
+
+    function clearSelection()
+    {
+        if (!clearsContext) return;
+
+		let contexts = clearsContext.split(' ');
+		contexts.forEach((c) => {
+			$contextItemsStore[c] = null;
+			$context_info_store[c] = '';
+		});
+
+		//e.stopPropagation();
+
+		$contextToolbarOperations = [];
+		$data_tick_store = $data_tick_store + 1;
+    }
     
 </script>
 
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 
-    <div class="no-print px-0 w-10">
+<section class="no-print flex flex-col w-full h-full" on:click={clearSelection}>
+    <div class="px-0 w-10">
         {#each tabs as tab}
             {@const isSelected = $main_sidebar_visible_store == tab.key}
             <button
                 class="h-16 px-0 flex justify-center items-center w-full text-stone-300 hover:text-stone-100"
                 class:bg-orange-500={isSelected}
-                on:click={()=> (on_tab_clicked(tab.key))}>
+                on:click|stopPropagation={()=> (on_tab_clicked(tab.key))}>
                 
                 <Icon size={6} component={tab.icon}/>
             </button>
@@ -182,18 +207,18 @@
 
     {#if !mobile}
     
-        <div class="no-print mt-auto h-auto items-center w-full">
+        <div class="mt-auto h-auto items-center w-full">
             
             <button
                 class="h-16 px-0 flex justify-center items-center w-full text-stone-300 hover:text-stone-100"
-                on:click={show_options}>
+                on:click|stopPropagation={show_options}>
 
                 <Icon size={4} component={FaCog} />
             </button>
 
         </div>
     {/if} <!-- !mobile -->
-
+</section>
 
     <!--Menu bind:this={menu}/-->
 

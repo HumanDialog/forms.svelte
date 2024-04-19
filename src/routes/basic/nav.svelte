@@ -66,7 +66,7 @@
 
     async function addList(listName, order)
     {
-        await reef.post("/app/Lists/new", 
+        await reef.post("/app/AllLists/new", 
                             { 
                                 Name: listName,
                                 Order: order
@@ -76,13 +76,13 @@
 
     async function deleteList(list)
     {
-        await reef.delete(`/app/Lists/${list.Id}`)
+        await reef.delete(`/app/AllLists/${list.Id}`)
         reload();
     }
 
     async function changeName(list, name)
     {
-        let res = await reef.post(`/app/Lists/${list.Id}/set`, 
+        let res = await reef.post(`/app/AllLists/${list.Id}/set`, 
                                 {
                                     Name: name
                                 });
@@ -91,7 +91,7 @@
 
     async function finishAllOnList(list)
     {
-        await reef.get(`/app/Lists/${list.Id}/FinishAll`)
+        await reef.get(`/app/AllLists/${list.Id}/FinishAll`)
         
         if(isActive(`#/tasklist/${list.Id}`, currentPath))
         {
@@ -171,6 +171,20 @@
         return menu_operations
     }
 
+    let archivedLists = []
+    let navArchivedLists;
+    async function onExpandArchived()
+    {
+        let res = await reef.get("/app/ArchivedLists?sort=-Id&fields=Id,Name,$type");
+        if(res != null)
+        {
+            archivedLists = res.TaskList;
+            navArchivedLists.reload(archivedLists)
+
+        }
+        else
+            archivedLists = [];
+    }
    
   </script>
   
@@ -208,6 +222,21 @@
                     </SidebarItem>
                 </svelte:fragment>
             </SidebarList> 
+        </SidebarGroup>
+
+        <SidebarGroup border title='Archived' collapsable onExpand={onExpandArchived}>
+            <SidebarList    objects={archivedLists}
+                            bind:this={navArchivedLists}>
+                <svelte:fragment let:item>
+                    {@const href = `#/tasklist/${item.Id}`}
+                    <SidebarItem   {href}
+                                    icon={FaList}
+                                    active={isActive(href, currentPath)}>
+                        {item.Name}
+                    </SidebarItem>
+                </svelte:fragment>
+            </SidebarList>
+            
         </SidebarGroup>
         
         {:else}

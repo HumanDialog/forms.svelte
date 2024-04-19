@@ -1,27 +1,91 @@
 <script lang="ts">
-    import {tick} from 'svelte'
+    import {tick, getContext} from 'svelte'
     import Tag from './tag.svelte' 
     import FaPlus from 'svelte-icons/fa/FaPlus.svelte'
-	import {Combo, ComboItem} from '$lib';
+	import Combo from './combo/combo.svelte'
+    import ComboItem from './combo/combo.item.svelte'
+    import {contextItemsStore, data_tick_store, contextTypesStore} from '../stores.js'
+    import {informModification, pushChanges} from '../updates.js'
 
     export let tags: string = ''
     export let globalTags :string = ''
 
+    export let self = null;
+    export let a = '';
+    export let context = '';
+    export let typename = '';
+
     export let onSelect: any|undefined = undefined
     export let onCreate: any|undefined = undefined
-    export let onRemove: any|undefined = undefined
-    export let isCompact: boolean = true;
+    //export let onRemove: any|undefined = undefined
+   
+    export let compact :boolean = true;
+    export let inContext :string = ''   // in compact mode
+    export let pushChangesImmediately: boolean = true;
 
+    export let changed = undefined;
     export let s: string = 'sm'
 
     let userClass = $$props.class ?? '';
 
+    let   item = null
+    let ctx = context ? context : getContext('ctx');
+
     let tagsTable = []
     let globalTagsTable = []
+    let isEditable: boolean = true;
 
-    $:{
+    $: setup($data_tick_store, $contextItemsStore);
+
+    function setup(...args)
+    {
         globalTagsTable = decomposeTags(globalTags)
+
+        if(!tags)
+        {
+            item = self ?? $contextItemsStore[ctx];
+                
+            if(!typename)
+                typename = $contextTypesStore[ctx];
+
+            if(!typename)
+            {
+                if(item.$type)
+                    typename = item.$type;
+                else if(item.$ref)
+                {
+                    let s = item.$ref.split('/')
+                    typename = s[1];
+                }
+            }
+            
+            if(!item[a])
+                tags = '';
+            else
+                tags = item[a];
+        }
+
         tagsTable = decomposeTags(tags, globalTagsTable)
+
+        if(compact)
+        {
+            isEditable = false;
+
+            if(!inContext)
+                isEditable = true;
+            else
+            {
+                let contexts = inContext.split(' ');
+                contexts.forEach(ctx => 
+                {   
+                    const selectedItem = $contextItemsStore[ctx];
+                    if(selectedItem && selectedItem.Id == item.Id)
+                        isEditable = true;
+                } )
+            }
+        }
+        else
+            isEditable =  true;
     }
 
     let addComboVisible: boolean = false;
@@ -47,14 +111,55 @@
         addCombo?.show(undefined, onAfterCloseCombo);
     } 
 
-    function onSelectedTagFromList(itm :object, key :string, name :string)
+    function applyChange()
     {
-        onSelect(key);
+        if(onSelect)
+            onSelect(tags)
+        else if(item != null)
+        {
+            item[a] = tags;
+            
+            if(typename)
+                informModification(item, a, typename);
+            else
+                informModification(item, a);
+
+            //$data_tick_store = $data_tick_store + 1;
+            if(pushChangesImmediately)
+                pushChanges();
+        }
+
+        if(!!changed)
+            changed(value);
+    }
+
+    function onSelectTag(itm: object, key: string, name: string)
+    {
+        tags += `#${key} `
+        tagsTable = decomposeTags(tags, globalTagsTable)
+
+        applyChange();
+    }
+
+    function onRemoveTag(tag: string)
+    {
+        tags = tags.replace(`#${tag}`, '')
+        tagsTable = decomposeTags(tags, globalTagsTable)
+
+        applyChange();
     }
 
     function onNewTagCreated(key :string, name :string)
     {
-        onCreate(key)
+        tags += `#${key} `
+        globalTags += `#${key} `
+        
+        globalTagsTable = decomposeTags(globalTags)
+        tagsTable = decomposeTags(tags, globalTagsTable)
+
+        applyChange();
+
+        onCreate(globalTags)
     }
 
     function decomposeTags(tags: string, referenceTable=undefined)
@@ -86,7 +191,8 @@
                 if(referenceTable && Array.isArray(referenceTable))
                 {
                     const referenceItem = referenceTable.find(e => e.label == label)
-                    color = referenceItem.color
+                    if(referenceItem)
+                        color = referenceItem.color
                 }
                 
                 if(!color)
@@ -120,15 +226,15 @@
     switch(s)
     {
     case 'md':
-        gap = 'gap-2'
+        gap = 'gap-3 sm:gap-2'
         break;
 
     case 'sm':
-        gap = 'gap-2'
+        gap = 'gap-2 sm:gap-2'
         break;
 
     case 'xs':
-        gap = 'gap-1'
+        gap = 'gap-2 sm:gap-1'
         break;
     }
 
@@ -136,17 +242,17 @@
 
 <div class="{userClass} flex flex-row {gap} flex-wrap mr-1 sm:mr-0">
     {#each tagsTable as tag}
-        {#if onRemove}
+        {#if isEditable}
             <Tag name={tag.label} color={tag.color} {s}
-                 onRemove={(e) => {onRemove(tag.label)}}/>
+                 onRemove={(e) => {onRemoveTag(tag.label)}}/>
         {:else}
             <Tag name={tag.label} color={tag.color} {s}/>
         {/if}
     {/each}
 
-    {#if onSelect}
+    {#if isEditable}
         {#if !addComboVisible}
-            {#if !isCompact}
+            {#if !compact}
                 <button    class="mt-1 pl-0 pr-1 rounded text-stone-500 flex flex-row border-stone-500 border hover:cursor-pointer"
                         on:click={(e) => { show(e, undefined)} }>
                     <div class="ml-1 mt-1 w-3 h-3"><FaPlus/></div>
@@ -155,7 +261,7 @@
         {:else}
             <Combo  compact={true} 
                     inContext='data'
-                    onSelect={onSelectedTagFromList}
+                    onSelect={onSelectTag}
                     onNewItemCreated={onNewTagCreated}
                     s={s}
                     filtered

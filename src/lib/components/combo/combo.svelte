@@ -59,7 +59,7 @@
     let input_pt = 'pt-0.5'
     let input_pb = 'pb-1'
     let font_size = 'text-lg sm:text-sm'
-    let line_h = 'h-5'
+    let line_h = 'h-6 sm:h-5'
     let chevron_mt = 'mt-2 sm:mt-0'
     
     switch (s)
@@ -114,6 +114,7 @@
         if(!typename)
             typename = $contextTypesStore[ctx];
 
+        
         //if(item && a)    
         //    val = item[a]
 

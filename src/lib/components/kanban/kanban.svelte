@@ -1,14 +1,20 @@
 <script lang="ts">
-    import {setContext, getContext, afterUpdate} from 'svelte'
+    import {setContext, getContext, afterUpdate, tick} from 'svelte'
     import {KanbanColumnBottom, KanbanColumnTop, rKanban_definition} from './Kanban'
-    import {parseWidthDirective, clearActiveItem, getPrev, getNext, remove, insertAt, insertAfter, swapElements} from '../../utils' 
+    import {parseWidthDirective, clearActiveItem, getPrev, getNext, remove, insertAt, insertAfter, swapElements, getActive} from '../../utils' 
     import {contextItemsStore, contextTypesStore, data_tick_store } from '../../stores'
     import Column from './internal/kanban.column.svelte'
 	import { informModification, pushChanges } from '$lib/updates';
     
     export let title:               string = ''
-    
     export let c = '';
+
+    // reload selection parameter
+    export const CLEAR_SELECTION = 0;
+    export const KEEP_SELECTION = -1;
+    export const SELECT_PREVIOUS = -2;
+    export const SELECT_NEXT = -3;
+    export const KEEP_OR_SELECT_NEXT = -4;
 
     let user_class = $$props.class ?? ''
     let definition :rKanban_definition = new rKanban_definition;
@@ -19,7 +25,6 @@
 
     clearActiveItem('props')
 
-    
     $: setup();
 
     function setup(...args)
@@ -27,20 +32,164 @@
         
     }
         
-    
-    export function reredner()
+    let renderToken = 0;
+    export async function rerender(selectColumnIdx: number = -1, selectCardId :number = -1)
     {
-        
+        definition.clear();
+        renderToken += 1;
+
+        await tick();
+
+        if(selectColumnIdx >= 0)
+        {
+            if(selectCardId >= 0)
+            {
+                columns[selectColumnIdx].activateByItemId(selectCardId)
+            }
+            else
+            {
+                columns[selectColumnIdx].activate();
+            }
+        }
     }
 
-    export function reload()
+    export async function reload(data: object|object[], selectElement=KEEP_SELECTION)
     {
+        let currentSelectedItem = getActive('props');
+        let selectElementId = 0;
+        let altSelectElementId = 0;
+        let selectedColumnIdx = -1;
+
+        const oa = definition.orderAttrib
+        const sa = definition.stateAttrib
+        let allItems = definition.getItems();
+
+        switch(selectElement)
+        {
+        case CLEAR_SELECTION:
+            selectElementId = 0;
+            break;
+        case KEEP_SELECTION:
+            selectElementId = currentSelectedItem.Id ?? 0;
+            selectedColumnIdx = definition.columns.findIndex(c => c.state == currentSelectedItem[sa])
+            break;
+        case SELECT_PREVIOUS:
+            if(currentSelectedItem)
+            {
+                const currentItemState = currentSelectedItem[sa]
+                selectedColumnIdx = definition.columns.findIndex(c => c.state == currentItemState)
+
+                const columnItems = allItems.filter(e => e[sa] == currentItemState)
+                const columnSelected = columnItems.find(e => e.Id == currentSelectedItem.Id)
+                const prevSelected = getPrev(columnItems, columnSelected)
+                if(prevSelected)
+                    selectElementId = prevSelected.Id
+            }
+            break;
+
+        case SELECT_NEXT:
+            if(currentSelectedItem)
+            {
+                const currentItemState = currentSelectedItem[sa]
+                selectedColumnIdx = definition.columns.findIndex(c => c.state == currentItemState)
+
+                const columnItems = allItems.filter(e => e[sa] == currentItemState)
+                const columnSelected = columnItems.find(e => e.Id == currentSelectedItem.Id)
+                const nextSelected = getNext(columnItems, columnSelected);
+                if(nextSelected)
+                    selectElementId = nextSelected.Id;
+            }
+            break;
+
+        case KEEP_OR_SELECT_NEXT:
+            {
+                selectElementId = currentSelectedItem.Id ?? 0;
+                if(currentSelectedItem)
+                {
+                    const currentItemState = currentSelectedItem[sa]
+                    selectedColumnIdx = definition.columns.findIndex(c => c.state == currentItemState)
+
+                    const columnItems = allItems.filter(e => e[sa] == currentItemState)
+                    const columnSelected = columnItems.find(e => e.Id == currentSelectedItem.Id)
+                    const nextSelected = getNext(columnItems, columnSelected);
+                    if(nextSelected)
+                        altSelectElementId = nextSelected.Id;
+                }
+                
+            }
+            break;
+
+        default:
+            if( typeof selectElement === 'object' &&
+                !Array.isArray(selectElement) &&
+                selectElement !== null)
+                selectElementId = selectElement.Id;
+            else
+                selectElementId = selectElement;
+        }
+
+        // ===================================================
+        if(Array.isArray(data))
+            definition.objects = data;
+        else
+            definition.self = data;
+
         definition.items = null;
+        columns.forEach( c => c.reload())
+
+        // ====================================================
+
+        await tick();
+
+        allItems = definition.getItems();
+        if(selectElementId > 0)
+        {
+            
+            if(selectedColumnIdx < 0)
+            {
+                let selectedElement = allItems.find(e => e.Id == selectElementId)
+                if(selectedElement)
+                {
+                    selectedColumnIdx = getColumnIdx(selectedElement)
+                    columns[selectedColumnIdx].activateByItemId(selectElementId)
+                }
+            }
+            else
+            {
+                const columnState = definition.columns[selectedColumnIdx].state;
+                const columnItems = allItems.filter(e => e[sa] == columnState)
+                let selectedElement = allItems.find(e => e.Id == selectElementId) 
+                
+                if(selectedElement == undefined)
+                {
+                    if(altSelectElementId > 0)
+                    {
+                        selectedElement = columnItems.find(e => e.Id == altSelectElementId)
+                        if(selectedElement)
+                            columns[selectedColumnIdx].activateByItemId(altSelectElementId)
+                    }
+                }
+                else
+                    columns[selectedColumnIdx].activateByItemId(selectElementId)
+            }
+        }
     }
 
     export function getColumnIdx(item)
     {
         return definition.columns.findIndex( c => c.state == item[definition.stateAttrib]);
+    }
+
+    export function edit(item: object, field: string)
+    {
+        const columnIdx = getColumnIdx(item)
+        if(columnIdx >=0)
+        {
+            const column = columns[columnIdx];
+            const card = column.findCardByItem(item);
+            if(card)
+                card.editProperty(field)
+        }
     }
 
     let columns = []
@@ -51,41 +200,41 @@
         {
             let left_column = columns[i-1];
             let right_column = columns[i];
-            const left_column_height = left_column.getHeight()
-            const right_column_height = right_column.getHeight()
+            const left_column_height = left_column?.getHeight()
+            const right_column_height = right_column?.getHeight()
             if(left_column_height > right_column_height)
             {
-                left_column.setBorder(left_column.SET_RIGHT)
-                right_column.setBorder(right_column.CLEAR_LEFT)
+                left_column?.setBorder(left_column.SET_RIGHT)
+                right_column?.setBorder(right_column.CLEAR_LEFT)
             }
             else
             {
-                left_column.setBorder(left_column.CLEAR_RIGHT)
-                right_column.setBorder(right_column.SET_LEFT)
+                left_column?.setBorder(left_column.CLEAR_RIGHT)
+                right_column?.setBorder(right_column.SET_LEFT)
             }
 
         }
     })
 
-    export function showMoveOperationsForItem(item)
+    /*export function showMoveOperationsForItem(item)
     {
         columns.forEach( c => {
             const card = c.findCardByItem(item)
             if(card)
                 card.showMoveOperations()
         })
-    }
+    }*/
 
-    export function scrollViewToCard(item)
+    /*export function scrollViewToCard(item)
     {
         columns.forEach( c => {
             const card = c.findCardByItem(item)
             if(card)
                 card._scrollViewToCard()
         })
-    }
+    }*/
 
-    function onMoveUp(item: object)
+    export function moveUp(item: object)
     {
         const columnIdx = getColumnIdx(item)
         let allItems = definition.getItems();
@@ -109,7 +258,7 @@
         column.reload()
     }
 
-    function onMoveDown(item: object)
+    export function moveDown(item: object)
     {
         const columnIdx = getColumnIdx(item)
         let allItems = definition.getItems();
@@ -165,8 +314,9 @@
         pushChanges();
     }
 
-    function onReplace(item, toColumnIdx, afterElement) 
+    export function replace(item, toColumnIdx, afterElement) 
     {
+        
         const fromColumnIdx = getColumnIdx(item)
         let allItems = definition.getItems();
 
@@ -280,8 +430,178 @@
         }
 	}
 
+    async function onInsert(columnIdx: number, title: string, afterId: number)
+    {
+        const columnState = definition.columns[columnIdx].state;
+        const oa = definition.orderAttrib
+        const sa = definition.stateAttrib
+
+        const allItems = definition.getItems();
+
+        const columnTop = allItems.find(e => e[sa] == columnState)
+        const columnBottom = allItems.findLast(e => e[sa] == columnState)
+
+        let newElement = {
+            [definition.titleAttrib]: title,
+            [sa]: columnState
+        }
+
+        if(afterId == KanbanColumnTop)
+        {
+            if(!columnTop)
+            {
+                let maxOrder = 0;
+                if(allItems.length > 0)
+                {
+                    const lastItem = allItems[allItems.length-1]
+                    maxOrder = lastItem[oa]
+                }
+                
+                newElement[oa] = maxOrder + ORDER_STEP
+            }
+            else
+            {
+                const prevItem = getPrev(allItems, columnTop);
+                if(prevItem)
+                {
+                    let prevOrder = prevItem[oa];
+                    let nextOrder = columnTop[oa];
+                    let orderSpace = nextOrder - prevOrder;
+                    if(orderSpace < 2)
+                    {
+                        reorderElements(allItems, prevItem);
+                        prevOrder = prevItem[oa];
+                        nextOrder = columnTop[oa];
+                        orderSpace = nextOrder - prevOrder;
+                    }
+                    const newOrder = prevOrder + Math.floor(orderSpace / 2)
+                    newElement[oa] = newOrder
+                }
+                else
+                {
+                    newElement[oa] = columnTop[oa] - ORDER_STEP
+                }
+            }
+        }
+        else if(afterId == KanbanColumnBottom)
+        {
+            if(!columnBottom)
+            {
+                let maxOrder = 0;
+                if(allItems.length > 0)
+                {
+                    const lastItem = allItems[allItems.length-1]
+                    maxOrder = lastItem[oa]
+                }
+                
+                newElement[oa] = maxOrder + ORDER_STEP
+            }
+            else
+            {
+                const nextItem = getNext(allItems, columnBottom);
+                if(nextItem)
+                {
+                    let nextOrder = nextItem[oa];
+                    let prevOrder = columnBottom[oa];
+                    let orderSpace = nextOrder - prevOrder;
+                    if(orderSpace < 2)
+                    {
+                        reorderElements(allItems, columnBottom)
+                        nextOrder = nextItem[oa];
+                        prevOrder = columnBottom[oa];
+                        orderSpace = nextOrder - prevOrder;
+                    }
+                    const newOrder = prevOrder + Math.floor(orderSpace / 2);
+                    newElement[oa] = newOrder
+                }
+                else
+                {
+                    newElement[oa] = columnBottom[oa] + ORDER_STEP
+                }
+            }
+        }
+        else
+        {
+            const prevItem = allItems.find(e => e.Id == afterId)
+            if(!prevItem)
+            {
+                let maxOrder = 0;
+                if(allItems.length > 0)
+                {
+                    const lastItem = allItems[allItems.length-1]
+                    maxOrder = lastItem[oa]
+                }
+                
+                newElement[oa] = maxOrder + ORDER_STEP
+            }
+            else
+            {
+                const nextItem = getNext(allItems, prevItem)
+                if(nextItem)
+                {
+                    let nextOrder = nextItem[oa];
+                    let prevOrder = prevItem[oa];
+                    let orderSpace = nextOrder - prevOrder;
+                    if(orderSpace < 2)
+                    {
+                        reorderElements(allItems, prevItem)
+                        nextOrder = nextItem[oa];
+                        prevOrder = prevItem[oa];
+                        orderSpace = nextOrder - prevOrder;
+                    }
+                    const newOrder = prevOrder + Math.floor(orderSpace / 2);
+                    newElement[oa] = newOrder
+                }
+                else
+                {
+                    newElement[oa] = prevItem[oa] + ORDER_STEP
+                }
+            }
+
+        }
+
+        // ======================
+        if(definition.onAdd)
+            await definition.onAdd(newElement)
+    }
+
+    export function activateColumn(columnIdx: number)
+    {
+        columns[columnIdx].activate();
+    }
+    
+    export function editColumnName(columnIdx: number, onFinish: Function|undefined = undefined)
+    {
+        columns[columnIdx].editName(onFinish)
+    }
+
+    export function moveCardsTo(items: object[], toColumnIdx: number)
+    {
+        items.forEach(item =>
+            replace(item, toColumnIdx, KanbanColumnBottom)
+        )
+    }
+
+    export function setCardsState(items: object[], state: number)
+    {
+        const sa = definition.stateAttrib
+        items.forEach(item => {
+                item[sa] = state
+                informModification(item, sa)
+            })
+            
+        pushChanges();
+    }
+
+    export function add(item: object)
+    {
+        const fromColumnIdx = getColumnIdx(item)
+        columns[fromColumnIdx].add(item)
+    }
+
 </script>
 
+{#key renderToken}
 <slot/> <!-- Launch definition settings -->
 
 {#if title}
@@ -289,14 +609,12 @@
     <!--hr class="hidden sm:block w-full"-->
 {/if}
 
-<section class="h-full mt-5 flex flex-row no-wrap  sm:justify-center  overflow-x-auto {user_class}">
+<section class="h-full mt-5 flex flex-row no-wrap  sm:justify-center 
+                overflow-x-auto snap-x snap-mandatory sm:snap-none
+                {user_class}">
     {#each definition.columns as column, idx (column.id)}
         <Column currentColumnIdx={idx}
-                {showMoveOperationsForItem}
-                {scrollViewToCard}
-                {onReplace}
-                {onMoveUp}
-                {onMoveDown}
+                {onInsert}
                 bind:this={columns[idx]}>
 
             
@@ -315,6 +633,7 @@
         </Column>
     {/each}
 </section>
+{/key}
 
 <style>
     .grid-1

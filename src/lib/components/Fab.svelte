@@ -162,9 +162,11 @@
                             <li class="flex flex-row px-0 py-0 justify-end group"
                                 on:click|stopPropagation={(e) => {on_click(e, operation)}}
                                 on:mousedown={mousedown}>
-                                <div>
-                                    <span class="block whitespace-nowrap text-sm mt-3 font-semibold text-white mr-3     select-none bg-stone-700 group-hover:bg-stone-800 px-1 shadow-lg rounded">{operation.caption}</span>
-                                </div>
+                                {#if operation.caption}
+                                    <div>
+                                        <span class="block whitespace-nowrap text-sm mt-3 font-semibold text-white mr-3     select-none bg-stone-700 group-hover:bg-stone-800 px-1 shadow-lg rounded">{operation.caption}</span>
+                                    </div>
+                                {/if}
                                 <button class=" bg-transparent
                                                 mx-0 mb-4 w-[55px] h-[55px] 
                                                 flex items-center justify-center

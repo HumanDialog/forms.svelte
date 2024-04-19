@@ -102,11 +102,16 @@ export function editable(node, params)
     let action;
     let active = false;
     let onRemove = undefined;
+    let onFinish = undefined;
     if(params instanceof Object)
     {
         action = params.action ?? params;
         active = params.active ?? false;
         onRemove = params.remove ?? undefined
+        onFinish = params.onFinish ?? undefined
+
+        if(params.readonly)
+            return;
     }
     else
         action = params;
@@ -246,6 +251,11 @@ export function editable(node, params)
     {
         node.contentEditable = "true"
         node.addEventListener('focus', focus_listener);
+
+        if(onFinish)
+        {
+            node.addEventListener("finish", (e) => { onFinish(e.detail) })
+        }
     }
     else
     {

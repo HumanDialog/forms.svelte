@@ -12,6 +12,7 @@
     import FaToggleOff from 'svelte-icons/fa/FaToggleOff.svelte'
     import {showMenu} from '$lib/components/menu'
     import {push} from 'svelte-spa-router'
+    import {contextItemsStore, context_info_store, contextToolbarOperations, data_tick_store} from './stores.js'
     //import Menu from '$lib/components/contextmenu.svelte'
 
     import {
@@ -38,6 +39,7 @@
     
 
     export let appConfig;
+    export let clearsContext = 'sel props'
     
     let config = null;
     let has_selection_details = false;
@@ -194,11 +196,28 @@
         showMenu(pt, options);    
     }
 
+    function clearSelection()
+    {
+        if (!clearsContext) return;
+
+		let contexts = clearsContext.split(' ');
+		contexts.forEach((c) => {
+			$contextItemsStore[c] = null;
+			$context_info_store[c] = '';
+		});
+
+		//e.stopPropagation();
+
+		$contextToolbarOperations = [];
+		$data_tick_store = $data_tick_store + 1;
+    }
+
 </script>
 
-<div class="print flex flex-row w-full">
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<div class="no-print flex flex-row w-full" on:click={clearSelection}>
     <div class="flex-none left-0 flex h-12 sm:h-10">
-        <button class="w-12 sm:w-10 h-full flex justify-center items-center text-stone-300 hover:text-stone-100" on:click={toggle_navigator}>
+        <button class="w-12 sm:w-10 h-full flex justify-center items-center text-stone-300 hover:text-stone-100" on:click|stopPropagation={toggle_navigator}>
             <Icon class="w-8 sm:w-6 h-8 sm:h-6" component={icon}/>
         </button>
     </div>
@@ -211,7 +230,7 @@
     <div class="flex-none ml-auto flex h-12 sm:h-10">        
         <button
             class="h-full w-12 sm:w-10 px-0 flex justify-center items-center   text-stone-300 hover:text-stone-100"
-            on:click={show_options}>
+            on:click|stopPropagation={show_options}>
 
             <Icon class="w-5 sm:w-4 h-5 sm:h-4" component={FaCog} />
         </button>
@@ -220,7 +239,7 @@
 </div>
 
 {#if tabs.length > 1 &&  $main_sidebar_visible_store != "*"}
-    <div  class="print flex-none block fixed left-0 top-[40px] w-[40px] h-screen z-20 inset-0   overflow-hidden">
+    <div  class="no-print flex-none block fixed left-0 top-[40px] w-[40px] h-screen z-20 inset-0   overflow-hidden">
         <div class="sticky top-0 flex h-full w-10 bg-stone-900 flex-col items-center text-stone-100 shadow">
             <VerticalToolbar {appConfig} mobile={true}/>
         </div>    

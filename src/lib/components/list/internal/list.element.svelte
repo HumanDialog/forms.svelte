@@ -287,25 +287,29 @@
             tabindex="0">
         <div class="block sm:flex sm:flex-row" on:click={(e) => on_active_row_clicked(e, 'top')}>
            
-            {#if definition.title_readonly}
+           {#if is_row_active}
+                {#key item[title]} <!-- Wymusza pełne wyrenderowanie zwłasza po zmiane z pustego na tekst  -->
+                    <p  class=" text-lg font-semibold min-h-[1.75rem]
+                                sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
+                                whitespace-nowrap overflow-clip w-full sm:flex-none sm:w-2/3"
+                        id="__hd_list_ctrl_{item[item_key]}_Title"
+                        use:editable={{
+                            action: (text) => {change_name(text)},
+                            active: true,
+                            readonly: definition.title_readonly,
+                        }}> 
+                            {element_title}
+                    </p>
+                {/key}
+           {:else}
                 <p  class=" text-lg font-semibold min-h-[1.75rem]
                             sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
                             whitespace-nowrap overflow-clip w-full sm:flex-none sm:w-2/3"
                     id="__hd_list_ctrl_{item[item_key]}_Title"> 
                     {element_title}
                 </p>
-            {:else}
-                {#key item[title]} <!-- Wymusza pełne wyrenderowanie zwłasza po zmiane z pustego na tekst  -->
-                    <p  class=" text-lg font-semibold min-h-[1.75rem]
-                                sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
-                                whitespace-nowrap overflow-clip w-full sm:flex-none sm:w-2/3"
-                        id="__hd_list_ctrl_{item[item_key]}_Title"
-                        use:editable={(text) => {change_name(text)}}
-                        on:click={edit}> 
-                            {element_title}
-                    </p>
-                {/key}
-            {/if}
+           {/if}
+           
            
 
             <section class="hidden sm:block w-full sm:flex-none sm:w-1/3">
@@ -323,6 +327,7 @@
                     placeholder={placeholder == 'Summary'}
                     editable={(text) => {change_summary(text)}}
                     clickEdit={edit}
+                    active={is_row_active}
                 />
         {/if}
 

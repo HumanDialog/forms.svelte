@@ -22,7 +22,7 @@
 	export let c = '';
 
 	export let toolbarOperations = undefined;
-	export let clears_context = '';
+	export let clearsContext = '';
 	export let title = '';
 
 	switch (c) {
@@ -96,9 +96,9 @@
 
 	function clear_selection(e) {
 		//console.log('page click', chnages.just_changed_context)
-		if (!clears_context) return;
+		if (!clearsContext) return;
 
-		let contexts = clears_context.split(' ');
+		let contexts = clearsContext.split(' ');
 		contexts.forEach((c) => {
 			$contextItemsStore[c] = null;
 			$context_info_store[c] = '';

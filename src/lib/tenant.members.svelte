@@ -426,7 +426,7 @@
 <Page   self={data_item} 
         cl="!bg-white dark:!bg-stone-900 w-full h-full flex flex-col overflow-y-auto overflow-x-hidden py-1 px-1 border-0" 
         toolbarOperations={page_operations}
-        clears_context='props sel'>
+        clearsContext='props sel'>
     <!--a href="/" class="underline text-sm font-semibold ml-3"> &lt; Back to root</a-->
 
     {#if reef_users && reef_users.length > 0}

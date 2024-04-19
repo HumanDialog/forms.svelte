@@ -11,8 +11,8 @@
                 ListDateProperty,
                 ListComboProperty,
 				mainViewReloader} from '$lib'
-    import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaColumns} from 'svelte-icons/fa'
-    import {location, push} from 'svelte-spa-router'
+    import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaColumns, FaArchive, FaList, FaExternalLinkAlt} from 'svelte-icons/fa'
+    import {location, push, querystring} from 'svelte-spa-router'
 
     export let params = {}
 
@@ -20,12 +20,15 @@
     let dataPath;
     let listId;
     let listComponent;
+    let showArchived = false;
+    let assocName = 'ActiveTasks'
+    let listTitle = ''
 
     let users = [];
 
-    const STATUS_CLOSED = 2;
+    const STATE_FINISHED = 1000;
     
-    $: onParamsChanged($location, $mainViewReloader);
+    $: onParamsChanged($location, $querystring, $mainViewReloader);
     
     async function onParamsChanged(...args)
     {
@@ -50,11 +53,25 @@
         currentList = null
 
         dataPath = `/app/Lists/${listId}/query`;
+
+        let params = new URLSearchParams($querystring);
+        if(params.has('archive'))
+        {
+            showArchived = true;
+            assocName = 'ArchivedTasks'
+        }
+        else
+        {
+            showArchived = false;
+            assocName = 'ActiveTasks'
+        }
+
         await fetchData()
     }
 
     async function fetchData()
     {
+
         let res = await reef.post(dataPath,
                             {
                                 Id: 1,
@@ -70,8 +87,8 @@
                                         [
                                             {
                                                 Id: 2,
-                                                Association: 'Tasks',
-                                                Filter: 'Status <> STATUS_CLOSED',
+                                                Association: assocName,
+                                                //Filter: 'State <> STATE_FINISHED',
                                                 Sort: 'ListOrder',
                                                 //ShowReferences: true,
                                                 SubTree:[
@@ -95,6 +112,14 @@
             currentList = res.TaskList;
         else
             currentList = null
+
+        if(currentList)
+        {
+            if(!showArchived)
+                listTitle = currentList.Name
+            else
+                listTitle = `Archive of ${currentList.Name}`
+        }
     }
 
     async function reloadTasks(selectRecommendation)
@@ -111,6 +136,12 @@
 
     }
 
+    async function archiveTask(task)
+    {
+        await reef.get(`${task.$ref}/Archive`)
+        await reloadTasks(listComponent.SELECT_NEXT)
+    }
+
     async function finishTask(event, task)
     {
         event.stopPropagation();
@@ -122,7 +153,7 @@
 
     async function addTask(newTaskAttribs)
     {
-        let res = await reef.post(`/app/Lists/${currentList.Id}/Tasks/new`, newTaskAttribs)
+        let res = await reef.post(`/app/Lists/${currentList.Id}/AllTasks/new`, newTaskAttribs)
         if(!res)
             return null;
 
@@ -130,22 +161,57 @@
         await reloadTasks(newTask.Id)
     }
 
-    let pageOperations = [
+    function getPageOperations()
+    {
+        if(!showArchived)
         {
-            icon: FaPlus,
-            caption: '',
-            action: (f) => { listComponent.addRowAfter(null) }
-        },
-        {
-            icon: FaColumns,
-            caption: 'Kanban view',
-            action: (f) => switchToKanban()
+            return [
+                        {
+                            icon: FaPlus,
+                            action: (f) => { listComponent.addRowAfter(null) }
+                        },
+                        {
+                            icon: FaColumns,
+                            right: true,
+                            action: (f) => switchToKanban()
+                        },
+                        {
+                            icon: FaArchive,
+                            right: true,
+                            action: (f) => switchToArchive()
+                        }
+                    ]
         }
-    ]
+        else
+        {
+            return [
+                        {
+                            icon: FaColumns,
+                            right: true,
+                            action: (f) => switchToKanban()
+                        },
+                        {
+                            icon: FaList,
+                            right: true,
+                            action: (f) => switchToActive()
+                        }
+            ]
+        }
+    }
 
     function switchToKanban()
     {
         push(`/listboard/${listId}`);
+    }
+
+    function switchToArchive()
+    {
+        push(`/tasklist/${listId}?archive`);
+    }
+
+    function switchToActive()
+    {
+        push(`/tasklist/${listId}`);
     }
 
     function getEditOperations(task)
@@ -174,31 +240,39 @@
         ];
     }
 
+    function onOpen(task)
+    {
+        push(`/task?ref=${task.$ref}`);
+    }
+
     let taskOperations = (task) => { 
         let editOperations = getEditOperations(task)
         return [
                 {
                     icon: FaPlus,
-                    caption: '',
                     action: (focused) => { listComponent.addRowAfter(task) }
                 },
                 {
                     icon: FaPen,
-                    caption: '',
                     grid: editOperations
                 },
                 {
-                    caption: '',
+                    icon: FaExternalLinkAlt,
+                    action: (f) => onOpen(task)
+                },
+                {
                     icon: FaCaretUp,
                     action: (focused) => listComponent.moveUp(task)
                 },
                 {
-                    caption: '',
                     icon: FaCaretDown,
                     action: (focused) => listComponent.moveDown(task)
                 },
                 {
-                    caption: '',
+                    icon: FaArchive,
+                    action: (f) => archiveTask(task)
+                },
+                {
                     icon: FaTrash,
                     action: (focused) => deleteTask(task)
                 }
@@ -218,13 +292,13 @@
 {#if currentList}
     <Page   self={currentList} 
             cl="!bg-white dark:!bg-stone-900 w-full h-full flex flex-col overflow-y-auto overflow-x-hidden py-1 px-1 border-0" 
-            toolbarOperations={pageOperations}
-            clears_context='props sel'
-            title={currentList.Name}>
+            toolbarOperations={ getPageOperations() }
+            clearsContext='props sel'
+            title={listTitle}>
 
         <List   self={currentList} 
-                a='Tasks' 
-                title={currentList.Name} 
+                a={assocName}
+                title={listTitle} 
                 toolbarOperations={taskOperations} 
                 contextMenu={taskContextMenu}
                 orderAttrib='ListOrder'
@@ -240,9 +314,16 @@
             <ListDateProperty name="DueDate"/>
 
             <span slot="left" let:element>
-                <Icon component={element.Status == STATUS_CLOSED ? FaRegCheckCircle : FaRegCircle} 
-                    on:click={(e) => finishTask(e, element)} 
-                    class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
+                {#if element.State == STATE_FINISHED}
+                    <Icon component={FaRegCheckCircle} 
+                        class="h-5 w-5 sm:w-4 sm:h-4 text-stone-400 dark:text-stone-500  mt-2 sm:mt-1.5 ml-2 "
+                    />    
+                {:else}
+                    <Icon component={FaRegCircle} 
+                        on:click={(e) => finishTask(e, element)} 
+                        class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "
+                    />
+                {/if}
             </span>
 
             
