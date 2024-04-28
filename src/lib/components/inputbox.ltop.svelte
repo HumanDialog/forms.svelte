@@ -109,7 +109,7 @@
 </script>    
 
 {#if itype == 'text'}
-    {@const border_style = invalid ? "border-red-300 dark:border-red-600" : "border-stone-300 dark:border-stone-600" }
+    {@const border_style = invalid ? "border-red-300 dark:border-red-600" : "border-stone-300 dark:border-stone-500" }
     <div class={cs}>
         <label for="name" class="block {label_mb} text-xs font-small text-stone-900 dark:text-white">{label}</label>
         

@@ -93,9 +93,9 @@
             From: "opacity-100 translate-y-0 sm:scale-100"
             To: "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
         -->
-        <div class=" transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all 
+        <div class=" transform overflow-hidden rounded-lg bg-white dark:bg-stone-700 text-left shadow-xl transition-all 
                     sm:my-8 w-full sm:max-w-lg">
-          <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+          <div class="bg-white dark:bg-stone-700 px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
             <div class="sm:flex sm:items-start">
               <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
                 {#if icon}
@@ -103,7 +103,7 @@
                 {/if}
               </div>
               <div class="grow mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
-                <h3 class="text-base font-semibold leading-6 text-stone-900" id="modal-title">{title}</h3>
+                <h3 class="text-base font-semibold leading-6 text-stone-900 dark:text-stone-100" id="modal-title">{title}</h3>
                 <div class="mt-2">
                     {#if content}
                         <p class="text-sm text-stone-500">{content}</p>
@@ -114,16 +114,16 @@
               </div>
             </div>
           </div>
-          <div class="bg-stone-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+          <div class="bg-stone-50 dark:bg-stone-700 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
             {#if mode == OK}
-                <button type="button" class="inline-flex w-full justify-center rounded-md bg-blue-700 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-800 sm:ml-3 sm:w-auto"
+                <button type="button" class="inline-flex w-full justify-center rounded-md bg-blue-700 dark:bg-blue-700 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-800 sm:ml-3 sm:w-auto"
                         on:click={on_ok}>
                         {okCaption}</button>
             {:else if mode == OKCancel}
-                <button type="button" class="inline-flex w-full justify-center rounded-md bg-blue-700 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-800 sm:ml-3 sm:w-auto"
+                <button type="button" class="inline-flex w-full justify-center rounded-md bg-blue-700 dark:bg-blue-700 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-800 sm:ml-3 sm:w-auto"
                         on:click={on_ok}>
                         {okCaption}</button>
-                <button type="button" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-stone-900 shadow-sm ring-1 ring-inset ring-stone-300 hover:bg-stone-50 sm:mt-0 sm:w-auto"
+                <button type="button" class="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-stone-400 px-3 py-2 text-sm font-semibold text-stone-900 shadow-sm  hover:bg-stone-50 sm:mt-0 sm:w-auto"
                         on:click={on_cancel}>
                         {cancelCaption}</button>
             {:else if mode == Custom}

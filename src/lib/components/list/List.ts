@@ -44,7 +44,7 @@ export class rList_property_tags extends rList_property
     }
 
     public onCreate: Function | undefined = undefined;
-    public allTags: string = '';
+    public getAllTags: Function | undefined = undefined;
 }
 
 export class rList_definition
@@ -64,6 +64,7 @@ export class rList_definition
     public can_insert           :boolean = false;
     public onInsert             :Function | undefined = undefined;
     public inserter_icon        :boolean = false;
+    public onOpen               :Function | undefined = undefined;
 
     public properties           :rList_property[] = [];
 }

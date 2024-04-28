@@ -80,10 +80,9 @@
                                         [
                                             {
                                                 Id: 2,
-                                                Association: 'ActiveTasks',
+                                                Association: 'Tasks',
                                                 //Filter: 'Status <> STATUS_CLOSED',
                                                 Sort: 'ListOrder',
-                                                //ShowReferences: true,
                                                 SubTree:[
                                                     {
                                                         Id: 3,
@@ -109,6 +108,7 @@
             return;
         }
 
+        let resetTaskStates = false;
         if(currentList.TaskStates)
         {
             try{
@@ -117,10 +117,29 @@
             catch(e)
             {
                 taskStates = [];
+                resetTaskStates = true;
             }
         }
         else
+        {
             taskStates = [];
+            resetTaskStates = true;
+        }
+
+        if(resetTaskStates)
+        {
+            taskStates=[
+                {
+                    name: 'Preparing',
+                    state: 0
+                },
+                {
+                    name: 'Finished',
+                    state: STATE_FINISHED
+                }
+            ]
+            await saveTaskStates();
+        }
     }
 
     async function reload(selectRecommendations)
@@ -153,7 +172,7 @@
 
     function switchToArchive()
     {
-        push(`/tasklist/${listId}?archive`);
+        push(`/tasklist/${listId}?archivedTasks`);
     }
   
 	async function onAdd(newTaskAttribs) 
@@ -297,7 +316,7 @@
     {
         const columnState = taskStates[columnIdx].state;
         const toColumnIdx = taskStates.findIndex(s => s.state == newState)
-        const tasks = currentList.ActiveTasks.filter(t => t.State == columnState)
+        const tasks = currentList.Tasks.filter(t => t.State == columnState)
         kanban.moveCardsTo(tasks, toColumnIdx);
 
         taskStates.splice(columnIdx, 1);
@@ -367,7 +386,7 @@
                     }
 
                     const newState = maxStateValue + 1;
-                    const tasks = currentList.ActiveTasks.filter(t => t.State == taskState.state)
+                    const tasks = currentList.Tasks.filter(t => t.State == taskState.state)
                     kanban.setCardsState(tasks, newState)
                     taskState.state = newState
                 }
@@ -375,7 +394,7 @@
         }
 
         const taskState = taskStates[columnIdx]
-        const tasks = currentList.ActiveTasks.filter(t => t.State == taskState.state)
+        const tasks = currentList.Tasks.filter(t => t.State == taskState.state)
         kanban.setCardsState(tasks, STATE_FINISHED)
         taskState.state = STATE_FINISHED
         
@@ -438,7 +457,7 @@
                 bind:this={kanban}>
 
             <KanbanSource self={currentList}
-                          a='ActiveTasks'
+                          a='Tasks'
                           stateAttrib='State'
                           orderAttrib='ListOrder'/>
 
@@ -464,7 +483,7 @@
             </KanbanComboProperty>
 
             <KanbanTagsProperty bottom a='Tags' 
-                                {allTags}
+                                getAllTags={() => allTags}
                                 onCreate={onCreateTag}/>
         </Kanban>
 	</Page>

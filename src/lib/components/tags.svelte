@@ -8,7 +8,7 @@
     import {informModification, pushChanges} from '../updates.js'
 
     export let tags: string = ''
-    export let globalTags :string = ''
+    export let getGlobalTags :Function
 
     export let self = null;
     export let a = '';
@@ -39,6 +39,7 @@
 
     function setup(...args)
     {
+        const globalTags = getGlobalTags()
         globalTagsTable = decomposeTags(globalTags)
 
         if(!tags)
@@ -152,6 +153,8 @@
     function onNewTagCreated(key :string, name :string)
     {
         tags += `#${key} `
+
+        let globalTags = getGlobalTags();
         globalTags += `#${key} `
         
         globalTagsTable = decomposeTags(globalTags)
@@ -210,6 +213,9 @@
 
     function getNotUsedTags()
     {
+        const globalTags = getGlobalTags();
+        globalTagsTable = decomposeTags(globalTags);
+
         let result = globalTagsTable.filter(e => {
             const label = e.label;
             let idx = tagsTable.findIndex(f => f.label == label)

@@ -5,7 +5,7 @@
 
     export let name     :string='';
     export let a        :string = '';
-    export let allTags  :string = '';
+    export let getAllTags  :Function | undefined = undefined;
     export let onCreate: Function | undefined = undefined;
     export let onSelect: Function | undefined = undefined;
     
@@ -35,7 +35,7 @@
 
     tagsProperty.onSelect = onSelect
     tagsProperty.onCreate = onCreate
-    tagsProperty.allTags = allTags
+    tagsProperty.getAllTags = getAllTags
 
     if(top)
         tagsProperty.position = KanbanCardTop;

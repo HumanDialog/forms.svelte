@@ -124,7 +124,7 @@
             selectElementId = 0;
             break;
         case KEEP_SELECTION:
-            selectElementId = currentSelectedItem.Id ?? 0;
+            selectElementId = currentSelectedItem?.Id ?? 0;
             break;
         case SELECT_PREVIOUS:
             if(currentSelectedItem)

@@ -53,6 +53,7 @@
             {
                 reef_users.push(
                     {
+                        Id: new_reef_user_id++,
                         [nameAttrib]: u[nameAttrib],
                         [emailAttrib]: u[emailAttrib],
                         [refAttrib]: u[refAttrib],
@@ -63,8 +64,7 @@
                         avatar_url : "",
                         invitation_not_accepted: false,
                         removed: false,
-                        membership_tag: "",
-                        __hd_internal_item_id: new_reef_user_id++
+                        membership_tag: ""
                     }
                 )
             })
@@ -90,9 +90,9 @@
             handled_no++;
             if(handled_no == reef_users.length)
             {
+                //console.log('reload', reef_users)
                 
-                
-                list?.updateObjects(reef_users);
+                list?.reload(reef_users);
             }
         } )
     }
@@ -114,7 +114,7 @@
         else
             user.membership_tag = "";
 
-        user.__hd_internal_item_id = new_reef_user_id++;
+        user.Id = new_reef_user_id++;
     }
 
     /*onMount(
@@ -362,10 +362,10 @@
         {
             reef_users.push(
                 {
+                    Id: 1000+i,
                     [nameAttrib]: names[i],
                     [emailAttrib]: 'u@fake.com',
-                    [refAttrib]: `./User/${1000+i}`,
-                    __hd_internal_item_id: 1000+i
+                    [refAttrib]: `./User/${1000+i}`
                 }
             )
         }
@@ -402,7 +402,7 @@
             set_user_info(new_reef_user, details);
 
             reef_users = [...reef_users, new_reef_user]
-            list?.updateObjects(reef_users);
+            list?.reload(reef_users);
         }
 
 
@@ -434,7 +434,6 @@
                 title='Members' 
                 toolbarOperations={user_operations} 
                 contextMenu={user_context_menu}
-                key='__hd_internal_item_id'
                 bind:this={list}>
             <ListTitle a={nameAttrib} onChange={on_name_changed}/>
             <ListSummary a={emailAttrib} readonly/>
@@ -487,7 +486,7 @@
                 <div class="flex flex-row items-center">
                     <span class="">Maintainer</span>
                     <Icon id="b1" size={4} component={FaInfoCircle} class="text-stone-400 ml-5 pt-0 mt-1"/>
-                    <Popover class="w-64 text-sm font-light " title="Maintainer" triggeredBy="#b1">
+                    <Popover class="w-64 text-sm font-light" title="Maintainer" triggeredBy="#b1" color="dropdown">
                         Means that the invited user will be able to add and remove others and manage permissions in this organization.
                     </Popover>
                 </div>

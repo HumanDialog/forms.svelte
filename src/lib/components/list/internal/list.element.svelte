@@ -18,6 +18,7 @@
                 
     import {rList_definition, rList_property_type} from '../List'
 	import { push } from 'svelte-spa-router';
+    import {FaExternalLinkAlt} from 'svelte-icons/fa/'
     
     export let item     :object;
 
@@ -299,6 +300,13 @@
                             readonly: definition.title_readonly,
                         }}> 
                             {element_title}
+
+                        {#if definition.onOpen}
+                            <button class="ml-3 w-5 h-5 sm:w-3 sm:h-3"
+                                    on:click={(e) => definition.onOpen(item)}>
+                                <FaExternalLinkAlt/>
+                            </button>
+                        {/if}
                     </p>
                 {/key}
            {:else}

@@ -113,7 +113,7 @@
 <ul class="mt-1 mb-6">
     {#each steps as step, idx (step[a])}
         {@const finished = isFinished(step) ? "line-through" : ""}
-        <li class="mt-0 mb-0 {finished} editable focus:outline-none"
+        <li class="mt-0 mb-0 {finished} editable focus:outline-none neglect-brs"
             use:editable={{
                 action: (text) => onChange(text, idx),
                 remove: () => onRemove(idx),
@@ -134,3 +134,19 @@
                     onInsert={async (text) => {await onAdd(text, undefined)}}/>
     {/if}
 </ul>
+
+<style>
+    
+    /*  firefox puts <br> into conenteditable element when 'space' is pressed 
+        quick solution is to not render those <br>s
+    ul li br 
+    {
+        display:none;
+    }*/
+
+    :global(.neglect-brs br)
+    {
+        display: none;
+    }
+
+</style>

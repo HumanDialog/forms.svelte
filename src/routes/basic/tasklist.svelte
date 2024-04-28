@@ -17,11 +17,12 @@
     export let params = {}
 
     let currentList = null;
-    let dataPath;
+    let listPath;
     let listId;
     let listComponent;
-    let showArchived = false;
-    let assocName = 'ActiveTasks'
+    let isArchivedList = false;
+    let isArchivedTasks = false;
+    let assocName = 'Tasks'
     let listTitle = ''
 
     let users = [];
@@ -52,27 +53,21 @@
         
         currentList = null
 
-        dataPath = `/app/Lists/${listId}/query`;
+        
+        const params = new URLSearchParams($querystring);
+        isArchivedList = params.has('archivedList')
+        isArchivedTasks = params.has('archivedTasks')
 
-        let params = new URLSearchParams($querystring);
-        if(params.has('archive'))
-        {
-            showArchived = true;
-            assocName = 'ArchivedTasks'
-        }
-        else
-        {
-            showArchived = false;
-            assocName = 'ActiveTasks'
-        }
-
+        assocName = (isArchivedTasks || isArchivedList) ? 'ArchivedTasks' : 'Tasks';
+        listPath = isArchivedList ? `/app/ArchivedLists/${listId}` : `/app/Lists/${listId}`;
+            
         await fetchData()
     }
 
     async function fetchData()
     {
 
-        let res = await reef.post(dataPath,
+        let res = await reef.post(`${listPath}/query`,
                             {
                                 Id: 1,
                                 Name: "collector",
@@ -90,7 +85,6 @@
                                                 Association: assocName,
                                                 //Filter: 'State <> STATE_FINISHED',
                                                 Sort: 'ListOrder',
-                                                //ShowReferences: true,
                                                 SubTree:[
                                                     {
                                                         Id: 3,
@@ -115,7 +109,7 @@
 
         if(currentList)
         {
-            if(!showArchived)
+            if(!isArchivedTasks)
                 listTitle = currentList.Name
             else
                 listTitle = `Archive of ${currentList.Name}`
@@ -153,17 +147,20 @@
 
     async function addTask(newTaskAttribs)
     {
-        let res = await reef.post(`/app/Lists/${currentList.Id}/AllTasks/new`, newTaskAttribs)
+        let res = await reef.post(`${listPath}/CreateTaskEx`,{ properties: newTaskAttribs })
         if(!res)
             return null;
 
-        let newTask = res.Task[0];
+        let newTask = res.Task;
         await reloadTasks(newTask.Id)
     }
 
     function getPageOperations()
     {
-        if(!showArchived)
+        if(isArchivedList)
+            return [];
+        
+        if(!isArchivedTasks)
         {
             return [
                         {
@@ -206,7 +203,7 @@
 
     function switchToArchive()
     {
-        push(`/tasklist/${listId}?archive`);
+        push(`/tasklist/${listId}?archivedTasks`);
     }
 
     function switchToActive()
@@ -257,10 +254,6 @@
                     grid: editOperations
                 },
                 {
-                    icon: FaExternalLinkAlt,
-                    action: (f) => onOpen(task)
-                },
-                {
                     icon: FaCaretUp,
                     action: (focused) => listComponent.moveUp(task)
                 },
@@ -303,7 +296,7 @@
                 contextMenu={taskContextMenu}
                 orderAttrib='ListOrder'
                 bind:this={listComponent}>
-            <ListTitle a='Title'/>
+            <ListTitle a='Title' {onOpen}/>
             <ListSummary a='Summary'/>
             <ListInserter action={addTask} icon/>
 

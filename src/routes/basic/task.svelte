@@ -464,7 +464,7 @@
                     {#if task.Tags || tagsPlaceholder}
                         <Tags class="ml-auto grow justify-end"
                             a='Tags'
-                            globalTags={allTags}
+                            getGlobalTags={() => allTags}
                             onCreate={onCreateTag}
                             bind:this={tags}/>
                     {/if}

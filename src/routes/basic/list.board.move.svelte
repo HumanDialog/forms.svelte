@@ -44,7 +44,7 @@
     {#if taskStates && taskStates.length > 0}
     {#each taskStates as taskState, idx}
         <section class="flex flex-col gap-1">
-            <p class="text-xs h-4 w-[100px] ml-1 truncate">{taskState.name}</p>
+            <p class="text-xs h-4 w-[100px] ml-1 truncate  text-stone-900 dark:text-stone-400">{taskState.name}</p>
             <button class=" h-8 w-full
                             text-base font-medium text-stone-900 dark:text-stone-400 dark:hover:text-white
                             bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 active:bg-stone-300 dark:active:bg-stone-600
@@ -110,7 +110,7 @@
     {#if taskStates && taskStates.length > 0}
     {#each taskStates as taskState, idx}
         <section class="flex flex-row">
-            <p class="text-base mt-4 truncate w-[120px]">{taskState.name}</p>
+            <p class="text-base mt-4 truncate w-[120px]  text-stone-900 dark:text-stone-400">{taskState.name}</p>
             <div class="flex flex-row ml-auto gap-3">
                 <button class=" bg-transparent
                                 w-[55px] h-[55px] 

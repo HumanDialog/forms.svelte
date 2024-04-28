@@ -263,6 +263,26 @@
 
     const on_keydown = (event) =>
     {
+        // ***  firefox case when sets caret direclty in div not within internal p
+        const sel = window.getSelection();
+        if(sel.focusNode == editable_div)
+        {
+            let next_text_editable_node :Node = find_next_editable_node(null, editable_div);
+            if(!next_text_editable_node)
+            {
+                event.preventDefault();
+                return;
+            }
+            
+            let range :Range = new Range;
+            range.collapse(true);
+            range.setStart(next_text_editable_node, 0);
+            range.setEnd(next_text_editable_node, 0);
+            set_selection(range);
+        }
+        // *****************
+
+
         switch(event.key)
         {
             case 'Enter':
@@ -988,7 +1008,13 @@
             return false;
         
         let element :HTMLElement = <HTMLElement> node;
-        return element.isContentEditable;
+        if(element.isContentEditable)
+            return false;
+
+        if(element.contentEditable == "false")
+            return true;
+
+        return false;
     }
 
     function find_next_editable_node(after :Node, parent :Node, check_upper_nodes :boolean = false) :Node
@@ -1001,7 +1027,6 @@
 
         while(node)
         {
-            
             if(node.hasChildNodes())
             {
                 if(!is_non_editable_element(node))
@@ -1437,6 +1462,7 @@
 [contenteditable]:focus {
     outline: 0px solid transparent;
 }
+
 
 /*
 :global(.doc-code) {

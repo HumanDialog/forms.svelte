@@ -156,7 +156,7 @@
                     inContext="props"
                     self={item}
                     a={prop.a}
-                    globalTags={prop.allTags}
+                    getGlobalTags={prop.getAllTags}
                     s="xs"
                     onSelect={prop.onSelect}
                     onCreate={prop.onCreate}

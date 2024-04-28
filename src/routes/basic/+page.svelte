@@ -9,6 +9,7 @@
     import Task from './task.svelte'
     import Board from './list.board.svelte';
     import MyTasks from './mytasks.svelte'
+    import Members from './members.svelte'
 
    
 
@@ -42,7 +43,8 @@
                         '/listboard' :  { component: Board},
                         '/listboard/*' :  { component: Board},
                         '/mytasks' :    { component: MyTasks },
-                        '/mytasks/*' :  { component: MyTasks }
+                        '/mytasks/*' :  { component: MyTasks },
+                        '/members'   :  { component: Members }
                     }
                 },
                 mainToolbar : {
