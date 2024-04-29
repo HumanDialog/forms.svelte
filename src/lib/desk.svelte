@@ -118,9 +118,9 @@
             content_top = 'top-[50px] sm:top-[40px]'
             
             if(bottom_bar_visible)
-                content_height = `h-[calc(100vh-290px)] sm:h-[calc(100vh-280px)]`    
+                content_height = `min-h-[calc(100vh-290px)] sm:min-h-[calc(100vh-280px)]`    
             else    
-                content_height = `h-[calc(100vh-50px)] sm:h-[calc(100vh-40px)]` 
+                content_height = `min-h-[calc(100vh-50px)] sm:min-h-[calc(100vh-40px)]` 
                
         }
         else
@@ -128,9 +128,9 @@
             tools_visibility = "hidden"
             content_top = `top-[50px] sm:top-0`
             if(bottom_bar_visible)
-                content_height = `h-[calc(100vh-290px)] sm:h-[calc(100vh-240px)]`           
+                content_height = `min-h-[calc(100vh-290px)] sm:min-h-[calc(100vh-240px)]`           
             else
-                content_height = `h-[calc(100vh-50px)] sm:h-screen`
+                content_height = `min-h-[calc(100vh-50px)] sm:min-h-screen`
         }
         
         
@@ -161,11 +161,11 @@
             on:click={handleSelect} 
             on:contextmenu={handleSelect}>
 
-        <div class="bg-white dark:bg-stone-900 dark:text-white      min-h-screen h-screen">    
+        <div class="bg-white dark:bg-stone-900 dark:text-white      min-h-screen">    
             <!--###########################################################-->
             <!--##  HORIZONTAL TOOLBAR (FOR PHONES)  ######################-->
             <!--###########################################################-->
-            <header class="fixed sm:hidden w-screen top-0 h-[50px] sm:h-[40px] z-20  overflow-auto shadow  shadow-stone-900/5 dark:shadow-none" >
+            <header class="fixed sm:hidden w-screen top-0 h-[50px] sm:h-[40px] z-20 shadow  shadow-stone-900/5 dark:shadow-none     overflow-auto" >
                     <div class=" flex flex-row justify-between  h-full  bg-stone-950   text-stone-100 ">
                         <HorizontalToolbar appConfig={layout}/>
                     <div>
@@ -230,7 +230,8 @@
                 <!--#######################################################-->
                 <!--##  CONTENT                          ##################-->
                 <!--#######################################################-->
-                <div  class="fixed left-0  w-screen  
+                <!-- fixed => relative, content-height => min content height -- -->
+                <div  class="relative left-0  w-screen  
                                 sm:left-[40px]  sm:w-[calc(100vw-40px)]    
                                 {content_top}
                                 {content_height}

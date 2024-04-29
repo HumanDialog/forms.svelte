@@ -47,7 +47,7 @@
 
 <a href="/" class="underline text-sm font-semibold ml-3"> &lt; Back to root</a>
 
-<Page self={self} typename='Task' cl="w-full h-full overflow-y-hidden  overflow-x-scroll py-0 px-1 border-0" >
+<Page self={self} typename='Task' cl="w-full overflow-y-hidden  overflow-x-scroll py-0 px-1 border-0" >
     <Row cl="grid-cols-2 h-full max-h-full overflow-y-hidden" w="w-[calc(200vw)] sm:w-[calc(200vw-80px)] lg:w-[calc(100vw-40px)]" >
         <Tile cl="col-span-1 h-full max-h-full overflow-y-hidden">
             <Box  c=5>  

@@ -43,8 +43,9 @@ export class rList_property_tags extends rList_property
         super(rList_property_type.Tags);
     }
 
-    public onCreate: Function | undefined = undefined;
+    public canChangeColor: boolean = false;
     public getAllTags: Function | undefined = undefined;
+    public onUpdateAllTags: Function | undefined = undefined;
 }
 
 export class rList_definition

@@ -6,8 +6,9 @@
     export let name     :string='';
     export let a        :string = '';
     export let getAllTags  :Function | undefined = undefined;
-    export let onCreate: Function | undefined = undefined;
+    export let onUpdateAllTags: Function | undefined = undefined;
     export let onSelect: Function | undefined = undefined;
+    export let canChangeColor: boolean = false;
     
     export let top:     boolean = false;
     export let middle:  boolean = true;
@@ -34,7 +35,8 @@
     }
 
     tagsProperty.onSelect = onSelect
-    tagsProperty.onCreate = onCreate
+    tagsProperty.onUpdateAllTags = onUpdateAllTags
+    tagsProperty.canChangeColor = canChangeColor;
     tagsProperty.getAllTags = getAllTags
 
     if(top)

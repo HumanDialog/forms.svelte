@@ -69,6 +69,8 @@ export function showFloatingToolbar(around :DOMRect|DOMPoint, toolbar, props = {
     }
     else
         console.error('what now?')
+
+    return toolbar_component;
 }
 
 export function showGridMenu(around :DOMRect|DOMPoint, operations)

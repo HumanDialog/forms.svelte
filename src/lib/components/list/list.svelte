@@ -194,7 +194,7 @@
             activateItem('props', null, [])
     }
 
-    export function moveUp(element: object)
+    export async function moveUp(element: object)
     {
         if(!orderAttrib)
             return;
@@ -207,12 +207,15 @@
         
         [element[orderAttrib], prev[orderAttrib]] = [prev[orderAttrib], element[orderAttrib]]
 
+        await tick();
+        scrollToSelectedElement()
+
         informModification(element, orderAttrib)
         informModification(prev, orderAttrib)
         pushChanges()
     }
 
-    export function moveDown(element: object)
+    export async function moveDown(element: object)
     {
         if(!orderAttrib)
             return;
@@ -224,6 +227,9 @@
         items = swapElements(items, element, next);
         
         [element[orderAttrib], next[orderAttrib]] = [next[orderAttrib], element[orderAttrib]]
+        
+        await tick();
+        scrollToSelectedElement()
 
         informModification(element, orderAttrib)
         informModification(next, orderAttrib)
@@ -263,6 +269,18 @@
         } );
     }
 
+    function scrollToSelectedElement()
+    {
+        const activeItem = getActive('props');
+        if(!activeItem)
+            return;
+
+        const activeItemKey = getItemKey(activeItem)
+
+        const activeIdx = items?.findIndex(i => getItemKey(i) == activeItemKey)
+        if(activeIdx >= 0)
+            rows[activeIdx].scrollToView()
+    }
     
 
     export function remove(element :object)

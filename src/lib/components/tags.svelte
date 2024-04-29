@@ -16,8 +16,9 @@
     export let typename = '';
 
     export let onSelect: any|undefined = undefined
-    export let onCreate: any|undefined = undefined
+    export let onUpdateAllTags: any|undefined = undefined
     //export let onRemove: any|undefined = undefined
+    export let canChangeColor: boolean = false;
    
     export let compact :boolean = true;
     export let inContext :string = ''   // in compact mode
@@ -162,7 +163,34 @@
 
         applyChange();
 
-        onCreate(globalTags)
+        onUpdateAllTags(globalTags)
+    }
+
+    function onColorizeTag(name: string, color: string)
+    {
+        let globalTags = getGlobalTags();
+        globalTagsTable = decomposeTags(globalTags)
+        const srcGlobalTag = globalTagsTable.find(i => i.label == name)
+        srcGlobalTag.color = color;
+
+        tagsTable = decomposeTags(tags, globalTagsTable)
+        const srcTag = tagsTable.find(i => i.label == name)
+        srcTag.color = color;
+
+        // compose tags
+        globalTags = ''
+        for(let i=0; i<globalTagsTable.length; i++)
+        {
+            const tag = globalTagsTable[i];
+            if(tag.color)
+                globalTags += `#${tag.label}:${tag.color} `
+            else
+                globalTags += `#${tag.label} `
+        }
+
+        applyChange();
+        onUpdateAllTags(globalTags)
+        
     }
 
     function decomposeTags(tags: string, referenceTable=undefined)
@@ -199,8 +227,11 @@
                 }
                 
                 if(!color)
-                    color = "DarkGray"   // todo generate from string hash
+                    color = "bg-stone-400"
             }
+
+            if(!color.startsWith('bg-'))    // incompatible color format, seems not to be a tailwind bg class
+                color = 'bg-stone-400'
             
             table.push( {
                 label: label,
@@ -250,7 +281,8 @@
     {#each tagsTable as tag}
         {#if isEditable}
             <Tag name={tag.label} color={tag.color} {s}
-                 onRemove={(e) => {onRemoveTag(tag.label)}}/>
+                 onRemove={(e) => {onRemoveTag(tag.label)}}
+                 onColor={canChangeColor ? onColorizeTag : null}/>
         {:else}
             <Tag name={tag.label} color={tag.color} {s}/>
         {/if}

@@ -10,7 +10,6 @@ import {
     export let active: boolean = false;
 
     export let editable :any;
-    export let clickEdit :any;
 
     let user_class = $$props.class ?? "";
 
@@ -52,7 +51,10 @@ import {
                      text-base min-h-[1.5rem]
                      text-stone-400 
                      {user_class}"
-            use:_editable={editable}
+                use:_editable={{
+                action: editable,
+                active: true
+            }}
             on:click>
     </p>
 {/if}

@@ -18,7 +18,7 @@
 	export let focused_only = false;
 	export let inContext = '';
 	export let cl =
-		'w-full h-full flex flex-col dark:bg-stone-800  overflow-y-hidden  overflow-x-hidden py-1 px-1 border-0'; // border-green-500
+		'w-full flex flex-col bg-white dark:bg-stone-900 overflow-x-hidden py-1 px-1 border-0'; // border-green-500
 	export let c = '';
 
 	export let toolbarOperations = undefined;

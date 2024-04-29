@@ -203,7 +203,7 @@
         push(`/task?ref=${item.$ref}`);
     }
 
-    async function onCreateTag(allAllTags)
+    async function onUpdateAllTags(allAllTags)
     {
         allTags = allAllTags
         await reef.post('app/set', { AllTags: allTags})
@@ -447,7 +447,6 @@
 {#if currentList}
 	<Page
 		self={currentList}
-		cl="!bg-white dark:!bg-stone-900 w-full h-full flex flex-col overflow-y-auto overflow-x-hidden py-1 px-1 border-0"
 		toolbarOperations={pageOperations}
 		clearsContext="props sel"
 		title={currentList.Name}
@@ -484,7 +483,8 @@
 
             <KanbanTagsProperty bottom a='Tags' 
                                 getAllTags={() => allTags}
-                                onCreate={onCreateTag}/>
+                                {onUpdateAllTags}
+                                canChangeColor/>
         </Kanban>
 	</Page>
 {:else}

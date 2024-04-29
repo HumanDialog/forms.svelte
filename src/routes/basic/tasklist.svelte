@@ -254,12 +254,12 @@
                     grid: editOperations
                 },
                 {
-                    icon: FaCaretUp,
-                    action: (focused) => listComponent.moveUp(task)
-                },
-                {
                     icon: FaCaretDown,
                     action: (focused) => listComponent.moveDown(task)
+                },
+                {
+                    icon: FaCaretUp,
+                    action: (focused) => listComponent.moveUp(task)
                 },
                 {
                     icon: FaArchive,
@@ -284,7 +284,6 @@
 
 {#if currentList}
     <Page   self={currentList} 
-            cl="!bg-white dark:!bg-stone-900 w-full h-full flex flex-col overflow-y-auto overflow-x-hidden py-1 px-1 border-0" 
             toolbarOperations={ getPageOperations() }
             clearsContext='props sel'
             title={listTitle}>

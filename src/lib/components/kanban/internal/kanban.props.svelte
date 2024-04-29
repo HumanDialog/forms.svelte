@@ -159,7 +159,8 @@
                     getGlobalTags={prop.getAllTags}
                     s="xs"
                     onSelect={prop.onSelect}
-                    onCreate={prop.onCreate}
+                    onUpdateAllTags={prop.onUpdateAllTags}
+                    canChangeColor={prop.canChangeColor}
                     bind:this={propElements[idx]}
                 />
             {/if}

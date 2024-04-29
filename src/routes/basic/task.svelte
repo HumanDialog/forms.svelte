@@ -96,7 +96,7 @@
         
     }
 
-    async function onCreateTag(newAllTags)
+    async function onUpdateAllTags(newAllTags)
     {
         allTags  = newAllTags
         await reef.post('app/set', { AllTags: allTags})
@@ -397,7 +397,6 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex-->
 <Page   self={task} 
-            cl="!bg-white dark:!bg-stone-900 w-full h-full flex flex-col overflow-y-auto overflow-x-hidden py-1 px-1 border-0" 
             toolbarOperations={pageOperations}
             clearsContext=''
             title={task.Title}>
@@ -465,7 +464,8 @@
                         <Tags class="ml-auto grow justify-end"
                             a='Tags'
                             getGlobalTags={() => allTags}
-                            onCreate={onCreateTag}
+                            {onUpdateAllTags}
+                            canChangeColor
                             bind:this={tags}/>
                     {/if}
                 </section>

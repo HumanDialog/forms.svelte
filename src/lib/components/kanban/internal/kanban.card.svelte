@@ -92,8 +92,8 @@
         card?.scrollIntoView(
             {
                 behavior: "smooth",
-                block: "start",
-                inline: "center"
+                block: "nearest",
+                inline: "nearest"
             }
         )
     }
@@ -196,7 +196,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 
-<li class="mx-2 pt-2 pb-4 px-1 rounded-md border border-transparent {selectedClass} {focusedClass}"
+<li class="mx-2 pt-2 pb-4 px-1 rounded-md border border-transparent {selectedClass} {focusedClass} scroll-mt-[50px] sm:scroll-mt-[40px]"
      class:cursor-pointer={!isCardActive}
      on:click={activate}
      use:selectable={item} 
@@ -268,7 +268,7 @@
     {#if item[definition.summaryAttrib] || summaryPlaceholder}
         {#key item[definition.summaryAttrib]}
             {#if isCardActive}
-                <summary class="  sm:text-xs sm:min-h-[1rem]
+                <p class="  sm:text-xs sm:min-h-[1rem]
                             text-base min-h-[1.5rem]
                             text-stone-400
                             max-h-[75px] sm:max-h-[64px]
@@ -280,15 +280,15 @@
                                 onFinish: (d) => {summaryPlaceholder = false}}}
                             bind:this={summaryElement}>
                     {item[definition.summaryAttrib]}
-                </summary>
+                </p>
             {:else}
-                <summary class="  sm:text-xs sm:min-h-[1rem]
+                <p class="  sm:text-xs sm:min-h-[1rem]
                                 text-base min-h-[1.5rem]
                                 text-stone-400
                                 max-h-[75px] sm:max-h-[64px]
                                 overflow-hidden">
                     {item[definition.summaryAttrib]}
-                </summary>
+                </p>
             {/if}
         {/key}
     {/if}

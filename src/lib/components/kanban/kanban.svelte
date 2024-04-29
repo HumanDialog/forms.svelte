@@ -225,14 +225,14 @@
         })
     }*/
 
-    /*export function scrollViewToCard(item)
+    export function scrollViewToCard(item)
     {
         columns.forEach( c => {
             const card = c.findCardByItem(item)
             if(card)
                 card._scrollViewToCard()
         })
-    }*/
+    }
 
     export function moveUp(item: object)
     {
