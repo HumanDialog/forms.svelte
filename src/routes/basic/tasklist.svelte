@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
     import {reef} from '@humandialog/auth.svelte'
     import {    Spinner, 
                 Page, 
@@ -9,22 +9,36 @@
                 ListSummary,
                 ListInserter,
                 ListDateProperty,
-                ListComboProperty} from '$lib'
-    import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen} from 'svelte-icons/fa'
+                ListComboProperty,
+				mainViewReloader,
+                Modal} from '$lib'
+    import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaColumns, FaArchive, FaList, FaEllipsisH, FaChevronRight, FaChevronLeft} from 'svelte-icons/fa'
+    import {location, pop, push, querystring} from 'svelte-spa-router'
 
     export let params = {}
 
-    let current_list = null;
-    let list_component;
+    let currentList = null;
+    let listPath;
+    let listId;
+    let listComponent;
+    let isArchivedList = false;
+    let isArchivedTasks = false;
+    let assocName = 'Tasks'
+    let listTitle = ''
 
     let users = [];
 
-    const STATUS_CLOSED = 2;
+    const STATE_FINISHED = 1000;
     
-    $: on_params_changed();
+    $: onParamsChanged($location, $querystring, $mainViewReloader);
     
-    async function on_params_changed(...args)
+    async function onParamsChanged(...args)
     {
+        const segments = $location.split('/');
+        const foundIdx = segments.findIndex( s => s == 'tasklist');
+        if(foundIdx < 0)
+            return;
+
         if(users.length == 0)
         {
             let res = await reef.get('/app/Users')
@@ -33,10 +47,28 @@
         }
         
         
-        let list_id = 'first';
-        current_list = null
+        if(!segments.length)
+            listId = 'first';
+        else
+            listId = segments[segments.length-1]
         
-        let res = await reef.post(`/app/Lists/${list_id}/query`,
+        currentList = null
+
+        
+        const params = new URLSearchParams($querystring);
+        isArchivedList = params.has('archivedList')
+        isArchivedTasks = params.has('archivedTasks')
+
+        assocName = (isArchivedTasks || isArchivedList) ? 'ArchivedTasks' : 'Tasks';
+        listPath = isArchivedList ? `/app/ArchivedLists/${listId}` : `/app/Lists/${listId}`;
+            
+        await fetchData()
+    }
+
+    async function fetchData()
+    {
+
+        let res = await reef.post(`${listPath}/query`,
                             {
                                 Id: 1,
                                 Name: "collector",
@@ -46,23 +78,23 @@
                                     {
                                         Id: 1,
                                         Association: '',
+                                        Expressions:['Id','Name'],
                                         SubTree:
                                         [
                                             {
                                                 Id: 2,
-                                                Association: 'Tasks',
-                                                Filter: 'Status <> STATUS_CLOSED',
-                                                Sort: 'Order',
-                                                //ShowReferences: true,
+                                                Association: assocName,
+                                                //Filter: 'State <> STATE_FINISHED',
+                                                Sort: 'ListOrder',
                                                 SubTree:[
                                                     {
                                                         Id: 3,
-                                                        Association: 'Responsible',
+                                                        Association: 'Actor',
                                                         Expressions:['$ref', 'Name']
                                                     },
                                                     {
                                                         Id: 4,
-                                                        Association: 'OnList',
+                                                        Association: 'TaskList',
                                                         Expressions:['$ref', 'Name']
                                                     }
                                                 ]
@@ -72,218 +104,288 @@
                                 ]
                             });
         if(res)
-            current_list = res.TaskList;
+            currentList = res.TaskList;
         else
-            current_list = null
+            currentList = null
 
+        if(currentList)
+        {
+            if(!isArchivedTasks)
+                listTitle = currentList.Name
+            else
+                listTitle = `Archive of ${currentList.Name}`
+        }
     }
 
-
-    async function move_task_up(task :object)
+    async function reloadTasks(selectRecommendation)
     {
-        let prev = current_list.Tasks.prev(task);
-        if(!prev)
+        await fetchData();
+        listComponent.reload(currentList, selectRecommendation);
+    }
+    
+
+    let deleteModal;
+    let taskToDelete;
+    function askToDelete(task)
+    {
+        taskToDelete = task;
+        deleteModal.show()
+    }
+
+    
+    async function deleteTask()
+    {
+        if(!taskToDelete)
             return;
 
-        [prev.Order, task.Order] = [task.Order, prev.Order]   // swap orders
-        current_list.Tasks.swap(prev, task)
+        await reef.delete(taskToDelete.$ref);
+        deleteModal.hide();
 
-        list_component.refresh();
-
-        let result = await reef.post(`${task.$ref}/MoveBefore`,
-                                    {
-                                        beforeTask: prev.$ref
-                                    });
-        if(result)
-            task.Order = result.Task.Order
+        
+        await reloadTasks(listComponent.SELECT_NEXT)
     }
 
-    async function move_task_down(task :object)
+    let archiveModal;
+    let taskToArchive;
+    function askToArchive(task)
     {
-        let next = current_list.Tasks.next(task);
-        if(!next)
+        taskToArchive = task;
+        archiveModal.show();
+    }
+
+    async function archiveTask()
+    {
+        if(!taskToArchive)
             return;
 
-        [next.Order, task.Order] = [task.Order, next.Order];
-        current_list.Tasks.swap(task, next);
+        await reef.get(`${taskToArchive.$ref}/Archive`)
+        archiveModal.hide();
+        
+        await reloadTasks(listComponent.SELECT_NEXT)
+    }
 
-        list_component.refresh();
+    async function finishTask(event, task)
+    {
+        if(event)
+            event.stopPropagation();
 
-        let result = await reef.post(`${task.$ref}/MoveAfter`,
-                                    {
-                                        afterTask: next.$ref
-                                    });
+        let result = await reef.get(`${task.$ref}/Finish`);
         if(result)
-            task.Order = result.Task.Order   
+            await reloadTasks(listComponent.KEEP_OR_SELECT_NEXT)   
     }
 
-    async function delete_task(task)
+    async function addTask(newTaskAttribs)
     {
-        list_component.remove(task);
-        current_list.Tasks.remove(task);
-        
-        await reef.delete(task.$ref);
+        let res = await reef.post(`${listPath}/CreateTaskEx`,{ properties: newTaskAttribs })
+        if(!res)
+            return null;
+
+        let newTask = res.Task;
+        await reloadTasks(newTask.Id)
     }
 
-    async function finish_task(event, task)
+    function getPageOperations()
     {
-        task.Status = STATUS_CLOSED;
-        
-        event.stopPropagation();
+        if(isArchivedList)
+            return [];
 
-        list_component.remove(task);
-        current_list.Tasks.remove(task);
+        if(isArchivedTasks)
+            return [];
         
-
-        await reef.post(`${task.$ref}/set`,
-                                    {
-                                        Status: STATUS_CLOSED
-                                    });
+        return [
+                    {
+                        icon: FaPlus,
+                        action: (f) => { listComponent.addRowAfter(null) }
+                    },
+                    {
+                        separator: true
+                    },
+                    {
+                        icon: FaColumns,
+                        right: true,
+                        action: (f) => switchToKanban()
+                    }
+                ]
+        
     }
 
-    async function add_task_after(title :string, after :object|null)
+    function switchToKanban()
     {
-        let new_task;
-        if(after == null)
-        {
-            new_task = await reef.post(`/app/Lists/${current_list.Id}/AddTask`,
-                            {
-                                title: title
-                            })
-
-            if(!new_task)
-                return null;
-            
-            current_list.Tasks = [...current_list.Tasks, new_task.Task]
-
-            return new_task.Task;
-        }
-        else
-        {
-            new_task = await reef.post(`/app/Lists/${current_list.Id}/AddTaskAfter`,
-                            {
-                                title: title,
-                                afterTask: after.$ref
-                            })
-            if(!new_task)
-                return null;
-
-            current_list.Tasks = current_list.Tasks.insert_after(after, new_task.Task)
-            
-            return new_task.Task;
-        }
-        
+        push(`/listboard/${listId}`);
     }
 
-    let page_operations = [
-        {
-            icon: FaPlus,
-            caption: '',
-            action: (focused) => { list_component.add(null) }
-        }
-    ]
+    function switchToArchive()
+    {
+        push(`/tasklist/${listId}?archivedTasks`);
+    }
 
-    function get_add_operations(task)
+    function switchToActive()
+    {
+        push(`/tasklist/${listId}`);
+    }
+
+    function getEditOperations(task)
     {
         return [
             {
                 caption: 'Name',
-                action: (focused) =>  { list_component.edit(task, 'Title') }
+                action: (focused) =>  { listComponent.edit(task, 'Title') }
             },
             {
                 caption: 'Summary',
-                action: (focused) =>  { list_component.edit(task, 'Summary') }
+                action: (focused) =>  { listComponent.edit(task, 'Summary') }
             },
             {
                 separator: true
             },
             {
                 caption: 'Responsible',
-                action: (focused) => { list_component.edit(task, 'Responsible') }
+                action: (focused) => { listComponent.edit(task, 'Actor') }
             },
             {
                 caption: 'Due Date',
-                action: (focused) => { list_component.edit(task, 'DueDate') }
+                action: (focused) => { listComponent.edit(task, 'DueDate') }
             }
 
         ];
     }
 
-    let task_operations = (task) => { 
-        let add_operations = get_add_operations(task)
+    function onOpen(task)
+    {
+        push(`/task?ref=${task.$ref}`);
+    }
+
+    let taskOperations = (task) => { 
+        let editOperations = getEditOperations(task)
         return [
                 {
                     icon: FaPlus,
-                    caption: '',
-                    action: (focused) => { list_component.add(task) }
+                    action: (f) => { listComponent.addRowAfter(task) }
                 },
                 {
-                    icon: FaPen,
-                    caption: '',
-                    grid: add_operations
+                    toolbox:[
+                        {
+                            icon: FaPen,
+                            grid: editOperations
+                        },
+                        {
+                            icon: FaEllipsisH,
+                            menu:[
+                                {
+                                    icon: FaArchive,
+                                    caption: 'Archive',
+                                    action: (f) => askToArchive(task)
+                                },
+                                {
+                                    icon: FaTrash,
+                                    caption: 'Delete',
+                                    action: (f) => askToDelete(task)
+                                }
+                            ]
+                        }
+                        
+                    ]
                 },
                 {
-                    caption: '',
-                    icon: FaCaretUp,
-                    action: (focused) => move_task_up(task)
-                },
-                {
-                    caption: '',
                     icon: FaCaretDown,
-                    action: (focused) => move_task_down(task)
+                    action: (f) => listComponent.moveDown(task)
                 },
                 {
-                    caption: '',
-                    icon: FaTrash,
-                    action: (focused) => delete_task(task)
+                    icon: FaCaretUp,
+                    action: (f) => listComponent.moveUp(task)
+                },
+                {
+                    icon: FaColumns,
+                    right: true,
+                    action: (f) => switchToKanban()
                 }
             ];
     }
 
-    let task_context_menu = (task) => {
-        let add_operations = get_add_operations(task);
+    let taskContextMenu = (task) => {
+        let editOperations = getEditOperations(task);
         return {
-            grid: add_operations
+            grid: editOperations
         }
     }
 
 </script>
 
-{#if current_list}
-    <Page   self={current_list} 
-            cl="!bg-white dark:!bg-stone-900 w-full h-full flex flex-col overflow-y-auto overflow-x-hidden py-1 px-1 border-0" 
-            toolbarOperations={page_operations}
-            clears_context='props sel'
-            title={current_list.Name}>
 
-        <List   self={current_list} 
-                a='Tasks' 
-                title={current_list.Name} 
-                toolbarOperations={task_operations} 
-                contextMenu={task_context_menu}
-                bind:this={list_component}>
-            <ListTitle a='Title' hrefFunc={(itm) => { return `#/task?ref=${itm.$ref}` }}/>
+{#if currentList}
+    <Page   self={currentList} 
+            toolbarOperations={ getPageOperations() }
+            clearsContext='props sel'
+            title={listTitle}>
+
+        <List   self={currentList} 
+                a={assocName}
+                title={listTitle} 
+                toolbarOperations={taskOperations} 
+                contextMenu={taskContextMenu}
+                orderAttrib='ListOrder'
+                bind:this={listComponent}>
+            <ListTitle a='Title' {onOpen}/>
             <ListSummary a='Summary'/>
-            <ListInserter action={add_task_after} icon/>
+            <ListInserter action={addTask} icon/>
 
-            <ListComboProperty  name="Responsible" association>
+            <ListComboProperty  name="Actor" association>
                 <ComboSource objects={users} key="$ref" name='Name'/>
             </ListComboProperty>
 
             <ListDateProperty name="DueDate"/>
 
             <span slot="left" let:element>
-                <Icon component={element.Status == STATUS_CLOSED ? FaRegCheckCircle : FaRegCircle} 
-                    on:click={(e) => finish_task(e, element)} 
-                    class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
+                {#if element.State == STATE_FINISHED}
+                    <Icon component={FaRegCheckCircle} 
+                        class="h-5 w-5 sm:w-4 sm:h-4 text-stone-400 dark:text-stone-500  mt-2 sm:mt-1.5 ml-2 "
+                    />    
+                {:else}
+                    <Icon component={FaRegCircle} 
+                        on:click={(e) => finishTask(e, element)} 
+                        class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "
+                    />
+                {/if}
             </span>
 
             
         </List>
 
-        <a href='#/board' class="mt-20 ml-5">Board</a>
+        {#if !isArchivedTasks}
+            {#if !isArchivedList}
+                <div class="ml-3 mt-20 mb-10">
+                    <a  href={`#/tasklist/${listId}?archivedTasks`} 
+                        class="hover:underline">
+                            Show archived tasks 
+                            <div class="inline-block mt-1.5 w-3 h-3"><FaChevronRight/></div>
+                    </a>
+                </div>
+            {/if}
+        {:else}
+            <div class="ml-3 mt-20  mb-10">
+                <button on:click={(e) => pop() }>
+                    <div class="inline-block mt-1.5 w-3 h-3"><FaChevronLeft/></div>
+                    Back 
+                </button>
+
+            </div>
+        {/if}
     </Page>
 {:else}
     <Spinner delay={3000}/>
 {/if}
 
+
+<Modal  title="Delete"
+        content="Are you sure you want to delete selected task?"
+        icon={FaTrash}
+        onOkCallback={deleteTask}
+        bind:this={deleteModal}
+        />
+
+<Modal  title="Archive"
+        content="Are you sure you want to archive selected task?"
+        icon={FaArchive}
+        onOkCallback={archiveTask}
+        bind:this={archiveModal}
+        />

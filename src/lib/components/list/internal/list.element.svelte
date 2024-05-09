@@ -18,6 +18,8 @@
                 
     import {rList_definition, rList_property_type} from '../List'
 	import { push } from 'svelte-spa-router';
+    import {FaExternalLinkAlt} from 'svelte-icons/fa/'
+	import { readonly } from 'svelte/store';
     
     export let item     :object;
 
@@ -178,10 +180,11 @@
             }
             else
             {
-                if((part == 'top') && !definition.title_readonly)
+            /*    if((part == 'top') && !definition.title_readonly)
                     force_editing('Title')
                 else if((part == 'bottom') && !definition.summary_readonly)
                     force_editing('Summary')
+            */
             }
         }
         else
@@ -264,7 +267,35 @@
             return; //todo
         }
 
-        startEditing(element_node, () => { placeholder='' });
+        element_node.focus();
+        setSelectionAtEnd(element_node);
+        //startEditing(element_node, () => { placeholder='' });
+    }
+
+    function setSelectionAtEnd(element: HTMLElement)
+    {
+        const textNode = element.childNodes[0]
+        const text = textNode.textContent;
+
+        let range = document.createRange();
+        let end_offset = text.length;
+        let end_container = textNode;
+        range.setStart(end_container, end_offset)
+        range.setEnd(end_container, end_offset)
+        let sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
+
+    let rootElement;
+    export function scrollToView()
+    {
+        rootElement.scrollIntoView(
+            {
+                behavior: "smooth",
+                block: "nearest",
+                inline: "nearest"
+            });
     }
 </script>
 
@@ -272,10 +303,11 @@
 {#if item}
 {@const element_title = item[title]}
 
-<section    class="mt-3 flex flex-row my-0  w-full text-sm text-stone-700 dark:text-stone-300 cursor-default rounded-md border border-transparent {selected_class} {focused_class}"
+<section    class="mt-3 flex flex-row my-0  w-full text-sm text-stone-700 dark:text-stone-300 cursor-default rounded-md border border-transparent {selected_class} {focused_class} scroll-mt-[50px] sm:scroll-mt-[40px]"
             on:contextmenu={on_contextmenu}
             role="menu"
-            tabindex="-1">
+            tabindex="-1"
+            bind:this={rootElement}>
 
     <slot name="left" element={item}/>
     
@@ -287,25 +319,36 @@
             tabindex="0">
         <div class="block sm:flex sm:flex-row" on:click={(e) => on_active_row_clicked(e, 'top')}>
            
-            {#if definition.title_readonly}
+           {#if is_row_active}
+                {#key item[title]} <!-- Wymusza pełne wyrenderowanie zwłasza po zmiane z pustego na tekst  -->
+                    <p  class=" text-lg font-semibold min-h-[1.75rem]
+                                sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
+                                whitespace-nowrap overflow-clip w-full sm:flex-none sm:w-2/3"
+                        id="__hd_list_ctrl_{item[item_key]}_Title"
+                        use:editable={{
+                            action: (text) => {change_name(text)},
+                            active: true,
+                            readonly: definition.title_readonly,
+                        }}> 
+                            {element_title}
+
+                        {#if definition.onOpen}
+                            <button class="ml-3 w-5 h-5 sm:w-3 sm:h-3"
+                                    on:click={(e) => definition.onOpen(item)}>
+                                <FaExternalLinkAlt/>
+                            </button>
+                        {/if}
+                    </p>
+                {/key}
+           {:else}
                 <p  class=" text-lg font-semibold min-h-[1.75rem]
                             sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
                             whitespace-nowrap overflow-clip w-full sm:flex-none sm:w-2/3"
                     id="__hd_list_ctrl_{item[item_key]}_Title"> 
                     {element_title}
                 </p>
-            {:else}
-                {#key item[title]} <!-- Wymusza pełne wyrenderowanie zwłasza po zmiane z pustego na tekst  -->
-                    <p  class=" text-lg font-semibold min-h-[1.75rem]
-                                sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
-                                whitespace-nowrap overflow-clip w-full sm:flex-none sm:w-2/3"
-                        id="__hd_list_ctrl_{item[item_key]}_Title"
-                        use:editable={(text) => {change_name(text)}}
-                        on:click={edit}> 
-                            {element_title}
-                    </p>
-                {/key}
-            {/if}
+           {/if}
+           
            
 
             <section class="hidden sm:block w-full sm:flex-none sm:w-1/3">
@@ -315,15 +358,43 @@
 
         {#if summary && (item[summary] || placeholder=='Summary')}
             {@const element_id = `__hd_list_ctrl_${item[item_key]}_Summary`}
-            <Summary
+            {#key item[summary]}
+                
+            <!--Summary
                     id={element_id}
                     on:click={(e) => on_active_row_clicked(e, 'bottom')}
                     text={item[summary]}
                     readonly={definition.summary_readonly}
                     placeholder={placeholder == 'Summary'}
                     editable={(text) => {change_summary(text)}}
-                    clickEdit={edit}
-                />
+                    active={is_row_active}
+                /-->
+
+                
+                {#if is_row_active}
+                    <p  id={element_id} 
+                        class=" sm:text-xs sm:min-h-[1rem]
+                                    text-base min-h-[1.5rem]
+                                    text-stone-400"
+                            use:editable={{
+                                action: (text) => {change_summary(text)},
+                                readonly: definition.summary_readonly,
+                                onFinish: (d) => {placeholder='';},
+                                active: true
+                            }}>
+                        {item[summary]}
+                    </p>
+                {:else}
+                    <p  id={element_id} 
+                        class=" sm:text-xs sm:min-h-[1rem]
+                                    text-base min-h-[1.5rem]
+                                    text-stone-400"
+                        on:click={(e) => on_active_row_clicked(e, 'bottom')}>
+                        {item[summary]}
+                    </p>
+                {/if}
+            {/key}
+                
         {/if}
 
         <section class="block sm:hidden w-full sm:flex-none sm:w-2/3">

@@ -7,6 +7,7 @@
     export let value = '';
     export let placeholder = '';
     export let onEnter = null;
+    export let onBlur = null;
 
     export let self = null;
     export let a = '';
@@ -68,7 +69,7 @@
     }
     
 
-    function on_activate_input_box(event)
+    export function run(event)
     {
         if( (!input_box_is_active) && 
             ( 
@@ -79,9 +80,12 @@
             input_box_is_active = true;
             focus_input_box = true;
             org_value = value;
-                    
-            event.preventDefault();
-            event.stopPropagation();
+                 
+            if(event)
+            {
+                event.preventDefault();
+                event.stopPropagation();
+            }
         }
     }
 
@@ -147,6 +151,9 @@
     {
         input_box_is_active = false;
         value = org_value;
+
+        if(onBlur)
+            onBlur();
     }
 
     function value_changed()
@@ -174,7 +181,7 @@
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class="{cs} flex items-center {additional_class}" on:click={on_activate_input_box}>
+<div class="{cs} flex items-center {additional_class}" on:click={run}>
     <slot></slot>
     
     {#if input_box_is_active}

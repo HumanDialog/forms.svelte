@@ -33,13 +33,39 @@
         const m = 15;
         let container_rect :DOMRect = new DOMRect(m, 0, window.innerWidth-2*m, window.innerHeight)
         
+        if(isDeviceSmallerThan('sm'))       // are we on mobile?
+        {
+            const sel = window.getSelection();
+            //console.log('sel', sel)
+            // if we have active selections then it's very possible we have onscreen keyboard visible, se we need to shrink window.innerHeight 
+            if(sel && sel.rangeCount>0 && sel.focusNode && sel.focusNode.nodeType==sel.focusNode.TEXT_NODE)
+            {
+                container_rect.height -= 300; // it will be enough?
+                console.log('shirnked: ', container_rect)
+            }
+        }
+
+        
+        
         //console.log('beforeUpdate', rect, ' in ', container_rect)
                 
+        let xShifted = false;
         if(rect.right > container_rect.right)
-            x = container_rect.right - rect.width;
+        {
+            x = container_rect.right - rect.width + m;
+            xShifted = true;
+        }
 
+        let yShifted = false;
         if(rect.bottom > container_rect.bottom)
-            y = container_rect.bottom - rect.height - around_rect.height;
+        {
+            y = container_rect.bottom - rect.height-m;
+            if(xShifted)    // possible covers around rect
+                x -= around_rect.width;
+            else
+                y -= around_rect.height-m;
+            yShifted = true;
+        }
 
         if(rect.left < container_rect.left)
             x = container_rect.left;
@@ -83,7 +109,8 @@
         if(is_root_menu)
             menu_root.addEventListener('click', on_before_container_click, true)
 
-        if(menu_items.length)
+        
+        if(menu_items.length && !isDeviceSmallerThan("sm"))
             focus_menu_item(focused_index);
         
     }
@@ -200,7 +227,8 @@
 
     function on_mouse_move(index)
     {
-        focus_menu_item(index);
+        if(!isDeviceSmallerThan("sm"))
+            focus_menu_item(index);
     }
 
     function execute_action(operation, index)
@@ -279,6 +307,12 @@
         hide();
     }
     
+    function mousedown(e)
+    {
+        // preventDefault on mousedown avoids focusing the button
+        // so it keeps focus (and text selection) 
+        e.preventDefault()
+    }
 
 </script>
 
@@ -298,15 +332,16 @@
             {@const icon_placeholder_with_desc = mobile ? 14 : 12}
             {@const icon_placeholder_size = operation.description ? icon_placeholder_with_desc : icon_placeholder_without_desc}
             {@const menu_item_id = menu_items_id_prefix + index}
-            {@const active = focused_index == index ? 'bg-stone-200 dark:bg-stone-600' : ''}
+            {@const active = ((!mobile) && (focused_index == index)) ? 'bg-stone-200 dark:bg-stone-600' : ''}
             {@const has_submenu = operation.menu !== undefined && operation.menu.length > 0}
             
-            <button class="font-medium m-0 p-2 text-lg sm:text-sm w-full text-left flex flex-row cursor-context-menu {active} focus:outline-none"
+            <button class="font-medium m-0 py-2 pr-4 text-lg sm:text-sm w-full text-left flex flex-row cursor-context-menu {active} focus:outline-none"
                     id={menu_item_id}
                     bind:this={menu_items[index]}
                     on:click|stopPropagation={(e) => { execute_action(operation, index) } } 
                     on:mouseenter = {(e) => {on_mouse_move(index)}}
-                    on:keydown|stopPropagation={(e) => on_keydown(e, operation, index)}>
+                    on:keydown|stopPropagation={(e) => on_keydown(e, operation, index)}
+                    on:mousedown={mousedown}>
                     
                 <div class="flex items-center justify-center mt-1 sm:mt-0.5" style:width={`${icon_placeholder_size*0.25}rem`}>
                     {#if operation.icon}

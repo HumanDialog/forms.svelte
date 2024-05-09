@@ -10,6 +10,7 @@
     import Palette from './internal/palette.svelte'
 
     import FaFont from 'svelte-icons/fa/FaFont.svelte'
+    import FaRemoveFormat from 'svelte-icons/fa/FaRemoveFormat.svelte'
     import FaHead from 'svelte-icons/fa/FaHeading.svelte'
     import FaCode from 'svelte-icons/fa/FaCode.svelte'
     import FaComments from 'svelte-icons/fa/FaComment.svelte'
@@ -37,12 +38,12 @@
         editable_div?.focus();
     }
 
-    export function get_formatting_operations()
+    export function getFormattingOperations(withCaptions = false)
     {
         let result = [];
         commands.forEach( c => {
             result.push({
-                caption: '',//c.caption,
+                caption: withCaptions ? c.caption : '',
                 icon: c.icon,
                 action: c.on_choice
             })
@@ -263,6 +264,26 @@
 
     const on_keydown = (event) =>
     {
+        // ***  firefox case when sets caret direclty in div not within internal p
+        const sel = window.getSelection();
+        if(sel.focusNode == editable_div)
+        {
+            let next_text_editable_node :Node = find_next_editable_node(null, editable_div);
+            if(!next_text_editable_node)
+            {
+                event.preventDefault();
+                return;
+            }
+            
+            let range :Range = new Range;
+            range.collapse(true);
+            range.setStart(next_text_editable_node, 0);
+            range.setEnd(next_text_editable_node, 0);
+            set_selection(range);
+        }
+        // *****************
+
+
         switch(event.key)
         {
             case 'Enter':
@@ -988,7 +1009,13 @@
             return false;
         
         let element :HTMLElement = <HTMLElement> node;
-        return element.isContentEditable;
+        if(element.isContentEditable)
+            return false;
+
+        if(element.contentEditable == "false")
+            return true;
+
+        return false;
     }
 
     function find_next_editable_node(after :Node, parent :Node, check_upper_nodes :boolean = false) :Node
@@ -1001,7 +1028,6 @@
 
         while(node)
         {
-            
             if(node.hasChildNodes())
             {
                 if(!is_non_editable_element(node))
@@ -1330,9 +1356,28 @@
         //console.log('Editor store selection', id, range.begin.absolute_index, range.end.absolute_index);
     }
 
+    let intervalId = 0;
+    function on_focus()
+    {
+        if(pushChangesImmediately)
+        {
+            intervalId = setInterval(() =>
+            {
+                saveData();
+            },
+            2000);
+        }
+    }
+
     function on_blur()
     {
         let active_range : Selection_range = Selection_helper.get_selection(editable_div);
+
+        if(intervalId)
+        {
+            clearInterval(intervalId)
+            intervalId = 0;
+        }
 
         if(onBlur)
         {
@@ -1340,6 +1385,15 @@
             onBlur = undefined
         }
 
+        if(saveData())
+        {
+            last_tick = $data_tick_store + 1;
+            $data_tick_store = last_tick;
+        }
+    }
+
+    function saveData()
+    {
         if(item && a && has_changed_value)
         {
             item[a] = changed_value;
@@ -1347,20 +1401,21 @@
             has_changed_value = false;
 
             if(typename)
-            {
                 informModification(item, a, typename);
-                if(pushChangesImmediately)
-                    pushChanges();
-            }
+            else
+                informModification(item, a);
+            
+            if(pushChangesImmediately)
+                pushChanges();
 
-            last_tick = $data_tick_store + 1;
-            $data_tick_store = last_tick;
+            return true;
         }
+        return false;
     }
 
     
     let commands         :Document_command[] = [
-               {   caption: 'Normal',       description: 'This is normal text style',      tags: 'text',    icon: FaFont,                       on_choice: () => { do_format('p', '') } } ,
+               {   caption: 'Normal',       description: 'This is normal text style',      tags: 'text',    icon: FaRemoveFormat,                       on_choice: () => { do_format('p', '') } } ,
                
             //   {   caption: 'Heading 1',    description: 'Big section heading',            tags: 'h1',      icon: FaHead,    icon_size: 6,      on_choice: () => { do_format('h2', '') } } ,
             //   {   caption: 'Heading 2',    description: 'Medium section heading',         tags: 'h2',      icon: FaHead,    icon_size: 5,      on_choice: () => { do_format('h3', '') } } ,
@@ -1388,6 +1443,7 @@
         class="{cs}     {appearance_class} 
                         prose prose-base sm:prose-base dark:prose-invert {additional_class} overflow-y-auto"
         on:blur={on_blur}
+        on:focus={on_focus}
         on:focus
         on:blur
         >
@@ -1407,6 +1463,7 @@
 [contenteditable]:focus {
     outline: 0px solid transparent;
 }
+
 
 /*
 :global(.doc-code) {

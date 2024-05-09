@@ -1,13 +1,20 @@
 <script lang="ts">
+    import {getContext} from 'svelte'
     import Icon from '../icon.svelte'
     import {contextItemsStore, auto_hide_sidebar, contextToolbarOperations} from '../../stores'
-    import FaBars from 'svelte-icons/fa/FaBars.svelte'
+    import {FaBars, FaEllipsisH} from 'svelte-icons/fa'
 
     import {
         selectable as _selectable,
         isSelected,
         editable as _editable,
-        handleSelect
+        handleSelect,
+
+		activateItem,
+
+		getActive
+
+
     } from "../../utils";
 
     import {showMenu} from '../menu'
@@ -18,16 +25,37 @@
     export let selectable :any|undefined = undefined;
     export let editable :any|undefined = undefined;
     export let operations :any|undefined = undefined;
+    export let item :object|undefined = undefined;
+    
+    let isOnPage :boolean = getContext('rIs-page-component');
 
     $: context_data = $contextItemsStore;
+    $: isRowActive = calculateIsRowActive($contextItemsStore)
 
     let user_class = $$props.class ?? ""
     let root;
+
+    function calculateIsRowActive(...args)
+    {
+        if(!isOnPage)
+            return active;
+
+        if(!item)
+            return active;
+
+        const activeItem = getActive('props')
+        if(activeItem == item)
+            return true;
+        else
+            return false;
+    }
 
     function selectable_if_needed(node, selectable)
     {
         if(selectable)
             _selectable(node, selectable);
+        else if(item)
+            _selectable(node, item);
     }
 
     function selected(itm, context_data)
@@ -50,9 +78,23 @@
         
         if(selectable)
             handleSelect(e);
+        else if(item)
+            handleSelect(e);
 
 
-        e.stopPropagation();
+        //e.stopPropagation();
+
+        if(isOnPage)
+        {
+            if(!isRowActive)
+            {
+                e.preventDefault();
+            }
+            else
+                e.stopPropagation();
+        }
+        else
+            e.stopPropagation();
     }
 
     function on_contextmenu(e)
@@ -74,6 +116,9 @@
 
     function can_show_context_menu(itm, context_data)
     {
+        if(isOnPage)
+            return false;
+
         if(!selected(itm, context_data))
             return false;
 
@@ -105,12 +150,38 @@
         showMenu(rect, operations_list)
     }
 
+    function activateRow(e)
+    {
+        if(!item)
+            return;
+
+        if(!isOnPage)
+            return;
+
+        let operationsContainer = [];
+        if(operations)
+        {
+            let operationsList = operations(root);
+            operationsContainer.push({
+                icon: FaEllipsisH,
+                menu: operationsList
+            })
+        }
+        
+       activateItem('props', item, operationsContainer)
+
+        if(e)
+            e.stopPropagation();
+
+    }
+
 </script>
 
 <li bind:this={root}>
     <!--svelte-ignore a11y-click-events-have-key-events -->
     <div
         on:click
+        on:click={activateRow}
         on:contextmenu={on_contextmenu}
         on:keydown
         on:keyup
@@ -119,8 +190,8 @@
                     text-stone-900 sm:hover:bg-stone-100  
                     dark:text-white sm:dark:hover:bg-stone-700 {user_class}
                     flex flex-row justify-between"
-        class:bg-stone-200={active}
-        class:dark:bg-stone-700={active}
+        class:bg-stone-200={isRowActive}
+        class:dark:bg-stone-700={isRowActive}
         class:selected={selected(selectable, context_data)}>
             <a  href={href} 
                 on:click={on_link_clicked} 
@@ -134,6 +205,7 @@
                 </span>
             </a>
 
+            {#if !isOnPage}
             <section    class="flex-0 w-20 sm:w-12 h-10 flex-0 flex flex-row"
                         use:selectable_if_needed={selectable}>
                 {#if can_show_context_menu(selectable, context_data)}
@@ -142,6 +214,7 @@
                     </button>
                 {/if}
             </section>
+            {/if}
         </div>
 </li>
 

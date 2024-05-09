@@ -1,5 +1,5 @@
 <script>
-	import { setContext, onMount } from 'svelte';
+	import { setContext, getContext, onMount } from 'svelte';
 	import {
 		contextItemsStore,
 		data_tick_store,
@@ -18,11 +18,11 @@
 	export let focused_only = false;
 	export let inContext = '';
 	export let cl =
-		'w-full h-full flex flex-col dark:bg-stone-800  overflow-y-hidden  overflow-x-hidden py-1 px-1 border-0'; // border-green-500
+		'w-full flex flex-col bg-white dark:bg-stone-900 overflow-x-hidden py-1 px-1 border-0'; // border-green-500
 	export let c = '';
 
 	export let toolbarOperations = undefined;
-	export let clears_context = '';
+	export let clearsContext = '';
 	export let title = '';
 
 	switch (c) {
@@ -37,6 +37,9 @@
 		default:
 		//NOP
 	}
+
+	if($$props.class)
+		cl += ' ' + $$props.class
 
 	onMount(() => {
 		if (toolbarOperations != undefined && Array.isArray(toolbarOperations))
@@ -54,7 +57,11 @@
 		};
 	});
 
+	setContext('rIs-page-component', true);
 	setContext('ctx', context);
+
+	const cascadingParams = getContext('rPage-cascading-params')
+
 	let item = null;
 	let visibilty = 'hidden';
 	if (inContext == '') inContext = context;
@@ -70,6 +77,7 @@
 			if ($contextItemsStore.focused == inContext) visibilty = '';
 		} else visibilty = '';
 	}
+	let heightClass = ''
 	let t = 0;
 	$: {
 		t = $data_tick_store;
@@ -92,13 +100,18 @@
 			//console.log(item)
 			//console.log("--------------")
 		}
+
+		if(cascadingParams && cascadingParams.min_h_class)
+			heightClass = cascadingParams.min_h_class;
+		else
+			heightClass = '';
 	}
 
-	function clear_selection(e) {
-		//console.log('page click', chnages.just_changed_context)
-		if (!clears_context) return;
+	function clear_selection(e) 
+	{
+		if (!clearsContext) return;
 
-		let contexts = clears_context.split(' ');
+		let contexts = clearsContext.split(' ');
 		contexts.forEach((c) => {
 			$contextItemsStore[c] = null;
 			$context_info_store[c] = '';
@@ -111,7 +124,7 @@
 	}
 </script>
 
-<div class="bg-stone-100 dark:bg-stone-800 {visibilty} {cl}" on:click={clear_selection}>
+<div class="bg-stone-100 dark:bg-stone-800 {visibilty} {cl} {heightClass}" on:click={clear_selection}>
 	{#if visibilty == ''}
 		<slot />
 	{/if}

@@ -15,7 +15,8 @@ const em = (px, base) => `${round(px / base)}em`
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./src/**/*.{html,js,svelte,ts}',
-  			'./node_modules/@humandialog/forms.svelte/**/*.{html,js,svelte,ts}'],
+  			'./node_modules/@humandialog/forms.svelte/**/*.{html,js,svelte,ts}',
+			'./node_modules/@humandialog/auth.svelte/**/*.{html,js,svelte,ts}'],
   theme: {
     extend: {
 			typography: {

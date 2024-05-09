@@ -1,28 +1,26 @@
 <script lang="ts">
     import {getContext, afterUpdate, tick} from 'svelte'
     import {data_tick_store, contextItemsStore, contextTypesStore} from '../../../stores'
-    import {getActive, activateItem } from '../../../utils.js'
+    import {getActive, activateItem, editable, isActive, isSelected, selectable, startEditing } from '../../../utils.js'
     import Card from './kanban.card.svelte'
     import {KanbanColumnTop, KanbanColumnBottom} from '../Kanban'
     import Inserter from './kanban.inserter.svelte'
-    import {FaPlus} from 'svelte-icons/fa'
+    import {FaPlus, FaCheck} from 'svelte-icons/fa'
+    import type{rKanban_definition, rKanban_column } from '../Kanban'
 
-    export let title:      string = '';
-    export let width:      string = 'w-[240px]';
-    export let self:       object|undefined = undefined;
-    export let a:          string = '';
-    export let objects:    object[]|undefined = undefined;
-    export let context:    string = ''
-    export let key:        string = ''
     export let currentColumnIdx :number
-    
-    export let showMoveOperationsForItem: Function | undefined = undefined;
-    export let scrollViewToCard: Function | undefined = undefined;
+    export let onInsert: Function;
 
     let column_element: HTMLElement;
     export function getHeight()
     {
         return column_element.getBoundingClientRect().height
+    }
+
+    let titleElement;
+    export function editName(onFinish: Function|undefined = undefined)
+    {
+        startEditing(titleElement, onFinish)
     }
 
     export const SET_LEFT = 0;
@@ -48,52 +46,53 @@
         }
     }
 
-    let definition = getContext("rKanban-definition");
+    let definition :rKanban_definition = getContext("rKanban-definition");
+    let columnDef: rKanban_column = definition.columns[currentColumnIdx];
+    
+    let     column_items :object[] | undefined = undefined;
+    
+    let width_class = columnDef.width ? `w-11/12 sm:${columnDef.width}` : 'w-11/12 sm:w-[240px]'
 
-    let     item  :object | null = null
-    let     items :object[] | undefined = undefined;
-    let     ctx   :string = context ? context : getContext('ctx');
+    $: setup_data();
 
-    let     last_tick = -1   
-    let     item_key :string = '';
+    $: is_row_active = calculate_active($contextItemsStore)
+    $: is_row_selected = selected($contextItemsStore)
+    $: selected_class = is_row_selected ? "!border-blue-300" : "";
+    $: focused_class = is_row_active ? "bg-stone-50 dark:bg-stone-700" : "";
 
-    let width_class = width ? `w-11/12 sm:${width}` : 'w-11/12 sm:w-[240px]'
+    $: force_rerender($data_tick_store, $contextItemsStore)
 
-    $: setup($data_tick_store, $contextItemsStore);
-
-    function setup(...args)
+    export function reload()
     {
-        //console.log('list setup', objects)
-        last_tick = $data_tick_store            
-        item = self ?? $contextItemsStore[ctx];
-        
-        items = undefined;
+        let allItems = definition.getItems();
+        if(definition.stateAttrib)
+            column_items = allItems.filter( e => e[definition.stateAttrib] == columnDef.state)
+    }
 
-        if(objects)
-        {
-            items = objects;
-        }
-        else if(item && a )
-            items = item[a];
+    function setup_data(...args)
+    {
+        reload();
+    }
 
-        if(items == undefined)
-            items = [];
+    function force_rerender(...args)
+    {
+        column_items = [...column_items];
+    }
 
-        if(items.length > 0)
-        {
-            let first_element = items[0];
-            let keys = Object.keys(first_element);
-            if(key)
-                item_key = key;
-            else if(keys.includes('Id'))
-                item_key = 'Id';
-            else if(keys.includes('$ref'))
-                item_key = '$ref';
-            else if(keys.length > 0)
-                item_key = keys[0];
-            else
-                item_key = '';
-        }
+    function calculate_active(...args)
+    {
+        if(!!columnDef.operations)
+            return isActive('props', columnDef)
+        else
+            return false;
+    }
+
+    function selected(...args)
+    {
+        if(!!columnDef.operations)
+            return isSelected(columnDef)
+        else
+            return false;
     }
 
     let cards = [];
@@ -102,18 +101,30 @@
         if(!cards)
             return null;
 
-        const item_idx = items?.findIndex( i => i == item)
-        if(item_idx >= 0)
+        const itemIdx = column_items?.findIndex( i => i == item)
+        if(itemIdx >= 0)
         {
-            return cards[item_idx]
+            return cards[itemIdx]
         }
         else
             return null;
     }
 
+    export function activateByItemId(id: number)
+    {
+        const itemIdx = column_items?.findIndex(e => e.Id == id)
+        if(itemIdx >= 0)
+        {
+            const card = cards[itemIdx]
+            card.activate()
+        }
+    }
+
+    
+
     let inserter;
     const None = 0
-    let showInserterAfter :object|number = None
+    let showInserterAfterId :number = None
     let activateAfterDomUpdate :object|null = null;
     let lastActivatedElement :object|null = null;
 
@@ -122,7 +133,11 @@
         if(!definition.onAdd)
             return;
 
-        showInserterAfter = after ?? KanbanColumnTop;
+        if(after === KanbanColumnTop || after === KanbanColumnBottom)
+            showInserterAfterId = after;
+        else
+            showInserterAfterId = after.Id;
+        //showInserterAfterId = after.Id ?? KanbanColumnTop;
 
         if(activateAfterDomUpdate)
             activateAfterDomUpdate = null;
@@ -137,7 +152,7 @@
             return;
 
         inserter.run( async (detail) => {
-            showInserterAfter = None;
+            showInserterAfterId = None;
 
             if(detail.cancel)
                 activateAfterDomUpdate = lastActivatedElement;
@@ -146,25 +161,41 @@
                 if(detail.incremental)
                 {
                     let currentActive = activateAfterDomUpdate ?? getActive('props');
-                    await add(currentActive);
+                    if(currentActive)
+                        await add(currentActive);
                 }
             }
         } );
     }
 
-    async function insert(title :string, after :object | number)
+    /*async function insert(title :string, after :object | number)
     {
+        let newElement = {
+            [definition.titleAttrib]: title
+        }
+
+        const oa = definition.orderAttrib
+        
+        if(after && )
+        {
+
+        }
+
+
+        // =============
+
         let newElement = await definition.onAdd(title, currentColumnIdx, after);
         if(!newElement)
             return;
 
         activateAfterDomUpdate = newElement;
     }
+    */
 
     afterUpdate(() => {
         if(activateAfterDomUpdate)
         {
-            let activateAfterDomUpdateIdx = items.findIndex( e => e == activateAfterDomUpdate);
+            let activateAfterDomUpdateIdx = column_items.findIndex( e => e == activateAfterDomUpdate);
             activateAfterDomUpdate = null;
             if(activateAfterDomUpdateIdx >= 0)
             {
@@ -172,31 +203,95 @@
             }
         }
     })
+
+    function getItemKey(item: object): string | number
+    {
+        if(definition.key)
+            return item[definition.key];
+        else if(item.Id)
+            return item.Id;
+        else if(item.$ref)
+            return item.$ref;
+        else 
+            return 0;
+    }
+
+    function onTitleChanged(text: string)
+    {
+        if(columnDef.onTitleChanged)
+            columnDef.onTitleChanged(text)
+    }
+
+    let headerElement;
+    export function activate(e)
+    {
+        if(e)
+            e.stopPropagation();
+
+        if(!columnDef.operations)
+            return;
+
+        if(isActive('props', columnDef))
+        {
+            return;
+        }
+       
+        activateItem('props', columnDef, columnDef.operations);
+        
+        if(!e)
+            headerElement?.scrollIntoView(
+                {
+                    block: "nearest",
+                    inline: "nearest"
+                }
+            )
+    }
     
 </script>
 
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 
-<section class="flex-none sm:flex-1 sm:min-w-[180px] sm:max-w-[240px] {width_class}">
-    <header>
-        <h2 class="mb-2 text-lg sm:text-xs uppercase w-full text-center whitespace-nowrap relative">{title}
-            <button class="absolute right-2 w-4 sm:w-2.5"
-                    on:click={(e) => add(KanbanColumnTop)}>
+<section class="    snap-center 
+                    sm:snap-align-none 
+                    flex-none sm:flex-1
+                    sm:min-w-[180px] sm:max-w-[240px]
+                    sm:min-h-[calc(100vh-8rem)] 
+                    min-h-[calc(100vh-5rem)] 
+                    rounded-md border border-transparent  
+                    {width_class} {selected_class} {focused_class}"
+        use:selectable={columnDef}
+        on:click={activate}>
+    <header class:cursor-pointer={!is_row_active && columnDef.operations} bind:this={headerElement}>
+        <h2 class="mt-2 mb-2 text-lg sm:text-xs uppercase w-full min-h-[1rem] text-center whitespace-nowrap relative">
+            <span 
+                use:editable={{
+                    action: (text) => onTitleChanged(text),
+                    active: false
+                }}
+                bind:this={titleElement}>
+                {columnDef.title}
+            </span>
+            
+            {#if columnDef.finishing}
+                <div class="inline-block text-green-600 h-3 w-3 ml-2">
+                    <FaCheck/>
+                </div>
+            {/if}
+            <!--button class="absolute right-2 w-4 sm:w-2.5"
+                    on:click|stopPropagation={(e) => add(KanbanColumnTop)}>
                 <FaPlus/>
-            </button>
+            </button-->
         </h2>
     </header>
-    <ul class="w-full border-stone-700" bind:this={column_element}>
-        {#if showInserterAfter === KanbanColumnTop}
-            <Inserter   onInsert={async (text) => {await insert(text, KanbanColumnTop)}}
+    <ul class="w-full border-stone-700 pb-20" bind:this={column_element}>
+        {#if showInserterAfterId === KanbanColumnTop}
+            <Inserter   onInsert={async (text) => {await onInsert(currentColumnIdx, text, KanbanColumnTop)}}
                         bind:this={inserter} />
         {/if}
 
-        {#if items && items.length > 0}
-            {#each items as element, item_idx (element[item_key])}
+        {#if column_items && column_items.length > 0}
+            {#each column_items as element, item_idx (getItemKey(element))}
                 <Card   item={element} 
-                        {showMoveOperationsForItem}
-                        {scrollViewToCard}
-                        runInserter={add}
                         bind:this={cards[item_idx]}>
                     <svelte:fragment slot="kanbanCardTopProps" let:element>
                         <slot name="kanbanCardTopProps" {element}/>
@@ -211,15 +306,15 @@
                     </svelte:fragment>
                 </Card>
 
-                {#if showInserterAfter == element}
-                    <Inserter   onInsert={async (text) => {await insert(text, showInserterAfter)}}
+                {#if showInserterAfterId == element.Id}
+                    <Inserter   onInsert={async (text) => {await onInsert(currentColumnIdx, text, showInserterAfterId)}}
                                 bind:this={inserter} />
                 {/if}
             {/each}
         {/if}
 
-        {#if showInserterAfter === KanbanColumnBottom}
-            <Inserter   onInsert={async (text) => {await insert(text, KanbanColumnBottom)}}
+        {#if showInserterAfterId === KanbanColumnBottom}
+            <Inserter   onInsert={async (text) => {await onInsert(currentColumnIdx, text, KanbanColumnBottom)}}
                         bind:this={inserter} />
         {/if}
 

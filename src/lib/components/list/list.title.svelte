@@ -5,6 +5,7 @@
     export let a        :string;
     export let editable :boolean = false;
     export let onChange :Function | undefined = undefined; // function(element, text, property)
+    export let onOpen   :Function | undefined = undefined;
     export let readonly :boolean = false;
     export let href     :string | undefined = undefined
     export let hrefFunc :Function | undefined = undefined
@@ -18,5 +19,6 @@
     definition.title_readonly = readonly;
     definition.title_href = href;
     definition.title_href_func = hrefFunc;
+    definition.onOpen = onOpen;
 
 </script>

@@ -6,7 +6,8 @@ export enum rList_property_type
     Text,
     Date,
     Combo,
-    Static
+    Static,
+    Tags
 }
 
 export class rList_property
@@ -20,6 +21,7 @@ export class rList_property
     public name         :string = '';
     public a            :string = '';
     public onSelect    :Function | undefined = undefined;
+    public position     :number|string|undefined = undefined
 }
 
 export class rList_property_combo extends rList_property
@@ -34,6 +36,17 @@ export class rList_property_combo extends rList_property
     public combo_definition :rCombo_definition;
 }
 
+export class rList_property_tags extends rList_property
+{
+    constructor()
+    {
+        super(rList_property_type.Tags);
+    }
+
+    public canChangeColor: boolean = false;
+    public getAllTags: Function | undefined = undefined;
+    public onUpdateAllTags: Function | undefined = undefined;
+}
 
 export class rList_definition
 {
@@ -52,6 +65,7 @@ export class rList_definition
     public can_insert           :boolean = false;
     public onInsert             :Function | undefined = undefined;
     public inserter_icon        :boolean = false;
+    public onOpen               :Function | undefined = undefined;
 
     public properties           :rList_property[] = [];
 }
