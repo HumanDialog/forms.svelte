@@ -69,22 +69,42 @@
         
         {#each leftOperations as operation}
             {#if !operation.separator}
-
-                <button type="button" 
-                        class="py-2.5 px-5 
-                        text-xs font-medium text-stone-100 dark:text-stone-300 dark:hover:text-white 
-                        hover:bg-stone-700 dark:hover:bg-stone-800 active:bg-stone-300 dark:active:bg-stone-600
-                        border-stone-200 focus:outline-none dark:border-stone-600
-                        inline-flex items-center"
-                        on:click={(e) => {on_click(e, operation)}}
-                        on:mousedown={mousedown}>
-                    {#if operation.icon}
-                        <div class="w-3 h-3 mr-1"><svelte:component this={operation.icon}/></div>
-                    {/if}
-                    {#if operation.caption}
-                        <span>{operation.caption}</span>
-                    {/if}
-                </button>    
+                {#if operation.toolbox}
+                    {#each operation.toolbox as operation}
+                        <button type="button" 
+                                class="py-2.5 px-5 
+                                text-xs font-medium text-stone-100 dark:text-stone-300 dark:hover:text-white 
+                                hover:bg-stone-700 dark:hover:bg-stone-800 active:bg-stone-300 dark:active:bg-stone-600
+                                border-stone-200 focus:outline-none dark:border-stone-600
+                                inline-flex items-center"
+                                on:click={(e) => {on_click(e, operation)}}
+                                on:mousedown={mousedown}>
+                            {#if operation.icon}
+                                <div class="w-3 h-3 mr-1"><svelte:component this={operation.icon}/></div>
+                            {/if}
+                            {#if operation.caption}
+                                <span>{operation.caption}</span>
+                            {/if}
+                        </button>
+                    {/each}
+                {:else}
+                
+                    <button type="button" 
+                            class="py-2.5 px-5 
+                            text-xs font-medium text-stone-100 dark:text-stone-300 dark:hover:text-white 
+                            hover:bg-stone-700 dark:hover:bg-stone-800 active:bg-stone-300 dark:active:bg-stone-600
+                            border-stone-200 focus:outline-none dark:border-stone-600
+                            inline-flex items-center"
+                            on:click={(e) => {on_click(e, operation)}}
+                            on:mousedown={mousedown}>
+                        {#if operation.icon}
+                            <div class="w-3 h-3 mr-1"><svelte:component this={operation.icon}/></div>
+                        {/if}
+                        {#if operation.caption}
+                            <span>{operation.caption}</span>
+                        {/if}
+                    </button>
+                {/if}    
             {/if}
         {/each}
     </div>

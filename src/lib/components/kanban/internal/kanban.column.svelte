@@ -133,7 +133,11 @@
         if(!definition.onAdd)
             return;
 
-        showInserterAfterId = after.Id ?? KanbanColumnTop;
+        if(after === KanbanColumnTop || after === KanbanColumnBottom)
+            showInserterAfterId = after;
+        else
+            showInserterAfterId = after.Id;
+        //showInserterAfterId = after.Id ?? KanbanColumnTop;
 
         if(activateAfterDomUpdate)
             activateAfterDomUpdate = null;
@@ -218,7 +222,7 @@
             columnDef.onTitleChanged(text)
     }
 
-    let rootElement;
+    let headerElement;
     export function activate(e)
     {
         if(e)
@@ -234,18 +238,30 @@
        
         activateItem('props', columnDef, columnDef.operations);
         
-        rootElement?.scrollIntoView()
+        if(!e)
+            headerElement?.scrollIntoView(
+                {
+                    block: "nearest",
+                    inline: "nearest"
+                }
+            )
     }
     
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 
-<section class="snap-center sm:snap-align-none flex-none sm:flex-1 sm:min-w-[180px] sm:max-w-[240px] rounded-md border border-transparent  {width_class} {selected_class} {focused_class}"
-        bind:this={rootElement}>
-    <header class:cursor-pointer={!is_row_active && columnDef.operations}
-            use:selectable={columnDef}
-            on:click={activate}>
+<section class="    snap-center 
+                    sm:snap-align-none 
+                    flex-none sm:flex-1
+                    sm:min-w-[180px] sm:max-w-[240px]
+                    sm:min-h-[calc(100vh-8rem)] 
+                    min-h-[calc(100vh-5rem)] 
+                    rounded-md border border-transparent  
+                    {width_class} {selected_class} {focused_class}"
+        use:selectable={columnDef}
+        on:click={activate}>
+    <header class:cursor-pointer={!is_row_active && columnDef.operations} bind:this={headerElement}>
         <h2 class="mt-2 mb-2 text-lg sm:text-xs uppercase w-full min-h-[1rem] text-center whitespace-nowrap relative">
             <span 
                 use:editable={{
@@ -261,13 +277,13 @@
                     <FaCheck/>
                 </div>
             {/if}
-            <button class="absolute right-2 w-4 sm:w-2.5"
+            <!--button class="absolute right-2 w-4 sm:w-2.5"
                     on:click|stopPropagation={(e) => add(KanbanColumnTop)}>
                 <FaPlus/>
-            </button>
+            </button-->
         </h2>
     </header>
-    <ul class="w-full border-stone-700" bind:this={column_element}>
+    <ul class="w-full border-stone-700 pb-20" bind:this={column_element}>
         {#if showInserterAfterId === KanbanColumnTop}
             <Inserter   onInsert={async (text) => {await onInsert(currentColumnIdx, text, KanbanColumnTop)}}
                         bind:this={inserter} />

@@ -238,7 +238,7 @@
                                 {lg_content_area_horizontal_dim}
                                 z-0 overflow-x-hidden" 
                                 >
-                        <Configurable config={layout.mainContent}>
+                        <Configurable config={layout.mainContent} min_h_class={content_height}>
                             <div slot='alt'></div>
                         </Configurable>
                 </div>    

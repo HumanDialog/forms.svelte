@@ -10,9 +10,10 @@
                 ListInserter,
                 ListDateProperty,
                 ListComboProperty,
-				mainViewReloader} from '$lib'
-    import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaColumns, FaArchive, FaList, FaExternalLinkAlt} from 'svelte-icons/fa'
-    import {location, push, querystring} from 'svelte-spa-router'
+				mainViewReloader,
+                Modal} from '$lib'
+    import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaColumns, FaArchive, FaList, FaEllipsisH, FaChevronRight, FaChevronLeft} from 'svelte-icons/fa'
+    import {location, pop, push, querystring} from 'svelte-spa-router'
 
     export let params = {}
 
@@ -123,22 +124,50 @@
     }
     
 
-    async function deleteTask(task)
+    let deleteModal;
+    let taskToDelete;
+    function askToDelete(task)
     {
-        await reef.delete(task.$ref);
-        await reloadTasks(listComponent.SELECT_NEXT)
-
+        taskToDelete = task;
+        deleteModal.show()
     }
 
-    async function archiveTask(task)
+    
+    async function deleteTask()
     {
-        await reef.get(`${task.$ref}/Archive`)
+        if(!taskToDelete)
+            return;
+
+        await reef.delete(taskToDelete.$ref);
+        deleteModal.hide();
+
+        
+        await reloadTasks(listComponent.SELECT_NEXT)
+    }
+
+    let archiveModal;
+    let taskToArchive;
+    function askToArchive(task)
+    {
+        taskToArchive = task;
+        archiveModal.show();
+    }
+
+    async function archiveTask()
+    {
+        if(!taskToArchive)
+            return;
+
+        await reef.get(`${taskToArchive.$ref}/Archive`)
+        archiveModal.hide();
+        
         await reloadTasks(listComponent.SELECT_NEXT)
     }
 
     async function finishTask(event, task)
     {
-        event.stopPropagation();
+        if(event)
+            event.stopPropagation();
 
         let result = await reef.get(`${task.$ref}/Finish`);
         if(result)
@@ -159,41 +188,25 @@
     {
         if(isArchivedList)
             return [];
+
+        if(isArchivedTasks)
+            return [];
         
-        if(!isArchivedTasks)
-        {
-            return [
-                        {
-                            icon: FaPlus,
-                            action: (f) => { listComponent.addRowAfter(null) }
-                        },
-                        {
-                            icon: FaColumns,
-                            right: true,
-                            action: (f) => switchToKanban()
-                        },
-                        {
-                            icon: FaArchive,
-                            right: true,
-                            action: (f) => switchToArchive()
-                        }
-                    ]
-        }
-        else
-        {
-            return [
-                        {
-                            icon: FaColumns,
-                            right: true,
-                            action: (f) => switchToKanban()
-                        },
-                        {
-                            icon: FaList,
-                            right: true,
-                            action: (f) => switchToActive()
-                        }
-            ]
-        }
+        return [
+                    {
+                        icon: FaPlus,
+                        action: (f) => { listComponent.addRowAfter(null) }
+                    },
+                    {
+                        separator: true
+                    },
+                    {
+                        icon: FaColumns,
+                        right: true,
+                        action: (f) => switchToKanban()
+                    }
+                ]
+        
     }
 
     function switchToKanban()
@@ -247,27 +260,44 @@
         return [
                 {
                     icon: FaPlus,
-                    action: (focused) => { listComponent.addRowAfter(task) }
+                    action: (f) => { listComponent.addRowAfter(task) }
                 },
                 {
-                    icon: FaPen,
-                    grid: editOperations
+                    toolbox:[
+                        {
+                            icon: FaPen,
+                            grid: editOperations
+                        },
+                        {
+                            icon: FaEllipsisH,
+                            menu:[
+                                {
+                                    icon: FaArchive,
+                                    caption: 'Archive',
+                                    action: (f) => askToArchive(task)
+                                },
+                                {
+                                    icon: FaTrash,
+                                    caption: 'Delete',
+                                    action: (f) => askToDelete(task)
+                                }
+                            ]
+                        }
+                        
+                    ]
                 },
                 {
                     icon: FaCaretDown,
-                    action: (focused) => listComponent.moveDown(task)
+                    action: (f) => listComponent.moveDown(task)
                 },
                 {
                     icon: FaCaretUp,
-                    action: (focused) => listComponent.moveUp(task)
+                    action: (f) => listComponent.moveUp(task)
                 },
                 {
-                    icon: FaArchive,
-                    action: (f) => archiveTask(task)
-                },
-                {
-                    icon: FaTrash,
-                    action: (focused) => deleteTask(task)
+                    icon: FaColumns,
+                    right: true,
+                    action: (f) => switchToKanban()
                 }
             ];
     }
@@ -320,9 +350,42 @@
 
             
         </List>
+
+        {#if !isArchivedTasks}
+            {#if !isArchivedList}
+                <div class="ml-3 mt-20 mb-10">
+                    <a  href={`#/tasklist/${listId}?archivedTasks`} 
+                        class="hover:underline">
+                            Show archived tasks 
+                            <div class="inline-block mt-1.5 w-3 h-3"><FaChevronRight/></div>
+                    </a>
+                </div>
+            {/if}
+        {:else}
+            <div class="ml-3 mt-20  mb-10">
+                <button on:click={(e) => pop() }>
+                    <div class="inline-block mt-1.5 w-3 h-3"><FaChevronLeft/></div>
+                    Back 
+                </button>
+
+            </div>
+        {/if}
     </Page>
 {:else}
     <Spinner delay={3000}/>
 {/if}
 
 
+<Modal  title="Delete"
+        content="Are you sure you want to delete selected task?"
+        icon={FaTrash}
+        onOkCallback={deleteTask}
+        bind:this={deleteModal}
+        />
+
+<Modal  title="Archive"
+        content="Are you sure you want to archive selected task?"
+        icon={FaArchive}
+        onOkCallback={archiveTask}
+        bind:this={archiveModal}
+        />

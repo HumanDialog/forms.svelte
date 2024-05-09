@@ -36,6 +36,7 @@
     import {session, signInHRef, signOutHRef} from '@humandialog/auth.svelte'
 
     import VerticalToolbar from '$lib/vertical.toolbar.svelte'
+	import { isDeviceSmallerThan } from './utils.js';
     
 
     export let appConfig;
@@ -87,24 +88,30 @@
 
     function toggle_navigator(e)
     {
-        if(tabs.length == 1)
-        {
-            $sidebar_left_pos = 0;
-            toggle_sidebar(tabs[0]);
-        }
+        if(isDeviceSmallerThan('sm'))
+            push('/')
         else
         {
-            let sidebar = $main_sidebar_visible_store;
-            if(sidebar == "*")
-            {
-                if((!previously_visible_sidebar) || previously_visible_sidebar === '*')
-                    sidebar = Object.keys(appConfig.sidebar)[0];
-                else
-                    sidebar = previously_visible_sidebar;
-            }
 
-            $sidebar_left_pos = 40;
-            toggle_sidebar(sidebar)
+            if(tabs.length == 1)
+            {
+                $sidebar_left_pos = 0;
+                toggle_sidebar(tabs[0]);
+            }
+            else
+            {
+                let sidebar = $main_sidebar_visible_store;
+                if(sidebar == "*")
+                {
+                    if((!previously_visible_sidebar) || previously_visible_sidebar === '*')
+                        sidebar = Object.keys(appConfig.sidebar)[0];
+                    else
+                        sidebar = previously_visible_sidebar;
+                }
+
+                $sidebar_left_pos = 40;
+                toggle_sidebar(sidebar)
+            }
         }
     }
 

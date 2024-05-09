@@ -4,6 +4,7 @@
     import {FaPlus} from 'svelte-icons/fa'
 	import { getPrev, getNext, swapElements, getLast } from '$lib/utils';
 	import { informModification, pushChanges } from '$lib/updates';
+	import { tick } from 'svelte';
 
     export let objects: object[];
     export let orderAttrib: string | undefined = undefined;
@@ -13,6 +14,8 @@
 
     export const ORDER_STEP = 64;
     export const MIN_ORDER = 0;
+
+    let temporaryInserter: boolean = false;
 
     export function reload(_objects: object[])
     {
@@ -59,6 +62,15 @@
         }
     }
 
+    let inserterElement;
+    export async function add(onAddHandler: Function)
+    {
+        temporaryInserter = true;
+        inserter = onAddHandler
+        await tick();
+        inserterElement?.run();
+    }
+
     function onNewElement(text: string)
     {
         if(orderAttrib)
@@ -75,6 +87,21 @@
         }
         else
             inserter(text)
+
+        if(temporaryInserter)
+        {
+            temporaryInserter = false;
+            inserter = undefined;
+        }
+    }
+
+    function onBlurInserter()
+    {
+        if(temporaryInserter)
+        {
+            temporaryInserter = false;
+            inserter = undefined;
+        }
     }
 
 </script>
@@ -89,7 +116,9 @@
     <Edit   class="p-3 sm:p-2 text-lg sm:text-base font-normal text-stone-500 rounded-lg dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700" 
             onEnter={onNewElement} 
             placeholder={inserterPlaceholder} 
-            inserter={true}>
+            inserter={true}
+            onBlur={onBlurInserter}
+            bind:this={inserterElement}>
         <Icon size={5} component={FaPlus} class="mr-3"/>
     </Edit>
 {/if}

@@ -11,13 +11,12 @@
 			activateItem,
 			isActive,
 			clearActiveItem,
-			informModification,
-            informModificationEx,
-			pushChanges} from '$lib'
+			isDeviceSmallerThan
+            } from '$lib'
 	import { onMount, tick } from 'svelte';
     import {querystring} from 'svelte-spa-router'
     import TaskSteps from './task.steps.svelte'
-    import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo} from 'svelte-icons/fa/'
+    import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaFont} from 'svelte-icons/fa/'
 
     let taskRef = ''
     let task = null;
@@ -362,20 +361,34 @@
 
     function getPageOperationsWithFormattingTools() 
     {
-        const add_operation = {
-            icon: FaPlus,
-            caption: '',
-            grid: addOperations
-        };
-
-        const separator = {
-            separator: true
+        const mobile = isDeviceSmallerThan("sm")
+        if(mobile)
+        {
+            return [
+                {
+                    icon: FaFont,
+                    menu: description.getFormattingOperations(true),
+                    aboveKeyboard: true 
+                }
+            ]
         }
+        else
+        {
+            const add_operation = {
+                icon: FaPlus,
+                caption: '',
+                grid: addOperations
+            };
 
-        const formatting_operations = description.getFormattingOperations();
+            const separator = {
+                separator: true
+            }
 
-        let operations = [add_operation, separator, ...formatting_operations]
-        return operations
+            const formatting_operations = description.getFormattingOperations();
+
+            let operations = [add_operation, separator, ...formatting_operations]
+            return operations
+        }
     }
 
     const descriptionActive = { }

@@ -91,7 +91,7 @@
         {@const borderBL = isBL ? "rounded-bl-lg": ""}
         {@const borderBR = isBR ? "rounded-br-lg": ""}
         
-        <button class="{color} w-10 h-10 {borderTL} {borderTR} {borderBL} {borderBR}"
+        <button class="{color} w-12 sm:w-10 h-12 sm:h-10 {borderTL} {borderTR} {borderBL} {borderBR}"
                 on:click={() => onSelect(color)}>
 
         </button>

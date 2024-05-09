@@ -83,7 +83,8 @@
         if(is_root_menu)
             menu_root.addEventListener('click', on_before_container_click, true)
 
-        if(menu_items.length)
+        
+        if(menu_items.length && !isDeviceSmallerThan("sm"))
             focus_menu_item(focused_index);
         
     }
@@ -200,7 +201,8 @@
 
     function on_mouse_move(index)
     {
-        focus_menu_item(index);
+        if(!isDeviceSmallerThan("sm"))
+            focus_menu_item(index);
     }
 
     function execute_action(operation, index)
@@ -279,6 +281,12 @@
         hide();
     }
     
+    function mousedown(e)
+    {
+        // preventDefault on mousedown avoids focusing the button
+        // so it keeps focus (and text selection) 
+        e.preventDefault()
+    }
 
 </script>
 
@@ -298,15 +306,16 @@
             {@const icon_placeholder_with_desc = mobile ? 14 : 12}
             {@const icon_placeholder_size = operation.description ? icon_placeholder_with_desc : icon_placeholder_without_desc}
             {@const menu_item_id = menu_items_id_prefix + index}
-            {@const active = focused_index == index ? 'bg-stone-200 dark:bg-stone-600' : ''}
+            {@const active = ((!mobile) && (focused_index == index)) ? 'bg-stone-200 dark:bg-stone-600' : ''}
             {@const has_submenu = operation.menu !== undefined && operation.menu.length > 0}
             
-            <button class="font-medium m-0 p-2 text-lg sm:text-sm w-full text-left flex flex-row cursor-context-menu {active} focus:outline-none"
+            <button class="font-medium m-0 py-2 pr-4 text-lg sm:text-sm w-full text-left flex flex-row cursor-context-menu {active} focus:outline-none"
                     id={menu_item_id}
                     bind:this={menu_items[index]}
                     on:click|stopPropagation={(e) => { execute_action(operation, index) } } 
                     on:mouseenter = {(e) => {on_mouse_move(index)}}
-                    on:keydown|stopPropagation={(e) => on_keydown(e, operation, index)}>
+                    on:keydown|stopPropagation={(e) => on_keydown(e, operation, index)}
+                    on:mousedown={mousedown}>
                     
                 <div class="flex items-center justify-center mt-1 sm:mt-0.5" style:width={`${icon_placeholder_size*0.25}rem`}>
                     {#if operation.icon}

@@ -1,5 +1,5 @@
 <script>
-	import { setContext, onMount } from 'svelte';
+	import { setContext, getContext, onMount } from 'svelte';
 	import {
 		contextItemsStore,
 		data_tick_store,
@@ -38,6 +38,9 @@
 		//NOP
 	}
 
+	if($$props.class)
+		cl += ' ' + $$props.class
+
 	onMount(() => {
 		if (toolbarOperations != undefined && Array.isArray(toolbarOperations))
 			$pageToolbarOperations = [...toolbarOperations];
@@ -54,7 +57,11 @@
 		};
 	});
 
+	setContext('rIs-page-component', true);
 	setContext('ctx', context);
+
+	const cascadingParams = getContext('rPage-cascading-params')
+
 	let item = null;
 	let visibilty = 'hidden';
 	if (inContext == '') inContext = context;
@@ -70,6 +77,7 @@
 			if ($contextItemsStore.focused == inContext) visibilty = '';
 		} else visibilty = '';
 	}
+	let heightClass = ''
 	let t = 0;
 	$: {
 		t = $data_tick_store;
@@ -92,10 +100,15 @@
 			//console.log(item)
 			//console.log("--------------")
 		}
+
+		if(cascadingParams && cascadingParams.min_h_class)
+			heightClass = cascadingParams.min_h_class;
+		else
+			heightClass = '';
 	}
 
-	function clear_selection(e) {
-		//console.log('page click', chnages.just_changed_context)
+	function clear_selection(e) 
+	{
 		if (!clearsContext) return;
 
 		let contexts = clearsContext.split(' ');
@@ -111,7 +124,7 @@
 	}
 </script>
 
-<div class="bg-stone-100 dark:bg-stone-800 {visibilty} {cl}" on:click={clear_selection}>
+<div class="bg-stone-100 dark:bg-stone-800 {visibilty} {cl} {heightClass}" on:click={clear_selection}>
 	{#if visibilty == ''}
 		<slot />
 	{/if}

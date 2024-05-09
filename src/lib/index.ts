@@ -82,7 +82,8 @@ export {
     editable,
     startEditing,
     selectable,
-    handleSelect
+    handleSelect,
+    isDeviceSmallerThan
 }   from './utils'
 
 export {

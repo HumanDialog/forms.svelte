@@ -24,6 +24,11 @@
         close_callback = on_close_callback;
     }
 
+    export function hide()
+    {
+        open = false;
+    }
+
     let root;
     afterUpdate(
       async () =>
@@ -79,7 +84,7 @@
         From: "opacity-100"
         To: "opacity-0"
     -->
-    <div class="fixed w-screen h-screen inset-0 bg-stone-500 bg-opacity-75 transition-opacity"></div>
+    <div class="fixed w-screen h-screen inset-0 bg-stone-500 dark:bg-stone-800 bg-opacity-75 dark:bg-opacity-75 transition-opacity"></div>
   
     <div class="fixed z-20 inset-0 w-screen overflow-y-auto">
       <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
@@ -106,7 +111,7 @@
                 <h3 class="text-base font-semibold leading-6 text-stone-900 dark:text-stone-100" id="modal-title">{title}</h3>
                 <div class="mt-2">
                     {#if content}
-                        <p class="text-sm text-stone-500">{content}</p>
+                        <p class="text-sm text-stone-500 dark:text-stone-300">{content}</p>
                     {:else}
                         <slot/>
                     {/if}

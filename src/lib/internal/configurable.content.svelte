@@ -2,8 +2,13 @@
     import Router from 'svelte-spa-router'
     import {wrap} from 'svelte-spa-router/wrap'
     import Loading from './loading.svelte'
+	import { getContext, setContext } from 'svelte';
     
     export let config;
+    export let min_h_class = '';
+
+    let cascadingParams = {}
+    setContext('rPage-cascading-params', cascadingParams)
     
     let component = null;
     let props = {};
@@ -63,6 +68,9 @@
             props = {};
             routes = null;
         }
+
+        if(min_h_class)
+            cascadingParams.min_h_class = min_h_class;
     }
   
 </script>

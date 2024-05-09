@@ -10,8 +10,9 @@
                 ListInserter,
                 ListDateProperty,
                 ListComboProperty,
-				mainViewReloader} from '$lib'
-    import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen} from 'svelte-icons/fa'
+				mainViewReloader,
+                Modal} from '$lib'
+    import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaArchive, FaEllipsisH} from 'svelte-icons/fa'
     
     export let params = {}
 
@@ -92,11 +93,44 @@
     }
     
 
-    async function deleteTask(task)
+    let deleteModal;
+    let taskToDelete;
+    function askToDelete(task)
     {
-        await reef.delete(task.$ref);
-        await reloadTasks(listComponent.SELECT_NEXT)
+        taskToDelete = task;
+        deleteModal.show()
+    }
 
+    
+    async function deleteTask()
+    {
+        if(!taskToDelete)
+            return;
+
+        await reef.delete(taskToDelete.$ref);
+        deleteModal.hide();
+
+        
+        await reloadTasks(listComponent.SELECT_NEXT)
+    }
+
+    let archiveModal;
+    let taskToArchive;
+    function askToArchive(task)
+    {
+        taskToArchive = task;
+        archiveModal.show();
+    }
+
+    async function archiveTask()
+    {
+        if(!taskToArchive)
+            return;
+
+        await reef.get(`${taskToArchive.$ref}/Archive`)
+        archiveModal.hide();
+        
+        await reloadTasks(listComponent.SELECT_NEXT)
     }
 
     async function finishTask(event, task)
@@ -110,11 +144,12 @@
 
     async function addTask(newTaskAttribs)
     {
-        let newTask = await reef.post(`/user/MyTasks/new`, newTaskAttribs)
-        if(!newTask)
+        let res = await reef.post(`/user/MyTasks/new`, newTaskAttribs)
+        if(!res)
             return null;
 
-        return newTask.Task[0];
+        let newTask = res.Task[0];
+        await reloadTasks(newTask.Id)
     }
 
     let pageOperations = [
@@ -160,24 +195,36 @@
                     action: (focused) => { listComponent.addRowAfter(task) }
                 },
                 {
-                    icon: FaPen,
-                    caption: '',
-                    grid: editOperations
+                    toolbox:[
+                        {
+                            icon: FaPen,
+                            grid: editOperations
+                        },
+                        {
+                            icon: FaEllipsisH,
+                            menu:[
+                            /* {
+                                    icon: FaArchive,
+                                    caption: 'Archive',
+                                    action: (f) => askToArchive(task)
+                                },*/
+                                {
+                                    icon: FaTrash,
+                                    caption: 'Delete',
+                                    action: (f) => askToDelete(task)
+                                }
+                            ]
+                        }
+                        
+                    ]
                 },
                 {
-                    caption: '',
-                    icon: FaCaretUp,
-                    action: (focused) => listComponent.moveUp(task)
-                },
-                {
-                    caption: '',
                     icon: FaCaretDown,
-                    action: (focused) => listComponent.moveDown(task)
+                    action: (f) => listComponent.moveDown(task)
                 },
                 {
-                    caption: '',
-                    icon: FaTrash,
-                    action: (focused) => deleteTask(task)
+                    icon: FaCaretUp,
+                    action: (f) => listComponent.moveUp(task)
                 }
             ];
     }
@@ -227,3 +274,16 @@
 {/if}
 
 
+<Modal  title="Delete"
+        content="Are you sure you want to delete selected task?"
+        icon={FaTrash}
+        onOkCallback={deleteTask}
+        bind:this={deleteModal}
+        />
+
+<Modal  title="Archive"
+        content="Are you sure you want to archive selected task?"
+        icon={FaArchive}
+        onOkCallback={archiveTask}
+        bind:this={archiveModal}
+        />

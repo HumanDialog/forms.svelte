@@ -593,10 +593,11 @@
         pushChanges();
     }
 
-    export function add(item: object)
+    export function add(item: object|number, columnIdx: number = -1)
     {
-        const fromColumnIdx = getColumnIdx(item)
-        columns[fromColumnIdx].add(item)
+        if(columnIdx < 0)
+            columnIdx = getColumnIdx(item)
+        columns[columnIdx].add(item)
     }
 
 </script>

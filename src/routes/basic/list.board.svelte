@@ -15,10 +15,13 @@
         KanbanTagsProperty,
         KanbanStaticProperty,
         mainViewReloader,
-		KanbanSource
+		KanbanSource,
+        Modal,
+		KanbanColumnBottom
+
 
 	} from '$lib';
-    import {FaPlus, FaList, FaPen, FaCaretLeft, FaCaretRight, FaTrash, FaArrowsAlt, FaArchive, FaCheck} from 'svelte-icons/fa'
+    import {FaPlus, FaList, FaPen, FaCaretLeft, FaCaretRight, FaTrash, FaArrowsAlt, FaArchive, FaCheck, FaEllipsisH, FaChevronRight} from 'svelte-icons/fa'
     import MoveOperations from './list.board.move.svelte'
 	
     export let params = {}
@@ -151,17 +154,15 @@
     let pageOperations = [
         {
             icon: FaPlus,
-            action: (f) => addColumn('')
+            action: (f) => kanban.add(KanbanColumnBottom, 0)
+        },
+        {
+            separator: true
         },
         {
             icon: FaList,
             right: true,
             action: (f) => switchToList()
-        },
-        {
-            icon: FaArchive,
-            right: true,
-            action: (f) => switchToArchive()
         }
     ];
 
@@ -185,15 +186,41 @@
         await reload(newTask.Id)
 	}
 
-	async function onRemove(task)
+    let deleteModal;
+    let taskToDelete;
+    function askToDelete(task)
     {
-        await reef.delete(task.$ref);
+        taskToDelete = task;
+        deleteModal.show()
+    }
+
+	async function deleteTask()
+    {
+        if(!taskToDelete)
+            return;
+
+        await reef.delete(taskToDelete.$ref);
+        deleteModal.hide();
+
         reload(kanban.SELECT_NEXT);
 	}
 
-    async function onArchive(task)
+    let archiveModal;
+    let taskToArchive;
+    function askToArchive(task)
     {
-        await reef.get(`${task.$ref}/Archive`)
+        taskToArchive = task;
+        archiveModal.show();
+    }
+
+    async function archiveTask(task)
+    {
+        if(!taskToArchive)
+            return;
+
+        await reef.get(`${taskToArchive.$ref}/Archive`)
+        archiveModal.hide();
+        
         reload(kanban.SELECT_NEXT);
     }
 
@@ -211,11 +238,66 @@
 
     function getCardOperations(task)
     {
+        const columnIdx = taskStates.findIndex(s => s.state == task.State)
+
         return [
             {
                 icon: FaPlus,
                 action: (f) => { kanban.add(task) }
             },
+            {
+                toolbox:[
+                    {
+                        icon: FaPen,
+                        grid: [
+                            {
+                                caption: 'Name',
+                                columns: 2,
+                                action: (f) =>  { kanban.edit(task, 'Title') }
+                            },
+                            {
+                                caption: 'Summary',
+                                action: (f) =>  { kanban.edit(task, 'Summary') }
+                            },
+                            {
+                                separator: true
+                            },
+                            {
+                                caption: 'Responsible',
+                                action: (f) => { kanban.edit(task, 'Actor') }
+                            },
+                            {
+                                caption: 'Due Date',
+                                action: (f) => { kanban.edit(task, 'DueDate') }
+                            },
+                            {
+                                caption: 'Tag',
+                                action: (f) => { kanban.edit(task, 'Tags') }
+                            }
+                        ]
+                    },
+                    {
+                        icon: FaEllipsisH,
+                        menu:[
+                            {
+                                caption: 'Archive',
+                                icon: FaArchive,
+                                action: (f) => askToArchive(task)
+                            },
+                            {
+                                caption: 'Delete',
+                                icon: FaTrash,
+                                action: (f) => askToDelete(task)
+                            },
+                            {
+                                caption: 'Column',
+                                menu: getColumnContextMenu(columnIdx, taskStates)
+                            }
+                        ]
+                    }
+                ]
+            },
+            
             {
                 icon: FaArrowsAlt,
                 toolbar: MoveOperations,
@@ -228,43 +310,50 @@
                         onReplace: kanban.replace}
             },
             {
-                icon: FaPen,
-                grid: [
-                    {
-                        caption: 'Name',
-                        columns: 2,
-                        action: (f) =>  { kanban.edit(task, 'Title') }
-                    },
-                    {
-                        caption: 'Summary',
-                        action: (f) =>  { kanban.edit(task, 'Summary') }
-                    },
-                    {
-                        separator: true
-                    },
-                    {
-                        caption: 'Responsible',
-                        action: (f) => { kanban.edit(task, 'Actor') }
-                    },
-                    {
-                        caption: 'Due Date',
-                        action: (f) => { kanban.edit(task, 'DueDate') }
-                    },
-                    {
-                        caption: 'Tag',
-                        action: (f) => { kanban.edit(task, 'Tags') }
-                    }
-                ]
-            },
-            {
-                icon: FaArchive,
-                action: (f) => onArchive(task)
-            },
-            {
-                icon: FaTrash,
-                action: (f) => onRemove(task)
+                icon: FaList,
+                right: true,
+                action: (f) => switchToList()
             }
+            
         ]
+    }
+
+    function getColumnContextMenu(columnIdx, taskState, inColumnContext=true)
+    {
+        return [
+            {
+                caption: inColumnContext ? 'Edit name' : 'Edit column name',
+                icon: inColumnContext ? FaPen : undefined,
+                action: (f) => kanban.editColumnName(columnIdx)
+            },
+            {
+                caption: inColumnContext ? 'Set as finished' : 'Set column as finished',
+                icon: inColumnContext ? FaCheck : undefined,
+                action: (f) => setColumnAsFinishing(columnIdx)
+            },
+            {
+                caption: inColumnContext ? 'Move left' : 'Move column left',
+                icon: inColumnContext ? FaCaretLeft : undefined,
+                action: (f) => onColumnMoveLeft(columnIdx)
+            },
+            {
+                caption: inColumnContext ? 'Move right' : 'Move column right',
+                icon: inColumnContext ? FaCaretRight : undefined,
+                action: (f) => onColumnMoveRight(columnIdx)
+            },
+            {
+                caption: inColumnContext ? 'Delete' : 'Delete column',
+                icon: inColumnContext ? FaTrash : undefined,
+                menu: getColumnDeleteOptions(columnIdx, taskState)
+            },
+            {
+                separator: true
+            },
+            {
+                caption: 'Add column',
+                icon: inColumnContext ? FaPlus : undefined,
+                action: (f) => addColumn("", columnIdx+1)
+            }];
     }
 
     function getColumnOperations(columnIdx, taskState)
@@ -273,28 +362,17 @@
 
         return [
             {
-                icon: FaPen,
-                action: (f) => kanban.editColumnName(columnIdx)
-            },
-            {
                 icon: FaPlus,
-                action: (f) => addColumn("", columnIdx+1)
+                action: (f) => kanban.add(KanbanColumnBottom, columnIdx)
             },
             {
-                icon: FaCaretLeft,
-                action: (f) => onColumnMoveLeft(columnIdx)
+                icon: FaEllipsisH,
+                menu: getColumnContextMenu(columnIdx, taskState)
             },
             {
-                icon: FaCaretRight,
-                action: (f) => onColumnMoveRight(columnIdx)
-            },
-            {
-                icon: FaCheck,
-                action: (f) => setColumnAsFinishing(columnIdx)
-            },
-            {
-                icon: FaTrash,
-                menu: getColumnDeleteOptions(columnIdx, taskState)
+                icon: FaList,
+                right: true,
+                action: (f) => switchToList()
             }
         ]
     }
@@ -486,7 +564,30 @@
                                 {onUpdateAllTags}
                                 canChangeColor/>
         </Kanban>
+
+        <div class="ml-3 mt-20 mb-10">
+            <a  href={`#/tasklist/${listId}?archivedTasks`} 
+                class="hover:underline">
+                    Show archived tasks 
+                    <div class="inline-block mt-1.5 w-3 h-3"><FaChevronRight/></div>
+            </a>
+        </div>
 	</Page>
 {:else}
 	<Spinner delay={3000} />
 {/if}
+
+
+<Modal  title="Delete"
+        content="Are you sure you want to delete selected task?"
+        icon={FaTrash}
+        onOkCallback={deleteTask}
+        bind:this={deleteModal}
+        />
+
+<Modal  title="Archive"
+        content="Are you sure you want to archive selected task?"
+        icon={FaArchive}
+        onOkCallback={archiveTask}
+        bind:this={archiveModal}
+        />

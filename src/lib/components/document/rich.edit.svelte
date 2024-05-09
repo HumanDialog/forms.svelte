@@ -10,6 +10,7 @@
     import Palette from './internal/palette.svelte'
 
     import FaFont from 'svelte-icons/fa/FaFont.svelte'
+    import FaRemoveFormat from 'svelte-icons/fa/FaRemoveFormat.svelte'
     import FaHead from 'svelte-icons/fa/FaHeading.svelte'
     import FaCode from 'svelte-icons/fa/FaCode.svelte'
     import FaComments from 'svelte-icons/fa/FaComment.svelte'
@@ -37,12 +38,12 @@
         editable_div?.focus();
     }
 
-    export function getFormattingOperations()
+    export function getFormattingOperations(withCaptions = false)
     {
         let result = [];
         commands.forEach( c => {
             result.push({
-                caption: '',//c.caption,
+                caption: withCaptions ? c.caption : '',
                 icon: c.icon,
                 action: c.on_choice
             })
@@ -1414,7 +1415,7 @@
 
     
     let commands         :Document_command[] = [
-               {   caption: 'Normal',       description: 'This is normal text style',      tags: 'text',    icon: FaFont,                       on_choice: () => { do_format('p', '') } } ,
+               {   caption: 'Normal',       description: 'This is normal text style',      tags: 'text',    icon: FaRemoveFormat,                       on_choice: () => { do_format('p', '') } } ,
                
             //   {   caption: 'Heading 1',    description: 'Big section heading',            tags: 'h1',      icon: FaHead,    icon_size: 6,      on_choice: () => { do_format('h2', '') } } ,
             //   {   caption: 'Heading 2',    description: 'Medium section heading',         tags: 'h2',      icon: FaHead,    icon_size: 5,      on_choice: () => { do_format('h3', '') } } ,
