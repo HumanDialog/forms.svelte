@@ -33,13 +33,39 @@
         const m = 15;
         let container_rect :DOMRect = new DOMRect(m, 0, window.innerWidth-2*m, window.innerHeight)
         
+        if(isDeviceSmallerThan('sm'))       // are we on mobile?
+        {
+            const sel = window.getSelection();
+            //console.log('sel', sel)
+            // if we have active selections then it's very possible we have onscreen keyboard visible, se we need to shrink window.innerHeight 
+            if(sel && sel.rangeCount>0 && sel.focusNode && sel.focusNode.nodeType==sel.focusNode.TEXT_NODE)
+            {
+                container_rect.height -= 300; // it will be enough?
+                console.log('shirnked: ', container_rect)
+            }
+        }
+
+        
+        
         //console.log('beforeUpdate', rect, ' in ', container_rect)
                 
+        let xShifted = false;
         if(rect.right > container_rect.right)
-            x = container_rect.right - rect.width;
+        {
+            x = container_rect.right - rect.width + m;
+            xShifted = true;
+        }
 
+        let yShifted = false;
         if(rect.bottom > container_rect.bottom)
-            y = container_rect.bottom - rect.height - around_rect.height;
+        {
+            y = container_rect.bottom - rect.height-m;
+            if(xShifted)    // possible covers around rect
+                x -= around_rect.width;
+            else
+                y -= around_rect.height-m;
+            yShifted = true;
+        }
 
         if(rect.left < container_rect.left)
             x = container_rect.left;

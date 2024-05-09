@@ -65,7 +65,7 @@
 
 
         let owner = e.target;
-        while(owner && owner.tagName != 'BUTTON')
+        while(owner && ((owner.tagName != 'BUTTON') && (owner.tagName != 'LI')))
             owner = owner.parentElement
 
         if(!owner)
