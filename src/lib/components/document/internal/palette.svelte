@@ -33,7 +33,7 @@
         const windowWidth = window.innerWidth - 2*margin;
 
         toolboxX = margin;
-        toolboxY = rect.bottom;
+        toolboxY = rect.bottom + margin;
 
         css_style = `position: fixed; left:${toolboxX}px; top:${toolboxY}px;`;
 

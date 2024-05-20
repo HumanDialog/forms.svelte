@@ -173,12 +173,16 @@
                 icon: FaPlus,
                 caption: '',
                 grid: addOperations
-            },
-            {
-                icon: FaSave,
-                action: (f) => saveCurrentEditable()
             }
         ];
+
+        if(!isDeviceSmallerThan('sm'))
+        {
+            operations.push({
+                icon: FaSave,
+                action: (f) => saveCurrentEditable()
+            })
+        }
 
         if(step.Done)
         {
@@ -360,16 +364,26 @@
         }
     ];
     
-    const pageOperations = [
+    function getPageOperations()
+    {
+        let operations = [
+            {
+                icon: FaPlus,
+                grid: addOperations 
+            }
+        ]
+
+        if(!isDeviceSmallerThan('sm'))
         {
-            icon: FaPlus,
-            grid: addOperations
-        },
-        {
-            icon: FaSave,
-            action: (f) => saveCurrentEditable()
+            operations.push({
+                icon: FaSave,
+                action: (f) => saveCurrentEditable()
+            })
         }
-    ]
+
+        return operations;
+    }
+    
 
     function getPageOperationsWithFormattingTools() 
     {
@@ -401,9 +415,11 @@
                 separator: true
             }
 
-            const formatting_operations = description.getFormattingOperations();
+            let formatting_operations = description.getFormattingOperations();
+            if(!isDeviceSmallerThan('sm'))
+                formatting_operations = [saveOperation, ...formatting_operations]
 
-            let operations = [add_operation,  separator, saveOperation, ...formatting_operations]
+            let operations = [add_operation,  separator, ...formatting_operations]
             return operations
         }
     }
@@ -427,7 +443,7 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex-->
 <Page   self={task} 
-            toolbarOperations={pageOperations}
+            toolbarOperations={getPageOperations()}
             clearsContext=''
             title={task.Title}>
     <section class="w-full flex justify-center">
