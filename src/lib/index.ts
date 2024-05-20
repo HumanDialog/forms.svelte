@@ -81,6 +81,7 @@ export {
     getActive,
     editable,
     startEditing,
+    saveCurrentEditable,
     selectable,
     handleSelect,
     isDeviceSmallerThan

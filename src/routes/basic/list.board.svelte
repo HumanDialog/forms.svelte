@@ -227,8 +227,10 @@
 	
     function onOpen(item)
     {
-        push(`/task?ref=${item.$ref}`);
+        push(`/task/${item.Id}`);
     }
+
+    
 
     async function onUpdateAllTags(allAllTags)
     {
@@ -278,6 +280,7 @@
                     },
                     {
                         icon: FaEllipsisH,
+                        
                         menu:[
                             {
                                 caption: 'Archive',
@@ -546,10 +549,9 @@
                                 finishing={taskState.state == STATE_FINISHED}/>
             {/each}
 
-			<KanbanCallbacks {onAdd} {onOpen} 
-                            {getCardOperations}/>
+			<KanbanCallbacks {onAdd} {getCardOperations}/>
 
-			<KanbanTitle a="Title"/>
+			<KanbanTitle a="Title" hrefFunc={(task) => `/task/${task.Id}`}/>
 			<KanbanSummary a="Summary" />
 
             <KanbanStaticProperty top a='Index'/>

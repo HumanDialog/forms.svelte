@@ -4,6 +4,8 @@
     import type {Document_command} from './Document_command'
     import Pallete_row from './palette.row.svelte'
     import { createEventDispatcher } from 'svelte';
+    import Icon from '../../icon.svelte'
+    import { isDeviceSmallerThan} from '../../../utils.js'
 
     export let commands         :Document_command[];
 
@@ -15,11 +17,32 @@
     let filtered_commands       : Document_command[] = [...commands];
     let current_command         : Document_command = (filtered_commands.length ? filtered_commands[0] : null);
 
+    let isToolbox: boolean = false;
+
     const dispatch = createEventDispatcher();
     
 
+    let toolboxX: number;
+    let toolboxY: number;
+    export function showAsToolbox(rect: DOMRect)
+    {
+        isToolbox = true;
+        visible = true;
+
+        const margin = 15;
+        const windowWidth = window.innerWidth - 2*margin;
+
+        toolboxX = margin;
+        toolboxY = rect.bottom;
+
+        css_style = `position: fixed; left:${toolboxX}px; top:${toolboxY}px;`;
+
+        dispatch('palette_shown');
+    }
+
     export function show(x :number, y :number, up :boolean = false)
     {
+        isToolbox = false;
         css_style = `width: ${width_px}px; max-height:${max_height_px}px; position: fixed; left:${x}px; top:${y}px;`;
         
         if(up)
@@ -31,6 +54,7 @@
 
     export function show_fullscreen(_width_px :number, _height_px :number)
     {
+        isToolbox = false;
         width_px = _width_px;
         max_height_px = _height_px;
         css_style =`position: fixed; left: 0px; top: 0px; width: ${_width_px}px; height: ${_height_px}px; z-index: 1055;`;
@@ -42,6 +66,7 @@
     export function hide()
     {
         visible = false;
+        isToolbox = false;
         dispatch('palette_hidden');
     }
 
@@ -132,7 +157,7 @@
             return;
 
         dispatch('palette_mouse_click')
-        await tick();
+        //await tick();
         
         hide();
         on_choice();
@@ -158,25 +183,106 @@
         current_command = cmd;
     }
 
+    function buttonMousedown(e: MouseEvent)
+    {
+        // preventDefault on mousedown avoids focusing the button
+        // so it keeps focus (and text selection) 
+        e.preventDefault()
+    }
+
+    let isMoving: boolean = false;
+    let beforeTrackingClient: DOMPoint | null = null;
+    let beforeTrackingPos: DOMPoint | null = null;
+    function mousedown(e)
+    {
+        if(e.touches.length != 1)
+            return;
+
+        const touch = e.touches.item(0);
+        beforeTrackingClient = new DOMPoint(touch.clientX, touch.clientY);
+        beforeTrackingPos = new DOMPoint(toolboxX, toolboxY);
+        isMoving = true;
+    }
+
+    function mousemove(e)
+    {
+        if(isMoving && beforeTrackingClient && beforeTrackingPos)
+        {
+            if(e.touches.length != 1)
+                return;
+
+            const touch = e.touches.item(0);
+            
+            const trackDelta = new DOMPoint(touch.clientX - beforeTrackingClient.x, touch.clientY - beforeTrackingClient.y);
+            
+            toolboxX = beforeTrackingPos.x + trackDelta.x;
+            //toolboxY = beforeTrackingPos.y + trackDelta.y;
+
+            css_style = `position: fixed; left:${toolboxX}px; top:${toolboxY}px;`;
+        }
+    }
+
+    function mouseup(e)
+    {
+        isMoving = false;
+        beforeTrackingClient = null
+        beforeTrackingPos = null
+    }
+
+
     
 </script>
 
-<div    class="not-prose bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md z-30" 
-        hidden={!visible}
-        style={css_style}>
-    {#if filtered_commands && filtered_commands.length}
-        {#each filtered_commands as cmd, idx (cmd.caption)}
-            {@const id = "cpi_" + idx}
-            <Pallete_row    {id}
-                            cmd={cmd}
-                            is_highlighted={cmd == current_command}
-                            on:click={ () => { execute_mouse_click(cmd.on_choice); }}
-                            on:mousemove={ () => { on_mouse_over(cmd); }}
-                            bind:this={rows[idx]}
-                            />
-        {/each}
-    {:else}
-        <p class="text-sm text-stone-500">No results</p>
-    {/if}
+{#if isToolbox}
+    <menu   class=" not-prose bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md 
+                    z-30
+                    flex flex-row flex-nowrap"
+            style={css_style}
+            hidden={!visible}
+            on:touchstart={mousedown}
+            on:touchmove={mousemove}
+            on:touchend={mouseup}>
+        {#if filtered_commands && filtered_commands.length}
+            {#each filtered_commands as cmd, idx (cmd.caption)}
+                {@const id = "cpi_" + idx}
+                {@const mobile = isDeviceSmallerThan("sm")}
+                {@const icon_placeholder_size = mobile ? 12 : 10}
+                <button class="font-medium m-0 py-2 pr-4 text-lg sm:text-sm w-full text-left flex flex-row cursor-context-menu focus:outline-none"
+                        {id}
+                        bind:this={rows[idx]}
+                        on:click={ () => { execute_mouse_click(cmd.on_choice); }}
+                        on:mousedown={buttonMousedown}>
+                
+                    <div class="flex items-center justify-center mt-1 sm:mt-0.5" style:width={`${icon_placeholder_size*0.25}rem`}>
+                        {#if cmd.icon}
+                            {@const cc = mobile ? 7 : 6}
+                            {@const icon_size = icon_placeholder_size - cc}
+                            <Icon size={icon_size} component={cmd.icon}/>
+                        {/if}
+                    </div>
+                </button>
+            {/each}
+        {/if}
+    </menu>
+{:else}
+    <div    class="not-prose bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md z-30" 
+            hidden={!visible}
+            style={css_style}>
+        {#if filtered_commands && filtered_commands.length}
+            {#each filtered_commands as cmd, idx (cmd.caption)}
+                {@const id = "cpi_" + idx}
+                <Pallete_row    {id}
+                                cmd={cmd}
+                                is_highlighted={cmd == current_command}
+                                on:click={ () => { execute_mouse_click(cmd.on_choice); }}
+                                on:mousemove={ () => { on_mouse_over(cmd); }}
+                                on:mousedown={buttonMousedown}
+                                bind:this={rows[idx]}
+                                />
+            {/each}
+        {:else}
+            <p class="text-sm text-stone-500">No results</p>
+        {/if}
 
-</div>
+    </div>
+{/if}

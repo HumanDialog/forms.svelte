@@ -98,11 +98,18 @@
         if(config.customOperations && Array.isArray(config.customOperations) && config.customOperations.length > 0)
         {
             config.customOperations.forEach( o => {
-                options.push({
-                            caption: o.caption,
-                            icon: o.icon,
-                            action: o.action
-                        })
+                let add = true;
+                if(o.condition)
+                    add = o.condition();
+
+                if(add)
+                {
+                    options.push({
+                                    caption: o.caption,
+                                    icon: o.icon,
+                                    action: o.action
+                                })
+                }
             })
         }
 

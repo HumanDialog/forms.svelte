@@ -1,5 +1,6 @@
 <script lang="ts">
 	import {getContext, tick} from 'svelte'
+    import{ push } from 'svelte-spa-router'
     import {    contextItemsStore, 
                 isActive, 
                 isSelected, 
@@ -8,7 +9,8 @@
                 editable,
 				showFloatingToolbar,
 				informModification,
-                pushChanges} from '$lib'
+                pushChanges,
+				startEditing} from '$lib'
     import {FaArrowsAlt, FaTrash, FaPlus, FaExternalLinkAlt} from 'svelte-icons/fa'
     import MoveOperations from './kanban.move.menu.svelte'
     import Properties from './kanban.props.svelte'
@@ -30,6 +32,7 @@
 
     $: selectedClass = isCardSelected ? "!border-blue-300" : "";
     $: focusedClass = isCardActive ? "bg-stone-100 dark:bg-stone-700" : "";
+    $: isLinkLike = isCardActive && (!!definition.titleHref || !!definition.titleHrefFunc)
 
     function calculate_active(...args)
     {
@@ -147,10 +150,17 @@
     {
         if(field == "Title")
         {
-            titleElement.focus();
+            if(isLinkLike)
+            {
+                startEditing(titleElement);
+            }
+            else
+            {
+                titleElement.focus();
+                await tick();
+                setSelectionAtEnd(titleElement)
+            }
             
-            await tick();
-            setSelectionAtEnd(titleElement)
         }
         else if(field == "Summary")
         {
@@ -192,6 +202,23 @@
         }
     }
 
+    function followDefinedHRef()
+    {
+        let link: string = getHRef();
+        if(link)
+            push(link);
+    }
+
+    function getHRef(): string
+    {
+        if(definition.titleHref)
+            return definition.titleHref;
+        else if(definition.titleHrefFunc)
+            return definition.titleHrefFunc(item);
+        else
+            return '';
+    }
+
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -227,25 +254,43 @@
     
 
     {#if isCardActive}
-        <h3  class=" text-lg font-semibold min-h-[1.75rem]
-                    sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
-                    whitespace-nowrap overflow-clip truncate w-full sm:flex-none
-                    relative"
-                    use:editable={{
-                        action: (text) => onTitleChanged(text), 
-                        active: true,
-                        readonly: definition.titleReadOnly,
-                        onFinish: (d) => {titleElement.blur()}}}
-                    bind:this={titleElement}>
-            {item[definition.titleAttrib]}
+        {#if isLinkLike}
+            <h3 class=" text-lg font-semibold min-h-[1.75rem]
+                        sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
+                        whitespace-nowrap overflow-clip truncate w-full sm:flex-none
+                        relative 
+                        sm:hover:cursor-pointer underline"
+                on:click|stopPropagation={followDefinedHRef}
+                use:editable={{
+                    action: (text) => onTitleChanged(text), 
+                    active: false,
+                    readonly: definition.titleReadOnly,
+                    onFinish: (d) => {titleElement.blur()}}}
+                bind:this={titleElement}>
+                    {item[definition.titleAttrib]}
+            </h3>
+        {:else}
+            <h3  class=" text-lg font-semibold min-h-[1.75rem]
+                        sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
+                        whitespace-nowrap overflow-clip truncate w-full sm:flex-none
+                        relative"
+                        use:editable={{
+                            action: (text) => onTitleChanged(text), 
+                            active: true,
+                            readonly: definition.titleReadOnly,
+                            onFinish: (d) => {titleElement.blur()}}}
+                        bind:this={titleElement}>
+                {item[definition.titleAttrib]}
 
-        {#if definition.onOpen}
-            <button class="absolute top-1 right-0 w-5 h-5 sm:w-3 sm:h-3"
-                    on:click={(e) => definition.onOpen(item)}>
-                <FaExternalLinkAlt/>
-            </button>
+                {#if definition.onOpen}
+                <button class="absolute top-1 right-0 w-5 h-5 sm:w-3 sm:h-3"
+                        on:click={(e) => definition.onOpen(item)}>
+                    <FaExternalLinkAlt/>
+                </button>
+                {/if}
+            </h3>
         {/if}
-        </h3>
+        
     {:else}
         <h3  class=" text-lg font-semibold min-h-[1.75rem]
                     sm:text-sm sm:font-semibold sm:min-h-[1.25rem]

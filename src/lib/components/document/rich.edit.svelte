@@ -1,12 +1,12 @@
 <script lang="ts">
     import type {Document_command} from './internal/Document_command'
     import { Selection_helper} from './internal/Selection_helper'
-    import { getContext, onDestroy, onMount} from 'svelte'
+    import { afterUpdate, getContext, onDestroy, onMount} from 'svelte'
     import { Selection_range, Selection_edge} from './internal/Selection_range';
     //import { createEventDispatcher } from 'svelte';
     import {data_tick_store, contextItemsStore, contextTypesStore} from '../../stores.js'
     import {informModification, pushChanges} from '../../updates.js'
-    import {parseWidthDirective} from '../../utils.js'
+    import {isDeviceSmallerThan, parseWidthDirective} from '../../utils.js'
     import Palette from './internal/palette.svelte'
 
     import FaFont from 'svelte-icons/fa/FaFont.svelte'
@@ -17,6 +17,7 @@
     import FaQuote from 'svelte-icons/fa/FaQuoteRight.svelte'
     import FaWarn from 'svelte-icons/fa/FaExclamationTriangle.svelte'
     import FaInfo from 'svelte-icons/fa/FaInfo.svelte'
+	import { showMenu } from '../menu';
 
 	
     export let value = '';
@@ -86,13 +87,16 @@
 
     $:{
         if(last_tick < $data_tick_store)
-            setup_source();
+        {
+            if(has_changed_value)
+                saveData();
+            else
+                setup_source();
+        }
     }
 
     function setup_source()
     {
-        //console.log('setup_source');
-
         last_tick = $data_tick_store;
 
         if(a)
@@ -113,9 +117,12 @@
             value = '<p>\u200B</p>';
 
         has_changed_value = false;
-    }   
 
-    
+        if(stored_selection)
+            set_selection(stored_selection);
+
+    }
+
     onMount( () => 
     {
         if(!editable_div)
@@ -130,6 +137,11 @@
                                     attributes: true,
                                     characterData: true,
                                     subtree: true } );
+        }
+
+        // same as blur in casse when on:blur will not came on dismounting
+        return () => {
+            on_blur()
         }
     });
 
@@ -299,7 +311,12 @@
                     event.cancelBubble = true;
                     event.preventDefault();
                     if(is_multiline())
-                        insert_new_line();
+                    {
+                        if(event.shiftKey)
+                            insert_character_at_caret_position('\n')
+                        else
+                            insert_new_line();
+                    }
                     else
                         move_cursor_to_next_editable_element();
                 }
@@ -308,6 +325,12 @@
             case '/':
                 store_node_text_and_position();
                 show_command_palette();
+                break;
+
+            case 'Tab':
+                event.cancelBubble = true;
+                event.preventDefault();
+                insert_character_at_caret_position('\t');
                 break;
 
             case 'Backspace':
@@ -495,7 +518,11 @@
                     navigate_command_palette(event.key);
                 }
                 break;
+
+            
         }
+
+        
         
     }
 
@@ -684,7 +711,7 @@
         let sel :Selection;
         sel = window.getSelection();
         const focus_node: Node = sel.focusNode;
-        const whole_text: string = focus_node.textContent;
+        const whole_text: string = focus_node.textContent;              // <br>: wrong in multi textNodes case when <br> used between them for instance
         const left_idx = Math.min(sel.focusOffset, sel.anchorOffset)
         const right_idx = Math.max(sel.focusOffset, sel.anchorOffset)
 
@@ -834,7 +861,7 @@
     {
         let sel :Selection;
         sel = window.getSelection();
-        return sel.focusNode == sel.anchorNode
+        return sel.focusNode == sel.anchorNode      // what about <br> 
     }
 
     function is_whole_parapraph_selected() :boolean
@@ -1084,7 +1111,7 @@
             node = node.parentNode;
         
         if(!node)
-            return;
+            return false;
 
         let element :Element = <Element> node;
         if(element.tagName == tag.toUpperCase())
@@ -1161,6 +1188,34 @@
             const range = Selection_helper.create_range(editableElem, stored_selection.begin.absolute_index, stored_selection.end.absolute_index);
             set_selection(range);
         }
+    }
+
+    function insert_character_at_caret_position(what_to_insert: string)
+    {
+        if(is_range_selected())
+        {
+            console.log("Unsupported");
+            return false;
+        }
+        else 
+        {
+            let sel :Selection;
+            sel = window.getSelection();
+            const focusNode: Node = sel.focusNode;
+            const wholeText: string = focusNode.textContent; 
+            const carretPos = sel.focusOffset
+
+            let leftPart: string = wholeText.substring(0, carretPos)
+            let rightPart :string = wholeText.substring(carretPos)
+
+            focusNode.textContent = leftPart + what_to_insert + rightPart;
+            let pos :number = carretPos + 1;
+            let range :Range = new Range;
+            range.collapse(true);
+            range.setStart(focusNode, pos);
+            range.setEnd(focusNode, pos);
+            set_selection(range);
+        }   
     }
 
     function insert_new_line()
@@ -1319,7 +1374,12 @@
         else 
             show_fullscreen = true;
 
-        if(show_fullscreen)
+        const isSmallDevice = isDeviceSmallerThan("sm")
+        if(isSmallDevice)
+        {
+            palette.showAsToolbox(rect)
+        }
+        else if(show_fullscreen)
             palette.show_fullscreen(client_rect.width, client_rect.height);
         else
             palette.show(x, y, show_above);
@@ -1348,9 +1408,11 @@
             palette.navigate_up();
     }
 
+    let stored_selection: Range | undefined = undefined;
     function on_selection_changed()
     {
-        //let active_range : Selection_range = Selection_helper.get_selection(editable_div);
+        let active_range : Selection_range = Selection_helper.get_selection(editable_div);
+        stored_selection = window.getSelection()?.getRangeAt(0);
 
         //stored_selections.set(id, range);
         //console.log('Editor store selection', id, range.begin.absolute_index, range.end.absolute_index);
@@ -1359,7 +1421,7 @@
     let intervalId = 0;
     function on_focus()
     {
-        if(pushChangesImmediately)
+        /*if(pushChangesImmediately)
         {
             intervalId = setInterval(() =>
             {
@@ -1367,17 +1429,21 @@
             },
             2000);
         }
+        */
     }
 
     function on_blur()
     {
         let active_range : Selection_range = Selection_helper.get_selection(editable_div);
+        console.log('rich.edit: on_blur', active_range?.begin?.absolute_index)
 
-        if(intervalId)
-        {
-            clearInterval(intervalId)
-            intervalId = 0;
-        }
+        stored_selection = undefined;
+
+        //if(intervalId)
+        //{
+        //    clearInterval(intervalId)
+        //    intervalId = 0;
+        //}
 
         if(onBlur)
         {
@@ -1385,6 +1451,15 @@
             onBlur = undefined
         }
 
+        if(saveData())
+        {
+            last_tick = $data_tick_store + 1;
+            $data_tick_store = last_tick;
+        }
+    }
+
+    export function save()
+    {
         if(saveData())
         {
             last_tick = $data_tick_store + 1;
@@ -1441,7 +1516,7 @@
         on:keydown={on_keydown}
         on:mouseup={on_mouseup}
         class="{cs}     {appearance_class} 
-                        prose prose-base sm:prose-base dark:prose-invert {additional_class} overflow-y-auto"
+                        prose prose-base sm:prose-base dark:prose-invert {additional_class} overflow-y-auto whitespace-pre-wrap"
         on:blur={on_blur}
         on:focus={on_focus}
         on:focus

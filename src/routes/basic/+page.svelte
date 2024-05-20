@@ -2,8 +2,10 @@
     import Layout from '$lib/desk.svelte'
     import {reef} from '@humandialog/auth.svelte'
 
-    import Nav from './sidebar.svelte'
+    import Sidebar from './sidebar.svelte'
     import AppIcon from './appicon.svelte'
+    import {FaUsers} from 'svelte-icons/fa/'
+    import {push} from 'svelte-spa-router'
     
 	import Tasklist from './tasklist.svelte';
     import Task from './task.svelte'
@@ -31,7 +33,7 @@
                 sidebar : {
                     'TOC': {
                         icon: AppIcon,
-                        component: Nav
+                        component: Sidebar
                     }
                 },
                 mainContent : {
@@ -49,7 +51,14 @@
                     }
                 },
                 mainToolbar : {
-                    signin: true
+                    signin: true,
+                    customOperations:[
+                        {
+                            caption: 'Members',
+                            icon: FaUsers,
+                            action: (f) => { push('/members') }
+                        }
+                    ]
                 },
                 dark:
                 {

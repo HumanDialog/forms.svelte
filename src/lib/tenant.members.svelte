@@ -442,9 +442,9 @@
             
             <ListComboProperty name='Privileges' a='auth_group' onSelect={on_change_privileges}>
                 <ComboItem name='None'       key={0}  />
-                <ComboItem name='Can See'    key={1}  />
-                <ComboItem name='Can Invite' key={3}  />
-                <ComboItem name='Maintainer' key={7}  />
+                <ComboItem name='Can see'    key={1}  />
+                <ComboItem name='Can invite' key={3}  />
+                <ComboItem name='Can fully manage' key={7}  />
             </ListComboProperty>
 
             {#if showFiles}
