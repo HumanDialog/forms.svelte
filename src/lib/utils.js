@@ -97,6 +97,8 @@ export function getActive(context_level)
         return null;
 }
 
+export let currentEditable = null;
+
 export function editable(node, params)
 {
     let action;
@@ -122,6 +124,9 @@ export function editable(node, params)
     const org_text = node.textContent;
     const blur_listener = async (e) =>
     {
+        if(currentEditable == node)
+            currentEditable = null;
+
         let cancel = !node.textContent
         if(observer)
             observer.disconnect();
@@ -170,6 +175,7 @@ export function editable(node, params)
        {
             node.removeEventListener("blur", blur_listener);
             node.removeEventListener("keydown", key_listener);
+            node.removeEventListener("save", save_listener);
             node.contentEditable = "false"
        
             let sel = window.getSelection();
@@ -206,11 +212,20 @@ export function editable(node, params)
             node.removeEventListener("finish", (e) => {});
     }
 
+    const save_listener = async (e) =>
+    {
+        if(has_changed)
+            await action(node.textContent)
+    }
+
     const edit_listener = async (e) =>
     {
         node.contentEditable = "true"
         node.addEventListener("blur", blur_listener);
         node.addEventListener("keydown", key_listener);
+        
+        currentEditable = node;
+        node.addEventListener("save", save_listener)
 
         node.focus();
 
@@ -235,6 +250,8 @@ export function editable(node, params)
         node.addEventListener("blur", blur_listener);
         node.addEventListener("keydown", key_listener);
         has_changed = false;
+        currentEditable = node;
+        node.addEventListener("save", save_listener)
         
         observer = new MutationObserver(() => { has_changed = true; });
         observer.observe(   node,  {
@@ -296,6 +313,12 @@ export function startEditing(element, finish_callback)
         const edit_event = new Event("edit")
         editable_node.dispatchEvent(edit_event)
     }
+}
+
+export function saveCurrentEditable()
+{
+    if(currentEditable)
+        currentEditable.dispatchEvent(new Event("save"))
 }
 
 export function selectable(node, itm)

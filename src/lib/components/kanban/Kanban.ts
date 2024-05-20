@@ -18,11 +18,13 @@ export class rKanban_column
 
 export class rKanban_definition
 {
-    public  columns:    rKanban_column[] = [];
-    public  titleAttrib: string = '';
-    public  titleOnChange: Function | undefined = undefined;
-    public  titleReadOnly: boolean = false;
-    public  summaryAttrib: string = '';
+    public  columns:        rKanban_column[] = [];
+    public  titleAttrib:    string = '';
+    public  titleOnChange:  Function | undefined = undefined;
+    public  titleReadOnly:  boolean = false;
+    public  titleHref:      string | undefined = undefined
+    public  titleHrefFunc:  Function | undefined = undefined;
+    public  summaryAttrib:  string = '';
     public  summaryOnChange: Function | undefined = undefined;
     public  summaryReadOnly: boolean = false;
 

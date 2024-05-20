@@ -5,11 +5,15 @@
     export let a: string;
     export let onChange: Function | undefined = undefined
     export let readOnly: boolean = false;
+    export let href     :string | undefined = undefined
+    export let hrefFunc :Function | undefined = undefined
 
     let definition :rKanban_definition = getContext("rKanban-definition");
     definition.titleAttrib = a;
     definition.titleOnChange = onChange;
     definition.titleReadOnly = readOnly;
+    definition.titleHref = href;
+    definition.titleHrefFunc = hrefFunc;
 
 </script>
 

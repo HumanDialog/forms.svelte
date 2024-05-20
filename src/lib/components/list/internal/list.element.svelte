@@ -42,7 +42,7 @@
 
     $: selected_class = is_row_selected ? "!border-blue-300" : "";
     $: focused_class = is_row_active ? "bg-stone-200 dark:bg-stone-700" : "";
-    $: is_link_like = is_row_selected && (!!definition.title_href || !!definition.title_href_func)
+    $: is_link_like = is_row_active && (!!definition.title_href || !!definition.title_href_func)
 
     if(!typename)
     {
@@ -169,14 +169,7 @@
         {
             if(definition.title_href || definition.title_href_func)
             {
-                let link: string = '';
-                if(definition.title_href)
-                    link = definition.title_href;
-                else if(definition.title_href_func)
-                    link = definition.title_href_func(item);
-
-                if(link)
-                    push(link);
+                //followDefinedHRef();
             }
             else
             {
@@ -195,6 +188,23 @@
                 force_editing('Summary')
             */
         }
+    }
+
+    function followDefinedHRef()
+    {
+        let link: string = getHRef();
+        if(link)
+            push(link);
+    }
+
+    function getHRef(): string
+    {
+        if(definition.title_href)
+            return definition.title_href;
+        else if(definition.title_href_func)
+            return definition.title_href_func(item);
+        else
+            return '';
     }
 
     function activate_row(e, item)
@@ -267,9 +277,25 @@
             return; //todo
         }
 
-        element_node.focus();
-        setSelectionAtEnd(element_node);
-        //startEditing(element_node, () => { placeholder='' });
+        if(field == 'Title')
+        {
+            if(is_link_like)
+            {
+                startEditing(element_node, () => { placeholder='' });
+            }
+            else
+            {
+                element_node.focus();
+                setSelectionAtEnd(element_node);
+            }
+        }
+        else
+        {
+            element_node.focus();
+            setSelectionAtEnd(element_node);
+        }
+
+        
     }
 
     function setSelectionAtEnd(element: HTMLElement)
@@ -312,43 +338,58 @@
     <slot name="left" element={item}/>
     
     <div    class="ml-3 w-full py-1" 
-            class:sm:hover:cursor-pointer={is_link_like}
             use:selectable={item} 
             on:click={(e) => {activate_row(e, item)}} 
             role="row" 
             tabindex="0">
         <div class="block sm:flex sm:flex-row" on:click={(e) => on_active_row_clicked(e, 'top')}>
            
-           {#if is_row_active}
-                {#key item[title]} <!-- Wymusza pełne wyrenderowanie zwłasza po zmiane z pustego na tekst  -->
-                    <p  class=" text-lg font-semibold min-h-[1.75rem]
-                                sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
-                                whitespace-nowrap overflow-clip w-full sm:flex-none sm:w-2/3"
-                        id="__hd_list_ctrl_{item[item_key]}_Title"
-                        use:editable={{
-                            action: (text) => {change_name(text)},
-                            active: true,
-                            readonly: definition.title_readonly,
-                        }}> 
+            {#if is_row_active}
+                {#key item[title]}      <!-- Wymusza pełne wyrenderowanie zwłasza po zmiane z pustego na tekst  -->
+                    {#if is_link_like}
+                        <p  class=" text-lg font-semibold min-h-[1.75rem]
+                                    sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
+                                    whitespace-nowrap overflow-clip w-full sm:flex-none sm:w-2/3
+                                    sm:hover:cursor-pointer underline"
+                                    id="__hd_list_ctrl_{item[item_key]}_Title"
+                                    on:click|stopPropagation={followDefinedHRef}
+                                    use:editable={{
+                                        action: (text) => {change_name(text)},
+                                        active: false,
+                                        readonly: definition.title_readonly,
+                                    }}
+                            > 
                             {element_title}
+                        </p>
+                    {:else}
+                        <p  class=" text-lg font-semibold min-h-[1.75rem]
+                                    sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
+                                    whitespace-nowrap overflow-clip w-full sm:flex-none sm:w-2/3"
+                            id="__hd_list_ctrl_{item[item_key]}_Title"
+                            use:editable={{
+                                action: (text) => {change_name(text)},
+                                active: true,
+                                readonly: definition.title_readonly,
+                            }}> 
+                                {element_title}
 
-                        {#if definition.onOpen}
-                            <button class="ml-3 w-5 h-5 sm:w-3 sm:h-3"
-                                    on:click={(e) => definition.onOpen(item)}>
-                                <FaExternalLinkAlt/>
-                            </button>
-                        {/if}
-                    </p>
+                            {#if definition.onOpen}
+                                <button class="ml-3 w-5 h-5 sm:w-3 sm:h-3"
+                                        on:click={(e) => definition.onOpen(item)}>
+                                    <FaExternalLinkAlt/>
+                                </button>
+                            {/if}
+                        </p>
+                    {/if}
                 {/key}
-           {:else}
+            {:else}
                 <p  class=" text-lg font-semibold min-h-[1.75rem]
                             sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
                             whitespace-nowrap overflow-clip w-full sm:flex-none sm:w-2/3"
                     id="__hd_list_ctrl_{item[item_key]}_Title"> 
                     {element_title}
                 </p>
-           {/if}
-           
+            {/if}
            
 
             <section class="hidden sm:block w-full sm:flex-none sm:w-1/3">

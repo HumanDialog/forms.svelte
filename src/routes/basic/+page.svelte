@@ -4,6 +4,8 @@
 
     import Sidebar from './sidebar.svelte'
     import AppIcon from './appicon.svelte'
+    import {FaUsers} from 'svelte-icons/fa/'
+    import {push} from 'svelte-spa-router'
     
 	import Tasklist from './tasklist.svelte';
     import Task from './task.svelte'
@@ -49,7 +51,14 @@
                     }
                 },
                 mainToolbar : {
-                    signin: true
+                    signin: true,
+                    customOperations:[
+                        {
+                            caption: 'Members',
+                            icon: FaUsers,
+                            action: (f) => { push('/members') }
+                        }
+                    ]
                 },
                 dark:
                 {

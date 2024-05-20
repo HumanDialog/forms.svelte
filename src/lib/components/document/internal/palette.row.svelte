@@ -18,7 +18,10 @@
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div id={id} class="font-medium m-0 p-0 text-sm w-full text-left flex flew-row cursor-context-menu {active_class} {cl}" on:click on:mousemove>
+<div id={id} class="font-medium m-0 p-0 text-sm w-full text-left flex flew-row cursor-context-menu {active_class} {cl}" 
+     on:click 
+     on:mousemove
+     on:mousedown>
     <div class="flex items-center justify-center" style:width={`${icon_placeholder_size*0.25}rem`}>
         {#if cmd.icon}
             <Icon size={icon_size} component={cmd.icon}/>
