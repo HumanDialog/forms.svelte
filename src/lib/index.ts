@@ -88,8 +88,8 @@ export {
 }   from './utils'
 
 export {
-            mainViewReloader,
-            reloadMainView } from './stores.js'
+            mainContentPageReloader,
+            reloadMainContentPage } from './stores.js'
 
 export {    data_tick_store,    // tmp
             hasSelectedItem, 

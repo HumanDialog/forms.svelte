@@ -8,7 +8,7 @@ export class rKanban_column
 {
     public  id:         number;
     public  title:      string = '';
-    public  width:      string = 'w-[240px]';
+    public  width:      string = '';
     public  state:      any = '';
     public  finishing:  boolean = false
     public  operations: object[]|undefined = undefined;

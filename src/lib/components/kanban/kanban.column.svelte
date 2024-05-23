@@ -3,7 +3,7 @@
     import {type rKanban_definition, rKanban_column} from './Kanban'
 
     export let title:      string = '';
-    export let width:      string = 'w-[240px]';
+    export let width:      string = '';
     export let state:      any = ''
     export let finishing:  boolean = false;
     export let operations: object[]|undefined = undefined;
