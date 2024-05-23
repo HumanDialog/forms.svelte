@@ -1,5 +1,5 @@
 <script>
-    import {Spinner, showMenu, startEditing, Sidebar, SidebarBrand, SidebarGroup, SidebarList, SidebarItem, reloadMainView} from '$lib'
+    import {Spinner, showMenu, startEditing, Sidebar, SidebarBrand, SidebarGroup, SidebarList, SidebarItem, reloadMainContentPage} from '$lib'
     import {FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash} from 'svelte-icons/fa'
     import { onMount, afterUpdate } from "svelte";
     import {setNavigatorTitle} from '$lib'
@@ -91,11 +91,11 @@
 
     async function finishAllOnList(list)
     {
-        await reef.get(`/app/AllLists/${list.Id}/FinishAll`)
+        await reef.post(`/app/AllLists/${list.Id}/FinishAll`, {})
         
         if(isActive(`#/tasklist/${list.Id}`, currentPath))
         {
-            reloadMainView();
+            reloadMainContentPage();
         }
     }
 
@@ -105,7 +105,7 @@
         
         if(isActive('#/mytasks', currentPath))
         {
-            reloadMainView();
+            reloadMainContentPage();
         }
 
     }

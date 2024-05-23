@@ -6,6 +6,7 @@
     export let name     :string | undefined = undefined;
     export let avatar   :string | undefined = undefined;
     export let color    :string | undefined = undefined;
+    export let icon     :any | undefined = undefined;
 
     let definition :rCombo_definition = getContext("rCombo-definition");
     let item = new rCombo_item;
@@ -14,6 +15,7 @@
     item.Key = key;
     item.Avatar = avatar;
     item.Color = color;
+    item.Icon = icon;
 
     definition.source.push(item);
 </script>

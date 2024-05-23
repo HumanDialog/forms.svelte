@@ -1,7 +1,7 @@
 <script lang="ts">
-    import {getContext, afterUpdate, tick} from 'svelte'
+    import {getContext, afterUpdate, tick, onMount} from 'svelte'
     import {data_tick_store, contextItemsStore, contextTypesStore} from '../../../stores'
-    import {getActive, activateItem, editable, isActive, isSelected, selectable, startEditing } from '../../../utils.js'
+    import {getActive, activateItem, editable, isActive, isSelected, selectable, startEditing, isDeviceSmallerThan } from '../../../utils.js'
     import Card from './kanban.card.svelte'
     import {KanbanColumnTop, KanbanColumnBottom} from '../Kanban'
     import Inserter from './kanban.inserter.svelte'
@@ -50,8 +50,6 @@
     let columnDef: rKanban_column = definition.columns[currentColumnIdx];
     
     let     column_items :object[] | undefined = undefined;
-    
-    let width_class = columnDef.width ? `w-11/12 sm:${columnDef.width}` : 'w-11/12 sm:w-[240px]'
 
     $: setup_data();
 
@@ -62,7 +60,7 @@
 
     $: force_rerender($data_tick_store, $contextItemsStore)
 
-    export function reload()
+   export function reload()
     {
         let allItems = definition.getItems();
         if(definition.stateAttrib)
@@ -246,6 +244,32 @@
                 }
             )
     }
+
+    onMount( () => {
+        window.addEventListener('resize', onResizeWindow)
+        return () => {
+            window.removeEventListener('resize', onResizeWindow)
+        }
+    })
+
+    let styleWidth :string = getWidthStyle();
+    function onResizeWindow()
+    {
+        styleWidth = getWidthStyle();
+    }
+
+    function getWidthStyle()
+    {
+        const assumed_space = 800;
+        const default_column_width = Math.floor( assumed_space / definition.columns.length );
+        const column_width = columnDef.width ? columnDef.width : default_column_width;
+
+        if(window.innerWidth >= 640)
+            return `width: ${column_width}px; min-width: 180px; max-width: ${column_width}px;`
+        else
+            return 'width: 92%;'
+
+    }
     
 </script>
 
@@ -254,11 +278,11 @@
 <section class="    snap-center 
                     sm:snap-align-none 
                     flex-none sm:flex-1
-                    sm:min-w-[180px] sm:max-w-[240px]
                     sm:min-h-[calc(100vh-8rem)] 
                     min-h-[calc(100vh-5rem)] 
                     rounded-md border border-transparent  
-                    {width_class} {selected_class} {focused_class}"
+                    {selected_class} {focused_class}"
+        style={styleWidth}
         use:selectable={columnDef}
         on:click={activate}>
     <header class:cursor-pointer={!is_row_active && columnDef.operations} bind:this={headerElement}>
@@ -320,3 +344,4 @@
 
     </ul>
 </section>
+

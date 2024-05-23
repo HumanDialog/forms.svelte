@@ -10,7 +10,7 @@
                 ListInserter,
                 ListDateProperty,
                 ListComboProperty,
-				mainViewReloader} from '$lib'
+				mainContentPageReloader} from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen} from 'svelte-icons/fa'
     import {location} from 'svelte-spa-router'
 
@@ -24,7 +24,7 @@
 
     const STATE_FINISHED = 1000;
     
-    $: onParamsChanged($location, $mainViewReloader);
+    $: onParamsChanged($location, $mainContentPageReloader);
     
     async function onParamsChanged(...args)
     {
@@ -115,7 +115,7 @@
     {
         event.stopPropagation();
 
-        let result = await reef.get(`${task.$ref}/Finish`);
+        let result = await reef.post(`${task.$ref}/Finish`, {});
         if(result)
             await reloadTasks(listComponent.KEEP_OR_SELECT_NEXT)   
     }

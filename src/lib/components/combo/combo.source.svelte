@@ -10,6 +10,7 @@
     export let key :string = '';
     export let name :string = ''; 
     export let avatar :string = '';
+    export let icon :string = '';
 
     let definition :rCombo_definition = getContext("rCombo-definition");
 
@@ -20,6 +21,7 @@
     definition.element_key = key;
     definition.element_name = name;
     definition.element_avatar = avatar;
+    definition.element_icon = icon;
 
     
 

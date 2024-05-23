@@ -4,6 +4,7 @@ export class rCombo_item
     public Name    :string | undefined;
     public Avatar  :string | undefined;  //url to avatar
     public Color   :string | undefined;
+    public Icon    :any | undefined = undefined;
 }
 
 
@@ -20,6 +21,7 @@ export class rCombo_definition
     public element_key      :string | undefined;
     public element_name     :string | undefined;
     public element_avatar   :string | undefined;
+    public element_icon     :string | undefined;
 
 }
 

@@ -114,6 +114,17 @@
         if(!typename)
             typename = $contextTypesStore[ctx];
 
+        if(!typename)
+        {
+            if(item.$type)
+                typename = item.$type;
+            else if(item.$ref)
+            {
+                let s = item.$ref.split('/')
+                typename = s[1];
+            }
+        }
+
         
         //if(item && a)    
         //    val = item[a]
@@ -148,6 +159,8 @@
             get_source_collection(definition.collection_path, `${definition.collection_path}`).then((source) => source_fetched(source) )
         else if(definition.collection)
             source_fetched(definition.collection);
+
+        //tick_request_internal = tick_request_internal + 1;
         
         return () => {}
     })
@@ -346,6 +359,8 @@
             let found = definition.source.find( e => e.Key == choosed_value);
             if(!found)
                 found = definition.source.find( e => e.Name == choosed_value);
+
+            console.log('found: ', found)
 
             if(found)
                 return found;
@@ -711,6 +726,8 @@
             {
                 if(definition.element_avatar)
                     el.Avatar = e[definition.element_avatar];
+                else if(definition.element_icon)
+                    el.Icon = e[definition.element_icon];
                 else
                     el.Avatar = e.$icon;
             } 
@@ -776,6 +793,10 @@
                 {#if icon && sel_item}
                     {#if sel_item.Color}
                         <Icon size={5} circle={true} color={sel_item.Color}/>
+                    {:else if sel_item.Icon}
+                        <Icon size={4} component={sel_item.Icon}/>
+                    {:else if sel_item.Icon == null}
+                        <div class="w-4 h-4"></div>
                     {:else}
                         <Icon size={5} circle={true} symbol={sel_item.Avatar} label={sel_item.Name}/>
                     {/if}
@@ -826,6 +847,10 @@
                                     <Icon size={5} circle={true} color={item.Color}/>
                                 {:else if item.Avatar} 
                                     <Icon size={5} circle={true} symbol={item.Avatar}/>
+                                {:else if item.Icon}
+                                    <Icon size={4} component={item.Icon}/>
+                                {:else if item.Icon == null}
+                                    <div class="w-4 h-4"></div>
                                 {:else if item.Name}
                                     <Icon size={5} circle={true} label={item.Name}/>
                                 {:else}
