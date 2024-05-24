@@ -1,7 +1,7 @@
 <script lang="ts">
     import type {Document_command} from './internal/Document_command'
     import { Selection_helper} from './internal/Selection_helper'
-    import { afterUpdate, getContext, onDestroy, onMount} from 'svelte'
+    import { beforeUpdate, afterUpdate, getContext, onDestroy, onMount} from 'svelte'
     import { Selection_range, Selection_edge} from './internal/Selection_range';
     //import { createEventDispatcher } from 'svelte';
     import {data_tick_store, contextItemsStore, contextTypesStore} from '../../stores.js'
@@ -118,8 +118,8 @@
 
         has_changed_value = false;
 
-        if(stored_selection)
-            set_selection(stored_selection);
+        //if(stored_selection)
+        //    set_selection(stored_selection);
 
     }
 
@@ -160,6 +160,28 @@
             hide_command_palette();
     });
 
+
+    let storedSelection :Selection_range | null = null;
+    beforeUpdate( () => {
+
+        if(editable_div && document.activeElement == editable_div)
+            storedSelection = Selection_helper.get_selection(editable_div);
+        else
+            storedSelection = null;
+        //console.log('before: ', storedSelection, storedSelection.begin.node_index, storedSelection.begin.absolute_index);
+        
+    })
+
+    afterUpdate( () => {
+        
+        //console.log('after: ', stored_selection, stored_selection?.begin.node_index, stored_selection?.begin.absolute_index)
+
+        if(storedSelection)
+        {
+            const range = Selection_helper.create_range(editable_div, storedSelection.begin.absolute_index, storedSelection.end.absolute_index);
+            set_selection(range);
+        }
+    })
 
     function content_changed(checkZeroWitdhSpaces :boolean)
     {
@@ -1408,11 +1430,11 @@
             palette.navigate_up();
     }
 
-    let stored_selection: Range | undefined = undefined;
+    //let stored_selection: Range | undefined = undefined;
     function on_selection_changed()
     {
-        let active_range : Selection_range = Selection_helper.get_selection(editable_div);
-        stored_selection = window.getSelection()?.getRangeAt(0);
+        //let active_range : Selection_range = Selection_helper.get_selection(editable_div);
+        //stored_selection = window.getSelection()?.getRangeAt(0);
 
         //stored_selections.set(id, range);
         //console.log('Editor store selection', id, range.begin.absolute_index, range.end.absolute_index);
@@ -1437,7 +1459,7 @@
         let active_range : Selection_range = Selection_helper.get_selection(editable_div);
         console.log('rich.edit: on_blur', active_range?.begin?.absolute_index)
 
-        stored_selection = undefined;
+        storedSelection = null;
 
         //if(intervalId)
         //{
