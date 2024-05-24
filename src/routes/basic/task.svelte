@@ -506,53 +506,51 @@
                 {task.Title}
             </h1>
             
-            {#if task.Actor || responsiblePlaceholder || task.Tags || tagsPlaceholder}
-                <section class="not-prose h-6 w-full flex flex-row justify-between">
-                    <div class="grow-0">
-                        {#if task.Actor || responsiblePlaceholder}
-                            <Combo  compact={true} 
-                                    inContext='data'
-                                    a='Actor'
-                                    isAssociation
-                                    icon={false}
-                                    placeholder='Responsible'
-                                    s='sm'
-                                    bind:this={responsible}>
-                                <ComboSource    objects={allActors}
-                                                key="$ref" 
-                                                name='Name'/>
-                            </Combo>
-                        {/if}
-                    </div>
+            <section class="not-prose w-full flex flex-row flex-wrap justify-between">
+                <div class="grow-0">
+                    {#if task.Actor || responsiblePlaceholder}
+                        <Combo  compact={true} 
+                                inContext='data'
+                                a='Actor'
+                                isAssociation
+                                icon={false}
+                                placeholder='Responsible'
+                                s='sm'
+                                bind:this={responsible}>
+                            <ComboSource    objects={allActors}
+                                            key="$ref" 
+                                            name='Name'/>
+                        </Combo>
+                    {/if}
+                </div>
 
-                    <div>
-                        {#if availableStates && availableStates.length > 0}
-                            <Combo  compact={true} 
-                                    inContext='data'
-                                    a='State'
-                                    icon
-                                    placeholder='State'
-                                    s='sm'>
-                                <ComboSource    objects={availableStates}
-                                                key="state" 
-                                                name="name"
-                                                icon="icon"/>
-                            </Combo>
-                        {/if}
-                    </div>
-                
-                    <div>
-                        {#if task.Tags || tagsPlaceholder}
-                            <Tags class=""
-                                a='Tags'
-                                getGlobalTags={() => allTags}
-                                {onUpdateAllTags}
-                                canChangeColor
-                                bind:this={tags}/>
-                        {/if}
-                    </div>
-                </section>
-            {/if}
+                <div>
+                    {#if availableStates && availableStates.length > 0}
+                        <Combo  compact={true} 
+                                inContext='data'
+                                a='State'
+                                icon
+                                placeholder='State'
+                                s='sm'>
+                            <ComboSource    objects={availableStates}
+                                            key="state" 
+                                            name="name"
+                                            icon="icon"/>
+                        </Combo>
+                    {/if}
+                </div>
+
+                <div>
+                    {#if task.Tags || tagsPlaceholder}
+                        <Tags class="not-prose h-6 w-full "
+                            a='Tags'
+                            getGlobalTags={() => allTags}
+                            {onUpdateAllTags}
+                            canChangeColor
+                            bind:this={tags}/>
+                    {/if}
+                </div>
+            </section>
             
             {#if task.Summary || summaryPlaceholder}
                 {#key task.Summary}

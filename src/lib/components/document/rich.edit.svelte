@@ -17,6 +17,10 @@
     import FaQuote from 'svelte-icons/fa/FaQuoteRight.svelte'
     import FaWarn from 'svelte-icons/fa/FaExclamationTriangle.svelte'
     import FaInfo from 'svelte-icons/fa/FaInfo.svelte'
+    import IcH1 from './internal/h1.icon.svelte'
+    import IcH2 from './internal/h2.icon.svelte'
+    import IcH3 from './internal/h3.icon.svelte'
+    import IcH4 from './internal/h4.icon.svelte'
 	import { showMenu } from '../menu';
 
 	
@@ -1517,8 +1521,8 @@
             //   {   caption: 'Heading 1',    description: 'Big section heading',            tags: 'h1',      icon: FaHead,    icon_size: 6,      on_choice: () => { do_format('h2', '') } } ,
             //   {   caption: 'Heading 2',    description: 'Medium section heading',         tags: 'h2',      icon: FaHead,    icon_size: 5,      on_choice: () => { do_format('h3', '') } } ,
             //   {   caption: 'Heading 3',    description: 'Small section heading',          tags: 'h3',      icon: FaHead,    icon_size: 4,      on_choice: () => { do_format('h4', '') } } ,
-               {   caption: 'Heading 1',      description: 'Description heading',            tags: 'h1',      icon: FaHead,    icon_size: 6,      on_choice: () => { do_format('h1', '') } } ,
-               {   caption: 'Heading 2',      description: 'Description heading',            tags: 'h2',      icon: FaHead,    icon_size: 6,      on_choice: () => { do_format('h2', '') } } ,
+               {   caption: 'Heading 1',      description: 'Description heading',            tags: 'h1',      icon: IcH1,          on_choice: () => { do_format('h1', '') } } ,
+               {   caption: 'Heading 2',      description: 'Description heading',            tags: 'h2',      icon: IcH2,          on_choice: () => { do_format('h2', '') } } ,
             //   {   caption: 'Heading 2',      description: 'Medium description heading',     tags: 'h3',      icon: FaHead,    icon_size: 5,      on_choice: () => { do_format('h3', '') } } ,
             //   {   caption: 'Heading 3',      description: 'Small description heading',      tags: 'h4',      icon: FaHead,    icon_size: 4,      on_choice: () => { do_format('h4', '') } } ,
                

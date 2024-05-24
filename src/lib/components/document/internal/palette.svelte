@@ -256,7 +256,8 @@
                     <div class="flex items-center justify-center mt-1 sm:mt-0.5" style:width={`${icon_placeholder_size*0.25}rem`}>
                         {#if cmd.icon}
                             {@const cc = mobile ? 7 : 6}
-                            {@const icon_size = icon_placeholder_size - cc}
+                            {@const default_icon_size = icon_placeholder_size - cc}
+                            {@const icon_size = cmd.icon_size ? cmd.icon_size : default_icon_size}
                             <Icon size={icon_size} component={cmd.icon}/>
                         {/if}
                     </div>
