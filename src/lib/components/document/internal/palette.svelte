@@ -29,13 +29,13 @@
         isToolbox = true;
         visible = true;
 
-        const margin = 15;
+        const margin = 0; //15;
         const windowWidth = window.innerWidth - 2*margin;
 
         toolboxX = margin;
         toolboxY = rect.bottom + margin;
 
-        css_style = `position: absolute; left:${toolboxX}px; top:${toolboxY}px;`;
+        css_style = `position: fixed; left:${toolboxX}px; top:${toolboxY}px;`;
 
         dispatch('palette_shown');
     }
