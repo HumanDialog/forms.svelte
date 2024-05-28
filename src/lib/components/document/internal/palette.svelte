@@ -35,7 +35,27 @@
         toolboxX = margin;
         toolboxY = rect.bottom + margin;
 
-        css_style = `position: fixed; left:${toolboxX}px; top:${toolboxY}px;`;
+        const mainContentDiv = document.getElementById('__hd_svelte_main_content_container')
+
+        /*console.log('window.scrollY', window.scrollY, window.pageYOffset)
+        console.log('window.screenTop, window.screenY', window.screenTop, window.screenY)
+
+        
+        console.log('mainContentDiv.scrollTop', mainContentDiv?.scrollTop, mainContentDiv.offsetTop, mainContentDiv.clientTop)
+
+        let parentElement = mainContentDiv?.parentElement
+        while(parentElement)
+        {
+            console.log('p scrollTop:', parentElement.scrollTop, parentElement.offsetTop, parentElement.clientTop);
+            parentElement = parentElement.parentElement;
+        }
+        */
+
+        //toolboxY += window.scrollY
+        //css_style = `position: fixed; left:${toolboxX}px; top:${toolboxY}px;`;
+        
+        toolboxY += window.scrollY /*+ mainContentDiv?.scrollTop*/;
+        css_style = `position: absolute; left:${toolboxX}px; top:${toolboxY}px;`;
 
         dispatch('palette_shown');
     }
@@ -218,6 +238,7 @@
         beforeTrackingClient = new DOMPoint(touch.clientX, touch.clientY);
         beforeTrackingPos = new DOMPoint(toolboxX, toolboxY);
         isMoving = true;
+        e.stopPropagation()
     }
 
     function mousemove(e)
@@ -234,7 +255,8 @@
             toolboxX = beforeTrackingPos.x + trackDelta.x;
             //toolboxY = beforeTrackingPos.y + trackDelta.y;
 
-            css_style = `position: fixed; left:${toolboxX}px; top:${toolboxY}px;`;
+            css_style = `position: absolute; left:${toolboxX}px; top:${toolboxY}px;`;
+            e.stopPropagation()
         }
     }
 

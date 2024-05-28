@@ -235,7 +235,8 @@
                 <!--##  CONTENT                          ##################-->
                 <!--#######################################################-->
                 <!-- fixed => relative, content-height => min content height -- -->
-                <div  class="relative left-0  w-screen  
+                <div    id="__hd_svelte_main_content_container"
+                        class="relative left-0  w-screen  
                                 sm:left-[40px]  sm:w-[calc(100vw-40px)]    
                                 {content_top}
                                 {content_height}
