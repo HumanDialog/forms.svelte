@@ -107,8 +107,8 @@
         bottom_bar_visible = $bottom_bar_visible_store
         let dts = $data_tick_store;
 
-        if(!hasSelectedItem())
-            bottom_bar_visible = false;
+        //if(!hasSelectedItem())
+        //    bottom_bar_visible = false;
 
         if(tools_visible)
         {
@@ -118,9 +118,9 @@
             content_top = 'top-[50px] sm:top-[40px]'
             
             if(bottom_bar_visible)
-                content_height = `min-h-[calc(100vh-290px)] sm:min-h-[calc(100vh-280px)]`    
+                content_height = `h-[calc(100vh-290px)] sm:h-[calc(100vh-280px)]`    
             else    
-                content_height = `min-h-[calc(100vh-50px)] sm:min-h-[calc(100vh-40px)]` 
+                content_height = `h-[calc(100vh-50px)] sm:h-[calc(100vh-40px)]` 
                
         }
         else
@@ -128,9 +128,9 @@
             tools_visibility = "hidden"
             content_top = `top-[50px] sm:top-0`
             if(bottom_bar_visible)
-                content_height = `min-h-[calc(100vh-290px)] sm:min-h-[calc(100vh-240px)]`           
+                content_height = `h-[calc(100vh-290px)] sm:h-[calc(100vh-240px)]`           
             else
-                content_height = `min-h-[calc(100vh-50px)] sm:min-h-screen`
+                content_height = `h-[calc(100vh-50px)] sm:h-screen`
         }
         
         
@@ -161,7 +161,7 @@
             on:click={handleSelect} 
             on:contextmenu={handleSelect}>
 
-        <div class="bg-white dark:bg-stone-900 dark:text-white      min-h-screen">    
+        <div class="bg-white dark:bg-stone-900 dark:text-white  overflow-x-clip overflow-y-clip  h-screen">    
             <!--###########################################################-->
             <!--##  HORIZONTAL TOOLBAR (FOR PHONES)  ######################-->
             <!--###########################################################-->
@@ -206,7 +206,11 @@
             </div>    
             {/if}
 
-            <section on:click|capture={auto_hide_sidebar}>
+            <!-- ! below overflow-x-clip prevents horizontal scrollbar when vertical scrollbar is visible. Default
+                behaviour is the content expand vertically, and only vertical scrollbar can be visible.
+                When content on the main page needs to be expanded horizontally (like kanban chart for example) then
+                that component should define overflow-x-* itself -->
+            <section on:click|capture={auto_hide_sidebar} class="">
 
                 <!--###########################################################-->
                 <!--##  HORIZONTAL TOOLS                 ######################-->
@@ -236,9 +240,9 @@
                                 {content_top}
                                 {content_height}
                                 {lg_content_area_horizontal_dim}
-                                z-0 overflow-x-hidden" 
+                                z-0 overflow-x-hidden overflow-y-auto" 
                                 >
-                        <Configurable config={layout.mainContent} min_h_class={content_height}>
+                        <Configurable config={layout.mainContent} min_h_class="min-h-full">
                             <div slot='alt'></div>
                         </Configurable>
                 </div>    

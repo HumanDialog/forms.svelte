@@ -13,6 +13,7 @@
     import MyTasks from './mytasks.svelte'
     import Members from './members.svelte'
     import Main from './main.svelte'
+    import {Console} from '$lib'
 
    
 
@@ -59,6 +60,10 @@
                             action: (f) => { push('/members') }
                         }
                     ]
+                },
+                selectionDetails:{
+                    caption: 'Console',
+                    component: Console
                 },
                 dark:
                 {

@@ -1,0 +1,128 @@
+<script>
+	import { reef, session } from "@humandialog/auth.svelte";
+	import { afterUpdate } from "svelte";
+    import { contextTypesStore, contextItemsStore} from './stores.js'
+
+	let prevLines = [];
+    let prompt = '>'
+    let input = ""
+    let inputElement;
+    let protocol = 'cons';
+    let protoButtonBorderClass = ''
+
+    async function onKeyDown(e)
+    {
+        if(!$session.isActive)
+        {
+            prevLines = [...prevLines, "Sign-in first"]
+            input = "";
+        }
+
+        if(e.key == 'Enter')
+        {
+            prevLines = [...prevLines, `${prompt} ${input}`];
+
+            if(input.startsWith('self'))
+            {
+                let navItem = getNav('props');
+                if(!navItem)
+                    navItem = getNav('data')
+
+                if(navItem)
+                    input = input.replace('self', navItem)
+            }
+
+            const apiVer = $session.configuration.api_version;
+            const result = await reef.fetch(`/${protocol}/${apiVer}/${input}`)
+            const res = await result.text();
+            prevLines = [...prevLines, res]
+
+            
+            input = "";
+        }
+        else if(e.key == 'Esc' || e.key == 'Escape')
+        {
+            input = "";
+        }
+    }
+
+    function getNav(contextLevel)
+    {
+        let navItem = '';
+        const pageItem = $contextItemsStore[contextLevel]
+        if(pageItem)
+        {
+            if(pageItem.$ref)
+                navItem = pageItem.$ref; //.substr(2); 
+            else if(pageItem.Id)
+            {
+                if(pageItem.$type)
+                    navItem = pageItem.$type + '/' + pageItem.Id;
+                else if(pageItem.oclType)
+                    navItem = pageItem.oclType + '/' + pageItem.Id;
+                else if($contextTypesStore[contextLevel])
+                    navItem = $contextTypesStore[contextLevel] + '/' + pageItem.Id;
+            }
+        }
+        return navItem;
+    }
+
+    afterUpdate(() =>
+    {
+        inputElement?.scrollIntoView();
+    })
+
+
+    function protoChange()
+    {
+        if(protocol == 'cons')
+        {
+            protocol = 'json';
+            protoButtonBorderClass = "border border-stone-400"
+        }
+        else
+        {
+            protocol = 'cons';
+            protoButtonBorderClass = ""
+        }
+    }
+
+</script>
+
+<div class="h-full overflow-y-auto">
+    <button class="fixed right-0 m-2 w-6 h-6 text-stone-200 {protoButtonBorderClass}" on:click={protoChange}>
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 4C14 4 11 5 11 9C11 13 11 15 11 18C11 21 6 23 6 23C6 23 11 25 11 28C11 31 11 35 11 39C11 43 14 44 16 44"/>
+            <path d="M32 4C34 4 37 5 37 9C37 13 37 15 37 18C37 21 42 23 42 23C42 23 37 25 37 28C37 31 37 35 37 39C37 43 34 44 32 44"/>
+        </svg>
+    </button>
+
+    <div class="p-2 w-full min-h-full  
+                bg-stone-800 border-l border-t border-black font-mono text-stone-200">
+        {#each prevLines as line}
+            <p class="whitespace-pre-wrap">{line}</p>
+        {/each}
+        <p bind:this={inputElement} class="whitespace-pre-wrap">{prompt} 
+            <input  type=text name="cmd" id="cmd" 
+                    autocomplete="off"
+                    class="bg-stone-800 w-11/12"
+                    bind:value={input} 
+                    on:keydown={onKeyDown}
+                    placeholder="Type command here">
+        </p>
+    </div>
+</div>
+<style>
+    input:focus {
+    outline: 0px solid transparent;
+  }
+
+  svg {
+        stroke: currentColor;
+        fill: currentColor;
+        stroke-width: 0;
+        width: 100%;
+        height: auto;
+        max-height: 100%;
+    }  
+</style>

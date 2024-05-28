@@ -21,7 +21,7 @@ export function setNavigatorTitle(key, title)
 
 export function hasSelectedItem()
 {
-    let itm = get(contextItemsStore).sel
+    let itm = get(contextItemsStore).props
     return itm !== null && itm !== undefined;
 }
 
