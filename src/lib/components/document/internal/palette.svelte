@@ -1,6 +1,6 @@
 <svelte:options accessors={true}/>
 <script lang="ts">
-    import { tick } from 'svelte';
+    import { tick, afterUpdate } from 'svelte';
     import type {Document_command} from './Document_command'
     import Pallete_row from './palette.row.svelte'
     import { createEventDispatcher } from 'svelte';
@@ -39,6 +39,22 @@
 
         dispatch('palette_shown');
     }
+
+    let toolboxElement;
+    afterUpdate(
+      async () =>
+      {
+          if(isToolbox && visible && toolboxElement)
+          {
+              let layoutRoot = document.getElementById("__hd_svelte_layout_root")
+              if(!!layoutRoot && toolboxElement.parentElement != layoutRoot)
+              {
+                await tick();
+                layoutRoot.appendChild(toolboxElement)
+              }
+          }
+      }
+    )
 
     export function show(x :number, y :number, up :boolean = false)
     {
@@ -241,7 +257,8 @@
             hidden={!visible}
             on:touchstart={mousedown}
             on:touchmove={mousemove}
-            on:touchend={mouseup}>
+            on:touchend={mouseup}
+            bind:this={toolboxElement}>
         {#if filtered_commands && filtered_commands.length}
             {#each filtered_commands as cmd, idx (cmd.caption)}
                 {@const id = "cpi_" + idx}
