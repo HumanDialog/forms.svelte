@@ -36,6 +36,7 @@
     let tabs = new Array();
     let config = null;
     let has_selection_details = false;
+    let selection_detils_caption = 'Properties';
     
     let show_sign_in_out_icons = false;
     let is_logged_in = false;
@@ -45,6 +46,8 @@
     $:{
         config = appConfig.mainToolbar;
         has_selection_details = appConfig.selectionDetails;
+        if(has_selection_details)
+            selection_detils_caption = appConfig.selectionDetails.caption ?? 'Properties'
         is_logged_in = $session.isActive;
         show_sign_in_out_icons = config.signin ? true : false;
         sign_in_href = $signInHRef;
@@ -168,7 +171,7 @@
         if(has_selection_details)
         {
             options.push( {
-                        caption: 'Properties',
+                        caption: selection_detils_caption,
                         icon: $bottom_bar_visible_store ? FaToggleOn : FaToggleOff,
                         action: (focused) => { $bottom_bar_visible_store = !$bottom_bar_visible_store }
                     });

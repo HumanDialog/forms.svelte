@@ -136,7 +136,7 @@
 
 <Page   self={current_list} cl="!bg-white dark:!bg-stone-900 w-full h-full flex flex-col overflow-y-hidden overflow-x-hidden py-1 px-1 border-0" 
         toolbarOperations={page_operations}
-        clears_context='sel'>
+        clearsContext='sel'>
     
     <Table collection='Tasks' bind:this={table} toolbarOperations={task_operations} {menuOperations}>
         <TableColumn size={5}/>

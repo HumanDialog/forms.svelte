@@ -10,7 +10,7 @@
                 ListInserter,
                 ListDateProperty,
                 ListComboProperty,
-				mainViewReloader} from '$lib'
+				mainContentPageReloader} from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen} from 'svelte-icons/fa'
     import {location} from 'svelte-spa-router'
 
@@ -22,9 +22,9 @@
 
     let users = [];
 
-    const STATUS_CLOSED = 2;
+    const STATE_FINISHED = 1000;
     
-    $: onParamsChanged($location, $mainViewReloader);
+    $: onParamsChanged($location, $mainContentPageReloader);
     
     async function onParamsChanged(...args)
     {
@@ -70,8 +70,8 @@
                                         [
                                             {
                                                 Id: 2,
-                                                Association: 'Tasks',
-                                                Filter: 'Status <> STATUS_CLOSED',
+                                                Association: 'ActiveTasks',
+                                                Filter: 'State <> STATE_FINISHED',
                                                 Sort: 'ListOrder',
                                                 //ShowReferences: true,
                                                 SubTree:[
@@ -115,14 +115,14 @@
     {
         event.stopPropagation();
 
-        let result = await reef.get(`${task.$ref}/Finish`);
+        let result = await reef.post(`${task.$ref}/Finish`, {});
         if(result)
             await reloadTasks(listComponent.KEEP_OR_SELECT_NEXT)   
     }
 
     async function addTask(newTaskAttribs)
     {
-        let res = await reef.post(`/app/Lists/${currentList.Id}/Tasks/new`, newTaskAttribs)
+        let res = await reef.post(`/app/Lists/${currentList.Id}/AllTasks/new`, newTaskAttribs)
         if(!res)
             return null;
 
@@ -207,13 +207,13 @@
 
 {#if currentList}
     <Page   self={currentList} 
-            cl="!bg-white dark:!bg-stone-900 w-full h-full flex flex-col overflow-y-auto overflow-x-hidden py-1 px-1 border-0" 
+            cl="!bg-white dark:!bg-stone-900 w-full flex flex-col overflow-x-hidden py-1 px-1 border-0" 
             toolbarOperations={pageOperations}
-            clears_context='props sel'
+            clearsContext='props sel'
             title={currentList.Name}>
 
         <List   self={currentList} 
-                a='Tasks' 
+                a='ActiveTasks' 
                 title={currentList.Name} 
                 toolbarOperations={taskOperations} 
                 contextMenu={taskContextMenu}
@@ -230,7 +230,7 @@
             <ListDateProperty name="DueDate"/>
 
             <span slot="left" let:element>
-                <Icon component={element.Status == STATUS_CLOSED ? FaRegCheckCircle : FaRegCircle} 
+                <Icon component={element.State == STATE_FINISHED ? FaRegCheckCircle : FaRegCircle} 
                     on:click={(e) => finishTask(e, element)} 
                     class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
             </span>

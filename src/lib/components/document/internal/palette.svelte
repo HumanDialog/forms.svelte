@@ -1,6 +1,6 @@
 <svelte:options accessors={true}/>
 <script lang="ts">
-    import { tick } from 'svelte';
+    import { tick, afterUpdate } from 'svelte';
     import type {Document_command} from './Document_command'
     import Pallete_row from './palette.row.svelte'
     import { createEventDispatcher } from 'svelte';
@@ -35,10 +35,46 @@
         toolboxX = margin;
         toolboxY = rect.bottom + margin;
 
-        css_style = `position: fixed; left:${toolboxX}px; top:${toolboxY}px;`;
+        const mainContentDiv = document.getElementById('__hd_svelte_main_content_container')
+
+        /*console.log('window.scrollY', window.scrollY, window.pageYOffset)
+        console.log('window.screenTop, window.screenY', window.screenTop, window.screenY)
+
+        
+        console.log('mainContentDiv.scrollTop', mainContentDiv?.scrollTop, mainContentDiv.offsetTop, mainContentDiv.clientTop)
+
+        let parentElement = mainContentDiv?.parentElement
+        while(parentElement)
+        {
+            console.log('p scrollTop:', parentElement.scrollTop, parentElement.offsetTop, parentElement.clientTop);
+            parentElement = parentElement.parentElement;
+        }
+        */
+
+        //toolboxY += window.scrollY
+        //css_style = `position: fixed; left:${toolboxX}px; top:${toolboxY}px;`;
+        
+        toolboxY += window.scrollY /*+ mainContentDiv?.scrollTop*/;
+        css_style = `position: absolute; left:${toolboxX}px; top:${toolboxY}px;`;
 
         dispatch('palette_shown');
     }
+
+    let toolboxElement;
+    afterUpdate(
+      async () =>
+      {
+          if(isToolbox && visible && toolboxElement)
+          {
+              let layoutRoot = document.getElementById("__hd_svelte_layout_root")
+              if(!!layoutRoot && toolboxElement.parentElement != layoutRoot)
+              {
+                await tick();
+                layoutRoot.appendChild(toolboxElement)
+              }
+          }
+      }
+    )
 
     export function show(x :number, y :number, up :boolean = false)
     {
@@ -202,6 +238,7 @@
         beforeTrackingClient = new DOMPoint(touch.clientX, touch.clientY);
         beforeTrackingPos = new DOMPoint(toolboxX, toolboxY);
         isMoving = true;
+        e.stopPropagation()
     }
 
     function mousemove(e)
@@ -218,7 +255,8 @@
             toolboxX = beforeTrackingPos.x + trackDelta.x;
             //toolboxY = beforeTrackingPos.y + trackDelta.y;
 
-            css_style = `position: fixed; left:${toolboxX}px; top:${toolboxY}px;`;
+            css_style = `position: absolute; left:${toolboxX}px; top:${toolboxY}px;`;
+            e.stopPropagation()
         }
     }
 
@@ -241,7 +279,8 @@
             hidden={!visible}
             on:touchstart={mousedown}
             on:touchmove={mousemove}
-            on:touchend={mouseup}>
+            on:touchend={mouseup}
+            bind:this={toolboxElement}>
         {#if filtered_commands && filtered_commands.length}
             {#each filtered_commands as cmd, idx (cmd.caption)}
                 {@const id = "cpi_" + idx}
@@ -256,7 +295,8 @@
                     <div class="flex items-center justify-center mt-1 sm:mt-0.5" style:width={`${icon_placeholder_size*0.25}rem`}>
                         {#if cmd.icon}
                             {@const cc = mobile ? 7 : 6}
-                            {@const icon_size = icon_placeholder_size - cc}
+                            {@const default_icon_size = icon_placeholder_size - cc}
+                            {@const icon_size = cmd.icon_size ? cmd.icon_size : default_icon_size}
                             <Icon size={icon_size} component={cmd.icon}/>
                         {/if}
                     </div>

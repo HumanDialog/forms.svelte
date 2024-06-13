@@ -56,6 +56,7 @@ export { default as ListStaticProperty} from './components/list/list.static.svel
 
 export { default as Modal} from './modal.svelte'
 export { default as MembersPage} from './tenant.members.svelte'
+export { default as Console} from './console.svelte'
 
 export {default as Tag} from './components/tag.svelte'
 export {default as Tags} from './components/tags.svelte'

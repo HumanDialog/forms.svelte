@@ -12,13 +12,19 @@
     export let typename = '';
     export let action = null;
 
+    export let hiddenFunc = undefined;
+    export let disabledFunc = undefined;
+    
+
     let ctx = context ? context : getContext('ctx');
     let is_table_component :boolean = getContext('rIs-table-component');
     let can_be_activated :boolean = true;
 
-    let   item = null
-    let   additional_class = $$restProps.class ?? '';
-
+    let     item = null
+    let     definedClass = $$restProps.class ?? '';
+    let     hidden :boolean = false;
+    let     disabled :boolean = false;
+    
     let  last_tick = -1;    
     $: setup($data_tick_store);
 
@@ -29,12 +35,23 @@
 
         last_tick = data_tick_store            
 
-        if(!action)
+        //if(!action)
         {
             item = self ?? $contextItemsStore[ctx];
                 
             if(!typename)
                 typename = $contextTypesStore[ctx];
+
+            if(!typename && !!item)
+            {
+                if(item.$type)
+                    typename = item.$type;
+                else if(item.$ref)
+                {
+                    let s = item.$ref.split('/')
+                    typename = s[1];
+                }
+            }
         }
         
 
@@ -46,17 +63,44 @@
                 can_be_activated = true;
         }
         else
-            can_be_activated =  true;
+            can_be_activated =  !!item;
+
+        if(hiddenFunc)
+        {
+            if(item)
+                hidden = hiddenFunc(item)
+            else
+                hidden = true;    
+        }
+        else if(disabledFunc)
+        {
+            if(item)
+                disabled = disabledFunc(item)
+            else
+                disabled = true;
+        }
+        else
+            disabled = !item;
     }
 
     async function click()
     {
         if(action)
         {
-            if(params)
-                action(params);
+            if(context)
+            {
+                if(params)
+                    action(item, params);
+                else
+                    action(item);
+            }
             else
-                action();
+            {
+                if(params)
+                    action(params);
+                else
+                    action();
+            }
                 
             $data_tick_store = $data_tick_store + 1;
         }
@@ -84,7 +128,7 @@
 
 {#if is_table_component}
     {#if can_be_activated}
-        <Button on:click={click} class="h-7 {additional_class}" 
+        <Button on:click={click} class="h-7 {definedClass}"
                 disabled={!can_be_activated}
                 color='alternative'
                 >
@@ -93,8 +137,11 @@
     {/if}
 {:else}
 
-    <Button on:click={click} class="h-7 {additional_class}" 
-            disabled={!can_be_activated}>
+    <button on:click={click}
+            class={definedClass}
+            {hidden}
+            {disabled}>
         <slot/>
-    </Button>
+    </button>
+
 {/if}

@@ -10,7 +10,7 @@
                 ListInserter,
                 ListDateProperty,
                 ListComboProperty,
-				mainViewReloader} from '$lib'
+				mainContentPageReloader} from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen} from 'svelte-icons/fa'
     
     export let params = {}
@@ -21,7 +21,7 @@
     let lists = [];
     const STATUS_CLOSED = 2;
 
-    $: onParamsChanged($session, $mainViewReloader);
+    $: onParamsChanged($session, $mainContentPageReloader);
     
     async function onParamsChanged(...args)
     {
@@ -103,7 +103,7 @@
     {
         event.stopPropagation();
 
-        let result = await reef.get(`${task.$ref}/Finish`);
+        let result = await reef.post(`${task.$ref}/Finish`, {});
         if(result)
             await reloadTasks(listComponent.KEEP_OR_SELECT_NEXT)   
     }
@@ -194,9 +194,9 @@
 
 {#if user}
     <Page   self={user} 
-            cl="!bg-white dark:!bg-stone-900 w-full h-full flex flex-col overflow-y-auto overflow-x-hidden py-1 px-1 border-0" 
+            cl="!bg-white dark:!bg-stone-900 w-full flex flex-col overflow-x-hidden py-1 px-1 border-0" 
             toolbarOperations={pageOperations}
-            clears_context='props sel'>
+            clearsContext='props sel'>
 
         <List   self={user} 
                 a='MyTasks' 

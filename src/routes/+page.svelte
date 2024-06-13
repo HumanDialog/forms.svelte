@@ -14,6 +14,7 @@
     <li><a href="/list">List</a></li>
     <li><a href="/mini">Mini</a></li>
     <li><a href="/basic">Basic</a></li>
+    <li><a href="/pizza">Pizza</a></li>
 </ul>
 
 <p>Create package using thease steps:</p>
