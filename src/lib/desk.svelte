@@ -69,15 +69,18 @@
             set_dark_mode_default(layout.dark.default)
     }
 
+    
     if(layout.operations != undefined)
     {
         if(layout.operations.optional)
             layout.mainToolbar.operations = true;
 
-        if(layout.operations.default)
+        if(layout.operations.default != undefined)
             set_default_tools_visible(layout.operations.default)
     }
-    
+    else
+        set_default_tools_visible(false)
+
     $: { visible_sidebar = $main_sidebar_visible_store
         
         if(visible_sidebar == "*")

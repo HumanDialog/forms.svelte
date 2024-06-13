@@ -1,6 +1,6 @@
 {
 	"name": "@humandialog/forms.svelte",
-	"version": "0.5.15",
+	"version": "0.5.20",
 	"description": "Basic Svelte UI components for Object Reef applications",
 	"scripts": {
 		"dev": "vite dev",
@@ -37,7 +37,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@humandialog/auth.svelte": "^1.5.3",
+		"@humandialog/auth.svelte": "^1.5.5",
 		"flowbite-svelte": "^0.29.13",
 		"svelte-icons": "^2.1.0",
 		"svelte-spa-router": "^3.3.0"

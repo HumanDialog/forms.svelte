@@ -70,8 +70,11 @@
             selectElementId = 0;
             break;
         case KEEP_SELECTION:
-            selectElementId = currentSelectedItem.Id ?? 0;
-            selectedColumnIdx = definition.columns.findIndex(c => c.state == currentSelectedItem[sa])
+            if(currentSelectedItem)
+            {
+                selectElementId = currentSelectedItem.Id ?? 0;
+                selectedColumnIdx = definition.columns.findIndex(c => c.state == currentSelectedItem[sa])
+            }
             break;
         case SELECT_PREVIOUS:
             if(currentSelectedItem)
@@ -103,9 +106,10 @@
 
         case KEEP_OR_SELECT_NEXT:
             {
-                selectElementId = currentSelectedItem.Id ?? 0;
                 if(currentSelectedItem)
                 {
+                    selectElementId = currentSelectedItem.Id ?? 0;
+
                     const currentItemState = currentSelectedItem[sa]
                     selectedColumnIdx = definition.columns.findIndex(c => c.state == currentItemState)
 
