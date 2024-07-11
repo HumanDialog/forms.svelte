@@ -181,7 +181,13 @@
 
     export function getColumnIdx(item)
     {
-        return definition.columns.findIndex( c => c.state == item[definition.stateAttrib]);
+        let idx = definition.columns.findIndex( c => c.state == item[definition.stateAttrib]);
+        if(idx >= 0)
+            return idx;
+        else
+        {
+            return definition.columns.findIndex(c => c.state < 0)
+        }
     }
 
     export function edit(item: object, field: string)

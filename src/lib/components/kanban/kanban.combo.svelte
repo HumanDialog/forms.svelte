@@ -8,6 +8,7 @@
     export let a        :string = '';
     export let onSelect = undefined;
     export let association :boolean = false;
+    export let hasNone:     boolean = association;
     export let top:     boolean = false;
     export let middle:  boolean = true;
     export let bottom:  boolean = false;
@@ -34,6 +35,7 @@
 
     combo_property.onSelect = onSelect
     combo_property.association = association;
+    combo_property.hasNone = hasNone
 
     if(top)
         combo_property.position = KanbanCardTop;

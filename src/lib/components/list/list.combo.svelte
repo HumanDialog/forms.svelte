@@ -7,6 +7,7 @@
     export let a        :string = '';
     export let onSelect = undefined;
     export let association :boolean = false;
+    export let hasNone:     boolean = association;
     
     let definition :rList_definition = getContext("rList-definition");
     
@@ -19,6 +20,7 @@
 
     combo_property.onSelect = onSelect
     combo_property.association = association;
+    combo_property.hasNone = hasNone;
 
     definition.properties.push(combo_property)
 

@@ -106,9 +106,9 @@
 
 </script>
 
-{#each objects as item (item.Id)}
+{#each objects as item, idx (item.Id)}
     {#key item}             <!-- Forces to fully rerender when item changed to fire use: callbacks again -->
-        <slot {item}/>
+        <slot {item} {idx}/>
     {/key}
 {/each }
 

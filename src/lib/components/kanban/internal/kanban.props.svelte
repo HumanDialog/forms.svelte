@@ -135,9 +135,11 @@
                         a={prop.a}
                         onSelect={prop.onSelect}
                         isAssociation={prop.association}
+                        hasNone={prop.hasNone}
                         icon={false}
                         definition={prop.combo_definition}
                         s="xs"
+                        changed={(k,n) => { /*fake assignment for component rer-ender*/ item[prop.a] = item[prop.a]; }} 
                         bind:this={propElements[idx]}/>
             {:else if prop.type == rList_property_type.Static}
                 <p

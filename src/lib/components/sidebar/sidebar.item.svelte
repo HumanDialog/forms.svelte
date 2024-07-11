@@ -11,7 +11,7 @@
         handleSelect,
 
 		activateItem,
-
+        startEditing,
 		getActive
 
 
@@ -26,11 +26,55 @@
     export let editable :any|undefined = undefined;
     export let operations :any|undefined = undefined;
     export let item :object|undefined = undefined;
+    export let summary :string|object|undefined = undefined;
     
     let isOnPage :boolean = getContext('rIs-page-component');
 
+    let summaryElement = null;
+    let summaryPlaceholder :boolean = false;
+    let summaryEditable :Function | object | undefined = undefined;
+
     $: context_data = $contextItemsStore;
     $: isRowActive = calculateIsRowActive($contextItemsStore)
+    $: summaryText = calculateSummary(summary)
+
+    function calculateSummary(...args)
+    {
+        if(!summary)
+        {
+            summaryEditable = undefined;
+            return "";
+        }
+
+        if(summary instanceof Object)
+        {
+            summaryEditable = summary.editable;
+            if(summary.content)
+                return summary.content;
+            else
+                return "";
+        }
+        else
+        {
+            summaryEditable = undefined;
+            return summary;
+        }
+    }
+    
+    export async function editSummary()
+    {
+        if(!summaryEditable)
+            return;
+
+        if(!!summaryElement)
+            startEditing(summaryElement, (d) => {summaryPlaceholder = false})
+        else
+        {
+            summaryPlaceholder = true;
+            await tick();
+            startEditing(summaryElement, (d) => {summaryPlaceholder = false})
+        }
+    }
 
     let user_class = $$props.class ?? ""
     let root;
@@ -188,34 +232,50 @@
         class="     border border-transparent rounded-lg
                     text-lg sm:text-base font-normal 
                     text-stone-900 sm:hover:bg-stone-100  
-                    dark:text-white sm:dark:hover:bg-stone-700 {user_class}
-                    flex flex-row justify-between"
+                    dark:text-white sm:dark:hover:bg-stone-700 {user_class}"
         class:bg-stone-200={isRowActive}
         class:dark:bg-stone-700={isRowActive}
         class:selected={selected(selectable, context_data)}>
-            <a  href={href} 
-                on:click={on_link_clicked} 
-                class="flex-1 ml-2 my-3 sm:my-2 inline-flex items-center group">
-                {#if icon}
-                    <Icon size={5} component={icon}/>
-                {/if}
-                <span   class="ml-3 group-hover:underline"
-                        use:editable_if_needed={editable}>
-                    <slot/>
-                </span>
-            </a>
+            <div class="flex flex-row justify-between">
+                <a  href={href} 
+                    on:click={on_link_clicked} 
+                    class="flex-1 ml-2 mt-3 sm:mt-2 inline-flex items-center group"
+                    class:mb-3={!summary}
+                    class:sm:mb-2={!summary}
+                    >
+                    {#if icon}
+                        <Icon size={5} component={icon}/>
+                    {/if}
+                    <span   class="ml-3 group-hover:underline"
+                            use:editable_if_needed={editable}>
+                        <slot/>
+                    </span>
+                </a>
 
-            {#if !isOnPage}
-            <section    class="flex-0 w-20 sm:w-12 h-10 flex-0 flex flex-row"
-                        use:selectable_if_needed={selectable}>
-                {#if can_show_context_menu(selectable, context_data)}
-                    <button class="w-6 sm:w-4 h-6 sm:h-4 mt-3 mr-3 sm:mr-2 ml-auto" on:click={on_show_menu}>
-                        <FaBars/>
-                    </button>
+                {#if !isOnPage}
+                <section    class="flex-0 w-20 sm:w-12 h-10 flex-0 flex flex-row"
+                            use:selectable_if_needed={selectable}>
+                    {#if can_show_context_menu(selectable, context_data)}
+                        <button class="w-6 sm:w-4 h-6 sm:h-4 mt-3 mr-3 sm:mr-2 ml-auto" on:click={on_show_menu}>
+                            <FaBars/>
+                        </button>
+                    {/if}
+                </section>
                 {/if}
-            </section>
+            </div>
+
+            {#if summary}
+                <p class="text-xs ml-10 mb-2 mr-2
+                        text-stone-900 dark:text-stone-400
+                        cursor-default"
+                    use:selectable_if_needed={selectable}
+                    use:editable_if_needed={summaryEditable}
+                    bind:this={summaryElement}>
+                    {summaryText}
+                </p>
             {/if}
-        </div>
+
+    </div>
 </li>
 
 

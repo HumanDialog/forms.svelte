@@ -34,6 +34,7 @@ export class rList_property_combo extends rList_property
 
     public association      :boolean = false;
     public combo_definition :rCombo_definition;
+    public hasNone          :boolean = false;
 }
 
 export class rList_property_tags extends rList_property

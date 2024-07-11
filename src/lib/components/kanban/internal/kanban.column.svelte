@@ -14,6 +14,9 @@
     let column_element: HTMLElement;
     export function getHeight()
     {
+        if(!column_element)
+            return 0;
+
         return column_element.getBoundingClientRect().height
     }
 
@@ -29,6 +32,9 @@
     export const CLEAR_RIGHT = 3;
     export function setBorder(what_to_do: number)
     {
+        if(!column_element)
+            return;
+        
         switch(what_to_do)
         {
             case SET_LEFT:
@@ -60,11 +66,44 @@
 
     $: force_rerender($data_tick_store, $contextItemsStore)
 
-   export function reload()
+    export function reload()
     {
         let allItems = definition.getItems();
         if(definition.stateAttrib)
-            column_items = allItems.filter( e => e[definition.stateAttrib] == columnDef.state)
+        {
+            if(columnDef.state <0 )
+            {
+                const isExplicitState = (e) => {
+                    const elementState = e[definition.stateAttrib];
+                    const colsNo = definition.columns.length;
+                    for(let i=0; i<colsNo; i++)
+                    {
+                        const def: rKanban_column = definition.columns[i];
+                        if((def.state >= 0) && (def.state == elementState))
+                            return true;
+                    }
+                    return false;
+                }   
+
+                column_items = allItems.filter( e => !isExplicitState(e))
+            }
+            else
+                column_items = allItems.filter( e => e[definition.stateAttrib] == columnDef.state)
+        }
+    }
+
+    export function isVisible()
+    {
+        if( columnDef.state < 0)
+        {
+            if(column_items && column_items.length > 0)
+                return true;
+            else
+                return false;
+        }
+        else
+            return true;
+
     }
 
     function setup_data(...args)
@@ -275,6 +314,8 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 
+{#if (columnDef.state >=0) || ((column_items && column_items.length > 0))}
+
 <section class="    snap-center 
                     sm:snap-align-none 
                     flex-none sm:flex-1
@@ -282,6 +323,8 @@
                     min-h-[calc(100vh-5rem)] 
                     rounded-md border border-transparent  
                     {selected_class} {focused_class}"
+                    
+                    
         style={styleWidth}
         use:selectable={columnDef}
         on:click={activate}>
@@ -344,4 +387,4 @@
 
     </ul>
 </section>
-
+{/if}
