@@ -24,6 +24,7 @@ export class rKanban_definition
     public  titleReadOnly:  boolean = false;
     public  titleHref:      string | undefined = undefined
     public  titleHrefFunc:  Function | undefined = undefined;
+    public  titleHasAttachment: Function | undefined = undefined;
     public  summaryAttrib:  string = '';
     public  summaryOnChange: Function | undefined = undefined;
     public  summaryReadOnly: boolean = false;

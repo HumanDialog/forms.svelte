@@ -11,10 +11,10 @@
 				informModification,
                 pushChanges,
 				startEditing} from '$lib'
-    import {FaArrowsAlt, FaTrash, FaPlus, FaExternalLinkAlt} from 'svelte-icons/fa'
-    import MoveOperations from './kanban.move.menu.svelte'
+    import {FaRegFileAlt} from 'svelte-icons/fa'
     import Properties from './kanban.props.svelte'
     import {KanbanCardTop, KanbanCardMiddle, KanbanCardBottom} from '../Kanban'
+    //import { Tooltip } from 'flowbite-svelte';
     
     export let item: object;
    // export let showMoveOperationsForItem: Function | undefined = undefined;
@@ -33,6 +33,7 @@
     $: selectedClass = isCardSelected ? "!border-blue-300" : "";
     $: focusedClass = isCardActive ? "bg-stone-100 dark:bg-stone-700" : "";
     $: isLinkLike = isCardActive && (!!definition.titleHref || !!definition.titleHrefFunc)
+    
 
     function calculate_active(...args)
     {
@@ -219,6 +220,36 @@
             return '';
     }
 
+    function performOpen(e: MouseEvent)
+    {
+        e.stopPropagation();
+
+        if(isLinkLike)
+            followDefinedHRef();
+        else
+            definition.onOpen(item)
+    }
+
+    function conditionalClick(node, {condition, callback})
+    {
+        if(condition)
+        {
+            node.addEventListener('click', callback)
+            return {
+                destroy() {
+                    node.removeEventListener('click', callback)
+                }
+            }
+        }
+    }
+
+    function showAttachementIcon(): boolean
+    {
+        if(!definition.titleHasAttachment)
+            return false;
+        return definition.titleHasAttachment(item);
+    }
+
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -254,43 +285,36 @@
     
 
     {#if isCardActive}
-        {#if isLinkLike}
+        {@const hasOpen = !!definition.onOpen}
+        {@const canOpen = isLinkLike || hasOpen}
+        {@const openableClass = canOpen ? "sm:hover:cursor-pointer underline" : ""}
+        {@const showIcon = showAttachementIcon()}
             <h3 class=" text-lg font-semibold min-h-[1.75rem]
                         sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
                         whitespace-nowrap overflow-clip truncate w-full sm:flex-none
-                        relative 
-                        sm:hover:cursor-pointer underline"
-                on:click|stopPropagation={followDefinedHRef}
+                        relative {openableClass}"
                 use:editable={{
                     action: (text) => onTitleChanged(text), 
                     active: false,
                     readonly: definition.titleReadOnly,
                     onFinish: (d) => {titleElement.blur()}}}
+                use:conditionalClick={{
+                    condition: canOpen, 
+                    callback: performOpen}}
                 bind:this={titleElement}>
                     {item[definition.titleAttrib]}
-            </h3>
-        {:else}
-            <h3  class=" text-lg font-semibold min-h-[1.75rem]
-                        sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
-                        whitespace-nowrap overflow-clip truncate w-full sm:flex-none
-                        relative"
-                        use:editable={{
-                            action: (text) => onTitleChanged(text), 
-                            active: true,
-                            readonly: definition.titleReadOnly,
-                            onFinish: (d) => {titleElement.blur()}}}
-                        bind:this={titleElement}>
-                {item[definition.titleAttrib]}
 
-                {#if definition.onOpen}
-                <button class="absolute top-1 right-0 w-5 h-5 sm:w-3 sm:h-3"
-                        on:click={(e) => definition.onOpen(item)}>
-                    <FaExternalLinkAlt/>
-                </button>
+                {#if showIcon}
+                    <span id="attachement" class="absolute top-1 right-0 w-5 h-5 sm:w-3 sm:h-3">
+                        <FaRegFileAlt/>
+                    </span>
                 {/if}
             </h3>
-        {/if}
+
+            <!--Tooltip type='light' triggeredBy="#attachement">Has attachement</Tooltip-->
         
+          
+                        
     {:else}
         <h3  class=" text-lg font-semibold min-h-[1.75rem]
                     sm:text-sm sm:font-semibold sm:min-h-[1.25rem]

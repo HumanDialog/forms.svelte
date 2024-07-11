@@ -33,6 +33,7 @@
     export let filtered: boolean = false;
     
     export let pushChangesImmediately: boolean = true;
+    export let hasNone :boolean = isAssociation;
     
 
     let is_compact :boolean = getContext('rIs-table-component') || compact;
@@ -384,7 +385,7 @@
             return textbox.innerHTML;
     }
 
-    async function on_choose(itm :rCombo_item)
+    async function on_choose(itm :rCombo_item|null)
     {
         //console.log('on_choose')
         hide();
@@ -394,9 +395,14 @@
             if(itm == new_item_option)
                 await onNewItemCreated(itm.Key, itm.Name);
             else
-                await onSelect(item, itm.Key, itm.Name);
+            {
+                if(itm)
+                    await onSelect(item, itm.Key, itm.Name);
+                else
+                    await onSelect(item, null, null);
+            }
             tick_request_internal = tick_request_internal + 1;
- }
+        }
         else
         {
             if( isAssociation )
@@ -404,7 +410,7 @@
                 if(choiceCallback)
                 {
                     let body = {
-                        choice :  itm.Key
+                        choice :  itm ? itm.Key : null
                     }
 
                     let path :string;
@@ -438,16 +444,23 @@
 
                     let result = await reef.post(path, 
                                         {
-                                            [a]: itm.Key
+                                            [a]: itm ? itm.Key : null
                                         });
 
                     if(result)
                     {
 
-                        let name = definition.element_name ?? '$display'
-                        item[a] = {
-                            $ref: itm.Key,
-                            [name]: itm.Name
+                        if(itm)
+                        {
+                            let name = definition.element_name ?? '$display'
+                            item[a] = {
+                                $ref: itm.Key,
+                                [name]: itm.Name
+                            }
+                        }
+                        else
+                        {
+                            item[a] = null
                         }
 
                         tick_request_internal = tick_request_internal + 1;
@@ -470,7 +483,7 @@
                     if(fields)
                         path += fields;
 
-                    let value = itm.Key ?? itm.Name;
+                    let value = itm ? (itm.Key ?? itm.Name) : null;
 
                     let result = await reef.post(path, { choice: value })
                     if(result)
@@ -481,7 +494,7 @@
                 }
                 else
                 {
-                    item[a] = itm.Key ?? itm.Name;
+                    item[a] = itm ? (itm.Key ?? itm.Name) : null;
                     tick_request_internal = tick_request_internal + 1;
 
                     if(item && a && typename)
@@ -496,7 +509,12 @@
         }
 
         if(!!changed)
-            changed(itm.Key, itm.Name); 
+        {
+            if(itm)
+                changed(itm.Key, itm.Name); 
+            else
+                changed(null, null);
+        }
     }
 
     function on_keydown(e)
@@ -600,7 +618,7 @@
     let tick_request_internal = 0;
     let last_tick_internal = -1;
 
-    function on_mouse_move(over :rCombo_item)
+    function on_mouse_move(over :rCombo_item | null)
     {
         highlighted_option = over;
     }
@@ -830,6 +848,22 @@
         <ul class="py-1">
 
             {#if definition.source && definition.source.length}
+                {#if hasNone}
+                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                    <li class="rounded p-2 flex flex-row items-center {font_size}" 
+                        class:bg-stone-100={highlighted_option == null}
+                        class:dark:bg-stone-700={highlighted_option == null}
+                        class:dark:hover:bg-stone-700={highlighted_option == null}
+                        on:mousemove={() => on_mouse_move(null)}
+                        on:click|preventDefault|stopPropagation={async () => await on_choose(null)}
+                        tabindex="-1">
+
+                        <div class="ml-2">
+                            &lt;none&gt;
+                        </div>
+                    </li>
+                {/if}
+
                 {@const _filtered_source = filtered_source ? filtered_source : definition.source}
                 {#if _filtered_source.length > 0}
                     {#each _filtered_source as item (item.Key)}

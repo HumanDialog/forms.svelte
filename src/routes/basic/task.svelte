@@ -323,7 +323,7 @@
                     {
                         responsiblePlaceholder = true;
                         await tick();
-                        responsible?.show(undefined, () => {responsiblePlaceholder = false})
+                        responsible?.show(undefined, () => {responsiblePlaceholder = false;})
                     }
                 }
         },
@@ -479,6 +479,7 @@
                                     icon={false}
                                     placeholder='List'
                                     s='sm'
+                                    hasNone={false}
                                     bind:this={onList}>
                                 <ComboSource    objects={allLists} 
                                                 key="$ref" 
@@ -516,6 +517,8 @@
                                 icon={false}
                                 placeholder='Responsible'
                                 s='sm'
+                                hasNone
+                                changed={(k,n) => { /*fake assignment for component rer-ender*/ task.Actor = task.Actor; }} 
                                 bind:this={responsible}>
                             <ComboSource    objects={allActors}
                                             key="$ref" 
@@ -531,6 +534,7 @@
                                 a='State'
                                 icon
                                 placeholder='State'
+                                hasNone={false}
                                 s='sm'>
                             <ComboSource    objects={availableStates}
                                             key="state" 

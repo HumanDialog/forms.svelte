@@ -113,6 +113,7 @@
                                 a={prop.a}
                                 onSelect={prop.onSelect}
                                 isAssociation={prop.association}
+                                hasNone={prop.hasNone}
                                 icon={false} 
                                 bind:this={props[prop_index]}
                                 definition={prop.combo_definition}
