@@ -119,7 +119,7 @@
             rect = range.getBoundingClientRect();
             let result = window.innerHeight - rect.top;
             result = Math.floor(result);
-            console.log('selection box', result)
+           // console.log('selection box', result)
             return result;
         }
         else

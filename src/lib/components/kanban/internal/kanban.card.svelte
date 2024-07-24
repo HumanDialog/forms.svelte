@@ -297,7 +297,9 @@
                     action: (text) => onTitleChanged(text), 
                     active: false,
                     readonly: definition.titleReadOnly,
-                    onFinish: (d) => {titleElement.blur()}}}
+                    onFinish: (d) => {titleElement.blur()},
+                    onSoftEnter: async (text) => { onTitleChanged(text); await editProperty('Summary') }
+                    }}
                 use:conditionalClick={{
                     condition: canOpen, 
                     callback: performOpen}}

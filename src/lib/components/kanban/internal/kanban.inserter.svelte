@@ -1,15 +1,37 @@
 <script lang="ts">
+    import {tick} from 'svelte'
 	import {    startEditing,
                 editable} from '$lib'
 
     export let onInsert;
 
+    let onClose;
     export function run(onclose)
     {
-        startEditing(insertion_paragraph, onclose)
+        onClose = onclose;
+        startEditing(titleElement, onclose)
     }
 
-    let insertion_paragraph;
+    let titleElement;
+
+    let title: string = ''
+    let summary: string = ''
+    let editSummary: boolean = false;
+    let summaryElement;
+
+    async function softEnter(t: string)
+    {
+        title = t;
+        editSummary = true;
+        await tick();
+        startEditing(summaryElement, onClose);
+    }
+
+    async function onSummaryChanged(text: string)
+    {
+        summary = text;
+        await onInsert(title, summary);
+    }
 
 </script>
 
@@ -21,8 +43,29 @@
     <h3  class=" text-lg font-semibold min-h-[1.75rem]
                 sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
                 whitespace-nowrap overflow-clip w-full sm:flex-none "
-                use:editable={onInsert}
-                bind:this={insertion_paragraph}>
-        
+                use:editable={{
+                    action: (text) => onInsert(text, ''),
+                    active: false,
+                    onSoftEnter: softEnter
+                }}
+                bind:this={titleElement}>
     </h3>
+
+    {#if editSummary}
+        <p class="  sm:text-xs sm:min-h-[1rem]
+                text-base min-h-[1.5rem]
+                text-stone-400
+                max-h-[75px] sm:max-h-[64px]
+                overflow-hidden"
+                use:editable={{
+                    action: (text) => onSummaryChanged(text), 
+                    active: false,
+                    onFinish: (d) => {editSummary = false}}}
+                bind:this={summaryElement}>
+            {summary}
+        </p>
+    {/if}
+    
+    
+
 </li>

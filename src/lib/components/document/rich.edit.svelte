@@ -1461,7 +1461,7 @@
     function on_blur()
     {
         let active_range : Selection_range = Selection_helper.get_selection(editable_div);
-        console.log('rich.edit: on_blur', active_range?.begin?.absolute_index)
+        //console.log('rich.edit: on_blur', active_range?.begin?.absolute_index)
 
         storedSelection = null;
 

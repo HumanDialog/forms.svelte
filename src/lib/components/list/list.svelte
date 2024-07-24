@@ -254,6 +254,10 @@
             return;
 
         inserter.run( async (detail) => {
+            
+            if(detail.softEnter)
+                return;
+
             show_insertion_row_after_element = null;
 
             if(detail.cancel)
@@ -340,10 +344,11 @@
         pushChanges();
     }
 
-    async function insert(title :string, after :object | null)
+    async function insert(title :string, summary: string, after :object | null)
     {
         let newElement = {
-            [definition.title]: title
+            [definition.title]: title,
+            [definition.summary]: summary
         }
 
         if(after && orderAttrib)
@@ -439,7 +444,7 @@
         </List_element>
         
         {#if show_insertion_row_after_element == element}
-            <Inserter   onInsert={async (text) => {await insert(text, show_insertion_row_after_element)}}
+            <Inserter   onInsert={async (title, summary) => {await insert(title, summary, show_insertion_row_after_element)}}
                         icon={definition.inserter_icon}
                         bind:this={inserter}    />
         {/if}
@@ -447,7 +452,7 @@
 {/if}
 
 {#if show_insertion_row_after_element == END_OF_LIST}
-    <Inserter   onInsert={async (text) => {await insert(text, null)}}
+    <Inserter   onInsert={async (title, summary) => {await insert(text, summary, null)}}
                 icon={definition.inserter_icon}
                 bind:this={inserter}    />
 {/if}
