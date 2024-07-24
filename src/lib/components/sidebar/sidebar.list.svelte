@@ -2,7 +2,7 @@
     import Icon from '../icon.svelte'
     import Edit from '../edit.field.svelte'
     import {FaPlus} from 'svelte-icons/fa'
-	import { getPrev, getNext, swapElements, getLast } from '$lib/utils';
+	import { getPrev, getNext, swapElements, getLast, getFirst, remove, insertAt } from '$lib/utils';
 	import { informModification, pushChanges } from '$lib/updates';
 	import { tick } from 'svelte';
 
@@ -40,6 +40,39 @@
             informModification(prev, orderAttrib)
             pushChanges();
         }
+    }
+
+    export function moveTop(element: object)
+    {
+        if(!orderAttrib)
+            return;
+
+        let current = getFirst(objects);
+
+        if(current == element)
+            return;
+
+        const firstOrder = current[orderAttrib];
+
+        while(current != element)
+        {
+            const next = getNext(objects, current);
+            const nextOrder = next[orderAttrib];
+            
+            current[orderAttrib] = nextOrder;
+            informModification(current, orderAttrib);
+
+            current = next;
+        }
+        
+        element[orderAttrib] = firstOrder
+        informModification(element, orderAttrib);
+
+        objects = remove(objects, element);
+        objects = insertAt(objects, 0, element);
+
+        pushChanges();
+        
     }
 
     export function moveDown(element: object)
