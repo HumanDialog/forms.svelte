@@ -621,9 +621,10 @@
     <!--hr class="hidden sm:block w-full"-->
 {/if}
 
-<section class="h-full mt-5 flex flex-row no-wrap  sm:justify-center 
+<section    id="__hd_svelte_kanban_columns_container"
+            class="h-full mt-5 flex flex-row no-wrap  
                 overflow-x-auto snap-x snap-mandatory sm:snap-none
-                {user_class}">
+                {user_class}"> <!--sm:justify-center -->
     {#each definition.columns as column, idx (column.id)}
         <Column currentColumnIdx={idx}
                 {onInsert}

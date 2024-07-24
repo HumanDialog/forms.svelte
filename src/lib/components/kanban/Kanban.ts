@@ -69,6 +69,35 @@ export class rKanban_definition
         return this.items;
     }
 
+    public visibleColumnsNo() :number
+    {
+        // has <Other> column
+        if(this.columns.find( (c) => c.state < 0))
+        {
+            const allItems = this.getItems();
+
+            const isExplicitState = (e) => {
+                const elementState = e[this.stateAttrib];
+                const colsNo = this.columns.length;
+                for(let i=0; i<colsNo; i++)
+                {
+                    const def: rKanban_column = this.columns[i];
+                    if((def.state >= 0) && (def.state == elementState))
+                        return true;
+                }
+                return false;
+            }
+
+            const unknownStateItems = allItems.filter( e => !isExplicitState(e))
+            if(unknownStateItems && (unknownStateItems.length > 0))
+                return this.columns.length;
+            else
+                return this.columns.length - 1;
+        }
+        else
+            return this.columns.length;
+    }
+
     public clear() 
     {
         this.columns = [];

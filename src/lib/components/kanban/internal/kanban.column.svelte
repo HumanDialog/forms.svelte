@@ -303,12 +303,17 @@
 
     function getWidthStyle()
     {
-        const assumed_space = 800;
-        const default_column_width = Math.floor( assumed_space / definition.columns.length );
-        const column_width = columnDef.width ? columnDef.width : default_column_width;
+        const container = document.getElementById("__hd_svelte_main_content_container")
+        const containerRect = container?.getBoundingClientRect();
+        
+        const assumed_space = containerRect.width
+        const columns_no = definition.visibleColumnsNo();
+        const default_column_width = Math.floor( assumed_space / columns_no );
+        const column_width = Math.min(columnDef.width ? columnDef.width : default_column_width, 640)
+
 
         if(window.innerWidth >= 640)
-            return `width: ${column_width}px; min-width: 180px; max-width: ${column_width}px;`
+            return `width: ${column_width}px; min-width: 200px; max-width: ${column_width}px;`
         else
             return 'width: 92%;'
 
