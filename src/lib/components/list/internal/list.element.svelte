@@ -357,6 +357,7 @@
                                         action: (text) => {change_name(text)},
                                         active: false,
                                         readonly: definition.title_readonly,
+                                        onSoftEnter: (text) => {change_name(text); editProperty('Summary')}
                                     }}
                             > 
                             {element_title}

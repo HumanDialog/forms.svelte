@@ -41,7 +41,7 @@
             if(sel && sel.rangeCount>0 && sel.focusNode && sel.focusNode.nodeType==sel.focusNode.TEXT_NODE)
             {
                 container_rect.height -= 300; // it will be enough?
-                console.log('shirnked: ', container_rect)
+               // console.log('shirnked: ', container_rect)
             }
         }
 

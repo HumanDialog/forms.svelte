@@ -105,13 +105,15 @@ export function editable(node, params)
     let active = false;
     let onRemove = undefined;
     let onFinish = undefined;
+    let onSoftEnter = undefined;
     if(params instanceof Object)
     {
         action = params.action ?? params;
         active = params.active ?? false;
         onRemove = params.remove ?? undefined
         onFinish = params.onFinish ?? undefined
-
+        onSoftEnter = params.onSoftEnter ?? undefined;
+       
         if(params.readonly)
             return;
     }
@@ -131,7 +133,7 @@ export function editable(node, params)
         if(observer)
             observer.disconnect();
 
-        await finish_editing(cancel, false);
+        await finish_editing({cancel: cancel});
     }
 
     const key_listener = async (e) =>
@@ -146,7 +148,7 @@ export function editable(node, params)
                 e.stopPropagation();
                 e.preventDefault();
 
-                await finish_editing(true, false);
+                await finish_editing({ cancel: true });
             }
             break;
 
@@ -154,7 +156,10 @@ export function editable(node, params)
             e.stopPropagation();
             e.preventDefault();
 
-            await finish_editing(false, true);
+            if(e.shiftKey && onSoftEnter)
+                await finish_editing({ softEnter: true});
+            else
+                await finish_editing({ incremental: true});
             break;
 
         case 'Backspace':
@@ -162,15 +167,19 @@ export function editable(node, params)
             {
                 e.stopPropagation();
                 e.preventDefault();
-                //await finish_editing(false, false);
                 onRemove();
             }
             break;
          }
     }
 
-    const finish_editing = async (cancel, incremental) =>
+    //const finish_editing = async (softEnter, cancel, incremental) =>
+        const finish_editing = async (params) =>
     {
+        const softEnter = params.softEnter ?? false;
+        const cancel = params.cancel ?? false;
+        const incremental = params.incremental ?? false;
+
        if(!active)
        {
             node.removeEventListener("blur", blur_listener);
@@ -185,6 +194,10 @@ export function editable(node, params)
         if(cancel)
         {
             node.innerHTML = org_text;
+        }
+        else if(softEnter)
+        {
+            onSoftEnter(node.textContent)
         }
         else if(action)
         {
@@ -202,7 +215,8 @@ export function editable(node, params)
                                 detail: 
                                 { 
                                     cancel: cancel, 
-                                    incremental: incremental
+                                    incremental: incremental,
+                                    softEnter: softEnter
                                 }
                             });
 

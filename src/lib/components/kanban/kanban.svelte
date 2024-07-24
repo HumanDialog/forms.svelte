@@ -440,7 +440,7 @@
         }
 	}
 
-    async function onInsert(columnIdx: number, title: string, afterId: number)
+    async function onInsert(columnIdx: number, title: string, summary: string, afterId: number)
     {
         const columnState = definition.columns[columnIdx].state;
         const oa = definition.orderAttrib
@@ -453,6 +453,7 @@
 
         let newElement = {
             [definition.titleAttrib]: title,
+            [definition.summaryAttrib]: summary,
             [sa]: columnState
         }
 

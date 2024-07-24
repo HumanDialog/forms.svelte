@@ -189,6 +189,10 @@
             return;
 
         inserter.run( async (detail) => {
+
+            if(detail.softEnter)
+                return;
+
             showInserterAfterId = None;
 
             if(detail.cancel)
@@ -352,7 +356,7 @@
     </header>
     <ul class="w-full border-stone-700 pb-20" bind:this={column_element}>
         {#if showInserterAfterId === KanbanColumnTop}
-            <Inserter   onInsert={async (text) => {await onInsert(currentColumnIdx, text, KanbanColumnTop)}}
+            <Inserter   onInsert={async (title, summary) => {await onInsert(currentColumnIdx, title, summary, KanbanColumnTop)}}
                         bind:this={inserter} />
         {/if}
 
@@ -374,14 +378,14 @@
                 </Card>
 
                 {#if showInserterAfterId == element.Id}
-                    <Inserter   onInsert={async (text) => {await onInsert(currentColumnIdx, text, showInserterAfterId)}}
+                    <Inserter   onInsert={async (title, summary) => {await onInsert(currentColumnIdx, title, summary, showInserterAfterId)}}
                                 bind:this={inserter} />
                 {/if}
             {/each}
         {/if}
 
         {#if showInserterAfterId === KanbanColumnBottom}
-            <Inserter   onInsert={async (text) => {await onInsert(currentColumnIdx, text, KanbanColumnBottom)}}
+            <Inserter   onInsert={async (title, summary) => {await onInsert(currentColumnIdx, title, summary, KanbanColumnBottom)}}
                         bind:this={inserter} />
         {/if}
 

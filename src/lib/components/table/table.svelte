@@ -106,7 +106,7 @@
             if(definition.items)
                 items = definition.items;
 
-                console.log('override_items_from_slot', definition.items, definition.items_ticket)
+               // console.log('override_items_from_slot', definition.items, definition.items_ticket)
         }
 
         return 0;
