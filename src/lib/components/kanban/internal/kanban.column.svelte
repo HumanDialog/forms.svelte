@@ -61,8 +61,8 @@
 
     $: is_row_active = calculate_active($contextItemsStore)
     $: is_row_selected = selected($contextItemsStore)
-    $: selected_class = is_row_selected ? "!border-blue-300" : "";
-    $: focused_class = is_row_active ? "bg-stone-50 dark:bg-stone-700" : "";
+    $: selected_class = is_row_selected ? "!border-blue-300 dark:!border-blue-300/50" : "";
+    $: focused_class = is_row_active ? "bg-stone-50 dark:bg-stone-800" : "";
 
     $: force_rerender($data_tick_store, $contextItemsStore)
 

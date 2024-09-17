@@ -30,7 +30,7 @@
     $: isCardActive = calculate_active(item, $contextItemsStore)
     $: isCardSelected = selected(item, $contextItemsStore)
 
-    $: selectedClass = isCardSelected ? "!border-blue-300" : "";
+    $: selectedClass = isCardSelected ? "!border-blue-300 dark:!border-blue-300/50" : "";
     $: focusedClass = isCardActive ? "bg-stone-100 dark:bg-stone-700" : "";
     $: isLinkLike = isCardActive && (!!definition.titleHref || !!definition.titleHrefFunc)
     
