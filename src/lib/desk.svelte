@@ -278,3 +278,52 @@
         </div>
     </div>
 </AuthorizedView>
+
+<style lang="scss">
+
+    #__hd_svelte_layout_root {
+        /* width */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        /* Track */
+        ::-webkit-scrollbar-track {
+        background: #FAFAF9;
+        }
+
+        /* Handle */
+        ::-webkit-scrollbar-thumb {
+        background: #E7E5E4;
+        }
+
+        /* Handle on hover */
+        ::-webkit-scrollbar-thumb:hover {
+        background: #D6D3D1;
+        }
+    }
+
+    #__hd_svelte_layout_root.dark {
+        
+        /* width */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        /* Track */
+        ::-webkit-scrollbar-track {
+        background: #292524;
+        }
+
+        /* Handle */
+        ::-webkit-scrollbar-thumb {
+        background: #44403c;
+        }
+
+        /* Handle on hover */
+        ::-webkit-scrollbar-thumb:hover {
+        background: #57534e;
+        }
+    }
+    
+</style>

@@ -40,7 +40,7 @@
     $: is_row_active = calculate_active(item, $contextItemsStore)
     $: is_row_selected = selected(item, $contextItemsStore)
 
-    $: selected_class = is_row_selected ? "!border-blue-300" : "";
+    $: selected_class = is_row_selected ? "!border-blue-300 dark:!border-blue-300/50" : "";
     $: focused_class = is_row_active ? "bg-stone-200 dark:bg-stone-700" : "";
     $: is_link_like = is_row_active && (!!definition.title_href || !!definition.title_href_func)
 
