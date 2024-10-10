@@ -452,7 +452,7 @@
 {/if}
 
 {#if show_insertion_row_after_element == END_OF_LIST}
-    <Inserter   onInsert={async (title, summary) => {await insert(text, summary, null)}}
+    <Inserter   onInsert={async (title, summary) => {await insert(title, summary, null)}}
                 icon={definition.inserter_icon}
                 bind:this={inserter}    />
 {/if}

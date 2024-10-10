@@ -318,6 +318,16 @@
             return 'width: 92%;'
 
     }
+
+    let columnContainerElement;
+    async function dblclick(e :MouseEvent)
+    {
+        // empty space
+        if((e.target == column_element) || (e.target == columnContainerElement))
+        {
+            await add(KanbanColumnBottom);
+        }
+    }
     
 </script>
 
@@ -332,11 +342,12 @@
                     min-h-[calc(100vh-5rem)] 
                     rounded-md border border-transparent  
                     {selected_class} {focused_class}"
-                    
-                    
+        
+        bind:this={columnContainerElement}            
         style={styleWidth}
         use:selectable={columnDef}
-        on:click={activate}>
+        on:click={activate}
+        on:dblclick={dblclick}>
     <header class:cursor-pointer={!is_row_active && columnDef.operations} bind:this={headerElement}>
         <h2 class="mt-2 mb-2 text-lg sm:text-xs uppercase w-full min-h-[1rem] text-center whitespace-nowrap relative">
             <span 
