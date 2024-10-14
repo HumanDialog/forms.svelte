@@ -130,8 +130,8 @@
         //if(item && a)    
         //    val = item[a]
 
-        if(!label)
-            label = a
+        //if(!label)
+        //    label = a
 
         tick_request_internal = tick_request_internal + 1;
         
@@ -796,7 +796,7 @@
 <div class="{cs} max-w-full inline-block"
     on:focusout={on_focus_out}
     bind:this={root_element}>
-    {#if !is_compact}
+    {#if !is_compact && label.length > 0}
         <label for="name" class="block {label_mb} text-xs font-small text-stone-900 dark:text-white">{label}</label>
     {/if}
     <!-- svelte-ignore a11y-click-events-have-key-events -->

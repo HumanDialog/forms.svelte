@@ -9,7 +9,8 @@
 
     export const OK = 0;
     export const OKCancel = 1;
-    export const Custom = 2;
+    export const Cancel = 2;
+    export const Custom = 3;
     export let mode = OKCancel; 
 
     export let okCaption :string = 'OK';
@@ -131,6 +132,10 @@
                 <button type="button" class="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-stone-400 px-3 py-2 text-sm font-semibold text-stone-900 shadow-sm  hover:bg-stone-50 sm:mt-0 sm:w-auto"
                         on:click={on_cancel}>
                         {cancelCaption}</button>
+              {:else if mode == Cancel}
+                  <button type="button" class="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-stone-400 px-3 py-2 text-sm font-semibold text-stone-900 shadow-sm  hover:bg-stone-50 sm:mt-0 sm:w-auto"
+                          on:click={on_cancel}>
+                          {cancelCaption}</button>
             {:else if mode == Custom}
                 <slot name="footer"/>
             {/if}

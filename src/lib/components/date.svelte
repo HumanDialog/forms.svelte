@@ -65,15 +65,21 @@
             input_pt = 'pt-2.5'
             input_pb = 'pb-2.5';  
             font_size = 'text-lg sm:text-sm'       
-            line_h = 'h-7 sm:h-5'  
+            if(!is_compact)
+                line_h = 'h-12 sm:h-10'  
+            else
+                line_h = 'h-7 sm:h-5'  
             chevron_mt = 'mt-2 sm:mt-1'      
             break;
 
         case 'xs':
             input_pt = 'pt-0.5'
             input_pb = 'pb-0.5';
-            font_size = 'text-base sm:text-xs'           
-            line_h = 'h-6 sm:h-4'
+            font_size = 'text-base sm:text-xs'   
+            if(!is_compact)        
+                line_h = 'h-7 sm:h-7'
+            else
+                line_h = 'h-6 sm:h-6'
             chevron_mt = 'mt-1.5 sm:mt-0.5' 
             break;
     }
@@ -105,12 +111,17 @@
     let  last_tick = -1;    
     $: setup($data_tick_store, $contextItemsStore);
 
+    export function refresh()
+    {
+        setup();
+    }
+
     function setup(...args)
     {   
         //if(data_tick_store <= last_tick)
         //    return;
 
-        last_tick = data_tick_store            
+        last_tick = $data_tick_store            
 
         if(!date)
         {
@@ -439,7 +450,7 @@
                 bind:this={input_element}
         />
     {:else}
-        <input  class=" dark:text-white {cs} {style}  {line_h} px-2.5 {background_class} {user_class}" 
+        <input  class=" dark:text-white {cs} {style}  {line_h} px-2.5 {user_class}" 
                 type="date" 
                 on:change={on_changed}
                 bind:value={rValue}
