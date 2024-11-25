@@ -15,8 +15,9 @@
     import Icon from "./components/icon.svelte";
 	import Modal from './modal.svelte'
 	import Checkbox from '$lib/components/checkbox.svelte';
-    import {Popover} from 'flowbite-svelte'
+    import {Popover, Alert} from 'flowbite-svelte'
 	import { reef } from '@humandialog/auth.svelte';
+	import { ComboSource } from '$lib';
 	
 
     // ==============================================================================
@@ -25,9 +26,9 @@
     export let nameAttrib = "Name";
     export let emailAttrib = "login";
     export let refAttrib = "$ref";
-    export let showFiles = false;
+    export let showFiles = true;
     //export let show_admin = true;
-    export let appGroups = undefined;
+    export let showAccessGroups = true;
 
     // ===============================================================================
   
@@ -41,11 +42,21 @@
 
     let reef_users = [];
     let new_reef_user_id = 1;
+    let access_groups = [];
 
     let fake_users;
 
     async function init()
     {
+        if(showAccessGroups)
+        {
+            let groups = await reef.get('/sys/list_access_groups')
+            access_groups = [];
+            if(groups)
+                groups.forEach( gname => access_groups.push({name: gname}));
+        }
+
+
         reef_users = [];
         if(users && Array.isArray(users) && users.length > 0)
         {
@@ -59,8 +70,8 @@
                         [refAttrib]: u[refAttrib],
                         auth_group: 0,
                         files_group :0,
-                        app_group: 0,
-                        other: "",
+                        app_group: "",
+                        //other: "",
                         avatar_url : "",
                         invitation_not_accepted: false,
                         removed: false,
@@ -95,6 +106,7 @@
                 list?.reload(reef_users);
             }
         } )
+
     }
 
     function set_user_info(user, info)
@@ -102,10 +114,11 @@
         user.auth_group = info.auth_group ?? 0;
         user.files_group = info.files_group ?? 0;
         user.avatar_url = info.avatar_url ?? "";
-        user.other = info.access_details ?? "";
-        user.app_group = info.reef_user_group_id ?? 0;
+        user.access_details = info.access_details
+        user.app_group = info.access_details?.group ?? '';
         user.removed = info.removed ?? false;
         user.invitation_not_accepted = info.invitation_not_accepted ?? false;
+        console.log(info)
 
         if(user.removed)
             user.membership_tag = "Removed";
@@ -143,7 +156,7 @@
         {
             //let removed_user = reef_users.find( u => u[emailAttrib] == user[emailAttrib])
             set_user_info(user, removed_user_details);
-            list?.refresh();
+            list?.rereder();
         }
     }
 
@@ -172,7 +185,7 @@
                 user.auth_group = flags;
 
                 set_user_info(user, info)
-                list?.refresh();
+                list?.rereder();
             }
         }
     }
@@ -188,7 +201,27 @@
             if(info)
             {
                 set_user_info(user, info)
-                list?.refresh();
+                list?.rereder();
+            }
+        }
+    }
+
+    async function on_change_access_group(user, group, name)
+    {
+        if(user.access_details && user.access_details.group != group)
+        {
+            user.access_details.group = group;   
+            user.app_group = group
+            console.log(user)
+
+            const details = JSON.stringify(user.access_details);
+
+            const email = user[emailAttrib];
+            const info = await reef.get(`sys/set_user_details?email=${email}&access_details=${details}`)
+            if(info)
+            {
+                set_user_info(user, info)
+                list?.rereder();
             }
         }
     }
@@ -214,14 +247,26 @@
                 action: (focused) =>  { list.edit(user, nameAttrib) }
             },
             {
-                caption: 'Privileges',
+                caption: 'Users management',
                 action: (focused) => { list.edit(user, 'Privileges') }
             }];
+
+        if(showAccessGroups)
+        {
+            operations.push({
+                separator: true
+            });
+
+            operations.push({
+                caption: 'Access group',
+                action: (focused) => { list.edit(user, 'Access') }
+            });
+        }
 
         if(showFiles)
         {
             operations.push({
-                caption: 'Files',
+                caption: 'External files',
                 action: (focused) => { list.edit(user, 'Files') }
             });
         }
@@ -232,6 +277,9 @@
     let user_operations = (user) => { 
         
         let operations = [];
+
+        if(user.removed)
+            return [];
         
         let edit_operations = get_edit_operations(user)
         if(edit_operations.length == 1)
@@ -261,6 +309,9 @@
     }
 
     let user_context_menu = (user) => {
+        if(user.removed)
+            return [];
+
         let edit_operations = get_edit_operations(user);
         return {
             grid: edit_operations
@@ -404,6 +455,11 @@
             reef_users = [...reef_users, new_reef_user]
             list?.reload(reef_users);
         }
+        else
+        {
+            //todo: toast
+            window.alert('Something went wrong');
+        }
 
 
 
@@ -441,25 +497,30 @@
             <ListStaticProperty name="Membership" a="membership_tag"/>
             
             <ListComboProperty name='Privileges' a='auth_group' onSelect={on_change_privileges}>
-                <ComboItem name='None'       key={0}  />
-                <ComboItem name='Can see'    key={1}  />
-                <ComboItem name='Can invite' key={3}  />
-                <ComboItem name='Can fully manage' key={7}  />
+                <ComboItem name='No auth access'       key={0}  />
+                <ComboItem name='Can see users'    key={1}  />
+                <ComboItem name='Can invite others' key={3}  />
+                <ComboItem name='Full auth access' key={7}  />
             </ListComboProperty>
+
+            {#if showAccessGroups}
+                <ListComboProperty name='Access' a='app_group' onSelect={on_change_access_group}>
+                    <ComboSource objects={access_groups} name='name' key='name'/>
+                </ListComboProperty>
+            {/if}
 
             {#if showFiles}
             <ListComboProperty name='Files' a='files_group' onSelect={on_change_files_access}>
-                <ComboItem name='None'      key={0}  />
-                <ComboItem name='Read'      key={1}  />
-                <ComboItem name='Write'     key={2}  />
-                <ComboItem name='Read&Write' key={3}  />
+                <ComboItem name="No files access"       key={0}  />
+                <ComboItem name='Can read files'   key={1}  />
+                <ComboItem name='Can write files'  key={2}  />
+                <ComboItem name='Full files access'    key={3}  />
             </ListComboProperty>
             {/if}
 
             
     </List>
     {/if}
-
 </Page>
 
 <Modal  bind:open={create_new_user_enabled}
@@ -486,10 +547,11 @@
                 <div class="flex flex-row items-center">
                     <span class="">Maintainer</span>
                     <Icon id="b1" size={4} component={FaInfoCircle} class="text-stone-400 ml-5 pt-0 mt-1"/>
-                    <Popover class="w-64 text-sm font-light" title="Maintainer" triggeredBy="#b1" color="dropdown">
-                        Means that the invited user will be able to add and remove others and manage permissions in this organization.
+                    <Popover class="w-64 text-sm font-light text-stone-500 bg-white dark:bg-stone-800 dark:border-stone-600 dark:text-stone-400" triggeredBy="#b1" color="dropdown">
+                        Means that the invited user will be able to add/remove others and manage permissions in this organization.
                     </Popover>
                 </div>
             </Checkbox>
 </Modal>
+
 
