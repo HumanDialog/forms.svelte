@@ -41,7 +41,7 @@
 
     async function fetchData()
     {
-        let res = await reef.get("/app/Lists?sort=Order&fields=Id,Name,Order,$type");
+        let res = await reef.get("/space/Lists?sort=Order&fields=Id,Name,Order,$type");
         if(res != null)
             taskLists = res.TaskList;
         else
@@ -56,7 +56,7 @@
 
     async function addList(listName, order)
     {
-        await reef.post("/app/Lists/new", 
+        await reef.post("/space/Lists/new", 
                             { 
                                 Name: listName,
                                 Order: order
@@ -66,7 +66,7 @@
 
     async function changeName(list, name)
     {
-        let res = await reef.post(`/app/Lists/${list.Id}/set`, 
+        let res = await reef.post(`/space/Lists/${list.Id}/set`, 
                                 {
                                     Name: name
                                 });
@@ -76,7 +76,7 @@
     async function changeSummary(list, summary)
     {
 
-        let res = await reef.post(`/app/Lists/${list.Id}/set`, 
+        let res = await reef.post(`/space/Lists/${list.Id}/set`, 
                                 {
                                     Summary: summary
                                 });
@@ -85,7 +85,7 @@
 
     async function finishAllOnList(list)
     {
-        await reef.post(`/app/Lists/${list.Id}/FinishAll`, {})
+        await reef.post(`/space/Lists/${list.Id}/FinishAll`, {})
         
         if( isRoutingTo(`#/listboard/${list.Id}`, currentPath) || 
             isRoutingTo(`#/tasklist/${list.Id}`, currentPath))
@@ -158,7 +158,7 @@
         if(!listToArchive)
             return;
 
-        await reef.post(`/app/Lists/${listToArchive.Id}/Archive`, {})
+        await reef.post(`/space/Lists/${listToArchive.Id}/Archive`, {})
         archiveModal.hide();
 
         reload();
@@ -169,7 +169,7 @@
         if(!listToDelete)
             return;
 
-        await reef.delete(`/app/Lists/${listToDelete.Id}`)
+        await reef.delete(`/space/Lists/${listToDelete.Id}`)
         deleteModal.hide();
 
         reload();
@@ -225,7 +225,7 @@
     let navArchivedLists;
     async function onExpandArchived()
     {
-        let res = await reef.get("/app/ArchivedLists?sort=-Id&fields=Id,Name,$type");
+        let res = await reef.get("/space/ArchivedLists?sort=-Id&fields=Id,Name,$type");
         if(res != null)
         {
             archivedLists = res.TaskList;
@@ -239,7 +239,7 @@
     export function requestAddList()
     {
         navLists.add(async (listName, order) => {
-            await reef.post("/app/Lists/new", 
+            await reef.post("/space/Lists/new", 
                             { 
                                 Name: listName,
                                 Order: order

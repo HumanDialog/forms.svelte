@@ -38,12 +38,25 @@
         const taskId = segments[segments.length-1]
         taskRef = `./Task/${taskId}`
 
-        allTags = await reef.get('/app/AllTags');
+        allTags = await reef.get('/space/AllTags');
 
-        let res = await reef.get('/app/Lists?fields=$ref,Name')
+        let res = await reef.get('/space/Lists?fields=$ref,Name')
         allLists = res.TaskList
 
-        res = await reef.get('/app/Users?fields=$ref,Name')
+        //res = await reef.get('/app/Users?fields=$ref,Name')
+        res = await reef.post('space/query',
+                            {
+                                Id: 1,
+                                Name: 'Users',
+                                Tree:[
+                                    {
+                                        Id: 1,
+                                        Association: 'Members/User',
+                                        Expressions:['$ref', 'Name']
+                                    }
+                                ]                    
+                            }
+                        )
         allActors = res.User;
 
         await reloadData();
@@ -121,7 +134,7 @@
     async function onUpdateAllTags(newAllTags)
     {
         allTags  = newAllTags
-        await reef.post('app/set', { AllTags: allTags})
+        await reef.post('space/set', { AllTags: allTags})
     }
 
     async function onAddStep(txt, beforeIdx)

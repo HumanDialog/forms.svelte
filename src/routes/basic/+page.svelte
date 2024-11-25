@@ -18,14 +18,30 @@
    
 
     reef.configure( {
-            mode: 'local',
+            mode: 'remote',
+            remote:{
+                iss: 'http://localhost:1996',
+                clientID: 'SampleClientId',
+                clientSecret: 'SampleClientSecret',
+                scope: 'openid profile email octopus',
+                apiVersion: 'v001',
+                tenant: 'octopus'
+            },
             local: {
                 api:    "http://127.0.0.1:1996/",
                 //api:    "http://192.168.0.102:1996/",
                 users:
                 [
-                    "alice@example.com",
-                    "bob@example.com"
+                    {
+                        username: "alice@example.com",
+                        group: 'Employee',
+                        sid: 13
+                    },
+                    {
+                        username: "bob@example.com",
+                        group: 'Developer',
+                        sid:13
+                    }
                 ],
                 apiVersion: "v001"}
             });

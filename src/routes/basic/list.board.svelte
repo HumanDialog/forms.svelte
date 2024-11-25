@@ -48,12 +48,24 @@
 
         if(users.length == 0)
         {
-            let res = await reef.get('/app/Users')
+            //let res = await reef.get('/app/Users')
+            let res = await reef.post('space/query',
+                            {
+                                Id: 1,
+                                Name: 'Users',
+                                Tree:[
+                                    {
+                                        Id: 1,
+                                        Association: 'Members/User'
+                                    }
+                                ]                    
+                            }
+                        )
             if(res)
                 users = res.User;
         }
 
-        allTags = await reef.get('/app/AllTags');
+        allTags = await reef.get('/space/AllTags');
         
         if(!segments.length)
             listId = 'first';
@@ -62,7 +74,7 @@
         
         currentList = null
 
-        listPath = `/app/Lists/${listId}`;
+        listPath = `/space/Lists/${listId}`;
         await fetchData()
     }
 
@@ -229,7 +241,7 @@
     async function onUpdateAllTags(allAllTags)
     {
         allTags = allAllTags
-        await reef.post('app/set', { AllTags: allTags})
+        await reef.post('space/set', { AllTags: allTags})
     }
 
     function getCardOperations(task)

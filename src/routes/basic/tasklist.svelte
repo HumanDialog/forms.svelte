@@ -41,7 +41,19 @@
 
         if(users.length == 0)
         {
-            let res = await reef.get('/app/Users')
+            //let res = await reef.get('/app/Users')
+            let res = await reef.post('space/query',
+                            {
+                                Id: 1,
+                                Name: 'Users',
+                                Tree:[
+                                    {
+                                        Id: 1,
+                                        Association: 'Members/User'
+                                    }
+                                ]                    
+                            }
+                        )
             if(res)
                 users = res.User;
         }
@@ -60,7 +72,7 @@
         isArchivedTasks = params.has('archivedTasks')
 
         assocName = (isArchivedTasks || isArchivedList) ? 'ArchivedTasks' : 'Tasks';
-        listPath = isArchivedList ? `/app/ArchivedLists/${listId}` : `/app/Lists/${listId}`;
+        listPath = isArchivedList ? `/space/ArchivedLists/${listId}` : `/space/Lists/${listId}`;
             
         await fetchData()
     }

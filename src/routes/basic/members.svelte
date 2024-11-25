@@ -7,7 +7,19 @@
     let users = []
     onMount( async () =>
     {
-        let result = await reef.get('app/Users')
+        //let result = await reef.get('app/Users')
+        let result = await reef.post('space/query',
+                            {
+                                Id: 1,
+                                Name: 'Users',
+                                Tree:[
+                                    {
+                                        Id: 1,
+                                        Association: 'Members/User'
+                                    }
+                                ]                    
+                            }
+                        )
         if(result)
         {
             users = result.User;

@@ -34,7 +34,7 @@
 
         if(lists.length == 0)
         {
-            let res = await reef.get('/app/Lists')
+            let res = await reef.get('/space/Lists')
             if(res)
                 lists = res.TaskList;
         }
