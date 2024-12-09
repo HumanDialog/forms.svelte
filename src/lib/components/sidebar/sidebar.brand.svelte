@@ -7,8 +7,8 @@
 
 </script>
 
-<section class={user_class}>
-    <a href={href} class="flex items-center pl-2.5 mb-5">
+<section class="mb-5 {user_class}">
+    <a href={href} class="flex items-center pl-2.5 ">
         {#if img}
             <img src={img} class="h-6 mr-3 sm:h-7" alt="" />
         {/if}
@@ -17,4 +17,7 @@
             <slot/>
         </span>
     </a>
+    {#if $$slots.summary}
+        <slot name="summary"/>
+    {/if}
 </section>

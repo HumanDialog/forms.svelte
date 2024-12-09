@@ -6,8 +6,9 @@
     import {push } from "svelte-spa-router";
     import Navigator from "./navigator.svelte";
     import {FaPlus} from 'svelte-icons/fa/'
+    import {session} from '@humandialog/auth.svelte'
 
-    export let defaultPath = '/mytasks'
+    export let defaultPath = ''
 
     const UNKNOWN = 0;
     const REDIRECT = 1;
@@ -23,7 +24,11 @@
             else 
             {
                 whatToShow = REDIRECT;
-                push(defaultPath);
+
+                if($session.isActive)
+                    push('/mytasks');
+                else
+                    push('/listboard');
             }
     }
 

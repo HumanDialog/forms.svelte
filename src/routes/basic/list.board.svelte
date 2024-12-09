@@ -1,5 +1,5 @@
 <script>
-    import {reef} from '@humandialog/auth.svelte'
+    import {reef, session} from '@humandialog/auth.svelte'
     import {location, push} from 'svelte-spa-router'
     import {
 		Page,
@@ -35,6 +35,7 @@
     let taskStates = [];
     let allTags = ''
     let kanban;
+    let gid = ''
 
     $: onParamsChanged($location, $mainContentPageReloader);
 
@@ -49,7 +50,7 @@
         if(users.length == 0)
         {
             //let res = await reef.get('/app/Users')
-            let res = await reef.post('space/query',
+            let res = await reef.post('group/query',
                             {
                                 Id: 1,
                                 Name: 'Users',
@@ -65,16 +66,21 @@
                 users = res.User;
         }
 
-        allTags = await reef.get('/space/AllTags');
+        allTags = await reef.get('/group/AllTags');
         
         if(!segments.length)
             listId = 'first';
         else
             listId = segments[segments.length-1]
         
+        if(listId == 'listboard')
+            listId = 'first'
+        
         currentList = null
 
-        listPath = `/space/Lists/${listId}`;
+        gid = $session.tid;
+
+        listPath = `/group/Lists/${listId}`;
         await fetchData()
     }
 
@@ -180,7 +186,7 @@
 
     function switchToList()
     {
-        push(`/tasklist/${listId}`);
+        push(`/tasklist/${listId}?gid=${gid}`);
     }
 
     async function onAdd(newTaskAttribs) 
@@ -241,7 +247,7 @@
     async function onUpdateAllTags(allAllTags)
     {
         allTags = allAllTags
-        await reef.post('space/set', { AllTags: allTags})
+        await reef.post('group/set', { AllTags: allTags})
     }
 
     function getCardOperations(task)
@@ -594,7 +600,7 @@
 			<KanbanCallbacks {onAdd} {getCardOperations}/>
 
 			<KanbanTitle    a="Title" 
-                            hrefFunc={(task) => `/task/${task.Id}`}
+                            hrefFunc={(task) => `/task/${task.Id}?gid=${gid}`}
                             hasAttachment={(task) => task.Description || (task.Steps && task.Steps.length > 0) }/>
 			<KanbanSummary a="Summary" />
 
@@ -612,7 +618,7 @@
         </Kanban>
 
         <div class="ml-3 mt-20 mb-10">
-            <a  href={`#/tasklist/${listId}?archivedTasks`} 
+            <a  href={`#/tasklist/${listId}?archivedTasks&gid=${gid}`} 
                 class="hover:underline">
                     Show archived tasks 
                     <div class="inline-block mt-1.5 w-3 h-3"><FaChevronRight/></div>

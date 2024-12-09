@@ -1,13 +1,10 @@
 <script>
-    import FaToggleOn from 'svelte-icons/fa/FaToggleOn.svelte'
-    import FaToggleOff from 'svelte-icons/fa/FaToggleOff.svelte'
-    import FaEllipsisH from 'svelte-icons/fa/FaEllipsisH.svelte'
-    import FaCog from 'svelte-icons/fa/FaCog.svelte'
-    import FaTools from 'svelte-icons/fa/FaTools.svelte'
-    import GoPrimitiveDot from 'svelte-icons/go/GoPrimitiveDot.svelte'
-    import FaSignInAlt from 'svelte-icons/fa/FaSignInAlt.svelte'
-    import FaSignOutAlt from 'svelte-icons/fa/FaSignOutAlt.svelte'
+    import {FaUsers, FaCog, FaToggleOn, FaToggleOff, FaSignInAlt, FaSignOutAlt, FaPlus} from 'svelte-icons/fa/'
+    //import GoPrimitiveDot from 'svelte-icons/go/GoPrimitiveDot.svelte'
     import {showMenu} from '$lib/components/menu'
+    import {reef} from '@humandialog/auth.svelte'
+    import Modal from './modal.svelte'
+    import Input from './components/inputbox.ltop.svelte'
     //import Menu from '$lib/components/contextmenu.svelte'
 
     import {dark_mode_store, 
@@ -21,11 +18,13 @@
             contextItemsStore,
             context_info_store,
             contextToolbarOperations,
-            data_tick_store
+            data_tick_store,
+            reloadWholeApp
         } from "./stores.js";     
     import Icon from './components/icon.svelte';
     import {session, signInHRef, signOutHRef} from '@humandialog/auth.svelte'
 	import { push } from 'svelte-spa-router';
+	import { tick } from 'svelte';
     
 
     export let appConfig;
@@ -42,8 +41,10 @@
     let is_logged_in = false;
     let sign_in_href = '';
     let sign_out_href = '';
+    let show_groups_switch_menu = false;
+    let can_add_new_group = false;
 
-    $:{
+    $:  {
         config = appConfig.mainToolbar;
         has_selection_details = appConfig.selectionDetails;
         if(has_selection_details)
@@ -74,6 +75,20 @@
                     hide_sidebar();
             }
         }
+       
+        show_groups_switch_menu = $session.tenants.length > 1
+
+        if($session.configuration.tenant)
+        {
+            reef.getAppInstanceInfo().then( (instanceInfo =>{
+                if(instanceInfo?.is_public)
+                {
+                    show_groups_switch_menu = true;
+                    can_add_new_group = true;
+                }
+            }))
+            
+        } 
         
     }
 
@@ -181,6 +196,49 @@
         showMenu(pt, options);    
     }
 
+    function show_groups(e)
+    {
+        let owner = e.target;
+        while(owner && owner.tagName != 'BUTTON')
+            owner = owner.parentElement
+
+        if(!owner)
+            return;
+
+        let rect = owner.getBoundingClientRect();
+        let options = [];
+
+        $session.tenants.forEach(tInfo =>
+            options.push({
+                caption: tInfo.name,
+                icon: FaUsers,
+                disabled: tInfo.id == $session.tid,
+                action: (f) => {
+                    $session.setCurrentTenantAPI(tInfo.url, tInfo.id)
+                    
+                    push('/')
+                    reloadWholeApp();
+                }
+            })
+        )
+
+        if(can_add_new_group)
+        {
+            options.push({
+                separator: true
+            })
+            options.push({
+                caption: 'Add group',
+                icon: FaPlus,
+                action: (f) => launchNewGroupWizzard()
+            })
+        }
+
+        
+        let pt = new DOMPoint(rect.right, rect.top)
+        showMenu(pt, options);    
+    }
+
     function clearSelection()
     {
         if (!clearsContext) return;
@@ -195,6 +253,64 @@
 
 		$contextToolbarOperations = [];
 		$data_tick_store = $data_tick_store + 1;
+    }
+
+    let newGroupParams = {
+        name: ''
+    }
+
+    let newGroupModalVisible = false;
+    function launchNewGroupWizzard()
+    {
+        newGroupParams.name = '';
+        newGroupModalVisible = true;
+    }
+
+    async function onNewGroupOK()
+    {
+        const appId = $session.appId
+        if(!appId)
+        {
+            return onNewGroupCancel()
+        }
+        
+        const appInstanceId = $session.configuration.tenant
+        if(!appInstanceId)
+        {
+            return onNewGroupCancel()
+        }
+
+            const body = {
+                app_id: $session.appId,
+                tenant: $session.configuration.tenant,
+                org_name: newGroupParams.name
+            }
+
+            const res = await reef.fetch(  "/dev/create-group-for-me",
+                                {
+                                    method: 'post',
+                                    body : JSON.stringify(body)
+                                });
+
+            if(res.ok)
+            {
+                await reef.refreshTokens()
+                //reloadWholeApp()
+            }
+            else
+            {
+                const result = await res.json();  
+                console.error(result.error);
+            }
+
+        newGroupParams.name = '';
+        newGroupModalVisible = false;
+    }
+
+    function onNewGroupCancel()
+    {
+        newGroupParams.name = '';
+        newGroupModalVisible = false;
     }
     
 </script>
@@ -219,8 +335,15 @@
     
         <div class="mt-auto h-auto items-center w-full">
             
+            {#if show_groups_switch_menu}
+                <button class="h-12 px-0 flex justify-center items-center w-full text-stone-300 hover:text-stone-100"
+                        on:click|stopPropagation={show_groups}>
+                    <Icon size={4} component={FaUsers} />
+                </button>
+            {/if}
+
             <button
-                class="h-16 px-0 flex justify-center items-center w-full text-stone-300 hover:text-stone-100"
+                class="h-12  px-0 flex justify-center items-center w-full text-stone-300 hover:text-stone-100"
                 on:click|stopPropagation={show_options}>
 
                 <Icon size={4} component={FaCog} />
@@ -231,6 +354,20 @@
 </section>
 
     <!--Menu bind:this={menu}/-->
+
+<Modal  bind:open={newGroupModalVisible}
+        title='Create group'
+        okCaption='Create'
+        onOkCallback={onNewGroupOK}
+        onCancelCallback={onNewGroupCancel}
+        icon={FaUsers}
+>
+    <Input  label='Group name' 
+            placeholder='' 
+            self={newGroupParams} 
+            a="name"
+            required/>
+</Modal>
 
 <style>
     @media print

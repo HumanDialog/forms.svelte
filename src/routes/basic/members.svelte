@@ -8,7 +8,7 @@
     onMount( async () =>
     {
         //let result = await reef.get('app/Users')
-        let result = await reef.post('space/query',
+        let result = await reef.post('group/query',
                             {
                                 Id: 1,
                                 Name: 'Users',
@@ -30,5 +30,5 @@
   </script>
 
 {#if users && users.length > 0}
-  <MembersPage {users} nameAttrib="Name" emailAttrib="login" refAttrib="$ref"/>
+  <MembersPage {users} nameAttrib="Name" emailAttrib="login" refAttrib="$ref" showAccessRoles/>
 {/if}

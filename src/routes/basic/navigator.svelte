@@ -17,6 +17,7 @@
     let user = {};
     let navLists;
     let navItems = [];
+    let gid = ''
 
     $: currentPath = $location;
 
@@ -28,20 +29,21 @@
 
     async function initNavigator()
     {
-        if(!$session.isActive)
-            return;
-        
-        let res = await reef.get("/user");
-        if(res != null)
-            user = res.User;
+        gid = $session.tid;
 
+        if($session.isActive)
+        {
+            let res = await reef.get("/user");
+            if(res != null)
+                user = res.User;
+        }
 
         await fetchData()
     }
 
     async function fetchData()
     {
-        let res = await reef.get("/space/Lists?sort=Order&fields=Id,Name,Order,$type");
+        let res = await reef.get("/group/Lists?sort=Order&fields=Id,Name,Order,$type");
         if(res != null)
             taskLists = res.TaskList;
         else
@@ -56,7 +58,7 @@
 
     async function addList(listName, order)
     {
-        await reef.post("/space/Lists/new", 
+        await reef.post("/group/Lists/new", 
                             { 
                                 Name: listName,
                                 Order: order
@@ -66,7 +68,7 @@
 
     async function changeName(list, name)
     {
-        let res = await reef.post(`/space/Lists/${list.Id}/set`, 
+        let res = await reef.post(`/group/Lists/${list.Id}/set`, 
                                 {
                                     Name: name
                                 });
@@ -76,7 +78,7 @@
     async function changeSummary(list, summary)
     {
 
-        let res = await reef.post(`/space/Lists/${list.Id}/set`, 
+        let res = await reef.post(`/group/Lists/${list.Id}/set`, 
                                 {
                                     Summary: summary
                                 });
@@ -85,7 +87,7 @@
 
     async function finishAllOnList(list)
     {
-        await reef.post(`/space/Lists/${list.Id}/FinishAll`, {})
+        await reef.post(`/group/Lists/${list.Id}/FinishAll`, {})
         
         if( isRoutingTo(`#/listboard/${list.Id}`, currentPath) || 
             isRoutingTo(`#/tasklist/${list.Id}`, currentPath))
@@ -158,7 +160,7 @@
         if(!listToArchive)
             return;
 
-        await reef.post(`/space/Lists/${listToArchive.Id}/Archive`, {})
+        await reef.post(`/group/Lists/${listToArchive.Id}/Archive`, {})
         archiveModal.hide();
 
         reload();
@@ -169,7 +171,7 @@
         if(!listToDelete)
             return;
 
-        await reef.delete(`/space/Lists/${listToDelete.Id}`)
+        await reef.delete(`/group/Lists/${listToDelete.Id}`)
         deleteModal.hide();
 
         reload();
@@ -225,7 +227,7 @@
     let navArchivedLists;
     async function onExpandArchived()
     {
-        let res = await reef.get("/space/ArchivedLists?sort=-Id&fields=Id,Name,$type");
+        let res = await reef.get("/group/ArchivedLists?sort=-Id&fields=Id,Name,$type");
         if(res != null)
         {
             archivedLists = res.TaskList;
@@ -239,7 +241,7 @@
     export function requestAddList()
     {
         navLists.add(async (listName, order) => {
-            await reef.post("/space/Lists/new", 
+            await reef.post("/group/Lists/new", 
                             { 
                                 Name: listName,
                                 Order: order
@@ -252,16 +254,19 @@
 
 {#if sidebar}
     {#if taskLists && taskLists.length > 0}
-        <SidebarGroup>
-            <SidebarItem   href="#/mytasks"
-                            icon={FaList}
-                            active={isRoutingTo("#/mytasks", currentPath)}
-                            operations={(node) => getUserListOperations(node, user)}
-                            summary="All active tasks assigned to me."
-                            selectable={user}>
-                My Tasks
-            </SidebarItem>
-        </SidebarGroup>
+
+        {#if $session.isActive}
+            <SidebarGroup>
+                <SidebarItem   href="#/mytasks"
+                                icon={FaList}
+                                active={isRoutingTo("#/mytasks", currentPath)}
+                                operations={(node) => getUserListOperations(node, user)}
+                                summary="All active tasks assigned to me."
+                                selectable={user}>
+                    My Tasks
+                </SidebarItem>
+            </SidebarGroup>
+        {/if}
 
         <SidebarGroup border>
             <SidebarList    objects={taskLists} 
@@ -270,7 +275,7 @@
                             inserterPlaceholder='New list'
                             bind:this={navLists}>
                 <svelte:fragment let:item let:idx>
-                    {@const href = `#/listboard/${item.Id}`}
+                    {@const href = `#/listboard/${item.Id}?gid=${gid}`}
                     <SidebarItem   {href}
                                     icon={FaList}
                                     bind:this={navItems[idx]}
@@ -291,7 +296,7 @@
             <SidebarList    objects={archivedLists}
                             bind:this={navArchivedLists}>
                 <svelte:fragment let:item>
-                    {@const href = `#/tasklist/${item.Id}?archivedList`}
+                    {@const href = `#/tasklist/${item.Id}?archivedList&gid=${gid}`}
                     <SidebarItem   {href}
                                     icon={FaList}
                                     summary={item.Summary}
@@ -310,22 +315,24 @@
 {:else} <!-- !sidebar -->
 
     {#if taskLists && taskLists.length > 0}
-        <SidebarGroup>
-            <SidebarItem    href="#/mytasks"
-                            icon={FaList}
-                            operations={(node) => getUserListOperations(node, user)}
-                            summary="All active tasks assigned to me."
-                            item={user}>
-                My Tasks
-            </SidebarItem>
-        </SidebarGroup>
-
+        {#if $session.isActive}
+            <SidebarGroup>
+                <SidebarItem    href="#/mytasks"
+                                icon={FaList}
+                                operations={(node) => getUserListOperations(node, user)}
+                                summary="All active tasks assigned to me."
+                                item={user}>
+                    My Tasks
+                </SidebarItem>
+            </SidebarGroup>
+        {/if}
+        
         <SidebarGroup border>
             <SidebarList    objects={taskLists} 
                             orderAttrib='Order'
                             bind:this={navLists}>
                 <svelte:fragment let:item let:idx>
-                    {@const href = `#/listboard/${item.Id}`}
+                    {@const href = `#/listboard/${item.Id}?gid=${gid}`}
                     <SidebarItem   {href}
                                     icon={FaList}
                                     bind:this={navItems[idx]}
@@ -345,7 +352,7 @@
             <SidebarList    objects={archivedLists}
                             bind:this={navArchivedLists}>
                 <svelte:fragment let:item>
-                    {@const href = `#/tasklist/${item.Id}?archivedList`}
+                    {@const href = `#/tasklist/${item.Id}?archivedList&gid=${gid}`}
                     <SidebarItem   {href}
                                     icon={FaList}
                                     summary={item.Summary}

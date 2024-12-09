@@ -14,7 +14,8 @@
             data_tick_store,
             set_default_tools_visible,
             set_dark_mode_default,
-            sidebar_left_pos } from './stores.js'
+            sidebar_left_pos,
+            wholeAppReloader } from './stores.js'
     
     import { AuthorizedView} from '@humandialog/auth.svelte'
     import { handleSelect, isDeviceSmallerThan } from './utils'
@@ -80,6 +81,8 @@
     }
     else
         set_default_tools_visible(false)
+
+    //let autoRedirectToSignIn = layout.autoRedirectToSignIn ?? true
 
     $: { visible_sidebar = $main_sidebar_visible_store
         
@@ -158,126 +161,130 @@
 
 <svelte:window bind:innerWidth bind:outerWidth bind:innerHeight bind:outerHeight />
 
-<AuthorizedView>
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <div    id="__hd_svelte_layout_root" class="{$dark_mode_store}"
-            on:click={handleSelect} 
-            on:contextmenu={handleSelect}>
+<!--AuthorizedView {autoRedirectToSignIn}-->
+    
+    {#key $wholeAppReloader}
+    
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <div    id="__hd_svelte_layout_root" class="{$dark_mode_store}"
+                on:click={handleSelect} 
+                on:contextmenu={handleSelect}>
 
-        <div class="bg-white dark:bg-stone-900 dark:text-white  overflow-x-clip overflow-y-clip  h-screen">    
-            <!--###########################################################-->
-            <!--##  HORIZONTAL TOOLBAR (FOR PHONES)  ######################-->
-            <!--###########################################################-->
-            <header class="fixed sm:hidden w-screen top-0 h-[50px] sm:h-[40px] z-20 shadow  shadow-stone-900/5 dark:shadow-none     overflow-auto" >
-                    <div class=" flex flex-row justify-between  h-full  bg-stone-950   text-stone-100 ">
-                        <HorizontalToolbar appConfig={layout}/>
-                    <div>
-            </header>        
-
-
-            <!--HorizontalToolbar /-->
-            <!--#######################################################-->
-            <!--##  VERTICAL TOOLBAR                 ##################-->
-            <!--#######################################################-->
-            <div  class="hidden sm:block fixed left-0 top-0 w-[50px] sm:w-[40px] h-screen z-20 inset-0   overflow-hidden">
-                <div class="sticky top-0 flex h-full w-10 bg-stone-800 dark:bg-stone-950 flex-col items-center text-stone-100 shadow">
-                    <VerticalToolbar appConfig={layout}/>
-                </div>    
-            </div>
-
-            <!--VerticalToolbar /-->
-
-            <!--#######################################################-->
-            <!--##  MAIN SIDE BAR                    ##################-->
-            <!--#######################################################-->
-            {#if true}
-            {@const sidebar_left = $sidebar_left_pos==0 ? "left-0" : "left-[50px]"}
-            {@const sidebar_small_width = $sidebar_left_pos==0 ? "w-full" : "w-[calc(100vw-50px)]"}
-
-            <div  class="{main_side_panel_visibility}  
-                            {sidebar_left}  sm:left-[40px]
-                            top-[50px]  sm:top-0 
-                            h-[calc(100vh-50px)] sm:h-full {lg_main_sidebar_height}
-                            {sidebar_small_width} sm:w-[320px] 
-                            z-20 overflow-x-hidden">
-
-                <div class=" bg-stone-50 w-full h-full dark:bg-stone-800 overflow-y-auto py-0 px-0">
-                    <Configurable config={layout.sidebar[visible_sidebar]}>
-                        <div slot='alt'></div>
-                    </Configurable>
-                </div>
-            </div>    
-            {/if}
-
-            <!-- ! below overflow-x-clip prevents horizontal scrollbar when vertical scrollbar is visible. Default
-                behaviour is the content expand vertically, and only vertical scrollbar can be visible.
-                When content on the main page needs to be expanded horizontally (like kanban chart for example) then
-                that component should define overflow-x-* itself -->
-            <section on:click|capture={auto_hide_sidebar} class="">
-
+            <div class="bg-white dark:bg-stone-900 dark:text-white  overflow-x-clip overflow-y-clip  h-screen">    
                 <!--###########################################################-->
-                <!--##  HORIZONTAL TOOLS                 ######################-->
+                <!--##  HORIZONTAL TOOLBAR (FOR PHONES)  ######################-->
                 <!--###########################################################-->
+                <header class="fixed sm:hidden w-screen top-0 h-[50px] sm:h-[40px] z-20 shadow  shadow-stone-900/5 dark:shadow-none     overflow-auto" >
+                        <div class=" flex flex-row justify-between  h-full  bg-stone-950   text-stone-100 ">
+                            <HorizontalToolbar appConfig={layout}/>
+                        <div>
+                </header>        
 
-                <div  class="   {tools_visibility} 
-                                w-screen sm:w-[calc(100vw-40px)] 
-                                h-[40px] 
-                                left-0 sm:left-[40px]     
-                                top-[40px] sm:top-0
-                                {lg_content_area_horizontal_dim}
-                                z-10 overflow-hidden " >
 
-                    <Operations/>
+                <!--HorizontalToolbar /-->
+                <!--#######################################################-->
+                <!--##  VERTICAL TOOLBAR                 ##################-->
+                <!--#######################################################-->
+                <div  class="hidden sm:block fixed left-0 top-0 w-[50px] sm:w-[40px] h-screen z-20 inset-0   overflow-hidden">
+                    <div class="sticky top-0 flex h-full w-10 bg-stone-800 dark:bg-stone-950 flex-col items-center text-stone-100 shadow">
+                        <VerticalToolbar appConfig={layout}/>
+                    </div>    
                 </div>
 
-                <div class="{fab_visibility} right-3 {fab_bottom} mb-1 cursor-pointer z-10">
-                    <Fab/>
-                </div>
+                <!--VerticalToolbar /-->
 
                 <!--#######################################################-->
-                <!--##  CONTENT                          ##################-->
+                <!--##  MAIN SIDE BAR                    ##################-->
                 <!--#######################################################-->
-                <!-- fixed => relative, content-height => min content height -- -->
-                <div    id="__hd_svelte_main_content_container"
-                        class="relative left-0  w-screen  
-                                sm:left-[40px]  sm:w-[calc(100vw-40px)]    
-                                {content_top}
-                                {content_height}
-                                {lg_content_area_horizontal_dim}
-                                z-0 overflow-x-hidden overflow-y-auto" 
-                                >
-                        <Configurable config={layout.mainContent} min_h_class="min-h-full">
+                {#if true}
+                {@const sidebar_left = $sidebar_left_pos==0 ? "left-0" : "left-[50px]"}
+                {@const sidebar_small_width = $sidebar_left_pos==0 ? "w-full" : "w-[calc(100vw-50px)]"}
+
+                <div  class="{main_side_panel_visibility}  
+                                {sidebar_left}  sm:left-[40px]
+                                top-[50px]  sm:top-0 
+                                h-[calc(100vh-50px)] sm:h-full {lg_main_sidebar_height}
+                                {sidebar_small_width} sm:w-[320px] 
+                                z-20 overflow-x-hidden">
+
+                    <div class=" bg-stone-50 w-full h-full dark:bg-stone-800 overflow-y-auto py-0 px-0">
+                        <Configurable config={layout.sidebar[visible_sidebar]}>
                             <div slot='alt'></div>
                         </Configurable>
+                    </div>
                 </div>    
+                {/if}
+
+                <!-- ! below overflow-x-clip prevents horizontal scrollbar when vertical scrollbar is visible. Default
+                    behaviour is the content expand vertically, and only vertical scrollbar can be visible.
+                    When content on the main page needs to be expanded horizontally (like kanban chart for example) then
+                    that component should define overflow-x-* itself -->
+                <section on:click|capture={auto_hide_sidebar} class="">
+
+                    <!--###########################################################-->
+                    <!--##  HORIZONTAL TOOLS                 ######################-->
+                    <!--###########################################################-->
+
+                    <div  class="   {tools_visibility} 
+                                    w-screen sm:w-[calc(100vw-40px)] 
+                                    h-[40px] 
+                                    left-0 sm:left-[40px]     
+                                    top-[40px] sm:top-0
+                                    {lg_content_area_horizontal_dim}
+                                    z-10 overflow-hidden " >
+
+                        <Operations/>
+                    </div>
+
+                    <div class="{fab_visibility} right-3 {fab_bottom} mb-1 cursor-pointer z-10">
+                        <Fab/>
+                    </div>
+
+                    <!--#######################################################-->
+                    <!--##  CONTENT                          ##################-->
+                    <!--#######################################################-->
+                    <!-- fixed => relative, content-height => min content height -- -->
+                    <div    id="__hd_svelte_main_content_container"
+                            class="relative left-0  w-screen  
+                                    sm:left-[40px]  sm:w-[calc(100vw-40px)]    
+                                    {content_top}
+                                    {content_height}
+                                    {lg_content_area_horizontal_dim}
+                                    z-0 overflow-x-hidden overflow-y-auto" 
+                                    >
+                            <Configurable config={layout.mainContent} min_h_class="min-h-full">
+                                <div slot='alt'></div>
+                            </Configurable>
+                    </div>    
 
 
 
-                <!--###########################################################-->
-                <!--##  BOTTOM SIDEBAR          ###############################-->
-                <!--###########################################################-->
+                    <!--###########################################################-->
+                    <!--##  BOTTOM SIDEBAR          ###############################-->
+                    <!--###########################################################-->
 
-                <div  class="{bottom_bar_visibility} left-0 bottom-0 w-screen h-[240px] z-20 overflow-y-hidden overflow-x-auto 
-                            sm:left-[40px] sm:w-[100vw-40px] " >
-                        <Configurable config={layout.selectionDetails} >
-                            <div slot="alt"></div>
-                        </Configurable>
-                    
-                </div>    
+                    <div  class="{bottom_bar_visibility} left-0 bottom-0 w-screen h-[240px] z-20 overflow-y-hidden overflow-x-auto 
+                                sm:left-[40px] sm:w-[100vw-40px] " >
+                            <Configurable config={layout.selectionDetails} >
+                                <div slot="alt"></div>
+                            </Configurable>
+                        
+                    </div>    
 
-                <!-- #########################################################-->
-                <!-- ## MODAL DIALOG #########################################-->
-                <!-- #########################################################-->
-                <div id="__hd_svelte_modal_root" class="z-30">
-                    <!-- after <Modal/> component is shown it's rettached to above div
-                        see: modal.svelte afterUpdate -->
-                </div>
+                    <!-- #########################################################-->
+                    <!-- ## MODAL DIALOG #########################################-->
+                    <!-- #########################################################-->
+                    <div id="__hd_svelte_modal_root" class="z-30">
+                        <!-- after <Modal/> component is shown it's rettached to above div
+                            see: modal.svelte afterUpdate -->
+                    </div>
 
-            </section>
+                </section>
 
+            </div>
         </div>
-    </div>
-</AuthorizedView>
+    {/key}
+<!--/AuthorizedView-->
 
 <style lang="scss">
 

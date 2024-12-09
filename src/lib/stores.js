@@ -11,6 +11,7 @@ export const pageToolbarOperations = writable([]);
 export const page_title = writable('');
 export const nav_titles = writable({});
 export const mainContentPageReloader = writable(1);
+export const wholeAppReloader = writable(1)
 
 export function setNavigatorTitle(key, title)
 {
@@ -36,6 +37,13 @@ export function reloadMainContentPage()
     let val = get(mainContentPageReloader);
     val += 1;
     mainContentPageReloader.set(val);
+}
+
+export function reloadWholeApp()
+{
+    let val = get(wholeAppReloader);
+    val += 1;
+    wholeAppReloader.set(val);
 }
 
 

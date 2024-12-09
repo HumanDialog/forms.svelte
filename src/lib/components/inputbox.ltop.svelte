@@ -20,18 +20,28 @@
     export let placeholder = 'pl'
     export let pushChangesImmediately = true;
 
+    export let required = false;
+
     export  let s = 'sm'
     export  let c = ''
-    export  let validateCb = undefined;
+    export  let validation = undefined;
     export function validate()
     {
-        if(!validateCb)
+        if(!validation)
         {
-            invalid = false;
-            return true;
+            if(required)
+            {
+                invalid = !val;
+                return !invalid;   
+            }
+            else
+            {
+                invalid = false;
+                return true;
+            }
         }
 
-        invalid = !validateCb(val);
+        invalid = !validation(val);
         return !invalid;
     } 
 

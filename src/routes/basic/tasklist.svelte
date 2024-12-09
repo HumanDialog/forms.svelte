@@ -1,5 +1,5 @@
 <script>
-    import {reef} from '@humandialog/auth.svelte'
+    import {reef, session} from '@humandialog/auth.svelte'
     import {    Spinner, 
                 Page, 
                 Icon, 
@@ -25,6 +25,7 @@
     let isArchivedTasks = false;
     let assocName = 'Tasks'
     let listTitle = ''
+    let gid = ''
 
     let users = [];
 
@@ -42,7 +43,7 @@
         if(users.length == 0)
         {
             //let res = await reef.get('/app/Users')
-            let res = await reef.post('space/query',
+            let res = await reef.post('group/query',
                             {
                                 Id: 1,
                                 Name: 'Users',
@@ -72,7 +73,9 @@
         isArchivedTasks = params.has('archivedTasks')
 
         assocName = (isArchivedTasks || isArchivedList) ? 'ArchivedTasks' : 'Tasks';
-        listPath = isArchivedList ? `/space/ArchivedLists/${listId}` : `/space/Lists/${listId}`;
+        listPath = isArchivedList ? `/group/ArchivedLists/${listId}` : `/group/Lists/${listId}`;
+
+        gid = $session.tid
             
         await fetchData()
     }
@@ -223,7 +226,7 @@
 
     function switchToKanban()
     {
-        push(`/listboard/${listId}`);
+        push(`/listboard/${listId}?gid=${gid}`);
     }
 
     function getEditOperations(task)
@@ -323,7 +326,7 @@
                 contextMenu={taskContextMenu}
                 orderAttrib='ListOrder'
                 bind:this={listComponent}>
-            <ListTitle a='Title' hrefFunc={(task) => `/task/${task.Id}`}/>
+            <ListTitle a='Title' hrefFunc={(task) => `/task/${task.Id}?gid=${gid}`}/>
             <ListSummary a='Summary'/>
             <ListInserter action={addTask} icon/>
 
@@ -352,7 +355,7 @@
         {#if !isArchivedTasks}
             {#if !isArchivedList}
                 <div class="ml-3 mt-20 mb-10">
-                    <a  href={`#/tasklist/${listId}?archivedTasks`} 
+                    <a  href={`#/tasklist/${listId}?archivedTasks&gid=${gid}`} 
                         class="hover:underline">
                             Show archived tasks 
                             <div class="inline-block mt-1.5 w-3 h-3"><FaChevronRight/></div>

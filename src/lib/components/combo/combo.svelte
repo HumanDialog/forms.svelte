@@ -35,6 +35,7 @@
     export let pushChangesImmediately: boolean = true;
     export let hasNone :boolean = isAssociation;
     
+    let userClass = $$restProps.class ?? '';
 
     let is_compact :boolean = getContext('rIs-table-component') || compact;
     
@@ -162,6 +163,7 @@
             source_fetched(definition.collection);
 
         //tick_request_internal = tick_request_internal + 1;
+        tick_request_internal = tick_request_internal + 1;
         
         return () => {}
     })
@@ -198,7 +200,6 @@
     {
         if(!can_be_activated)
             return;
-        
         
         if(!combo)
             return;
@@ -273,11 +274,11 @@
         }
 
         
-        /*console.log('dropdown_position', dropdown_position, rect, client_rect)
+        console.log('dropdown_position', dropdown_position, rect, client_rect)
         console.log('preferred_palette_height', preferred_palette_height)
         console.log('bottom_space', bottom_space)
         console.log('top_space', top_space)
-        */
+        
 
         is_dropdown_open = true;
         
@@ -390,16 +391,26 @@
         //console.log('on_choose')
         hide();
 
+        let success: boolean = true;
+
         if(onSelect)
         {
             if(itm == new_item_option)
-                await onNewItemCreated(itm.Key, itm.Name);
+            {
+                let res = await onNewItemCreated(itm.Key, itm.Name);
+                if(res !== undefined)
+                    success = !!res;
+            }
             else
             {
+                let res;
                 if(itm)
-                    await onSelect(item, itm.Key, itm.Name);
+                    res = await onSelect(item, itm.Key, itm.Name);
                 else
-                    await onSelect(item, null, null);
+                    res = await onSelect(item, null, null);
+
+                if(res !== undefined)
+                    success = !!res;
             }
             tick_request_internal = tick_request_internal + 1;
         }
@@ -508,7 +519,7 @@
             }
         }
 
-        if(!!changed)
+        if(!!changed && success)
         {
             if(itm)
                 changed(itm.Key, itm.Name); 
@@ -762,11 +773,13 @@
     {
         if(tick_request_internal <= last_tick_internal)
             return;
-        
+
         last_tick_internal = tick_request_internal;
 
         sel_item = selected_item(item, a);
         combo_text = get_combo_text();
+
+        //console.log('combo setup view', JSON.stringify(definition), JSON.stringify(sel_item), a, combo_text)
         
         if(textbox)
             textbox.innerHTML = combo_text;
@@ -793,7 +806,7 @@
 {#if true}
     {@const c = setup_view(item, a, tick_request_internal) }
     
-<div class="{cs} max-w-full inline-block"
+<div class="{cs} max-w-full inline-block {userClass}"
     on:focusout={on_focus_out}
     bind:this={root_element}>
     {#if !is_compact && label.length > 0}

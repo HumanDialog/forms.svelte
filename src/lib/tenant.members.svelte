@@ -2,7 +2,8 @@
     import {    FaUserPlus,
                 FaUserMinus,
                 FaPen,
-                FaInfoCircle} from 'svelte-icons/fa'
+                FaInfoCircle,
+                FaChevronDown} from 'svelte-icons/fa'
     
     import Page from './page.svelte'
     import List from './components/list/list.svelte'
@@ -13,11 +14,14 @@
     import ListStaticProperty from './components/list/list.static.svelte'
     import Input from './components/inputbox.ltop.svelte';
     import Icon from "./components/icon.svelte";
+    import Combo from './components/combo/combo.svelte'
 	import Modal from './modal.svelte'
 	import Checkbox from '$lib/components/checkbox.svelte';
     import {Popover, Alert} from 'flowbite-svelte'
 	import { reef } from '@humandialog/auth.svelte';
 	import { ComboSource } from '$lib';
+    import {removeAt} from './utils'
+    import {showMenu} from '$lib/components/menu'
 	
 
     // ==============================================================================
@@ -26,9 +30,9 @@
     export let nameAttrib = "Name";
     export let emailAttrib = "login";
     export let refAttrib = "$ref";
-    export let showFiles = true;
+    export let showFiles = false;
     //export let show_admin = true;
-    export let showAccessGroups = true;
+    export let showAccessRoles = false;
 
     // ===============================================================================
   
@@ -42,18 +46,31 @@
 
     let reef_users = [];
     let new_reef_user_id = 1;
-    let access_groups = [];
+    let access_roles = [];
 
     let fake_users;
 
+    const authAccessKinds = [
+        { name: 'No auth access', key: 0 },
+        { name: 'Read auth access', key: 1 },
+        { name: 'Can invite others', key: 3 },
+        { name: 'Full auth access', key: 7 },
+    ]
+
+    const filesAccessKinds = [
+        { name: 'Can read files', key: 0 },
+        { name: 'Can write files', key: 1 },
+        { name: 'Full files access', key: 3 },
+    ]
+
     async function init()
     {
-        if(showAccessGroups)
+        if(showAccessRoles)
         {
-            let groups = await reef.get('/sys/list_access_groups')
-            access_groups = [];
-            if(groups)
-                groups.forEach( gname => access_groups.push({name: gname}));
+            let roles = await reef.get('/sys/list_access_roles')
+            access_roles = [];
+            if(roles)
+                roles.forEach( gname => access_roles.push({name: gname}));
         }
 
 
@@ -70,7 +87,7 @@
                         [refAttrib]: u[refAttrib],
                         auth_group: 0,
                         files_group :0,
-                        app_group: "",
+                        acc_role: "",
                         //other: "",
                         avatar_url : "",
                         invitation_not_accepted: false,
@@ -102,6 +119,7 @@
             if(handled_no == reef_users.length)
             {
                 //console.log('reload', reef_users)
+                //reef_users = [...reef_users]
                 
                 list?.reload(reef_users);
             }
@@ -115,10 +133,10 @@
         user.files_group = info.files_group ?? 0;
         user.avatar_url = info.avatar_url ?? "";
         user.access_details = info.access_details
-        user.app_group = info.access_details?.group ?? '';
+        user.acc_role = info.access_details?.role ?? '';
         user.removed = info.removed ?? false;
         user.invitation_not_accepted = info.invitation_not_accepted ?? false;
-        console.log(info)
+        //console.log(info)
 
         if(user.removed)
             user.membership_tag = "Removed";
@@ -141,24 +159,13 @@
     let new_user = {
         name: '',
         email: '',
-        maintainer: false
+        auth_group: 0,
+        files_group: 0,
+        acc_role: ''
     }
 
     let name_input;
     let email_input;
-
-    async function delete_user(user)
-    {
-        let email = user[emailAttrib];
-        
-        let removed_user_details = await reef.get('/sys/kick_out_user?email=' + email);
-        if(removed_user_details)
-        {
-            //let removed_user = reef_users.find( u => u[emailAttrib] == user[emailAttrib])
-            set_user_info(user, removed_user_details);
-            list?.rereder();
-        }
-    }
 
     async function on_name_changed(user, name, property)
     {
@@ -179,56 +186,92 @@
         if(user.auth_group != flags)
         {
             let email = user[emailAttrib];
-            let info = await reef.get(`sys/set_user_details?email=${email}&auth_group=${flags}`)
-            if(info)
+            const res = await reef.fetch(`/json/anyv/sys/set_user_details?email=${email}&auth_group=${flags}`)
+            if(res.ok)
             {
+                const response_string = await res.text();
+                const info = JSON.parse(response_string);
+                
                 user.auth_group = flags;
 
                 set_user_info(user, info)
                 list?.rereder();
+                return true;
+            }
+            else
+            {
+                const err_msg = await res.text();
+                alerts.push(err_msg)
+                alerts = [...alerts];
+                return false;
             }
         }
+        return false;
     }
 
     async function on_change_files_access(user, flags, name)
     {
         if(user.files_group != flags)
         {
-            user.files_group = flags;
-            
             let email = user[emailAttrib];
-            let info = await reef.get(`sys/set_user_details?email=${email}&files_group=${flags}`)
-            if(info)
+            const res = await reef.fetch(`/json/anyv/sys/set_user_details?email=${email}&files_group=${flags}`)
+            if(res.ok)
             {
+                const response_string = await res.text();
+                const info = JSON.parse(response_string);
+                
+                user.files_group = flags;
+
                 set_user_info(user, info)
                 list?.rereder();
+                return true;
+            }
+            else
+            {
+                const err_msg = await res.text();
+                alerts.push(err_msg)
+                alerts = [...alerts];
+                return false;
             }
         }
+        return false;
     }
 
-    async function on_change_access_group(user, group, name)
+    async function on_change_access_role(user, role, name)
     {
-        if(user.access_details && user.access_details.group != group)
+        if(user.access_details && user.access_details.role != role)
         {
-            user.access_details.group = group;   
-            user.app_group = group
-            console.log(user)
-
-            const details = JSON.stringify(user.access_details);
-
             const email = user[emailAttrib];
-            const info = await reef.get(`sys/set_user_details?email=${email}&access_details=${details}`)
-            if(info)
+            const res = await reef.fetch(`/json/anyv/sys/set_user_role?email=${email}&role=${role}`)
+            if(res.ok)
             {
+                const response_string = await res.text();
+                const info = JSON.parse(response_string);
+                
+                user.access_details.role = role;   
+                user.acc_role = role
+
                 set_user_info(user, info)
                 list?.rereder();
+                return true;
+            }
+            else
+            {
+                const err_msg = await res.text();
+                alerts = [err_msg, ...alerts];
+                return false;
             }
         }
+        return false;
     }
     
     function create_new_user()
     {
+        if(showAccessRoles)
+            new_user.acc_role = access_roles[0].name
+
         create_new_user_enabled = true;
+
     }
 
     let page_operations=[
@@ -251,14 +294,14 @@
                 action: (focused) => { list.edit(user, 'Privileges') }
             }];
 
-        if(showAccessGroups)
+        if(showAccessRoles)
         {
             operations.push({
                 separator: true
             });
 
             operations.push({
-                caption: 'Access group',
+                caption: 'Access role',
                 action: (focused) => { list.edit(user, 'Access') }
             });
         }
@@ -302,7 +345,7 @@
         operations.push({
                             caption: '',
                             icon: FaUserMinus,
-                            action: (focused) => delete_user(user)
+                            action: (focused) => askToRemove(user)
                         });
 
         return operations;
@@ -349,11 +392,7 @@
         
     }
 
-    function is_valid_name(s)
-    {
-        return !!s;
-    }
-
+    
     function add_fake_users(reef_users)
     {
         const names = [
@@ -430,42 +469,66 @@
         if(!email_input?.validate())
             return;
 
-        let result = await reef.post('/sys/invite_user',
-                        {
-                            email: new_user.email,
-                            admin: new_user.maintainer,
-                            set:
-                            {
-                                [nameAttrib]: new_user.name,
-                                [emailAttrib]: new_user.email
-                            }
+        try {
+                const res = await reef.fetch('/json/anyv/sys/invite_user', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                email: new_user.email,
+                                auth_group: new_user.auth_group,
+                                files_group: new_user.files_group,
+                                role: new_user.acc_role,
+                                set:
+                                {
+                                    [nameAttrib]: new_user.name,
+                                    [emailAttrib]: new_user.email
+                                }
+                            })
                         })
-        if(result)
-        {
-            let created_user = result.User;
-            let new_reef_user = {
-                [nameAttrib]: created_user[nameAttrib],
-                [emailAttrib]: created_user[emailAttrib],
-                [refAttrib]: created_user[refAttrib]
-            }
 
-            let details = await reef.get(`/sys/user_details?email=${new_reef_user[emailAttrib]}`)
-            set_user_info(new_reef_user, details);
+                if(res.ok)
+                {
+                    const result = await res.json();
+                    let created_user = result.User;
+                    let new_reef_user = {
+                        [nameAttrib]: created_user[nameAttrib],
+                        [emailAttrib]: created_user[emailAttrib],
+                        [refAttrib]: created_user[refAttrib]
+                    }
 
-            reef_users = [...reef_users, new_reef_user]
-            list?.reload(reef_users);
+                    let details = await reef.get(`/sys/user_details?email=${new_reef_user[emailAttrib]}`)
+                    set_user_info(new_reef_user, details);
+
+                    let sameUserIdx = reef_users.findIndex(ru => ru[refAttrib] == new_reef_user[refAttrib])
+                    if(sameUserIdx >= 0)
+                    {
+                        reef_users[sameUserIdx] = new_reef_user;
+                        reef_users = [... reef_users];
+                    }
+                    else
+                    {
+                        reef_users = [...reef_users, new_reef_user]
+                    }
+
+                    
+                    list?.reload(reef_users);
+                }
+                else
+                {
+                    const err_msg = await res.text();
+                    alerts = [err_msg, ...alerts];
+                }
         }
-        else
+        catch (err)
         {
-            //todo: toast
-            window.alert('Something went wrong');
+            alerts = [err, ...alerts];
         }
-
-
 
         new_user.name = '';
         new_user.email = '';
-        new_user.maintainer = false;
+        new_user.auth_group = 0;
+        new_user.files_group = 0;
+        new_user.acc_role = ''
+
         create_new_user_enabled = false;
     }
 
@@ -473,10 +536,54 @@
     {
         new_user.name = '';
         new_user.email = '';
-        new_user.maintainer = false;
+        new_user.auth_group = 0;
+        new_user.files_group = 0;
+        new_user.acc_role = ''
+
         create_new_user_enabled = false;
     }
 
+    let alerts = []
+
+    let removeModal;
+    let userToRemove;
+    function askToRemove(user)
+    {
+        userToRemove = user;
+        removeModal.show()
+    }
+
+    async function removeUser()
+    {
+        if(!userToRemove)
+            return;
+
+        let email = userToRemove[emailAttrib];
+        try{
+
+            const res = await reef.fetch('/json/anyv/sys/kick_out_user?email=' + email)
+            removeModal.hide();
+
+            if(res.ok)
+            {
+                const removed_user_details = await res.json();
+                //let removed_user = reef_users.find( u => u[emailAttrib] == user[emailAttrib])
+                set_user_info(userToRemove, removed_user_details);
+                list?.rereder();
+            }
+            else
+            {
+                const err = await res.text()
+                alerts = [err, ...alerts];
+            }
+        }
+        catch(err)
+        {
+            alerts = [err, ...alerts];
+        }
+    }
+
+    
 </script>
 
 <Page   self={data_item} 
@@ -484,6 +591,23 @@
         toolbarOperations={page_operations}
         clearsContext='props sel'>
     <!--a href="/" class="underline text-sm font-semibold ml-3"> &lt; Back to root</a-->
+
+    <!-- alerts -->
+    <section class="absolute left-2 sm:left-auto sm:right-2 bottom-2 flex flex-col gap-2">
+        {#each alerts as alert, idx}
+            <Alert class="bg-red-900/40  shadow-lg shadow-stone-400 dark:shadow-black flex flex-row">
+                <p>
+                    {alert}
+                </p>
+                <button class="font-bold  ml-auto"
+                        on:click={() => {alerts = removeAt(alerts, idx)}}>
+                    x
+                </button>
+            </Alert>    
+        {/each}
+    </section>
+    
+    
 
     {#if reef_users && reef_users.length > 0}
     <List       objects={reef_users} 
@@ -497,30 +621,29 @@
             <ListStaticProperty name="Membership" a="membership_tag"/>
             
             <ListComboProperty name='Privileges' a='auth_group' onSelect={on_change_privileges}>
-                <ComboItem name='No auth access'       key={0}  />
-                <ComboItem name='Can see users'    key={1}  />
-                <ComboItem name='Can invite others' key={3}  />
-                <ComboItem name='Full auth access' key={7}  />
+                {#each authAccessKinds as kind}
+                    <ComboItem name={kind.name} key={kind.key}  />    
+                {/each}
             </ListComboProperty>
 
-            {#if showAccessGroups}
-                <ListComboProperty name='Access' a='app_group' onSelect={on_change_access_group}>
-                    <ComboSource objects={access_groups} name='name' key='name'/>
+            {#if showAccessRoles}
+                <ListComboProperty name='Access' a='acc_role' onSelect={on_change_access_role}>
+                    <ComboSource objects={access_roles} name='name' key='name'/>
                 </ListComboProperty>
             {/if}
 
             {#if showFiles}
             <ListComboProperty name='Files' a='files_group' onSelect={on_change_files_access}>
-                <ComboItem name="No files access"       key={0}  />
-                <ComboItem name='Can read files'   key={1}  />
-                <ComboItem name='Can write files'  key={2}  />
-                <ComboItem name='Full files access'    key={3}  />
+                {#each filesAccessKinds as kind}
+                    <ComboItem name={kind.name} key={kind.key}  />    
+                {/each}
             </ListComboProperty>
             {/if}
 
             
     </List>
     {/if}
+    
 </Page>
 
 <Modal  bind:open={create_new_user_enabled}
@@ -529,21 +652,21 @@
         onOkCallback={on_new_user_requested}
         onCancelCallback={on_new_user_canceled}
         icon={FaUserPlus}>
-            <Input  label='Name' 
-                    placeholder='' 
-                    self={new_user} 
-                    a="name"
-                    validateCb={is_valid_name}
-                    bind:this={name_input}/>
             
             <Input  label='E-mail' 
                     placeholder='' 
                     self={new_user} 
                     a="email" 
-                    validateCb={is_valid_email_address}
+                    validation={is_valid_email_address}
                     bind:this={email_input}/>
 
-            <Checkbox class="mt-2 text-xs font-normal" self={new_user} a="maintainer">
+            <Input  label='Name' 
+                    placeholder='Optional' 
+                    self={new_user} 
+                    a="name"
+                    bind:this={name_input}/>
+
+            <!--Checkbox class="mt-2 text-xs font-normal" self={new_user} a="maintainer">
                 <div class="flex flex-row items-center">
                     <span class="">Maintainer</span>
                     <Icon id="b1" size={4} component={FaInfoCircle} class="text-stone-400 ml-5 pt-0 mt-1"/>
@@ -551,7 +674,132 @@
                         Means that the invited user will be able to add/remove others and manage permissions in this organization.
                     </Popover>
                 </div>
-            </Checkbox>
+            </Checkbox-->
+
+            <!-- There is problem with dropdown/combo on dialogs (nested fixed stacks) -->
+            <!--Combo class="mt-2" label='Privileges' a='auth_group' self={new_user} >
+                <ComboItem name='No auth access'    key={0}  />
+                <ComboItem name='Read auth access'  key={1}  />
+                <ComboItem name='Can invite others' key={3}  />
+                <ComboItem name='Full auth access'  key={7}  />
+            </Combo-->
+
+            <section class="mt-2 grid grid-cols-2 gap-2">
+                <div class="flex flex-col">
+                    <label for="new_user_auth_group"
+                            class="text-xs">
+                        Auth access
+                    </label>
+                    <button id="new_user_auth_group"
+                            class=" w-full mt-0.5
+                                    bg-stone-50 border border-stone-300 text-stone-900 text-base sm:text-sm rounded-lg 
+                                    focus:ring-primary-600 focus:border-primary-600 pb-0.5 pt-0.5 px-2.5 dark:bg-stone-700 
+                                    dark:border-stone-600 dark:placeholder-stone-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                            on:click={(e) => {
+                        let owner = e.target;
+                        while(owner && owner.tagName != 'BUTTON')
+                            owner = owner.parentElement
+
+                        if(!owner)
+                            return;
+
+                        let options = [];
+                        authAccessKinds.forEach(k => options.push({
+                            caption: k.name,
+                            action: (f) => { new_user.auth_group=k.key}
+                        }));
+
+                        let rect = owner.getBoundingClientRect();
+                        let pt = new DOMPoint(rect.left, rect.bottom)
+                        showMenu(pt, options);   
+                    }}>
+                        {authAccessKinds.find(k => k.key == new_user.auth_group)?.name}
+                        <span class="w-3 h-3 inline-block text-stone-700 dark:text-stone-300 ml-2 mt-2 sm:mt-1">
+                            <FaChevronDown/>
+                        </span>
+                    </button>
+                </div>
+
+                {#if showFiles}
+                    <div class="flex flex-col">
+                        <label for="new_user_auth_group"
+                                class="text-xs">
+                            Files access
+                        </label>
+                        <button 
+                                class=" mt-0.5 w-full
+                                        bg-stone-50 border border-stone-300 text-stone-900 text-base sm:text-sm rounded-lg 
+                                        focus:ring-primary-600 focus:border-primary-600 pb-0.5 pt-0.5 px-2.5 dark:bg-stone-700 
+                                        dark:border-stone-600 dark:placeholder-stone-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                on:click={(e) => {
+                            let owner = e.target;
+                            while(owner && owner.tagName != 'BUTTON')
+                                owner = owner.parentElement
+
+                            if(!owner)
+                                return;
+
+                            let options = [];
+                            filesAccessKinds.forEach(k => options.push({
+                                caption: k.name,
+                                action: (f) => { new_user.files_group=k.key}
+                            }));
+
+                            let rect = owner.getBoundingClientRect();
+                            let pt = new DOMPoint(rect.left, rect.bottom)
+                            showMenu(pt, options);   
+                        }}>
+                            {filesAccessKinds.find(k => k.key == new_user.files_group)?.name}
+                            <span class="w-3 h-3 inline-block text-stone-700 dark:text-stone-300 ml-2 mt-2 sm:mt-1">
+                                <FaChevronDown/>
+                            </span>
+                        </button>
+                    </div>
+                {/if}
+
+                {#if showAccessRoles}
+                    <div class="flex flex-col">
+                        <label for="new_user_auth_group"
+                                class="text-xs">
+                            App role
+                        </label>
+                        <button 
+                                class=" mt-0.5 w-full
+                                        bg-stone-50 border border-stone-300 text-stone-900 text-base sm:text-sm rounded-lg 
+                                        focus:ring-primary-600 focus:border-primary-600 pb-0.5 pt-0.5 px-2.5 dark:bg-stone-700 
+                                        dark:border-stone-600 dark:placeholder-stone-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                on:click={(e) => {
+                            let owner = e.target;
+                            while(owner && owner.tagName != 'BUTTON')
+                                owner = owner.parentElement
+
+                            if(!owner)
+                                return;
+
+                            let options = [];
+                            access_roles.forEach(k => options.push({
+                                caption: k.name,
+                                action: (f) => { new_user.acc_role=k.name}
+                            }));
+
+                            let rect = owner.getBoundingClientRect();
+                            let pt = new DOMPoint(rect.left, rect.bottom)
+                            showMenu(pt, options);   
+                        }}>
+                            {new_user.acc_role ? new_user.acc_role : '<none>'}
+                            <span class="w-3 h-3 inline-block text-stone-700 dark:text-stone-300 ml-2 mt-2 sm:mt-1">
+                                <FaChevronDown/>
+                            </span>
+                        </button>
+                    </div>
+                {/if}
+            </section>
 </Modal>
 
-
+<Modal  title="User removal"
+        content="Are you sure you want to remove {userToRemove ? userToRemove[nameAttrib] : 'user'} from the group?"
+        icon={FaUserMinus}
+        okCaption='Remove'
+        onOkCallback={removeUser}
+        bind:this={removeModal}
+        />

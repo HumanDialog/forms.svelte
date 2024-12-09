@@ -18,6 +18,7 @@
 
     let user = null;
     let listComponent;
+    let gid = ''
 
     let lists = [];
     const STATE_FINISHED = 1000;
@@ -34,11 +35,12 @@
 
         if(lists.length == 0)
         {
-            let res = await reef.get('/space/Lists')
+            let res = await reef.get('/group/Lists')
             if(res)
                 lists = res.TaskList;
         }
         
+        gid = $session.tid;
         
         await fetchData()
     }
@@ -250,7 +252,7 @@
                 contextMenu={taskContextMenu}
                 orderAttrib='UserOrder'
                 bind:this={listComponent}>
-            <ListTitle a='Title' hrefFunc={(task) => `/task/${task.Id}`}/>
+            <ListTitle a='Title' hrefFunc={(task) => `/task/${task.Id}?gid=${gid}`}/>
             <ListSummary a='Summary'/>
             <ListInserter action={addTask} icon/>
 

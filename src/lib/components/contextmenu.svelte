@@ -92,7 +92,7 @@
         visible = true;
         
         operations = [..._operations];
-        focused_index = 0;
+        focused_index = operations.findIndex(o => !o.disabled)
 
         const is_root_menu = (owner_menu_item == undefined)
 
@@ -257,6 +257,10 @@
 
     function focus_menu_item(index :number)
     {
+        const operation = operations[index]
+        if(operation.disabled)
+            return;
+
         focused_index = index;
         let element :HTMLElement = menu_items[focused_index];
         element.focus();
@@ -332,7 +336,11 @@
             {@const icon_placeholder_with_desc = mobile ? 14 : 12}
             {@const icon_placeholder_size = operation.description ? icon_placeholder_with_desc : icon_placeholder_without_desc}
             {@const menu_item_id = menu_items_id_prefix + index}
-            {@const active = ((!mobile) && (focused_index == index)) ? 'bg-stone-200 dark:bg-stone-600' : ''}
+            {@const isTop = index==0}
+            {@const isBottom = index == operations.length-1}
+            {@const isFocused = index == focused_index}
+            {@const clipFocusedBorder = isFocused ? (isTop ? 'rounded-t-lg' : (isBottom ? 'rounded-b-lg' : '')) : ''}
+            {@const active = ((!mobile) && isFocused) ? `bg-stone-200 dark:bg-stone-600 ${clipFocusedBorder}` : ''}
             {@const has_submenu = operation.menu !== undefined && operation.menu.length > 0}
             
             <button class="font-medium m-0 py-2 pr-4 text-lg sm:text-sm w-full text-left flex flex-row cursor-context-menu {active} focus:outline-none"
@@ -341,7 +349,9 @@
                     on:click|stopPropagation={(e) => { execute_action(operation, index) } } 
                     on:mouseenter = {(e) => {on_mouse_move(index)}}
                     on:keydown|stopPropagation={(e) => on_keydown(e, operation, index)}
-                    on:mousedown={mousedown}>
+                    on:mousedown={mousedown}
+                    disabled={operation.disabled}
+                    class:opacity-60={operation.disabled}>
                     
                 <div class="flex items-center justify-center mt-1 sm:mt-0.5" style:width={`${icon_placeholder_size*0.25}rem`}>
                     {#if operation.icon}
@@ -351,7 +361,7 @@
                     {/if}
                 </div>
                 <div class="">
-                    <p>{operation.caption}</p>
+                    <p> {operation.caption}</p>
                     {#if operation.description}
                         {@const shortcut_width_px = operation.shortcut ? 80 : 0}
                         <p  class="text-sm font-normal text-stone-900 dark:text-stone-500 truncate inline-block"

@@ -30,6 +30,7 @@
 
     async function onParamsChanged(...args)
     {
+        //console.log('task: ', $location)
         const segments = $location.split('/');
         const foundIdx = segments.findIndex( s => s == 'task');
         if(foundIdx < 0)
@@ -38,13 +39,13 @@
         const taskId = segments[segments.length-1]
         taskRef = `./Task/${taskId}`
 
-        allTags = await reef.get('/space/AllTags');
+        allTags = await reef.get('/group/AllTags');
 
-        let res = await reef.get('/space/Lists?fields=$ref,Name')
+        let res = await reef.get('/group/Lists?fields=$ref,Name')
         allLists = res.TaskList
 
         //res = await reef.get('/app/Users?fields=$ref,Name')
-        res = await reef.post('space/query',
+        res = await reef.post('group/query',
                             {
                                 Id: 1,
                                 Name: 'Users',
@@ -134,7 +135,7 @@
     async function onUpdateAllTags(newAllTags)
     {
         allTags  = newAllTags
-        await reef.post('space/set', { AllTags: allTags})
+        await reef.post('group/set', { AllTags: allTags})
     }
 
     async function onAddStep(txt, beforeIdx)

@@ -28,7 +28,7 @@
 	async function onParamsChanged(...args) {
 		if (users.length == 0) {
 			//const res = await reef.get('/app/Users?fields=$ref,Name');
-			const res = await reef.post('space/query',
+			const res = await reef.post('group/query',
                             {
                                 Id: 1,
                                 Name: 'Users',
