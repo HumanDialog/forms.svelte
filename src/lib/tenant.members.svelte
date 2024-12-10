@@ -18,7 +18,7 @@
 	import Modal from './modal.svelte'
 	import Checkbox from '$lib/components/checkbox.svelte';
     import {Popover, Alert} from 'flowbite-svelte'
-	import { reef } from '@humandialog/auth.svelte';
+	import { reef, session, signInHRef } from '@humandialog/auth.svelte';
 	import { ComboSource } from '$lib';
     import {removeAt} from './utils'
     import {showMenu} from '$lib/components/menu'
@@ -477,6 +477,9 @@
                                 auth_group: new_user.auth_group,
                                 files_group: new_user.files_group,
                                 role: new_user.acc_role,
+                                client_id: $session.configuration.client_id,
+                                redirect_uri: `${window.location.origin}/#/auth/cb`,
+                                state: `${window.location.origin}/#/auth/signin`,
                                 set:
                                 {
                                     [nameAttrib]: new_user.name,
