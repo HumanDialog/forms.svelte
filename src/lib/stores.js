@@ -76,7 +76,7 @@ export let sidebar_left_pos = writable(0)
 let has_saved_tools_visible = false;
 function create_tools_visible_store()
 {
-    if(localStorage.tools_visible_store != undefined)
+    if(localStorage.tools_visible_store !== undefined)
         has_saved_tools_visible = true;
     else
         has_saved_tools_visible = false;
@@ -87,9 +87,9 @@ function create_tools_visible_store()
 export const tools_visible_store = create_tools_visible_store();
 tools_visible_store.subscribe( (value) => { localStorage.tools_visible_store = (value ? 'true' : '') } );
 
-export function set_default_tools_visible(value)
+export function set_default_tools_visible(value, force)
 {
-    if(!has_saved_tools_visible)
+    if((!has_saved_tools_visible) || force)
         tools_visible_store.set(value)
 }
 

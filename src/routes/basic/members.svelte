@@ -1,6 +1,6 @@
 <script>
    
-	import { reef } from '@humandialog/auth.svelte';
+	import { reef, session, signInHRef } from '@humandialog/auth.svelte';
     import {MembersPage} from '$lib';
 	import { onMount } from 'svelte';
 	

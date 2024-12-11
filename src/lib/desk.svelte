@@ -70,17 +70,16 @@
             set_dark_mode_default(layout.dark.default)
     }
 
-    
-    if(layout.operations != undefined)
+    if(layout.operations !== undefined)
     {
         if(layout.operations.optional)
             layout.mainToolbar.operations = true;
 
-        if(layout.operations.default != undefined)
-            set_default_tools_visible(layout.operations.default)
+        if(layout.operations.default !== undefined)
+            set_default_tools_visible(layout.operations.default, !layout.operations.optional)
     }
     else
-        set_default_tools_visible(false)
+        set_default_tools_visible(false, true)
 
     //let autoRedirectToSignIn = layout.autoRedirectToSignIn ?? true
 

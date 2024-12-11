@@ -3,6 +3,7 @@
                 FaUserMinus,
                 FaPen,
                 FaInfoCircle,
+                FaUserSlash,
                 FaChevronDown} from 'svelte-icons/fa'
     
     import Page from './page.svelte'
@@ -267,8 +268,8 @@
     
     function create_new_user()
     {
-        if(showAccessRoles)
-            new_user.acc_role = access_roles[0].name
+        if(showAccessRoles && access_roles.length > 0)
+            new_user.acc_role = access_roles[0].name ?? ""
 
         create_new_user_enabled = true;
 
@@ -279,6 +280,14 @@
             icon: FaUserPlus,
             caption: '',
             action: (focused) => { create_new_user(); }
+        },
+        {
+            separator: true
+        },
+        {
+            icon: FaUserSlash,
+            caption: '',
+            action: (f) => {askToDeleteApplicationAccount();}
         }
     ]
 
@@ -586,6 +595,42 @@
         }
     }
 
+    let deleteAccountModal;
+    function askToDeleteApplicationAccount()
+    {
+        deleteAccountModal.show()
+    }
+
+    async function deleteApplicationAccount()
+    {
+        let my_email = $session.user.email ?? ""
+        if(!my_email)
+            return;
+
+        try{
+
+            const res = await reef.fetch(`json/anyv/sys/unregister_user?email=${my_email}`)
+            deleteAccountModal.hide();
+
+            if(res.ok)
+            {
+                $session.signout();
+                window.location.href = $signInHRef;
+            }
+            else
+            {
+                const err = await res.text()
+                alerts = [err, ...alerts];
+            }
+        }
+        catch(err)
+        {
+            deleteAccountModal.hide();
+
+            console.error(err)
+            alerts = [err, ...alerts];
+        }
+    }
     
 </script>
 
@@ -646,6 +691,7 @@
             
     </List>
     {/if}
+
     
 </Page>
 
@@ -805,4 +851,12 @@
         okCaption='Remove'
         onOkCallback={removeUser}
         bind:this={removeModal}
+        />
+
+<Modal  title="Delete app account"
+        content="Are you sure you want to delete your application account?"
+        icon={FaUserSlash}
+        okCaption='Delete'
+        onOkCallback={deleteApplicationAccount}
+        bind:this={deleteAccountModal}
         />
