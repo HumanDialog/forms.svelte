@@ -7,15 +7,17 @@
     import {FaUsersCog, FaSignOutAlt} from 'svelte-icons/fa/'
     import {push} from 'svelte-spa-router'
     
+    
 	import Tasklist from './tasklist.svelte';
     import Task from './task.svelte'
     import Board from './list.board.svelte';
     import MyTasks from './mytasks.svelte'
     import Members from './members.svelte'
     import Main from './main.svelte'
-    import Landing from './landing.svelte' 
-    import {Console} from '$lib'
     import Cookies from './cookies.svelte';
+    import Landing from './landing/root.svelte'
+    import {Console} from '$lib'
+    
 	
     const domain = 'objectreef.local:1996'
     const appId = 'octopus'

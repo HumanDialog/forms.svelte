@@ -5,9 +5,11 @@
                 SidebarList, 
                 SidebarItem, 
                 reloadMainContentPage, 
-                Modal} from '$lib'
-    import {FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaArchive} from 'svelte-icons/fa'
-    import {location} from 'svelte-spa-router'
+                Modal,
+                reloadWholeApp,
+                Input} from '$lib'
+    import {FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaArchive, FaUsers, FaPlus} from 'svelte-icons/fa'
+    import {location, push} from 'svelte-spa-router'
     import {reef, session} from '@humandialog/auth.svelte'
 	import { onMount } from 'svelte';
 
@@ -37,6 +39,8 @@
             if(res != null)
                 user = res.User;
         }
+
+        initGroupSelector();
 
         await fetchData()
     }
@@ -250,6 +254,121 @@
         })
     }
 
+    let showGroupsSwitchMenu = false;
+    let canAddNewGroup = false;
+    let currentGroup = {}
+
+    function initGroupSelector()
+    {
+        showGroupsSwitchMenu = $session.tenants.length > 1
+        if($session.configuration.tenant)
+        {
+            reef.getAppInstanceInfo().then( (instanceInfo =>{
+                if(instanceInfo?.is_public)
+                {
+                    showGroupsSwitchMenu = true;
+                    canAddNewGroup = true;
+                }
+            }))
+        }
+        
+        currentGroup = $session.tenants.find(t => t.id == $session.tid)
+        
+    }
+
+    function getGroupsMenu()
+    {
+        if(!showGroupsSwitchMenu)
+            return []
+        
+        let options = []
+        $session.tenants.forEach(tInfo =>
+            options.push({
+                caption: tInfo.name,
+                icon: FaUsers,
+                disabled: tInfo.id == $session.tid,
+                action: (f) => {
+                    $session.setCurrentTenantAPI(tInfo.url, tInfo.id)
+                    
+                    push('/')
+                    reloadWholeApp();
+                }
+            })
+        )
+
+        if(canAddNewGroup)
+        {
+            options.push({
+                separator: true
+            })
+            options.push({
+                caption: 'Add group',
+                icon: FaPlus,
+                action: (f) => launchNewGroupWizzard()
+            })
+        }
+        
+        return options;
+    }
+
+    let newGroupParams = {
+        name: ''
+    }
+
+    let newGroupModalVisible = false;
+    function launchNewGroupWizzard()
+    {
+        newGroupParams.name = '';
+        newGroupModalVisible = true;
+    }
+
+    async function onNewGroupOK()
+    {
+        const appId = $session.appId
+        if(!appId)
+        {
+            return onNewGroupCancel()
+        }
+        
+        const appInstanceId = $session.configuration.tenant
+        if(!appInstanceId)
+        {
+            return onNewGroupCancel()
+        }
+
+            const body = {
+                app_id: $session.appId,
+                tenant: $session.configuration.tenant,
+                org_name: newGroupParams.name
+            }
+
+            const res = await reef.fetch(  "/dev/create-group-for-me",
+                                {
+                                    method: 'post',
+                                    body : JSON.stringify(body)
+                                });
+
+            if(res.ok)
+            {
+                await reef.refreshTokens()
+                //reloadWholeApp()
+            }
+            else
+            {
+                const result = await res.json();  
+                console.error(result.error);
+            }
+
+        newGroupParams.name = '';
+        newGroupModalVisible = false;
+    }
+
+    function onNewGroupCancel()
+    {
+        newGroupParams.name = '';
+        newGroupModalVisible = false;
+    }
+
 </script>
 
 {#if sidebar}
@@ -269,6 +388,15 @@
         {/if}
 
         <SidebarGroup border>
+            {#if showGroupsSwitchMenu}
+                <SidebarItem    href=""    
+                                icon={FaUsers}
+                                operations={(n) => getGroupsMenu()}
+                                selectable={currentGroup}>
+                    {currentGroup?.name}
+                </SidebarItem>
+            {/if}
+
             <SidebarList    objects={taskLists} 
                             orderAttrib='Order'
                             inserter={addList} 
@@ -328,6 +456,15 @@
         {/if}
         
         <SidebarGroup border>
+            {#if showGroupsSwitchMenu}
+                <SidebarItem    href=""    
+                                icon={FaUsers}
+                                operations={(n) => getGroupsMenu()}
+                                item={currentGroup}>
+                    {currentGroup?.name}
+                </SidebarItem>
+            {/if}
+
             <SidebarList    objects={taskLists} 
                             orderAttrib='Order'
                             bind:this={navLists}>
@@ -382,3 +519,17 @@
         onOkCallback={archiveList}
         bind:this={archiveModal}
         />
+
+<Modal  bind:open={newGroupModalVisible}
+        title='Create group'
+        okCaption='Create'
+        onOkCallback={onNewGroupOK}
+        onCancelCallback={onNewGroupCancel}
+        icon={FaUsers}
+>
+    <Input  label='Group name' 
+            placeholder='' 
+            self={newGroupParams} 
+            a="name"
+            required/>
+</Modal>

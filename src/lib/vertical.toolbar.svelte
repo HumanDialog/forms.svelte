@@ -76,7 +76,7 @@
             }
         }
        
-        show_groups_switch_menu = $session.tenants.length > 1
+        /*show_groups_switch_menu = $session.tenants.length > 1
 
         if($session.configuration.tenant)
         {
@@ -89,6 +89,7 @@
             }))
             
         } 
+        */
         
     }
 

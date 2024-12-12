@@ -1,6 +1,6 @@
 
 <script lang="ts">
-    import AppIcon from './appicon.svelte'
+    import AppIcon from '../appicon.svelte'
     import { link } from 'svelte-spa-router';
     import {Authorized, NotAuthorized, signInHRef, signOutHRef, signUpHRef } from '@humandialog/auth.svelte'
     

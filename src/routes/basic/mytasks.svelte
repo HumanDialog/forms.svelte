@@ -244,7 +244,8 @@
 {#if user}
     <Page   self={user} 
             toolbarOperations={pageOperations}
-            clearsContext='props sel'>
+            clearsContext='props sel'
+            title='My tasks'>
 
         <List   self={user} 
                 a='MyTasks' 

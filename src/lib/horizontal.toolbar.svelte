@@ -53,7 +53,7 @@
         show_sign_in_out_icons = config.signin ? true : false;
         sign_in_href = $signInHRef;
         sign_out_href = $signOutHRef;
-        user_is_in_multiple_groups = $session.tenants.length > 1
+        //user_is_in_multiple_groups = $session.tenants.length > 1
 
         tabs = Object.keys(appConfig.sidebar);
         if(tabs.length > 1)

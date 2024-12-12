@@ -331,5 +331,20 @@
         background: #57534e;
         }
     }
+
+    /* bg-white */
+    :global(body)
+    {
+      --tw-bg-opacity: 1;
+      background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+    }
+  
+    /* dark:bg-gray-900 */
+    :global(body.dark)
+    {
+      --tw-bg-opacity: 1;
+      background-color: rgb(28 25 23 / var(--tw-bg-opacity));
+      
+    }
     
 </style>

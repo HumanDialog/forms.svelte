@@ -1,6 +1,6 @@
 <script lang="ts">
     import {Toggle} from 'flowbite-svelte';
-    import {cookies_saved_at, cookies_valid_until, cookies_allow_essential, cookies_allow_preferences, cookies_allow_analytics, cookies_allow_marketing} from './cookie.preferences'
+    import {cookies_saved_at, cookies_valid_until, cookies_allow_essential, cookies_allow_preferences, cookies_allow_analytics, cookies_allow_marketing} from './landing/cookie.preferences'
 
     let show: boolean = false;
     

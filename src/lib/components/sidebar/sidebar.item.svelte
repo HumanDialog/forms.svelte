@@ -231,26 +231,42 @@
         on:keyup
         class="     border border-transparent rounded-lg
                     text-lg sm:text-base font-normal 
-                    text-stone-900 sm:hover:bg-stone-100  
-                    dark:text-white sm:dark:hover:bg-stone-700 {user_class}"
+                    text-stone-900 dark:text-white  {user_class}"
+        class:sm:hover:bg-stone-100={!!href}
+        class:sm:dark:hover:bg-stone-700={!!href}
         class:bg-stone-200={isRowActive}
         class:dark:bg-stone-700={isRowActive}
         class:selected={selected(selectable, context_data)}>
             <div class="flex flex-row justify-between">
-                <a  href={href} 
-                    on:click={on_link_clicked} 
-                    class="flex-1 ml-2 mt-3 sm:mt-2 inline-flex items-center group"
-                    class:mb-3={!summary}
-                    class:sm:mb-2={!summary}
-                    >
-                    {#if icon}
-                        <Icon size={5} component={icon}/>
-                    {/if}
-                    <span   class="ml-3 group-hover:underline"
-                            use:editable_if_needed={editable}>
-                        <slot/>
-                    </span>
-                </a>
+                {#if href}
+                    <a  href={href} 
+                        on:click={on_link_clicked} 
+                        class="flex-1 ml-2 mt-3 sm:mt-2 inline-flex items-center group"
+                        class:mb-3={!summary}
+                        class:sm:mb-2={!summary}
+                        >
+                        {#if icon}
+                            <Icon size={5} component={icon}/>
+                        {/if}
+                        <span   class="ml-3 group-hover:underline"
+                                use:editable_if_needed={editable}>
+                            <slot/>
+                        </span>
+                    </a>
+                {:else}
+                    <p  class="flex-1 ml-2 mt-3 sm:mt-2 inline-flex items-center group cursor-default"
+                        class:mb-3={!summary}
+                        class:sm:mb-2={!summary}
+                        use:selectable_if_needed={selectable}>
+                        {#if icon}
+                            <Icon size={5} component={icon}/>
+                        {/if}
+                        <span   class="ml-3"
+                                use:editable_if_needed={editable}>
+                            <slot/>
+                        </span>
+                    </p>
+                {/if}
 
                 {#if !isOnPage}
                 <section    class="flex-0 w-20 sm:w-12 h-10 flex-0 flex flex-row"
