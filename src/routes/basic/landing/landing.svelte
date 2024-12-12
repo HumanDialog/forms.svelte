@@ -3,7 +3,6 @@
     import Header from './header.svelte'
     import Footer  from './footer.svelte';
     import {link} from 'svelte-spa-router'
-	import Add from '../../layout/add.svelte';
 </script>
 
 <div class="min-h-screen h-screen overflow-x-hidden">
