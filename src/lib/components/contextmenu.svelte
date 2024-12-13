@@ -36,12 +36,17 @@
         if(isDeviceSmallerThan('sm'))       // are we on mobile?
         {
             const sel = window.getSelection();
-            //console.log('sel', sel)
+            console.log('sel', sel)
             // if we have active selections then it's very possible we have onscreen keyboard visible, se we need to shrink window.innerHeight 
             if(sel && sel.rangeCount>0 && sel.focusNode && sel.focusNode.nodeType==sel.focusNode.TEXT_NODE)
             {
-                container_rect.height -= 300; // it will be enough?
-               // console.log('shirnked: ', container_rect)
+                const el :HTMLElement|null = sel.focusNode.parentElement;
+                if(el && (el.isContentEditable || el.contentEditable == 'true' || el.tagName == 'INPUT'))
+                {
+                    console.log('keyboard visible, move menu 300px up', el)
+                    container_rect.height -= 300; // it will be enough?
+                }
+                
             }
         }
 
