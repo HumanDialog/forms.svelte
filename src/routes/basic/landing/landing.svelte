@@ -3,7 +3,13 @@
     import Header from './header.svelte'
     import Footer  from './footer.svelte';
     import {link} from 'svelte-spa-router'
+	
 </script>
+
+<svelte:head>
+  <title>Octopus Basic | A simple task management tool that even the busiest will love.</title>
+  <link rel="canonical" href="https://octopus.objectreef.dev"/>
+</svelte:head> 
 
 <div class="min-h-screen h-screen overflow-x-hidden">
 

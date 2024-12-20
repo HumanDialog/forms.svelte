@@ -22,7 +22,7 @@
 	import { reef, session, signInHRef } from '@humandialog/auth.svelte';
 	import { ComboSource } from '$lib';
     import {showMenu} from '$lib/components/menu'
-    import {onErroronErrorAddAlert} from './stores'
+    import {onErrorShowAlert} from './stores'
 	
 
     // ==============================================================================
