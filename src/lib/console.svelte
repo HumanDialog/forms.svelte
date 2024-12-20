@@ -12,7 +12,7 @@
 
     async function onKeyDown(e)
     {
-        if(!$session.isActive)
+        if(!$session.isActive && !$session.isUnauthorizedGuest)
         {
             prevLines = [...prevLines, "Sign-in first"]
             input = "";

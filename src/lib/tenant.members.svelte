@@ -18,11 +18,11 @@
     import Combo from './components/combo/combo.svelte'
 	import Modal from './modal.svelte'
 	import Checkbox from '$lib/components/checkbox.svelte';
-    import {Popover, Alert} from 'flowbite-svelte'
+   
 	import { reef, session, signInHRef } from '@humandialog/auth.svelte';
 	import { ComboSource } from '$lib';
-    import {removeAt} from './utils'
     import {showMenu} from '$lib/components/menu'
+    import {onErroronErrorAddAlert} from './stores'
 	
 
     // ==============================================================================
@@ -202,8 +202,7 @@
             else
             {
                 const err_msg = await res.text();
-                alerts.push(err_msg)
-                alerts = [...alerts];
+                onErrorShowAlert(err_msg);
                 return false;
             }
         }
@@ -230,8 +229,7 @@
             else
             {
                 const err_msg = await res.text();
-                alerts.push(err_msg)
-                alerts = [...alerts];
+                onErrorShowAlert(err_msg)
                 return false;
             }
         }
@@ -259,7 +257,7 @@
             else
             {
                 const err_msg = await res.text();
-                alerts = [err_msg, ...alerts];
+                onErrorShowAlert(err_msg);
                 return false;
             }
         }
@@ -527,12 +525,12 @@
                 else
                 {
                     const err_msg = await res.text();
-                    alerts = [err_msg, ...alerts];
+                    onErrorShowAlert(err_msg);
                 }
         }
         catch (err)
         {
-            alerts = [err, ...alerts];
+            onErrorShowAlert(err);
         }
 
         new_user.name = '';
@@ -554,8 +552,6 @@
 
         create_new_user_enabled = false;
     }
-
-    let alerts = []
 
     let removeModal;
     let userToRemove;
@@ -586,12 +582,12 @@
             else
             {
                 const err = await res.text()
-                alerts = [err, ...alerts];
+                onErrorShowAlert(err);
             }
         }
         catch(err)
         {
-            alerts = [err, ...alerts];
+            onErrorShowAlert(err);
         }
     }
 
@@ -620,7 +616,7 @@
             else
             {
                 const err = await res.text()
-                alerts = [err, ...alerts];
+                onErrorShowAlert(err);
             }
         }
         catch(err)
@@ -628,7 +624,7 @@
             deleteAccountModal.hide();
 
             console.error(err)
-            alerts = [err, ...alerts];
+            onErrorShowAlert(err);
         }
     }
     
@@ -640,20 +636,7 @@
         clearsContext='props sel'>
     <!--a href="/" class="underline text-sm font-semibold ml-3"> &lt; Back to root</a-->
 
-    <!-- alerts -->
-    <section class="absolute left-2 sm:left-auto sm:right-2 bottom-2 flex flex-col gap-2">
-        {#each alerts as alert, idx}
-            <Alert class="bg-red-900/40  shadow-lg shadow-stone-400 dark:shadow-black flex flex-row">
-                <p>
-                    {alert}
-                </p>
-                <button class="font-bold  ml-auto"
-                        on:click={() => {alerts = removeAt(alerts, idx)}}>
-                    x
-                </button>
-            </Alert>    
-        {/each}
-    </section>
+    
     
     
 

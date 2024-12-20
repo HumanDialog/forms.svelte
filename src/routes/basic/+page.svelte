@@ -1,6 +1,6 @@
 <script>
     import {reef, session, AuthorizedView, signInHRef, signUpHRef, Authorized, NotAuthorized} from '@humandialog/auth.svelte'
-	import {Layout} from '$lib';
+	import {Layout, onErrorShowAlert} from '$lib';
 
     import Sidebar from './sidebar.svelte'
     import AppIcon from './appicon.svelte'
@@ -81,7 +81,7 @@
                         {
                             caption: 'Members',
                             icon: FaUsersCog,
-                            action: (f) => { push(`/members?gid=${$session.tid}`) }
+                            action: (f) => { push(`/members`) }
                         }
                     ]
                 },
@@ -125,7 +125,10 @@
                         {
                             caption: 'Leave guest session',
                             icon: FaSignOutAlt,
-                            action: (f) => { $session.isUnauthorizedGuest = false }
+                            action: (f) => { 
+                                $session.isUnauthorizedGuest = false 
+                                push('/');
+                            }
                         }
                     ]
                 },
@@ -157,13 +160,37 @@
         isAlreadyConfigured = true
 
         const lastChosenTenantId = $session.lastChosenTenantId;
+        let result = null;
+        try {
+            const res = await fetch(`${proto}://${tenantId}.${domain}/json/anyv/app/PublicGroups`, {
+                                    method: 'get',
+                                    headers:{
+                                        'Accept':'application/json',
+                                        'X-Reef-Flags': '1'
+                                    }})
+            if(res.ok)
+            {
+                result = await res.json();
+            }
+            else
+            {
+                const err = await res.text()
+                console.error(err)
+                onErrorShowAlert(err);
+            }
+        }
+        catch(err)
+        {
+            console.error(err)
+            onErrorShowAlert(err);
+        }
 
-        $session.setCurrentTenantAPI(`${proto}://${tenantId}.${domain}/`, '')
-        const res = await reef.get(`app/PublicGroups`)
-        if(res)
+        //$session.setCurrentTenantAPI(`${proto}://${tenantId}.${domain}/`, '')
+        //const result = await reef.get(`app/PublicGroups`)
+        if(result)
         {
             let groupInfos = []
-            res.Group.forEach(g => {
+            result.Group.forEach(g => {
                 groupInfos.push({
                     id: `${tenantId}/${g.Id}`,
                     url: `${proto}://${tenantId}.${domain}/`,

@@ -12,6 +12,15 @@ export const page_title = writable('');
 export const nav_titles = writable({});
 export const mainContentPageReloader = writable(1);
 export const wholeAppReloader = writable(1)
+export const alerts = writable([])
+
+export const addAlert = (txt) => {
+    let al = get(alerts)
+    al = [txt, ...al];
+    alerts.set(al);
+}
+
+export const onErrorShowAlert = addAlert;
 
 export function setNavigatorTitle(key, title)
 {

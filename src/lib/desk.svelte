@@ -4,6 +4,7 @@
     import Configurable from './internal/configurable.content.svelte'
     import Operations from './operations.svelte'
     import Fab from './components/Fab.svelte'
+     import {Alert} from 'flowbite-svelte'
         
     import {main_sidebar_visible_store, 
             tools_visible_store, 
@@ -15,25 +16,14 @@
             set_default_tools_visible,
             set_dark_mode_default,
             sidebar_left_pos,
-            wholeAppReloader } from './stores.js'
+            wholeAppReloader,
+            alerts } from './stores.js'
     
-    import { AuthorizedView} from '@humandialog/auth.svelte'
-    import { handleSelect, isDeviceSmallerThan } from './utils'
-	import { afterUpdate, onMount } from 'svelte';
+    //import { AuthorizedView} from '@humandialog/auth.svelte'
+    import { handleSelect, isDeviceSmallerThan, removeAt } from './utils'
+    import { afterUpdate, onMount } from 'svelte';
     
     export let layout;
-
-    onMount( () => {
-        window.addEventListener('resize', on_resize)
-        return () => {
-            window.removeEventListener('resize', on_resize)
-        }
-    })
-
-    function on_resize()
-    {
-        auto_hide_sidebar();
-    }
 
     const sizes = {
             bottom: 240,
@@ -156,9 +146,33 @@
     }
 
     //$: screen.width = innerWidth;  
+
+    $: switchBodyClass($dark_mode_store);
+    function switchBodyClass(...args)
+    {
+        document.body.className = $dark_mode_store;
+    }
+
+    onMount( () => {
+        window.addEventListener('resize', on_resize)
+        return () => {
+            window.removeEventListener('resize', on_resize)
+            
+            // remove dark class form body element when we leave Layout view
+            if($dark_mode_store)
+                document.body.classList.remove($dark_mode_store)
+        }
+    })
+
+    function on_resize()
+    {
+        auto_hide_sidebar();
+    }
+
 </script>
 
 <svelte:window bind:innerWidth bind:outerWidth bind:innerHeight bind:outerHeight />
+
 
 <!--AuthorizedView {autoRedirectToSignIn}-->
     
@@ -270,6 +284,29 @@
                         
                     </div>    
 
+                    <!--##########################################################-->
+                    <!--##  ALERTS ###############################################-->
+                    <!--##########################################################-->
+                    <section class="absolute left-2 sm:left-auto sm:right-2 bottom-2 flex flex-col gap-2">
+                        {#if $alerts && $alerts.length > 0}
+                            {#each $alerts as alert, idx}
+                                <Alert class="bg-red-900/40  shadow-lg shadow-stone-400 dark:shadow-black flex flex-row">
+                                    <button class="sm:hidden font-bold  ml-auto"
+                                            on:click={() => {$alerts = removeAt($alerts, idx)}}>
+                                        x
+                                    </button>
+                                    <p>
+                                        {alert}
+                                    </p>
+                                    <button class="hidden sm:block font-bold  ml-auto"
+                                            on:click={() => {$alerts = removeAt($alerts, idx)}}>
+                                        x
+                                    </button>
+                                </Alert>    
+                            {/each}
+                        {/if}
+                    </section>
+
                     <!-- #########################################################-->
                     <!-- ## MODAL DIALOG #########################################-->
                     <!-- #########################################################-->
@@ -307,6 +344,9 @@
         ::-webkit-scrollbar-thumb:hover {
         background: #D6D3D1;
         }
+
+        --tw-bg-opacity: 1;
+        background-color: rgb(255 255 255 / var(--tw-bg-opacity));
     }
 
     #__hd_svelte_layout_root.dark {
@@ -330,16 +370,19 @@
         ::-webkit-scrollbar-thumb:hover {
         background: #57534e;
         }
+
+        --tw-bg-opacity: 1;
+        background-color: rgb(28 25 23 / var(--tw-bg-opacity));
     }
 
-    /* bg-white */
+    /* bg-white */ 
     :global(body)
     {
       --tw-bg-opacity: 1;
       background-color: rgb(255 255 255 / var(--tw-bg-opacity));
     }
   
-    /* dark:bg-gray-900 */
+    
     :global(body.dark)
     {
       --tw-bg-opacity: 1;

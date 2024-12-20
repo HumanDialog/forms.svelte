@@ -7,7 +7,8 @@
                 reloadMainContentPage, 
                 Modal,
                 reloadWholeApp,
-                Input} from '$lib'
+                Input, 
+                onErrorShowAlert} from '$lib'
     import {FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaArchive, FaUsers, FaPlus} from 'svelte-icons/fa'
     import {location, push} from 'svelte-spa-router'
     import {reef, session} from '@humandialog/auth.svelte'
@@ -19,8 +20,7 @@
     let user = {};
     let navLists;
     let navItems = [];
-    let gid = ''
-
+    
     $: currentPath = $location;
 
     onMount( async () =>
@@ -31,11 +31,9 @@
 
     async function initNavigator()
     {
-        gid = $session.tid;
-
         if($session.isActive)
         {
-            let res = await reef.get("/user");
+            let res = await reef.get("/user", onErrorShowAlert);
             if(res != null)
                 user = res.User;
         }
@@ -47,7 +45,7 @@
 
     async function fetchData()
     {
-        let res = await reef.get("/group/Lists?sort=Order&fields=Id,Name,Order,$type");
+        let res = await reef.get("/group/Lists?sort=Order&fields=Id,Name,Order,$type", onErrorShowAlert);
         if(res != null)
             taskLists = res.TaskList;
         else
@@ -66,7 +64,8 @@
                             { 
                                 Name: listName,
                                 Order: order
-                            });
+                            },
+                            onErrorShowAlert);
         reload();
     }
 
@@ -75,7 +74,8 @@
         let res = await reef.post(`/group/Lists/${list.Id}/set`, 
                                 {
                                     Name: name
-                                });
+                                },
+                                onErrorShowAlert);
         return (res != null);
     }
 
@@ -85,13 +85,14 @@
         let res = await reef.post(`/group/Lists/${list.Id}/set`, 
                                 {
                                     Summary: summary
-                                });
+                                },
+                                onErrorShowAlert);
         return (res != null);
     }
 
     async function finishAllOnList(list)
     {
-        await reef.post(`/group/Lists/${list.Id}/FinishAll`, {})
+        await reef.post(`/group/Lists/${list.Id}/FinishAll`, {}, onErrorShowAlert)
         
         if( isRoutingTo(`#/listboard/${list.Id}`, currentPath) || 
             isRoutingTo(`#/tasklist/${list.Id}`, currentPath))
@@ -102,7 +103,7 @@
 
     async function finishAllMyTasks()
     {       
-        await reef.post(`/user/FinishTasks`, {})
+        await reef.post(`/user/FinishTasks`, {}, onErrorShowAlert)
         
         if(isRoutingTo('#/mytasks', currentPath))
         {
@@ -164,7 +165,7 @@
         if(!listToArchive)
             return;
 
-        await reef.post(`/group/Lists/${listToArchive.Id}/Archive`, {})
+        await reef.post(`/group/Lists/${listToArchive.Id}/Archive`, {}, onErrorShowAlert)
         archiveModal.hide();
 
         reload();
@@ -175,7 +176,7 @@
         if(!listToDelete)
             return;
 
-        await reef.delete(`/group/Lists/${listToDelete.Id}`)
+        await reef.delete(`/group/Lists/${listToDelete.Id}`, onErrorShowAlert)
         deleteModal.hide();
 
         reload();
@@ -231,7 +232,7 @@
     let navArchivedLists;
     async function onExpandArchived()
     {
-        let res = await reef.get("/group/ArchivedLists?sort=-Id&fields=Id,Name,$type");
+        let res = await reef.get("/group/ArchivedLists?sort=-Id&fields=Id,Name,$type", onErrorShowAlert);
         if(res != null)
         {
             archivedLists = res.TaskList;
@@ -249,7 +250,8 @@
                             { 
                                 Name: listName,
                                 Order: order
-                            });
+                            },
+                            onErrorShowAlert);
             reload();
         })
     }
@@ -357,6 +359,7 @@
             {
                 const result = await res.json();  
                 console.error(result.error);
+                onErrorShowAlert(result.error)
             }
 
         newGroupParams.name = '';
@@ -373,9 +376,20 @@
 
 {#if sidebar}
     {#if taskLists && taskLists.length > 0}
-
-        {#if $session.isActive}
+        {#if showGroupsSwitchMenu}
             <SidebarGroup>
+                <SidebarItem    href=""    
+                                icon={FaUsers}
+                                operations={(n) => getGroupsMenu()}
+                                selectable={currentGroup}>
+                    {currentGroup?.name}
+                </SidebarItem>
+            </SidebarGroup>
+        {/if}
+        
+        {#if $session.isActive}
+            {@const border=showGroupsSwitchMenu}
+            <SidebarGroup {border}>
                 <SidebarItem   href="#/mytasks"
                                 icon={FaList}
                                 active={isRoutingTo("#/mytasks", currentPath)}
@@ -388,22 +402,14 @@
         {/if}
 
         <SidebarGroup border>
-            {#if showGroupsSwitchMenu}
-                <SidebarItem    href=""    
-                                icon={FaUsers}
-                                operations={(n) => getGroupsMenu()}
-                                selectable={currentGroup}>
-                    {currentGroup?.name}
-                </SidebarItem>
-            {/if}
-
+           
             <SidebarList    objects={taskLists} 
                             orderAttrib='Order'
                             inserter={addList} 
                             inserterPlaceholder='New list'
                             bind:this={navLists}>
                 <svelte:fragment let:item let:idx>
-                    {@const href = `#/listboard/${item.Id}?gid=${gid}`}
+                    {@const href = `#/listboard/${item.Id}`}
                     <SidebarItem   {href}
                                     icon={FaList}
                                     bind:this={navItems[idx]}
@@ -424,7 +430,7 @@
             <SidebarList    objects={archivedLists}
                             bind:this={navArchivedLists}>
                 <svelte:fragment let:item>
-                    {@const href = `#/tasklist/${item.Id}?archivedList&gid=${gid}`}
+                    {@const href = `#/tasklist/${item.Id}?archivedList`}
                     <SidebarItem   {href}
                                     icon={FaList}
                                     summary={item.Summary}
@@ -443,8 +449,21 @@
 {:else} <!-- !sidebar -->
 
     {#if taskLists && taskLists.length > 0}
+
+    {#if showGroupsSwitchMenu}
+        <SidebarGroup>
+            <SidebarItem    href=""    
+                            icon={FaUsers}
+                            operations={(n) => getGroupsMenu()}
+                            item={currentGroup}>
+                {currentGroup?.name}
+            </SidebarItem>
+        </SidebarGroup>
+    {/if}
+        
         {#if $session.isActive}
-            <SidebarGroup>
+            {@const border=showGroupsSwitchMenu}
+            <SidebarGroup {border}>
                 <SidebarItem    href="#/mytasks"
                                 icon={FaList}
                                 operations={(node) => getUserListOperations(node, user)}
@@ -456,20 +475,11 @@
         {/if}
         
         <SidebarGroup border>
-            {#if showGroupsSwitchMenu}
-                <SidebarItem    href=""    
-                                icon={FaUsers}
-                                operations={(n) => getGroupsMenu()}
-                                item={currentGroup}>
-                    {currentGroup?.name}
-                </SidebarItem>
-            {/if}
-
             <SidebarList    objects={taskLists} 
                             orderAttrib='Order'
                             bind:this={navLists}>
                 <svelte:fragment let:item let:idx>
-                    {@const href = `#/listboard/${item.Id}?gid=${gid}`}
+                    {@const href = `#/listboard/${item.Id}`}
                     <SidebarItem   {href}
                                     icon={FaList}
                                     bind:this={navItems[idx]}
@@ -489,7 +499,7 @@
             <SidebarList    objects={archivedLists}
                             bind:this={navArchivedLists}>
                 <svelte:fragment let:item>
-                    {@const href = `#/tasklist/${item.Id}?archivedList&gid=${gid}`}
+                    {@const href = `#/tasklist/${item.Id}?archivedList`}
                     <SidebarItem   {href}
                                     icon={FaList}
                                     summary={item.Summary}

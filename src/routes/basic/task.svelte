@@ -12,7 +12,8 @@
 			activateItem,
 			isActive,
 			clearActiveItem,
-			isDeviceSmallerThan
+			isDeviceSmallerThan,
+            onErrorShowAlert
             } from '$lib'
 	import { onMount, tick } from 'svelte';
     import {location, querystring} from 'svelte-spa-router'
@@ -39,9 +40,9 @@
         const taskId = segments[segments.length-1]
         taskRef = `./Task/${taskId}`
 
-        allTags = await reef.get('/group/AllTags');
+        allTags = await reef.get('/group/AllTags', onErrorShowAlert);
 
-        let res = await reef.get('/group/Lists?fields=$ref,Name')
+        let res = await reef.get('/group/Lists?fields=$ref,Name', onErrorShowAlert)
         allLists = res.TaskList
 
         //res = await reef.get('/app/Users?fields=$ref,Name')
@@ -56,7 +57,8 @@
                                         Expressions:['$ref', 'Name']
                                     }
                                 ]                    
-                            }
+                            },
+                            onErrorShowAlert
                         )
         allActors = res.User;
 
@@ -98,7 +100,8 @@
                                     ]
                                 }
                             ]
-                        })
+                        },
+                        onErrorShowAlert)
         
         task = res.Task
         if(task.TaskList.TaskStates)
@@ -117,25 +120,28 @@
                 availableStates = [];
             }
         }
+
+        if(task.Steps == undefined)
+            task.Steps = []
     }
 
     async function onTitleChanged(text)
     {
         task.Title = text;
-        await reef.post(`${taskRef}/set`, {Title: text})
+        await reef.post(`${taskRef}/set`, {Title: text}, onErrorShowAlert)
     }
 
     async function onSummaryChanged(text)
     {
         task.Summary = text;
-        await reef.post(`${taskRef}/set`, {Summary: text})
+        await reef.post(`${taskRef}/set`, {Summary: text}, onErrorShowAlert)
         
     }
 
     async function onUpdateAllTags(newAllTags)
     {
         allTags  = newAllTags
-        await reef.post('group/set', { AllTags: allTags})
+        await reef.post('group/set', { AllTags: allTags}, onErrorShowAlert)
     }
 
     async function onAddStep(txt, beforeIdx)
@@ -173,7 +179,7 @@
                 newStep.Order = next.Order - 64;
         }
 
-        await reef.post(`${taskRef}/Steps/new`, {...newStep})
+        await reef.post(`${taskRef}/Steps/new`, {...newStep}, onErrorShowAlert)
         await reloadData();
     }
 
@@ -181,13 +187,13 @@
     {
         const taskStep = task.Steps[idx];
         taskStep.Label = txt;
-        await reef.post(`${taskRef}/Steps/${taskStep.Id}/set`, { Label: txt}) 
+        await reef.post(`${taskRef}/Steps/${taskStep.Id}/set`, { Label: txt}, onErrorShowAlert) 
     }
 
     async function onRemoveStep(idx)
     {
         const taskStep = task.Steps[idx];
-        await reef.delete(`${taskRef}/Steps/${taskStep.Id}`) 
+        await reef.delete(`${taskRef}/Steps/${taskStep.Id}`, onErrorShowAlert) 
         await reloadData();
     }
 
@@ -195,7 +201,7 @@
     {
         taskStep.Done = value;
         task.Steps = [...task.Steps]
-        await reef.post(`${taskRef}/Steps/${taskStep.Id}/set`, {Done: value})
+        await reef.post(`${taskRef}/Steps/${taskStep.Id}/set`, {Done: value}, onErrorShowAlert)
     }
 
     function getPageOperationsWithStepTools(step) 

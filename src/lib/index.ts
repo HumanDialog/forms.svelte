@@ -91,7 +91,10 @@ export {
 export {
             mainContentPageReloader,
             reloadMainContentPage,
-            reloadWholeApp } from './stores.js'
+            reloadWholeApp,
+            alerts,
+            addAlert,
+            onErrorShowAlert } from './stores.js'
 
 export {    data_tick_store,    // tmp
             hasSelectedItem, 

@@ -11,7 +11,8 @@
                 ListDateProperty,
                 ListComboProperty,
 				mainContentPageReloader,
-                Modal} from '$lib'
+                Modal,
+                onErrorShowAlert} from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaColumns, FaArchive, FaList, FaEllipsisH, FaChevronRight, FaChevronLeft} from 'svelte-icons/fa'
     import {location, pop, push, querystring} from 'svelte-spa-router'
 
@@ -25,8 +26,7 @@
     let isArchivedTasks = false;
     let assocName = 'Tasks'
     let listTitle = ''
-    let gid = ''
-
+    
     let users = [];
 
     const STATE_FINISHED = 1000;
@@ -53,7 +53,8 @@
                                         Association: 'Members/User'
                                     }
                                 ]                    
-                            }
+                            },
+                            onErrorShowAlert
                         )
             if(res)
                 users = res.User;
@@ -75,7 +76,6 @@
         assocName = (isArchivedTasks || isArchivedList) ? 'ArchivedTasks' : 'Tasks';
         listPath = isArchivedList ? `/group/ArchivedLists/${listId}` : `/group/Lists/${listId}`;
 
-        gid = $session.tid
             
         await fetchData()
     }
@@ -117,7 +117,8 @@
                                         ]
                                     }
                                 ]
-                            });
+                            },
+                            onErrorShowAlert);
         if(res)
             currentList = res.TaskList;
         else
@@ -153,7 +154,7 @@
         if(!taskToDelete)
             return;
 
-        await reef.delete(taskToDelete.$ref);
+        await reef.delete(taskToDelete.$ref, onErrorShowAlert);
         deleteModal.hide();
 
         
@@ -173,7 +174,7 @@
         if(!taskToArchive)
             return;
 
-        await reef.post(`${taskToArchive.$ref}/Archive`, {})
+        await reef.post(`${taskToArchive.$ref}/Archive`, {}, onErrorShowAlert)
         archiveModal.hide();
         
         await reloadTasks(listComponent.SELECT_NEXT)
@@ -184,14 +185,14 @@
         if(event)
             event.stopPropagation();
 
-        let result = await reef.post(`${task.$ref}/Finish`, {});
+        let result = await reef.post(`${task.$ref}/Finish`, {}, onErrorShowAlert);
         if(result)
             await reloadTasks(listComponent.KEEP_OR_SELECT_NEXT)   
     }
 
     async function addTask(newTaskAttribs)
     {
-        let res = await reef.post(`${listPath}/CreateTaskEx`,{ properties: newTaskAttribs })
+        let res = await reef.post(`${listPath}/CreateTaskEx`,{ properties: newTaskAttribs }, onErrorShowAlert)
         if(!res)
             return null;
 
@@ -226,7 +227,7 @@
 
     function switchToKanban()
     {
-        push(`/listboard/${listId}?gid=${gid}`);
+        push(`/listboard/${listId}`);
     }
 
     function getEditOperations(task)
@@ -326,7 +327,7 @@
                 contextMenu={taskContextMenu}
                 orderAttrib='ListOrder'
                 bind:this={listComponent}>
-            <ListTitle a='Title' hrefFunc={(task) => `/task/${task.Id}?gid=${gid}`}/>
+            <ListTitle a='Title' hrefFunc={(task) => `/task/${task.Id}`}/>
             <ListSummary a='Summary'/>
             <ListInserter action={addTask} icon/>
 
@@ -355,7 +356,7 @@
         {#if !isArchivedTasks}
             {#if !isArchivedList}
                 <div class="ml-3 mt-20 mb-10">
-                    <a  href={`#/tasklist/${listId}?archivedTasks&gid=${gid}`} 
+                    <a  href={`#/tasklist/${listId}?archivedTasks`} 
                         class="hover:underline">
                             Show archived tasks 
                             <div class="inline-block mt-1.5 w-3 h-3"><FaChevronRight/></div>

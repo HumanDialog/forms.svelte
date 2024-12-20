@@ -13,7 +13,8 @@
 		KanbanCallbacks,
 		KanbanColumnTop,
 		KanbanColumnBottom,
-        Tags
+        Tags,
+		onErrorShowAlert
 	} from '$lib';
 	import { list, global_tags } from './board.data.js';
 	import { reef } from '@humandialog/auth.svelte';
@@ -39,7 +40,8 @@
                                         Expressions:['$ref', 'Name']
                                     }
                                 ]                    
-                            }
+                            }, 
+							onErrorShowAlert
                         )
 			if (res) users = res.User;
 		}

@@ -75,7 +75,7 @@
                         {
                             caption: 'Members',
                             icon: FaUsersCog,
-                            action: (f) => { push(`/members?gid=${$session.tid}`) }
+                            action: (f) => { push(`/members`) }
                         }
                     ]
                 },

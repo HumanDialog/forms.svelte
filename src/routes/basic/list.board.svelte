@@ -17,7 +17,8 @@
         mainContentPageReloader,
 		KanbanSource,
         Modal,
-		KanbanColumnBottom
+		KanbanColumnBottom,
+        onErrorShowAlert
 
 
 	} from '$lib';
@@ -35,8 +36,7 @@
     let taskStates = [];
     let allTags = ''
     let kanban;
-    let gid = ''
-
+    
     $: onParamsChanged($location, $mainContentPageReloader);
 
 	async function onParamsChanged(...args) 
@@ -60,13 +60,14 @@
                                         Association: 'Members/User'
                                     }
                                 ]                    
-                            }
+                            },
+                            onErrorShowAlert
                         )
             if(res)
                 users = res.User;
         }
 
-        allTags = await reef.get('/group/AllTags');
+        allTags = await reef.get('/group/AllTags', onErrorShowAlert);
         
         if(!segments.length)
             listId = 'first';
@@ -77,8 +78,6 @@
             listId = 'first'
         
         currentList = null
-
-        gid = $session.tid;
 
         listPath = `/group/Lists/${listId}`;
         await fetchData()
@@ -120,7 +119,8 @@
                                         ]
                                     }
                                 ]
-                            });
+                            },
+                            onErrorShowAlert);
         if(res)
             currentList = res.TaskList;
         else
@@ -186,12 +186,12 @@
 
     function switchToList()
     {
-        push(`/tasklist/${listId}?gid=${gid}`);
+        push(`/tasklist/${listId}`);
     }
 
     async function onAdd(newTaskAttribs) 
     {
-        let res = await reef.post(`${listPath}/CreateTaskEx`,{ properties: newTaskAttribs })
+        let res = await reef.post(`${listPath}/CreateTaskEx`,{ properties: newTaskAttribs }, onErrorShowAlert)
         if(!res)
             return null;
 
@@ -212,7 +212,7 @@
         if(!taskToDelete)
             return;
 
-        await reef.delete(taskToDelete.$ref);
+        await reef.delete(taskToDelete.$ref, onErrorShowAlert);
         deleteModal.hide();
 
         reload(kanban.SELECT_NEXT);
@@ -231,7 +231,7 @@
         if(!taskToArchive)
             return;
 
-        await reef.post(`${taskToArchive.$ref}/Archive`, {})
+        await reef.post(`${taskToArchive.$ref}/Archive`, {}, onErrorShowAlert)
         archiveModal.hide();
         
         reload(kanban.SELECT_NEXT);
@@ -239,7 +239,7 @@
 
     async function finishTask(task)
     {
-        await reef.post(`${task.$ref}/Finish`, {});
+        await reef.post(`${task.$ref}/Finish`, {}, onErrorShowAlert);
         reload(task.Id); 
     }
 
@@ -247,7 +247,7 @@
     async function onUpdateAllTags(allAllTags)
     {
         allTags = allAllTags
-        await reef.post('group/set', { AllTags: allTags})
+        await reef.post('group/set', { AllTags: allTags}, onErrorShowAlert)
     }
 
     function getCardOperations(task)
@@ -564,7 +564,8 @@
         await reef.post(`${listPath}/set`,
                     {
                         TaskStates: currentList.TaskStates
-                    });
+                    },
+                    onErrorShowAlert);
     }
 
 </script>
@@ -600,7 +601,7 @@
 			<KanbanCallbacks {onAdd} {getCardOperations}/>
 
 			<KanbanTitle    a="Title" 
-                            hrefFunc={(task) => `/task/${task.Id}?gid=${gid}`}
+                            hrefFunc={(task) => `/task/${task.Id}`}
                             hasAttachment={(task) => task.Description || (task.Steps && task.Steps.length > 0) }/>
 			<KanbanSummary a="Summary" />
 
@@ -618,7 +619,7 @@
         </Kanban>
 
         <div class="ml-3 mt-20 mb-10">
-            <a  href={`#/tasklist/${listId}?archivedTasks&gid=${gid}`} 
+            <a  href={`#/tasklist/${listId}?archivedTasks`} 
                 class="hover:underline">
                     Show archived tasks 
                     <div class="inline-block mt-1.5 w-3 h-3"><FaChevronRight/></div>
