@@ -20,6 +20,12 @@
     let isToolbox: boolean = false;
 
     const dispatch = createEventDispatcher();
+
+    let current_editor_range = undefined;
+    export function set_current_editor_range(range)
+    {
+        current_editor_range = range;
+    }
     
 
     let toolboxX: number;
@@ -115,18 +121,18 @@
             return;
 
         hide(); // await tick here?
-        current_command.on_choice();
+        current_command.on_choice(current_editor_range);
     }
 
-    export function filter(key :string)
+    export function filter(key :string) :Document_command[]
     {
         if(!filtered_commands)
-            return;
+            return filtered_commands;
 
         if(!key)
         {
             filtered_commands = [...commands];
-            return;
+            return filtered_commands;
         }
 
         let was_any_items_before = filtered_commands.length > 0;
@@ -153,6 +159,13 @@
         // Najwidoczniej użytkownik nie jest zainteresowany wybieraniem czegokolwiek z palety.
         if((!was_any_items_before) && (filtered_commands.length == 0))
             hide();
+
+        return filtered_commands;
+    }
+
+    export function get_filtered_commands() :Document_command[]
+    {
+        return filtered_commands;
     }
 
     export function navigate_up()
@@ -196,7 +209,7 @@
         //await tick();
         
         hide();
-        on_choice();
+        on_choice(current_editor_range);
     }
 
     function on_mouse_over(cmd :Document_command)

@@ -33,7 +33,7 @@
     {
         //console.log('task: ', $location)
         const segments = $location.split('/');
-        const foundIdx = segments.findIndex( s => s == 'task');
+        const foundIdx = segments.findIndex( s => s == 'task2');
         if(foundIdx < 0)
             return;
 
