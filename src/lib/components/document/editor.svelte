@@ -400,7 +400,7 @@
 		editor = new Editor({
             editorProps: {
                 attributes: {
-                    class: `${cs} ${appearance_class} prose prose-base sm:prose-base dark:prose-invert ${additional_class} overflow-y-auto whitespace-pre-wrap focus:outline-none`,
+                    class: `${cs} ${appearance_class} prose prose-base sm:prose-base dark:prose-invert ${additional_class}  whitespace-pre-wrap focus:outline-none`,
                 },
             },
 			element: editorElement,
