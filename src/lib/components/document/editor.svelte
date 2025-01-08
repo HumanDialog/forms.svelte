@@ -10,6 +10,7 @@
     import Blockquote from '@tiptap/extension-blockquote'
     import HardBreak from '@tiptap/extension-hard-break'
     import HorizontalRule from '@tiptap/extension-horizontal-rule'
+    import Image from '@tiptap/extension-image'
 
     import Bold from '@tiptap/extension-bold'
     import Code from '@tiptap/extension-code'
@@ -24,7 +25,7 @@
     import {isDeviceSmallerThan, parseWidthDirective} from '../../utils.js'
     import Palette from './internal/palette.svelte'
 
-    import {FaFont, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle, FaInfo} from 'svelte-icons/fa'
+    import {FaFont, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle, FaInfo, FaImage} from 'svelte-icons/fa'
     import IcH1 from './internal/h1.icon.svelte'
     import IcH2 from './internal/h2.icon.svelte'
     import IcH3 from './internal/h3.icon.svelte'
@@ -44,6 +45,7 @@
 
     export let onFocusCb = undefined;
     export let onBlurCb = undefined;
+    export let onAddImage = undefined;
     
     export let c='';
     export let pushChangesImmediately = true;
@@ -411,6 +413,7 @@
                 Heading.configure({
                     levels: [1, 2],
                 }),
+                Image,
                 HardBreak,
                 HorizontalRule,
                 
@@ -610,6 +613,12 @@
             palette.show(x, y, show_above);
     }
 
+    function onAddedImageReady(src)
+    {
+        editor.commands.setImage({
+            src: src
+        })
+    }
 
 
     // ================================================================================================================================
@@ -625,7 +634,9 @@
                {   caption: 'Comment',      description: 'With this you can comment the above paragraph',   icon: FaComment,                    on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsComment().run(); else editor.commands.setAsComment() } } ,
                {   caption: 'Quote',        description: 'To quote someone',                                icon: FaQuoteRight,                 on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsQuote().run(); else editor.commands.setAsQuote() } } ,
                {   caption: 'Warning',      description: 'An important warning to above paragraph',         icon: FaExclamationTriangle,        on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsWarning().run(); else editor.commands.setAsWarning() } } ,
-               {   caption: 'Info',         description: 'An important info about above paragraph',         icon: FaInfo,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsInfo().run(); else editor.commands.setAsInfo() } } 
+               {   caption: 'Info',         description: 'An important info about above paragraph',         icon: FaInfo,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsInfo().run(); else editor.commands.setAsInfo() } }, 
+
+               {   caption: 'Image',        description: 'Add image to document',                           icon: FaImage,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).run(); if(onAddImage) onAddImage(onAddedImageReady);  } } 
             ];
     
     

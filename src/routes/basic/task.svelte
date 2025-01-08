@@ -1,5 +1,5 @@
 <script>
-    import {reef} from '@humandialog/auth.svelte'
+    import {reef, session} from '@humandialog/auth.svelte'
 	import  { Editor,
             Page,
             Combo,
@@ -19,6 +19,7 @@
     import {location, querystring} from 'svelte-spa-router'
     import TaskSteps from './task.steps.svelte'
     import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave} from 'svelte-icons/fa/'
+	
 
     let taskRef = ''
     let task = null;
@@ -96,6 +97,11 @@
                                             Id: 12,
                                             Association: 'TaskList',
                                             Expressions:['$ref', 'Name', 'TaskStates']
+                                        },
+                                        {
+                                            Id: 13,
+                                            Association: 'Attachements',
+                                            Expressions: ['$ref', 'Id', 'Name'],
                                         }
                                     ]
                                 }
@@ -123,6 +129,9 @@
 
         if(task.Steps == undefined)
             task.Steps = []
+
+        if(task.Attachements == undefined)
+            task.Attachements = []
     }
 
     async function onTitleChanged(text)
@@ -474,6 +483,95 @@
             clearActiveItem('props')
     }
 
+    let imgInput;
+    let imgEditorActionAfterSuccess;
+    function uploadImage(editorActionAfterSuccess)
+    {
+        imgEditorActionAfterSuccess = editorActionAfterSuccess;
+        imgInput?.click();
+    }
+    
+    async function onImageSelected()
+    {
+        const [file] = imgInput.files;
+        if(file)
+        {
+            const newAttachement ={
+                Name: file.name
+            }
+
+            const res = await reef.post(`${taskRef}/Attachements/new`, {...newAttachement}, onErrorShowAlert)
+            if(res && res.File && res.File.length > 0)
+            {
+                const newFile = res.File[0];
+                
+                try
+                {
+                    const apiVer = $session.configuration.api_version;
+                    const imgPath = `/json/${apiVer}/${taskRef}/Attachements/${newFile.Id}/blob`
+                    const res = await reef.fetch(`${imgPath}?name=${file.name}`, {
+                                                            method: 'PUT',
+                                                            body: ''
+                                                        })
+                    if(res.ok)
+                    {
+                        const result = await res.json()
+                        const redirectTo = result.redirect;
+                        if(redirectTo)
+                        {
+                            const res = await fetch(redirectTo, {
+                                                        method: 'PUT',
+                                                        headers: new Headers({
+                                                            'Content-Type': file.type
+                                                        }),
+                                                        body: file})
+                            if(res.ok)
+                            {
+                                // todo: editor path imgPath
+                                let imgPullPath = $session.apiAddress;
+                                if (imgPullPath.endsWith('/')) {
+                                    if (imgPath.startsWith('/'))
+                                        imgPullPath = imgPullPath + imgPath.substr(1);
+                                    else
+                                        imgPullPath = imgPullPath + imgPath;
+                                }
+                                else {
+                                    if (imgPath.startsWith('/'))
+                                        imgPullPath = imgPullPath + imgPath;
+                                    else
+                                        imgPullPath = imgPullPath + '/' + imgPath;
+                                }
+                                    
+                                console.log('upload success for ', imgPullPath)
+                                if(imgEditorActionAfterSuccess)
+                                    imgEditorActionAfterSuccess(imgPullPath)
+                            }
+                            else
+                            {
+                                const err = await res.text()
+                                console.error(err)
+                                onErrorShowAlert(err)
+                            }
+                        }
+                    }
+                    else
+                    {
+                        const err = await res.text()
+                        console.error(err)
+                        onErrorShowAlert(err)
+                    }
+                }
+                catch(err)
+                {
+                    console.error(err)
+                    onErrorShowAlert(err)
+                }
+            }
+
+            await reloadData();
+        }
+    }
+
 </script>
 
 {#if task != null}
@@ -607,12 +705,15 @@
                             compact={true}
                             bind:this={description}
                             onFocusCb={() => activateFormattingTools()}
-                            onBlurCb={() => deactivateFormattingToolsIfNeeded()}/>
+                            onBlurCb={() => deactivateFormattingToolsIfNeeded()}
+                            onAddImage={uploadImage}/>
 
             {/if}
 
         </article>
     </section>
+
+    <input hidden type="file" id="imageFile" capture="environment" accept="image/*" bind:this={imgInput} on:change={onImageSelected}/>
 </Page>
 {/if}
 
