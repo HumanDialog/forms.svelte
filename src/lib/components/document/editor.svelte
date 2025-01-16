@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onMount, onDestroy,  getContext } from 'svelte';
+    import {session} from '@humandialog/auth.svelte'
 	import { Editor } from '@tiptap/core';
 	
     import StarterKit from '@tiptap/starter-kit';
@@ -46,7 +47,8 @@
     export let onFocusCb = undefined;
     export let onBlurCb = undefined;
     export let onAddImage = undefined;
-    
+    export let onRemoveImage = undefined
+
     export let c='';
     export let pushChangesImmediately = true;
 
@@ -90,7 +92,10 @@
 
     let  last_tick = -1;
 
-    $:{
+    $: updateAfterUIChanges($data_tick_store)
+
+    function updateAfterUIChanges(...args)
+    {
         if(last_tick < $data_tick_store)
         {
             if(hasChangedValue)
@@ -398,6 +403,102 @@
         }
     })
 
+    function prepareFullImagePath(url)
+    {
+        if (!url.startsWith('/json/'))
+        {
+            const apiVer = $session.configuration.api_version ?? 'anyv'
+
+            if (url.startsWith('/'))
+                url = `/json/${apiVer}${url}`;
+            else
+                url = `/json/${apiVer}/${url}`;
+        }
+
+        let fullPath = "";
+        let absolute_pattern = /^https?:\/\//i;
+        if (!absolute_pattern.test(url)) {
+            fullPath = $session.apiAddress;
+            if (fullPath.endsWith('/')) {
+                if (url.startsWith('/'))
+                    fullPath = fullPath + url.substr(1);
+                else
+                    fullPath = fullPath + url;
+            }
+            else {
+                if (url.startsWith('/'))
+                    fullPath = fullPath + url;
+                else
+                    fullPath = fullPath + '/' + url;
+            }
+        }
+        else    
+            fullPath = url;
+
+        
+
+        if($session.tenants.length > 0)
+        {
+            const currentGroupInfo = $session.tenants.find(t => t.id == $session.tid)
+            if(currentGroupInfo && currentGroupInfo.headers && currentGroupInfo.headers.length > 0)
+            {
+                
+                const paramsNo = currentGroupInfo.headers.length
+                for(let i=0; i<paramsNo; i++)
+                {
+                    const param = currentGroupInfo.headers[i]
+                    if(i==0)
+                    {
+                        if(fullPath.includes('?'))     // has other params
+                        {
+                            fullPath += '&'
+                        }   
+                        else
+                        {
+                            fullPath += '?'
+                        }
+                    }
+                   
+                    fullPath += param.key.toLowerCase()
+                    fullPath += '=' + param.value;
+                }
+            }
+        }
+
+        return fullPath;
+    }
+
+    const CrossImage = Image.extend({
+        addAttributes() {
+            return {
+                crossorigin: {
+                    default: 'use-credentials'
+                },
+
+                dataPath: {
+                    default: null,
+                    parseHTML: (element) => {  return element.getAttribute('data-path') },
+                    renderHTML: (attributes) => {
+                        const dataPath = attributes.dataPath;
+                        if(dataPath)
+                        {
+                            return {
+                                'data-path': dataPath,
+                                src: prepareFullImagePath(dataPath)
+                            }
+                        }
+                        else
+                        {
+                           return {
+
+                           }
+                        }
+                    } 
+                }
+            }
+        }
+    })
+
     onMount(() => {
 		editor = new Editor({
             editorProps: {
@@ -413,7 +514,12 @@
                 Heading.configure({
                     levels: [1, 2],
                 }),
-                Image,
+                /*Image.configure({
+                    HTMLAttributes: {
+                        crossorigin: 'use-credentials'
+                    }
+                }),*/
+                CrossImage,
                 HardBreak,
                 HorizontalRule,
                 
@@ -442,6 +548,7 @@
 			onTransaction({ editor, transaction }) {
 				hasChangedValue = true;
                 changedValue = editor.getHTML()
+                handleImagesDeletions(transaction)
 			},
             onFocus({ editor, event }) {
                 // The editor is focused.
@@ -613,11 +720,44 @@
             palette.show(x, y, show_above);
     }
 
-    function onAddedImageReady(src)
+    function onAddedImageReady(dataPath)
     {
-        editor.commands.setImage({
-            src: src
+        const imgFullPath = prepareFullImagePath(dataPath)
+        editor.commands.insertContent({
+          type: 'image',
+          attrs: {
+             src: imgFullPath, 
+             dataPath: dataPath
+          },
         })
+    }
+
+    function handleImagesDeletions(transaction)
+    {
+        if(!onRemoveImage)
+            return;
+
+        const getImageSrcs = (fragment) => {
+            let srcs = new Set();
+            fragment.forEach((node) => {
+                if (node.type.name === 'image') {
+                    srcs.add(node.attrs.dataPath);
+                }
+            });
+                return srcs;
+        };
+
+        let currentSrcs = getImageSrcs(transaction.doc.content);
+        let previousSrcs = getImageSrcs(transaction.before.content);
+
+        if (currentSrcs.size === 0 && previousSrcs.size === 0) {
+            return;
+        }
+
+        // Determine which images were deleted
+        let deletedImageSrcs = [...previousSrcs].filter((src) => !currentSrcs.has(src));
+
+        deletedImageSrcs.forEach( src => onRemoveImage(src))
     }
 
 
