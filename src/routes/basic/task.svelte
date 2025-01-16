@@ -97,11 +97,6 @@
                                             Id: 12,
                                             Association: 'TaskList',
                                             Expressions:['$ref', 'Name', 'TaskStates']
-                                        },
-                                        {
-                                            Id: 13,
-                                            Association: 'Attachements',
-                                            Expressions: ['$ref', 'Id', 'Name'],
                                         }
                                     ]
                                 }
@@ -130,8 +125,6 @@
         if(task.Steps == undefined)
             task.Steps = []
 
-        if(task.Attachements == undefined)
-            task.Attachements = []
     }
 
     async function onTitleChanged(text)
@@ -496,63 +489,28 @@
         const [file] = imgInput.files;
         if(file)
         {
-            const newAttachement ={
-                Name: file.name
-            }
-
-            const res = await reef.post(`${taskRef}/Attachements/new`, {...newAttachement}, onErrorShowAlert)
-            if(res && res.File && res.File.length > 0)
+            const res = await reef.post(`${taskRef}/Images/blob?name=${file.name}&size=${file.size}`, {}, onErrorShowAlert)
+            if(res && res.key && res.uploadUrl)
             {
-                const newFile = res.File[0];
+                const newKey = res.key;
+                const uploadUrl = res.uploadUrl
                 
                 try
                 {
-                    const apiVer = $session.configuration.api_version;
-                    const imgPath = `/json/${apiVer}/${taskRef}/Attachements/${newFile.Id}/blob`
-                    const res = await reef.fetch(`${imgPath}?name=${file.name}`, {
-                                                            method: 'PUT',
-                                                            body: ''
-                                                        })
+                    const res = await fetch(uploadUrl, {
+                                                method: 'PUT',
+                                                headers: new Headers({
+                                                    'Content-Type': file.type
+                                                }),
+                                                body: file})
                     if(res.ok)
                     {
-                        const result = await res.json()
-                        const redirectTo = result.redirect;
-                        if(redirectTo)
-                        {
-                            const res = await fetch(redirectTo, {
-                                                        method: 'PUT',
-                                                        headers: new Headers({
-                                                            'Content-Type': file.type
-                                                        }),
-                                                        body: file})
-                            if(res.ok)
-                            {
-                                // todo: editor path imgPath
-                                let imgPullPath = $session.apiAddress;
-                                if (imgPullPath.endsWith('/')) {
-                                    if (imgPath.startsWith('/'))
-                                        imgPullPath = imgPullPath + imgPath.substr(1);
-                                    else
-                                        imgPullPath = imgPullPath + imgPath;
-                                }
-                                else {
-                                    if (imgPath.startsWith('/'))
-                                        imgPullPath = imgPullPath + imgPath;
-                                    else
-                                        imgPullPath = imgPullPath + '/' + imgPath;
-                                }
-                                    
-                                console.log('upload success for ', imgPullPath)
-                                if(imgEditorActionAfterSuccess)
-                                    imgEditorActionAfterSuccess(imgPullPath)
-                            }
-                            else
-                            {
-                                const err = await res.text()
-                                console.error(err)
-                                onErrorShowAlert(err)
-                            }
-                        }
+                        // todo: editor path imgPath
+                        const dataPath = `${taskRef}/Images/blob?key=${newKey}`
+                            
+                        console.log('upload success for ', dataPath)
+                        if(imgEditorActionAfterSuccess)
+                            imgEditorActionAfterSuccess(dataPath)
                     }
                     else
                     {
@@ -560,6 +518,7 @@
                         console.error(err)
                         onErrorShowAlert(err)
                     }
+                        
                 }
                 catch(err)
                 {
@@ -570,6 +529,11 @@
 
             await reloadData();
         }
+    }
+
+    function removeImage(dataPath)
+    {
+        console.log('todo: removeImage from storage', dataPath)
     }
 
 </script>
@@ -706,7 +670,8 @@
                             bind:this={description}
                             onFocusCb={() => activateFormattingTools()}
                             onBlurCb={() => deactivateFormattingToolsIfNeeded()}
-                            onAddImage={uploadImage}/>
+                            onAddImage={uploadImage}
+                            onRemoveImage={removeImage}/>
 
             {/if}
 
