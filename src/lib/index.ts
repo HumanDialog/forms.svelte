@@ -34,6 +34,7 @@ export { default as ComboSource } from './components/combo/combo.source.svelte'
 export { default as ComboItem } from './components/combo/combo.item.svelte'
 
 export { default as RichEdit} from './components/document/rich.edit.svelte'
+export { default as Editor} from './components/document/editor.svelte'
 
 export { default as Spinner} from './components/delayed.spinner.svelte'
 //export { default as Menu } from './components/contextmenu.svelte'
@@ -90,7 +91,11 @@ export {
 
 export {
             mainContentPageReloader,
-            reloadMainContentPage } from './stores.js'
+            reloadMainContentPage,
+            reloadWholeApp,
+            alerts,
+            addAlert,
+            onErrorShowAlert } from './stores.js'
 
 export {    data_tick_store,    // tmp
             hasSelectedItem, 

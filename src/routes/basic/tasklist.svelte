@@ -1,5 +1,5 @@
 <script>
-    import {reef} from '@humandialog/auth.svelte'
+    import {reef, session} from '@humandialog/auth.svelte'
     import {    Spinner, 
                 Page, 
                 Icon, 
@@ -11,7 +11,8 @@
                 ListDateProperty,
                 ListComboProperty,
 				mainContentPageReloader,
-                Modal} from '$lib'
+                Modal,
+                onErrorShowAlert} from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaColumns, FaArchive, FaList, FaEllipsisH, FaChevronRight, FaChevronLeft} from 'svelte-icons/fa'
     import {location, pop, push, querystring} from 'svelte-spa-router'
 
@@ -25,7 +26,7 @@
     let isArchivedTasks = false;
     let assocName = 'Tasks'
     let listTitle = ''
-
+    
     let users = [];
 
     const STATE_FINISHED = 1000;
@@ -41,7 +42,20 @@
 
         if(users.length == 0)
         {
-            let res = await reef.get('/app/Users')
+            //let res = await reef.get('/app/Users')
+            let res = await reef.post('group/query',
+                            {
+                                Id: 1,
+                                Name: 'Users',
+                                Tree:[
+                                    {
+                                        Id: 1,
+                                        Association: 'Members/User'
+                                    }
+                                ]                    
+                            },
+                            onErrorShowAlert
+                        )
             if(res)
                 users = res.User;
         }
@@ -60,7 +74,8 @@
         isArchivedTasks = params.has('archivedTasks')
 
         assocName = (isArchivedTasks || isArchivedList) ? 'ArchivedTasks' : 'Tasks';
-        listPath = isArchivedList ? `/app/ArchivedLists/${listId}` : `/app/Lists/${listId}`;
+        listPath = isArchivedList ? `/group/ArchivedLists/${listId}` : `/group/Lists/${listId}`;
+
             
         await fetchData()
     }
@@ -102,7 +117,8 @@
                                         ]
                                     }
                                 ]
-                            });
+                            },
+                            onErrorShowAlert);
         if(res)
             currentList = res.TaskList;
         else
@@ -138,7 +154,7 @@
         if(!taskToDelete)
             return;
 
-        await reef.delete(taskToDelete.$ref);
+        await reef.delete(taskToDelete.$ref, onErrorShowAlert);
         deleteModal.hide();
 
         
@@ -158,7 +174,7 @@
         if(!taskToArchive)
             return;
 
-        await reef.post(`${taskToArchive.$ref}/Archive`, {})
+        await reef.post(`${taskToArchive.$ref}/Archive`, {}, onErrorShowAlert)
         archiveModal.hide();
         
         await reloadTasks(listComponent.SELECT_NEXT)
@@ -169,14 +185,14 @@
         if(event)
             event.stopPropagation();
 
-        let result = await reef.post(`${task.$ref}/Finish`, {});
+        let result = await reef.post(`${task.$ref}/Finish`, {}, onErrorShowAlert);
         if(result)
             await reloadTasks(listComponent.KEEP_OR_SELECT_NEXT)   
     }
 
     async function addTask(newTaskAttribs)
     {
-        let res = await reef.post(`${listPath}/CreateTaskEx`,{ properties: newTaskAttribs })
+        let res = await reef.post(`${listPath}/CreateTaskEx`,{ properties: newTaskAttribs }, onErrorShowAlert)
         if(!res)
             return null;
 

@@ -13,7 +13,8 @@
 		KanbanCallbacks,
 		KanbanColumnTop,
 		KanbanColumnBottom,
-        Tags
+        Tags,
+		onErrorShowAlert
 	} from '$lib';
 	import { list, global_tags } from './board.data.js';
 	import { reef } from '@humandialog/auth.svelte';
@@ -27,7 +28,21 @@
 	$: onParamsChanged();
 	async function onParamsChanged(...args) {
 		if (users.length == 0) {
-			const res = await reef.get('/app/Users?fields=$ref,Name');
+			//const res = await reef.get('/app/Users?fields=$ref,Name');
+			const res = await reef.post('group/query',
+                            {
+                                Id: 1,
+                                Name: 'Users',
+                                Tree:[
+                                    {
+                                        Id: 1,
+                                        Association: 'Members/User',
+                                        Expressions:['$ref', 'Name']
+                                    }
+                                ]                    
+                            }, 
+							onErrorShowAlert
+                        )
 			if (res) users = res.User;
 		}
 

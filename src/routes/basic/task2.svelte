@@ -1,5 +1,5 @@
 <script>
-    import {reef, session} from '@humandialog/auth.svelte'
+    import {reef} from '@humandialog/auth.svelte'
 	import  { Editor,
             Page,
             Combo,
@@ -19,7 +19,6 @@
     import {location, querystring} from 'svelte-spa-router'
     import TaskSteps from './task.steps.svelte'
     import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave} from 'svelte-icons/fa/'
-	
 
     let taskRef = ''
     let task = null;
@@ -34,7 +33,7 @@
     {
         //console.log('task: ', $location)
         const segments = $location.split('/');
-        const foundIdx = segments.findIndex( s => s == 'task');
+        const foundIdx = segments.findIndex( s => s == 'task2');
         if(foundIdx < 0)
             return;
 
@@ -124,7 +123,6 @@
 
         if(task.Steps == undefined)
             task.Steps = []
-
     }
 
     async function onTitleChanged(text)
@@ -476,66 +474,6 @@
             clearActiveItem('props')
     }
 
-    let imgInput;
-    let imgEditorActionAfterSuccess;
-    function uploadImage(editorActionAfterSuccess)
-    {
-        imgEditorActionAfterSuccess = editorActionAfterSuccess;
-        imgInput?.click();
-    }
-    
-    async function onImageSelected()
-    {
-        const [file] = imgInput.files;
-        if(file)
-        {
-            const res = await reef.post(`${taskRef}/Images/blob?name=${file.name}&size=${file.size}`, {}, onErrorShowAlert)
-            if(res && res.key && res.uploadUrl)
-            {
-                const newKey = res.key;
-                const uploadUrl = res.uploadUrl
-                
-                try
-                {
-                    const res = await fetch(uploadUrl, {
-                                                method: 'PUT',
-                                                headers: new Headers({
-                                                    'Content-Type': file.type
-                                                }),
-                                                body: file})
-                    if(res.ok)
-                    {
-                        // todo: editor path imgPath
-                        const dataPath = `${taskRef}/Images/blob?key=${newKey}`
-                            
-                        console.log('upload success for ', dataPath)
-                        if(imgEditorActionAfterSuccess)
-                            imgEditorActionAfterSuccess(dataPath)
-                    }
-                    else
-                    {
-                        const err = await res.text()
-                        console.error(err)
-                        onErrorShowAlert(err)
-                    }
-                        
-                }
-                catch(err)
-                {
-                    console.error(err)
-                    onErrorShowAlert(err)
-                }
-            }
-
-            await reloadData();
-        }
-    }
-
-    function removeImage(dataPath)
-    {
-        console.log('todo: removeImage from storage', dataPath)
-    }
-
 </script>
 
 {#if task != null}
@@ -669,16 +607,12 @@
                             compact={true}
                             bind:this={description}
                             onFocusCb={() => activateFormattingTools()}
-                            onBlurCb={() => deactivateFormattingToolsIfNeeded()}
-                            onAddImage={uploadImage}
-                            onRemoveImage={removeImage}/>
+                            onBlurCb={() => deactivateFormattingToolsIfNeeded()}/>
 
             {/if}
 
         </article>
     </section>
-
-    <input hidden type="file" id="imageFile" capture="environment" accept="image/*" bind:this={imgInput} on:change={onImageSelected}/>
 </Page>
 {/if}
 

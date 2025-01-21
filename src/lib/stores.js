@@ -11,6 +11,16 @@ export const pageToolbarOperations = writable([]);
 export const page_title = writable('');
 export const nav_titles = writable({});
 export const mainContentPageReloader = writable(1);
+export const wholeAppReloader = writable(1)
+export const alerts = writable([])
+
+export const addAlert = (txt) => {
+    let al = get(alerts)
+    al = [txt, ...al];
+    alerts.set(al);
+}
+
+export const onErrorShowAlert = addAlert;
 
 export function setNavigatorTitle(key, title)
 {
@@ -36,6 +46,13 @@ export function reloadMainContentPage()
     let val = get(mainContentPageReloader);
     val += 1;
     mainContentPageReloader.set(val);
+}
+
+export function reloadWholeApp()
+{
+    let val = get(wholeAppReloader);
+    val += 1;
+    wholeAppReloader.set(val);
 }
 
 
@@ -68,7 +85,7 @@ export let sidebar_left_pos = writable(0)
 let has_saved_tools_visible = false;
 function create_tools_visible_store()
 {
-    if(localStorage.tools_visible_store != undefined)
+    if(localStorage.tools_visible_store !== undefined)
         has_saved_tools_visible = true;
     else
         has_saved_tools_visible = false;
@@ -79,9 +96,9 @@ function create_tools_visible_store()
 export const tools_visible_store = create_tools_visible_store();
 tools_visible_store.subscribe( (value) => { localStorage.tools_visible_store = (value ? 'true' : '') } );
 
-export function set_default_tools_visible(value)
+export function set_default_tools_visible(value, force)
 {
-    if(!has_saved_tools_visible)
+    if((!has_saved_tools_visible) || force)
         tools_visible_store.set(value)
 }
 

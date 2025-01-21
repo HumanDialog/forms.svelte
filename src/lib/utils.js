@@ -23,6 +23,11 @@ export function isDeviceSmallerThan(br)
 export function selectItem(itm)
 {
     let data_context = get(contextItemsStore);
+
+    const prevSel = data_context['sel'];
+    if(prevSel === itm)
+        return;
+
     data_context['sel'] = itm;
     data_context.focused = 'sel';
     contextItemsStore.set( {...data_context} )
@@ -43,6 +48,7 @@ export function activateItem(context_level, itm, operations=null)
     data_context.focused = context_level;
     contextItemsStore.set( {...data_context} )
 
+    
     let ticket = get(data_tick_store)
     ticket++;
     data_tick_store.set(ticket)
@@ -60,6 +66,7 @@ export function clearActiveItem(context_level)
     data_context.focused = context_level;
     contextItemsStore.set( {...data_context} )
 
+    
     let ticket = get(data_tick_store)
     ticket++;
     data_tick_store.set(ticket)

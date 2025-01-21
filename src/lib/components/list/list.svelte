@@ -55,7 +55,7 @@
     let activate_after_dom_update :object | null =null;
 
     let inserter;
-
+    
     clearActiveItem('props')
 
     let  last_tick = -1   
@@ -171,7 +171,9 @@
         else
             self = data;
 
+        
         rereder();
+        
 
         if(selectElementId > 0)
         {
@@ -429,33 +431,35 @@
 
 <!--div class="w-full h-full overflow-y-auto"-->
 
-{#if items && items.length > 0 }
-    {#each items as element, i (getItemKey(element))}
-        
-        <List_element   item={element} 
-                        {toolbarOperations}
-                        {contextMenu}
-                        bind:this={rows[i]}
-                        >
-          
-            <span slot="left" let:element>
-                <slot name="left" {element}/>
-            </span>
-        </List_element>
-        
-        {#if show_insertion_row_after_element == element}
-            <Inserter   onInsert={async (title, summary) => {await insert(title, summary, show_insertion_row_after_element)}}
-                        icon={definition.inserter_icon}
-                        bind:this={inserter}    />
-        {/if}
-    {/each}
-{/if}
 
-{#if show_insertion_row_after_element == END_OF_LIST}
-    <Inserter   onInsert={async (title, summary) => {await insert(title, summary, null)}}
-                icon={definition.inserter_icon}
-                bind:this={inserter}    />
-{/if}
+    {#if items && items.length > 0 }
+        {#each items as element, i (getItemKey(element))}
+            
+            <List_element   item={element} 
+                            {toolbarOperations}
+                            {contextMenu}
+                            bind:this={rows[i]}
+                            >
+            
+                <span slot="left" let:element>
+                    <slot name="left" {element}/>
+                </span>
+            </List_element>
+            
+            {#if show_insertion_row_after_element == element}
+                <Inserter   onInsert={async (title, summary) => {await insert(title, summary, show_insertion_row_after_element)}}
+                            icon={definition.inserter_icon}
+                            bind:this={inserter}    />
+            {/if}
+        {/each}
+    {/if}
+
+    {#if show_insertion_row_after_element == END_OF_LIST}
+        <Inserter   onInsert={async (title, summary) => {await insert(title, summary, null)}}
+                    icon={definition.inserter_icon}
+                    bind:this={inserter}    />
+    {/if}
+
 
 <!--/div-->
 

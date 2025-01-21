@@ -11,14 +11,15 @@
                 ListDateProperty,
                 ListComboProperty,
 				mainContentPageReloader,
-                Modal} from '$lib'
+                Modal,
+                onErrorShowAlert} from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaArchive, FaEllipsisH} from 'svelte-icons/fa'
     
     export let params = {}
 
     let user = null;
     let listComponent;
-
+    
     let lists = [];
     const STATE_FINISHED = 1000;
 
@@ -34,11 +35,10 @@
 
         if(lists.length == 0)
         {
-            let res = await reef.get('/app/Lists')
+            let res = await reef.get('/group/Lists', onErrorShowAlert)
             if(res)
                 lists = res.TaskList;
         }
-        
         
         await fetchData()
     }
@@ -79,7 +79,8 @@
                                             ]
                                         }
                                     ]   
-                                });
+                                },
+                                onErrorShowAlert);
         if(res)
             user = res.User;
         else
@@ -107,7 +108,7 @@
         if(!taskToDelete)
             return;
 
-        await reef.delete(taskToDelete.$ref);
+        await reef.delete(taskToDelete.$ref, onErrorShowAlert);
         deleteModal.hide();
 
         
@@ -127,7 +128,7 @@
         if(!taskToArchive)
             return;
 
-        await reef.post(`${taskToArchive.$ref}/Archive`, {})
+        await reef.post(`${taskToArchive.$ref}/Archive`, {}, onErrorShowAlert)
         archiveModal.hide();
         
         await reloadTasks(listComponent.SELECT_NEXT)
@@ -137,14 +138,14 @@
     {
         event.stopPropagation();
 
-        let result = await reef.post(`${task.$ref}/Finish`, {});
+        let result = await reef.post(`${task.$ref}/Finish`, {}, onErrorShowAlert);
         if(result)
             await reloadTasks(listComponent.KEEP_OR_SELECT_NEXT)   
     }
 
     async function addTask(newTaskAttribs)
     {
-        let res = await reef.post(`/user/MyTasks/new`, newTaskAttribs)
+        let res = await reef.post(`/user/MyTasks/new`, newTaskAttribs, onErrorShowAlert)
         if(!res)
             return null;
 
@@ -242,7 +243,8 @@
 {#if user}
     <Page   self={user} 
             toolbarOperations={pageOperations}
-            clearsContext='props sel'>
+            clearsContext='props sel'
+            title='My tasks'>
 
         <List   self={user} 
                 a='MyTasks' 

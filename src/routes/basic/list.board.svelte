@@ -1,5 +1,5 @@
 <script>
-    import {reef} from '@humandialog/auth.svelte'
+    import {reef, session} from '@humandialog/auth.svelte'
     import {location, push} from 'svelte-spa-router'
     import {
 		Page,
@@ -17,7 +17,8 @@
         mainContentPageReloader,
 		KanbanSource,
         Modal,
-		KanbanColumnBottom
+		KanbanColumnBottom,
+        onErrorShowAlert
 
 
 	} from '$lib';
@@ -35,7 +36,7 @@
     let taskStates = [];
     let allTags = ''
     let kanban;
-
+    
     $: onParamsChanged($location, $mainContentPageReloader);
 
 	async function onParamsChanged(...args) 
@@ -48,21 +49,37 @@
 
         if(users.length == 0)
         {
-            let res = await reef.get('/app/Users')
+            //let res = await reef.get('/app/Users')
+            let res = await reef.post('group/query',
+                            {
+                                Id: 1,
+                                Name: 'Users',
+                                Tree:[
+                                    {
+                                        Id: 1,
+                                        Association: 'Members/User'
+                                    }
+                                ]                    
+                            },
+                            onErrorShowAlert
+                        )
             if(res)
                 users = res.User;
         }
 
-        allTags = await reef.get('/app/AllTags');
+        allTags = await reef.get('/group/AllTags', onErrorShowAlert);
         
         if(!segments.length)
             listId = 'first';
         else
             listId = segments[segments.length-1]
         
+        if(listId == 'listboard')
+            listId = 'first'
+        
         currentList = null
 
-        listPath = `/app/Lists/${listId}`;
+        listPath = `/group/Lists/${listId}`;
         await fetchData()
     }
 
@@ -102,7 +119,8 @@
                                         ]
                                     }
                                 ]
-                            });
+                            },
+                            onErrorShowAlert);
         if(res)
             currentList = res.TaskList;
         else
@@ -173,7 +191,7 @@
 
     async function onAdd(newTaskAttribs) 
     {
-        let res = await reef.post(`${listPath}/CreateTaskEx`,{ properties: newTaskAttribs })
+        let res = await reef.post(`${listPath}/CreateTaskEx`,{ properties: newTaskAttribs }, onErrorShowAlert)
         if(!res)
             return null;
 
@@ -194,7 +212,7 @@
         if(!taskToDelete)
             return;
 
-        await reef.delete(taskToDelete.$ref);
+        await reef.delete(taskToDelete.$ref, onErrorShowAlert);
         deleteModal.hide();
 
         reload(kanban.SELECT_NEXT);
@@ -213,7 +231,7 @@
         if(!taskToArchive)
             return;
 
-        await reef.post(`${taskToArchive.$ref}/Archive`, {})
+        await reef.post(`${taskToArchive.$ref}/Archive`, {}, onErrorShowAlert)
         archiveModal.hide();
         
         reload(kanban.SELECT_NEXT);
@@ -221,7 +239,7 @@
 
     async function finishTask(task)
     {
-        await reef.post(`${task.$ref}/Finish`, {});
+        await reef.post(`${task.$ref}/Finish`, {}, onErrorShowAlert);
         reload(task.Id); 
     }
 
@@ -229,7 +247,7 @@
     async function onUpdateAllTags(allAllTags)
     {
         allTags = allAllTags
-        await reef.post('app/set', { AllTags: allTags})
+        await reef.post('group/set', { AllTags: allTags}, onErrorShowAlert)
     }
 
     function getCardOperations(task)
@@ -546,7 +564,8 @@
         await reef.post(`${listPath}/set`,
                     {
                         TaskStates: currentList.TaskStates
-                    });
+                    },
+                    onErrorShowAlert);
     }
 
 </script>

@@ -71,6 +71,25 @@
 
     if(!summary)
         summary = definition.summary;
+
+    let [name_w, props_w] = calc_horz_division();
+    function calc_horz_division()
+    {
+        const props_no = definition.properties.length
+        switch(props_no)
+        {
+        case 0:
+            return ['w-full', ''];
+        case 1:
+            return ['w-2/3', 'w-1/3']
+        case 2:
+            return ['w-2/3', 'w-1/3']
+        case 3:
+            return ['w-1/2', 'w-1/2']
+        default:
+            return ['w-1/3', 'w-2/3']
+        }
+    }
             
 
     function calculate_active(...args)
@@ -337,6 +356,8 @@
 
     <slot name="left" element={item}/>
     
+    <i class="hidden sm:w-1/2 sm:w-2/3 sm:w-1/3"></i>   <!-- just to force tailwind classes including -->
+    
     <div    class="ml-3 w-full py-1" 
             use:selectable={item} 
             on:click={(e) => {activate_row(e, item)}} 
@@ -349,7 +370,7 @@
                     {#if is_link_like}
                         <p  class=" text-lg font-semibold min-h-[1.75rem]
                                     sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
-                                    whitespace-nowrap overflow-clip w-full sm:flex-none sm:w-2/3
+                                    whitespace-nowrap overflow-clip w-full sm:flex-none sm:{name_w}
                                     sm:hover:cursor-pointer underline"
                                     id="__hd_list_ctrl_{item[item_key]}_Title"
                                     on:click|stopPropagation={followDefinedHRef}
@@ -365,7 +386,7 @@
                     {:else}
                         <p  class=" text-lg font-semibold min-h-[1.75rem]
                                     sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
-                                    whitespace-nowrap overflow-clip w-full sm:flex-none sm:w-2/3"
+                                    whitespace-nowrap overflow-clip w-full sm:flex-none sm:{name_w}"
                             id="__hd_list_ctrl_{item[item_key]}_Title"
                             use:editable={{
                                 action: (text) => {change_name(text)},
@@ -386,14 +407,14 @@
             {:else}
                 <p  class=" text-lg font-semibold min-h-[1.75rem]
                             sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
-                            whitespace-nowrap overflow-clip w-full sm:flex-none sm:w-2/3"
+                            whitespace-nowrap overflow-clip w-full sm:flex-none sm:{name_w}"
                     id="__hd_list_ctrl_{item[item_key]}_Title"> 
                     {element_title}
                 </p>
             {/if}
            
 
-            <section class="hidden sm:block w-full sm:flex-none sm:w-1/3">
+            <section class="hidden sm:block w-full sm:flex-none sm:{props_w}">
                 <Properties {definition} {item} {placeholder} bind:this={props_md}/>
             </section>
         </div>

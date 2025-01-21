@@ -1,15 +1,6 @@
 <script>
-    import FaMoon from 'svelte-icons/fa/FaMoon.svelte'
-    import FaSun from 'svelte-icons/fa/FaSun.svelte'
-    import FaEllipsisH from 'svelte-icons/fa/FaEllipsisH.svelte'
-    import FaCog from 'svelte-icons/fa/FaCog.svelte'
-    import FaTools from 'svelte-icons/fa/FaTools.svelte'
-    import GoPrimitiveDot from 'svelte-icons/go/GoPrimitiveDot.svelte'
-    import FaSignInAlt from 'svelte-icons/fa/FaSignInAlt.svelte'
-    import FaSignOutAlt from 'svelte-icons/fa/FaSignOutAlt.svelte'
-    import FaBars from 'svelte-icons/fa/FaBars.svelte'
-    import FaToggleOn from 'svelte-icons/fa/FaToggleOn.svelte'
-    import FaToggleOff from 'svelte-icons/fa/FaToggleOff.svelte'
+    import {FaUsers, FaCog, FaSignInAlt, FaSignOutAlt, FaBars, FaToggleOn, FaToggleOff} from 'svelte-icons/fa/'
+    //import GoPrimitiveDot from 'svelte-icons/go/GoPrimitiveDot.svelte'
     import {showMenu} from '$lib/components/menu'
     import {push} from 'svelte-spa-router'
     import {contextItemsStore, context_info_store, contextToolbarOperations, data_tick_store} from './stores.js'
@@ -25,12 +16,9 @@
         previously_visible_sidebar,
         main_sidebar_visible_store,
         sidebar_left_pos,
-
 		page_title,
-
-		nav_titles
-
-
+		nav_titles,
+        reloadWholeApp
     } from "./stores.js";
     import Icon from './components/icon.svelte';
     import {session, signInHRef, signOutHRef} from '@humandialog/auth.svelte'
@@ -50,6 +38,7 @@
     let is_logged_in = false;
     let sign_in_href = '';
     let sign_out_href = '';
+    let user_is_in_multiple_groups = false;
 
     let tabs = [];
     let icon;
@@ -64,6 +53,7 @@
         show_sign_in_out_icons = config.signin ? true : false;
         sign_in_href = $signInHRef;
         sign_out_href = $signOutHRef;
+        //user_is_in_multiple_groups = $session.tenants.length > 1
 
         tabs = Object.keys(appConfig.sidebar);
         if(tabs.length > 1)
@@ -213,6 +203,36 @@
         showMenu(pt, options);    
     }
 
+    function show_groups(e)
+    {
+        let owner = e.target;
+        while(owner && owner.tagName != 'BUTTON')
+            owner = owner.parentElement
+
+        if(!owner)
+            return;
+
+        let rect = owner.getBoundingClientRect();
+        let options = [];
+
+        $session.tenants.forEach(tInfo =>
+            options.push({
+                caption: tInfo.name,
+                icon: FaUsers,
+                disabled: tInfo.id == $session.tid,
+                action: (f) => {
+                    $session.setCurrentTenantAPI(tInfo.url, tInfo.id)
+                    push('/')
+                    reloadWholeApp();
+                }
+            })
+        )
+
+        
+        let pt = new DOMPoint(rect.left, rect.bottom)
+        showMenu(pt, options);    
+    }
+
     function clearSelection()
     {
         if (!clearsContext) return;
@@ -244,7 +264,14 @@
         <div class="block sm:hidden mt-4 sm:mt-3 uppercase text-sm text-center">{@html title}</div>
     </div>
 
-    <div class="flex-none ml-auto flex h-12 sm:h-10">        
+    <div class="flex-none ml-auto flex h-12 sm:h-10">   
+        {#if user_is_in_multiple_groups}
+            <button class="h-full w-12 sm:w-10 px-0 flex justify-center items-center   text-stone-300 hover:text-stone-100"
+                    on:click|stopPropagation={show_groups}>
+                <Icon class="w-5 sm:w-4 h-5 sm:h-4" component={FaUsers} />
+            </button>
+        {/if}
+
         <button
             class="h-full w-12 sm:w-10 px-0 flex justify-center items-center   text-stone-300 hover:text-stone-100"
             on:click|stopPropagation={show_options}>

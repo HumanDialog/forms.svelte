@@ -20,32 +20,42 @@
     export let placeholder = 'pl'
     export let pushChangesImmediately = true;
 
+    export let required = false;
+
     export  let s = 'sm'
     export  let c = ''
-    export  let validateCb = undefined;
+    export  let validation = undefined;
     export function validate()
     {
-        if(!validateCb)
+        if(!validation)
         {
-            invalid = false;
-            return true;
+            if(required)
+            {
+                invalid = !val;
+                return !invalid;   
+            }
+            else
+            {
+                invalid = false;
+                return true;
+            }
         }
 
-        invalid = !validateCb(val);
+        invalid = !validation(val);
         return !invalid;
     } 
 
     
     let   item = null
 
-    let     label_mb = 'mb-1' //
+    let     labelMargins = 'mt-1 mb-0.5' //
     let input_pt = 'pt-0.5'
     let input_pb = 'pb-1'
     
     switch (s)
     {
         case 'md':
-            label_mb = 'mb-2';
+            labelMargins = 'mt-1 mb-1';
             input_pt = 'pt-2.5'
             input_pb = 'pb-2.5';           
             break;
@@ -111,7 +121,7 @@
 {#if itype == 'text'}
     {@const border_style = invalid ? "border-red-300 dark:border-red-600" : "border-stone-300 dark:border-stone-500" }
     <div class={cs}>
-        <label for="name" class="block {label_mb} text-xs font-small text-stone-900 dark:text-white">{label}</label>
+        <label for="name" class="block {labelMargins} text-xs font-small text-stone-900 dark:text-white">{label}</label>
         
         <input  type=text name="name" id="name" 
                 bind:value={val} 

@@ -1,6 +1,6 @@
 {
 	"name": "@humandialog/forms.svelte",
-	"version": "0.5.25",
+	"version": "1.2.3",
 	"description": "Basic Svelte UI components for Object Reef applications",
 	"scripts": {
 		"dev": "vite dev",
@@ -37,10 +37,16 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@humandialog/auth.svelte": "^1.5.5",
-		"flowbite-svelte": "^0.29.13",
+		"@humandialog/auth.svelte": "^1.8.3",
+		"@tiptap/core": "^2.11.0",
+		"@tiptap/extension-image": "^2.11.0",
+		"@tiptap/pm": "^2.11.0",
+		"@tiptap/starter-kit": "^2.11.0",
+		"@tiptap/suggestion": "^2.11.0",
+		"flowbite-svelte": "^0.44.4",
+		"pdfjs-dist": "^4.10.38",
 		"svelte-icons": "^2.1.0",
-		"svelte-spa-router": "^3.3.0"
+		"svelte-spa-router": "^4.0.1"
 	},
 	"keywords": [
 		"svelte",
