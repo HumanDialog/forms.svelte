@@ -19,7 +19,7 @@
     import {Console} from '$lib'
     
 	
-    const domain = 'objectreef.local:1996'
+    const domain = 'localhost:1996'
     const appId = 'octopus'
     const tenantId = 'octopus'
     const proto = 'http'
@@ -47,7 +47,7 @@
                     },
                     {
                         username: "bob@example.com",
-                        role: 'Developer',
+                        role: 'Employee',
                         groupId: 13
                     }
                 ],

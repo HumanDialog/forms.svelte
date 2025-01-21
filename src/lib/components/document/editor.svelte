@@ -464,6 +464,32 @@
                 }
             }
         }
+        else
+        {
+            const user = $session.localDevCurrentUser;
+            if (user) 
+            {
+                if(fullPath.includes('?'))     // has other params
+                {
+                    fullPath += '&'
+                }   
+                else
+                {
+                    fullPath += '?'
+                }
+
+                if(user.uid > 0)
+                    fullPath += 'x-reef-user-id=' + user.uid
+                else
+                    fullPath += 'x-reef-as-user=' + user.username
+
+                if(user.role)
+                    fullPath += '&x-reef-access-role=' + user.role
+
+                if(user.groupId)
+                    fullPath += '&x-reef-group-id=' + user.groupId
+            }
+        }
 
         return fullPath;
     }
