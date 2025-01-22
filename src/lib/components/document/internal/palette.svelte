@@ -41,7 +41,7 @@
         toolboxX = margin;
         toolboxY = rect.bottom + margin;
 
-        const mainContentDiv = document.getElementById('__hd_svelte_main_content_container')
+        //const mainContentDiv = document.getElementById('__hd_svelte_main_content_container')
 
         /*console.log('window.scrollY', window.scrollY, window.pageYOffset)
         console.log('window.screenTop, window.screenY', window.screenTop, window.screenY)
@@ -66,17 +66,18 @@
         dispatch('palette_shown');
     }
 
-    let toolboxElement;
+    let paletteElement;
     afterUpdate(
       async () =>
       {
-          if(isToolbox && visible && toolboxElement)
+        // OCT-273: not only for toolbox case. Z order problems are also for large screen, full palette case
+          if(/*isToolbox && */visible && paletteElement)
           {
               let layoutRoot = document.getElementById("__hd_svelte_layout_root")
-              if(!!layoutRoot && toolboxElement.parentElement != layoutRoot)
+              if(!!layoutRoot && paletteElement.parentElement != layoutRoot)
               {
                 await tick();
-                layoutRoot.appendChild(toolboxElement)
+                layoutRoot.appendChild(paletteElement)
               }
           }
       }
@@ -293,7 +294,7 @@
             on:touchstart={mousedown}
             on:touchmove={mousemove}
             on:touchend={mouseup}
-            bind:this={toolboxElement}>
+            bind:this={paletteElement}>
         {#if filtered_commands && filtered_commands.length}
             {#each filtered_commands as cmd, idx (cmd.caption)}
                 {@const id = "cpi_" + idx}
@@ -320,7 +321,8 @@
 {:else}
     <div    class="not-prose bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md z-30" 
             hidden={!visible}
-            style={css_style}>
+            style={css_style}
+            bind:this={paletteElement}>
         {#if filtered_commands && filtered_commands.length}
             {#each filtered_commands as cmd, idx (cmd.caption)}
                 {@const id = "cpi_" + idx}

@@ -12,7 +12,7 @@
     import {FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaArchive, FaUsers, FaPlus} from 'svelte-icons/fa'
     import {location, push} from 'svelte-spa-router'
     import {reef, session} from '@humandialog/auth.svelte'
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 
     export let sidebar = true;
 
@@ -289,10 +289,11 @@
                 caption: tInfo.name,
                 icon: FaUsers,
                 disabled: tInfo.id == $session.tid,
-                action: (f) => {
+                action: async (f) => {
                     $session.setCurrentTenantAPI(tInfo.url, tInfo.id)
-                    
                     push('/')
+                    
+                    await tick()
                     reloadWholeApp();
                 }
             })
