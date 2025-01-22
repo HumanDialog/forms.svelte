@@ -678,7 +678,7 @@
         </article>
     </section>
 
-    <input hidden type="file" id="imageFile" capture="environment" accept="image/*" bind:this={imgInput} on:change={onImageSelected}/>
+    <input hidden type="file" id="imageFile" accept="image/*" bind:this={imgInput} on:change={onImageSelected}/> <!-- capture="environment" -->
 </Page>
 {/if}
 

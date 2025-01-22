@@ -177,8 +177,9 @@
                     return
                 }
 
-                //console.log('decorationNode', props.decorationNode, props.text)
-                show_command_palette();
+
+                const cursorRect = props.clientRect();
+                show_command_palette(cursorRect);
                 palette.set_current_editor_range(props.range)
                 palette.filter('');
             },
@@ -687,9 +688,9 @@
         //clear_previous_text_and_position();
     }
 
-    function show_command_palette()
+    function show_command_palette(cursorRect)
     {
-        let rect = get_selection_bbox();
+        let rect = cursorRect; //get_selection_bbox();
         let client_rect = get_window_box();
         let top_space = rect.y;
         let bottom_space = client_rect.height - (rect.y + rect.height);
