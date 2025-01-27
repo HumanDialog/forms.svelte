@@ -162,7 +162,7 @@ export function editable(node, params)
         case 'Enter':
             e.stopPropagation();
             e.preventDefault();
-
+            
             if(e.shiftKey && onSoftEnter)
                 await finish_editing({ softEnter: true});
             else
@@ -211,11 +211,14 @@ export function editable(node, params)
             if(active)
             {
                 if(has_changed)
+                {
+                    has_changed = false;
                     await action(node.textContent)
+                }
+                    
             }
             else
                 await action(node.textContent)
-            
         }
 
         const finish_event  = new CustomEvent("finish", {

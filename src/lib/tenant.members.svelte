@@ -68,10 +68,17 @@
     {
         if(showAccessRoles)
         {
-            let roles = await reef.get('/sys/list_access_roles')
+            let roles = await reef.get('/sys/list_access_roles?details')
             access_roles = [];
             if(roles)
-                roles.forEach( gname => access_roles.push({name: gname}));
+                roles.forEach( roleInfo => 
+                    access_roles.push(
+                        {
+                            name: roleInfo.name,
+                            flags: roleInfo.flags,
+                            id: roleInfo.id,
+                            summary: roleInfo.summary ? roleInfo.summary : roleInfo.name
+                        }));
         }
 
 
@@ -659,7 +666,7 @@
 
             {#if showAccessRoles}
                 <ListComboProperty name='Access' a='acc_role' onSelect={on_change_access_role}>
-                    <ComboSource objects={access_roles} name='name' key='name'/>
+                    <ComboSource objects={access_roles} name='summary' key='name'/>
                 </ListComboProperty>
             {/if}
 
@@ -810,7 +817,7 @@
 
                             let options = [];
                             access_roles.forEach(k => options.push({
-                                caption: k.name,
+                                caption: k.summary,
                                 action: (f) => { new_user.acc_role=k.name}
                             }));
 
@@ -818,7 +825,12 @@
                             let pt = new DOMPoint(rect.left, rect.bottom)
                             showMenu(pt, options);   
                         }}>
-                            {new_user.acc_role ? new_user.acc_role : '<none>'}
+                            {#if new_user.acc_role}
+                                {access_roles.find(r => r.name==new_user.acc_role).summary}
+                            {:else}
+                                {"<none>"}
+                            {/if}
+                           
                             <span class="w-3 h-3 inline-block text-stone-700 dark:text-stone-300 ml-2 mt-2 sm:mt-1">
                                 <FaChevronDown/>
                             </span>

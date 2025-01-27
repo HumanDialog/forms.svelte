@@ -1,5 +1,6 @@
 import {writable} from 'svelte/store';
 import {reef} from '@humandialog/auth.svelte/dist/index'
+import {onErrorShowAlert} from './stores.js'
 
 
 const modified_item_store = writable(null);
@@ -121,19 +122,14 @@ update_request_ticket.subscribe(async (v) => {
             changes.push(value.item);
         });
 
-        try
-        {
-            //console.log('push: ', changes);
-            const res = await reef.post('/Push', { Items: changes });
+        
+        //console.log('push: ', changes);
+        const res = await reef.post('/Push', { Items: changes }, onErrorShowAlert);
 
-            if(res)
-            {
-                modified_items_map.clear();
-            }
-        }
-        catch(err)
-        {
-            console.error(err);
-        }
+        //if(res)
+        //{
+            modified_items_map.clear();
+        //}
+        
     }
 })

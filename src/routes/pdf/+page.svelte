@@ -1,6 +1,8 @@
 <script>
     import PDFPage from './pdf.page.viewer.svelte'
 
+
+    const url = "./pdf/ZG_PW_A_R01_RZUT_I PIETRO_REW_7_220628-PW_A_R01_1_100.pdf"   // compressed.tracemonkey-pldi-09.pdf
     let pageNo = 1
     let scale = 1.0
     let rotation = 0
@@ -50,5 +52,5 @@ rotation {rotation}
 <button class="p-1 bg-stone-300" on:click={rotateRight}>rotate right</button>
 
 {#key pageNo + scale + rotation}
-    <PDFPage url="./pdf/compressed.tracemonkey-pldi-09.pdf" {pageNo} {scale} {rotation}/>
+    <PDFPage {url} {pageNo} {scale} {rotation}/>
 {/key}

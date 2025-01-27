@@ -91,6 +91,7 @@
         await pdfPage.render({
             canvasContext: ctx,
             viewport: viewport,
+            annotationMode: pdfjs.AnnotationMode.DISABLE,
             background: null
         }).promise
  

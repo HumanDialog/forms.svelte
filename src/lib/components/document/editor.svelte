@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { onMount, onDestroy,  getContext } from 'svelte';
-    import {session} from '@humandialog/auth.svelte'
+    import { onMount, onDestroy,  getContext, afterUpdate } from 'svelte';
+    import {reef, session} from '@humandialog/auth.svelte'
 	import { Editor } from '@tiptap/core';
 	
     import StarterKit from '@tiptap/starter-kit';
@@ -21,7 +21,7 @@
     import Gapcursor from '@tiptap/extension-gapcursor'
     import History from '@tiptap/extension-history'
     
-    import {data_tick_store, contextItemsStore, contextTypesStore} from '../../stores.js'
+    import {data_tick_store, contextItemsStore, contextTypesStore, onErrorShowAlert} from '../../stores.js'
     import {informModification, pushChanges} from '../../updates.js'
     import {isDeviceSmallerThan, parseWidthDirective} from '../../utils.js'
     import Palette from './internal/palette.svelte'
@@ -459,6 +459,8 @@
                             fullPath += '?'
                         }
                     }
+                    else
+                        fullPath += '&';
                    
                     fullPath += param.key.toLowerCase()
                     fullPath += '=' + param.value;
@@ -495,11 +497,17 @@
         return fullPath;
     }
 
+    let downloadedImages = []
+
     const CrossImage = Image.extend({
         addAttributes() {
             return {
-                crossorigin: {
-                    default: 'use-credentials'
+                //crossorigin: {
+                //    default: 'use-credentials'
+                //},
+
+                loading: {
+                    default: 'lazy'
                 },
 
                 dataPath: {
@@ -509,9 +517,51 @@
                         const dataPath = attributes.dataPath;
                         if(dataPath)
                         {
+                            let src = '';
+                            let found = downloadedImages.find(e => e.dataPath == dataPath)
+                            if(found)
+                            {
+                                if(found.url)
+                                    src = found.url;
+                            }
+                            else
+                            {
+                                const newEntry = {
+                                    dataPath: dataPath,
+                                    url: ''
+                                }
+
+                                downloadedImages.push(newEntry)
+                                
+                                reef.fetch(`/json/anyv/${dataPath}`).then( (res) => {
+                                    if(res.ok)
+                                    {
+                                        res.blob().then( blob => {
+                                            newEntry.url = URL.createObjectURL(blob);
+                                            console.log('image loaded: ', dataPath, newEntry.url)
+
+                                            editorElement.querySelectorAll('img').forEach( img => {
+                                                if(img.getAttribute('data-path') == dataPath)
+                                                    img.src = newEntry.url
+                                            })
+                                        })        
+                                    }
+                                    else    
+                                    {
+                                        res.text().then( err => onErrorShowAlert(err))
+                                    }
+                                },
+                                
+                                (err) => {
+                                    onErrorShowAlert(err)
+                                })
+                            }
+
                             return {
                                 'data-path': dataPath,
-                                src: prepareFullImagePath(dataPath)
+                            //    src: prepareFullImagePath(dataPath)
+                           //      src: 'http://localhost/_hd_force_img_error'
+                                src: src
                             }
                         }
                         else
@@ -575,7 +625,7 @@
 			onTransaction({ editor, transaction }) {
 				hasChangedValue = true;
                 changedValue = editor.getHTML()
-                handleImagesDeletions(transaction)
+                handleImagesChanges(transaction)
 			},
             onFocus({ editor, event }) {
                 // The editor is focused.
@@ -592,6 +642,9 @@
                 // The editor content does not match the schema.
                 console.log('editor content error:', error)
             },
+            onUpdate({editor}) {
+                //setupImgErrorHandlers()
+            }
 		});
 	});
 
@@ -603,6 +656,42 @@
         if(is_command_palette_visible)
             palette.hide();
 	});
+
+    /* afterUpdate( () =>
+    {
+        setupImgErrorHandlers()
+    })
+
+    function setupImgErrorHandlers()
+    {
+        editorElement.querySelectorAll('img').forEach( img =>
+            {
+                const dataPath = img.getAttribute('data-path')
+                if(dataPath)
+                {
+                    img.onerror = onImgError
+                }
+            }
+        )
+    }
+
+    const onImgError = async (e) => {
+        const img = e.target;
+        if(img.src.endsWith('/_hd_force_img_error'))
+        {
+            const dataPath = img.getAttribute('data-path')
+            if(dataPath)
+            {
+                const res = await reef.fetch(`json/anyv/${dataPath}`)
+                if(res.ok)
+                {
+                    const blob = await res.blob() 
+                    img.src = URL.createObjectURL(blob)  
+                }
+            }
+            //    img.src = prepareFullImagePath(dataPath)
+        }
+    } */
 
     function on_blur()
     {
@@ -747,23 +836,48 @@
             palette.show(x, y, show_above);
     }
 
-    function onAddedImageReady(dataPath)
+    async function onAddedImageReady(dataPath)
     {
-        const imgFullPath = prepareFullImagePath(dataPath)
+        //const imgFullPath = prepareFullImagePath(dataPath)
         editor.commands.insertContent({
-          type: 'image',
-          attrs: {
-             src: imgFullPath, 
-             dataPath: dataPath
-          },
-        })
+                type: 'image',
+                attrs: {
+                    src: '', 
+                    dataPath: dataPath
+                },
+            })
+        /*
+        
+        const res = await reef.fetch(`json/anyv/${dataPath}`)
+        if(res.ok)
+        {
+            const blob = await res.blob() 
+            const src = URL.createObjectURL(blob)
+            
+            editor.commands.insertContent({
+                type: 'image',
+                attrs: {
+                    src: src, 
+                    dataPath: dataPath
+                },
+            })
+        }
+        else
+        {
+            editor.commands.insertContent({
+                type: 'image',
+                attrs: {
+                    src: 'file://_hd_force_img_error', 
+                    dataPath: dataPath
+                },
+            })
+        }
+        */
+
     }
 
-    function handleImagesDeletions(transaction)
+    function handleImagesChanges(transaction)
     {
-        if(!onRemoveImage)
-            return;
-
         const getImageSrcs = (fragment) => {
             let srcs = new Set();
             fragment.forEach((node) => {
@@ -784,7 +898,10 @@
         // Determine which images were deleted
         let deletedImageSrcs = [...previousSrcs].filter((src) => !currentSrcs.has(src));
 
-        deletedImageSrcs.forEach( src => onRemoveImage(src))
+        if(onRemoveImage)
+            deletedImageSrcs.forEach( src => onRemoveImage(src))
+
+
     }
 
 
