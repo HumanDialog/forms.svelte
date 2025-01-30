@@ -617,5 +617,9 @@ export function isOnScreenKeyboardVisible()
     }
 
     return false;
+}
 
+export const UI = {
+    operations: null,
+    fab: null
 }

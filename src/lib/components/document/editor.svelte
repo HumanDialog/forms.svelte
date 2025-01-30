@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onMount, onDestroy,  getContext, afterUpdate } from 'svelte';
+    import { onMount, onDestroy,  getContext, afterUpdate, tick } from 'svelte';
     import {reef, session} from '@humandialog/auth.svelte'
 	import { Editor } from '@tiptap/core';
 	
@@ -12,6 +12,7 @@
     import HardBreak from '@tiptap/extension-hard-break'
     import HorizontalRule from '@tiptap/extension-horizontal-rule'
     import Image from '@tiptap/extension-image'
+    import Link from '@tiptap/extension-link'
 
     import Bold from '@tiptap/extension-bold'
     import Code from '@tiptap/extension-code'
@@ -24,11 +25,11 @@
     
     import {data_tick_store, contextItemsStore, contextTypesStore, onErrorShowAlert} from '../../stores.js'
     import {informModification, pushChanges} from '../../updates.js'
-    import {isDeviceSmallerThan, parseWidthDirective, refreshToolbarOperations} from '../../utils.js'
+    import {isDeviceSmallerThan, parseWidthDirective, refreshToolbarOperations, UI} from '../../utils.js'
     import Palette from './internal/palette.svelte'
 
     import {FaFont, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle, FaInfo, FaImage,
-            FaBold, FaItalic, FaUnderline, FaStrikethrough  } from 'svelte-icons/fa'
+            FaBold, FaItalic, FaUnderline, FaStrikethrough, FaArrowLeft, FaGripLines } from 'svelte-icons/fa'
     import IcH1 from './internal/h1.icon.svelte'
     import IcH2 from './internal/h2.icon.svelte'
     import IcH3 from './internal/h3.icon.svelte'
@@ -62,9 +63,25 @@
         editor.commands.focus();
     }
 
+    let suggestionRange = undefined;
     export function getFormattingOperations(withCaptions = false)
     {
         let result = [];
+
+        if(isDeviceSmallerThan("sm"))
+        {
+            result = [
+                {
+                    caption: 'Back to edit',
+                    icon: FaArrowLeft,
+                    action: (fi) => {editor?.commands.focus();}
+                },
+                {
+                    separator: true
+                }
+            ]   
+        }
+
         commands.forEach( c => {
             if(c.separator)
             {
@@ -75,7 +92,7 @@
                 result.push({
                     caption: withCaptions ? c.caption : '',
                     icon: c.icon,
-                    action: c.on_choice,
+                    action: (f) => c.on_choice(suggestionRange),
                     activeFunc: c.is_active
                 })
             }
@@ -101,6 +118,7 @@
                             px-2.5`;
 
     let  last_tick = -1;
+    let  lockNextBlurCallbacks = 0;
 
     $: updateAfterUIChanges($data_tick_store)
 
@@ -187,11 +205,21 @@
                     return
                 }
 
-
-                const cursorRect = props.clientRect();
-                show_command_palette(cursorRect);
-                palette.set_current_editor_range(props.range)
-                palette.filter('');
+                if(isDeviceSmallerThan("sm"))
+                {
+                    lockNextBlurCallbacks++;
+                    suggestionRange = props.range;
+                    editor.commands.blur();
+                    setTimeout(() => UI.fab?.activateMainOperation(), 100)
+                    
+                }
+                else
+                {
+                    const cursorRect = props.clientRect();
+                    show_command_palette(cursorRect);
+                    palette.set_current_editor_range(props.range)
+                    palette.filter('');
+                }
             },
 
             onUpdate(props) {
@@ -623,6 +651,7 @@
                 Italic,
                 Strike,
                 Underline,
+                Link,
 
                 Dropcursor,
                 Gapcursor,
@@ -647,9 +676,16 @@
             },
             onBlur({ editor, event }) {
                 // The editor isn’t focused anymore.
-                on_blur();
-                if(onBlurCb)
-                    onBlurCb();
+                if(lockNextBlurCallbacks > 0)
+                {
+                    lockNextBlurCallbacks--;
+                }
+                else
+                {
+                    on_blur();
+                    if(onBlurCb)
+                        onBlurCb();
+                }
             },
             onContentError({ editor, error, disableCollaboration }) {
                 // The editor content does not match the schema.
@@ -943,7 +979,8 @@
                {   caption: 'Info',         description: 'An important info about above paragraph',         icon: FaInfo,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsInfo().run(); else editor.commands.setAsInfo() }, is_active: () => editor?.isActive('InfoBlock')  }, 
                
                {    caption: 'Other blocks', separator: true },
-               {   caption: 'Image',        description: 'Add image to document',                           icon: FaImage,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).run(); if(onAddImage) onAddImage(onAddedImageReady);  } } 
+               {   caption: 'Image',        description: 'Add image to document',                           icon: FaImage,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).run(); if(onAddImage) onAddImage(onAddedImageReady);  } } ,
+               {   caption: 'Horizontal rule', description: 'Add horizonal role',           tags: 'hr',      icon: FaGripLines,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHorizontalRule().run(); else editor.commands.setHorizontalRule();  } } 
             ];
     
     function makeBold(range)

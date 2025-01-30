@@ -20,7 +20,7 @@
             alerts } from './stores.js'
     
     //import { AuthorizedView} from '@humandialog/auth.svelte'
-    import { handleSelect, isDeviceSmallerThan, isOnScreenKeyboardVisible, removeAt } from './utils'
+    import { handleSelect, isDeviceSmallerThan, isOnScreenKeyboardVisible, removeAt, UI } from './utils'
     import { afterUpdate, onMount } from 'svelte';
     
     export let layout;
@@ -212,6 +212,14 @@
         }
     }
 
+    let operationsComponent
+    let fabComponent;
+    afterUpdate( () =>
+    {
+        UI.operations = operationsComponent
+        UI.fab = fabComponent;          
+    })
+
 </script>
 
 <svelte:window bind:innerWidth bind:outerWidth bind:innerHeight bind:outerHeight />
@@ -290,11 +298,11 @@
                                     {lg_content_area_horizontal_dim}
                                     z-10 overflow-hidden " >
 
-                        <Operations/>
+                        <Operations bind:this={operationsComponent} />
                     </div>
 
                     <div class="{fab_visibility} right-3 {fab_bottom} mb-1 cursor-pointer z-10">
-                        <Fab/>
+                        <Fab bind:this={fabComponent}/>
                     </div>
 
                     <!--#######################################################-->
