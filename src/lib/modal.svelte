@@ -137,7 +137,9 @@
                           on:click={on_cancel}>
                           {cancelCaption}</button>
             {:else if mode == Custom}
+              {#if $$slots.footer}
                 <slot name="footer"/>
+              {/if}
             {/if}
           </div>
         </div>

@@ -86,7 +86,9 @@ export {
     saveCurrentEditable,
     selectable,
     handleSelect,
-    isDeviceSmallerThan
+    isDeviceSmallerThan,
+    resizeImage,
+    refreshToolbarOperations
 }   from './utils'
 
 export {

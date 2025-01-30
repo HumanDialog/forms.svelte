@@ -17,16 +17,18 @@
     import Code from '@tiptap/extension-code'
     import Italic from '@tiptap/extension-italic'
     import Strike from '@tiptap/extension-strike'
+    import Underline from '@tiptap/extension-underline'
     import Dropcursor from '@tiptap/extension-dropcursor'
     import Gapcursor from '@tiptap/extension-gapcursor'
     import History from '@tiptap/extension-history'
     
     import {data_tick_store, contextItemsStore, contextTypesStore, onErrorShowAlert} from '../../stores.js'
     import {informModification, pushChanges} from '../../updates.js'
-    import {isDeviceSmallerThan, parseWidthDirective} from '../../utils.js'
+    import {isDeviceSmallerThan, parseWidthDirective, refreshToolbarOperations} from '../../utils.js'
     import Palette from './internal/palette.svelte'
 
-    import {FaFont, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle, FaInfo, FaImage} from 'svelte-icons/fa'
+    import {FaFont, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle, FaInfo, FaImage,
+            FaBold, FaItalic, FaUnderline, FaStrikethrough  } from 'svelte-icons/fa'
     import IcH1 from './internal/h1.icon.svelte'
     import IcH2 from './internal/h2.icon.svelte'
     import IcH3 from './internal/h3.icon.svelte'
@@ -64,11 +66,19 @@
     {
         let result = [];
         commands.forEach( c => {
-            result.push({
-                caption: withCaptions ? c.caption : '',
-                icon: c.icon,
-                action: c.on_choice
-            })
+            if(c.separator)
+            {
+                result.push({separator: true})
+            }
+            else
+            {
+                result.push({
+                    caption: withCaptions ? c.caption : '',
+                    icon: c.icon,
+                    action: c.on_choice,
+                    activeFunc: c.is_active
+                })
+            }
         })
         
         return result;
@@ -404,7 +414,7 @@
         }
     })
 
-    function prepareFullImagePath(url)
+    /*function prepareFullImagePath(url)
     {
         if (!url.startsWith('/json/'))
         {
@@ -496,6 +506,7 @@
 
         return fullPath;
     }
+    */
 
     let downloadedImages = []
 
@@ -611,6 +622,7 @@
                 Code,
                 Italic,
                 Strike,
+                Underline,
 
                 Dropcursor,
                 Gapcursor,
@@ -626,6 +638,7 @@
 				hasChangedValue = true;
                 changedValue = editor.getHTML()
                 handleImagesChanges(transaction)
+                refreshToolbarOperations()
 			},
             onFocus({ editor, event }) {
                 // The editor is focused.
@@ -779,6 +792,8 @@
 
     function show_command_palette(cursorRect)
     {
+        //editor.commands.blur();
+        //return;
         let rect = cursorRect; //get_selection_bbox();
         let client_rect = get_window_box();
         let top_space = rect.y;
@@ -909,20 +924,76 @@
 
     
     let commands  = [
-               {   caption: 'Normal',       description: 'This is normal text style',      tags: 'text',    icon: FaRemoveFormat,               on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setParagraph().run(); else editor.commands.setParagraph() } } ,
+               {    caption: 'Bold',        description: 'Marks text as bolded',            tags: 'strong', icon: FaBold,                       on_choice: makeBold,            is_active: () => editor?.isActive('bold')  },
+               {    caption: 'Italic',      description: 'Marks text as italic',            tags: 'strong', icon: FaItalic,                     on_choice: makeItalic,          is_active: () => editor?.isActive('italic')  },
+               {    caption: 'Underlie',    description: 'Marks text as underlined',                        icon: FaUnderline,                  on_choice: makeUnderline,       is_active: () => editor?.isActive('underline')    },
+               {    caption: 'Strikethrough',description: 'Marks text as strikethrough',                    icon: FaStrikethrough,              on_choice: makeStrikethrough,   is_active: () => editor?.isActive('strike')},
                
-               {   caption: 'Heading 1',      description: 'Description heading',            tags: 'h1',      icon: IcH1,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 1}).run(); else editor.commands.setHeading({ level: 1 }) } } ,
-               {   caption: 'Heading 2',      description: 'Description heading',            tags: 'h2',      icon: IcH2,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 2}).run(); else editor.commands.setHeading({ level: 2 }) } } ,
+               {    caption: 'Styles',       separator: true },
+               
+               {   caption: 'Normal',       description: 'This is normal text style',      tags: 'text',    icon: FaRemoveFormat,               on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setParagraph().run(); else editor.commands.setParagraph() },  is_active: () => editor?.isActive('paragraph')  } ,
+               
+               {   caption: 'Heading 1',      description: 'Description heading',           tags: 'h1',      icon: IcH1,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 1}).run(); else editor.commands.setHeading({ level: 1 }) },   is_active: () => editor?.isActive('heading', {level: 1})  } ,
+               {   caption: 'Heading 2',      description: 'Secondary heading',             tags: 'h2',      icon: IcH2,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 2}).run(); else editor.commands.setHeading({ level: 2 }) },   is_active: () => editor?.isActive('heading', {level: 2}) } ,
               
-               {   caption: 'Code',         description: 'Source code monospace text',                      icon: FaCode,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsCode().run(); else editor.commands.setAsCode() } },
-               {   caption: 'Comment',      description: 'With this you can comment the above paragraph',   icon: FaComment,                    on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsComment().run(); else editor.commands.setAsComment() } } ,
-               {   caption: 'Quote',        description: 'To quote someone',                                icon: FaQuoteRight,                 on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsQuote().run(); else editor.commands.setAsQuote() } } ,
-               {   caption: 'Warning',      description: 'An important warning to above paragraph',         icon: FaExclamationTriangle,        on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsWarning().run(); else editor.commands.setAsWarning() } } ,
-               {   caption: 'Info',         description: 'An important info about above paragraph',         icon: FaInfo,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsInfo().run(); else editor.commands.setAsInfo() } }, 
-
+               {   caption: 'Code',         description: 'Source code monospace text',                      icon: FaCode,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsCode().run(); else editor.commands.setAsCode() }, is_active: () => editor?.isActive('CodeBlock') },
+               {   caption: 'Comment',      description: 'With this you can comment the above paragraph',   icon: FaComment,                    on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsComment().run(); else editor.commands.setAsComment() }, is_active: () => editor?.isActive('CommentBlock')  } ,
+               {   caption: 'Quote',        description: 'To quote someone',                                icon: FaQuoteRight,                 on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsQuote().run(); else editor.commands.setAsQuote() }, is_active: () => editor?.isActive('QuoteBlock')  } ,
+               {   caption: 'Warning',      description: 'An important warning to above paragraph',         icon: FaExclamationTriangle,        on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsWarning().run(); else editor.commands.setAsWarning() }, is_active: () => editor?.isActive('WarningBlock')  } ,
+               {   caption: 'Info',         description: 'An important info about above paragraph',         icon: FaInfo,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsInfo().run(); else editor.commands.setAsInfo() }, is_active: () => editor?.isActive('InfoBlock')  }, 
+               
+               {    caption: 'Other blocks', separator: true },
                {   caption: 'Image',        description: 'Add image to document',                           icon: FaImage,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).run(); if(onAddImage) onAddImage(onAddedImageReady);  } } 
             ];
     
+    function makeBold(range)
+    {
+        if(range)
+        {
+            editor.chain().focus().deleteRange(range).toggleBold().run()
+        }
+        else
+        {
+            editor.chain().focus().toggleBold().run()
+        }   
+    }
+
+    function makeItalic(range)
+    {
+        if(range)
+        {
+            editor.chain().focus().deleteRange(range).toggleItalic().run()
+        }
+        else
+        {
+            editor.chain().focus().toggleItalic().run()
+        } 
+    }
+
+    function makeUnderline(range)
+    {
+        if(range)
+        {
+            editor.chain().focus().deleteRange(range).toggleUnderline().run()
+        }
+        else
+        {
+            editor.chain().focus().toggleUnderline().run()
+        }
+    }
+
+    function makeStrikethrough(range)
+    {
+        if(range)
+        {
+            editor.chain().focus().deleteRange(range).toggleStrike().run()
+        }
+        else
+        {
+            editor.chain().focus().toggleStrike().run()
+        }
+    }
+
     
 </script>
 

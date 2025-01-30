@@ -20,6 +20,8 @@
     import {points} from './points'
 	import { remove, removeAt } from '$lib/utils';
 	import { page } from '$app/stores';
+    import {FaMapPin, FaMapMarker, FaMapMarkerAlt} from 'svelte-icons/fa'
+    
 	
     export let pageNo = 1;
     export let rotation = undefined

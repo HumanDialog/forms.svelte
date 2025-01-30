@@ -25,7 +25,7 @@
     const proto = 'http'
     
     reef.configure( {
-            mode: 'remote',
+            mode: 'local',
             remote:{
                 iss: `${proto}://${domain}`,
                 clientID: 'SampleClientId',
@@ -47,7 +47,7 @@
                     },
                     {
                         username: "bob@example.com",
-                        role: 'GroupOwner',
+                        role: 'Guest',
                         groupId: 13
                     }
                 ],

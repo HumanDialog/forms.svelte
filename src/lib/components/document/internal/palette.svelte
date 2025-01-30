@@ -61,7 +61,8 @@
         //css_style = `position: fixed; left:${toolboxX}px; top:${toolboxY}px;`;
         
         toolboxY += window.scrollY /*+ mainContentDiv?.scrollTop*/;
-        css_style = `position: absolute; left:${toolboxX}px; top:${toolboxY}px;`;
+        //css_style = `position: absolute; left:${toolboxX}px; top:${toolboxY}px;`;
+        css_style = `position: fixed; left:${toolboxX}px; top:${toolboxY}px;`;
 
         dispatch('palette_shown');
     }
@@ -140,10 +141,12 @@
         filtered_commands = [];
         commands.forEach( (cmd) =>
         {
-            if(cmd.caption.toLowerCase().includes(key.toLowerCase()))
+            if(cmd.separator)
+                filtered_commands.push(cmd);
+            else if(cmd.caption.toLowerCase().includes(key.toLowerCase()))
                 filtered_commands.push(cmd);
             else if(cmd.tags && cmd.tags.toLowerCase().includes(key.toLowerCase()))
-            filtered_commands.push(cmd);
+                filtered_commands.push(cmd);
         });
 
         // jeśli poprzednio podświetlony element znalazł się w podownie nowym zestawie to zostaje dalej jako podświetlony
@@ -151,7 +154,7 @@
         if(!current_command || filtered_commands.every( v => v != current_command))
         {
             if(filtered_commands.length)
-                current_command = filtered_commands[0];
+                current_command = get_operation_or_next_valid(0);
             else
                 current_command = null;
         }
@@ -164,9 +167,41 @@
         return filtered_commands;
     }
 
+    
+
     export function get_filtered_commands() :Document_command[]
     {
         return filtered_commands;
+    }
+
+    function get_operation_or_next_valid(idx: number) :Document_command|null
+    {
+        let op :Document_command|null = filtered_commands[idx];
+        while(op.separator && idx < filtered_commands.length-1)
+        {   
+            idx++;
+            op = filtered_commands[idx];
+        }
+
+        if(op.separator)
+            return null;
+        else
+            return op;
+    }
+
+    function get_operation_or_prev_valid(idx: number) :Document_command|null
+    {
+        let op :Document_command|null = filtered_commands[idx];
+        while(op.separator && idx > 0)
+        {
+            idx--;
+            op = filtered_commands[idx];
+        }
+
+        if(op.separator)
+            return null;
+        else
+            return op;
     }
 
     export function navigate_up()
@@ -174,14 +209,22 @@
         if(!current_command)
         {
             if(filtered_commands.length > 0)
-            update_current_command(filtered_commands[filtered_commands.length-1]);
+            {
+                let op :Document_command|null = get_operation_or_prev_valid(filtered_commands.length-1);
+                if(op)
+                    update_current_command(op);
+            }
 
             return;
         }
 
         let idx = filtered_commands.findIndex((c) => c == current_command);
         if(idx > 0)
-            update_current_command(filtered_commands[idx-1]);
+        {
+            let op :Document_command|null = get_operation_or_prev_valid(idx-1)
+            if(op)
+                update_current_command(op);
+        }
 
     }
 
@@ -190,14 +233,22 @@
         if(!current_command)
         {
             if(filtered_commands.length > 0)
-                update_current_command(filtered_commands[0]);
+            {
+                let op :Document_command|null = get_operation_or_next_valid(0);
+                if(op)
+                    update_current_command(op);
+            }
                 
             return;
         }
 
         let idx = filtered_commands.findIndex((c) => c == current_command);
         if(idx < filtered_commands.length-1)
-            update_current_command(filtered_commands[idx+1]);
+        {
+            let op :Document_command|null = get_operation_or_next_valid(idx+1);
+            if(op)
+                update_current_command(op);
+        }
 
     }
 
@@ -225,10 +276,14 @@
         let prev_current = current_command;
         
         if(prev_current)
-            rows.find((r) => r.cmd == prev_current).is_highlighted = false;
+            rows.find((r) => !!r && r.cmd == prev_current).is_highlighted = false;
 
         if(cmd)
-            rows.find((r) => r.cmd == cmd).is_highlighted = true;
+        {
+            const row = rows.find((r) => !!r && r.cmd == cmd);
+            row.is_highlighted = true;
+            row?.scrollToView();
+        }
 
         current_command = cmd;
     }
@@ -269,7 +324,8 @@
             toolboxX = beforeTrackingPos.x + trackDelta.x;
             //toolboxY = beforeTrackingPos.y + trackDelta.y;
 
-            css_style = `position: absolute; left:${toolboxX}px; top:${toolboxY}px;`;
+            //css_style = `position: absolute; left:${toolboxX}px; top:${toolboxY}px;`;
+            css_style = `position: fixed; left:${toolboxX}px; top:${toolboxY}px;`;
             e.stopPropagation()
         }
     }
@@ -282,6 +338,13 @@
     }
 
 
+    function isRowActive(cmd)
+    {
+        if(cmd.is_active)
+            return cmd.is_active()
+        else
+            return false;
+    }
     
 </script>
 
@@ -297,43 +360,57 @@
             bind:this={paletteElement}>
         {#if filtered_commands && filtered_commands.length}
             {#each filtered_commands as cmd, idx (cmd.caption)}
-                {@const id = "cpi_" + idx}
-                {@const mobile = isDeviceSmallerThan("sm")}
-                {@const icon_placeholder_size = mobile ? 12 : 10}
-                <button class="font-medium m-0 py-2 pr-4 text-lg sm:text-sm w-full text-left flex flex-row cursor-context-menu focus:outline-none"
-                        {id}
-                        bind:this={rows[idx]}
-                        on:click={ () => { execute_mouse_click(cmd.on_choice); }}
-                        on:mousedown={buttonMousedown}>
-                
-                    <div class="flex items-center justify-center mt-1 sm:mt-0.5" style:width={`${icon_placeholder_size*0.25}rem`}>
-                        {#if cmd.icon}
-                            {@const cc = mobile ? 7 : 6}
-                            {@const default_icon_size = icon_placeholder_size - cc}
-                            {@const icon_size = cmd.icon_size ? cmd.icon_size : default_icon_size}
-                            <Icon size={icon_size} component={cmd.icon}/>
-                        {/if}
-                    </div>
-                </button>
+                {#if !cmd.separator}
+                    {@const id = "cpi_" + idx}
+                    {@const mobile = isDeviceSmallerThan("sm")}
+                    {@const icon_placeholder_size = mobile ? 12 : 10}
+                    {@const active=isRowActive(cmd)}
+                    <button class="font-medium m-0 py-2 mr-4 text-lg sm:text-sm w-full text-left flex flex-row cursor-context-menu focus:outline-none"
+                            class:dark:bg-stone-700={active}
+                            class:bg-stone-300={active}
+                            {id}
+                            bind:this={rows[idx]}
+                            on:click={ () => { execute_mouse_click(cmd.on_choice); }}
+                            on:mousedown={buttonMousedown}>
+                    
+                        <div class="flex items-center justify-center mt-1 sm:mt-0.5" style:width={`${icon_placeholder_size*0.25}rem`}>
+                            {#if cmd.icon}
+                                {@const cc = mobile ? 7 : 6}
+                                {@const default_icon_size = icon_placeholder_size - cc}
+                                {@const icon_size = cmd.icon_size ? cmd.icon_size : default_icon_size}
+                                <Icon size={icon_size} component={cmd.icon}/>
+                            {/if}
+                        </div>
+                    </button>
+                {/if}
             {/each}
         {/if}
     </menu>
 {:else}
-    <div    class="not-prose bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md z-30" 
+    <div    id="__hd_FormattingPalette"
+            class="not-prose bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md z-30 overflow-y-auto" 
             hidden={!visible}
             style={css_style}
             bind:this={paletteElement}>
         {#if filtered_commands && filtered_commands.length}
             {#each filtered_commands as cmd, idx (cmd.caption)}
-                {@const id = "cpi_" + idx}
-                <Pallete_row    {id}
-                                cmd={cmd}
-                                is_highlighted={cmd == current_command}
-                                on:click={ () => { execute_mouse_click(cmd.on_choice); }}
-                                on:mousemove={ () => { on_mouse_over(cmd); }}
-                                on:mousedown={buttonMousedown}
-                                bind:this={rows[idx]}
-                                />
+                {#if cmd.separator}
+                    {#if idx>0 && idx<filtered_commands.length-1}   <!-- not first or last place -->
+                        <hr class="mx-4 my-1 border-stone-300 dark:border-stone-700"/>
+                    {/if}
+                {:else}
+                    {@const id = "cpi_" + idx}
+                    {@const active=isRowActive(cmd)}
+                    <Pallete_row    {id}
+                                    cmd={cmd}
+                                    is_highlighted={cmd == current_command}
+                                    on:click={ () => { execute_mouse_click(cmd.on_choice); }}
+                                    on:mousemove={ () => { on_mouse_over(cmd); }}
+                                    on:mousedown={buttonMousedown}
+                                    bind:this={rows[idx]}
+                                    {active}
+                                    />
+                {/if}
             {/each}
         {:else}
             <p class="text-sm text-stone-500">No results</p>
@@ -341,3 +418,4 @@
 
     </div>
 {/if}
+

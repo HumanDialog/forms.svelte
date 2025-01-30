@@ -13,20 +13,25 @@
 			isActive,
 			clearActiveItem,
 			isDeviceSmallerThan,
-            onErrorShowAlert
+            onErrorShowAlert,
+            Modal,
+			Spinner,
+            resizeImage
             } from '$lib'
 	import { onMount, tick } from 'svelte';
     import {location, querystring} from 'svelte-spa-router'
     import TaskSteps from './task.steps.svelte'
-    import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave} from 'svelte-icons/fa/'
-	
-
+    import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont} from 'svelte-icons/fa/'
+	import { readonly } from 'svelte/store';
+    
     let taskRef = ''
     let task = null;
     let allTags = '';
     let allLists = [];
     let allActors = [];
     let availableStates = [];
+    let pendingUploading = false;
+    let isReadOnly = false;
 
     $: onParamsChanged($location)
 
@@ -81,7 +86,7 @@
                                 {
                                     Id: 1,
                                     Association: '',
-                                    Expressions:['Id', 'Index', 'Title','Summary', 'Description', 'DueDate', 'Tags', 'State', '$ref', '$type'],
+                                    Expressions:['Id', 'Index', 'Title','Summary', 'Description', 'DueDate', 'Tags', 'State', '$ref', '$type', '$acc'],
                                     SubTree:[
                                         {
                                             Id: 10,
@@ -124,6 +129,8 @@
 
         if(task.Steps == undefined)
             task.Steps = []
+
+        isReadOnly = task.$acc === 1
 
     }
 
@@ -431,11 +438,11 @@
         if(mobile)
         {
             return [
-                /*{
+                {
                     icon: FaFont,
                     //aboveKeyboard: true,
                     menu: description.getFormattingOperations(true)
-                }*/
+                }
             ]
         }
         else
@@ -489,7 +496,13 @@
         const [file] = imgInput.files;
         if(file)
         {
-            const res = await reef.post(`${taskRef}/Images/blob?name=${file.name}&size=${file.size}`, {}, onErrorShowAlert)
+            pendingUploading = true 
+
+            let resizedImage = await resizeImage(file, 1024, 1024)
+            if(!resizedImage)
+                resizedImage = file
+            
+            const res = await reef.post(`${taskRef}/Images/blob?name=${file.name}&size=${resizedImage.size}`, {}, onErrorShowAlert)
             if(res && res.key && res.uploadUrl)
             {
                 const newKey = res.key;
@@ -497,18 +510,19 @@
                 
                 try
                 {
+                    //const res = await new Promise(r => setTimeout(r, 10000));
                     const res = await fetch(uploadUrl, {
                                                 method: 'PUT',
                                                 headers: new Headers({
-                                                    'Content-Type': file.type
+                                                    'Content-Type': resizedImage.type
                                                 }),
-                                                body: file})
+                                                body: resizedImage})
                     if(res.ok)
                     {
                         // todo: editor path imgPath
                         const dataPath = `${taskRef}/Images/blob?key=${newKey}`
                             
-                        console.log('upload success for ', dataPath)
+                        //console.log('upload success for ', dataPath)
                         if(imgEditorActionAfterSuccess)
                             imgEditorActionAfterSuccess(dataPath)
                     }
@@ -527,13 +541,15 @@
                 }
             }
 
+            pendingUploading = false;
+
             await reloadData();
         }
     }
 
     function removeImage(dataPath)
     {
-        console.log('todo: removeImage from storage', dataPath)
+        reef.delete(dataPath, onErrorShowAlert)
     }
 
 </script>
@@ -584,7 +600,8 @@
             <h1     class="font-normal text-4xl"
                     use:editable={{
                         action: (text) => onTitleChanged(text), 
-                        active: true}}
+                        active: true,
+                        readonly: isReadOnly}}
                         tabindex="0">
                 {task.Title}
             </h1>
@@ -643,7 +660,8 @@
                     <p  class="mb-1" 
                         use:editable={{
                             action: (text) => onSummaryChanged(text),
-                            active: true}}
+                            active: true,
+                            readonly: isReadOnly}}
                         tabindex="0"
                         bind:this={summary}>
                         {task.Summary}
@@ -681,4 +699,9 @@
     <input hidden type="file" id="imageFile" accept="image/*" bind:this={imgInput} on:change={onImageSelected}/> <!-- capture="environment" -->
 </Page>
 {/if}
+
+<Modal title='Uploading...' bind:open={pendingUploading} mode={3} icon={FaCloudUploadAlt}>
+    <Spinner delay={0}/> 
+    <span class="ml-3">Your image is uploading to the server</span>
+</Modal>
 

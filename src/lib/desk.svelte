@@ -287,7 +287,7 @@
                     <!--##########################################################-->
                     <!--##  ALERTS ###############################################-->
                     <!--##########################################################-->
-                    <section class="absolute left-2 sm:left-auto sm:right-2 bottom-2 flex flex-col gap-2">
+                    <section class="fixed left-2 sm:left-auto sm:right-2 bottom-2 flex flex-col gap-2">
                         {#if $alerts && $alerts.length > 0}
                             {#each $alerts as alert, idx}
                                 <Alert class="bg-red-900/40  shadow-lg shadow-stone-400 dark:shadow-black flex flex-row">

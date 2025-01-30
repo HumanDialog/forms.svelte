@@ -1,6 +1,7 @@
 import { getContext, tick } from "svelte";
 import {get} from 'svelte/store'
-import { contextItemsStore, contextToolbarOperations, data_tick_store } from "./stores";
+import { contextItemsStore, contextToolbarOperations, pageToolbarOperations, data_tick_store } from "./stores";
+import { Img } from "flowbite-svelte";
 
 export let icons = {symbols :null}
 
@@ -74,6 +75,22 @@ export function clearActiveItem(context_level)
     //chnages.just_changed_context = true;
 
     contextToolbarOperations.set( [] )
+}
+
+export function refreshToolbarOperations()
+{
+    const contextOperations = get(contextToolbarOperations)
+    if(contextOperations && contextOperations.length)
+    {
+        contextToolbarOperations.set([...contextOperations])
+    
+    }
+    else
+    {
+        const pageOperations = get(pageToolbarOperations);
+        if(pageOperations && pageOperations.length)
+            pageToolbarOperations.set([...pageOperations])
+    }
 }
 
 export function isSelected(itm)
@@ -524,4 +541,63 @@ export function swapElements(array, e1, e2)
     array[idx2] = e1;
 
     return array;
+}
+
+
+export async function resizeImage(file, maxWidth=1024, maxHeight=1024, contentType='', quality=0.95)
+{
+    if(!contentType)
+        contentType = file.type
+
+    if(!contentType)
+        contentType = 'image/png'
+
+    const calculateSize = (img, maxWidth, maxHeight) => {
+        let w = img.width,
+            h = img.height;
+        if (w > h) {
+          if (w > maxWidth) {
+            h = Math.round((h * maxWidth) / w);
+            w = maxWidth;
+          }
+        } else {
+          if (h > maxHeight) {
+            w = Math.round((w * maxHeight) / h);
+            h = maxHeight;
+          }
+        }
+        return [w, h];
+      };
+
+    return new Promise((resolve) => {
+
+        const img = new Image();
+        img.onerror = function () {
+            URL.revokeObjectURL(this.src)
+        }
+
+        img.onload = function () {
+            URL.revokeObjectURL(this.src)
+            const [newWidth, newHeight] = calculateSize(img, maxWidth, maxHeight);
+
+            console.log('resizeImage', img.width, '=>', newWidth, img.height, '=>', newHeight, contentType, quality)
+            
+            const canvas = document.createElement("canvas");
+            canvas.width = newWidth;
+            canvas.height = newHeight;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, newWidth, newHeight);
+    
+            canvas.toBlob((blob) => {
+                resolve(blob);
+              },
+    
+              contentType,
+              quality)
+       
+        }
+
+        img.src = URL.createObjectURL(file);
+
+    }) 
 }
