@@ -20,7 +20,7 @@
             alerts } from './stores.js'
     
     //import { AuthorizedView} from '@humandialog/auth.svelte'
-    import { handleSelect, isDeviceSmallerThan, removeAt } from './utils'
+    import { handleSelect, isDeviceSmallerThan, isOnScreenKeyboardVisible, removeAt } from './utils'
     import { afterUpdate, onMount } from 'svelte';
     
     export let layout;
@@ -92,7 +92,8 @@
     let bottom_bar_visibility = "hidden"
     let bottom_bar_visible = false
     let lg_main_sidebar_height = ""
-    let fab_visibility = "hidden"
+    let fab_base_visibility = "hidden"
+    let fab_visibility = fab_base_visibility;
     let fab_bottom = "bottom-0"
                                 
     let content_top = ""
@@ -108,14 +109,14 @@
         if(tools_visible)
         {
             tools_visibility = "hidden sm:block sm:fixed"
-            fab_visibility = "fixed sm:hidden"
+            fab_base_visibility = "fixed sm:hidden"
 
             content_top = 'top-[50px] sm:top-[40px]'
             
             if(bottom_bar_visible)
-                content_height = `h-[calc(100vh-290px)] sm:h-[calc(100vh-280px)]`    
+                content_height = `min-h-[calc(100vh-290px)] sm:h-[calc(100vh-280px)]`
             else    
-                content_height = `h-[calc(100vh-50px)] sm:h-[calc(100vh-40px)]` 
+                content_height = `min-h-[calc(100vh-50px)] sm:h-[calc(100vh-40px)]` 
                
         }
         else
@@ -123,9 +124,9 @@
             tools_visibility = "hidden"
             content_top = `top-[50px] sm:top-0`
             if(bottom_bar_visible)
-                content_height = `h-[calc(100vh-290px)] sm:h-[calc(100vh-240px)]`           
+                content_height = `min-h-[calc(100vh-290px)] sm:h-[calc(100vh-240px)]`           
             else
-                content_height = `h-[calc(100vh-50px)] sm:h-screen`
+                content_height = `min-h-[calc(100vh-50px)] sm:h-screen`
         }
         
         
@@ -143,6 +144,7 @@
             fab_bottom = "bottom-0"
         }
         
+        fab_visibility = fab_base_visibility;
     }
 
     //$: screen.width = innerWidth;  
@@ -155,7 +157,14 @@
 
     onMount( () => {
         window.addEventListener('resize', on_resize)
+        
+        const vp = window.visualViewport;
+
+        vp?.addEventListener('resize', onViewportResize)
+        setViewportHeight(vp)
+
         return () => {
+            vp?.removeEventListener('resize', onViewportResize)
             window.removeEventListener('resize', on_resize)
             
             // remove dark class form body element when we leave Layout view
@@ -167,6 +176,40 @@
     function on_resize()
     {
         auto_hide_sidebar();
+    }
+
+    let minViewportHeight = 0;
+    let maxViewportHeight = 0;
+    function setViewportHeight(vp)
+    {
+        if(!vp)
+            return;
+
+        const h = vp.height
+        if(!minViewportHeight) {
+            minViewportHeight = h }
+        else if(minViewportHeight > h) {
+            minViewportHeight = h }
+
+        if(!maxViewportHeight) {
+            maxViewportHeight = h; }
+        else if(maxViewportHeight < h) {
+            maxViewportHeight = h }
+    }
+
+    function onViewportResize(e)
+    {
+        const vp = window.visualViewport;
+        setViewportHeight(vp)
+
+        if(isOnScreenKeyboardVisible())
+        {
+            fab_visibility = 'hidden'
+        }
+        else
+        {
+            fab_visibility = fab_base_visibility;
+        }
     }
 
 </script>
@@ -183,7 +226,8 @@
                 on:click={handleSelect} 
                 on:contextmenu={handleSelect}>
 
-            <div class="bg-white dark:bg-stone-900 dark:text-white  overflow-x-clip overflow-y-clip  h-screen">    
+            <div class="bg-white dark:bg-stone-900 dark:text-white  overflow-x-clip 
+                        sm:overflow-y-clip  min-h-screen sm:h-screen">    
                 <!--###########################################################-->
                 <!--##  HORIZONTAL TOOLBAR (FOR PHONES)  ######################-->
                 <!--###########################################################-->
@@ -261,9 +305,9 @@
                             class="relative left-0  w-screen  
                                     sm:left-[40px]  sm:w-[calc(100vw-40px)]    
                                     {content_top}
-                                    {content_height}
                                     {lg_content_area_horizontal_dim}
-                                    z-0 overflow-x-hidden overflow-y-auto" 
+                                    z-0 overflow-x-hidden 
+                                    {content_height} sm:overflow-y-auto" 
                                     >
                             <Configurable config={layout.mainContent} min_h_class="min-h-full">
                                 <div slot='alt'></div>

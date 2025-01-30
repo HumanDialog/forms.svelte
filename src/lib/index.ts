@@ -88,7 +88,8 @@ export {
     handleSelect,
     isDeviceSmallerThan,
     resizeImage,
-    refreshToolbarOperations
+    refreshToolbarOperations,
+    isOnScreenKeyboardVisible
 }   from './utils'
 
 export {

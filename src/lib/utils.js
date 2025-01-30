@@ -601,3 +601,21 @@ export async function resizeImage(file, maxWidth=1024, maxHeight=1024, contentTy
 
     }) 
 }
+
+export function isOnScreenKeyboardVisible()
+{
+    if(!isDeviceSmallerThan('sm'))       // are we on mobile?
+        return false;
+
+    const sel = window.getSelection();
+    // if we have active selections then it's very possible we have onscreen keyboard visible, se we need to shrink window.innerHeight 
+    if(sel && sel.rangeCount>0 && sel.focusNode && sel.focusNode.nodeType==sel.focusNode.TEXT_NODE)
+    {
+        const el = sel.focusNode.parentElement;
+        if(el && (el.isContentEditable || el.contentEditable == 'true' || el.tagName == 'INPUT'))
+            return true;
+    }
+
+    return false;
+
+}
