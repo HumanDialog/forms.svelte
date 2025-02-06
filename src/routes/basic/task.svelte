@@ -480,8 +480,8 @@
             title={task.Title}>
     <section class="w-full flex justify-center">
         <article class="w-full prose prose-base prose-zinc dark:prose-invert">
-            <section class="not-prose h-6 w-full flex flex-row justify-between mb-10">
-                    <p class="text-base sm:text-xs mt-1 sm:mt-2">
+            <section class="not-prose h-6 w-full flex flex-row justify-between mb-2">
+                    <p class="text-base sm:text-xs">
                         {task.Index}
                     </p>
                     <div>
@@ -597,11 +597,13 @@
             {/if}
                 
             {#if task.Description || descriptionPlaceholder}
+            <div class = "mt-10">
                 <RichEdit   a='Description'
                             compact={true}
                             bind:this={description}
                             on:focus={activateFormattingTools}
                             on:blur={deactivateFormattingToolsIfNeeded}/>
+            </div>
 
             {/if}
 
