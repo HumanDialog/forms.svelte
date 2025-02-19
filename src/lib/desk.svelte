@@ -4,6 +4,7 @@
     import Configurable from './internal/configurable.content.svelte'
     import Operations from './operations.svelte'
     import Fab from './components/Fab.svelte'
+     import {Alert} from 'flowbite-svelte'
         
     import {main_sidebar_visible_store, 
             tools_visible_store, 
@@ -15,25 +16,14 @@
             set_default_tools_visible,
             set_dark_mode_default,
             sidebar_left_pos,
-            wholeAppReloader } from './stores.js'
+            wholeAppReloader,
+            alerts } from './stores.js'
     
-    import { AuthorizedView} from '@humandialog/auth.svelte'
-    import { handleSelect, isDeviceSmallerThan } from './utils'
-	import { afterUpdate, onMount } from 'svelte';
+    //import { AuthorizedView} from '@humandialog/auth.svelte'
+    import { handleSelect, isDeviceSmallerThan, isOnScreenKeyboardVisible, removeAt, UI } from './utils'
+    import { afterUpdate, onMount } from 'svelte';
     
     export let layout;
-
-    onMount( () => {
-        window.addEventListener('resize', on_resize)
-        return () => {
-            window.removeEventListener('resize', on_resize)
-        }
-    })
-
-    function on_resize()
-    {
-        auto_hide_sidebar();
-    }
 
     const sizes = {
             bottom: 240,
@@ -102,7 +92,8 @@
     let bottom_bar_visibility = "hidden"
     let bottom_bar_visible = false
     let lg_main_sidebar_height = ""
-    let fab_visibility = "hidden"
+    let fab_base_visibility = "hidden"
+    let fab_visibility = fab_base_visibility;
     let fab_bottom = "bottom-0"
                                 
     let content_top = ""
@@ -118,14 +109,14 @@
         if(tools_visible)
         {
             tools_visibility = "hidden sm:block sm:fixed"
-            fab_visibility = "fixed sm:hidden"
+            fab_base_visibility = "fixed sm:hidden"
 
             content_top = 'top-[50px] sm:top-[40px]'
             
             if(bottom_bar_visible)
-                content_height = `h-[calc(100vh-290px)] sm:h-[calc(100vh-280px)]`    
+                content_height = `min-h-[calc(100vh-290px)] sm:h-[calc(100vh-280px)]`
             else    
-                content_height = `h-[calc(100vh-50px)] sm:h-[calc(100vh-40px)]` 
+                content_height = `min-h-[calc(100vh-50px)] sm:h-[calc(100vh-40px)]` 
                
         }
         else
@@ -133,9 +124,9 @@
             tools_visibility = "hidden"
             content_top = `top-[50px] sm:top-0`
             if(bottom_bar_visible)
-                content_height = `h-[calc(100vh-290px)] sm:h-[calc(100vh-240px)]`           
+                content_height = `min-h-[calc(100vh-290px)] sm:h-[calc(100vh-240px)]`           
             else
-                content_height = `h-[calc(100vh-50px)] sm:h-screen`
+                content_height = `min-h-[calc(100vh-50px)] sm:h-screen`
         }
         
         
@@ -153,12 +144,86 @@
             fab_bottom = "bottom-0"
         }
         
+        fab_visibility = fab_base_visibility;
     }
 
     //$: screen.width = innerWidth;  
+
+    $: switchBodyClass($dark_mode_store);
+    function switchBodyClass(...args)
+    {
+        document.body.className = $dark_mode_store;
+    }
+
+    onMount( () => {
+        window.addEventListener('resize', on_resize)
+        
+        const vp = window.visualViewport;
+
+        vp?.addEventListener('resize', onViewportResize)
+        setViewportHeight(vp)
+
+        return () => {
+            vp?.removeEventListener('resize', onViewportResize)
+            window.removeEventListener('resize', on_resize)
+            
+            // remove dark class form body element when we leave Layout view
+            if($dark_mode_store)
+                document.body.classList.remove($dark_mode_store)
+        }
+    })
+
+    function on_resize()
+    {
+        auto_hide_sidebar();
+    }
+
+    let minViewportHeight = 0;
+    let maxViewportHeight = 0;
+    function setViewportHeight(vp)
+    {
+        if(!vp)
+            return;
+
+        const h = vp.height
+        if(!minViewportHeight) {
+            minViewportHeight = h }
+        else if(minViewportHeight > h) {
+            minViewportHeight = h }
+
+        if(!maxViewportHeight) {
+            maxViewportHeight = h; }
+        else if(maxViewportHeight < h) {
+            maxViewportHeight = h }
+    }
+
+    function onViewportResize(e)
+    {
+        const vp = window.visualViewport;
+        setViewportHeight(vp)
+
+        if(isOnScreenKeyboardVisible())
+        {
+            fab_visibility = 'hidden'
+        }
+        else
+        {
+            fab_visibility = fab_base_visibility;
+        }
+    }
+
+    let operationsComponent
+    let fabComponent;
+    afterUpdate( () =>
+    {
+        UI.operations = operationsComponent
+        UI.fab = fabComponent;          
+    })
+
 </script>
 
 <svelte:window bind:innerWidth bind:outerWidth bind:innerHeight bind:outerHeight />
+
 
 <!--AuthorizedView {autoRedirectToSignIn}-->
     
@@ -169,7 +234,8 @@
                 on:click={handleSelect} 
                 on:contextmenu={handleSelect}>
 
-            <div class="bg-white dark:bg-stone-900 dark:text-white  overflow-x-clip overflow-y-clip  h-screen">    
+            <div class="bg-white dark:bg-stone-900 dark:text-white  overflow-x-clip 
+                        sm:overflow-y-clip  min-h-screen sm:h-screen">    
                 <!--###########################################################-->
                 <!--##  HORIZONTAL TOOLBAR (FOR PHONES)  ######################-->
                 <!--###########################################################-->
@@ -232,11 +298,11 @@
                                     {lg_content_area_horizontal_dim}
                                     z-10 overflow-hidden " >
 
-                        <Operations/>
+                        <Operations bind:this={operationsComponent} />
                     </div>
 
                     <div class="{fab_visibility} right-3 {fab_bottom} mb-1 cursor-pointer z-10">
-                        <Fab/>
+                        <Fab bind:this={fabComponent}/>
                     </div>
 
                     <!--#######################################################-->
@@ -247,9 +313,9 @@
                             class="relative left-0  w-screen  
                                     sm:left-[40px]  sm:w-[calc(100vw-40px)]    
                                     {content_top}
-                                    {content_height}
                                     {lg_content_area_horizontal_dim}
-                                    z-0 overflow-x-hidden overflow-y-auto" 
+                                    z-0 overflow-x-hidden 
+                                    {content_height} sm:overflow-y-auto" 
                                     >
                             <Configurable config={layout.mainContent} min_h_class="min-h-full">
                                 <div slot='alt'></div>
@@ -269,6 +335,29 @@
                             </Configurable>
                         
                     </div>    
+
+                    <!--##########################################################-->
+                    <!--##  ALERTS ###############################################-->
+                    <!--##########################################################-->
+                    <section class="fixed left-2 sm:left-auto sm:right-2 bottom-2 flex flex-col gap-2">
+                        {#if $alerts && $alerts.length > 0}
+                            {#each $alerts as alert, idx}
+                                <Alert class="bg-red-900/40  shadow-lg shadow-stone-400 dark:shadow-black flex flex-row">
+                                    <button class="sm:hidden font-bold  ml-auto"
+                                            on:click={() => {$alerts = removeAt($alerts, idx)}}>
+                                        x
+                                    </button>
+                                    <p>
+                                        {alert}
+                                    </p>
+                                    <button class="hidden sm:block font-bold  ml-auto"
+                                            on:click={() => {$alerts = removeAt($alerts, idx)}}>
+                                        x
+                                    </button>
+                                </Alert>    
+                            {/each}
+                        {/if}
+                    </section>
 
                     <!-- #########################################################-->
                     <!-- ## MODAL DIALOG #########################################-->
@@ -307,6 +396,9 @@
         ::-webkit-scrollbar-thumb:hover {
         background: #D6D3D1;
         }
+
+        --tw-bg-opacity: 1;
+        background-color: rgb(255 255 255 / var(--tw-bg-opacity));
     }
 
     #__hd_svelte_layout_root.dark {
@@ -330,16 +422,19 @@
         ::-webkit-scrollbar-thumb:hover {
         background: #57534e;
         }
+
+        --tw-bg-opacity: 1;
+        background-color: rgb(28 25 23 / var(--tw-bg-opacity));
     }
 
-    /* bg-white */
+    /* bg-white */ 
     :global(body)
     {
       --tw-bg-opacity: 1;
       background-color: rgb(255 255 255 / var(--tw-bg-opacity));
     }
   
-    /* dark:bg-gray-900 */
+    
     :global(body.dark)
     {
       --tw-bg-opacity: 1;

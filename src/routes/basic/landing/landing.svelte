@@ -3,7 +3,13 @@
     import Header from './header.svelte'
     import Footer  from './footer.svelte';
     import {link} from 'svelte-spa-router'
+	
 </script>
+
+<svelte:head>
+  <title>Octopus Basic | A simple task management tool that even the busiest will love.</title>
+  <link rel="canonical" href="https://octopus.objectreef.dev"/>
+</svelte:head> 
 
 <div class="min-h-screen h-screen overflow-x-hidden">
 
@@ -13,7 +19,7 @@
 
 
     <div class="bg-stone-50 dark:bg-stone-900">
-        <section class="dark:bg-black bg-local bg-cover" style="background-image: url(b-m6.jpg)">
+        <section class="dark:bg-black bg-local bg-cover">
             <div class="relative max-w-5xl mx-auto pt-20 sm:pt-24 lg:pt-32 pb-8 sm-pb-16">
                 <h1
                     class="px-8 sm:px-20 text-slate-900 font-extrabold text-4xl sm:text-5xl lg:text-6xl tracking-tight text-center dark:text-white">

@@ -61,26 +61,37 @@
         // so it keeps focus (and text selection) 
         e.preventDefault()
     }
+
+    function isOperationActivated(operation)
+    {
+        if(operation.activeFunc)
+            return operation.activeFunc();
+        else 
+            return operation.active ?? false;
+    }
 </script>
 
-<section class="flex flex-row no-print h-10 bg-stone-600 dark:bg-stone-950 overflow-x-clip overflow-y-hidden py-0 text-xs ">
+<section class="flex flex-row no-print h-10 bg-stone-600 dark:bg-stone-950 overflow-x-clip overflow-y-hidden py-0 text-xs whitespace-nowrap">
     <div    class="flex flex-row"
             class:flex-row-reverse={mobile}>
         
         {#each leftOperations as operation}
             {#if !operation.separator}
+                {@const isActive=isOperationActivated(operation)}
                 {#if operation.toolbox}
                     {#each operation.toolbox as operation}
                         <button type="button" 
-                                class="py-2.5 px-5 
-                                text-xs font-medium text-stone-100 dark:text-stone-300 dark:hover:text-white 
+                                class="py-2.5 px-4 
+                                text-xs font-thin text-stone-100 dark:text-stone-300 dark:hover:text-white 
                                 hover:bg-stone-700 dark:hover:bg-stone-800 active:bg-stone-300 dark:active:bg-stone-600
                                 border-stone-200 focus:outline-none dark:border-stone-600
                                 inline-flex items-center"
+                                class:bg-stone-700={isActive}
+                                class:dark:bg-stone-800={isActive}
                                 on:click={(e) => {on_click(e, operation)}}
                                 on:mousedown={mousedown}>
                             {#if operation.icon}
-                                <div class="w-3 h-3 mr-1"><svelte:component this={operation.icon}/></div>
+                                <div class="w-3.5 h-3.5 mr-1"><svelte:component this={operation.icon}/></div>
                             {/if}
                             {#if operation.caption}
                                 <span>{operation.caption}</span>
@@ -90,21 +101,25 @@
                 {:else}
                 
                     <button type="button" 
-                            class="py-2.5 px-5 
-                            text-xs font-medium text-stone-100 dark:text-stone-300 dark:hover:text-white 
+                            class="py-2.5 px-4
+                            text-xs font-thin text-stone-100 dark:text-stone-300 dark:hover:text-white 
                             hover:bg-stone-700 dark:hover:bg-stone-800 active:bg-stone-300 dark:active:bg-stone-600
                             border-stone-200 focus:outline-none dark:border-stone-600
                             inline-flex items-center"
+                            class:bg-stone-700={isActive}
+                            class:dark:bg-stone-800={isActive}
                             on:click={(e) => {on_click(e, operation)}}
                             on:mousedown={mousedown}>
                         {#if operation.icon}
-                            <div class="w-3 h-3 mr-1"><svelte:component this={operation.icon}/></div>
+                            <div class="w-3.5 h-3.5 mr-1"><svelte:component this={operation.icon}/></div>
                         {/if}
                         {#if operation.caption}
                             <span>{operation.caption}</span>
                         {/if}
                     </button>
-                {/if}    
+                {/if} 
+            {:else}
+                <!--div class="border-l my-2"></div-->
             {/if}
         {/each}
     </div>
@@ -112,17 +127,19 @@
     <div class="ml-auto flex flex-row">
         {#each rightOperations as operation}
             {#if !operation.separator}
-
+            {@const isActive=isOperationActivated(operation)}
                 <button type="button" 
-                        class="py-2.5 px-5 
-                        text-xs font-medium text-stone-100 dark:text-stone-300 dark:hover:text-white 
+                        class="py-2.5 px-4 
+                        text-xs font-thin text-stone-100 dark:text-stone-300 dark:hover:text-white 
                         hover:bg-stone-700 dark:hover:bg-stone-800 active:bg-stone-300 dark:active:bg-stone-600
                         border-stone-200 focus:outline-none dark:border-stone-600
                         inline-flex items-center"
+                        class:bg-stone-700={isActive}
+                        class:dark:bg-stone-800={isActive}
                         on:click={(e) => {on_click(e, operation)}}
                         on:mousedown={mousedown}>
                     {#if operation.icon}
-                        <div class="w-3 h-3 mr-1"><svelte:component this={operation.icon}/></div>
+                        <div class="w-3.5 h-3.5 mr-1"><svelte:component this={operation.icon}/></div>
                     {/if}
                     {#if operation.caption}
                         <span>{operation.caption}</span>

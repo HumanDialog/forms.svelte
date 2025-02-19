@@ -2,7 +2,7 @@
 	import { afterUpdate, tick} from 'svelte';
     import Icon from './icon.svelte'
     import {contextItemsStore} from '../stores'
-    import {isDeviceSmallerThan} from '../utils'
+    import {isDeviceSmallerThan, isOnScreenKeyboardVisible} from '../utils'
     import {hideWholeContextMenu} from './menu'
 
     export let widthPx     :number = 400;
@@ -33,25 +33,13 @@
         const m = 15;
         let container_rect :DOMRect = new DOMRect(m, 0, window.innerWidth-2*m, window.innerHeight)
         
-        if(isDeviceSmallerThan('sm'))       // are we on mobile?
+        if(isOnScreenKeyboardVisible())       // are we on mobile?
         {
-            const sel = window.getSelection();
-            console.log('sel', sel)
-            // if we have active selections then it's very possible we have onscreen keyboard visible, se we need to shrink window.innerHeight 
-            if(sel && sel.rangeCount>0 && sel.focusNode && sel.focusNode.nodeType==sel.focusNode.TEXT_NODE)
-            {
-                const el :HTMLElement|null = sel.focusNode.parentElement;
-                if(el && (el.isContentEditable || el.contentEditable == 'true' || el.tagName == 'INPUT'))
-                {
-                    console.log('keyboard visible, move menu 300px up', el)
-                    container_rect.height -= 300; // it will be enough?
-                }
-                
-            }
+            //console.log('keyboard visible, move menu 300px up', el)
+            // todo: exact value can be calculated from minViewportHeight and maxViewportHeight
+            container_rect.height -= 300; // it will be enough?  
         }
 
-        
-        
         //console.log('beforeUpdate', rect, ' in ', container_rect)
                 
         let xShifted = false;

@@ -47,6 +47,15 @@
             isExpandable = false;
    }
 
+   export function activateMainOperation()
+   {
+        const mainOperationButton = document.getElementById('__hd_fab_mainOperation')
+        if(!mainOperationButton)
+            return;
+
+        mainOperationButton.click();
+   }
+
     function on_click(e, operation)
     {
         //vToolboxExpanded = false;
@@ -130,7 +139,8 @@
 {#if operations && operations.length > 0}
     {@const topPosition = 350}
     {@const verticalPosition = mainOperation.aboveKeyboard ? `bottom: ${topPosition}px` : "bottom: 10px"}
-    <button class="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 
+    <button     id="__hd_fab_mainOperation"
+                class="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 
                     font-medium rounded-full text-sm text-center shadow-md
                     w-[55px] h-[55px] 
                     fixed m-0 absolute bottom-0 right-[0px]

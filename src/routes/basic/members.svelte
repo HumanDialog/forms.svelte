@@ -1,7 +1,7 @@
 <script>
    
 	import { reef, session, signInHRef } from '@humandialog/auth.svelte';
-    import {MembersPage} from '$lib';
+    import {MembersPage, onErrorShowAlert} from '$lib';
 	import { onMount } from 'svelte';
 	
     let users = []
@@ -18,7 +18,8 @@
                                         Association: 'Members/User'
                                     }
                                 ]                    
-                            }
+                            },
+                            onErrorShowAlert
                         )
         if(result)
         {

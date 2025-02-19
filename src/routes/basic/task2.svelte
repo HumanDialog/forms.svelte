@@ -1,5 +1,5 @@
 <script>
-    import {reef, session} from '@humandialog/auth.svelte'
+    import {reef} from '@humandialog/auth.svelte'
 	import  { Editor,
             Page,
             Combo,
@@ -13,25 +13,19 @@
 			isActive,
 			clearActiveItem,
 			isDeviceSmallerThan,
-            onErrorShowAlert,
-            Modal,
-			Spinner,
-            resizeImage
+            onErrorShowAlert
             } from '$lib'
 	import { onMount, tick } from 'svelte';
     import {location, querystring} from 'svelte-spa-router'
     import TaskSteps from './task.steps.svelte'
-    import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont} from 'svelte-icons/fa/'
-	import { readonly } from 'svelte/store';
-    
+    import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave} from 'svelte-icons/fa/'
+
     let taskRef = ''
     let task = null;
     let allTags = '';
     let allLists = [];
     let allActors = [];
     let availableStates = [];
-    let pendingUploading = false;
-    let isReadOnly = false;
 
     $: onParamsChanged($location)
 
@@ -39,7 +33,7 @@
     {
         //console.log('task: ', $location)
         const segments = $location.split('/');
-        const foundIdx = segments.findIndex( s => s == 'task');
+        const foundIdx = segments.findIndex( s => s == 'task2');
         if(foundIdx < 0)
             return;
 
@@ -86,7 +80,7 @@
                                 {
                                     Id: 1,
                                     Association: '',
-                                    Expressions:['Id', 'Index', 'Title','Summary', 'Description', 'DueDate', 'Tags', 'State', '$ref', '$type', '$acc'],
+                                    Expressions:['Id', 'Index', 'Title','Summary', 'Description', 'DueDate', 'Tags', 'State', '$ref', '$type'],
                                     SubTree:[
                                         {
                                             Id: 10,
@@ -129,9 +123,6 @@
 
         if(task.Steps == undefined)
             task.Steps = []
-
-        isReadOnly = task.$acc === 1
-
     }
 
     async function onTitleChanged(text)
@@ -438,11 +429,11 @@
         if(mobile)
         {
             return [
-                {
+                /*{
                     icon: FaFont,
                     //aboveKeyboard: true,
                     menu: description.getFormattingOperations(true)
-                }
+                }*/
             ]
         }
         else
@@ -483,75 +474,6 @@
             clearActiveItem('props')
     }
 
-    let imgInput;
-    let imgEditorActionAfterSuccess;
-    function uploadImage(editorActionAfterSuccess)
-    {
-        imgEditorActionAfterSuccess = editorActionAfterSuccess;
-        imgInput?.click();
-    }
-    
-    async function onImageSelected()
-    {
-        const [file] = imgInput.files;
-        if(file)
-        {
-            pendingUploading = true 
-
-            let resizedImage = await resizeImage(file, 1024, 1024)
-            if(!resizedImage)
-                resizedImage = file
-            
-            const res = await reef.post(`${taskRef}/Images/blob?name=${file.name}&size=${resizedImage.size}`, {}, onErrorShowAlert)
-            if(res && res.key && res.uploadUrl)
-            {
-                const newKey = res.key;
-                const uploadUrl = res.uploadUrl
-                
-                try
-                {
-                    //const res = await new Promise(r => setTimeout(r, 10000));
-                    const res = await fetch(uploadUrl, {
-                                                method: 'PUT',
-                                                headers: new Headers({
-                                                    'Content-Type': resizedImage.type
-                                                }),
-                                                body: resizedImage})
-                    if(res.ok)
-                    {
-                        // todo: editor path imgPath
-                        const dataPath = `${taskRef}/Images/blob?key=${newKey}`
-                            
-                        //console.log('upload success for ', dataPath)
-                        if(imgEditorActionAfterSuccess)
-                            imgEditorActionAfterSuccess(dataPath)
-                    }
-                    else
-                    {
-                        const err = await res.text()
-                        console.error(err)
-                        onErrorShowAlert(err)
-                    }
-                        
-                }
-                catch(err)
-                {
-                    console.error(err)
-                    onErrorShowAlert(err)
-                }
-            }
-
-            pendingUploading = false;
-
-            await reloadData();
-        }
-    }
-
-    function removeImage(dataPath)
-    {
-        reef.delete(dataPath, onErrorShowAlert)
-    }
-
 </script>
 
 {#if task != null}
@@ -564,8 +486,8 @@
             title={task.Title}>
     <section class="w-full flex justify-center">
         <article class="w-full prose prose-base prose-zinc dark:prose-invert">
-            <section class="not-prose h-6 w-full flex flex-row justify-between mb-2">
-                    <p class="text-base sm:text-xs">
+            <section class="not-prose h-6 w-full flex flex-row justify-between mb-10">
+                    <p class="text-base sm:text-xs mt-1 sm:mt-2">
                         {task.Index}
                     </p>
                     <div>
@@ -600,8 +522,7 @@
             <h1     class="font-normal text-4xl"
                     use:editable={{
                         action: (text) => onTitleChanged(text), 
-                        active: true,
-                        readonly: isReadOnly}}
+                        active: true}}
                         tabindex="0">
                 {task.Title}
             </h1>
@@ -660,8 +581,7 @@
                     <p  class="mb-1" 
                         use:editable={{
                             action: (text) => onSummaryChanged(text),
-                            active: true,
-                            readonly: isReadOnly}}
+                            active: true}}
                         tabindex="0"
                         bind:this={summary}>
                         {task.Summary}
@@ -687,21 +607,12 @@
                             compact={true}
                             bind:this={description}
                             onFocusCb={() => activateFormattingTools()}
-                            onBlurCb={() => deactivateFormattingToolsIfNeeded()}
-                            onAddImage={uploadImage}
-                            onRemoveImage={removeImage}/>
+                            onBlurCb={() => deactivateFormattingToolsIfNeeded()}/>
 
             {/if}
 
         </article>
     </section>
-
-    <input hidden type="file" id="imageFile" accept="image/*" bind:this={imgInput} on:change={onImageSelected}/> <!-- capture="environment" -->
 </Page>
 {/if}
-
-<Modal title='Uploading...' bind:open={pendingUploading} mode={3} icon={FaCloudUploadAlt}>
-    <Spinner delay={0}/> 
-    <span class="ml-3">Your image is uploading to the server</span>
-</Modal>
 

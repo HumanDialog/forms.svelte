@@ -18,11 +18,11 @@
     import Combo from './components/combo/combo.svelte'
 	import Modal from './modal.svelte'
 	import Checkbox from '$lib/components/checkbox.svelte';
-    import {Popover, Alert} from 'flowbite-svelte'
+   
 	import { reef, session, signInHRef } from '@humandialog/auth.svelte';
 	import { ComboSource } from '$lib';
-    import {removeAt} from './utils'
     import {showMenu} from '$lib/components/menu'
+    import {onErrorShowAlert} from './stores'
 	
 
     // ==============================================================================
@@ -68,10 +68,17 @@
     {
         if(showAccessRoles)
         {
-            let roles = await reef.get('/sys/list_access_roles')
+            let roles = await reef.get('/sys/list_access_roles?details')
             access_roles = [];
             if(roles)
-                roles.forEach( gname => access_roles.push({name: gname}));
+                roles.forEach( roleInfo => 
+                    access_roles.push(
+                        {
+                            name: roleInfo.name,
+                            flags: roleInfo.flags,
+                            id: roleInfo.id,
+                            summary: roleInfo.summary ? roleInfo.summary : roleInfo.name
+                        }));
         }
 
 
@@ -202,8 +209,7 @@
             else
             {
                 const err_msg = await res.text();
-                alerts.push(err_msg)
-                alerts = [...alerts];
+                onErrorShowAlert(err_msg);
                 return false;
             }
         }
@@ -230,8 +236,7 @@
             else
             {
                 const err_msg = await res.text();
-                alerts.push(err_msg)
-                alerts = [...alerts];
+                onErrorShowAlert(err_msg)
                 return false;
             }
         }
@@ -259,7 +264,7 @@
             else
             {
                 const err_msg = await res.text();
-                alerts = [err_msg, ...alerts];
+                onErrorShowAlert(err_msg);
                 return false;
             }
         }
@@ -527,12 +532,12 @@
                 else
                 {
                     const err_msg = await res.text();
-                    alerts = [err_msg, ...alerts];
+                    onErrorShowAlert(err_msg);
                 }
         }
         catch (err)
         {
-            alerts = [err, ...alerts];
+            onErrorShowAlert(err);
         }
 
         new_user.name = '';
@@ -554,8 +559,6 @@
 
         create_new_user_enabled = false;
     }
-
-    let alerts = []
 
     let removeModal;
     let userToRemove;
@@ -586,12 +589,12 @@
             else
             {
                 const err = await res.text()
-                alerts = [err, ...alerts];
+                onErrorShowAlert(err);
             }
         }
         catch(err)
         {
-            alerts = [err, ...alerts];
+            onErrorShowAlert(err);
         }
     }
 
@@ -620,7 +623,7 @@
             else
             {
                 const err = await res.text()
-                alerts = [err, ...alerts];
+                onErrorShowAlert(err);
             }
         }
         catch(err)
@@ -628,7 +631,7 @@
             deleteAccountModal.hide();
 
             console.error(err)
-            alerts = [err, ...alerts];
+            onErrorShowAlert(err);
         }
     }
     
@@ -640,20 +643,7 @@
         clearsContext='props sel'>
     <!--a href="/" class="underline text-sm font-semibold ml-3"> &lt; Back to root</a-->
 
-    <!-- alerts -->
-    <section class="absolute left-2 sm:left-auto sm:right-2 bottom-2 flex flex-col gap-2">
-        {#each alerts as alert, idx}
-            <Alert class="bg-red-900/40  shadow-lg shadow-stone-400 dark:shadow-black flex flex-row">
-                <p>
-                    {alert}
-                </p>
-                <button class="font-bold  ml-auto"
-                        on:click={() => {alerts = removeAt(alerts, idx)}}>
-                    x
-                </button>
-            </Alert>    
-        {/each}
-    </section>
+    
     
     
 
@@ -676,7 +666,7 @@
 
             {#if showAccessRoles}
                 <ListComboProperty name='Access' a='acc_role' onSelect={on_change_access_role}>
-                    <ComboSource objects={access_roles} name='name' key='name'/>
+                    <ComboSource objects={access_roles} name='summary' key='name'/>
                 </ListComboProperty>
             {/if}
 
@@ -827,7 +817,7 @@
 
                             let options = [];
                             access_roles.forEach(k => options.push({
-                                caption: k.name,
+                                caption: k.summary,
                                 action: (f) => { new_user.acc_role=k.name}
                             }));
 
@@ -835,7 +825,12 @@
                             let pt = new DOMPoint(rect.left, rect.bottom)
                             showMenu(pt, options);   
                         }}>
-                            {new_user.acc_role ? new_user.acc_role : '<none>'}
+                            {#if new_user.acc_role}
+                                {access_roles.find(r => r.name==new_user.acc_role).summary}
+                            {:else}
+                                {"<none>"}
+                            {/if}
+                           
                             <span class="w-3 h-3 inline-block text-stone-700 dark:text-stone-300 ml-2 mt-2 sm:mt-1">
                                 <FaChevronDown/>
                             </span>
