@@ -80,7 +80,7 @@ export const main_sidebar_visible_store = writable((localStorage.main_sidebar_vi
 main_sidebar_visible_store.subscribe( (value) => { localStorage.main_sidebar_visible_store = value });
 
 export let previously_visible_sidebar = "";
-export let sidebar_left_pos = writable(0)
+export const sidebar_left_pos = writable(0)
 
 let has_saved_tools_visible = false;
 function create_tools_visible_store()

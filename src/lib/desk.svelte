@@ -159,11 +159,15 @@
         window.addEventListener('resize', on_resize)
         
         const vp = window.visualViewport;
-
         vp?.addEventListener('resize', onViewportResize)
         setViewportHeight(vp)
 
+        document.addEventListener('selectionchange', onSelectionChanged)
+        //document.addEventListener('focusout', onFocusOut)
+
         return () => {
+          //  document.removeEventListener('focusout', onFocusOut)
+            document.removeEventListener('selectionchange', onSelectionChanged)
             vp?.removeEventListener('resize', onViewportResize)
             window.removeEventListener('resize', on_resize)
             
@@ -202,14 +206,44 @@
         const vp = window.visualViewport;
         setViewportHeight(vp)
 
-        if(isOnScreenKeyboardVisible())
-        {
-            fab_visibility = 'hidden'
-        }
-        else
-        {
-            fab_visibility = fab_base_visibility;
-        }
+        determineFABVisibility();
+    }
+
+    function onSelectionChanged(e)
+    {
+        determineFABVisibility();
+    }
+
+    function onFocusOut(e)
+    {
+        determineFABVisibility();
+    }
+
+    let change_ticket = 0
+    let last_change_ticket = 0
+    function determineFABVisibility()
+    {
+        change_ticket++;
+        setTimeout( () => {
+            if(change_ticket != last_change_ticket)
+            {
+                last_change_ticket = change_ticket;
+                let new_fab_visibility = "";
+
+                if(isOnScreenKeyboardVisible())
+                {
+                    new_fab_visibility = 'hidden'
+                }
+                else
+                {
+                    new_fab_visibility = fab_base_visibility;
+                }
+
+                if(fab_visibility != new_fab_visibility)
+                    fab_visibility = new_fab_visibility;
+            }
+        }, 200)
+        
     }
 
     let operationsComponent
