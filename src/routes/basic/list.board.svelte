@@ -171,6 +171,7 @@
 
     let pageOperations = [
         {
+            main: true,
             icon: FaPlus,
             action: (f) => kanban.add(KanbanColumnBottom, 0)
         },

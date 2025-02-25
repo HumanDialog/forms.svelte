@@ -3,7 +3,10 @@
 	import {Layout, onErrorShowAlert} from '$lib';
 
     import Sidebar from './sidebar.svelte'
+    import SidebarFolders from './sidebar.folders.svelte'
+    
     import AppIcon from './appicon.svelte'
+    import FaFolder from 'svelte-icons/fa/FaFolder.svelte'
     import {FaUsersCog, FaSignOutAlt} from 'svelte-icons/fa/'
     import {push} from 'svelte-spa-router'
     
@@ -59,6 +62,10 @@
                     'TOC': {
                         icon: AppIcon,
                         component: Sidebar
+                    },
+                    'Folders': {
+                        icon: FaFolder,
+                        component: SidebarFolders
                     }
                 },
                 mainContent : {

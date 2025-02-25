@@ -564,8 +564,8 @@
             title={task.Title}>
     <section class="w-full flex justify-center">
         <article class="w-full prose prose-base prose-zinc dark:prose-invert">
-            <section class="not-prose h-6 w-full flex flex-row justify-between mb-2">
-                    <p class="text-base sm:text-xs">
+            <section class="not-prose h-6 w-full flex flex-row justify-between mb-4">
+                    <p class="text-base sm:text-xs mt-1 sm:mt-2">
                         {task.Index}
                     </p>
                     <div>
@@ -576,7 +576,7 @@
                                     isAssociation
                                     icon={false}
                                     placeholder='List'
-                                    s='sm'
+                                    s='s'
                                     hasNone={false}
                                     bind:this={onList}>
                                 <ComboSource    objects={allLists} 
@@ -597,7 +597,7 @@
                     </div>
             </section>
 
-            <h1     class="font-normal text-4xl"
+            <h1     class="not-prose font-normal text-4xl mb-1"
                     use:editable={{
                         action: (text) => onTitleChanged(text), 
                         active: true,
@@ -606,7 +606,7 @@
                 {task.Title}
             </h1>
             
-            <section class="not-prose w-full flex flex-row flex-wrap justify-between">
+            <section class="not-prose w-full flex flex-row flex-wrap mt-3 justify-between">
                 <div class="grow-0">
                     {#if task.Actor || responsiblePlaceholder}
                         <Combo  compact={true} 
@@ -615,7 +615,7 @@
                                 isAssociation
                                 icon={false}
                                 placeholder='Responsible'
-                                s='sm'
+                                s='s'
                                 hasNone
                                 changed={(k,n) => { /*fake assignment for component rer-ender*/ task.Actor = task.Actor; }} 
                                 bind:this={responsible}>
@@ -634,7 +634,7 @@
                                 icon
                                 placeholder='State'
                                 hasNone={false}
-                                s='sm'>
+                                s='s'>
                             <ComboSource    objects={availableStates}
                                             key="state" 
                                             name="name"
@@ -645,7 +645,7 @@
 
                 <div>
                     {#if task.Tags || tagsPlaceholder}
-                        <Tags class="not-prose h-6 w-full "
+                        <Tags class="h-6 w-full "
                             a='Tags'
                             getGlobalTags={() => allTags}
                             {onUpdateAllTags}
@@ -657,7 +657,7 @@
             
             {#if task.Summary || summaryPlaceholder}
                 {#key task.Summary}
-                    <p  class="mb-1" 
+                    <p  
                         use:editable={{
                             action: (text) => onSummaryChanged(text),
                             active: true,
@@ -675,14 +675,15 @@
                                 a='Label'
                                 checkedAttribute='Done'
                                 onRemove={onRemoveStep}
-                                onAdd={onAddStep}
                                 onChange={onChangeStep}
+                                onAdd={onAddStep}
                                 onSelect={onSelectStep}
                                 onUnselect={onUnselectStep}
                                 bind:this={steps}/>
             {/if}
                 
             {#if task.Description || descriptionPlaceholder}
+                <hr/>    
                 <Editor   a='Description'
                             compact={true}
                             bind:this={description}
@@ -694,6 +695,9 @@
             {/if}
 
         </article>
+        
+        
+        
     </section>
 
     <input hidden type="file" id="imageFile" accept="image/*" bind:this={imgInput} on:change={onImageSelected}/> <!-- capture="environment" -->

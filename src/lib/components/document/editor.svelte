@@ -13,6 +13,14 @@
     import HorizontalRule from '@tiptap/extension-horizontal-rule'
     import Image from '@tiptap/extension-image'
     import Link from '@tiptap/extension-link'
+    import CodeBlock from '@tiptap/extension-code-block'
+    import BulletList from '@tiptap/extension-bullet-list'
+    import ListItem from '@tiptap/extension-list-item'
+    
+    import Table from '@tiptap/extension-table'
+    import TableCell from '@tiptap/extension-table-cell'
+    import TableHeader from '@tiptap/extension-table-header'
+    import TableRow from '@tiptap/extension-table-row'
 
     import Bold from '@tiptap/extension-bold'
     import Code from '@tiptap/extension-code'
@@ -29,7 +37,8 @@
     import Palette from './internal/palette.svelte'
 
     import {FaFont, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle, FaInfo, FaImage,
-            FaBold, FaItalic, FaUnderline, FaStrikethrough, FaArrowLeft, FaGripLines } from 'svelte-icons/fa'
+            FaBold, FaItalic, FaUnderline, FaStrikethrough, FaArrowLeft, FaGripLines, FaListUl, FaTable } from 'svelte-icons/fa'
+            
     import IcH1 from './internal/h1.icon.svelte'
     import IcH2 from './internal/h2.icon.svelte'
     import IcH3 from './internal/h3.icon.svelte'
@@ -273,7 +282,7 @@
 	let editor;
 
     const codeBlockClass = 'ml-6 text-sm font-mono break-normal text-pink-700 dark:text-pink-600'
-    const CodeBlock = Paragraph.extend({
+    const _CodeBlock = Paragraph.extend({
         name: 'CodeBlock',
         priority: 999,
         addAttributes() {
@@ -628,7 +637,7 @@
                 Paragraph,
                 Text,
                 Heading.configure({
-                    levels: [1, 2],
+                    levels: [1, 2, 3, 4],
                 }),
                 /*Image.configure({
                     HTMLAttributes: {
@@ -638,6 +647,15 @@
                 CrossImage,
                 HardBreak,
                 HorizontalRule,
+                BulletList, 
+                ListItem,
+                
+                Table.configure({
+                    resizable: true,
+                }),
+                TableRow,
+                TableHeader,
+                TableCell,
                 
                 // custom
                 CodeBlock,
@@ -960,23 +978,32 @@
 
     
     let commands  = [
-               {    caption: 'Bold',        description: 'Marks text as bolded',            tags: 'strong', icon: FaBold,                       on_choice: makeBold,            is_active: () => editor?.isActive('bold')  },
-               {    caption: 'Italic',      description: 'Marks text as italic',            tags: 'strong', icon: FaItalic,                     on_choice: makeItalic,          is_active: () => editor?.isActive('italic')  },
-               {    caption: 'Underlie',    description: 'Marks text as underlined',                        icon: FaUnderline,                  on_choice: makeUnderline,       is_active: () => editor?.isActive('underline')    },
-               {    caption: 'Strikethrough',description: 'Marks text as strikethrough',                    icon: FaStrikethrough,              on_choice: makeStrikethrough,   is_active: () => editor?.isActive('strike')},
                
-               {    caption: 'Styles',       separator: true },
+               
+               //{    caption: 'Styles',       separator: true },
                
                {   caption: 'Normal',       description: 'This is normal text style',      tags: 'text',    icon: FaRemoveFormat,               on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setParagraph().run(); else editor.commands.setParagraph() },  is_active: () => editor?.isActive('paragraph')  } ,
                
                {   caption: 'Heading 1',      description: 'Description heading',           tags: 'h1',      icon: IcH1,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 1}).run(); else editor.commands.setHeading({ level: 1 }) },   is_active: () => editor?.isActive('heading', {level: 1})  } ,
                {   caption: 'Heading 2',      description: 'Secondary heading',             tags: 'h2',      icon: IcH2,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 2}).run(); else editor.commands.setHeading({ level: 2 }) },   is_active: () => editor?.isActive('heading', {level: 2}) } ,
+               {   caption: 'Heading 3',      description: 'Secondary heading',             tags: 'h3',      icon: IcH3,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 3}).run(); else editor.commands.setHeading({ level: 3 }) },   is_active: () => editor?.isActive('heading', {level: 3}) } ,
+               {   caption: 'Heading 4',      description: 'Secondary heading',             tags: 'h4',      icon: IcH4,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 4}).run(); else editor.commands.setHeading({ level: 4 }) },   is_active: () => editor?.isActive('heading', {level: 4}) } ,
               
-               {   caption: 'Code',         description: 'Source code monospace text',                      icon: FaCode,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsCode().run(); else editor.commands.setAsCode() }, is_active: () => editor?.isActive('CodeBlock') },
+               {   caption: 'Code',         description: 'Source code monospace text',                      icon: FaCode,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setCodeBlock().run(); else editor.commands.setCodeBlock() }, is_active: () => editor?.isActive('CodeBlock') },
                {   caption: 'Comment',      description: 'With this you can comment the above paragraph',   icon: FaComment,                    on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsComment().run(); else editor.commands.setAsComment() }, is_active: () => editor?.isActive('CommentBlock')  } ,
                {   caption: 'Quote',        description: 'To quote someone',                                icon: FaQuoteRight,                 on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsQuote().run(); else editor.commands.setAsQuote() }, is_active: () => editor?.isActive('QuoteBlock')  } ,
                {   caption: 'Warning',      description: 'An important warning to above paragraph',         icon: FaExclamationTriangle,        on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsWarning().run(); else editor.commands.setAsWarning() }, is_active: () => editor?.isActive('WarningBlock')  } ,
                {   caption: 'Info',         description: 'An important info about above paragraph',         icon: FaInfo,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsInfo().run(); else editor.commands.setAsInfo() }, is_active: () => editor?.isActive('InfoBlock')  }, 
+               {   caption: 'Bullet list',  description: 'Unordered list of items',                         icon: FaListUl,                     on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).toggleBulletList().run(); else editor.commands.toggleBulletList() }, is_active: () => editor?.isActive('bulletList')  }, 
+               {   caption: 'Table',        description: 'Table',                                           icon: FaTable,                      on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).insertTable().run(); else editor.commands.insertTable() }, is_active: () => editor?.isActive('table')  }, 
+               
+               
+               {    caption: 'Format',       separator: true },
+               {    caption: 'Bold',        description: 'Marks text as bolded',            tags: 'strong', icon: FaBold,                       on_choice: makeBold,            is_active: () => editor?.isActive('bold')  },
+               {    caption: 'Italic',      description: 'Marks text as italic',            tags: 'strong', icon: FaItalic,                     on_choice: makeItalic,          is_active: () => editor?.isActive('italic')  },
+               {    caption: 'Underlie',    description: 'Marks text as underlined',                        icon: FaUnderline,                  on_choice: makeUnderline,       is_active: () => editor?.isActive('underline')    },
+               {    caption: 'Strikethrough',description: 'Marks text as strikethrough',                    icon: FaStrikethrough,              on_choice: makeStrikethrough,   is_active: () => editor?.isActive('strike')},    
+               
                
                {    caption: 'Other blocks', separator: true },
                {   caption: 'Image',        description: 'Add image to document',                           icon: FaImage,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).run(); if(onAddImage) onAddImage(onAddedImageReady);  } } ,
