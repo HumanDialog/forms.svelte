@@ -23,8 +23,9 @@
         } from "./stores.js";     
     import Icon from './components/icon.svelte';
     import {session, signInHRef, signOutHRef} from '@humandialog/auth.svelte'
-	import { push } from 'svelte-spa-router';
+	import { pop, push } from 'svelte-spa-router';
 	import { tick } from 'svelte';
+	import { popNavigationPage } from './utils';
     
 
     export let appConfig;
@@ -98,7 +99,12 @@
         if(!mobile)
             toggle_sidebar(key);
         else
-            show_sidebar(key);
+        {
+            if($main_sidebar_visible_store == key)
+                popNavigationPage();
+            else
+                show_sidebar(key);
+        }
     }
 
     function show_options(e)
@@ -319,7 +325,7 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 
 <section class="no-print flex flex-col w-full h-full" on:click={clearSelection}>
-    <div class="px-0 w-10">
+    <div class="px-0 w-12 sm:w-10">
         {#each tabs as tab}
             {@const isSelected = $main_sidebar_visible_store == tab.key}
             <button

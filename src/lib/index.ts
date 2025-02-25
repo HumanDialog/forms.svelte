@@ -11,6 +11,7 @@ export { default as Box } from "./form.box.svelte";
 export { default as Operations } from './operations.svelte'
 
 export {default as Layout } from './desk.svelte'
+export {default as VerticalToolbar} from './vertical.toolbar.svelte'
 
 // @ts-ignore
 export { default as Icon } from "./components/icon.svelte";
@@ -98,7 +99,8 @@ export {
             reloadWholeApp,
             alerts,
             addAlert,
-            onErrorShowAlert } from './stores.js'
+            onErrorShowAlert,
+            main_sidebar_visible_store } from './stores.js'
 
 export {    data_tick_store,    // tmp
             hasSelectedItem, 

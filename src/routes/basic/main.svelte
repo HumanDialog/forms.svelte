@@ -1,10 +1,14 @@
 <script>
 	import {    isDeviceSmallerThan, 
                 Spinner, 
-                Page
+                Page,
+                VerticalToolbar,
+				main_sidebar_visible_store
+
     } from '$lib'
     import {push } from "svelte-spa-router";
     import Navigator from "./navigator.svelte";
+    import NavigatorFolders from "./navigator.group.folders.svelte";
     import {FaPlus} from 'svelte-icons/fa/'
     import {session} from '@humandialog/auth.svelte'
 
@@ -16,20 +20,22 @@
 
     let whatToShow = UNKNOWN;
 
-    $: {
-            if(isDeviceSmallerThan("sm"))
-            {
-                whatToShow = NAVIGATOR;
-            }
-            else 
-            {
-                whatToShow = REDIRECT;
+    $: update($main_sidebar_visible_store)
+    function update(...args)
+    {
+        if(isDeviceSmallerThan("sm"))
+        {
+            whatToShow = NAVIGATOR;
+        }
+        else 
+        {
+            whatToShow = REDIRECT;
 
-                if($session.isActive)
-                    push('/mytasks');
-                else
-                    push('/listboard');
-            }
+            if($session.isActive)
+                push('/mytasks');
+            else
+                push('/listboard');
+        }
     }
 
     let navigator;
@@ -53,9 +59,15 @@
             clearsContext='props sel'
             self={currentNav} 
             title="Octopus Basic">
-                
-        <Navigator  sidebar={false}
-                    bind:this={navigator}/>
+
+        {#if $main_sidebar_visible_store == "Folders"}
+            <NavigatorFolders   sidebar={false}
+                                bind:this={navigator} />
+        {:else}
+            <Navigator  sidebar={false}
+                        bind:this={navigator}/>
+        {/if}
+
     </Page>
 
 

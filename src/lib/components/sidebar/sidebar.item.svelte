@@ -118,8 +118,6 @@
 
     function on_link_clicked(e)
     {
-        auto_hide_sidebar();
-        
         if(selectable)
             handleSelect(e);
         else if(item)
@@ -138,7 +136,10 @@
                 e.stopPropagation();
         }
         else
+        {
             e.stopPropagation();
+            auto_hide_sidebar();
+        }
     }
 
     function on_contextmenu(e)
