@@ -85,8 +85,8 @@
             assocName = 'Tasks'
             assocFilter = ''
         }
-        
-        listPath = isArchivedList ? `/group/ArchivedLists/${listId}` : `/group/Lists/${listId}`;
+
+        listPath = `/group/AllLists/${listId}`;
 
             
         await fetchData()
