@@ -38,16 +38,18 @@
                 user = res.User;
         }
 
-        initGroupSelector();
+ 
 
         await fetchData()
+        navLists?.reload(taskLists)
     }
 
     async function fetchData()
     {
-        let res = await reef.get("/group/Lists?sort=Order&fields=Id,Name,Order,href,$type", onErrorShowAlert);
+        let res = await reef.get("/group/Folders?sort=Order&fields=Id,Title,Order,href,$type", onErrorShowAlert);
+        console.log(res)
         if(res != null)
-            taskLists = res.TaskList;
+            taskLists = res.Folder;
         else
             taskLists = [];
     }
@@ -58,20 +60,20 @@
         navLists.reload(taskLists)
     }
 
-    async function addList(listName, order)
+    async function addFolder(folderName, order)
     {
         await reef.post("/group/Lists/new", 
                             { 
-                                Name: listName,
+                                Name: folderName,
                                 Order: order
                             },
                             onErrorShowAlert);
         reload();
     }
 
-    async function changeName(list, name)
+    async function changeName(folder, name)
     {
-        let res = await reef.post(`/group/Lists/${list.Id}/set`, 
+        let res = await reef.post(`/group/Folders/${folder.Id}/set`, 
                                 {
                                     Name: name
                                 },
@@ -79,10 +81,10 @@
         return (res != null);
     }
 
-    async function changeSummary(list, summary)
+    async function changeSummary(folder, summary)
     {
 
-        let res = await reef.post(`/group/Lists/${list.Id}/set`, 
+        let res = await reef.post(`/group/Lists/${folder.Id}/set`, 
                                 {
                                     Summary: summary
                                 },
@@ -90,28 +92,7 @@
         return (res != null);
     }
 
-    async function finishAllOnList(list)
-    {
-        await reef.post(`/group/Lists/${list.Id}/FinishAll`, {}, onErrorShowAlert)
-        
-        if( isRoutingTo(`#/listboard/${list.Id}`, currentPath) || 
-            isRoutingTo(`#/tasklist/${list.Id}`, currentPath))
-        {
-            reloadMainContentPage();
-        }
-    }
-
-    async function finishAllMyTasks()
-    {       
-        await reef.post(`/user/FinishTasks`, {}, onErrorShowAlert)
-        
-        if(isRoutingTo('#/mytasks', currentPath))
-        {
-            reloadMainContentPage();
-        }
-
-    }
-
+    
     function isRoutingTo(href, currentPath)
     {
         if(!sidebar)
@@ -243,12 +224,12 @@
             archivedLists = [];
     }
 
-    export function requestAddList()
+    export function requestaddFolder()
     {
-        navLists.add(async (listName, order) => {
+        navLists.add(async (folderName, order) => {
             await reef.post("/group/Lists/new", 
                             { 
-                                Name: listName,
+                                Name: folderName,
                                 Order: order
                             },
                             onErrorShowAlert);
@@ -260,140 +241,21 @@
     let canAddNewGroup = false;
     let currentGroup = {}
 
-    function initGroupSelector()
-    {
-        showGroupsSwitchMenu = $session.tenants.length > 1
-        if($session.configuration.tenant)
-        {
-            reef.getAppInstanceInfo().then( (instanceInfo =>{
-                if(instanceInfo?.is_public)
-                {
-                    showGroupsSwitchMenu = true;
-                    canAddNewGroup = true;
-                }
-            }))
-        }
-        
-        currentGroup = $session.tenants.find(t => t.id == $session.tid)
-        
-    }
+    
 
-    function getGroupsMenu()
-    {
-        if(!showGroupsSwitchMenu)
-            return []
-        
-        let options = []
-        $session.tenants.forEach(tInfo =>
-            options.push({
-                caption: tInfo.name,
-                icon: FaUsers,
-                disabled: tInfo.id == $session.tid,
-                action: async (f) => {
-                    $session.setCurrentTenantAPI(tInfo.url, tInfo.id)
-                    push('/')
-                    
-                    await tick()
-                    reloadWholeApp();
-                }
-            })
-        )
+   
 
-        if(canAddNewGroup)
-        {
-            options.push({
-                separator: true
-            })
-            options.push({
-                caption: 'Add group',
-                icon: FaPlus,
-                action: (f) => launchNewGroupWizzard()
-            })
-        }
-        
-        return options;
-    }
-
-    let newGroupParams = {
-        name: ''
-    }
-
-    let newGroupModalVisible = false;
-    function launchNewGroupWizzard()
-    {
-        newGroupParams.name = '';
-        newGroupModalVisible = true;
-    }
-
-    async function onNewGroupOK()
-    {
-        const appId = $session.appId
-        if(!appId)
-        {
-            return onNewGroupCancel()
-        }
-        
-        const appInstanceId = $session.configuration.tenant
-        if(!appInstanceId)
-        {
-            return onNewGroupCancel()
-        }
-
-            const body = {
-                app_id: $session.appId,
-                tenant: $session.configuration.tenant,
-                org_name: newGroupParams.name
-            }
-
-            const res = await reef.fetch(  "/dev/create-group-for-me",
-                                {
-                                    method: 'post',
-                                    body : JSON.stringify(body)
-                                });
-
-            if(res.ok)
-            {
-                await reef.refreshTokens()
-                //reloadWholeApp()
-            }
-            else
-            {
-                const result = await res.json();  
-                console.error(result.error);
-                onErrorShowAlert(result.error)
-            }
-
-        newGroupParams.name = '';
-        newGroupModalVisible = false;
-    }
-
-    function onNewGroupCancel()
-    {
-        newGroupParams.name = '';
-        newGroupModalVisible = false;
-    }
-
+    
 </script>
 
 {#if sidebar}
     {#if taskLists && taskLists.length > 0}
-        {#if showGroupsSwitchMenu}
-            <SidebarGroup>
-                <SidebarItem    href=""    
-                                icon={FaUsers}
-                                operations={(n) => getGroupsMenu()}
-                                selectable={currentGroup}>
-                    {currentGroup?.name}
-                </SidebarItem>
-            </SidebarGroup>
-        {/if}
-        
         {#if $session.isActive}
             {@const border=showGroupsSwitchMenu}
             <SidebarGroup {border}>
-                <SidebarItem   href="#/mytasks"
+                <SidebarItem   href="#/myfolders"
                                 icon={FaList}
-                                active={isRoutingTo("#/mytasks", currentPath)}
+                                active={isRoutingTo("#/myfolders", currentPath)} 
                                 operations={(node) => getUserListOperations(node, user)}
                                 summary="All active tasks assigned to me."
                                 selectable={user}>
@@ -406,7 +268,7 @@
            
             <SidebarList    objects={taskLists} 
                             orderAttrib='Order'
-                            inserter={addList} 
+                            inserter={addFolder} 
                             inserterPlaceholder='New list'
                             bind:this={navLists}>
                 <svelte:fragment let:item let:idx>
@@ -421,7 +283,7 @@
                                         editable: (text) => {changeSummary(item, text)},
                                         content: item.Summary}}
                                     editable={(text) => {changeName(item, text)}}>
-                        {item.Name}
+                        {item.Title}
                     </SidebarItem>
                 </svelte:fragment>
             </SidebarList> 
@@ -538,16 +400,3 @@
         bind:this={archiveModal}
         />
 
-<Modal  bind:open={newGroupModalVisible}
-        title='Create group'
-        okCaption='Create'
-        onOkCallback={onNewGroupOK}
-        onCancelCallback={onNewGroupCancel}
-        icon={FaUsers}
->
-    <Input  label='Group name' 
-            placeholder='' 
-            self={newGroupParams} 
-            a="name"
-            required/>
-</Modal>

@@ -15,6 +15,7 @@
     import Task from './task.svelte'
     import Board from './list.board.svelte';
     import MyTasks from './mytasks.svelte'
+    import MyFolders from './myfolders.svelte'
     import Members from './members.svelte'
     import Main from './main.svelte'
     import Cookies from './cookies.svelte';
@@ -84,6 +85,8 @@
                         '/listboard/*': { component: Board},
                         '/mytasks' :    { component: MyTasks },
                         '/mytasks/*' :  { component: MyTasks },
+                        '/myfolders' :  { component: MyFolders},
+                        '/myfolders/*' :{ component: MyFolders},
                         '/members'   :  { component: Members }
                     }
                 },
