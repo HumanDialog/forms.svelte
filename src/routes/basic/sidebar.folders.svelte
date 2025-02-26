@@ -35,12 +35,7 @@
     
         
     <GroupFoldersNavigator sidebar/>
-    <SidebarGroup>
-        <SidebarItem    href=""  >
-                        
-            Lorem ipsum
-        </SidebarItem>
-    </SidebarGroup>
+    
 
 </Sidebar>
 

@@ -2,7 +2,7 @@
     import {FaUsers, FaCog, FaSignInAlt, FaSignOutAlt, FaBars, FaToggleOn, FaToggleOff} from 'svelte-icons/fa/'
     //import GoPrimitiveDot from 'svelte-icons/go/GoPrimitiveDot.svelte'
     import {showMenu} from '$lib/components/menu'
-    import {push} from 'svelte-spa-router'
+    import {push, pop, location} from 'svelte-spa-router'
     import {contextItemsStore, context_info_store, contextToolbarOperations, data_tick_store} from './stores.js'
     //import Menu from '$lib/components/contextmenu.svelte'
 
@@ -24,7 +24,7 @@
     import {session, signInHRef, signOutHRef} from '@humandialog/auth.svelte'
 
     import VerticalToolbar from '$lib/vertical.toolbar.svelte'
-	import { isDeviceSmallerThan } from './utils.js';
+	import { isDeviceSmallerThan, isOnNavigationPage, pushNavigationPage, popNavigationPage } from './utils.js';
     
 
     export let appConfig;
@@ -82,7 +82,36 @@
     function toggle_navigator(e)
     {
         if(isDeviceSmallerThan('sm'))
-            push('/')
+        {
+            if(isOnNavigationPage())
+            {
+                popNavigationPage();
+            }
+            else
+            {
+                if(tabs.length == 1)
+                {
+                    $sidebar_left_pos = 0;
+                    show_sidebar(tabs[0]);
+                }
+                else
+                {
+                    let sidebar = $main_sidebar_visible_store;
+                    if(sidebar == "*")
+                    {
+                        if((!previously_visible_sidebar) || previously_visible_sidebar === '*')
+                            sidebar = Object.keys(appConfig.sidebar)[0];
+                        else
+                            sidebar = previously_visible_sidebar;
+                    }
+
+                    $sidebar_left_pos = 40;
+                    show_sidebar(sidebar)
+                }
+
+                pushNavigationPage();
+            }
+        }
         else
         {
 
@@ -282,7 +311,7 @@
 
 </div>
 
-{#if tabs.length > 1 &&  $main_sidebar_visible_store != "*"}
+{#if false && tabs.length > 1 &&  $main_sidebar_visible_store != "*"}
     <div  class="no-print flex-none block fixed left-0 top-[40px] w-[40px] h-screen z-20 inset-0   overflow-hidden">
         <div class="sticky top-0 flex h-full w-10 bg-stone-900 flex-col items-center text-stone-100 shadow">
             <VerticalToolbar {appConfig} mobile={true}/>

@@ -20,8 +20,9 @@
             alerts } from './stores.js'
     
     //import { AuthorizedView} from '@humandialog/auth.svelte'
-    import { handleSelect, isDeviceSmallerThan, isOnScreenKeyboardVisible, removeAt, UI } from './utils'
+    import { handleSelect, isDeviceSmallerThan, isOnNavigationPage, isOnScreenKeyboardVisible, removeAt, UI } from './utils'
     import { afterUpdate, onMount } from 'svelte';
+    import {location} from 'svelte-spa-router'
     
     export let layout;
 
@@ -75,16 +76,26 @@
 
     $: { visible_sidebar = $main_sidebar_visible_store
         
-        if(visible_sidebar == "*")
+        if(!is_small)
+        {
+            if(visible_sidebar == "*")
+            {
+                main_side_panel_visibility = "hidden"
+                lg_content_area_horizontal_dim = ""
+            }
+            else
+            {
+                main_side_panel_visibility = "fixed lg:block"
+                lg_content_area_horizontal_dim = `lg:left-[360px] lg:w-[calc(100vw-360px)]`
+            }    
+        }
+        else
         {
             main_side_panel_visibility = "hidden"
             lg_content_area_horizontal_dim = ""
         }
-        else
-        {
-            main_side_panel_visibility = "fixed lg:block"
-            lg_content_area_horizontal_dim = `lg:left-[360px] lg:w-[calc(100vw-360px)]`
-        }      
+          
+        console.log('main_side_panel_visibility', main_side_panel_visibility)
     }
     
     let tools_visibility = "hidden"
@@ -95,6 +106,9 @@
     let fab_base_visibility = "hidden"
     let fab_visibility = fab_base_visibility;
     let fab_bottom = "bottom-0"
+    let vertical_toolbar_visibility = "hidden sm:block"
+    let content_left = "left-0 sm:left-[40px]";
+    let content_width = "w-screen  sm:w-[calc(100vw-40px)] ";
                                 
     let content_top = ""
     let content_height = ""                                
@@ -147,6 +161,36 @@
         fab_visibility = fab_base_visibility;
     }
 
+
+    $: navigationPageVisible = navigationPageSetup($location);
+    function navigationPageSetup(...args)
+    {
+        if(!is_small)
+        {
+            vertical_toolbar_visibility = "hidden sm:block"
+            content_left = "left-0 sm:left-[40px]";
+            content_width = "w-screen  sm:w-[calc(100vw-40px)]";
+            return false;
+        }
+        else
+        {
+            if(isOnNavigationPage())
+            {
+                vertical_toolbar_visibility = "block"
+                content_left = "left-[50px]";
+                content_width = "w-[calc(100vw-50px)] ";
+                return true;
+            }
+            else
+            {
+                vertical_toolbar_visibility = "hidden sm:block"
+                content_left = "left-0 sm:left-[40px]";
+                content_width = "w-screen  sm:w-[calc(100vw-40px)] ";
+                return false;
+            }
+        }
+    }
+
     //$: screen.width = innerWidth;  
 
     $: switchBodyClass($dark_mode_store);
@@ -159,11 +203,15 @@
         window.addEventListener('resize', on_resize)
         
         const vp = window.visualViewport;
-
         vp?.addEventListener('resize', onViewportResize)
         setViewportHeight(vp)
 
+        document.addEventListener('selectionchange', onSelectionChanged)
+        //document.addEventListener('focusout', onFocusOut)
+
         return () => {
+          //  document.removeEventListener('focusout', onFocusOut)
+            document.removeEventListener('selectionchange', onSelectionChanged)
             vp?.removeEventListener('resize', onViewportResize)
             window.removeEventListener('resize', on_resize)
             
@@ -202,14 +250,44 @@
         const vp = window.visualViewport;
         setViewportHeight(vp)
 
-        if(isOnScreenKeyboardVisible())
-        {
-            fab_visibility = 'hidden'
-        }
-        else
-        {
-            fab_visibility = fab_base_visibility;
-        }
+        determineFABVisibility();
+    }
+
+    function onSelectionChanged(e)
+    {
+        determineFABVisibility();
+    }
+
+    function onFocusOut(e)
+    {
+        determineFABVisibility();
+    }
+
+    let change_ticket = 0
+    let last_change_ticket = 0
+    function determineFABVisibility()
+    {
+        change_ticket++;
+        setTimeout( () => {
+            if(change_ticket != last_change_ticket)
+            {
+                last_change_ticket = change_ticket;
+                let new_fab_visibility = "";
+
+                if(isOnScreenKeyboardVisible())
+                {
+                    new_fab_visibility = 'hidden'
+                }
+                else
+                {
+                    new_fab_visibility = fab_base_visibility;
+                }
+
+                if(fab_visibility != new_fab_visibility)
+                    fab_visibility = new_fab_visibility;
+            }
+        }, 200)
+        
     }
 
     let operationsComponent
@@ -250,9 +328,9 @@
                 <!--#######################################################-->
                 <!--##  VERTICAL TOOLBAR                 ##################-->
                 <!--#######################################################-->
-                <div  class="hidden sm:block fixed left-0 top-0 w-[50px] sm:w-[40px] h-screen z-20 inset-0   overflow-hidden">
-                    <div class="sticky top-0 flex h-full w-10 bg-stone-800 dark:bg-stone-950 flex-col items-center text-stone-100 shadow">
-                        <VerticalToolbar appConfig={layout}/>
+                <div  class="{vertical_toolbar_visibility} fixed left-0 top-[50px] sm:top-0 w-[50px] sm:w-[40px] h-screen z-20 inset-0   overflow-hidden">
+                    <div class="sticky top-0 flex h-full w-12 sm:w-10 bg-stone-800 dark:bg-stone-950 flex-col items-center text-stone-100 shadow">
+                        <VerticalToolbar appConfig={layout} mobile={is_small}/>
                     </div>    
                 </div>
 
@@ -284,7 +362,7 @@
                     behaviour is the content expand vertically, and only vertical scrollbar can be visible.
                     When content on the main page needs to be expanded horizontally (like kanban chart for example) then
                     that component should define overflow-x-* itself -->
-                <section on:click|capture={auto_hide_sidebar} class="">
+                <section on:click|capture={() => { if(!navigationPageVisible) auto_hide_sidebar()}  } class="">
 
                     <!--###########################################################-->
                     <!--##  HORIZONTAL TOOLS                 ######################-->
@@ -310,8 +388,9 @@
                     <!--#######################################################-->
                     <!-- fixed => relative, content-height => min content height -- -->
                     <div    id="__hd_svelte_main_content_container"
-                            class="relative left-0  w-screen  
-                                    sm:left-[40px]  sm:w-[calc(100vw-40px)]    
+                            class="relative 
+                                    {content_left}
+                                    {content_width}   
                                     {content_top}
                                     {lg_content_area_horizontal_dim}
                                     z-0 overflow-x-hidden 

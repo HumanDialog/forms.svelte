@@ -80,7 +80,7 @@ export const main_sidebar_visible_store = writable((localStorage.main_sidebar_vi
 main_sidebar_visible_store.subscribe( (value) => { localStorage.main_sidebar_visible_store = value });
 
 export let previously_visible_sidebar = "";
-export let sidebar_left_pos = writable(0)
+export const sidebar_left_pos = writable(0)
 
 let has_saved_tools_visible = false;
 function create_tools_visible_store()
@@ -110,6 +110,7 @@ export const visible_property_tab_store = writable('');
 
 export function restore_defults()
 {
+    
     main_sidebar_visible_store.set('*');
     tools_visible_store.set(false);
     bottom_bar_visible_store.set(false);
@@ -121,6 +122,8 @@ export function toggle_sidebar(index)
 {
     previously_visible_sidebar = get(main_sidebar_visible_store);
 
+    console.log('toggle_sidebar', previously_visible_sidebar, '=>', index)
+
     if(get(main_sidebar_visible_store) == index)
         main_sidebar_visible_store.set('*')
     else
@@ -129,8 +132,8 @@ export function toggle_sidebar(index)
 
 export function auto_hide_sidebar()
 {
+    console.log('auto_hide_sidebar')
     //console.log("sw: " + window.innerWidth, SCREEN_SIZES.lg)
-    
     if(window.innerWidth < SCREEN_SIZES.lg)
         hide_sidebar()
 }

@@ -1,7 +1,7 @@
 import { getContext, tick } from "svelte";
 import {get} from 'svelte/store'
 import { contextItemsStore, contextToolbarOperations, pageToolbarOperations, data_tick_store } from "./stores";
-import { Img } from "flowbite-svelte";
+import {location, push, pop} from 'svelte-spa-router' 
 
 export let icons = {symbols :null}
 
@@ -622,4 +622,25 @@ export function isOnScreenKeyboardVisible()
 export const UI = {
     operations: null,
     fab: null
+}
+
+export const NAVIGATION_PAGE_PATH = '/'
+export function isOnNavigationPage()
+{
+    const loc = get(location)
+    if(loc == NAVIGATION_PAGE_PATH)
+        return true;
+    else
+        return false;
+}
+
+export function pushNavigationPage()
+{
+    push(NAVIGATION_PAGE_PATH)
+}
+
+export function popNavigationPage()
+{
+    if(isOnNavigationPage())
+        pop();
 }

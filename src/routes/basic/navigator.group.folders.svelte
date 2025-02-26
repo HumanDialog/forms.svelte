@@ -374,6 +374,13 @@
             
         </SidebarGroup>
 
+        <SidebarGroup>
+            <SidebarItem    href=""  >
+                            
+                Lorem ipsum
+            </SidebarItem>
+        </SidebarGroup>
+
     {:else}
         <Spinner delay={3000}/>
     {/if}
