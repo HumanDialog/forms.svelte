@@ -225,8 +225,9 @@
         
     }
 
-    function switchToKanban()
+    async function switchToKanban()
     {
+        let res = await reef.post(`${listPath}/SwitchToKanban`,{ }, onErrorShowAlert)
         push(`/listboard/${listId}`);
     }
 

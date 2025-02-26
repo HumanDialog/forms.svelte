@@ -187,7 +187,8 @@
 
     function switchToList()
     {
-        push(`/tasklist/${listId}`);
+        reef.post(`${listPath}/SwitchToList`,{  }, onErrorShowAlert)
+        push(`/tasklist/${listId}`);      
     }
 
     async function onAdd(newTaskAttribs) 
