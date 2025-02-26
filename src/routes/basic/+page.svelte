@@ -22,13 +22,18 @@
     import {Console} from '$lib'
     
 	
+    //const domain = 'localhost:1996'
+    //const appId = 'octopus'
+    //const tenantId = 'octopus'
+    //const proto = 'http'
+
     const domain = 'localhost:1996'
-    const appId = 'octopus'
-    const tenantId = 'octopus'
+    const appId = 'octopus_jugjrtua'
+    const tenantId = 'humandialog_niom'
     const proto = 'http'
     
     reef.configure( {
-            mode: 'local',
+            mode: 'remote',
             remote:{
                 iss: `${proto}://${domain}`,
                 clientID: 'SampleClientId',

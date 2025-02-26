@@ -25,6 +25,7 @@
     let isArchivedList = false;
     let isArchivedTasks = false;
     let assocName = 'Tasks'
+    let assocFilter = ''
     let listTitle = ''
     
     let users = [];
@@ -73,7 +74,18 @@
         isArchivedList = params.has('archivedList')
         isArchivedTasks = params.has('archivedTasks')
 
-        assocName = (isArchivedTasks || isArchivedList) ? 'ArchivedTasks' : 'Tasks';
+        //assocName = (isArchivedTasks || isArchivedList) ? 'ArchivedTasks' : 'Tasks';
+        if(isArchivedTasks || isArchivedList)
+        {
+            assocName = 'AllTasks'
+            assocFilter = 'Status = STATUS_ARCHIVED'
+        }
+        else
+        {
+            assocName = 'Tasks'
+            assocFilter = ''
+        }
+        
         listPath = isArchivedList ? `/group/ArchivedLists/${listId}` : `/group/Lists/${listId}`;
 
             
@@ -99,7 +111,7 @@
                                             {
                                                 Id: 2,
                                                 Association: assocName,
-                                                //Filter: 'State <> STATE_FINISHED',
+                                                Filter: assocFilter,
                                                 Sort: 'ListOrder',
                                                 SubTree:[
                                                     {
