@@ -72,7 +72,7 @@
         editor.commands.focus();
     }
 
-    let suggestionRange = undefined;
+let suggestionRange = undefined;
     export function getFormattingOperations(withCaptions = false)
     {
         let result = [];
@@ -219,8 +219,9 @@
                     lockNextBlurCallbacks++;
                     suggestionRange = props.range;
                     editor.commands.blur();
-                    setTimeout(() => UI.fab?.activateMainOperation(), 100)
-                    
+                    //setTimeout(() => UI.fab?.activateMainOperation(), 100)
+                    const cursorRect = props.clientRect();
+                    setTimeout(() => show_command_palette(cursorRect), 100)
                 }
                 else
                 {
@@ -843,18 +844,38 @@
         is_command_palette_visible = false;
         //clear_previous_text_and_position();
     }
+    
+    function show_command_palette(cursor_rect)
+    {
+        let client_rect = get_window_box();
+        
+        if(isDeviceSmallerThan("sm"))
+            show_small_command_palette(client_rect)
+        else
+            show_big_command_palette(cursor_rect, client_rect)        
+    }
+    
+    function show_small_command_palette(client_rect)
+    {
+        palette.max_height_px = client_rect.height - 64;
+        palette.width_px = client_rect.width - 96;
+        let x=64, y=32;
+        let show_above = false;        
+        palette.show(x, y, show_above);
+    }
 
-    function show_command_palette(cursorRect)
+    function show_big_command_palette(cursor_rect, client_rect)
     {
         //editor.commands.blur();
         //return;
-        let rect = cursorRect; //get_selection_bbox();
-        let client_rect = get_window_box();
+        let rect = cursor_rect; //get_selection_bbox();
+        
         let top_space = rect.y;
         let bottom_space = client_rect.height - (rect.y + rect.height);
+        //console.log('cu:', rect, ' cl:', client_rect)
         
         palette.max_height_px = 500;
-        palette.width_px = 400;
+        palette.width_px = 200;
 
         let preferred_palette_height = palette.max_height_px;
         let preferred_palette_width = palette.width_px;
