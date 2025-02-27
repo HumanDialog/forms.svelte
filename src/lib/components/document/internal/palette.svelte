@@ -63,7 +63,7 @@
         toolboxY += window.scrollY /*+ mainContentDiv?.scrollTop*/;
         //css_style = `position: absolute; left:${toolboxX}px; top:${toolboxY}px;`;
         css_style = `position: fixed; left:${toolboxX}px; top:${toolboxY}px;`;
-
+        console.log("toolbox: ", css_style)
         dispatch('palette_shown');
     }
 
@@ -91,7 +91,7 @@
         
         if(up)
             css_style += ' transform: translate(0, -100%);'
-
+        //console.log("show:", css_style)
         visible = true;
         dispatch('palette_shown');
     }
@@ -349,7 +349,7 @@
 </script>
 
 {#if isToolbox}
-    <menu   class=" not-prose bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md 
+    <menu   class="  bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md 
                     z-30
                     flex flex-row flex-nowrap"
             style={css_style}
@@ -388,7 +388,7 @@
     </menu>
 {:else}
     <div    id="__hd_FormattingPalette"
-            class="not-prose bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md z-30 overflow-y-auto" 
+            class="bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md z-30 overflow-y-auto" 
             hidden={!visible}
             style={css_style}
             bind:this={paletteElement}>

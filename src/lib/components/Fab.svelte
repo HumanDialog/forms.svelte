@@ -64,7 +64,7 @@ import {contextToolbarOperations, pageToolbarOperations, contextItemsStore} from
         const mainOperationButton = document.getElementById('__hd_fab_mainOperation')
         if(!mainOperationButton)
             return;
-
+        console.log("activateMainOperation")
         mainOperationButton.click();
    }
 
