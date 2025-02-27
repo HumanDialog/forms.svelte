@@ -23,6 +23,7 @@
 	import { ComboSource } from '$lib';
     import {showMenu} from '$lib/components/menu'
     import {onErrorShowAlert} from './stores'
+    import {randomString} from './utils'
 	
 
     // ==============================================================================
@@ -169,7 +170,8 @@
         email: '',
         auth_group: 0,
         files_group: 0,
-        acc_role: ''
+        acc_role: '',
+        silently: false
     }
 
     let name_input;
@@ -271,12 +273,14 @@
         return false;
     }
     
+    let inviteUserIdempotencyToken = ''
     function create_new_user()
     {
         if(showAccessRoles && access_roles.length > 0)
             new_user.acc_role = access_roles[0].name ?? ""
 
         create_new_user_enabled = true;
+        inviteUserIdempotencyToken = randomString(8);
 
     }
 
@@ -336,7 +340,13 @@
         let operations = [];
 
         if(user.removed)
-            return [];
+            return [
+            {
+                icon: FaUserPlus,
+                caption: '',
+                action: (f) => askToAddAgain(user),
+            }
+        ];
         
         let edit_operations = get_edit_operations(user)
         if(edit_operations.length == 1)
@@ -494,6 +504,8 @@
                                 client_id: $session.configuration.client_id,
                                 redirect_uri: `${window.location.origin}/#/auth/cb`,
                                 state: `${window.location.origin}/#/auth/signin`,
+                                idempotency_token: inviteUserIdempotencyToken,
+                                silently: new_user.silently ?? false,
                                 set:
                                 {
                                     [nameAttrib]: new_user.name,
@@ -545,6 +557,7 @@
         new_user.auth_group = 0;
         new_user.files_group = 0;
         new_user.acc_role = ''
+        new_user.silently = false;
 
         create_new_user_enabled = false;
     }
@@ -556,15 +569,18 @@
         new_user.auth_group = 0;
         new_user.files_group = 0;
         new_user.acc_role = ''
+        new_user.silently = false;
 
         create_new_user_enabled = false;
     }
 
     let removeModal;
     let userToRemove;
+    let removeUserIdempotencyToken = ''
     function askToRemove(user)
     {
         userToRemove = user;
+        removeUserIdempotencyToken = randomString(8);
         removeModal.show()
     }
 
@@ -576,7 +592,7 @@
         let email = userToRemove[emailAttrib];
         try{
 
-            const res = await reef.fetch('/json/anyv/sys/kick_out_user?email=' + email)
+            const res = await reef.fetch(`/json/anyv/sys/kick_out_user?email=${email}&idempotency_token=${removeUserIdempotencyToken}`)
             removeModal.hide();
 
             if(res.ok)
@@ -599,9 +615,11 @@
     }
 
     let deleteAccountModal;
+    let deleteAccountIdempotencyToken = ''
     function askToDeleteApplicationAccount()
     {
         deleteAccountModal.show()
+        deleteAccountIdempotencyToken = randomString(8)
     }
 
     async function deleteApplicationAccount()
@@ -612,7 +630,7 @@
 
         try{
 
-            const res = await reef.fetch(`json/anyv/sys/unregister_user?email=${my_email}`)
+            const res = await reef.fetch(`json/anyv/sys/unregister_user?email=${my_email}&idempotency_token=${deleteAccountIdempotencyToken}`)
             deleteAccountModal.hide();
 
             if(res.ok)
@@ -634,6 +652,20 @@
             onErrorShowAlert(err);
         }
     }
+
+    function askToAddAgain(user)
+    {
+        new_user.email = user[emailAttrib];
+        new_user.name = user[nameAttrib];      
+        new_user.silently = true;
+
+        //name_input?.setReadonly(true)
+        //email_input?.setReadonly(true)
+
+        create_new_user();
+    }
+
+   
     
 </script>
 
@@ -697,13 +729,15 @@
                     self={new_user} 
                     a="email" 
                     validation={is_valid_email_address}
-                    bind:this={email_input}/>
+                    bind:this={email_input}
+                    readonly={new_user.silently}/>
 
             <Input  label='Name' 
                     placeholder='Optional' 
                     self={new_user} 
                     a="name"
-                    bind:this={name_input}/>
+                    bind:this={name_input}
+                    readonly={new_user.silently}/>
 
             <!--Checkbox class="mt-2 text-xs font-normal" self={new_user} a="maintainer">
                 <div class="flex flex-row items-center">
