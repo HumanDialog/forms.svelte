@@ -27,6 +27,11 @@
     const appId = 'octopus'
     const tenantId = 'octopus'
     const proto = 'http'
+
+    //const domain = 'localhost:1996'
+    //const appId = 'octopus_jugjrtua'
+    //const tenantId = 'humandialog_niom'
+    //const proto = 'http'
     
     reef.configure( {
             mode: 'local',

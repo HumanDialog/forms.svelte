@@ -232,7 +232,7 @@
     let navArchivedLists;
     async function onExpandArchived()
     {
-        let res = await reef.get("/group/ArchivedLists?sort=-Id&fields=Id,Name,$type", onErrorShowAlert);
+        let res = await reef.get("/group/AllLists?sort=-Id&fields=Id,Name,$type&Status=TLS_GROUP_ARCHVIVED_LIST", onErrorShowAlert);
         if(res != null)
         {
             archivedLists = res.TaskList;

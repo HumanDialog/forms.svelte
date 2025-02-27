@@ -22,8 +22,7 @@
     import {location, querystring} from 'svelte-spa-router'
     import TaskSteps from './task.steps.svelte'
     import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont} from 'svelte-icons/fa/'
-	import { readonly } from 'svelte/store';
-    
+	
     let taskRef = ''
     let task = null;
     let allTags = '';
@@ -32,6 +31,7 @@
     let availableStates = [];
     let pendingUploading = false;
     let isReadOnly = false;
+    const s = session;
 
     $: onParamsChanged($location)
 
