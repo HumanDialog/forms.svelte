@@ -8,7 +8,8 @@
                 Modal,
                 reloadWholeApp,
                 Input, 
-                onErrorShowAlert} from '$lib'
+                onErrorShowAlert,
+                randomString} from '$lib'
     import {FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaArchive, FaUsers, FaPlus} from 'svelte-icons/fa'
     import {location, push} from 'svelte-spa-router'
     import {reef, session} from '@humandialog/auth.svelte'
@@ -319,10 +320,12 @@
     }
 
     let newGroupModalVisible = false;
+    let newGroupIdempotencyToken = ''
     function launchNewGroupWizzard()
     {
         newGroupParams.name = '';
         newGroupModalVisible = true;
+        newGroupIdempotencyToken = randomString(8);
     }
 
     async function onNewGroupOK()
@@ -342,7 +345,8 @@
             const body = {
                 app_id: $session.appId,
                 tenant: $session.configuration.tenant,
-                org_name: newGroupParams.name
+                org_name: newGroupParams.name,
+                idempotency_token: newGroupIdempotencyToken
             }
 
             const res = await reef.fetch(  "/dev/create-group-for-me",

@@ -90,7 +90,8 @@ export {
     isDeviceSmallerThan,
     resizeImage,
     refreshToolbarOperations,
-    isOnScreenKeyboardVisible
+    isOnScreenKeyboardVisible,
+    randomString,
 }   from './utils'
 
 export {
