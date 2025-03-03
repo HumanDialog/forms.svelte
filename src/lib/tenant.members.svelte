@@ -55,7 +55,7 @@
     const authAccessKinds = [
         { name: 'No auth access', key: 0 },
         { name: 'Read auth access', key: 1 },
-        { name: 'Can invite others', key: 3 },
+        //{ name: 'Can invite others', key: 3 },
         { name: 'Full auth access', key: 7 },
     ]
 
