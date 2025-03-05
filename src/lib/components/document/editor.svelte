@@ -220,6 +220,7 @@ let suggestionRange = undefined;
                     suggestionRange = props.range;
                     editor.commands.blur();
                     //setTimeout(() => UI.fab?.activateMainOperation(), 100)
+                    palette.set_current_editor_range(props.range)
                     const cursorRect = props.clientRect();
                     setTimeout(() => show_command_palette(cursorRect), 100)
                 }

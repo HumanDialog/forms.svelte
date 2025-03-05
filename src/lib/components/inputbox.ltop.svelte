@@ -21,6 +21,7 @@
     export let pushChangesImmediately = true;
 
     export let required = false;
+    export let readonly = false;
 
     export  let s = 'sm'
     export  let c = ''
@@ -44,6 +45,12 @@
         invalid = !validation(val);
         return !invalid;
     } 
+
+    export function setReadonly(val)
+    {
+        readonly = val;
+        itype = itype;
+    }
 
     
     let   item = null
@@ -128,6 +135,7 @@
                 on:change={()=> (value_changed())}
                 on:blur={() => { accept_change();} }
                 on:keydown={(e)=>{check_validity();}}
+                {readonly}
                 
                 class="     bg-stone-50 dark:bg-stone-700
                             border {border_style} rounded-lg 
