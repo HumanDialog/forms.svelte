@@ -9,7 +9,7 @@
                 reloadWholeApp,
                 Input, 
                 onErrorShowAlert} from '$lib'
-    import {FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaArchive, FaUsers, FaPlus} from 'svelte-icons/fa'
+    import {FaRegFolder, FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaArchive, FaUsers, FaPlus} from 'svelte-icons/fa'
     import {location, push} from 'svelte-spa-router'
     import {reef, session} from '@humandialog/auth.svelte'
 	import { onMount, tick } from 'svelte';
@@ -254,12 +254,12 @@
             {@const border=showGroupsSwitchMenu}
             <SidebarGroup {border}>
                 <SidebarItem   href="#/myfolders"
-                                icon={FaList}
+                                icon={FaRegFolder}
                                 active={isRoutingTo("#/myfolders", currentPath)} 
                                 operations={(node) => getUserListOperations(node, user)}
-                                summary="All active tasks assigned to me."
+                                summary="Personal folders"
                                 selectable={user}>
-                    My Tasks
+                    My Folders*
                 </SidebarItem>
             </SidebarGroup>
         {/if}
@@ -274,7 +274,7 @@
                 <svelte:fragment let:item let:idx>
                     {@const href = item.href}
                     <SidebarItem   {href}
-                                    icon={FaList}
+                                    icon={FaRegFolder}
                                     bind:this={navItems[idx]}
                                     active={isRoutingTo(`#/tasklist/${item.Id}`, currentPath) || isRoutingTo(`#/listboard/${item.Id}`, currentPath)}
                                     operations={(node) => getTaskListOperations(node, item, navItems[idx])}
@@ -289,21 +289,7 @@
             </SidebarList> 
         </SidebarGroup>
 
-        <SidebarGroup border title='Archived' collapsable onExpand={onExpandArchived}>
-            <SidebarList    objects={archivedLists}
-                            bind:this={navArchivedLists}>
-                <svelte:fragment let:item>
-                    {@const href = `#/tasklist/${item.Id}?archivedList`}
-                    <SidebarItem   {href}
-                                    icon={FaList}
-                                    summary={item.Summary}
-                                    active={isRoutingTo(href, currentPath)}>
-                        {item.Name}
-                    </SidebarItem>
-                </svelte:fragment>
-            </SidebarList>
-            
-        </SidebarGroup>
+       
 
         {:else}
             <Spinner delay={3000}/>
@@ -342,7 +328,7 @@
                             orderAttrib='Order'
                             bind:this={navLists}>
                 <svelte:fragment let:item let:idx>
-                    {@const href = `#/listboard/${item.Id}`}
+                    {@const href = `#${item.href}`}
                     <SidebarItem   {href}
                                     icon={FaList}
                                     bind:this={navItems[idx]}

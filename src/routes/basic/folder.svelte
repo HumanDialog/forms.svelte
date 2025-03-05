@@ -13,19 +13,17 @@
 				mainContentPageReloader,
                 Modal,
                 onErrorShowAlert} from '$lib'
-    import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaColumns, FaArchive, FaList, FaEllipsisH, FaChevronRight, FaChevronLeft} from 'svelte-icons/fa'
+    import {FaRegFile, FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaColumns, FaArchive, FaList, FaEllipsisH, FaChevronRight, FaChevronLeft} from 'svelte-icons/fa'
     import {location, pop, push, querystring} from 'svelte-spa-router'
 
     export let params = {}
 
-    let currentList = null;
-    let listPath;
-    let listId;
+    let contextItem = null;
+    let contextPath;
+    let contextItemId;
     let listComponent;
     let isArchivedList = false;
     let isArchivedTasks = false;
-    let assocName = 'Tasks'
-    let assocFilter = ''
     let listTitle = ''
     
     let users = [];
@@ -37,65 +35,29 @@
     async function onParamsChanged(...args)
     {
         const segments = $location.split('/');
-        const foundIdx = segments.findIndex( s => s == 'tasklist');
+        const foundIdx = segments.findIndex( s => s == 'folder');
         if(foundIdx < 0)
             return;
-
-        if(users.length == 0)
-        {
-            //let res = await reef.get('/app/Users')
-            let res = await reef.post('group/query',
-                            {
-                                Id: 1,
-                                Name: 'Users',
-                                Tree:[
-                                    {
-                                        Id: 1,
-                                        Association: 'Members/User'
-                                    }
-                                ]                    
-                            },
-                            onErrorShowAlert
-                        )
-            if(res)
-                users = res.User;
-        }
         
         
         if(!segments.length)
-            listId = 'first';
+            contextItemId = 'first';
         else
-            listId = segments[segments.length-1]
+            contextItemId = segments[segments.length-1]
         
-        currentList = null
-
         
-        const params = new URLSearchParams($querystring);
-        isArchivedList = params.has('archivedList')
-        isArchivedTasks = params.has('archivedTasks')
-
-        //assocName = (isArchivedTasks || isArchivedList) ? 'ArchivedTasks' : 'Tasks';
-        if(isArchivedTasks || isArchivedList)
-        {
-            assocName = 'AllTasks'
-            assocFilter = 'Status = STATUS_ARCHIVED'
-        }
-        else
-        {
-            assocName = 'Tasks'
-            assocFilter = ''
-        }
-
-        listPath = `/group/AllLists/${listId}`;
-
+        
+        contextItem = null
+        contextPath = `/Folder/${contextItemId}` 
+     
             
         await fetchData()
     }
 
     async function fetchData()
     {
-
-        let res = await reef.post(`${listPath}/query`,
+        console.log('cp:',contextPath)
+        let res = await reef.post(`/Folder/${contextItemId}/query`,
                             {
                                 Id: 1,
                                 Name: "collector",
@@ -105,26 +67,24 @@
                                     {
                                         Id: 1,
                                         Association: '',
-                                        Expressions:['Id','Name'],
+                                        Expressions:['Id','Title','Summary'],
                                         SubTree:
                                         [
                                             {
                                                 Id: 2,
-                                                Association: assocName,
-                                                Filter: assocFilter,
-                                                Sort: 'ListOrder',
-                                                SubTree:[
-                                                    {
-                                                        Id: 3,
-                                                        Association: 'Actor',
-                                                        Expressions:['$ref', 'Name']
-                                                    },
-                                                    {
-                                                        Id: 4,
-                                                        Association: 'TaskList',
-                                                        Expressions:['$ref', 'Name']
-                                                    }
-                                                ]
+                                                Association: 'Folders',
+                                                //Filter: 'State <> STATE_FINISHED',
+                                                Sort: 'Title',
+                                                Expressions:['$ref', 'Title', 'href', 'fref']
+                                                
+                                            },
+                                            {
+                                                Id: 3,
+                                                Association: 'Notes',
+                                                //Filter: 'State <> STATE_FINISHED',
+                                                Sort: 'Title',
+                                                Expressions:['$ref', 'Title', 'href', 'fref']
+                                                
                                             }
                                         ]
                                     }
@@ -132,23 +92,21 @@
                             },
                             onErrorShowAlert);
         if(res)
-            currentList = res.TaskList;
-        else
-            currentList = null
-
-        if(currentList)
-        {
-            if(!isArchivedTasks)
-                listTitle = currentList.Name
-            else
-                listTitle = `Archive of ${currentList.Name}`
+        {    
+            contextItem = res.Folder;
+            listTitle = contextItem.Title;
         }
+        else
+            contextItem = null
+
+         console.log(res)                       
+         //
     }
 
     async function reloadTasks(selectRecommendation)
     {
         await fetchData();
-        listComponent.reload(currentList, selectRecommendation);
+        listComponent.reload(contextItem, selectRecommendation);
     }
     
 
@@ -204,7 +162,7 @@
 
     async function addTask(newTaskAttribs)
     {
-        let res = await reef.post(`${listPath}/CreateTaskEx`,{ properties: newTaskAttribs }, onErrorShowAlert)
+        let res = await reef.post(`${contextPath}/CreateTaskEx`,{ properties: newTaskAttribs }, onErrorShowAlert)
         if(!res)
             return null;
 
@@ -237,10 +195,9 @@
         
     }
 
-    async function switchToKanban()
+    function switchToKanban()
     {
-        let res = await reef.post(`${listPath}/SwitchToKanban`,{ }, onErrorShowAlert)
-        push(`/listboard/${listId}`);
+        push(`/listboard/${contextItemId}`);
     }
 
     function getEditOperations(task)
@@ -327,64 +284,45 @@
 </script>
 
 
-{#if currentList}
-    <Page   self={currentList} 
+{#if contextItem}
+    <Page   self={contextItem} 
             toolbarOperations={ getPageOperations() }
             clearsContext='props sel'
             title={listTitle}>
-            <section class="w-full place-self-center max-w-3xl">
-        <List   self={currentList} 
-                a={assocName}
+
+        <List   self={contextItem} 
+                a='Folders'
                 title={listTitle} 
                 toolbarOperations={taskOperations} 
                 contextMenu={taskContextMenu}
-                orderAttrib='ListOrder'
+                orderAttrib='Title'
                 bind:this={listComponent}>
-            <ListTitle a='Title' hrefFunc={(task) => `/task/${task.Id}`}/>
+            <ListTitle a='Title' hrefFunc={(folder) => `${folder.fref}`}/>
             <ListSummary a='Summary'/>
             <ListInserter action={addTask} icon/>
 
-            <ListComboProperty  name="Actor" association hasNone>
-                <ComboSource objects={users} key="$ref" name='Name'/>
-            </ListComboProperty>
-
-            <ListDateProperty name="DueDate"/>
+            <span slot="left" let:element>
+                <Icon component={FaRegFolder} 
+                    class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
+            </span>
+        </List>
+        <List   self={contextItem} 
+                a='Notes'
+                
+                toolbarOperations={taskOperations} 
+                contextMenu={taskContextMenu}
+                orderAttrib='Title'
+                bind:this={listComponent}>
+            <ListTitle a='Title' hrefFunc={(note) => `${note.fref}`}/>
+            <ListSummary a='Summary'/>
+            <ListInserter action={addTask} icon/>
 
             <span slot="left" let:element>
-                {#if element.State == STATE_FINISHED}
-                    <Icon component={FaRegCheckCircle} 
-                    class="h-6 w-6  text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
-                      
-                {:else}
-                    <Icon component={FaRegCircle} 
-                        on:click={(e) => finishTask(e, element)} 
-                        class="h-6 w-6  text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
-                    
-                {/if}
+                <Icon component={FaRegFile} 
+                    class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
             </span>
-
-            
         </List>
-    </section>
-        {#if !isArchivedTasks}
-            {#if !isArchivedList}
-                <div class="ml-3 mt-20 mb-10">
-                    <a  href={`#/tasklist/${listId}?archivedTasks`} 
-                        class="hover:underline">
-                            Show archived tasks 
-                            <div class="inline-block mt-1.5 w-3 h-3"><FaChevronRight/></div>
-                    </a>
-                </div>
-            {/if}
-        {:else}
-            <div class="ml-3 mt-20  mb-10">
-                <button on:click={(e) => pop() }>
-                    <div class="inline-block mt-1.5 w-3 h-3"><FaChevronLeft/></div>
-                    Back 
-                </button>
 
-            </div>
-        {/if}
     </Page>
 {:else}
     <Spinner delay={3000}/>

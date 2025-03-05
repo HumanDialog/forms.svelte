@@ -36,8 +36,8 @@
 			break;
 
 		case 'sm':
-			font = 'mt-0 sm:mt-0.5 text-sm sm:text-xs font-semibold';
-			x_size = 'ml-3 sm:ml-1 mt-1 sm:mt-1.5 w-3 sm:w-2 h-3 sm:h-2';
+			font = 'mt-0 text-xs mb-0.5 font-semibold';
+			x_size = 'ml-3  mt-1  w-3 w-2 h-3 ';
 			break;
 
 		case 'xs':

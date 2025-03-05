@@ -15,6 +15,7 @@ export {default as VerticalToolbar} from './vertical.toolbar.svelte'
 
 // @ts-ignore
 export { default as Icon } from "./components/icon.svelte";
+export { default as IconT } from "./components/icon.ex.svelte";
 
 export { default as Button } from './components/button.svelte';
 export { default as Checkbox } from './components/checkbox.svelte';

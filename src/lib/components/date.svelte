@@ -55,7 +55,7 @@
 
     let input_pt = 'pt-0.5'
     let input_pb = 'pb-1'
-    let font_size = 'text-lg sm:text-sm'
+    let font_size = 'text-base'
     let line_h = 'h-7 sm:h-5'
     let chevron_mt = 'mt-2 sm:mt-1' 
     
@@ -64,18 +64,29 @@
         case 'md':
             input_pt = 'pt-2.5'
             input_pb = 'pb-2.5';  
-            font_size = 'text-lg sm:text-sm'       
+            font_size = 'text-md'       
             if(!is_compact)
                 line_h = 'h-12 sm:h-10'  
             else
                 line_h = 'h-7 sm:h-5'  
             chevron_mt = 'mt-2 sm:mt-1'      
             break;
-
+            
+        case 'sm':
+            input_pt = 'pt-2.5'
+            input_pb = 'pb-2.5';  
+            font_size = 'text-sm'       
+            if(!is_compact)
+                line_h = 'h-12 sm:h-10'  
+            else
+                line_h = 'h-7 sm:h-5'  
+            chevron_mt = 'mt-2 sm:mt-1'      
+        
+            break;
         case 'xs':
             input_pt = 'pt-0.5'
             input_pb = 'pb-0.5';
-            font_size = 'text-base sm:text-xs'   
+            font_size = 'text-xs'   
             if(!is_compact)        
                 line_h = 'h-7 sm:h-7'
             else

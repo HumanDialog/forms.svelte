@@ -2,7 +2,8 @@
     import {reef, session} from '@humandialog/auth.svelte'
     import {    Spinner, 
                 Page, 
-                Icon, 
+                Icon,
+                IconT, 
                 ComboSource,
                 List,
                 ListTitle,
@@ -245,7 +246,7 @@
             toolbarOperations={pageOperations}
             clearsContext='props sel'
             title='My tasks'>
-
+            <section class="w-full place-self-center max-w-3xl">
         <List   self={user} 
                 a='MyTasks' 
                 toolbarOperations={taskOperations} 
@@ -263,13 +264,14 @@
             <ListDateProperty name="DueDate"/>
 
             <span slot="left" let:element>
-                <Icon component={element.State == STATE_FINISHED ? FaRegCheckCircle : FaRegCircle} 
+                <IconT component={element.State == STATE_FINISHED ? FaRegCheckCircle : FaRegCircle} 
                     on:click={(e) => finishTask(e, element)} 
-                    class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
+                    class="h-6 w-6  text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
             </span>
 
             
         </List>
+        <section class="w-full flex justify-center">
     </Page>
 {:else}
     <Spinner delay={3000}/>

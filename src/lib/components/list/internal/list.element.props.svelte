@@ -91,7 +91,7 @@
 
 </script>
 
-<div class="text-xs grid-{definition.properties.length}">
+<div class="text-base grid-{definition.properties.length}">
     {#each definition.properties as prop, prop_index}
         <p class="col-span-1 w-full mr-auto mt-0.5">
             {#if item[prop.a] || placeholder == prop.name}
@@ -101,7 +101,7 @@
                                     a={prop.a}
                                     compact={true}
                                     onSelect={prop.onSelect}
-                                    s="xs"
+                                    s=""
                                     inContext="props sel"
                                     bind:this={props[prop_index]}
                                     changed={(value)=>{on_date_changed(value, prop.a)}}
@@ -118,9 +118,9 @@
                                 bind:this={props[prop_index]}
                                 definition={prop.combo_definition}
                                 changed={(key,name)=>{on_combo_changed(key, name, prop)}}
-                                s='xs'/>
+                                s=""/>
                     {:else if prop.type == rList_property_type.Static}
-                        <span class="dark:text-white text-stone-400 truncate px-2.5 bg-stone-900/10 dark:bg-stone-100/10 rounded-lg">
+                        <span class="dark:text-white text-stone-400 truncate  bg-stone-900/10 dark:bg-stone-100/10 rounded-lg">
                             {item[prop.a]}
                         </span>
                     {/if}

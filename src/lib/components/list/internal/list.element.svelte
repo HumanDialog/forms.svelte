@@ -348,7 +348,7 @@
 {#if item}
 {@const element_title = item[title]}
 
-<section    class="mt-3 flex flex-row my-0  w-full text-sm text-stone-700 dark:text-stone-300 cursor-default rounded-md border border-transparent {selected_class} {focused_class} scroll-mt-[50px] sm:scroll-mt-[40px]"
+<section    class="my-1 flex flex-row my-0  w-full  text-stone-700 dark:text-stone-300 cursor-default rounded-md border border-transparent {selected_class} {focused_class} scroll-mt-[50px] sm:scroll-mt-[40px]"
             on:contextmenu={on_contextmenu}
             role="menu"
             tabindex="-1"
@@ -358,7 +358,7 @@
     
     <i class="hidden sm:w-1/2 sm:w-2/3 sm:w-1/3"></i>   <!-- just to force tailwind classes including -->
     
-    <div    class="ml-3 w-full py-1" 
+    <div    class="ml-3 w-full py-0" 
             use:selectable={item} 
             on:click={(e) => {activate_row(e, item)}} 
             role="row" 
@@ -368,8 +368,8 @@
             {#if is_row_active}
                 {#key item[title]}      <!-- Wymusza pełne wyrenderowanie zwłasza po zmiane z pustego na tekst  -->
                     {#if is_link_like}
-                        <p  class=" text-lg font-semibold min-h-[1.75rem]
-                                    sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
+                        <p  class=" text-base font-semibold 
+                                   
                                     whitespace-nowrap overflow-clip w-full sm:flex-none sm:{name_w}
                                     sm:hover:cursor-pointer underline"
                                     id="__hd_list_ctrl_{item[item_key]}_Title"
@@ -381,11 +381,11 @@
                                         onSoftEnter: (text) => {change_name(text); editProperty('Summary')}
                                     }}
                             > 
-                            {element_title}
+                            {element_title} (1)
                         </p>
                     {:else}
-                        <p  class=" text-lg font-semibold min-h-[1.75rem]
-                                    sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
+                        <p  class=" text-base font-semibold 
+                                    
                                     whitespace-nowrap overflow-clip w-full sm:flex-none sm:{name_w}"
                             id="__hd_list_ctrl_{item[item_key]}_Title"
                             use:editable={{
@@ -393,7 +393,7 @@
                                 active: true,
                                 readonly: definition.title_readonly,
                             }}> 
-                                {element_title}
+                                {element_title} (2)
 
                             {#if definition.onOpen}
                                 <button class="ml-3 w-5 h-5 sm:w-3 sm:h-3"
@@ -405,11 +405,11 @@
                     {/if}
                 {/key}
             {:else}
-                <p  class=" text-lg font-semibold min-h-[1.75rem]
-                            sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
+                <p  class=" text-base font-semibold 
+                             
                             whitespace-nowrap overflow-clip w-full sm:flex-none sm:{name_w}"
                     id="__hd_list_ctrl_{item[item_key]}_Title"> 
-                    {element_title}
+                    {element_title} (3)
                 </p>
             {/if}
            
@@ -421,46 +421,32 @@
 
         {#if summary && (item[summary] || placeholder=='Summary')}
             {@const element_id = `__hd_list_ctrl_${item[item_key]}_Summary`}
-            {#key item[summary]}
-                
-            <!--Summary
-                    id={element_id}
-                    on:click={(e) => on_active_row_clicked(e, 'bottom')}
-                    text={item[summary]}
-                    readonly={definition.summary_readonly}
-                    placeholder={placeholder == 'Summary'}
-                    editable={(text) => {change_summary(text)}}
-                    active={is_row_active}
-                /-->
-
-                
+            {#key item[summary] }           
                 {#if is_row_active}
                     <p  id={element_id} 
-                        class=" sm:text-xs sm:min-h-[1rem]
-                                    text-base min-h-[1.5rem]
-                                    text-stone-400"
+                        class=" text-sm   mt-1  mb-2                          
+                                text-stone-400"
                             use:editable={{
                                 action: (text) => {change_summary(text)},
                                 readonly: definition.summary_readonly,
                                 onFinish: (d) => {placeholder='';},
                                 active: true
                             }}>
-                        {item[summary]}
+                        {item[summary]} (I)
                     </p>
                 {:else}
                     <p  id={element_id} 
-                        class=" sm:text-xs sm:min-h-[1rem]
-                                    text-base min-h-[1.5rem]
+                        class=" text-sm mt-1 mb-2
                                     text-stone-400"
                         on:click={(e) => on_active_row_clicked(e, 'bottom')}>
-                        {item[summary]}
+                        {item[summary]} (II)
                     </p>
                 {/if}
             {/key}
                 
         {/if}
 
-        <section class="block sm:hidden w-full sm:flex-none sm:w-2/3">
+        <section class="block sm:hidden w-full">
             <Properties {definition} {item} {placeholder} bind:this={props_sm}/>
         </section>
 

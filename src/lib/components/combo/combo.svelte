@@ -70,7 +70,7 @@
             label_mb = 'mb-2';
             input_pt = 'pt-2.5'
             input_pb = 'pb-2.5';     
-            font_size = 'text-lg sm:text-sm'      
+            font_size = 'text-lg'      
             line_h = 'h-7 sm:h-5'
             chevron_mt = 'mt-2 sm:mt-1'
             break;
@@ -79,10 +79,27 @@
             label_mb = 'mb-0.5';
             input_pt = 'pt-0.5'
             input_pb = 'pb-0.5';
-            font_size = 'text-base sm:text-xs'           
-            line_h = 'h-6 sm:h-4'
+            font_size = 'text-xs'           
+            line_h = 'h-6 '
             chevron_mt = ''
             break;
+        case 'sm':
+            label_mb = 'mb-0.5';
+            input_pt = 'pt-0.5'
+            input_pb = 'pb-0.5';
+            font_size = 'text-sm'           
+            line_h = 'h-6 '
+            chevron_mt = ''
+            break;           
+            
+        default:
+            label_mb =  'mb-0.5';
+            input_pt =  'pt-0.5'
+            input_pb =  'pb-0.5';
+            font_size = 'text-base'           
+            line_h =    'h-6'
+            chevron_mt = ''
+                
     }
 
     let background_class = is_compact && !icon ? "" : ""; //bg-stone-900/10 dark:bg-stone-100/10 rounded-lg" : ""

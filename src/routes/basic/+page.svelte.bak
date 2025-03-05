@@ -12,7 +12,6 @@
     
     
 	import Tasklist from './tasklist.svelte';
-    import Folder from './folder.svelte';
     import Task from './task.svelte'
     import Board from './list.board.svelte';
     import MyTasks from './mytasks.svelte'

@@ -242,7 +242,7 @@
                 {#if href}
                     <a  href={href} 
                         on:click={on_link_clicked} 
-                        class="flex-1 ml-2 mt-3 sm:mt-2 inline-flex items-center group"
+                        class="flex-1 ml-2 mt-1 sm:mt-1 inline-flex items-center group"
                         class:mb-3={!summary}
                         class:sm:mb-2={!summary}
                         >
@@ -255,12 +255,12 @@
                         </span>
                     </a>
                 {:else}
-                    <p  class="flex-1 ml-2 mt-3 sm:mt-2 inline-flex items-center group cursor-default"
+                    <p  class="flex-1 ml-2 mt-1 sm:mt-1 inline-flex items-center group cursor-default"
                         class:mb-3={!summary}
                         class:sm:mb-2={!summary}
                         use:selectable_if_needed={selectable}>
                         {#if icon}
-                            <Icon size={5} component={icon}/>
+                            <Icon size={2} component={icon}/>
                         {/if}
                         <span   class="ml-3"
                                 use:editable_if_needed={editable}>

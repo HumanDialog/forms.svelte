@@ -13,8 +13,8 @@
 				mainContentPageReloader,
                 Modal,
                 onErrorShowAlert} from '$lib'
-    import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaArchive, FaEllipsisH} from 'svelte-icons/fa'
-    
+    import {FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaArchive, FaEllipsisH} from 'svelte-icons/fa'
+
     export let params = {}
 
     let user = null;
@@ -55,26 +55,14 @@
                                         {
                                             Id: 1,
                                             Association: '',
-                                            Expressions:['Id','Name'],
+                                            Expressions:['Id','Name','login'],
                                             SubTree:
                                             [
                                                 {
                                                     Id: 2,
-                                                    Association: 'MyTasks',
-                                                    Filter: 'State <> STATE_FINISHED',
-                                                    Sort: "UserOrder",
-                                                    SubTree:[
-                                                        {
-                                                            Id: 3,
-                                                            Association: 'Actor',
-                                                            Expressions:['$ref', 'Name']
-                                                        },
-                                                        {
-                                                            Id: 4,
-                                                            Association: 'TaskList',
-                                                            Expressions:['$ref', 'Name']
-                                                        }
-                                                    ]
+                                                    Association: 'Folders',
+                                                    Expressions:['Id','Title', 'Summary', 'href'],
+                                                    Sort: "Title",
                                                 }
                                             ]
                                         }
@@ -241,37 +229,35 @@
 
 
 {#if user}
+    
     <Page   self={user} 
             toolbarOperations={pageOperations}
             clearsContext='props sel'
-            title='My tasks'>
-
+            title='My Folders'>
+            <section class="w-full place-self-center max-w-3xl">
         <List   self={user} 
-                a='MyTasks' 
+                a='Folders' 
                 toolbarOperations={taskOperations} 
                 contextMenu={taskContextMenu}
-                orderAttrib='UserOrder'
+                
                 bind:this={listComponent}>
-            <ListTitle a='Title' hrefFunc={(task) => `/task/${task.Id}`}/>
+            <ListTitle a='Title' hrefFunc={(folder) => `${folder.href}`}/>
             <ListSummary a='Summary'/>
             <ListInserter action={addTask} icon/>
 
-            <ListComboProperty  name="TaskList" association>
-                <ComboSource objects={lists} key="$ref" name='Name'/>
-            </ListComboProperty>
-
-            <ListDateProperty name="DueDate"/>
+           
 
             <span slot="left" let:element>
-                <Icon component={element.State == STATE_FINISHED ? FaRegCheckCircle : FaRegCircle} 
-                    on:click={(e) => finishTask(e, element)} 
-                    class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
+                <Icon component={FaRegFolder} 
+                    class="h-6 w-6  text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
             </span>
-
+           
             
         </List>
+    </section>
     </Page>
 {:else}
+    Hello
     <Spinner delay={3000}/>
 {/if}
 
