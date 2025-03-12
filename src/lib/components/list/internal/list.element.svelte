@@ -381,7 +381,7 @@
                                         onSoftEnter: (text) => {change_name(text); editProperty('Summary')}
                                     }}
                             > 
-                            {element_title} (1)
+                            {element_title}
                         </p>
                     {:else}
                         <p  class=" text-base font-semibold 
@@ -393,7 +393,7 @@
                                 active: true,
                                 readonly: definition.title_readonly,
                             }}> 
-                                {element_title} (2)
+                                {element_title}
 
                             {#if definition.onOpen}
                                 <button class="ml-3 w-5 h-5 sm:w-3 sm:h-3"
@@ -409,7 +409,7 @@
                              
                             whitespace-nowrap overflow-clip w-full sm:flex-none sm:{name_w}"
                     id="__hd_list_ctrl_{item[item_key]}_Title"> 
-                    {element_title} (3)
+                    {element_title}
                 </p>
             {/if}
            
@@ -432,14 +432,14 @@
                                 onFinish: (d) => {placeholder='';},
                                 active: true
                             }}>
-                        {item[summary]} (I)
+                        {item[summary]}
                     </p>
                 {:else}
                     <p  id={element_id} 
                         class=" text-sm mt-1 mb-2
                                     text-stone-400"
                         on:click={(e) => on_active_row_clicked(e, 'bottom')}>
-                        {item[summary]} (II)
+                        {item[summary]}
                     </p>
                 {/if}
             {/key}

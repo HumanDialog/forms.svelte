@@ -247,7 +247,7 @@
                         class:sm:mb-2={!summary}
                         >
                         {#if icon}
-                            <Icon size={5} component={icon}/>
+                            <Icon class="w-5 h-5" component={icon}/>
                         {/if}
                         <span   class="ml-3 group-hover:underline"
                                 use:editable_if_needed={editable}>
@@ -260,7 +260,7 @@
                         class:sm:mb-2={!summary}
                         use:selectable_if_needed={selectable}>
                         {#if icon}
-                            <Icon size={2} component={icon}/>
+                            <Icon class="w-5 h-5" component={icon}/>
                         {/if}
                         <span   class="ml-3"
                                 use:editable_if_needed={editable}>

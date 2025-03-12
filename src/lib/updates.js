@@ -122,14 +122,41 @@ update_request_ticket.subscribe(async (v) => {
             changes.push(value.item);
         });
 
-        
-        //console.log('push: ', changes);
+        /*
         const res = await reef.post('/Push', { Items: changes }, onErrorShowAlert);
 
         //if(res)
         //{
             modified_items_map.clear();
         //}
+        */
+        
+        let path = reef.correct_path_with_api_version_if_needed('/Push')
+
+        try {
+            let res = await reef.fetch(path, {
+                method: 'POST',
+                body: JSON.stringify( { Items: changes } )
+            })
+            if (res.ok) {
+                modified_items_map.clear();
+            }
+            else
+            {
+                if(res.status == 400)   // basic exception like access rights 
+                {
+                    modified_items_map.clear();
+                }
+
+                const err = await res.text()
+                console.error(err)
+                onErrorShowAlert(err)
+            }
+        }
+        catch (err) {
+            console.error(err);
+            onErrorShowAlert(err)
+        }
         
     }
 })
