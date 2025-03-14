@@ -103,15 +103,22 @@
     let bottom_bar_visibility = "hidden"
     let bottom_bar_visible = false
     let lg_main_sidebar_height = ""
-    let fab_base_visibility = "hidden"
-    let fab_visibility = fab_base_visibility;
-    let fab_bottom = "bottom-0"
+    //let fab_base_visibility = "hidden"
+    //let fab_visibility = fab_base_visibility;
+    //let fab_bottom = "bottom-0"
     let vertical_toolbar_visibility = "hidden sm:block"
     let content_left = "left-0 sm:left-[40px]";
     let content_width = "w-screen  sm:w-[calc(100vw-40px)] ";
                                 
     let content_top = ""
-    let content_height = ""                                
+    let content_height = ""              
+    
+    const FAB_HIDDEN = 0
+    const FAB_VISIBLE_ON_MOBILE = 1
+    const FAB_VISIBLE_ALWAYS = 2
+    let fab_visibility_mode = FAB_HIDDEN
+    let is_fab_visible = false;
+    
     
     $: { tools_visible = $tools_visible_store
         bottom_bar_visible = $bottom_bar_visible_store
@@ -123,7 +130,8 @@
         if(tools_visible)
         {
             tools_visibility = "hidden sm:block sm:fixed"
-            fab_base_visibility = "fixed sm:hidden"
+            //fab_base_visibility = "fixed sm:hidden"
+            fab_visibility_mode = FAB_VISIBLE_ON_MOBILE
 
             content_top = 'top-[50px] sm:top-[40px]'
             
@@ -136,6 +144,9 @@
         else
         {
             tools_visibility = "hidden"
+            //fab_base_visibility = "hidden"
+            fab_visibility_mode = FAB_HIDDEN
+
             content_top = `top-[50px] sm:top-0`
             if(bottom_bar_visible)
                 content_height = `min-h-[calc(100vh-290px)] sm:h-[calc(100vh-240px)]`           
@@ -149,16 +160,18 @@
         {
             lg_main_sidebar_height = `lg:h-[calc(100vh-240px)]`    
             bottom_bar_visibility = "fixed"
-            fab_bottom = `bottom-[240px]`;
+         //   fab_bottom = `bottom-[240px]`;
         }
         else
         {    
             lg_main_sidebar_height = ""
             bottom_bar_visibility = "hidden"
-            fab_bottom = "bottom-0"
+         //   fab_bottom = "bottom-0"
         }
         
-        fab_visibility = fab_base_visibility;
+        
+        //fab_visibility = fab_base_visibility;
+        determineFABVisibility();
     }
 
 
@@ -250,44 +263,61 @@
         const vp = window.visualViewport;
         setViewportHeight(vp)
 
-        determineFABVisibility();
+        determineFABVisibilityAsync();
     }
 
     function onSelectionChanged(e)
     {
-        determineFABVisibility();
+        determineFABVisibilityAsync();
     }
 
     function onFocusOut(e)
     {
-        determineFABVisibility();
+        determineFABVisibilityAsync();
     }
 
     let change_ticket = 0
     let last_change_ticket = 0
-    function determineFABVisibility()
+    function determineFABVisibilityAsync()
     {
         change_ticket++;
         setTimeout( () => {
             if(change_ticket != last_change_ticket)
             {
                 last_change_ticket = change_ticket;
-                let new_fab_visibility = "";
-
-                if(isOnScreenKeyboardVisible())
-                {
-                    new_fab_visibility = 'hidden'
-                }
-                else
-                {
-                    new_fab_visibility = fab_base_visibility;
-                }
-
-                if(fab_visibility != new_fab_visibility)
-                    fab_visibility = new_fab_visibility;
+                determineFABVisibility();
             }
         }, 200)
         
+    }
+
+    function determineFABVisibility()
+    {
+        switch(fab_visibility_mode)
+        {
+        case FAB_HIDDEN:
+            is_fab_visible = false;
+            break;
+
+        case FAB_VISIBLE_ON_MOBILE:
+            if(isDeviceSmallerThan("sm"))
+            {
+                if(isOnScreenKeyboardVisible())
+                    is_fab_visible = false;
+                else
+                    is_fab_visible = true;
+            }
+            else
+                is_fab_visible = false;
+            break;
+
+        case FAB_VISIBLE_ALWAYS:
+            if(isOnScreenKeyboardVisible())
+                is_fab_visible = false;
+            else
+                is_fab_visible = true;
+            break;
+        }
     }
 
     let operationsComponent
@@ -379,9 +409,11 @@
                         <Operations bind:this={operationsComponent} />
                     </div>
 
-                    <div class="{fab_visibility} right-3 {fab_bottom} mb-1 cursor-pointer z-10">
+                    {#if is_fab_visible}
+                    <!--div class="{fab_visibility} left-3 {fab_bottom} mb-1 cursor-pointer z-10"-->
                         <Fab bind:this={fabComponent}/>
-                    </div>
+                    <!---/div-->
+                    {/if}
 
                     <!--#######################################################-->
                     <!--##  CONTENT                          ##################-->

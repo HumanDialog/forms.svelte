@@ -7,7 +7,7 @@
     
     import AppIcon from './appicon.svelte'
     import FaFolder from 'svelte-icons/fa/FaFolder.svelte'
-    import {FaUsersCog, FaSignOutAlt} from 'svelte-icons/fa/'
+    import {FaUsersCog, FaSignOutAlt, FaList} from 'svelte-icons/fa/'
     import {push} from 'svelte-spa-router'
     
     
@@ -67,7 +67,7 @@
     const authorizedLayout = {
                 sidebar : {
                     'TOC': {
-                        icon: AppIcon,
+                        icon: FaList,
                         component: Sidebar
                     },
                     'Folders': {

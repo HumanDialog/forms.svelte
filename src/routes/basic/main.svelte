@@ -39,7 +39,7 @@
     }
 
     let navigator;
-    function getPageOperations()
+    function getPageOperationsX()
     {
         return [
             {
@@ -47,6 +47,25 @@
                 action: (f) => navigator?.requestAddList()
             }
         ]
+    }
+
+    function getPageOperations()
+    {
+        return {
+            opver: 1,
+            operations: [
+                {
+                    caption: 'View',
+                    operations: [
+                        {
+                            icon: FaPlus,
+                            action: (f) => navigator?.requestAddList(),
+                            fab: 'M10'
+                        }
+                    ]
+                }
+            ]
+        }
     }
 
     const currentNav = {}

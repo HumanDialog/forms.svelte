@@ -277,16 +277,18 @@
 
 </script>
 
-<div class="{userClass} flex flex-row {gap} flex-wrap mr-1 sm:mr-0">
-    {#each tagsTable as tag}
-        {#if isEditable}
-            <Tag name={tag.label} color={tag.color} {s}
-                 onRemove={(e) => {onRemoveTag(tag.label)}}
-                 onColor={canChangeColor ? onColorizeTag : null}/>
-        {:else}
-            <Tag name={tag.label} color={tag.color} {s}/>
-        {/if}
-    {/each}
+<section class="{userClass} flex flex-row {gap} flex-wrap mr-1 sm:mr-0">
+    <p class="flex flex-row {gap} flex-wrap ">
+        {#each tagsTable as tag}
+            {#if isEditable}
+                <Tag name={tag.label} color={tag.color} {s}
+                    onRemove={(e) => {onRemoveTag(tag.label)}}
+                    onColor={canChangeColor ? onColorizeTag : null}/>
+            {:else}
+                <Tag name={tag.label} color={tag.color} {s}/>
+            {/if}
+        {/each}
+    </p>
 
     {#if isEditable}
         {#if !addComboVisible}
@@ -311,4 +313,4 @@
             </Combo>
         {/if}
     {/if}
-</div>
+</section>

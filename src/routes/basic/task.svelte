@@ -19,9 +19,9 @@
             resizeImage
             } from '$lib'
 	import { onMount, tick } from 'svelte';
-    import {location, querystring} from 'svelte-spa-router'
+    import {location, querystring, push} from 'svelte-spa-router'
     import TaskSteps from './task.steps.svelte'
-    import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont} from 'svelte-icons/fa/'
+    import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen, FaList} from 'svelte-icons/fa/'
 	
     let taskRef = ''
     let task = null;
@@ -101,7 +101,7 @@
                                         {
                                             Id: 12,
                                             Association: 'TaskList',
-                                            Expressions:['$ref', 'Name', 'TaskStates']
+                                            Expressions:['$ref', 'Name', 'TaskStates', 'href']
                                         }
                                     ]
                                 }
@@ -213,7 +213,7 @@
         await reef.post(`${taskRef}/Steps/${taskStep.Id}/set`, {Done: value}, onErrorShowAlert)
     }
 
-    function getPageOperationsWithStepTools(step) 
+    function getPageOperationsWithStepToolsX(step) 
     {
         let operations = [ 
             {
@@ -260,6 +260,64 @@
 
         return operations
     }
+
+    function getPageOperationsWithStepTools(step) 
+    {
+        let checkOperation;
+        if(step.Done)
+        {
+            checkOperation =
+                {
+                    icon: FaUndo,
+                    action: async (f) => 
+                    {  
+                        await setStepDone( false, step)
+                        activateItem('props', step, getPageOperationsWithStepTools(step))
+                    },
+                    fab: 'M02',
+                    tbr: 'B'
+                }
+        }
+        else
+        {
+            checkOperation =
+                {
+                    icon: FaCheck,
+                    action: async (f) => 
+                    {  
+                        await setStepDone( true, step)
+                        activateItem('props', step, getPageOperationsWithStepTools(step))
+                    },
+                    fab: 'M02',
+                    tbr: 'B'
+                }
+        }
+
+        return {
+            opver: 1,
+            operations: [
+                {
+                    caption: 'View',
+                    operations: [
+                        {
+                            icon: FaPen,
+                            grid: addOperations,
+                            fab: 'M10',
+                            tbr: 'A'
+                        },
+                        {
+                            icon: FaSave,
+                            action: (f) => saveCurrentEditable(),
+                            fab: 'S00',
+                            tbr: 'A'
+                        },
+                        checkOperation
+                    ]
+                }
+            ]
+        }
+    }
+
     function onSelectStep(idx)
     {
         let step = task.Steps[idx];
@@ -411,7 +469,7 @@
         }
     ];
     
-    function getPageOperations()
+    function getPageOperationsX()
     {
         let operations = [
             {
@@ -431,6 +489,37 @@
         return operations;
     }
     
+    function getPageOperations()
+    {
+        return {
+            opver: 1,
+            operations: [
+                {
+                    caption: 'View',
+                    operations: [
+                        {
+                            icon: FaPen,
+                            grid: addOperations,
+                            fab: 'M10',
+                            tbr: 'A'
+                        },
+                        {
+                            icon: FaSave,
+                            action: (f) => saveCurrentEditable(),
+                            fab: 'S00',
+                            tbr: 'A'
+                        },
+                        {
+                            icon: FaList,
+                            action: (f) => { push(task.TaskList.href) },
+                            fab: 'C00',
+                            tbr: 'C'
+                        }
+                    ]
+                }
+            ]
+        }
+    }
 
     function getPageOperationsWithFormattingTools() 
     {
@@ -448,7 +537,7 @@
         else
         {
             const addOperation = {
-                icon: FaPlus,
+                icon: FaPen,
                 caption: '',
                 grid: addOperations
             };
@@ -564,19 +653,19 @@
             title={task.Title}>
     <section class="w-full flex justify-center">
         <article class="w-full prose prose-base prose-zinc dark:prose-invert">
-            <section class="not-prose h-6 w-full flex flex-row justify-between mb-4">
-                    <p class="text-base sm:text-xs mt-1 sm:mt-2">
+            <section class="w-full flex flex-row justify-between">
+                    <p class="">
                         {task.Index}
                     </p>
                     <div>
                         {#if task.TaskList || onListPlaceholder}
-                            <Combo  compact={true} 
+                            <Combo  compact
                                     inContext='data'
                                     a='TaskList'
                                     isAssociation
                                     icon={false}
                                     placeholder='List'
-                                    s='s'
+                                    s='prose'
                                     hasNone={false}
                                     bind:this={onList}>
                                 <ComboSource    objects={allLists} 
@@ -588,8 +677,8 @@
                     <div>
                         {#if task.DueDate || dueDatePlaceholder}
                             <DatePicker     a='DueDate'
-                                            compact={true}
-                                            s="sm"
+                                            compact
+                                            s="prose"
                                             inContext="data"
                                             bind:this={dueDate}
                                 />
@@ -597,7 +686,7 @@
                     </div>
             </section>
 
-            <h1     class="not-prose font-normal text-4xl mb-1"
+            <h1     class=""
                     use:editable={{
                         action: (text) => onTitleChanged(text), 
                         active: true,
@@ -605,8 +694,23 @@
                         tabindex="0">
                 {task.Title}
             </h1>
+
+            {#if task.Summary || summaryPlaceholder}
+                {#key task.Summary}
+                    <p  class="lead"
+                        use:editable={{
+                            action: (text) => onSummaryChanged(text),
+                            active: true,
+                            readonly: isReadOnly}}
+                        tabindex="0"
+                        bind:this={summary}>
+                        {task.Summary}
+                    </p>
+                {/key}
+                
+            {/if}
             
-            <section class="not-prose w-full flex flex-row flex-wrap mt-3 justify-between">
+            <section class="w-full flex flex-row flex-wrap justify-between">
                 <div class="grow-0">
                     {#if task.Actor || responsiblePlaceholder}
                         <Combo  compact={true} 
@@ -615,7 +719,7 @@
                                 isAssociation
                                 icon={false}
                                 placeholder='Responsible'
-                                s='s'
+                                s='prose'
                                 hasNone
                                 changed={(k,n) => { /*fake assignment for component rer-ender*/ task.Actor = task.Actor; }} 
                                 bind:this={responsible}>
@@ -634,7 +738,7 @@
                                 icon
                                 placeholder='State'
                                 hasNone={false}
-                                s='s'>
+                                s='prose'>
                             <ComboSource    objects={availableStates}
                                             key="state" 
                                             name="name"
@@ -645,8 +749,9 @@
 
                 <div>
                     {#if task.Tags || tagsPlaceholder}
-                        <Tags class="h-6 w-full "
+                        <Tags class="w-full "
                             a='Tags'
+                            s='prose'
                             getGlobalTags={() => allTags}
                             {onUpdateAllTags}
                             canChangeColor
@@ -655,20 +760,7 @@
                 </div>
             </section>
             
-            {#if task.Summary || summaryPlaceholder}
-                {#key task.Summary}
-                    <p  
-                        use:editable={{
-                            action: (text) => onSummaryChanged(text),
-                            active: true,
-                            readonly: isReadOnly}}
-                        tabindex="0"
-                        bind:this={summary}>
-                        {task.Summary}
-                    </p>
-                {/key}
-                
-            {/if}
+            
             
             {#if (task.Steps && task.Steps.length > 0) || stepsPlaceholder}
                 <TaskSteps steps={task.Steps}

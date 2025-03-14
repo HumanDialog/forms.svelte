@@ -3,6 +3,8 @@
     import Icon from '../icon.svelte'
     import {contextItemsStore, auto_hide_sidebar, contextToolbarOperations} from '../../stores'
     import {FaBars, FaEllipsisH} from 'svelte-icons/fa'
+    import {link, push} from 'svelte-spa-router'
+    //import FaBars from 'svelte-icons/fa/FaBars.svelte'
 
     import {
         selectable as _selectable,
@@ -12,7 +14,10 @@
 
 		activateItem,
         startEditing,
-		getActive
+		getActive,
+
+		isOnNavigationPage
+
 
 
     } from "../../utils";
@@ -124,21 +129,32 @@
             handleSelect(e);
 
 
-        //e.stopPropagation();
+        if(!e.target)
+            return;
+
+        let linkNode = e.target;
+        while(linkNode && linkNode.tagName != 'A')
+            linkNode = linkNode.parentElement;
+
+        if(!linkNode)
+            return;
+        
+        const href = linkNode.getAttribute('href');
+        e.preventDefault();
 
         if(isOnPage)
         {
-            if(!isRowActive)
+            if(isRowActive)
             {
-                e.preventDefault();
+                if(href)
+                    push(href);
             }
-            else
-                e.stopPropagation();
         }
         else
         {
-            e.stopPropagation();
             auto_hide_sidebar();
+            if(href)
+                push(href);
         }
     }
 
@@ -203,15 +219,28 @@
         if(!isOnPage)
             return;
 
-        let operationsContainer = [];
+        let operationsContainer;
         if(operations)
         {
             let operationsList = operations(root);
-            operationsContainer.push({
-                icon: FaEllipsisH,
-                menu: operationsList
-            })
+            operationsContainer = {
+                opver: 1,
+                operations: [
+                    {
+                        caption: 'View',
+                        operations: [
+                            {
+                                icon: FaEllipsisH,
+                                menu: operationsList,
+                                fab: 'M10'
+                            }
+                        ]
+                    }
+                ]
+            }
         }
+        else
+            operationsContainer = []
         
        activateItem('props', item, operationsContainer)
 
@@ -230,24 +259,24 @@
         on:contextmenu={on_contextmenu}
         on:keydown
         on:keyup
-        class="     border border-transparent rounded-lg
-                    text-lg sm:text-base font-normal 
+        class="     mb-2
+                    border border-transparent rounded-lg
                     text-stone-900 dark:text-white  {user_class}"
         class:sm:hover:bg-stone-100={!!href}
         class:sm:dark:hover:bg-stone-700={!!href}
         class:bg-stone-200={isRowActive}
         class:dark:bg-stone-700={isRowActive}
         class:selected={selected(selectable, context_data)}>
-            <div class="flex flex-row justify-between">
+            <div class="flex flex-row justify-between
+                        text-base font-semibold">
                 {#if href}
                     <a  href={href} 
                         on:click={on_link_clicked} 
-                        class="flex-1 ml-2 mt-1 sm:mt-1 inline-flex items-center group"
-                        class:mb-3={!summary}
-                        class:sm:mb-2={!summary}
+                        class="flex-1 ml-2 inline-flex items-center group"
                         >
                         {#if icon}
-                            <Icon class="w-5 h-5" component={icon}/>
+                            <Icon class="w-5 h-5 mt-0.5 ml-2 mr-1" component={icon}/>
+                            
                         {/if}
                         <span   class="ml-3 group-hover:underline"
                                 use:editable_if_needed={editable}>
@@ -255,12 +284,10 @@
                         </span>
                     </a>
                 {:else}
-                    <p  class="flex-1 ml-2 mt-1 sm:mt-1 inline-flex items-center group cursor-default"
-                        class:mb-3={!summary}
-                        class:sm:mb-2={!summary}
+                    <p  class="flex-1 ml-2 inline-flex items-center group cursor-default"
                         use:selectable_if_needed={selectable}>
                         {#if icon}
-                            <Icon class="w-5 h-5" component={icon}/>
+                            <Icon class="w-5 h-5 mt-0.5 ml-2 mr-1" component={icon}/>
                         {/if}
                         <span   class="ml-3"
                                 use:editable_if_needed={editable}>
@@ -269,11 +296,11 @@
                     </p>
                 {/if}
 
-                {#if !isOnPage}
-                <section    class="flex-0 w-20 sm:w-12 h-10 flex-0 flex flex-row"
+                {#if  !isOnPage}
+                <section    class="flex-0 w-20 sm:w-12 flex-0 flex flex-row"
                             use:selectable_if_needed={selectable}>
                     {#if can_show_context_menu(selectable, context_data)}
-                        <button class="w-6 sm:w-4 h-6 sm:h-4 mt-3 mr-3 sm:mr-2 ml-auto" on:click={on_show_menu}>
+                        <button class="w-5 h-5 mt-0.5 mr-3 ml-auto" on:click={on_show_menu}>
                             <FaBars/>
                         </button>
                     {/if}
@@ -281,10 +308,11 @@
                 {/if}
             </div>
 
-            {#if summary}
-                <p class="text-xs ml-10 mb-2 mr-2
+            {#if summaryText}
+                <p class="ml-14 mt-1
                         text-stone-900 dark:text-stone-400
-                        cursor-default"
+                        cursor-default
+                        text-sm   "
                     use:selectable_if_needed={selectable}
                     use:editable_if_needed={summaryEditable}
                     bind:this={summaryElement}>

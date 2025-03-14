@@ -42,13 +42,13 @@
                     <h2 class="mb-3 sm:mb-6 text-xs sm:text-sm font-semibold text-gray-900 uppercase dark:text-white">Company</h2>
                     <ul class="text-gray-600 dark:text-gray-400">
                         <li class="mb-2 sm:mb-4">
-                            <a href="#/contact" use:link  class="hover:underline">Contact us</a>
+                            <a href="/contact" use:link  class="hover:underline">Contact us</a>
                         </li>
                         <li class="mb-2 sm:mb-4">
-                            <a href="#/privacy-policy" use:link  class="hover:underline">Privacy Policy</a>
+                            <a href="/privacy-policy" use:link  class="hover:underline">Privacy Policy</a>
                         </li>
                         <li>
-                            <a href="#/terms-and-conditions" use:link class="hover:underline">Terms &amp; Conditions</a>
+                            <a href="/terms-and-conditions" use:link class="hover:underline">Terms &amp; Conditions</a>
                         </li>
                     </ul>
                 </div>

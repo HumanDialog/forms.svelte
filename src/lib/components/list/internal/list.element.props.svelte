@@ -101,7 +101,7 @@
                                     a={prop.a}
                                     compact={true}
                                     onSelect={prop.onSelect}
-                                    s=""
+                                    s="sm"
                                     inContext="props sel"
                                     bind:this={props[prop_index]}
                                     changed={(value)=>{on_date_changed(value, prop.a)}}
@@ -118,7 +118,7 @@
                                 bind:this={props[prop_index]}
                                 definition={prop.combo_definition}
                                 changed={(key,name)=>{on_combo_changed(key, name, prop)}}
-                                s=""/>
+                                s="sm"/>
                     {:else if prop.type == rList_property_type.Static}
                         <span class="dark:text-white text-stone-400 truncate  bg-stone-900/10 dark:bg-stone-100/10 rounded-lg">
                             {item[prop.a]}

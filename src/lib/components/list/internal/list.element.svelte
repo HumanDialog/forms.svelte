@@ -348,7 +348,7 @@
 {#if item}
 {@const element_title = item[title]}
 
-<section    class="my-1 flex flex-row my-0  w-full  text-stone-700 dark:text-stone-300 cursor-default rounded-md border border-transparent {selected_class} {focused_class} scroll-mt-[50px] sm:scroll-mt-[40px]"
+<section    class="my-1 flex flex-row w-full  text-stone-700 dark:text-stone-300 cursor-default rounded-md border border-transparent {selected_class} {focused_class} scroll-mt-[50px] sm:scroll-mt-[40px]"
             on:contextmenu={on_contextmenu}
             role="menu"
             tabindex="-1"
@@ -419,12 +419,16 @@
             </section>
         </div>
 
+        <section class="block sm:hidden w-full">
+            <Properties {definition} {item} {placeholder} bind:this={props_sm}/>
+        </section>
+
         {#if summary && (item[summary] || placeholder=='Summary')}
             {@const element_id = `__hd_list_ctrl_${item[item_key]}_Summary`}
             {#key item[summary] }           
                 {#if is_row_active}
                     <p  id={element_id} 
-                        class=" text-sm   mt-1  mb-2                          
+                        class=" text-sm    mb-2                          
                                 text-stone-400"
                             use:editable={{
                                 action: (text) => {change_summary(text)},
@@ -436,7 +440,7 @@
                     </p>
                 {:else}
                     <p  id={element_id} 
-                        class=" text-sm mt-1 mb-2
+                        class=" text-sm mb-2
                                     text-stone-400"
                         on:click={(e) => on_active_row_clicked(e, 'bottom')}>
                         {item[summary]}
@@ -446,9 +450,7 @@
                 
         {/if}
 
-        <section class="block sm:hidden w-full">
-            <Properties {definition} {item} {placeholder} bind:this={props_sm}/>
-        </section>
+        
 
     </div>
 </section>

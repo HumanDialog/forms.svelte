@@ -93,6 +93,14 @@
                 line_h = 'h-6 sm:h-6'
             chevron_mt = 'mt-1.5 sm:mt-0.5' 
             break;
+
+        default:
+            //label_mb =  'mb-0.5';
+            input_pt =  ''
+            input_pb =  '';
+            font_size = ''           
+            line_h =    ''
+            chevron_mt = ''
     }
 
     let   item = null
@@ -413,40 +421,44 @@
 </script>
 
 {#if is_compact}
-    <div class="inline-block relative {line_h}">
+    <div class="inline-block  {line_h}">
        <div class="dark:text-stone-300 {font_size} truncate  
                     pl-0 pr-0
-                    h-full flex flex-row" >
-            <div class="grow-1 pr-2.5">
-                {pretty_value}
-            </div>
+                    h-full " >
+            <p >
+                <span class="inline-block relative flex flex-row  items-center">
+                    <span class="grow-1 pr-2.5 ">
+                        {pretty_value}
+                    </span>
 
-            {#if can_be_activated}
-                <div class="no-print ml-auto w-3 h-3 {chevron_mt} text-stone-700 dark:text-stone-300">
-                    <FaChevronDown/>
-                </div>
-            {/if}
-        
-            {#if can_be_activated}
-                {#if type == "datetime-local"}
-                    <input  type="datetime-local" 
-                            class="datepicker-input"
-                            tabindex="-1"
-                            on:change={on_changed}
-                            bind:value={rValue}
-                            bind:this={input_element}>
-                {:else}
-                    <input  type="date" 
-                            class="datepicker-input"
-                            tabindex="-1"
-                            on:change={on_changed}
-                            bind:value={rValue}
-                            bind:this={input_element}
-                            on:blur={blur}>
-                {/if}
+                    {#if can_be_activated}
+                        <div class="no-print ml-auto w-3 h-3 {chevron_mt} text-stone-700 dark:text-stone-300">
+                            <FaChevronDown/>
+                        </div>
+                    {/if}
 
-                
-            {/if}
+                    {#if can_be_activated}
+                        {#if type == "datetime-local"}
+                            <input  type="datetime-local" 
+                                    class="datepicker-input"
+                                    tabindex="-1"
+                                    on:change={on_changed}
+                                    bind:value={rValue}
+                                    bind:this={input_element}>
+                        {:else}
+                            <input  type="date" 
+                                    class="datepicker-input"
+                                    tabindex="-1"
+                                    on:change={on_changed}
+                                    bind:value={rValue}
+                                    bind:this={input_element}
+                                    on:blur={blur}>
+                        {/if}
+                    {/if}
+
+                </span>
+            </p>
+
         </div>
 
         

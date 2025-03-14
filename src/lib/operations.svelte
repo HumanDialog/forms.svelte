@@ -12,13 +12,56 @@
 
     function update(...args)
     {
-        if($contextToolbarOperations && $contextToolbarOperations.length > 0)
+        let isOpVer1 = false;
+        if($contextToolbarOperations && Array.isArray($contextToolbarOperations) && $contextToolbarOperations.length > 0)
+        { 
             operations = $contextToolbarOperations;
+        }
+        else if($contextToolbarOperations && $contextToolbarOperations.operations && $contextToolbarOperations.operations.length > 0)
+        {
+            operations = $contextToolbarOperations.operations;
+            if($contextToolbarOperations.opver && $contextToolbarOperations.opver == 1)
+                isOpVer1 = true;
+        }
         else
-            operations = $pageToolbarOperations;
+        {
+            if(Array.isArray($pageToolbarOperations))
+                operations = $pageToolbarOperations;
+            else
+            {
+                operations = $pageToolbarOperations.operations;
+                if($pageToolbarOperations.opver && $pageToolbarOperations.opver == 1)
+                    isOpVer1 = true;
+            }
+        }
 
-        leftOperations = operations.filter(o => !o.right)
-        rightOperations = operations.filter(o => o.right == true)
+        leftOperations = []
+        rightOperations = []
+
+        let AOperations = []
+        let BOperations = []
+        let COperations = []
+
+        if(isOpVer1)
+        {
+            // first level group 'View', 'File', etc
+            operations.forEach(group => {
+                if(group.operations && group.operations.length > 0)
+                {
+                    AOperations = [...AOperations, ...group.operations.filter(o => o.tbr == 'A')  ]
+                    BOperations = [...BOperations, ...group.operations.filter(o => o.tbr == 'B')  ]
+                    COperations = [...COperations, ...group.operations.filter(o => o.tbr == 'C')  ]
+                }
+            })
+
+            leftOperations = [...AOperations, ...BOperations]
+            rightOperations = [...COperations]
+        }
+        else
+        {
+            leftOperations = operations.filter(o => !o.right)
+            rightOperations = operations.filter(o => o.right == true)
+        }
     }
 
     function on_click(e, operation)
@@ -94,7 +137,7 @@
                                 <div class="w-3.5 h-3.5 mr-1"><svelte:component this={operation.icon}/></div>
                             {/if}
                             {#if operation.caption}
-                                <span>{operation.caption}</span>
+                                <span class="ml-1">{operation.caption}</span>
                             {/if}
                         </button>
                     {/each}
@@ -114,7 +157,7 @@
                             <div class="w-3.5 h-3.5 mr-1"><svelte:component this={operation.icon}/></div>
                         {/if}
                         {#if operation.caption}
-                            <span>{operation.caption}</span>
+                            <span class="ml-1">{operation.caption}</span>
                         {/if}
                     </button>
                 {/if} 
@@ -142,7 +185,7 @@
                         <div class="w-3.5 h-3.5 mr-1"><svelte:component this={operation.icon}/></div>
                     {/if}
                     {#if operation.caption}
-                        <span>{operation.caption}</span>
+                        <span class="ml-1">{operation.caption}</span>
                     {/if}
                 </button>    
             {/if}
