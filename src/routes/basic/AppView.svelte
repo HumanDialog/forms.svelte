@@ -1,74 +1,53 @@
 <script>
-    import {reef, session, AuthorizedView, signInHRef, signUpHRef, Authorized, NotAuthorized} from '@humandialog/auth.svelte'
+    import {reef, session, Authorized} from '@humandialog/auth.svelte'
 	import {Layout, onErrorShowAlert} from '$lib';
-
     import Sidebar from './sidebar.svelte'
-    import SidebarFolders from './sidebar.folders.svelte'
     
+    import SidebarFolders from './sidebar.folders.svelte'
+
+    import {push} from 'svelte-spa-router'
+
+    import Sidebar2 from './sidebar2.svelte'
     import AppIcon from './appicon.svelte'
     import FaFolder from 'svelte-icons/fa/FaFolder.svelte'
-    import {FaUsersCog, FaSignOutAlt} from 'svelte-icons/fa/'
-    import {push} from 'svelte-spa-router'
-    
-    
-	import Tasklist from './tasklist.svelte';
+    import {FaUsersCog, FaSignOutAlt, FaList} from 'svelte-icons/fa/'
+
+    import Tasklist from './tasklist.svelte';
+    import Folder from './folder.svelte';
     import Task from './task.svelte'
     import Board from './list.board.svelte';
     import MyTasks from './mytasks.svelte'
     import MyFolders from './myfolders.svelte'
     import Members from './members.svelte'
-    import Main from './main.svelte'
-    import Cookies from './cookies.svelte';
-    import Landing from './landing/root.svelte'
+    import AppMain from './AppMain.svelte'
+
     import {Console} from '$lib'
-    
-	
-    const domain = 'localhost:1996'
+    import { tick } from 'svelte';
+
+    const objectreef_io = 'localhost:1996'
     const appId = 'octopus'
     const tenantId = 'octopus'
     const proto = 'http'
 
-    //const domain = 'localhost:1996'
-    //const appId = 'octopus_jugjrtua'
-    //const tenantId = 'humandialog_niom'
-    //const proto = 'http'
-    
-    reef.configure( {
-            mode: 'local',
-            remote:{
-                iss: `${proto}://${domain}`,
-                clientID: 'SampleClientId',
-                clientSecret: 'SampleClientSecret',
-                scope: `openid profile email ${appId}`,
-                apiVersion: 'v001',
-                tenant: `${tenantId}`,
-                groupsOnly: true
-            },
-            local: {
-                api:    "http://127.0.0.1:1996/",
-                //api:    "http://192.168.0.102:1996/",
-                users:
-                [
-                    {
-                        username: "alice@example.com",
-                        role: 'GroupOwner',
-                        groupId: 13
-                    },
-                    {
-                        username: "bob@example.com",
-                        role: 'Guest',
-                        groupId: 13
-                    }
-                ],
-                apiVersion: "v001"}
-            });
+    $: init($session)
+
+    async function init(...args)
+    {
+        if(!$session.isActive && !$session.isUnauthorizedGuest)
+        {
+            await tick();
+            reef.redirectToSignIn();
+        }
+
+    }
 
     const authorizedLayout = {
                 sidebar : {
                     'TOC': {
-                        icon: AppIcon,
+                        icon: FaList,
                         component: Sidebar
                     },
+
                     'Folders': {
                         icon: FaFolder,
                         component: SidebarFolders
@@ -76,7 +55,7 @@
                 },
                 mainContent : {
                     routes : {
-                        '/' :           { component: Main},
+                        '/' :           { component: AppMain},
                         '/tasklist':    { component: Tasklist},
                         '/tasklist/*':  { component: Tasklist},
                         '/task' :       { component: Task },
@@ -87,8 +66,8 @@
                         '/mytasks/*' :  { component: MyTasks },
                         '/folder'    :  { component: Folder },
                         '/folder/*'  :  { component: Folder },
-                        '/myfolders' :  { component: MyFolders},
-                        '/myfolders/*' :{ component: MyFolders},
+                        '/myfolders' :  { component: MyFolders },
+                        '/myfolders/*': { component: MyFolders },
                         '/members'   :  { component: Members }
                     }
                 },
@@ -122,13 +101,13 @@
     const guestLayout = {
                 sidebar : {
                     'TOC': {
-                        icon: AppIcon,
+                        icon: FaList,
                         component: Sidebar
                     }
                 },
                 mainContent : {
                     routes : {
-                        '/' :           { component: Main},
+                        '/' :           { component: AppMain},
                         '/tasklist':    { component: Tasklist},
                         '/tasklist/*':  { component: Tasklist},
                         '/task' :       { component: Task },
@@ -179,7 +158,7 @@
         const lastChosenTenantId = $session.lastChosenTenantId;
         let result = null;
         try {
-            const res = await fetch(`${proto}://${tenantId}.${domain}/json/anyv/app/PublicGroups`, {
+            const res = await fetch(`${proto}://${tenantId}.${objectreef_io}/json/anyv/app/PublicGroups`, {
                                     method: 'get',
                                     headers:{
                                         'Accept':'application/json',
@@ -202,7 +181,7 @@
             onErrorShowAlert(err);
         }
 
-        //$session.setCurrentTenantAPI(`${proto}://${tenantId}.${domain}/`, '')
+        //$session.setCurrentTenantAPI(`${proto}://${tenantId}.${objectreef_io}/`, '')
         //const result = await reef.get(`app/PublicGroups`)
         if(result)
         {
@@ -210,7 +189,7 @@
             result.Group.forEach(g => {
                 groupInfos.push({
                     id: `${tenantId}/${g.Id}`,
-                    url: `${proto}://${tenantId}.${domain}/`,
+                    url: `${proto}://${tenantId}.${objectreef_io}/`,
                     name: g.Name,
                     headers: [
                         {
@@ -253,28 +232,20 @@
         else
             return false;
     }
-
 </script>
 
-<AuthorizedView optionalGuestMode automaticallyRefreshTokens={true}>
-    <Authorized>
-        {#if $session.isUnauthorizedGuest}
-            {#await configurePublicSession()}
-                <p>Loading public content</p>
-            {:then hasContent} 
-                {#if hasContent}
-                    <Layout layout={guestLayout}/>
-                {:else}
-                    <p>There is no public content for this application</p>
-                {/if}
-            {/await}
-        {:else}
-            <Layout layout={authorizedLayout}/>
-        {/if}
-    </Authorized>
-
-    <NotAuthorized>
-        <Landing/>
-    </NotAuthorized>
-    <Cookies/>
-</AuthorizedView>
+<Authorized>
+    {#if $session.isUnauthorizedGuest}
+        {#await configurePublicSession()}
+            <p>Loading public content</p>
+        {:then hasContent} 
+            {#if hasContent}
+                <Layout layout={guestLayout}/>
+            {:else}
+                <p>There is no public content for this application</p>
+            {/if}
+        {/await}
+    {:else}
+        <Layout layout={authorizedLayout}/>
+    {/if}
+</Authorized>

@@ -394,7 +394,6 @@
             ]
         }
     }
-    
 
     let taskContextMenu = (task) => {
         let editOperations = getEditOperations(task);

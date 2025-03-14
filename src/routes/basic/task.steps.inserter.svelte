@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
     import {editable, startEditing} from '$lib'
     
     export let onInsert;

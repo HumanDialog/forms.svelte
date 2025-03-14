@@ -3,7 +3,7 @@
     import {    Spinner, 
                 Page, 
                 Icon,
-                IconT, 
+                 
                 ComboSource,
                 List,
                 ListTitle,
@@ -171,7 +171,6 @@
                 }
             ]
         }
-    
 
     function getEditOperations(task)
     {
@@ -293,7 +292,7 @@
             <ListDateProperty name="DueDate"/>
 
             <span slot="left" let:element>
-                <IconT component={element.State == STATE_FINISHED ? FaRegCheckCircle : FaRegCircle} 
+                <Icon component={element.State == STATE_FINISHED ? FaRegCheckCircle : FaRegCircle} 
                     on:click={(e) => finishTask(e, element)} 
                     class="h-6 w-6  text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
             </span>

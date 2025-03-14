@@ -14,7 +14,7 @@
 <div class="min-h-screen h-screen overflow-x-hidden">
 
     <section class="bg-local bg-cover bg-stone-900" > <!-- style="background-image: url(b-sv1.jpg)"-->
-        <Header />
+        <Header main/>
     </section>
 
 

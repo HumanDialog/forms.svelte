@@ -15,14 +15,14 @@
 
     
     
-	const mode = 'local'
-    const objectreef_io = 'localhost:1996'
-    const appId = 'octopus'
-    const tenantId = 'octopus'
-    const proto = 'http'
-    const clientID = 'SampleClientId'
-    const clientSecret = 'SampleClientSecret'
-    const website = 'http://localhost:5173'
+	const mode = __APP_MODE__
+    const objectreef_io = __OBJECTREEF_IO__
+    const appId = __APP_ID__
+    const tenantId = __TENANT_ID__
+    const proto = __SERVICE_PROTOCOL__
+    const clientID = __CLIENT_ID__
+    const clientSecret = __CLIENT_SECRET__
+    const website = __WEBSITE__
 
    reef.configure( {
                     mode: mode,

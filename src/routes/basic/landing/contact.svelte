@@ -133,6 +133,7 @@
 
 <svelte:head>
     <script src="https://www.google.com/recaptcha/api.js?render=explicit" async defer></script>
+    <title>Contact | Octopus Basic</title>
 </svelte:head>
 
 <section class="bg-stone-900"> <!--class="bg-local bg-cover" style="background-image: url(b-sv1.jpg)"-->
@@ -249,6 +250,6 @@
     </div>
 </div>
 
-<section class="bg-stone-900"> <!-- class="bg-local bg-cover" style="background-image: url(b-sv1.jpg)"-->
+<section > <!-- class="bg-local bg-cover" style="background-image: url(b-sv1.jpg)"-->
     <Footer />
 </section>

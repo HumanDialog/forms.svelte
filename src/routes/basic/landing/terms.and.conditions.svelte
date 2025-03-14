@@ -5,7 +5,6 @@
 
 <svelte:head>
   <title>Terms and Conditions | Octopus Basic</title>
-  <link rel="canonical" href="https://octopus.objectreef.dev/terms-and-conditions"/>
 </svelte:head> 
 
 <section class="bg-local bg-cover" >

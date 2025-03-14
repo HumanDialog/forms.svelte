@@ -488,7 +488,7 @@
 
         return operations;
     }
-    
+
     function getPageOperations()
     {
         return {
@@ -520,6 +520,7 @@
             ]
         }
     }
+    
 
     function getPageOperationsWithFormattingTools() 
     {
