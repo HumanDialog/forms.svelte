@@ -284,21 +284,30 @@
 
     }
 
-    let page_operations=[
-        {
-            icon: FaUserPlus,
-            caption: '',
-            action: (focused) => { create_new_user(); }
-        },
-        {
-            separator: true
-        },
-        {
-            icon: FaUserSlash,
-            caption: '',
-            action: (f) => {askToDeleteApplicationAccount();}
-        }
-    ]
+    let page_operations={
+        opver: 1,
+        operations: [
+            {
+                caption: 'View',
+                operations: [
+                    {
+                        icon: FaUserPlus,
+                        caption: '',
+                        action: (focused) => { create_new_user(); },
+                        fab: 'M10',
+                        tbr: 'A'
+                    },
+                    {
+                        icon: FaUserSlash,
+                        caption: '',
+                        action: (f) => {askToDeleteApplicationAccount();},
+                        fab: 'S00',
+                        tbr: 'C'
+                    }
+                ]
+            }
+        ]
+    }
 
     function get_edit_operations(user)
     {
@@ -340,39 +349,60 @@
         let operations = [];
 
         if(user.removed)
-            return [
-            {
-                icon: FaUserPlus,
-                caption: '',
-                action: (f) => askToAddAgain(user),
-            }
-        ];
-        
-        let edit_operations = get_edit_operations(user)
-        if(edit_operations.length == 1)
         {
-            operations.push({
-                                icon: FaPen,
-                                caption: '',
-                                action: edit_operations[0].action
-                            });
+            operations = [
+                {
+                    icon: FaUserPlus,
+                    caption: '',
+                    action: (f) => askToAddAgain(user),
+                    fab: 'M10',
+                    tbr: 'B'
+                }
+            ];
         }
         else
         {
+            let edit_operations = get_edit_operations(user)
+            if(edit_operations.length == 1)
+            {
+                operations.push({
+                                    icon: FaPen,
+                                    caption: '',
+                                    action: edit_operations[0].action,
+                                    fab: 'M20',
+                                    tbr: 'B'
+                                });
+            }
+            else
+            {
+                operations.push({
+                                    icon: FaPen,
+                                    caption: '',
+                                    grid: edit_operations,
+                                    fab: 'M20',
+                                    tbr: 'B'
+                                });
+            }
+
             operations.push({
-                                icon: FaPen,
                                 caption: '',
-                                grid: edit_operations
+                                icon: FaUserMinus,
+                                action: (focused) => askToRemove(user),
+                                fab: 'M30',
+                                tbr: 'B'
                             });
         }
 
-        operations.push({
-                            caption: '',
-                            icon: FaUserMinus,
-                            action: (focused) => askToRemove(user)
-                        });
-
-        return operations;
+        
+        return {
+            opver: 1,
+            operations: [
+                {
+                    caption: 'User',
+                    operations: operations
+                }
+            ]
+        }
     }
 
     let user_context_menu = (user) => {

@@ -348,7 +348,7 @@
 {#if item}
 {@const element_title = item[title]}
 
-<section    class="my-1 flex flex-row my-0  w-full  text-stone-700 dark:text-stone-300 cursor-default rounded-md border border-transparent {selected_class} {focused_class} scroll-mt-[50px] sm:scroll-mt-[40px]"
+<section    class="my-1 flex flex-row w-full  text-stone-700 dark:text-stone-300 cursor-default rounded-md border border-transparent {selected_class} {focused_class} scroll-mt-[50px] sm:scroll-mt-[40px]"
             on:contextmenu={on_contextmenu}
             role="menu"
             tabindex="-1"
@@ -381,7 +381,7 @@
                                         onSoftEnter: (text) => {change_name(text); editProperty('Summary')}
                                     }}
                             > 
-                            {element_title} (1)
+                            {element_title}
                         </p>
                     {:else}
                         <p  class=" text-base font-semibold 
@@ -393,7 +393,7 @@
                                 active: true,
                                 readonly: definition.title_readonly,
                             }}> 
-                                {element_title} (2)
+                                {element_title}
 
                             {#if definition.onOpen}
                                 <button class="ml-3 w-5 h-5 sm:w-3 sm:h-3"
@@ -409,7 +409,7 @@
                              
                             whitespace-nowrap overflow-clip w-full sm:flex-none sm:{name_w}"
                     id="__hd_list_ctrl_{item[item_key]}_Title"> 
-                    {element_title} (3)
+                    {element_title}
                 </p>
             {/if}
            
@@ -419,12 +419,16 @@
             </section>
         </div>
 
+        <section class="block sm:hidden w-full">
+            <Properties {definition} {item} {placeholder} bind:this={props_sm}/>
+        </section>
+
         {#if summary && (item[summary] || placeholder=='Summary')}
             {@const element_id = `__hd_list_ctrl_${item[item_key]}_Summary`}
             {#key item[summary] }           
                 {#if is_row_active}
                     <p  id={element_id} 
-                        class=" text-sm   mt-1  mb-2                          
+                        class=" text-sm    mb-2                          
                                 text-stone-400"
                             use:editable={{
                                 action: (text) => {change_summary(text)},
@@ -432,23 +436,21 @@
                                 onFinish: (d) => {placeholder='';},
                                 active: true
                             }}>
-                        {item[summary]} (I)
+                        {item[summary]}
                     </p>
                 {:else}
                     <p  id={element_id} 
-                        class=" text-sm mt-1 mb-2
+                        class=" text-sm mb-2
                                     text-stone-400"
                         on:click={(e) => on_active_row_clicked(e, 'bottom')}>
-                        {item[summary]} (II)
+                        {item[summary]}
                     </p>
                 {/if}
             {/key}
                 
         {/if}
 
-        <section class="block sm:hidden w-full">
-            <Properties {definition} {item} {placeholder} bind:this={props_sm}/>
-        </section>
+        
 
     </div>
 </section>

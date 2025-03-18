@@ -131,23 +131,33 @@
         if(!filtered_commands)
             return filtered_commands;
 
+        let was_any_items_before = filtered_commands.length > 0;
+
         if(!key)
         {
             filtered_commands = [...commands];
-            return filtered_commands;
+        }
+        else
+        {
+            filtered_commands = [];
+            commands.forEach( (cmd) =>
+            {
+                if(cmd.separator)
+                    filtered_commands.push(cmd);
+                else if(cmd.caption.toLowerCase().includes(key.toLowerCase()))
+                    filtered_commands.push(cmd);
+                else if(cmd.tags && cmd.tags.toLowerCase().includes(key.toLowerCase()))
+                    filtered_commands.push(cmd);
+            });
         }
 
-        let was_any_items_before = filtered_commands.length > 0;
-        filtered_commands = [];
-        commands.forEach( (cmd) =>
-        {
-            if(cmd.separator)
-                filtered_commands.push(cmd);
-            else if(cmd.caption.toLowerCase().includes(key.toLowerCase()))
-                filtered_commands.push(cmd);
-            else if(cmd.tags && cmd.tags.toLowerCase().includes(key.toLowerCase()))
-                filtered_commands.push(cmd);
-        });
+        // sprawdzamy zdefiniowany warunek widoczności
+        filtered_commands = filtered_commands.filter(c => {
+            if(c.is_visible)
+                return c.is_visible()
+            else
+                return true;
+        })
 
         // jeśli poprzednio podświetlony element znalazł się w podownie nowym zestawie to zostaje dalej jako podświetlony
         // w przeciwym wypadku podświetlamy pierwszy element na liście.
@@ -158,6 +168,7 @@
             else
                 current_command = null;
         }
+
 
         // jeśli poprzednio nie było juz nic do wyświetlenia i tym razem też tak wyszło, wówczas zamykamy zupełnie paletę. 
         // Najwidoczniej użytkownik nie jest zainteresowany wybieraniem czegokolwiek z palety.

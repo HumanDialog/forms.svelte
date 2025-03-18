@@ -15,25 +15,37 @@ import {contextToolbarOperations, pageToolbarOperations, contextItemsStore} from
     let vToolboxExpanded :boolean = false;
     let hToolboxExpanded: boolean = false;
     
-    let isMain = false;
+    let isDirectPositioningMode = false;
 
     function update(...args)
     {
-        //vToolboxExpanded = false;
-        if($contextToolbarOperations && $contextToolbarOperations.length > 0)
-            operations = $contextToolbarOperations;
-        else
-            operations = $pageToolbarOperations;
         
-        if(operations && operations.length > 0 && operations[0].main)
+        isDirectPositioningMode = false;
+        if($contextToolbarOperations && Array.isArray($contextToolbarOperations) && $contextToolbarOperations.length > 0)
+            operations = $contextToolbarOperations;
+        else if($contextToolbarOperations && $contextToolbarOperations.operations && $contextToolbarOperations.operations.length > 0)
         {
-            isMain = true;
+            operations = $contextToolbarOperations.operations;
+            if($contextToolbarOperations.opver && $contextToolbarOperations.opver == 1)
+                isDirectPositioningMode = true;
         }
         else
         {
-            isMain = false;   
+            if(Array.isArray($pageToolbarOperations))
+                operations = $pageToolbarOperations;
+            else
+            {
+                operations = $pageToolbarOperations.operations;
+                if($pageToolbarOperations.opver && $pageToolbarOperations.opver == 1)
+                    isDirectPositioningMode = true;
+            }
         }
 
+       
+
+        if(isDirectPositioningMode)
+            return;
+        
         if(operations.length > 0)
             mainOperation = operations[0];
         else
@@ -64,7 +76,6 @@ import {contextToolbarOperations, pageToolbarOperations, contextItemsStore} from
         const mainOperationButton = document.getElementById('__hd_fab_mainOperation')
         if(!mainOperationButton)
             return;
-        console.log("activateMainOperation")
         mainOperationButton.click();
    }
 
@@ -149,36 +160,123 @@ import {contextToolbarOperations, pageToolbarOperations, contextItemsStore} from
     
     function calculatePosition(operation) : string
     {
-        let right = 0;
-        let result = `bottom: 10px; right:${right}px`
+        const isLeftHanded = false;
+        let result = '';
+
+        const fab = operation.fab;
+        if(fab.length != 3)
+            return '';
+
+        const section = fab[0]
+        const col_no = parseInt(fab[1]);
+        const row_no = parseInt(fab[2]);
+        
+        if((col_no == NaN) || (row_no == NaN))
+            return '';
+        
+        const width = 55;   //px
+        const height = 55;   //px
+        const margin = 10;
+
+       
+        if(!isLeftHanded)
+        {
+            switch(section)
+            {
+            case 'M':
+                result = `right: ${margin + col_no * width}px; bottom: ${margin + row_no * height}px`
+                break;
+
+            case 'S':
+                result = `left: ${margin + col_no * width}px; bottom: ${margin + row_no * height}px`
+                break;
+
+            case 'A':
+                result = `right: ${margin + col_no * width}px; top: calc(50vh - ${row_no * height}px)`
+                break;
+
+            case 'C':
+                result = `left: ${margin + col_no * width}px; top: calc(50vh - ${row_no * height}px)`
+                break;
+
+            case 'T':
+                result = `right: ${margin + col_no * width}px; top: ${margin + row_no * height}px`
+                break;
+
+            case 'F':
+                result = `left: ${margin + col_no * width}px; top: ${margin + row_no * height}px`
+                break;
+            }
+        }
+        else
+        {
+            switch(section)
+            {
+            case 'M':
+                result = `left: ${margin + col_no * width}px; bottom: ${margin + row_no * height}px`
+                break;
+
+            case 'S':
+                result = `right: ${margin + col_no * width}px; bottom: ${margin + row_no * height}px`
+                break;
+
+            case 'A':
+                result = `left: ${margin + col_no * width}px; top: calc(50vh - ${row_no * height}px)`
+                break;
+
+            case 'C':
+                result = `right: ${margin + col_no * width}px; top: calc(50vh - ${row_no * height}px)`
+                break;
+
+            case 'T':
+                result = `left: ${margin + col_no * width}px; top: ${margin + row_no * height}px`
+                break;
+
+            case 'F':
+                result = `right: ${margin + col_no * width}px; top: ${margin + row_no * height}px`
+                break;
+            }
+        }
+
         return result
     }
     
     function operationVisible(operation): boolean
     {
-        return false;
+        if(!operation.fab)
+            return false;
+
+        return true;
     }
     
 </script>
 
-{#if isMain}
+{#if isDirectPositioningMode}
     {#if operations && operations.length > 0}
-        {#each operations as operation, idx}
-            {#if operationVisible(operation)}
-            <button  
-                    class="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 
-                        font-medium rounded-full text-sm text-center shadow-md
-                        w-[55px] h-[55px] 
-                        fixed m-0 absolute bottom-0
-                        dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800
-                        flex items-center justify-center
-                        disable-dbl-tap-zoom"
-                        style={calculatePosition(operation)}
-                        on:click|stopPropagation={(e) => {on_click(e, mainOperation)}} 
-                        on:mousedown={mousedown} >
-            <div class="w-7 h-7"><svelte:component this={operation.icon}/></div>
-        </button>
-        {/if}
+        {#each operations as group}
+            {#if group.operations && group.operations.length > 0}
+                {#each group.operations as operation}
+                    {#if operationVisible(operation)}
+                        {@const position = calculatePosition(operation)}
+                        {#if position}
+                            <button  
+                                class="text-white bg-blue-700/70 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 
+                                        font-medium rounded-full text-sm text-center shadow-md
+                                        w-[35px] h-[35px] 
+                                        fixed m-0  
+                                        dark:bg-blue-600/50 dark:hover:bg-blue-700 dark:focus:ring-blue-800
+                                        flex items-center justify-center
+                                        disable-dbl-tap-zoom
+                                        cursor-pointer z-10"
+                                        style={position}
+                                        on:click|stopPropagation={(e) => {on_click(e, operation)}} 
+                                        on:mousedown={mousedown} >
+                            <div class="w-5 h-5"><svelte:component this={operation.icon}/></div>
+                            </button>
+                        {/if}
+                    {/if}
+                {/each} 
+            {/if}
         {/each}
     {/if}
 {:else}
@@ -190,7 +288,7 @@ import {contextToolbarOperations, pageToolbarOperations, contextItemsStore} from
                     class="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 
                         font-medium rounded-full text-sm text-center shadow-md
                         w-[55px] h-[55px] 
-                        fixed m-0 absolute bottom-0 right-[0px]
+                        fixed m-0 bottom-0 right-[0px]
                         dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800
                         flex items-center justify-center
                         disable-dbl-tap-zoom"
@@ -203,7 +301,7 @@ import {contextToolbarOperations, pageToolbarOperations, contextItemsStore} from
         {#if secondaryOperation || isExpandable}
             
             <!-- horizontal container -->
-            <div class="flex flex-row m-0 absolute bottom-[10px] right-[60px]">
+            <div class="flex flex-row m-0 fixed bottom-[10px] right-[60px]">
             
                 {#if isExpandable}
                     <!-- Expander -->
@@ -290,7 +388,7 @@ import {contextToolbarOperations, pageToolbarOperations, contextItemsStore} from
 
         {#if operations.length > 2} <!-- has vertical operations -->
             <!-- vertical tools container  -->
-            <ul class="list-none m-0 absolute bottom-[70px] right-0">
+            <ul class="list-none m-0 fixed bottom-[70px] right-0">
                 {#if (isExpandable && vToolboxExpanded) || !isExpandable}
                     {@const verticalOperations = operations.slice(2).reverse()}
                     {#each verticalOperations as operation}

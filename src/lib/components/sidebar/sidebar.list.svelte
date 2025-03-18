@@ -146,12 +146,14 @@
 {/each }
 
 {#if inserter}
-    <Edit   class="p-3 sm:p-2 text-lg sm:text-base font-normal text-stone-500 rounded-lg dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700" 
+    <Edit   class=" mb-2 ml-2
+            text-base font-normal 
+            text-stone-500 rounded-lg dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700" 
             onEnter={onNewElement} 
             placeholder={inserterPlaceholder} 
             inserter={true}
             onBlur={onBlurInserter}
             bind:this={inserterElement}>
-        <Icon size={5} component={FaPlus} class="mr-3"/>
+        <Icon component={FaPlus} class="w-5 h-5 mt-0.5 ml-2.5 pr-0.5 mr-4"/>
     </Edit>
 {/if}

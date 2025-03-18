@@ -61,17 +61,21 @@
 
     function getOperations()
     {
-        let operations = []
-        
         const getCustomOperations = definition.getCardOperations;
         if(getCustomOperations)
         {
             const cutomOperations = getCustomOperations(item)
-            cutomOperations.forEach( o => operations.push(o))
+            if(Array.isArray(cutomOperations))
+            {
+                return [...cutomOperations]
+            }
+            else
+            {
+                return {...cutomOperations}
+            }
         }
 
 
-        return operations;
     }
 
     //let moveButton;

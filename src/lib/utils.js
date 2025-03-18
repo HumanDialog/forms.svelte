@@ -56,8 +56,13 @@ export function activateItem(context_level, itm, operations=null)
 
     //chnages.just_changed_context = true;
 
-    if(operations && Array.isArray(operations))
-        contextToolbarOperations.set( [...operations] )
+    if(operations)
+    { 
+        if(Array.isArray(operations))
+            contextToolbarOperations.set( [...operations] )
+        else
+            contextToolbarOperations.set( {...operations} )
+    }
 }
 
 export function clearActiveItem(context_level)
@@ -80,16 +85,40 @@ export function clearActiveItem(context_level)
 export function refreshToolbarOperations()
 {
     const contextOperations = get(contextToolbarOperations)
-    if(contextOperations && contextOperations.length)
+    if(contextOperations)
     {
-        contextToolbarOperations.set([...contextOperations])
-    
+        if(Array.isArray(contextOperations))
+        {
+            if(contextOperations.length)
+                contextToolbarOperations.set([...contextOperations])
+        }
+        else
+        {
+            if(contextOperations.operations.length)
+                contextToolbarOperations.set({...contextOperations})
+        }
     }
     else
     {
         const pageOperations = get(pageToolbarOperations);
-        if(pageOperations && pageOperations.length)
-            pageToolbarOperations.set([...pageOperations])
+        if(pageOperations)
+        {
+            if(Array.isArray(pageOperations))
+            {
+                if(pageOperations.length > 0)
+                {
+                    pageToolbarOperations.set([...pageOperations])
+                }
+            }
+            else
+            {
+                if(pageOperations.operations && pageOperations.operations.length > 0)
+                {
+                    pageToolbarOperations.set({...pageOperations})
+                }
+            }
+        }
+
     }
 }
 
@@ -609,7 +638,7 @@ export function isOnScreenKeyboardVisible()
 
     const sel = window.getSelection();
     // if we have active selections then it's very possible we have onscreen keyboard visible, se we need to shrink window.innerHeight 
-    if(sel && sel.rangeCount>0 && sel.focusNode && sel.focusNode.nodeType==sel.focusNode.TEXT_NODE)
+    if(sel && sel.rangeCount>0 && sel.focusNode /*&& sel.focusNode.nodeType==sel.focusNode.TEXT_NODE*/) // TipTap fix: when cursor blinks at begining of line it's not TEXT_NODE. ProseMirror handles it as special case
     {
         const el = sel.focusNode.parentElement;
         if(el && (el.isContentEditable || el.contentEditable == 'true' || el.tagName == 'INPUT'))

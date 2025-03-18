@@ -14,7 +14,7 @@
                 Modal,
                 onErrorShowAlert} from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaColumns, FaArchive, FaList, FaEllipsisH, FaChevronRight, FaChevronLeft} from 'svelte-icons/fa'
-    import {location, pop, push, querystring} from 'svelte-spa-router'
+    import {location, pop, push, querystring, link} from 'svelte-spa-router'
 
     export let params = {}
 
@@ -219,21 +219,32 @@
 
         if(isArchivedTasks)
             return [];
+
+        return {
+            opver: 1,
+            operations: [
+                {
+                    caption: 'View',
+                    operations: [
+                        {
+                            icon: FaPlus,
+                            action: (f) => { listComponent.addRowAfter(null) },
+                            fab: 'M10',
+                            tbr: 'A'
+                        },
+                        {
+                            icon: FaColumns,
+                            right: true,
+                            action: (f) => switchToKanban(),
+                            fab: 'A01',
+                            tbr: 'C'
+                        }
+                    ]
+                }
+            ]
+        }
         
-        return [
-                    {
-                        icon: FaPlus,
-                        action: (f) => { listComponent.addRowAfter(null) }
-                    },
-                    {
-                        separator: true
-                    },
-                    {
-                        icon: FaColumns,
-                        right: true,
-                        action: (f) => switchToKanban()
-                    }
-                ]
+       
         
     }
 
@@ -270,7 +281,7 @@
     }
 
     
-    let taskOperations = (task) => { 
+    let taskOperationsX = (task) => { 
         let editOperations = getEditOperations(task)
         return [
                 {
@@ -317,6 +328,73 @@
             ];
     }
 
+    let taskOperations = (task) => {
+        let editOperations = getEditOperations(task);
+        return {
+            opver: 1,
+            operations: [
+                {
+                    caption: 'View',
+                    operations: [
+                        {
+                            icon: FaPlus,
+                            action: (f) => { listComponent.addRowAfter(task) },
+                            fab: 'M10',
+                            tbr: 'A'
+                        },
+                        {
+                            icon: FaColumns,
+                            right: true,
+                            action: (f) => switchToKanban(),
+                            fab: 'A01',
+                            tbr: 'C'
+                        }
+                    ]
+                },
+                {
+                    caption: 'Task',
+                    operations: [
+                        {
+                            icon: FaPen,
+                            grid: editOperations,
+                            fab: 'M20',
+                            tbr: 'B'
+                        },
+                        {
+                            icon: FaEllipsisH,
+                            menu:[
+                                {
+                                    icon: FaArchive,
+                                    caption: 'Archive',
+                                    action: (f) => askToArchive(task)
+                                },
+                                {
+                                    icon: FaTrash,
+                                    caption: 'Delete',
+                                    action: (f) => askToDelete(task)
+                                }
+                            ],
+                            fab: 'M30',
+                            tbr: 'B'
+                        },
+                        {
+                            icon: FaCaretDown,
+                            action: (f) => listComponent.moveDown(task),
+                            fab: 'M02',
+                            tbr: 'B'
+                        },
+                        {
+                            icon: FaCaretUp,
+                            action: (f) => listComponent.moveUp(task),
+                            fab: 'M03',
+                            tbr: 'B'
+                        },
+                    ]
+                }
+            ]
+        }
+    }
+
     let taskContextMenu = (task) => {
         let editOperations = getEditOperations(task);
         return {
@@ -353,12 +431,12 @@
             <span slot="left" let:element>
                 {#if element.State == STATE_FINISHED}
                     <Icon component={FaRegCheckCircle} 
-                    class="h-6 w-6  text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
+                    class="h-5 w-5  text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
                       
                 {:else}
                     <Icon component={FaRegCircle} 
                         on:click={(e) => finishTask(e, element)} 
-                        class="h-6 w-6  text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
+                        class="h-5 w-5  text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
                     
                 {/if}
             </span>
@@ -369,8 +447,9 @@
         {#if !isArchivedTasks}
             {#if !isArchivedList}
                 <div class="ml-3 mt-20 mb-10">
-                    <a  href={`#/tasklist/${listId}?archivedTasks`} 
-                        class="hover:underline">
+                    <a  href={`/tasklist/${listId}?archivedTasks`} 
+                        class="hover:underline"
+                        use:link>
                             Show archived tasks 
                             <div class="inline-block mt-1.5 w-3 h-3"><FaChevronRight/></div>
                     </a>

@@ -87,7 +87,12 @@
             $contextItemsStore.focused = select
 
         if(itm)
-            $contextToolbarOperations = [...toolbarOperations];    
+        {
+            if(Array.isArray(toolbarOperations))
+                $contextToolbarOperations = [...toolbarOperations];    
+            else
+                $contextToolbarOperations = {...toolbarOperations};  
+        }
         else
             $contextToolbarOperations = [];
         

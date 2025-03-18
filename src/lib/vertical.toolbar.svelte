@@ -333,7 +333,7 @@
                 class:bg-orange-500={isSelected}
                 on:click|stopPropagation={()=> (on_tab_clicked(tab.key))}>
                 
-                <Icon size={6} component={tab.icon}/>
+                <Icon class="w-5 h-5" component={tab.icon}/>
             </button>
         {/each}
     </div>

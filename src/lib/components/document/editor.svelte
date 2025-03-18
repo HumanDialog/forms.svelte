@@ -222,6 +222,7 @@ let suggestionRange = undefined;
                     //setTimeout(() => UI.fab?.activateMainOperation(), 100)
                     palette.set_current_editor_range(props.range)
                     const cursorRect = props.clientRect();
+                    palette.filter('');
                     setTimeout(() => show_command_palette(cursorRect), 100)
                 }
                 else
@@ -858,10 +859,19 @@ let suggestionRange = undefined;
     
     function show_small_command_palette(client_rect)
     {
-        palette.max_height_px = client_rect.height - 64;
-        palette.width_px = client_rect.width - 96;
-        let x=64, y=32;
-        let show_above = false;        
+        //palette.max_height_px = client_rect.height - 64;
+        //palette.width_px = client_rect.width - 96;
+        //let x=64, y=32;
+        //let show_above = false;        
+
+        const margin = 5
+
+        palette.max_height_px = client_rect.height / 2 - margin;
+        palette.width_px = client_rect.width - 2*margin;
+        let x=margin;
+        let y = client_rect.bottom - margin;
+        let show_above = true;        
+
         palette.show(x, y, show_above);
     }
 
@@ -1003,6 +1013,8 @@ let suggestionRange = undefined;
                
                
                //{    caption: 'Styles',       separator: true },
+
+               {    caption: 'Back to edit', description: 'Escape',                                         icon: FaArrowLeft,                  on_choice: () => { editor?.commands.focus()}, is_visible: () => isDeviceSmallerThan("sm") },
                
                {   caption: 'Normal',       description: 'This is normal text style',      tags: 'text',    icon: FaRemoveFormat,               on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setParagraph().run(); else editor.commands.setParagraph() },  is_active: () => editor?.isActive('paragraph')  } ,
                

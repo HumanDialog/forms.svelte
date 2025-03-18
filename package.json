@@ -1,6 +1,6 @@
 {
 	"name": "@humandialog/forms.svelte",
-	"version": "1.3.9",
+	"version": "1.3.12",
 	"description": "Basic Svelte UI components for Object Reef applications",
 	"scripts": {
 		"dev": "vite dev",
@@ -37,7 +37,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@humandialog/auth.svelte": "^1.8.3",
+		"@humandialog/auth.svelte": "^1.8.4",
 		"@tiptap/core": "^2.11.0",
 		"@tiptap/extension-bullet-list": "^2.11.5",
 		"@tiptap/extension-code-block": "^2.11.5",

@@ -70,8 +70,8 @@
             label_mb = 'mb-2';
             input_pt = 'pt-2.5'
             input_pb = 'pb-2.5';     
-            font_size = 'text-lg'      
-            line_h = 'h-7 sm:h-5'
+            font_size = 'text-base'      
+            line_h = 'h-5 sm:h-5'
             chevron_mt = 'mt-2 sm:mt-1'
             break;
 
@@ -93,11 +93,11 @@
             break;           
             
         default:
-            label_mb =  'mb-0.5';
-            input_pt =  'pt-0.5'
-            input_pb =  'pb-0.5';
-            font_size = 'text-base'           
-            line_h =    'h-6'
+            label_mb =  '';
+            input_pt =  ''
+            input_pb =  '';
+            font_size = ''           
+            line_h =    ''
             chevron_mt = ''
                 
     }
@@ -218,7 +218,7 @@
         if(!can_be_activated)
             return;
         
-        if(!combo)
+        if(!textbox)
             return;
  
         if(is_dropdown_open)
@@ -243,7 +243,7 @@
         client_rect.width = window.innerWidth;
         client_rect.height = window.innerHeight;
         
-        let rect = combo.getBoundingClientRect();
+        let rect = textbox.getBoundingClientRect();
 
         let top_space = rect.y;
         let bottom_space = client_rect.height - (rect.y + rect.height);
@@ -831,13 +831,14 @@
     {/if}
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div    bind:this={combo}    
-            on:click={(e) => { show(e, undefined) }}
-            class:cursor-pointer={can_be_activated && is_compact}
             class="max-w-full {appearance_class} flex flex-row content-between items-center"
          >
             
-        <div class="max-w-full flex-1 flex flex-row items-center">
-            {#if !is_dropdown_open}
+        <p  class="max-w-full flex-1 flex flex-row items-center"
+            on:click={(e) => { show(e, undefined) }}
+            class:cursor-pointer={can_be_activated && is_compact}>
+            
+            {#if true || !is_dropdown_open}
                 {#if icon && sel_item}
                     {#if sel_item.Color}
                         <Icon size={5} circle={true} color={sel_item.Color}/>
@@ -852,7 +853,7 @@
             {/if}
 
             
-            <p  bind:this={textbox}
+            <span  bind:this={textbox}
                 class="dark:text-stone-300 {line_h} truncate pl-0 pr-2.5 {background_class} min-w-[2.5rem]"
                 class:ml-2={icon}
                 class:text-stone-400={ (!is_dropdown_open) && (!sel_item)}
@@ -861,18 +862,20 @@
                 contenteditable={is_dropdown_open && filtered}
                 on:keydown={on_keydown}
                 tabindex="0">
-                {combo_text}</p>
-        </div>
+                {combo_text}</span>
+
+            {#if can_be_activated }
+                <div class="w-3 h-3 no-print flex-none text-stone-700 dark:text-stone-300 {chevron_mt}">
+                    <FaChevronDown/>
+                </div>
+            {/if}
+        </p>
         
-        {#if can_be_activated }
-            <div class="w-3 h-3 no-print flex-none text-stone-700 dark:text-stone-300 {chevron_mt}">
-                <FaChevronDown/>
-            </div>
-        {/if}
+        
     </div>
 
     <div    hidden={!is_dropdown_open} 
-            class="{cs} bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md overflow-y-auto cursor-pointer z-30"
+            class="not-prose {cs} bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md overflow-y-auto cursor-pointer z-30"
             style={dropdown_position}
             use:dropdown_action>
         <ul class="py-1">

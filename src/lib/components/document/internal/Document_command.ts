@@ -9,5 +9,6 @@ export class Document_command
     public icon_size?   :number = 6;
     public on_choice;
     public is_active;
+    public is_visible;
     public separator?   :boolean = false
 }

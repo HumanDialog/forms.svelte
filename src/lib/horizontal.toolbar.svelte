@@ -284,7 +284,7 @@
 <div class="no-print flex flex-row w-full" on:click={clearSelection}>
     <div class="flex-none left-0 flex h-12 sm:h-10">
         <button class="w-12 sm:w-10 h-full flex justify-center items-center text-stone-300 hover:text-stone-100" on:click|stopPropagation={toggle_navigator}>
-            <Icon class="w-8 sm:w-6 h-8 sm:h-6" component={icon}/>
+            <Icon class="w-5 h-5" component={icon}/>
         </button>
     </div>
 
@@ -297,7 +297,7 @@
         {#if user_is_in_multiple_groups}
             <button class="h-full w-12 sm:w-10 px-0 flex justify-center items-center   text-stone-300 hover:text-stone-100"
                     on:click|stopPropagation={show_groups}>
-                <Icon class="w-5 sm:w-4 h-5 sm:h-4" component={FaUsers} />
+                <Icon class="w-5  h-5 " component={FaUsers} />
             </button>
         {/if}
 
@@ -305,7 +305,7 @@
             class="h-full w-12 sm:w-10 px-0 flex justify-center items-center   text-stone-300 hover:text-stone-100"
             on:click|stopPropagation={show_options}>
 
-            <Icon class="w-5 sm:w-4 h-5 sm:h-4" component={FaCog} />
+            <Icon class="w-5  h-5 " component={FaCog} />
         </button>
     </div>
 

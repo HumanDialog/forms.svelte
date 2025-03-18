@@ -3,7 +3,7 @@
     import {    Spinner, 
                 Page, 
                 Icon,
-                IconT, 
+                 
                 ComboSource,
                 List,
                 ListTitle,
@@ -154,13 +154,23 @@
         await reloadTasks(newTask.Id)
     }
 
-    let pageOperations = [
-        {
-            icon: FaPlus,
-            caption: '',
-            action: (focused) => { listComponent.addRowAfter(null) }
+    let pageOperations = {
+            opver: 1,
+            operations: [
+                {
+                    caption: 'View',
+                    operations: [
+                        {
+                            icon: FaPlus,
+                            caption: '',
+                            action: (focused) => { listComponent.addRowAfter(null) },
+                            fab: 'M10',
+                            tbr: 'A'
+                        }
+                    ]
+                }
+            ]
         }
-    ]
 
     function getEditOperations(task)
     {
@@ -190,17 +200,29 @@
 
     let taskOperations = (task) => { 
         let editOperations = getEditOperations(task)
-        return [
+        return {
+            opver: 1,
+            operations: [
                 {
-                    icon: FaPlus,
-                    caption: '',
-                    action: (focused) => { listComponent.addRowAfter(task) }
+                    caption: 'View',
+                    operations: [
+                        {
+                            icon: FaPlus,
+                            caption: '',
+                            action: (focused) => { listComponent.addRowAfter(task) },
+                            fab: 'M10',
+                            tbr: 'A'
+                        }
+                    ]
                 },
                 {
-                    toolbox:[
+                    caption: 'Task',
+                    operations: [
                         {
                             icon: FaPen,
-                            grid: editOperations
+                            grid: editOperations,
+                            fab: 'M20',
+                            tbr: 'B'
                         },
                         {
                             icon: FaEllipsisH,
@@ -215,20 +237,26 @@
                                     caption: 'Delete',
                                     action: (f) => askToDelete(task)
                                 }
-                            ]
+                            ],
+                            fab: 'M30',
+                            tbr: 'B'
+                        },
+                        {
+                            icon: FaCaretDown,
+                            action: (f) => listComponent.moveDown(task),
+                            fab: 'M02',
+                            tbr: 'B'
+                        },
+                        {
+                            icon: FaCaretUp,
+                            action: (f) => listComponent.moveUp(task),
+                            fab: 'M03',
+                            tbr: 'B'
                         }
-                        
                     ]
-                },
-                {
-                    icon: FaCaretDown,
-                    action: (f) => listComponent.moveDown(task)
-                },
-                {
-                    icon: FaCaretUp,
-                    action: (f) => listComponent.moveUp(task)
                 }
-            ];
+            ]
+        }
     }
 
     let taskContextMenu = (task) => {
@@ -264,7 +292,7 @@
             <ListDateProperty name="DueDate"/>
 
             <span slot="left" let:element>
-                <IconT component={element.State == STATE_FINISHED ? FaRegCheckCircle : FaRegCircle} 
+                <Icon component={element.State == STATE_FINISHED ? FaRegCheckCircle : FaRegCircle} 
                     on:click={(e) => finishTask(e, element)} 
                     class="h-6 w-6  text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
             </span>

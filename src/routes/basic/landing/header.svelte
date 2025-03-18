@@ -3,6 +3,8 @@
     import AppIcon from '../appicon.svelte'
     import { link } from 'svelte-spa-router';
     import {Authorized, NotAuthorized, signInHRef, signOutHRef, signUpHRef } from '@humandialog/auth.svelte'
+
+    export let main = false;
     
 </script>
 
@@ -16,16 +18,18 @@
       </a>
        <div class="px-4 w-full block sm:w-auto">
             <ul class="flex flex-row pt-3  items-center justify-between mx-auto space-x-2 sm:space-x-12 mt-0 border-0 border-gray-700">
-                <!--li><a class="block  rounded md:bg-transparent p-0  dark:hover:text-indigo-400" use:link href="/doc/what-is-objectreef-tech-ak1">About</a></li-->
-                <NotAuthorized>
-                    <li><a class="block  rounded md:bg-transparent p-0  text-slate-200 hover:text-indigo-300" use:link href={$signInHRef}>Sign in</a></li>
-                </NotAuthorized>
-                <NotAuthorized>
-                    <li><a class="block rounded md:bg-transparent p-0 text-slate-200 hover:text-indigo-300" use:link href={$signUpHRef}>Get started</a></li>
-                </NotAuthorized>
-                <Authorized>
-                    <li><a class="block  rounded md:bg-transparent p-0 text-slate-200 hover:text-indigo-300" use:link href={$signOutHRef}>Sign out</a></li>
-                </Authorized>
+                {#if main}
+                    <NotAuthorized>
+                        <li><a class="block  rounded md:bg-transparent p-0  text-slate-200 hover:text-indigo-300" use:link href={$signInHRef}>Sign in</a></li>
+                    </NotAuthorized>
+                    <NotAuthorized>
+                        <li><a class="block rounded md:bg-transparent p-0 text-slate-200 hover:text-indigo-300" use:link href={$signUpHRef}>Get started</a></li>
+                    </NotAuthorized>
+                {:else}
+                    <Authorized>
+                        <li><a class="block  rounded md:bg-transparent p-0 text-slate-200 hover:text-indigo-300" use:link href='/'>App</a></li>
+                    </Authorized>
+                {/if}
             </ul>
         </div>
     

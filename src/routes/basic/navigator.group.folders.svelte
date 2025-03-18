@@ -253,9 +253,9 @@
         {#if $session.isActive}
             {@const border=showGroupsSwitchMenu}
             <SidebarGroup {border}>
-                <SidebarItem   href="#/myfolders"
+                <SidebarItem   href="/myfolders"
                                 icon={FaRegFolder}
-                                active={isRoutingTo("#/myfolders", currentPath)} 
+                                active={isRoutingTo("/myfolders", currentPath)} 
                                 operations={(node) => getUserListOperations(node, user)}
                                 summary="Personal folders"
                                 selectable={user}>
@@ -276,7 +276,7 @@
                     <SidebarItem   {href}
                                     icon={FaRegFolder}
                                     bind:this={navItems[idx]}
-                                    active={isRoutingTo(`#/tasklist/${item.Id}`, currentPath) || isRoutingTo(`#/listboard/${item.Id}`, currentPath)}
+                                    active={isRoutingTo(`/tasklist/${item.Id}`, currentPath) || isRoutingTo(`/listboard/${item.Id}`, currentPath)}
                                     operations={(node) => getTaskListOperations(node, item, navItems[idx])}
                                     selectable={item}
                                     summary={{
@@ -313,12 +313,12 @@
         {#if $session.isActive}
             {@const border=showGroupsSwitchMenu}
             <SidebarGroup {border}>
-                <SidebarItem    href="#/mytasks"
-                                icon={FaList}
+                <SidebarItem    href="/myfolders"
+                                icon={FaRegFolder}
                                 operations={(node) => getUserListOperations(node, user)}
-                                summary="All active tasks assigned to me."
+                                summary="Personal folders"
                                 item={user}>
-                    My Tasks
+                    My Folders*
                 </SidebarItem>
             </SidebarGroup>
         {/if}
@@ -328,9 +328,9 @@
                             orderAttrib='Order'
                             bind:this={navLists}>
                 <svelte:fragment let:item let:idx>
-                    {@const href = `#${item.href}`}
+                    {@const href = `${item.href}`}
                     <SidebarItem   {href}
-                                    icon={FaList}
+                                    icon={FaRegFolder}
                                     bind:this={navItems[idx]}
                                     operations={(node) => getTaskListOperations(node, item, navItems[idx])}
                                     {item}
@@ -338,7 +338,7 @@
                                         editable: (text) => {changeSummary(item, text)},
                                         content: item.Summary}}
                                     editable={(text) => {changeName(item, text)}}>
-                        {item.Name}
+                        {item.Title}
                     </SidebarItem>
                 </svelte:fragment>
             </SidebarList> 
@@ -348,7 +348,7 @@
             <SidebarList    objects={archivedLists}
                             bind:this={navArchivedLists}>
                 <svelte:fragment let:item>
-                    {@const href = `#/tasklist/${item.Id}?archivedList`}
+                    {@const href = `/tasklist/${item.Id}?archivedList`}
                     <SidebarItem   {href}
                                     icon={FaList}
                                     summary={item.Summary}

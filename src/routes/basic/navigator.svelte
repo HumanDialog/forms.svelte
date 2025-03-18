@@ -95,8 +95,8 @@
     {
         await reef.post(`/group/Lists/${list.Id}/FinishAll`, {}, onErrorShowAlert)
         
-        if( isRoutingTo(`#/listboard/${list.Id}`, currentPath) || 
-            isRoutingTo(`#/tasklist/${list.Id}`, currentPath))
+        if( isRoutingTo(`/listboard/${list.Id}`, currentPath) || 
+            isRoutingTo(`/tasklist/${list.Id}`, currentPath))
         {
             reloadMainContentPage();
         }
@@ -106,7 +106,7 @@
     {       
         await reef.post(`/user/FinishTasks`, {}, onErrorShowAlert)
         
-        if(isRoutingTo('#/mytasks', currentPath))
+        if(isRoutingTo('/mytasks', currentPath))
         {
             reloadMainContentPage();
         }
@@ -119,7 +119,7 @@
             return false;
 
         let linkPath = href;
-        linkPath.startsWith('#')
+        if(linkPath.startsWith('#'))
             linkPath = linkPath.substring(1)
 
         
@@ -395,9 +395,9 @@
         {#if $session.isActive}
             {@const border=showGroupsSwitchMenu}
             <SidebarGroup {border}>
-                <SidebarItem   href="#/mytasks"
+                <SidebarItem   href="/mytasks"
                                 icon={FaList}
-                                active={isRoutingTo("#/mytasks", currentPath)}
+                                active={isRoutingTo("/mytasks", currentPath)}
                                 operations={(node) => getUserListOperations(node, user)}
                                 summary="All active tasks assigned to me."
                                 selectable={user}>
@@ -418,7 +418,7 @@
                     <SidebarItem   {href}
                                     icon={FaList}
                                     bind:this={navItems[idx]}
-                                    active={isRoutingTo(`#/tasklist/${item.Id}`, currentPath) || isRoutingTo(`#/listboard/${item.Id}`, currentPath)}
+                                    active={isRoutingTo(`/tasklist/${item.Id}`, currentPath) || isRoutingTo(`/listboard/${item.Id}`, currentPath)}
                                     operations={(node) => getTaskListOperations(node, item, navItems[idx])}
                                     selectable={item}
                                     summary={{
@@ -435,7 +435,7 @@
             <SidebarList    objects={archivedLists}
                             bind:this={navArchivedLists}>
                 <svelte:fragment let:item>
-                    {@const href = `#/tasklist/${item.Id}?archivedList`}
+                    {@const href = `/tasklist/${item.Id}?archivedList`}
                     <SidebarItem   {href}
                                     icon={FaList}
                                     summary={item.Summary}
@@ -469,7 +469,7 @@
         {#if $session.isActive}
             {@const border=showGroupsSwitchMenu}
             <SidebarGroup {border}>
-                <SidebarItem    href="#/mytasks"
+                <SidebarItem    href="/mytasks"
                                 icon={FaList}
                                 operations={(node) => getUserListOperations(node, user)}
                                 summary="All active tasks assigned to me."
@@ -484,7 +484,7 @@
                             orderAttrib='Order'
                             bind:this={navLists}>
                 <svelte:fragment let:item let:idx>
-                    {@const href = `#/listboard/${item.Id}`}
+                    {@const href = item.href}
                     <SidebarItem   {href}
                                     icon={FaList}
                                     bind:this={navItems[idx]}
@@ -504,7 +504,7 @@
             <SidebarList    objects={archivedLists}
                             bind:this={navArchivedLists}>
                 <svelte:fragment let:item>
-                    {@const href = `#/tasklist/${item.Id}?archivedList`}
+                    {@const href = `/tasklist/${item.Id}?archivedList`}
                     <SidebarItem   {href}
                                     icon={FaList}
                                     summary={item.Summary}

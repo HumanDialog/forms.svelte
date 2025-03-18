@@ -42,8 +42,13 @@
 		cl += ' ' + $$props.class
 
 	onMount(() => {
-		if (toolbarOperations != undefined && Array.isArray(toolbarOperations))
-			$pageToolbarOperations = [...toolbarOperations];
+		if (toolbarOperations != undefined)
+		{ 
+			if(Array.isArray(toolbarOperations))
+				$pageToolbarOperations = [...toolbarOperations];
+			else
+				$pageToolbarOperations = {...toolbarOperations};
+		}
 
 		$page_title = title;
 
