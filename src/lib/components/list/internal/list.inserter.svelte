@@ -37,7 +37,7 @@
     
 </script>
 
-<section    class="mt-3 my-0  w-full text-lg sm:text-sm text-stone-700 dark:text-stone-400 cursor-default rounded-md border border-transparent bg-stone-200 dark:bg-stone-700">
+<section    class=" my-1 w-full text-base text-stone-700 dark:text-stone-400 cursor-default rounded-md border border-transparent bg-stone-200 dark:bg-stone-700">
     <div class="flex flex-row">
         {#if icon}
             <!--Icon   size={3} 
@@ -47,8 +47,8 @@
         {/if}
 
         <p  class=" ml-3 py-1
-                    text-lg font-semibold min-h-[1.75rem]
-                    sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
+                    text-base font-semibold min-h-[1.75rem]
+                    sm:min-h-[1.25rem]
                     whitespace-nowrap overflow-clip flex-none w-1/2 sm:w-1/3" tabindex="0"
             bind:this={titleElement}
             use:editable={{
@@ -62,8 +62,8 @@
     {#if editSummary}
         <p  bind:this={summaryElement}
             class="     ml-10 sm:ml-9 
-                        sm:text-xs sm:min-h-[1rem]
-                        text-base min-h-[1.5rem]
+                        sm:min-h-[1rem]
+                        text-sm min-h-[1.5rem]
                         text-stone-400"
                 use:editable={{
                     action: onSummaryChanged,

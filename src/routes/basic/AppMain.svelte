@@ -48,7 +48,7 @@
         return [
             {
                 icon: FaPlus,
-                action: (f) => navigator?.requestAddList()
+                action: (f) => navigator?.requestAdd()
             }
         ]
     }
@@ -63,7 +63,7 @@
                     operations: [
                         {
                             icon: FaPlus,
-                            action: (f) => navigator?.requestAddList(),
+                            action: (f) => navigator?.requestAdd(),
                             fab: 'M10'
                         }
                     ]

@@ -13,6 +13,8 @@
     import NotFound from './landing/not.found.svelte'
     import AppView from './AppView.svelte';
 
+    import { GoogleAnalytics } from '@beyonk/svelte-google-analytics'
+    import {cookies_allow_analytics} from './landing/cookie.preferences'
     
     
 	const mode = __APP_MODE__
@@ -55,7 +57,29 @@
                         ],
                         apiVersion: "v001"}
                    });
+
+    let google_analytics;
+    const google_analytics_identifier = __GA_IDENTIFIER__
+    let enable_google_analytics = false;
+
+    $:{
+        let prev_enable_google_analytics = enable_google_analytics;
+
+        if($cookies_allow_analytics === 'true')
+            enable_google_analytics = true;
+        else
+            enable_google_analytics = false;
+
+        if(!prev_enable_google_analytics && prev_enable_google_analytics != enable_google_analytics && google_analytics)
+            google_analytics.init();
+    }
+
 </script>
+
+<GoogleAnalytics 
+    bind:this={google_analytics}
+    properties={[ google_analytics_identifier ]}
+    enabled={enable_google_analytics}/>
 
 <AuthorizedView optionalGuestMode automaticallyRefreshTokens={true}>
     <Router

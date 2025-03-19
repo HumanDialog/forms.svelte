@@ -13,7 +13,8 @@
 				mainContentPageReloader,
                 Modal,
                 onErrorShowAlert} from '$lib'
-    import {FaRegFile, FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaColumns, FaArchive, FaList, FaEllipsisH, FaChevronRight, FaChevronLeft} from 'svelte-icons/fa'
+    import {FaRegFile, FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaColumns, FaArchive, 
+        FaList, FaEllipsisH, FaChevronRight, FaChevronLeft, FaRegShareSquare, FaLink, FaRegStar, FaStar} from 'svelte-icons/fa'
     import {location, pop, push, querystring} from 'svelte-spa-router'
 
     export let params = {}
@@ -21,10 +22,10 @@
     let contextItem = null;
     let contextPath;
     let contextItemId;
-    let listComponent;
-    let isArchivedList = false;
-    let isArchivedTasks = false;
-    let listTitle = ''
+    let subfoldersComponent;
+    let notesComponent;
+    let tasksComponent;
+    let folderTitle = ''
     
     let users = [];
 
@@ -67,23 +68,31 @@
                                     {
                                         Id: 1,
                                         Association: '',
-                                        Expressions:['Id','Title','Summary'],
+                                        Expressions:['Id', '$ref','Title','Summary', 'IsPinned', 'IsBasket'],
                                         SubTree:
                                         [
                                             {
                                                 Id: 2,
                                                 Association: 'Folders',
                                                 //Filter: 'State <> STATE_FINISHED',
-                                                Sort: 'Title',
-                                                Expressions:['$ref', 'Title', 'href', 'fref']
+                                                Sort: 'Order',
+                                                Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'IsPinned']
                                                 
                                             },
                                             {
                                                 Id: 3,
                                                 Association: 'Notes',
                                                 //Filter: 'State <> STATE_FINISHED',
-                                                Sort: 'Title',
-                                                Expressions:['$ref', 'Title', 'href', 'fref']
+                                                Sort: 'Order',
+                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href']
+                                                
+                                            },
+                                            {
+                                                Id: 4,
+                                                Association: 'Tasks',
+                                                //Filter: 'State <> STATE_FINISHED',
+                                                Sort: 'Order',
+                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'href']
                                                 
                                             }
                                         ]
@@ -94,41 +103,33 @@
         if(res)
         {    
             contextItem = res.Folder;
-            listTitle = contextItem.Title;
+            folderTitle = contextItem.Title;
         }
         else
             contextItem = null
 
-         console.log(res)                       
-         //
     }
 
-    async function reloadTasks(selectRecommendation)
-    {
-        await fetchData();
-        listComponent.reload(contextItem, selectRecommendation);
-    }
-    
-
+   
     let deleteModal;
-    let taskToDelete;
-    function askToDelete(task)
+    let folderToDelete;
+    function askToDelete(folder)
     {
-        taskToDelete = task;
+        folderToDelete = folder;
         deleteModal.show()
     }
 
     
-    async function deleteTask()
+    async function deleteFolder()
     {
-        if(!taskToDelete)
+        if(!folderToDelete)
             return;
 
-        await reef.delete(taskToDelete.$ref, onErrorShowAlert);
+        await reef.delete(folderToDelete.$ref, onErrorShowAlert);
         deleteModal.hide();
 
-        
-        await reloadTasks(listComponent.SELECT_NEXT)
+        await fetchData();
+        subfoldersComponent.reload(contextItem, subfoldersComponent.SELECT_NEXT);
     }
 
     let archiveModal;
@@ -147,7 +148,8 @@
         await reef.post(`${taskToArchive.$ref}/Archive`, {}, onErrorShowAlert)
         archiveModal.hide();
         
-        await reloadTasks(listComponent.SELECT_NEXT)
+        await fetchData();
+        tasksComponent.reload(contextItem, tasksComponent.SELECT_NEXT);
     }
 
     async function finishTask(event, task)
@@ -157,43 +159,153 @@
 
         let result = await reef.post(`${task.$ref}/Finish`, {}, onErrorShowAlert);
         if(result)
-            await reloadTasks(listComponent.KEEP_OR_SELECT_NEXT)   
+        {
+            await fetchData();
+            tasksComponent.reload(contextItem, tasksComponent.KEEP_OR_SELECT_NEXT);
+        }
     }
 
     async function addTask(newTaskAttribs)
     {
-        let res = await reef.post(`${contextPath}/CreateTaskEx`,{ properties: newTaskAttribs }, onErrorShowAlert)
+        let res = await reef.post(`${contextPath}/CreateTaskUI`,{ properties: newTaskAttribs }, onErrorShowAlert)
         if(!res)
             return null;
 
-        let newTask = res.Task;
-        await reloadTasks(newTask.Id)
+        let newTask = res.FolderTask;
+
+        await fetchData();
+        tasksComponent.reload(contextItem, newTask.Id);
+    }
+
+    async function addNote(newNoteAttribs)
+    {
+        let res = await reef.post(`${contextPath}/CreateNoteUI`,{ properties: newNoteAttribs }, onErrorShowAlert)
+        if(!res)
+            return null;
+
+        let newNote = res.FolderNote;
+
+        await fetchData();
+        notesComponent.reload(contextItem, newNote.Id);
+    }
+
+    async function addFolder(newFolderAttribs)
+    {
+        let res = await reef.post(`${contextPath}/CreateSubFolderUI`,{ properties: newFolderAttribs }, onErrorShowAlert)
+        if(!res)
+            return null;
+
+        let newFolder = res.FolderFolder;
+
+        await fetchData();
+        subfoldersComponent.reload(contextItem, newFolder.Id);
+    }
+
+    async function toggleFolderPinned(folder)
+    {
+        let res = await reef.post(`${folder.$ref}/TogglePinned`, {}, onErrorShowAlert)
+        if(res)
+        {
+            folder.IsPinned = true
+        }
+        else
+        {
+            folder.IsPinned = false
+        }
     }
 
     function getPageOperations()
     {
-        if(isArchivedList)
+        if(!contextItem)
             return [];
 
-        if(isArchivedTasks)
-            return [];
-        
-        return [
+        if(contextItem.IsBasket)
+        {
+            return {
+                opver: 1,
+                operations: [
                     {
-                        icon: FaPlus,
-                        action: (f) => { listComponent.addRowAfter(null) }
-                    },
-                    {
-                        separator: true
-                    },
-                    {
-                        icon: FaColumns,
-                        right: true,
-                        action: (f) => switchToKanban()
+                        caption: 'View',
+                        operations: [
+                            {
+                                caption: 'Clear Basket',
+                                icon: FaTrash,
+                                action: (f) => console.log('TODO: clear basket', contextItem),
+                                fab: 'M20',
+                                tbr: 'A'
+                            }
+                        ]
                     }
                 ]
-        
+            }
+        }
+        else
+        {
+            let pinOperation;
+            if(contextItem.IsPinned)
+            {
+                pinOperation = {
+                    icon: FaStar, //aRegShareSquare, // 
+                    action: async (f) => { await toggleFolderPinned(contextItem)  },
+                    fab: 'M30',
+                    tbr: 'C'
+                }
+            }
+            else
+            {
+                pinOperation = {
+                    icon: FaRegStar, //aRegShareSquare, // 
+                    action: async (f) => { await toggleFolderPinned(contextItem)  },
+                    fab: 'M30',
+                    tbr: 'C'
+                }
+            }
+
+            
+            return {
+                opver: 1,
+                operations: [
+                    {
+                        caption: "View",
+                        operations: [
+                            {
+                                icon: FaPlus,
+                                menu: [
+                                    {
+                                        caption: 'New folder',
+                                        icon: FaRegFolder,
+                                        action: (f) => { subfoldersComponent.addRowAfter(null) }
+                                    },
+                                    {
+                                        caption: 'New note',
+                                        icon: FaRegFile,
+                                        action: (f) => { notesComponent.addRowAfter(null) }
+                                    },
+                                    {
+                                        caption: 'New task',
+                                        icon: FaRegCircle,
+                                        action: (f) => { tasksComponent.addRowAfter(null) }
+                                    }
+                                ],
+                                fab: 'M10',
+                                tbr: 'A'
+                            },
+                            {
+                                caption: 'Attach...',
+                                icon: FaLink, //aRegShareSquare, // 
+                                action: (f) => { console.log('Attach...')  },
+                                fab: 'M20',
+                                tbr: 'A'
+                            },
+                            pinOperation
+                        
+                        ]
+                    }
+                ]
+            }
+        }
     }
+    
 
     function switchToKanban()
     {
@@ -274,10 +386,41 @@
             ];
     }
 
-    let taskContextMenu = (task) => {
-        let editOperations = getEditOperations(task);
+    let subfolderOperations = (subfolder) => { 
         return {
-            grid: editOperations
+            opver: 1,
+            operations: [
+                {
+                    caption: 'Folder',
+                    operations: [
+                        {
+                            icon: FaTrash,
+                            action: (f) => console.log('TODO: delete folder', subfolder),
+                            fab: 'M20',
+                            tbr: 'A'
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+
+    let noteOperations = (note) => {
+        return { 
+            opver: 1,
+            operations: [
+                {
+                    caption: 'Note',
+                    operations: [
+                        {
+                            icon: FaTrash,
+                            action: (f) => {console.log('TODO: delete note', note) },
+                            fab: 'M20',
+                            tbr: 'A'
+                        }
+                    ]
+                }
+            ]
         }
     }
 
@@ -288,40 +431,67 @@
     <Page   self={contextItem} 
             toolbarOperations={ getPageOperations() }
             clearsContext='props sel'
-            title={listTitle}>
+            title={folderTitle}>
 
-        <List   self={contextItem} 
-                a='Folders'
-                title={listTitle} 
-                toolbarOperations={taskOperations} 
-                contextMenu={taskContextMenu}
-                orderAttrib='Title'
-                bind:this={listComponent}>
-            <ListTitle a='Title' hrefFunc={(folder) => `${folder.fref}`}/>
-            <ListSummary a='Summary'/>
-            <ListInserter action={addTask} icon/>
+        <!--section-->
+            <List   self={contextItem} 
+                    a='Folders'
+                    title={folderTitle} 
+                    toolbarOperations={subfolderOperations} 
+                    orderAttrib='Order'
+                    bind:this={subfoldersComponent}>
+                <ListTitle a='Title' hrefFunc={(folder) => `${folder.href}`}/>
+                <ListSummary a='Summary'/>
+                <ListInserter action={addFolder} icon/>
 
-            <span slot="left" let:element>
-                <Icon component={FaRegFolder} 
-                    class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
-            </span>
-        </List>
-        <List   self={contextItem} 
-                a='Notes'
-                
-                toolbarOperations={taskOperations} 
-                contextMenu={taskContextMenu}
-                orderAttrib='Title'
-                bind:this={listComponent}>
-            <ListTitle a='Title' hrefFunc={(note) => `${note.fref}`}/>
-            <ListSummary a='Summary'/>
-            <ListInserter action={addTask} icon/>
+                <span slot="left" let:element>
+                    <Icon component={FaRegFolder} 
+                        class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
+                </span>
+            </List>
+        <!--/section-->
 
-            <span slot="left" let:element>
-                <Icon component={FaRegFile} 
-                    class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
-            </span>
-        </List>
+        <!--section-->
+            <List   self={contextItem} 
+                    a='Notes'
+                    toolbarOperations={noteOperations} 
+                    orderAttrib='Order'
+                    bind:this={notesComponent}>
+                <ListTitle a='Title' hrefFunc={(note) => `${note.href}`}/>
+                <ListSummary a='Summary'/>
+                <ListInserter action={addNote} icon/>
+
+                <span slot="left" let:element>
+                    <Icon component={FaRegFile} 
+                        class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
+                </span>
+            </List>
+        <!--/section-->
+        
+        <!--section-->
+            <List   self={contextItem} 
+                    a='Tasks'
+                    toolbarOperations={taskOperations} 
+                    orderAttrib='Order'
+                    bind:this={tasksComponent}>
+                <ListTitle a='Title' hrefFunc={(task) => `${task.href}`}/>
+                <ListSummary a='Summary'/>
+                <ListInserter action={addTask} icon/>
+
+                <span slot="left" let:element>
+                    {#if element.State == STATE_FINISHED}
+                        <Icon component={FaRegCheckCircle} 
+                        class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
+                        
+                    {:else}
+                        <Icon component={FaRegCircle} 
+                            on:click={(e) => finishTask(e, element)} 
+                            class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
+                        
+                    {/if}
+                </span>
+            </List>
+        <!---/section-->
 
     </Page>
 {:else}
@@ -332,7 +502,7 @@
 <Modal  title="Delete"
         content="Are you sure you want to delete selected task?"
         icon={FaTrash}
-        onOkCallback={deleteTask}
+        onOkCallback={deleteFolder}
         bind:this={deleteModal}
         />
 

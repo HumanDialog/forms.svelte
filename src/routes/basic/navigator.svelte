@@ -244,7 +244,7 @@
             archivedLists = [];
     }
 
-    export function requestAddList()
+    export function requestAdd()
     {
         navLists.add(async (listName, order) => {
             await reef.post("/group/Lists/new", 

@@ -361,7 +361,6 @@
 
     export function hide()
     {
-        console.log('combo hide')
         if(mutation_observer)
             mutation_observer.disconnect();
 
