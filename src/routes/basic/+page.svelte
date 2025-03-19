@@ -69,6 +69,8 @@
             '/tasklist/*':  AppView,
             '/task' :       AppView,
             '/task/*' :     AppView,
+            '/note' :       AppView,
+            '/note/*' :     AppView,
             '/listboard' :  AppView,
             '/listboard/*': AppView,
             '/mytasks' :    AppView,

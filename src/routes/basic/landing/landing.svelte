@@ -7,7 +7,7 @@
 </script>
 
 <svelte:head>
-  <title>Octopus Basic | A simple task management tool that even the busiest will love.</title>
+  <title>Octopus | A simple task and note organizer for developers and teams.</title>
   <link rel="canonical" href="https://octopus.objectreef.dev"/>
 </svelte:head> 
 
@@ -23,10 +23,10 @@
             <div class="relative max-w-5xl mx-auto pt-20 sm:pt-24 lg:pt-32 pb-8 sm-pb-16">
                 <h1
                     class="px-8 sm:px-20 text-slate-900 font-extrabold text-4xl sm:text-5xl lg:text-6xl tracking-tight text-center dark:text-white">
-                    Get the chaos under control.<br> Organize your life.
+                    OCTOPUS
                 </h1>
-                <h2 class="px-2 sm:px-10 mt-6 text-xl sm:text-2xl text-slate-600 dark:text-slate-200 text-center max-w-5xl mx-2 ">
-                    A simple task management tool that even the busiest will love.
+                <h2 class="px-2 sm:px-10 mt-6 pb-10 text-xl sm:text-2xl text-slate-600 dark:text-slate-200 text-center max-w-5xl mx-2 ">
+                    A simple task and note organizer for developers and teams.
                 </h2>
                 
                 <div class="flex flex-row justify-center mt-4">
