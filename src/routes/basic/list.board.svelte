@@ -593,7 +593,8 @@
                 caption: 'Add column',
                 icon: inColumnContext ? FaPlus : undefined,
                 action: (f) => addColumn("", columnIdx+1)
-            }];
+            }
+        ];
     }
 
     function getColumnOperationsX(columnIdx, taskState)

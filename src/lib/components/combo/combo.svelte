@@ -1,10 +1,10 @@
 <script lang="ts">
-    import {data_tick_store, contextItemsStore, contextTypesStore} from '../../stores.js' 
+    import {data_tick_store, contextItemsStore, contextTypesStore, toolsActionsOperations} from '../../stores.js' 
     import {informModification, pushChanges} from '../../updates.js'
-    import {parseWidthDirective,shouldBeComapact} from '../../utils.js'
+    import {isDeviceSmallerThan, parseWidthDirective,shouldBeComapact} from '../../utils.js'
     import {afterUpdate, getContext, onMount, setContext} from 'svelte';
     import {rCombo_definition, rCombo_item, cached_sources} from './combo'
-    import FaChevronDown from 'svelte-icons/fa/FaChevronDown.svelte'
+    import {FaChevronDown, FaTimes} from 'svelte-icons/fa'
     import Icon from '../icon.svelte'
     import { reef } from '@humandialog/auth.svelte/dist/index.js';
 
@@ -279,7 +279,25 @@
         else    // like bottom 
             y = rect.y + rect.height;
 
-        if(show_fullscreen)
+        if(isDeviceSmallerThan("sm"))
+        {
+            let screenRect = new DOMRect;
+            screenRect.x = 0;
+            screenRect.y = 0;
+            screenRect.width = window.innerWidth;
+            screenRect.height = window.innerHeight;
+
+            const margin = 5
+
+           
+            const maxHeight = screenRect.height / 2 - margin;
+            const width = screenRect.width - 2*margin;
+            x = margin;
+            y = screenRect.bottom - margin;
+
+            dropdown_position = `position: fixed; left: ${x}px; top: ${y}px; transform: translate(0, -100%); width: ${width}px; max-height: ${maxHeight}px; display: block`
+        }
+        else if(show_fullscreen)
         {
             dropdown_position =`position: fixed; left: 0px; top: 0px; width: ${client_rect.width}px; height: ${client_rect.height}px;`;
         }
@@ -290,12 +308,12 @@
                 dropdown_position += ' transform: translate(0, -100%);'
         }
 
-        
-        console.log('dropdown_position', dropdown_position, rect, client_rect)
-        console.log('preferred_palette_height', preferred_palette_height)
-        console.log('bottom_space', bottom_space)
-        console.log('top_space', top_space)
-        
+        //
+        //console.log('dropdown_position', dropdown_position, rect, client_rect)
+        //console.log('preferred_palette_height', preferred_palette_height)
+        //console.log('bottom_space', bottom_space)
+        //console.log('top_space', top_space)
+        //
 
         is_dropdown_open = true;
         
@@ -317,6 +335,25 @@
                                         subtree: true } );
         }
 
+        if(isDeviceSmallerThan("sm"))
+        {    
+            $toolsActionsOperations = {
+                opver: 1,
+                operations: [
+                    {
+                        caption: 'Menu',
+                        operations: [
+                            {
+                                icon: FaTimes,
+                                action: (f) => { hide(); },
+                                fab: 'M00',
+                                tbr: 'A'
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
         
         //filtered_source = definition.source.map( e => e);
         //highlighted_option = filtered_source.length > 0 ? filtered_source[0] : null;
@@ -324,10 +361,13 @@
 
     export function hide()
     {
+        console.log('combo hide')
         if(mutation_observer)
             mutation_observer.disconnect();
 
         is_dropdown_open = false;
+        $toolsActionsOperations = []
+        dropdown_position = 'display: none;'
 
         combo_text = get_combo_text();
         

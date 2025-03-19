@@ -31,13 +31,13 @@
     import Gapcursor from '@tiptap/extension-gapcursor'
     import History from '@tiptap/extension-history'
     
-    import {data_tick_store, contextItemsStore, contextTypesStore, onErrorShowAlert} from '../../stores.js'
+    import {data_tick_store, contextItemsStore, contextTypesStore, onErrorShowAlert, toolsActionsOperations} from '../../stores.js'
     import {informModification, pushChanges} from '../../updates.js'
     import {isDeviceSmallerThan, parseWidthDirective, refreshToolbarOperations, UI} from '../../utils.js'
     import Palette from './internal/palette.svelte'
 
     import {FaFont, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle, FaInfo, FaImage,
-            FaBold, FaItalic, FaUnderline, FaStrikethrough, FaArrowLeft, FaGripLines, FaListUl, FaTable } from 'svelte-icons/fa'
+            FaBold, FaItalic, FaUnderline, FaStrikethrough, FaArrowLeft, FaGripLines, FaListUl, FaTable, FaTimes } from 'svelte-icons/fa'
             
     import IcH1 from './internal/h1.icon.svelte'
     import IcH2 from './internal/h2.icon.svelte'
@@ -72,7 +72,7 @@
         editor.commands.focus();
     }
 
-let suggestionRange = undefined;
+    let suggestionRange = undefined;
     export function getFormattingOperations(withCaptions = false)
     {
         let result = [];
@@ -839,11 +839,34 @@ let suggestionRange = undefined;
     function on_palette_shown()
     {
         is_command_palette_visible = true;
+
+        if(isDeviceSmallerThan("sm"))
+        {    
+            $toolsActionsOperations = {
+                opver: 1,
+                operations: [
+                    {
+                        caption: 'Palette',
+                        operations: [
+                            {
+                                icon: FaTimes,
+                                action: (f) => { palette.hide(); editor?.commands.focus() },
+                                fab: 'M00',
+                                tbr: 'A'
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+            
     }
 
     function on_palette_hidden()
     {
         is_command_palette_visible = false;
+        $toolsActionsOperations = []
+
         //clear_previous_text_and_position();
     }
     
@@ -1014,7 +1037,7 @@ let suggestionRange = undefined;
                
                //{    caption: 'Styles',       separator: true },
 
-               {    caption: 'Back to edit', description: 'Escape',                                         icon: FaArrowLeft,                  on_choice: () => { editor?.commands.focus()}, is_visible: () => isDeviceSmallerThan("sm") },
+             //  {    caption: 'Back to edit', description: 'Escape',                                         icon: FaArrowLeft,                  on_choice: () => { editor?.commands.focus()}, is_visible: () => isDeviceSmallerThan("sm") },
                
                {   caption: 'Normal',       description: 'This is normal text style',      tags: 'text',    icon: FaRemoveFormat,               on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setParagraph().run(); else editor.commands.setParagraph() },  is_active: () => editor?.isActive('paragraph')  } ,
                

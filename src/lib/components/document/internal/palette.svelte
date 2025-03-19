@@ -5,8 +5,8 @@
     import Pallete_row from './palette.row.svelte'
     import { createEventDispatcher } from 'svelte';
     import Icon from '../../icon.svelte'
-    import { isDeviceSmallerThan} from '../../../utils.js'
-
+    import { isDeviceSmallerThan, UI} from '../../../utils.js'
+    
     export let commands         :Document_command[];
 
     export let width_px        :number = 400;
@@ -94,6 +94,7 @@
         //console.log("show:", css_style)
         visible = true;
         dispatch('palette_shown');
+        
     }
 
     export function show_fullscreen(_width_px :number, _height_px :number)
@@ -105,6 +106,7 @@
 
         visible = true;
         dispatch('palette_shown');
+        
     }
 
     export function hide()
@@ -398,11 +400,12 @@
         {/if}
     </menu>
 {:else}
-    <div    id="__hd_FormattingPalette"
-            class="bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md z-30 overflow-y-auto" 
+    <div    class="bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md overflow-y-auto z-20"
+            id="__hd_FormattingPalette"
+            bind:this={paletteElement}
             hidden={!visible}
-            style={css_style}
-            bind:this={paletteElement}>
+            style={css_style} >
+        
         {#if filtered_commands && filtered_commands.length}
             {#each filtered_commands as cmd, idx (cmd.caption)}
                 {#if cmd.separator}
@@ -428,5 +431,6 @@
         {/if}
 
     </div>
+    
 {/if}
 

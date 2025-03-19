@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { afterUpdate, tick} from 'svelte';
     import Icon from './icon.svelte'
-    import {contextItemsStore} from '../stores'
+    import {contextItemsStore, toolsActionsOperations} from '../stores'
     import {isDeviceSmallerThan, isOnScreenKeyboardVisible} from '../utils'
     import {hideWholeContextMenu} from './menu'
+    import {FaTimes} from 'svelte-icons/fa'
 
     export let widthPx     :number = 400;
 
@@ -21,51 +22,131 @@
     let menu_items :HTMLElement[] = [];
     let submenus = [];
     let around_rect :DOMRect;
+    let css_position = ''
 
     $: display = visible ? 'block' : 'none';
 
-    afterUpdate(() => 
+    /* afterUpdate(() => 
     {
+        console.log('menu afterUpdate', around_rect)
+
         let rect :DOMRect = menu_root.getBoundingClientRect()
         if(rect.height == 0)
             return;
 
-        const m = 15;
-        let container_rect :DOMRect = new DOMRect(m, 0, window.innerWidth-2*m, window.innerHeight)
-        
-        if(isOnScreenKeyboardVisible())       // are we on mobile?
+        if(isDeviceSmallerThan("sm"))
         {
-            //console.log('keyboard visible, move menu 300px up', el)
-            // todo: exact value can be calculated from minViewportHeight and maxViewportHeight
-            container_rect.height -= 300; // it will be enough?  
+            
         }
-
-        //console.log('beforeUpdate', rect, ' in ', container_rect)
-                
-        let xShifted = false;
-        if(rect.right > container_rect.right)
+        else
         {
-            x = container_rect.right - rect.width + m;
-            xShifted = true;
+            //css_position = calculatePosition(x, y, around_rect, visible);
         }
-
-        let yShifted = false;
-        if(rect.bottom > container_rect.bottom)
-        {
-            y = container_rect.bottom - rect.height-m;
-            if(xShifted)    // possible covers around rect
-                x -= around_rect.width;
-            else
-                y -= around_rect.height-m;
-            yShifted = true;
-        }
-
-        if(rect.left < container_rect.left)
-            x = container_rect.left;
-
-        if(rect.top < container_rect.top)
-            y = container_rect.top
     })
+        */
+
+    function calculatePosition(x: number, y: number, around: DOMRect, visible: boolean, fresh: boolean): string
+    {
+        let result = '';
+
+        if(!visible)
+        {
+            result = 'display: none';
+        }
+        else if(isDeviceSmallerThan("sm"))
+        {
+            let screenRect = new DOMRect;
+            screenRect.x = 0;
+            screenRect.y = 0;
+            screenRect.width = window.innerWidth;
+            screenRect.height = window.innerHeight;
+
+            const margin = 5
+
+            let myRect :DOMRect|null = null;
+            if(!fresh)
+            {
+                myRect = menu_root.getBoundingClientRect()
+                if(myRect.height == 0)
+                {
+                    myRect = null;
+                }
+            }
+            
+            if(myRect)
+            {
+                let maxHeight = screenRect.height / 2 - margin;
+
+                if(myRect.height < maxHeight)
+                    maxHeight = myRect.height
+                
+                const width = screenRect.width - 2*margin;
+                x = margin;
+                y = screenRect.bottom - maxHeight - margin;
+
+                result = `left: ${x}px; top: ${y}px; width: ${width}px; max-height: ${maxHeight}px; display: block`
+            }
+            else
+            {
+                const maxHeight = screenRect.height / 2 - margin;
+                const width = screenRect.width - 2*margin;
+                x = margin;
+                y = screenRect.bottom - maxHeight - margin;
+
+                result = `left: ${x}px; top: ${y}px; width: ${width}px; max-height: ${maxHeight}px; display: block`
+            }
+            
+        }
+        else
+        {   
+            let myRect :DOMRect|null = null;
+            if(!fresh)
+            {
+                myRect = menu_root.getBoundingClientRect()
+                if(myRect.height == 0)
+                {
+                    myRect = null;
+                }
+            }
+
+            if(myRect)
+            {
+                const m = 15;
+                let screenRect :DOMRect = new DOMRect(m, 0, window.innerWidth-2*m, window.innerHeight)
+
+                let xShifted = false;
+                if(myRect.right > screenRect.right)
+                {
+                    x = screenRect.right - myRect.width + m;
+                    xShifted = true;
+                }
+
+                let yShifted = false;
+                if(myRect.bottom > screenRect.bottom)
+                {
+                    y = screenRect.bottom - myRect.height-m;
+                    if(around)
+                    {
+                        if(xShifted)    // possible covers around rect
+                            x -= around.width;
+                        else
+                            y -= around.height-m;
+                    }
+                    yShifted = true;
+                }
+
+                if(myRect.left < screenRect.left)
+                    x = screenRect.left;
+
+                if(myRect.top < screenRect.top)
+                    y = screenRect.top
+            }
+
+            result = `left:${x}px; top:${y}px; display: block`
+        }
+
+        return result;
+    }
     
     export async function show(around :DOMRect|DOMPoint, _operations)
     {
@@ -83,7 +164,9 @@
         }
 
         visible = true;
+        css_position = calculatePosition(x, y, around_rect, true, true);
         
+
         operations = [..._operations];
         focused_index = operations.findIndex(o => !o.disabled)
 
@@ -97,7 +180,29 @@
         }
         
 
-        await tick();
+        if(isDeviceSmallerThan("sm"))
+        {    
+            $toolsActionsOperations = {
+                opver: 1,
+                operations: [
+                    {
+                        caption: 'Menu',
+                        operations: [
+                            {
+                                icon: FaTimes,
+                                action: (f) => { hide(); },
+                                fab: 'M00',
+                                tbr: 'A'
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+
+        await tick();       // render menu and fix position after rendering
+
+        css_position = calculatePosition(x, y, around_rect, true, false);
 
         if(is_root_menu)
             menu_root.addEventListener('click', on_before_container_click, true)
@@ -105,8 +210,11 @@
         
         if(menu_items.length && !isDeviceSmallerThan("sm"))
             focus_menu_item(focused_index);
+
         
     }
+
+    
 
     export function isVisible()
     {
@@ -115,7 +223,10 @@
 
     export function hide()
     {
+        $toolsActionsOperations = []
+
         visible = false;
+        css_position = calculatePosition(x, y, around_rect, false, false);
 
         window.removeEventListener('click', on_before_window_click, true);
         menu_root.removeEventListener('click', on_before_container_click, true);
@@ -315,8 +426,8 @@
 
 <div id="__hd_svelte_contextmenu" 
     class=" bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-900 shadow-md 
-            z-30 fixed min-w-[{min_width_px}px] w-max" 
-    style={`left:${x}px; top:${y}px; display:${display}`}
+            z-30 fixed min-w-[{min_width_px}px] w-max overflow-y-auto" 
+    style={css_position}
     bind:this={menu_root}>
 
     {#each operations as operation, index}

@@ -21,7 +21,7 @@
 	import { onMount, tick } from 'svelte';
     import {location, querystring, push} from 'svelte-spa-router'
     import TaskSteps from './task.steps.svelte'
-    import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen, FaList} from 'svelte-icons/fa/'
+    import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen, FaList, FaTimes} from 'svelte-icons/fa/'
 	
     let taskRef = ''
     let task = null;
@@ -522,7 +522,7 @@
     }
     
 
-    function getPageOperationsWithFormattingTools() 
+    function getPageOperationsWithFormattingToolsX() 
     {
         const mobile = isDeviceSmallerThan("sm")
         if(mobile)
@@ -558,6 +558,28 @@
 
             let operations = [addOperation,  separator, ...formattingOperations]
             return operations
+        }
+    }
+
+    function getPageOperationsWithFormattingTools()
+    {
+        return [];
+        
+        return {
+            opver: 1,
+            operations: [
+                {
+                    caption: 'View',
+                    operations: [
+                        {
+                            icon: FaTimes,
+                            action: (f) => {},
+                            fab: 'M00',
+                            tbr: 'A'
+                        }
+                    ]
+                }
+            ]
         }
     }
 
@@ -653,7 +675,7 @@
             clearsContext=''
             title={task.Title}>
     <section class="w-full flex justify-center">
-        <article class="w-full prose prose-base prose-zinc dark:prose-invert">
+        <article class="w-full prose prose-base prose-zinc dark:prose-invert mx-2">
             <section class="w-full flex flex-row justify-between">
                     <p class="">
                         {task.Index}

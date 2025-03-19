@@ -52,7 +52,7 @@
      on:mousemove
      on:mousedown
      bind:this={element}>
-    <div class="flex items-center justify-center space-x-10 px-4 py-2" >
+    <div class="flex items-center justify-center space-x-10 px-4 py-2 ml-12 sm:ml-0" >
         {#if cmd.icon}
             <Icon size={icon_size} component={cmd.icon}/>
         {/if}

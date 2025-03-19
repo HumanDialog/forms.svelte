@@ -1,11 +1,11 @@
 <script lang="ts">
     import { each } from 'svelte/internal';
-import {contextToolbarOperations, pageToolbarOperations, contextItemsStore} from '../stores.js'
+    import {contextToolbarOperations, pageToolbarOperations, contextItemsStore, toolsActionsOperations} from '../stores.js'
     import { showFloatingToolbar, showMenu, showGridMenu } from './menu.js';
     import {FaChevronUp, FaChevronDown, FaChevronLeft, FaChevronRight, FaCircle} from 'svelte-icons/fa/'
     
     
-    $: update($pageToolbarOperations, $contextToolbarOperations);
+    $: setupCurrentContextOperations($pageToolbarOperations, $contextToolbarOperations, $toolsActionsOperations);
 
     let operations :object[] = [];
     let mainOperation :object|null = null;
@@ -17,12 +17,24 @@ import {contextToolbarOperations, pageToolbarOperations, contextItemsStore} from
     
     let isDirectPositioningMode = false;
 
-    function update(...args)
+    function setupCurrentContextOperations(...args)
     {
         
         isDirectPositioningMode = false;
-        if($contextToolbarOperations && Array.isArray($contextToolbarOperations) && $contextToolbarOperations.length > 0)
+        if($toolsActionsOperations && Array.isArray($toolsActionsOperations) && toolsActionsOperations.length > 0)
+        {
+            operations = $toolsActionsOperations
+        }
+        else if($toolsActionsOperations && $toolsActionsOperations.operations && $toolsActionsOperations.operations.length > 0)
+        {
+            operations = $toolsActionsOperations.operations;
+            if($toolsActionsOperations.opver && $toolsActionsOperations.opver == 1)
+                isDirectPositioningMode = true;
+        }
+        else if($contextToolbarOperations && Array.isArray($contextToolbarOperations) && $contextToolbarOperations.length > 0)
+        {
             operations = $contextToolbarOperations;
+        }
         else if($contextToolbarOperations && $contextToolbarOperations.operations && $contextToolbarOperations.operations.length > 0)
         {
             operations = $contextToolbarOperations.operations;
@@ -70,6 +82,36 @@ import {contextToolbarOperations, pageToolbarOperations, contextItemsStore} from
         else
             isExpandable = false;
    }
+
+   /*
+   export function setFloatingToolsOperations(ops)
+   {
+        console.log('setFloatingToolsOperations', ops)
+        if(!ops)
+        {
+            setupCurrentContextOperations();
+        }
+        else
+        {
+            if(Array.isArray(ops))
+                operations = [...ops]
+            else
+            {
+                operations = [...ops.operations]
+                if(ops.opver == 1)
+                {
+                    isDirectPositioningMode = true;   
+                }
+            }
+        }
+   }
+
+   export function clearFloatingToolsOperations()
+   {
+        console.log('clearFloatingToolsOperations')
+        setupCurrentContextOperations();
+   }
+   */
 
    export function activateMainOperation()
    {
@@ -267,7 +309,7 @@ import {contextToolbarOperations, pageToolbarOperations, contextItemsStore} from
                                         dark:bg-blue-600/50 dark:hover:bg-blue-700 dark:focus:ring-blue-800
                                         flex items-center justify-center
                                         disable-dbl-tap-zoom
-                                        cursor-pointer z-10"
+                                        cursor-pointer z-40"
                                         style={position}
                                         on:click|stopPropagation={(e) => {on_click(e, operation)}} 
                                         on:mousedown={mousedown} >

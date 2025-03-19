@@ -95,7 +95,7 @@
             lg_content_area_horizontal_dim = ""
         }
           
-        console.log('main_side_panel_visibility', main_side_panel_visibility)
+        //console.log('main_side_panel_visibility', main_side_panel_visibility)
     }
     
     let tools_visibility = "hidden"
@@ -268,6 +268,7 @@
 
     function onSelectionChanged(e)
     {
+        console.log('onSelectionChanged')
         determineFABVisibilityAsync();
     }
 
