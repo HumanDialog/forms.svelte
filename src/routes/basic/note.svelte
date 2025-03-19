@@ -385,7 +385,7 @@
             clearsContext=''
             title={note.Title}>
     <section class="w-full flex justify-center">
-        <article class="w-full prose prose-base prose-zinc dark:prose-invert">
+        <article class="w-full prose prose-base prose-zinc dark:prose-invert prose-img:rounded-xl prose-p:my-0">
             <section class="w-full flex flex-row justify-between">
                     <p class="">
                         {note.Index}
@@ -425,7 +425,7 @@
                 {note.Title}
             </h1>
 
-            <!--{#if note.Summary || summaryPlaceholder}-->
+            {#if note.Summary || summaryPlaceholder}
                 {#key note.Summary}
                     <lead  
                         use:editable={{
@@ -438,11 +438,13 @@
                     </lead>
                 {/key}
                 
-            <!--{/if}-->
+           {/if}
             
             <section class="w-full flex flex-row flex-wrap justify-between">
                 <div class="grow-0">
-                    <p> note.CreatedBy.Name </p>
+                    {#if note.CreatedBy}
+                    <p> {note.CreatedBy.Name} </p>
+                    {/if}
                 </div>
 
                 <div>
@@ -481,14 +483,14 @@
                 
             <!--{#if note.Description || descriptionPlaceholder}-->
                 <hr/>    
-                <Editor   a='Description'
+                <Editor   a='Content'
                             compact={true}
                             bind:this={description}
                             onFocusCb={() => activateFormattingTools()}
                             onBlurCb={() => deactivateFormattingToolsIfNeeded()}
                             onAddImage={uploadImage}
                             onRemoveImage={removeImage}/>
-
+                 <hr/> 
             <!--{/if}-->
 
         </article>

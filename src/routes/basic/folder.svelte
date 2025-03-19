@@ -289,7 +289,7 @@
             toolbarOperations={ getPageOperations() }
             clearsContext='props sel'
             title={listTitle}>
-
+        <section class="w-full place-self-center max-w-3xl">
         <List   self={contextItem} 
                 a='Folders'
                 title={listTitle} 
@@ -322,7 +322,7 @@
                     class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
             </span>
         </List>
-
+    </section>
     </Page>
 {:else}
     <Spinner delay={3000}/>
