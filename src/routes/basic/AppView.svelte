@@ -15,6 +15,7 @@
     import Tasklist from './tasklist.svelte';
     import Folder from './folder.svelte';
     import Task from './task.svelte'
+    import Note from './note.svelte'
     import Board from './list.board.svelte';
     import MyTasks from './mytasks.svelte'
     import MyFolders from './myfolders.svelte'
@@ -60,6 +61,8 @@
                         '/tasklist/*':  { component: Tasklist},
                         '/task' :       { component: Task },
                         '/task/*' :     { component: Task },
+                        '/note' :       { component: Note },
+                        '/note/*' :     { component: Note },
                         '/listboard' :  { component: Board},
                         '/listboard/*': { component: Board},
                         '/mytasks' :    { component: MyTasks },

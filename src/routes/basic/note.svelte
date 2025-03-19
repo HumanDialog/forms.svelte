@@ -20,13 +20,13 @@
             } from '$lib'
 	import { onMount, tick } from 'svelte';
     import {location, querystring, push} from 'svelte-spa-router'
-    import TaskSteps from './task.steps.svelte'
+    
     import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen, FaList} from 'svelte-icons/fa/'
 	
     let taskRef = ''
-    let task = null;
+    let note = null;
     let allTags = '';
-    let allLists = [];
+   
     let allActors = [];
     let availableStates = [];
     let pendingUploading = false;
@@ -37,22 +37,21 @@
 
     async function onParamsChanged(...args)
     {
-        //console.log('task: ', $location)
+        //console.log('note: ', $location)
         const segments = $location.split('/');
-        const foundIdx = segments.findIndex( s => s == 'task');
+        const foundIdx = segments.findIndex( s => s == 'note');
         if(foundIdx < 0)
             return;
 
         const taskId = segments[segments.length-1]
-        taskRef = `./Task/${taskId}`
+        taskRef = `./Note/${taskId}`
 
         allTags = await reef.get('/group/AllTags', onErrorShowAlert);
 
-        let res = await reef.get('/group/Lists?fields=$ref,Name', onErrorShowAlert)
-        allLists = res.TaskList
+       
 
         //res = await reef.get('/app/Users?fields=$ref,Name')
-        res = await reef.post('group/query',
+        let res = await reef.post('group/query',
                             {
                                 Id: 1,
                                 Name: 'Users',
@@ -89,11 +88,6 @@
                                     Expressions:['Id', 'Index', 'Title','Summary', 'Content', 'ModificationDate', 'Tags', 'Kind', 'State', '$ref', '$type', '$acc'],
                                     SubTree:[
                                         {
-                                            Id: 10,
-                                            Association: 'Steps',
-                                            Sort: 'Order',
-                                        },
-                                        {
                                             Id: 11,
                                             Association: 'CreatedBy',
                                             Expressions:['$ref', 'Name']
@@ -102,11 +96,6 @@
                                             Id: 12,
                                             Association: 'ModifiedBy',
                                             Expressions:['$ref', 'Name']
-                                        },
-                                        {
-                                            Id: 12,
-                                            Association: 'TaskList',
-                                            Expressions:['$ref', 'Name', 'TaskStates', 'href']
                                         }
                                     ]
                                 }
@@ -114,40 +103,21 @@
                         },
                         onErrorShowAlert)
         
-        task = res.Task
-        if(task.TaskList.TaskStates)
-        {
-            try{
-                availableStates = JSON.parse(task.TaskList.TaskStates);
-                availableStates.forEach( e => {
-                    if(e.state == 1000)
-                        e.icon = FaCheck;
-                    else
-                        e.icon = null;
-                })
-            }
-            catch(e)
-            {
-                availableStates = [];
-            }
-        }
-
-        if(task.Steps == undefined)
-            task.Steps = []
-
-        isReadOnly = task.$acc === 1
+        note = res.Note
+        
+        isReadOnly = note.$acc === 1
 
     }
 
     async function onTitleChanged(text)
     {
-        task.Title = text;
+        note.Title = text;
         await reef.post(`${taskRef}/set`, {Title: text}, onErrorShowAlert)
     }
 
     async function onSummaryChanged(text)
     {
-        task.Summary = text;
+        note.Summary = text;
         await reef.post(`${taskRef}/set`, {Summary: text}, onErrorShowAlert)
         
     }
@@ -158,201 +128,23 @@
         await reef.post('group/set', { AllTags: allTags}, onErrorShowAlert)
     }
 
-    async function onAddStep(txt, beforeIdx)
-    {
-        if(task.Steps == undefined)
-            task.Steps = []
-
-        if(beforeIdx >= task.Steps.length)
-            beforeIdx = undefined;
-
-        const newStep = {
-                Label: txt,
-                Done: false,
-                Order: 0}
-
-        if(beforeIdx == undefined)
-        {
-            let maxOrder = 0;
-            task.Steps.forEach(s => {
-                if(s.Order > maxOrder)
-                    maxOrder = s.Order;});
-            
-            newStep.Order = maxOrder + 64;
-        }
-        else
-        {
-            const next = task.Steps[beforeIdx]
-            if(beforeIdx > 0)
-            {
-                const prev = task.Steps[beforeIdx-1]
-                const orderSpace = next.Order - prev.Order;
-                newStep.Order = prev.Order + Math.floor(orderSpace / 2)
-            }
-            else
-                newStep.Order = next.Order - 64;
-        }
-
-        await reef.post(`${taskRef}/Steps/new`, {...newStep}, onErrorShowAlert)
-        await reloadData();
-    }
-
-    async function onChangeStep(txt, idx)
-    {
-        const taskStep = task.Steps[idx];
-        taskStep.Label = txt;
-        await reef.post(`${taskRef}/Steps/${taskStep.Id}/set`, { Label: txt}, onErrorShowAlert) 
-    }
-
-    async function onRemoveStep(idx)
-    {
-        const taskStep = task.Steps[idx];
-        await reef.delete(`${taskRef}/Steps/${taskStep.Id}`, onErrorShowAlert) 
-        await reloadData();
-    }
-
-    async function setStepDone(value, taskStep)
-    {
-        taskStep.Done = value;
-        task.Steps = [...task.Steps]
-        await reef.post(`${taskRef}/Steps/${taskStep.Id}/set`, {Done: value}, onErrorShowAlert)
-    }
-
-    function getPageOperationsWithStepToolsX(step) 
-    {
-        let operations = [ 
-            {
-                icon: FaPlus,
-                caption: '',
-                grid: addOperations
-            }
-        ];
-
-        if(!isDeviceSmallerThan('sm'))
-        {
-            operations.push({
-                icon: FaSave,
-                action: (f) => saveCurrentEditable()
-            })
-        }
-
-        if(step.Done)
-        {
-            operations.push(
-                {
-                    icon: FaUndo,
-                    action: async (f) => 
-                    {  
-                        await setStepDone( false, step)
-                        activateItem('props', step, getPageOperationsWithStepTools(step))
-                    }
-                }
-            )
-        }
-        else
-        {
-            operations.push(
-                {
-                    icon: FaCheck,
-                    action: async (f) => 
-                    {  
-                        await setStepDone( true, step)
-                        activateItem('props', step, getPageOperationsWithStepTools(step))
-                    }
-                }
-            )
-        }
-
-        return operations
-    }
-
-    function getPageOperationsWithStepTools(step) 
-    {
-        let checkOperation;
-        if(step.Done)
-        {
-            checkOperation =
-                {
-                    icon: FaUndo,
-                    action: async (f) => 
-                    {  
-                        await setStepDone( false, step)
-                        activateItem('props', step, getPageOperationsWithStepTools(step))
-                    },
-                    fab: 'M02',
-                    tbr: 'B'
-                }
-        }
-        else
-        {
-            checkOperation =
-                {
-                    icon: FaCheck,
-                    action: async (f) => 
-                    {  
-                        await setStepDone( true, step)
-                        activateItem('props', step, getPageOperationsWithStepTools(step))
-                    },
-                    fab: 'M02',
-                    tbr: 'B'
-                }
-        }
-
-        return {
-            opver: 1,
-            operations: [
-                {
-                    caption: 'View',
-                    operations: [
-                        {
-                            icon: FaPen,
-                            grid: addOperations,
-                            fab: 'M10',
-                            tbr: 'A'
-                        },
-                        {
-                            icon: FaSave,
-                            action: (f) => saveCurrentEditable(),
-                            fab: 'S00',
-                            tbr: 'A'
-                        },
-                        checkOperation
-                    ]
-                }
-            ]
-        }
-    }
-
-    function onSelectStep(idx)
-    {
-        let step = task.Steps[idx];
-        activateItem('props', step, getPageOperationsWithStepTools(step))
-    }
-
-    function onUnselectStep(idx)
-    {
-        let step = task.Steps[idx];
-        if(isActive('props', step))
-            clearActiveItem('props')
-    }
-
+    
+    
     let summary;
     let summaryPlaceholder = false;
     
     let dueDate;
     let dueDatePlaceholder = false
 
-    let onList;
-    let onListPlaceholder = false
+   
 
-    let responsible;
+    let createdBy;
     let responsiblePlaceholder = false
 
     let tags;
     let tagsPlaceholder = false
 
-    let steps;
-    let stepsPlaceholder = false;
+   
 
     let description;
     let descriptionPlaceholder = false;
@@ -372,52 +164,10 @@
                     }
                 }
         },
-        {
-            caption: 'List',
-            action: async (f) => 
-                {
-                    if(onList)
-                        onList.show();
-                    else
-                    {
-                        onListPlaceholder = true;
-                        await tick();
-                        onList?.show(undefined, () => {onListPlaceholder = false})
-                    }
-                }
-        },
-        {
-            caption: 'Due Date',
-            icon: FaCalendarAlt,
-            action: async (f) => 
-                {
-                    if(dueDate)
-                        dueDate.show();
-                    else
-                    {
-                        dueDatePlaceholder = true;
-                        await tick();
-                        dueDate?.show(undefined, () => {dueDatePlaceholder = false})
-                    }
-                }
-        },
+        
+        
         {
             separator: true
-        },
-        {
-            caption: 'Responsible',
-            icon: FaUser,
-            action: async (f) => 
-                {
-                    if(responsible)
-                        responsible.show();
-                    else
-                    {
-                        responsiblePlaceholder = true;
-                        await tick();
-                        responsible?.show(undefined, () => {responsiblePlaceholder = false;})
-                    }
-                }
         },
         
         {
@@ -435,30 +185,12 @@
                     }
                 }
         },
-        {
-            caption: 'Step',
-            icon: FaCheck,
-            action: async (f) => 
-                {
-                    if(steps)
-                        steps.run();
-                    else
-                    {
-                        stepsPlaceholder = true;
-                        
-                        if(task.Steps == undefined)
-                            task.Steps = []
-
-                        await tick();
-                        steps?.run(steps.END_OF_LIST, '', () => {stepsPlaceholder = false})
-                    }
-                }
-        },
+        
         {
             separator: true
         },
         {
-            caption: 'Description',
+            caption: 'Content',
             icon: FaAlignLeft,
             action: async (f) => 
                 {
@@ -514,12 +246,7 @@
                             fab: 'S00',
                             tbr: 'A'
                         },
-                        {
-                            icon: FaList,
-                            action: (f) => { push(task.TaskList.href) },
-                            fab: 'C00',
-                            tbr: 'C'
-                        }
+                       
                     ]
                 }
             ]
@@ -649,22 +376,22 @@
 
 </script>
 
-{#if task != null}
+{#if note != null}
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex-->
-<Page   self={task} 
+<Page   self={note} 
             toolbarOperations={getPageOperations()}
             clearsContext=''
-            title={task.Title}>
+            title={note.Title}>
     <section class="w-full flex justify-center">
         <article class="w-full prose prose-base prose-zinc dark:prose-invert">
             <section class="w-full flex flex-row justify-between">
                     <p class="">
-                        {task.Index}
+                        {note.Index}
                     </p>
-                    <div>
-                        {#if task.TaskList || onListPlaceholder}
+                    <!--div>
+                        {#if note.TaskList || onListPlaceholder}
                             <Combo  compact
                                     inContext='data'
                                     a='TaskList'
@@ -679,15 +406,12 @@
                                                 name='Name'/>
                             </Combo>
                         {/if}
-                    </div>
+                    </div-->
                     <div>
-                        {#if task.DueDate || dueDatePlaceholder}
-                            <DatePicker     a='DueDate'
-                                            compact
-                                            s="prose"
-                                            inContext="data"
-                                            bind:this={dueDate}
-                                />
+                        {#if note.CreationDate}
+                            <p>
+                                {note.CreationDate}
+                            </p>
                         {/if}
                     </div>
             </section>
@@ -698,42 +422,27 @@
                         active: true,
                         readonly: isReadOnly}}
                         tabindex="0">
-                {task.Title}
+                {note.Title}
             </h1>
 
-            {#if task.Summary || summaryPlaceholder}
-                {#key task.Summary}
-                    <p  class="lead"
+            <!--{#if note.Summary || summaryPlaceholder}-->
+                {#key note.Summary}
+                    <lead  
                         use:editable={{
                             action: (text) => onSummaryChanged(text),
                             active: true,
                             readonly: isReadOnly}}
                         tabindex="0"
                         bind:this={summary}>
-                        {task.Summary}
-                    </p>
+                        {note.Summary}
+                    </lead>
                 {/key}
                 
-            {/if}
+            <!--{/if}-->
             
             <section class="w-full flex flex-row flex-wrap justify-between">
                 <div class="grow-0">
-                    {#if task.Actor || responsiblePlaceholder}
-                        <Combo  compact={true} 
-                                inContext='data'
-                                a='Actor'
-                                isAssociation
-                                icon={false}
-                                placeholder='Responsible'
-                                s='prose'
-                                hasNone
-                                changed={(k,n) => { /*fake assignment for component rer-ender*/ task.Actor = task.Actor; }} 
-                                bind:this={responsible}>
-                            <ComboSource    objects={allActors}
-                                            key="$ref" 
-                                            name='Name'/>
-                        </Combo>
-                    {/if}
+                    <p> note.CreatedBy.Name </p>
                 </div>
 
                 <div>
@@ -754,7 +463,7 @@
                 </div>
 
                 <div>
-                    {#if task.Tags || tagsPlaceholder}
+                    {#if note.Tags || tagsPlaceholder}
                         <Tags class="w-full "
                             a='Tags'
                             s='prose'
@@ -768,19 +477,9 @@
             
             
             
-            {#if (task.Steps && task.Steps.length > 0) || stepsPlaceholder}
-                <TaskSteps steps={task.Steps}
-                                a='Label'
-                                checkedAttribute='Done'
-                                onRemove={onRemoveStep}
-                                onChange={onChangeStep}
-                                onAdd={onAddStep}
-                                onSelect={onSelectStep}
-                                onUnselect={onUnselectStep}
-                                bind:this={steps}/>
-            {/if}
+            
                 
-            {#if task.Description || descriptionPlaceholder}
+            <!--{#if note.Description || descriptionPlaceholder}-->
                 <hr/>    
                 <Editor   a='Description'
                             compact={true}
@@ -790,7 +489,7 @@
                             onAddImage={uploadImage}
                             onRemoveImage={removeImage}/>
 
-            {/if}
+            <!--{/if}-->
 
         </article>
         
