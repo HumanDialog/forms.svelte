@@ -37,10 +37,11 @@
         visible = true;
         toolbar = _toolbar;
         props = _props;
-
+        
         cssPosition = calculatePosition(x, y, around_rect, true, true);
 
         props.onHide = () => {hide()};
+        props.onSizeChanged = () => onSizeChanged();
 
         hide_window_indicator = 0;
         window.addEventListener('click', on_before_window_click, true);
@@ -83,11 +84,17 @@
         visible = false;
         cssPosition = calculatePosition(x, y, around_rect, false, false);
         $toolsActionsOperations = []
-
+        
         window.removeEventListener('click', on_before_window_click, true);
         root_element.removeEventListener('click', on_before_container_click, true);
     }
 
+    async function onSizeChanged()
+    {
+        cssPosition = calculatePosition(x, y, around_rect, true, true);
+        await tick();
+        cssPosition = calculatePosition(x, y, around_rect, true, false);
+    }
     
     let hide_window_indicator :number = 0;
     function on_before_window_click()
@@ -216,7 +223,6 @@
             
         }
 
-        console.log(result)
         return result;
     }
 

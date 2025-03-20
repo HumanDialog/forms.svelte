@@ -27,8 +27,8 @@
     export let summary  :string = '';
     
     export let typename :string | undefined = undefined;
-    export let toolbarOperations;
-    export let contextMenu;
+    export let toolbarOperations = undefined;
+    export let contextMenu = undefined;
 
     let definition :rList_definition = getContext("rList-definition");
     //console.log(definition.properties, item)
@@ -228,10 +228,13 @@
 
     function activate_row(e, item)
     {
-        activateItem('props', item, toolbarOperations(item));
-        
-        if(e)
-            e.stopPropagation();
+        if(toolbarOperations)
+        {
+            activateItem('props', item, toolbarOperations(item));
+            
+            if(e)
+                e.stopPropagation();
+        }
     }
 
     
@@ -428,7 +431,7 @@
             {#key item[summary] }           
                 {#if is_row_active}
                     <p  id={element_id} 
-                        class=" text-sm    mb-2                          
+                        class=" text-sm                              
                                 text-stone-400"
                             use:editable={{
                                 action: (text) => {change_summary(text)},
@@ -440,7 +443,7 @@
                     </p>
                 {:else}
                     <p  id={element_id} 
-                        class=" text-sm mb-2
+                        class=" text-sm 
                                     text-stone-400"
                         on:click={(e) => on_active_row_clicked(e, 'bottom')}>
                         {item[summary]}

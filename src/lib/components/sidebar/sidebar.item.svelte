@@ -142,8 +142,6 @@
         const href = linkNode.getAttribute('href');
         e.preventDefault();
 
-        console.log(href)
-
         if(isOnPage)
         {
             if(isRowActive)

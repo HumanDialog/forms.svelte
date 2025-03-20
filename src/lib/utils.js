@@ -333,7 +333,7 @@ export function editable(node, params)
 
     node.classList.add("editable")
     node.classList.add("focus:outline-none")
-
+    
     if(active)
     {
         node.contentEditable = "true"
@@ -650,7 +650,8 @@ export function isOnScreenKeyboardVisible()
 
 export const UI = {
     operations: null,
-    fab: null
+    fab: null,
+    navigator: null
 }
 
 export const NAVIGATION_PAGE_PATH = '/'

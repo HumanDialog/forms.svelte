@@ -1,6 +1,6 @@
 <script lang="ts">
     import {setContext, getContext, afterUpdate, tick, onMount} from 'svelte'
-    import {data_tick_store, contextItemsStore, contextTypesStore, page_title } from '../../stores'
+    import {data_tick_store, contextItemsStore, contextTypesStore } from '../../stores'
     import {activateItem, getActive, clearActiveItem, parseWidthDirective, getPrev, getNext, swapElements, getLast, insertAfter} from '../../utils' 
     
     import {rList_definition} from './List'
@@ -21,8 +21,8 @@
     export let typename :string = '';
     export let c = '';
 
-    export let toolbarOperations;
-    export let contextMenu;
+    export let toolbarOperations = undefined;
+    export let contextMenu = undefined;
 
     export let key: string = '';
 
@@ -56,7 +56,8 @@
 
     let inserter;
     
-    clearActiveItem('props')
+    if(toolbarOperations)
+        clearActiveItem('props')
 
     let  last_tick = -1   
     $: setup($data_tick_store, $contextItemsStore);
@@ -86,10 +87,10 @@
     {
         if(key)
             return item[key];
-        else if(item.Id)
-            return item.Id;
         else if(item.$ref)
             return item.$ref;
+        else if(item.Id)
+            return item.Id;
         else 
             return 0;
     }

@@ -12,10 +12,13 @@
                 ListComboProperty,
 				mainContentPageReloader,
                 Modal,
-                onErrorShowAlert} from '$lib'
+                onErrorShowAlert,
+				activateItem, UI,
+				showFloatingToolbar} from '$lib'
     import {FaRegFile, FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaColumns, FaArchive, 
-        FaList, FaEllipsisH, FaChevronRight, FaChevronLeft, FaRegShareSquare, FaLink, FaRegStar, FaStar} from 'svelte-icons/fa'
+        FaList, FaEllipsisH, FaChevronRight, FaChevronLeft, FaRegShareSquare, FaLink, FaUnlink, FaRegStar, FaStar, FaShoppingBasket, FaCopy, FaCut} from 'svelte-icons/fa'
     import {location, pop, push, querystring} from 'svelte-spa-router'
+    import BasketPreview from './basket.preview.svelte'
 
     export let params = {}
 
@@ -26,7 +29,7 @@
     let notesComponent;
     let tasksComponent;
     let folderTitle = ''
-    
+
     let users = [];
 
     const STATE_FINISHED = 1000;
@@ -57,7 +60,6 @@
 
     async function fetchData()
     {
-        console.log('cp:',contextPath)
         let res = await reef.post(`/Folder/${contextItemId}/query`,
                             {
                                 Id: 1,
@@ -111,45 +113,113 @@
     }
 
    
+
     let deleteModal;
-    let folderToDelete;
-    function askToDelete(folder)
+    let objectToDelete;
+    let deleteObjectKind = ''
+    function askToDelete(object, kind)
     {
-        folderToDelete = folder;
+        deleteObjectKind = kind;
+        objectToDelete = object;
         deleteModal.show()
     }
 
     
-    async function deleteFolder()
+    async function deleteElement()
     {
-        if(!folderToDelete)
+        if(!objectToDelete)
             return;
 
-        await reef.delete(folderToDelete.$ref, onErrorShowAlert);
-        deleteModal.hide();
+        switch(deleteObjectKind)
+        {
+        case 'Task':
+            await reef.post(`${contextItem.$ref}/DeletePermanentlyTask`, { taskLink: objectToDelete.$ref } , onErrorShowAlert);
+            deleteModal.hide();
+            await fetchData();
+            tasksComponent.reload(contextItem, tasksComponent.SELECT_NEXT);
+            break;
 
+        case 'Note':
+            await reef.post(`${contextItem.$ref}/DeletePermanentlyNote`, { noteLink: objectToDelete.$ref } , onErrorShowAlert);  
+            deleteModal.hide();
+            await fetchData();
+            notesComponent.reload(contextItem, notesComponent.SELECT_NEXT);
+            break;
+
+        case 'Folder':
+            await reef.post(`${contextItem.$ref}/DeletePermanentlyFolder`, { folderLink: objectToDelete.$ref } , onErrorShowAlert);
+            deleteModal.hide();
+            await fetchData();
+            subfoldersComponent.reload(contextItem, subfoldersComponent.SELECT_NEXT);
+            break;
+        }
+        
+    }
+
+    async function dettachSubFolder(folder)
+    {
+        await reef.post(`${contextItem.$ref}/DettachSubFolder`, { folderLink: folder.$ref } , onErrorShowAlert);
         await fetchData();
         subfoldersComponent.reload(contextItem, subfoldersComponent.SELECT_NEXT);
     }
 
-    let archiveModal;
-    let taskToArchive;
-    function askToArchive(task)
+    async function dettachNote(note)
     {
-        taskToArchive = task;
-        archiveModal.show();
+        await reef.post(`${contextItem.$ref}/DettachNote`, { noteLink: note.$ref } , onErrorShowAlert);
+        await fetchData();
+        notesComponent.reload(contextItem, notesComponent.SELECT_NEXT);
     }
 
-    async function archiveTask()
+    async function dettachTask(task)
     {
-        if(!taskToArchive)
-            return;
-
-        await reef.post(`${taskToArchive.$ref}/Archive`, {}, onErrorShowAlert)
-        archiveModal.hide();
-        
+        await reef.post(`${contextItem.$ref}/DettachTask`, { taskLink: task.$ref } , onErrorShowAlert);
         await fetchData();
         tasksComponent.reload(contextItem, tasksComponent.SELECT_NEXT);
+    }
+
+    async function copyTaskToBasket(task)
+    {
+        await reef.post(`${contextItem.$ref}/CopyTaskToBasket`, { taskLink: task.$ref } , onErrorShowAlert);
+        // not needed
+        //await fetchData();
+        //tasksComponent.reload(contextItem, tasksComponent.SELECT_NEXT);
+    }
+
+    async function cutTaskToBasket(task)
+    {
+        await reef.post(`${contextItem.$ref}/CutTaskToBasket`, { taskLink: task.$ref } , onErrorShowAlert);
+        await fetchData();
+        tasksComponent.reload(contextItem, tasksComponent.SELECT_NEXT);
+    }
+
+    async function copyNoteToBasket(note)
+    {
+        await reef.post(`${contextItem.$ref}/CopyNoteToBasket`, { noteLink: note.$ref } , onErrorShowAlert);
+        // not needed
+        //await fetchData();
+        //tasksComponent.reload(contextItem, tasksComponent.SELECT_NEXT);
+    }
+
+    async function cutNoteToBasket(note)
+    {
+        await reef.post(`${contextItem.$ref}/CutNoteToBasket`, { noteLink: note.$ref } , onErrorShowAlert);
+        await fetchData();
+        notesComponent.reload(contextItem, notesComponent.SELECT_NEXT);
+    }
+
+    async function copySubFolderToBasket(folder)
+    {
+        await reef.post(`${contextItem.$ref}/CopySubFolderToBasket`, { folderLink: folder.$ref } , onErrorShowAlert);
+        // not needed
+        //await fetchData();
+        //tasksComponent.reload(contextItem, tasksComponent.SELECT_NEXT);
+    }
+
+    async function cutSubFolderToBasket(folder)
+    {
+        await reef.post(`${contextItem.$ref}/CutSubFolderToBasket`, { folderLink: folder.$ref } , onErrorShowAlert);
+        await fetchData();
+        subfoldersComponent.reload(contextItem, subfoldersComponent.SELECT_NEXT);
     }
 
     async function finishTask(event, task)
@@ -167,7 +237,7 @@
 
     async function addTask(newTaskAttribs)
     {
-        let res = await reef.post(`${contextPath}/CreateTaskUI`,{ properties: newTaskAttribs }, onErrorShowAlert)
+        let res = await reef.post(`${contextPath}/CreateTaskEx`,{ properties: newTaskAttribs }, onErrorShowAlert)
         if(!res)
             return null;
 
@@ -179,7 +249,7 @@
 
     async function addNote(newNoteAttribs)
     {
-        let res = await reef.post(`${contextPath}/CreateNoteUI`,{ properties: newNoteAttribs }, onErrorShowAlert)
+        let res = await reef.post(`${contextPath}/CreateNoteEx`,{ properties: newNoteAttribs }, onErrorShowAlert)
         if(!res)
             return null;
 
@@ -191,7 +261,7 @@
 
     async function addFolder(newFolderAttribs)
     {
-        let res = await reef.post(`${contextPath}/CreateSubFolderUI`,{ properties: newFolderAttribs }, onErrorShowAlert)
+        let res = await reef.post(`${contextPath}/CreateSubFolderEx`,{ properties: newFolderAttribs }, onErrorShowAlert)
         if(!res)
             return null;
 
@@ -214,6 +284,16 @@
         }
     }
 
+    async function dettachAllMyContent()
+    {
+        await reef.post(`${contextItem.$ref}/DettachAllContent`, {} , onErrorShowAlert)
+        
+        await fetchData();
+        subfoldersComponent.reload(contextItem, subfoldersComponent.CLEAR_SELECTION)
+        notesComponent.reload(contextItem, notesComponent.CLEAR_SELECTION)
+        tasksComponent.reload(contextItem, tasksComponent.CLEAR_SELECTION)
+    }
+
     function getPageOperations()
     {
         if(!contextItem)
@@ -230,8 +310,8 @@
                             {
                                 caption: 'Clear Basket',
                                 icon: FaTrash,
-                                action: (f) => console.log('TODO: clear basket', contextItem),
-                                fab: 'M20',
+                                action: async (f) => await dettachAllMyContent(),
+                                fab: 'M30',
                                 tbr: 'A'
                             }
                         ]
@@ -246,8 +326,14 @@
             {
                 pinOperation = {
                     icon: FaStar, //aRegShareSquare, // 
-                    action: async (f) => { await toggleFolderPinned(contextItem)  },
-                    fab: 'M30',
+                    action: async (f) => { 
+                        await toggleFolderPinned(contextItem); 
+                        // refreshing operations
+                        activateItem('data', contextItem, getPageOperations());
+                        if(UI.navigator)
+                            UI.navigator.refresh()
+                      },
+                    fab: 'S00',
                     tbr: 'C'
                 }
             }
@@ -255,8 +341,14 @@
             {
                 pinOperation = {
                     icon: FaRegStar, //aRegShareSquare, // 
-                    action: async (f) => { await toggleFolderPinned(contextItem)  },
-                    fab: 'M30',
+                    action: async (f) => { 
+                        await toggleFolderPinned(contextItem); 
+                        // refreshing operations 
+                        activateItem('data', contextItem, getPageOperations());
+                        if(UI.navigator)
+                            UI.navigator.refresh()
+                    },
+                    fab: 'S00',
                     tbr: 'C'
                 }
             }
@@ -292,9 +384,13 @@
                             },
                             {
                                 caption: 'Attach...',
-                                icon: FaLink, //aRegShareSquare, // 
-                                action: (f) => { console.log('Attach...')  },
-                                fab: 'M20',
+                                icon: FaShoppingBasket, //FaLink, //aRegShareSquare, // 
+                                toolbar: BasketPreview,
+                                props: {
+                                    destinationFolder: contextItem.$ref,
+                                    onRefreshView: refreshViewAfterAttachingFromBasket
+                                },
+                                fab: 'M01',
                                 tbr: 'A'
                             },
                             pinOperation
@@ -305,6 +401,14 @@
             }
         }
     }
+
+    async function refreshViewAfterAttachingFromBasket(f)
+    {
+        await fetchData();
+        subfoldersComponent.reload(contextItem, subfoldersComponent.CLEAR_SELECTION)
+        notesComponent.reload(contextItem, notesComponent.CLEAR_SELECTION)
+        tasksComponent.reload(contextItem, tasksComponent.CLEAR_SELECTION)
+    }
     
 
     function switchToKanban()
@@ -312,117 +416,181 @@
         push(`/listboard/${contextItemId}`);
     }
 
-    function getEditOperations(task)
+    function listComponent(kind)
+    {
+        switch(kind)
+        {
+        case 'Task':
+            return tasksComponent;
+        case 'Note':
+            return notesComponent;
+        case 'Folder':
+            return subfoldersComponent
+        }
+    }
+
+    function getEditOperations(obj, kind)
     {
         return [
             {
-                caption: 'Name',
-                action: (focused) =>  { listComponent.edit(task, 'Title') }
+                caption: 'Title',
+                action: (focused) =>  { listComponent(kind).edit(obj, 'Title') }
             },
             {
                 caption: 'Summary',
-                action: (focused) =>  { listComponent.edit(task, 'Summary') }
-            },
-            {
-                separator: true
-            },
-            {
-                caption: 'Responsible',
-                action: (focused) => { listComponent.edit(task, 'Actor') }
-            },
-            {
-                caption: 'Due Date',
-                action: (focused) => { listComponent.edit(task, 'DueDate') }
+                action: (focused) =>  { listComponent(kind).edit(obj, 'Summary') }
             }
-
         ];
     }
 
+
+    async function dettachElement(element, kind)
+    {
+        switch(kind)
+        {
+        case 'Folder':
+            return dettachSubFolder(element)
+        case 'Note':
+            return dettachNote(element)
+        case 'Task':
+            return dettachTask(element)
+        }   
+    }
     
-    let taskOperations = (task) => { 
-        let editOperations = getEditOperations(task)
-        return [
-                {
-                    icon: FaPlus,
-                    action: (f) => { listComponent.addRowAfter(task) }
-                },
-                {
-                    toolbox:[
-                        {
-                            icon: FaPen,
-                            grid: editOperations
-                        },
-                        {
-                            icon: FaEllipsisH,
-                            menu:[
-                                {
-                                    icon: FaArchive,
-                                    caption: 'Archive',
-                                    action: (f) => askToArchive(task)
-                                },
-                                {
-                                    icon: FaTrash,
-                                    caption: 'Delete',
-                                    action: (f) => askToDelete(task)
-                                }
-                            ]
-                        }
-                        
-                    ]
-                },
-                {
-                    icon: FaCaretDown,
-                    action: (f) => listComponent.moveDown(task)
-                },
-                {
-                    icon: FaCaretUp,
-                    action: (f) => listComponent.moveUp(task)
-                },
-                {
-                    icon: FaColumns,
-                    right: true,
-                    action: (f) => switchToKanban()
-                }
-            ];
+    async function copyElementToBasket(element, kind)
+    {
+        switch(kind)
+        {
+        case 'Folder':
+            return copySubFolderToBasket(element)
+        case 'Note':
+            return copyNoteToBasket(element)
+        case 'Task':
+            return copyTaskToBasket(element)
+        }   
     }
 
-    let subfolderOperations = (subfolder) => { 
-        return {
-            opver: 1,
-            operations: [
-                {
-                    caption: 'Folder',
-                    operations: [
-                        {
-                            icon: FaTrash,
-                            action: (f) => console.log('TODO: delete folder', subfolder),
-                            fab: 'M20',
-                            tbr: 'A'
-                        }
-                    ]
-                }
-            ]
+    async function cutElementToBasket(element, kind)
+    {
+        switch(kind)
+        {
+        case 'Folder':
+            return cutSubFolderToBasket(element)
+        case 'Note':
+            return cutNoteToBasket(element)
+        case 'Task':
+            return cutTaskToBasket(element)
+        }   
+    }
+
+    let elementOperations = (element, kind) => {
+        let list = listComponent(kind)
+        
+        if(contextItem.IsBasket)
+        {
+            return {
+                opver: 1,
+                operations: [
+                    {
+                        caption: kind,
+                        operations: [
+                            {
+                                icon: FaCaretDown,
+                                action: (f) => list.moveDown(element),
+                                fab:'M02',
+                                tbr:'A' 
+                            },
+                            {
+                                icon: FaCaretUp,
+                                action: (f) => list.moveUp(element),
+                                fab:'M03',
+                                tbr:'A' 
+                            },
+                            {
+                                icon: FaTrash,
+                                caption: 'Remove from Basket',
+                                action: (f) => dettachElement(element, kind),
+                                fab:'M30',
+                                tbr:'B'
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+        else
+        {
+            let editOperations = getEditOperations(element, kind)
+
+            return {
+                opver: 1,
+                operations: [
+                    {
+                        caption: kind,
+                        operations: [
+                            {
+                                icon: FaPlus,
+                                action: (f) => { list.addRowAfter(element) },
+                                fab:'M10',
+                                tbr:'A' 
+                            },
+                            {
+                                icon: FaPen,
+                                grid: editOperations,
+                                fab:'M20',
+                                tbr:'A' 
+                            },
+                            {
+                                icon: FaCaretDown,
+                                action: (f) => list.moveDown(element),
+                                fab:'M02',
+                                tbr:'A' 
+                            },
+                            {
+                                icon: FaCaretUp,
+                                action: (f) => list.moveUp(element),
+                                fab:'M03',
+                                tbr:'A' 
+                            },
+                            {
+                                icon: FaCopy,
+                                caption: 'Copy to basket',
+                                action: (f) => copyElementToBasket(element, kind),
+                                fab: 'M05',
+                                tbr: 'A'
+
+                            },
+                            {
+                                icon: FaCut,
+                                caption: 'Move to basket',
+                                action: (f) => cutElementToBasket(element, kind),
+                                fab: 'M04',
+                                tbr: 'A'
+                            },
+                            {
+                                icon: FaTrash,
+                                menu: [
+                                    {
+                                        caption: 'Dettach',
+                                        icon: FaUnlink,
+                                        action: (f) => dettachElement(element, kind)
+                                    },
+                                    {
+                                        caption: 'Delete permanently',
+                                        icon: FaTrash,
+                                        action: (f) => askToDelete(element, kind)
+                                    }
+                                ],
+                                fab:'M30',
+                                tbr:'B'
+                            }
+                        ]
+                    }
+                ]
+            }
         }
     }
 
-    let noteOperations = (note) => {
-        return { 
-            opver: 1,
-            operations: [
-                {
-                    caption: 'Note',
-                    operations: [
-                        {
-                            icon: FaTrash,
-                            action: (f) => {console.log('TODO: delete note', note) },
-                            fab: 'M20',
-                            tbr: 'A'
-                        }
-                    ]
-                }
-            ]
-        }
-    }
 
 </script>
 
@@ -433,11 +601,12 @@
             clearsContext='props sel'
             title={folderTitle}>
 
-        <!--section-->
+            <section class="w-full place-self-center max-w-3xl">
+        
             <List   self={contextItem} 
                     a='Folders'
                     title={folderTitle} 
-                    toolbarOperations={subfolderOperations} 
+                    toolbarOperations={(el) => elementOperations(el, 'Folder')} 
                     orderAttrib='Order'
                     bind:this={subfoldersComponent}>
                 <ListTitle a='Title' hrefFunc={(folder) => `${folder.href}`}/>
@@ -449,12 +618,10 @@
                         class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
                 </span>
             </List>
-        <!--/section-->
-
-        <!--section-->
+        
             <List   self={contextItem} 
                     a='Notes'
-                    toolbarOperations={noteOperations} 
+                    toolbarOperations={ (el) => elementOperations(el, 'Note')} 
                     orderAttrib='Order'
                     bind:this={notesComponent}>
                 <ListTitle a='Title' hrefFunc={(note) => `${note.href}`}/>
@@ -466,12 +633,10 @@
                         class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
                 </span>
             </List>
-        <!--/section-->
         
-        <!--section-->
             <List   self={contextItem} 
                     a='Tasks'
-                    toolbarOperations={taskOperations} 
+                    toolbarOperations={(el) => elementOperations(el, 'Task')} 
                     orderAttrib='Order'
                     bind:this={tasksComponent}>
                 <ListTitle a='Title' hrefFunc={(task) => `${task.href}`}/>
@@ -491,7 +656,8 @@
                     {/if}
                 </span>
             </List>
-        <!---/section-->
+        
+    </section>
 
     </Page>
 {:else}
@@ -500,15 +666,9 @@
 
 
 <Modal  title="Delete"
-        content="Are you sure you want to delete selected task?"
+        content="Are you sure you want to delete selected element?"
         icon={FaTrash}
-        onOkCallback={deleteFolder}
+        onOkCallback={deleteElement}
         bind:this={deleteModal}
         />
 
-<Modal  title="Archive"
-        content="Are you sure you want to archive selected task?"
-        icon={FaArchive}
-        onOkCallback={archiveTask}
-        bind:this={archiveModal}
-        />

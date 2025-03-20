@@ -8,7 +8,7 @@
                 Modal,
                 reloadWholeApp,
                 Input, 
-                onErrorShowAlert} from '$lib'
+                onErrorShowAlert, UI} from '$lib'
     import {FaRegFolder, FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaArchive, FaUsers, FaPlus, FaRegStar, FaStar, FaShoppingBasket} from 'svelte-icons/fa'
     import {location, push} from 'svelte-spa-router'
     import {reef, session} from '@humandialog/auth.svelte'
@@ -21,15 +21,27 @@
     let basket = {}
     let pinnedFolders = []
     let navGroupFolders;
+    let navPinnedFolders;
     let navGroupItems = [];
     let navPinnedItems = [];
     
     $: currentPath = $location;
 
+    const navRefresher = {
+        refresh: () => {
+                initNavigator();
+            }
+    }
+
     onMount( async () =>
     {
         await initNavigator();
-        return () => {}        
+
+        UI.navigator = navRefresher
+        return () => {
+            if(UI.navigator == navRefresher)
+                UI.navigator = null
+        }        
     })
 
     async function initNavigator()
@@ -73,36 +85,40 @@
                 user = res.User
                 basket = user.BasketFolder
                 pinnedFolders = user.PinnedFolders['Folders/Folder']
-
-                console.log(user)
-                console.log(basket)
-                console.log(pinnedFolders)
             }
-
-            
 
         }
 
- 
+        await fetchGroupFolders();
 
-        await fetchData()
-        navGroupFolders?.reload(groupFolders)
+        navGroupFolders.reload(groupFolders)
+        navPinnedFolders.reload(pinnedFolders)
     }
 
-    async function fetchData()
+    async function fetchGroupFolders()
     {
         let res = await reef.get("/group/Folders?sort=Order&fields=Id,Title,Summary,Order,href,$type", onErrorShowAlert);
-        console.log(res)
         if(res != null)
             groupFolders = res.Folder;
         else
             groupFolders = [];
     }
 
-    async function reload()
+    async function reloadGroupFolders()
     {
-        await fetchData();
+        await fetchGroupFolders();
         navGroupFolders.reload(groupFolders)
+    }
+
+    async function reloadPinnedFolders()
+    {
+        //await fetchGroupFolders();
+        //navGroupFolders.reload(groupFolders)
+    }
+
+    async function refreshNavigator()
+    {
+        
     }
 
     async function addFolder(folderName, order)
@@ -113,7 +129,7 @@
                                 Order: order
                             },
                             onErrorShowAlert);
-        reload();
+        reloadGroupFolders();
     }
 
     async function changeName(folder, name)
@@ -192,7 +208,7 @@
         await reef.post(`/group/Folders/${folderToArchive.Id}/Archive`, {}, onErrorShowAlert)
         archiveModal.hide();
 
-        reload();
+        reloadGroupFolders();
     }
 
     async function deleteFolder()
@@ -203,7 +219,7 @@
         await reef.delete(`/group/Folders/${folderToDelete.Id}`, onErrorShowAlert)
         deleteModal.hide();
 
-        reload();
+        reloadGroupFolders();
     }
 
     function getFolderOperations(domNode, dataItem, navItem)
@@ -259,7 +275,7 @@
                                 Order: order
                             },
                             onErrorShowAlert);
-            reload();
+            reloadGroupFolders();
         })
     }
 
@@ -291,7 +307,8 @@
                 <SidebarGroup border>
             
                     <SidebarList    objects={pinnedFolders} 
-                                    orderAttrib='Order'>
+                                    orderAttrib='Order'
+                                    bind:this={navPinnedFolders}>
                         <svelte:fragment let:item let:idx>
                             {@const href = item.href}
                             <SidebarItem   {href}
@@ -318,7 +335,7 @@
                                 operations={(node) => getMyFoldersOperations(node, user)}
                                 summary="Personal folders"
                                 selectable={user}>
-                    My Folders*
+                    My Folders
                 </SidebarItem>
             </SidebarGroup>
         {/if}
@@ -373,11 +390,12 @@
             {#if pinnedFolders && pinnedFolders.length > 0}
                 <SidebarGroup border>
                     <SidebarList    objects={pinnedFolders} 
-                                    orderAttrib='Order'>
+                                    orderAttrib='Order'
+                                    bind:this={navPinnedFolders}>
                         <svelte:fragment let:item let:idx>
-                            {@const href = `${item.href}`}
+                            {@const href = item.href}
                             <SidebarItem   {href}
-                                            icon={FaRegFolder}
+                                            icon={FaRegStar}
                                             bind:this={navPinnedItems[idx]}
                                             operations={(node) => getFolderOperations(node, item, navPinnedItems[idx])}
                                             {item}
@@ -398,7 +416,7 @@
                                 operations={(node) => getMyFoldersOperations(node, user)}
                                 summary="Personal folders"
                                 item={user}>
-                    My Folders*
+                    My Folders
                 </SidebarItem>
             </SidebarGroup>
         {/if}
@@ -408,7 +426,7 @@
                             orderAttrib='Order'
                             bind:this={navGroupFolders}>
                 <svelte:fragment let:item let:idx>
-                    {@const href = `${item.href}`}
+                    {@const href = item.href}
                     <SidebarItem   {href}
                                     icon={FaRegFolder}
                                     bind:this={navGroupItems[idx]}
@@ -424,7 +442,16 @@
             </SidebarList> 
         </SidebarGroup>
 
-        
+        <SidebarGroup border>
+            {@const href = `/folder/${basket.Id}`}
+            <SidebarItem    {href}
+                            icon={FaShoppingBasket}
+                            operations={(node) => getBasketOperations(node, basket)}
+                            summary="List of selected items for quick operations"
+                            item={basket}>
+                My Basket
+            </SidebarItem>
+        </SidebarGroup>
 
 
     {:else}
