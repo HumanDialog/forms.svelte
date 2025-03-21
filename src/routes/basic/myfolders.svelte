@@ -13,15 +13,13 @@
 				mainContentPageReloader,
                 Modal,
                 onErrorShowAlert} from '$lib'
-    import {FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaArchive, FaEllipsisH} from 'svelte-icons/fa'
+    import {FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaArchive, FaEllipsisH, FaCopy, FaCut} from 'svelte-icons/fa'
 
     export let params = {}
 
     let user = null;
     let listComponent;
     
-    let lists = [];
-    const STATE_FINISHED = 1000;
 
     $: onParamsChanged($session, $mainContentPageReloader);
     
@@ -31,13 +29,6 @@
         {
             user = null;
             return;
-        }
-
-        if(lists.length == 0)
-        {
-            let res = await reef.get('/group/Lists', onErrorShowAlert)
-            if(res)
-                lists = res.TaskList;
         }
         
         await fetchData()
@@ -55,14 +46,14 @@
                                         {
                                             Id: 1,
                                             Association: '',
-                                            Expressions:['Id','Name','login'],
+                                            Expressions:['Id','Name','login', '$ref'],
                                             SubTree:
                                             [
                                                 {
                                                     Id: 2,
                                                     Association: 'Folders',
-                                                    Expressions:['Id','Title', 'Summary', 'href'],
-                                                    Sort: "Title",
+                                                    Expressions:['Id','Title', 'Summary', 'href', 'Order', '$ref'],
+                                                    Sort: "Order",
                                                 }
                                             ]
                                         }
@@ -75,7 +66,7 @@
             user = null
     }
 
-    async function reloadTasks(selectRecommendation)
+    async function reloadFolders(selectRecommendation)
     {
         await fetchData();
         listComponent.reload(user, selectRecommendation);
@@ -83,147 +74,143 @@
     
 
     let deleteModal;
-    let taskToDelete;
-    function askToDelete(task)
+    let folderToDelete;
+    function askToDelete(folder)
     {
-        taskToDelete = task;
+        folderToDelete = folder;
         deleteModal.show()
     }
 
     
-    async function deleteTask()
+    async function deleteFolder()
     {
-        if(!taskToDelete)
+        if(!folderToDelete)
             return;
 
-        await reef.delete(taskToDelete.$ref, onErrorShowAlert);
+        await reef.post(`${folderToDelete.$ref}/DeletePermanently`, { }, onErrorShowAlert);
         deleteModal.hide();
 
         
-        await reloadTasks(listComponent.SELECT_NEXT)
+        await reloadFolders(listComponent.SELECT_NEXT)
     }
 
-    let archiveModal;
-    let taskToArchive;
-    function askToArchive(task)
+    
+    async function addFolder(newFolderAttribs)
     {
-        taskToArchive = task;
-        archiveModal.show();
-    }
-
-    async function archiveTask()
-    {
-        if(!taskToArchive)
-            return;
-
-        await reef.post(`${taskToArchive.$ref}/Archive`, {}, onErrorShowAlert)
-        archiveModal.hide();
-        
-        await reloadTasks(listComponent.SELECT_NEXT)
-    }
-
-    async function finishTask(event, task)
-    {
-        event.stopPropagation();
-
-        let result = await reef.post(`${task.$ref}/Finish`, {}, onErrorShowAlert);
-        if(result)
-            await reloadTasks(listComponent.KEEP_OR_SELECT_NEXT)   
-    }
-
-    async function addTask(newTaskAttribs)
-    {
-        let res = await reef.post(`/user/MyTasks/new`, newTaskAttribs, onErrorShowAlert)
+        let res = await reef.post(`/user/Folders/new`, newFolderAttribs, onErrorShowAlert)
         if(!res)
             return null;
 
-        let newTask = res.Task[0];
-        await reloadTasks(newTask.Id)
+        let newFolder = res.Folder[0];
+        await reloadFolders(newFolder.Id)
     }
 
-    let pageOperations = [
-        {
-            icon: FaPlus,
-            caption: '',
-            action: (focused) => { listComponent.addRowAfter(null) }
-        }
-    ]
+    let pageOperations = {
+        opver: 1,
+        operations: [
+            {
+                caption: 'View',
+                operations: [
+                    {
+                        icon: FaPlus,
+                        caption: '',
+                        action: (focused) => { listComponent.addRowAfter(null) },
+                        fab: 'M10',
+                        tbr: 'A'
+                    }
+                ]
+            }
+        ]
+    }
 
-    function getEditOperations(task)
+    function getEditOperations(folder)
     {
         return [
             {
                 caption: 'Name',
-                action: (focused) =>  { listComponent.edit(task, 'Title') }
+                action: (focused) =>  { listComponent.edit(folder, 'Title') }
             },
             {
                 caption: 'Summary',
-                action: (focused) =>  { listComponent.edit(task, 'Summary') }
-            },
-            {
-                separator: true
-            },
-            {
-                caption: 'List',
-                action: (focused) => { listComponent.edit(task, 'TaskList') }
-            },
-            {
-                caption: 'Due Date',
-                action: (focused) => { listComponent.edit(task, 'DueDate') }
+                action: (focused) =>  { listComponent.edit(folder, 'Summary') }
             }
-
         ];
     }
 
-    let taskOperations = (task) => { 
-        let editOperations = getEditOperations(task)
-        return [
+    let folderOperations = (folder) => { 
+        let editOperations = getEditOperations(folder)
+        return {
+            opver: 1,
+            operations: [
                 {
-                    icon: FaPlus,
-                    caption: '',
-                    action: (focused) => { listComponent.addRowAfter(task) }
-                },
-                {
-                    toolbox:[
+                    caption: 'Folder',
+                    operations: [
                         {
-                            icon: FaPen,
-                            grid: editOperations
+                            icon: FaPlus,
+                            caption: '',
+                            action: (focused) => { listComponent.addRowAfter(folder) },
+                            fab: 'M10',
+                            tbr: 'A'
                         },
                         {
-                            icon: FaEllipsisH,
-                            menu:[
-                            /* {
-                                    icon: FaArchive,
-                                    caption: 'Archive',
-                                    action: (f) => askToArchive(task)
-                                },*/
-                                {
-                                    icon: FaTrash,
-                                    caption: 'Delete',
-                                    action: (f) => askToDelete(task)
-                                }
-                            ]
+                            icon: FaPen,
+                            grid: editOperations,
+                            fab: 'M20',
+                            tbr: 'A',
+                        },
+                        {
+                            icon: FaCaretDown,
+                            action: (f) => listComponent.moveDown(folder),
+                            fab:'M02',
+                            tbr:'A' 
+                        },
+                        {
+                            icon: FaCaretUp,
+                            action: (f) => listComponent.moveUp(folder),
+                            fab:'M03',
+                            tbr:'A' 
+                        },
+                    /*    {
+                            icon: FaCopy,   // MdLibraryAdd
+                            caption: 'Copy to basket',
+                            action: (f) => copyFolderToBasket(folder),
+                            fab: 'M05',
+                            tbr: 'A'
+                        },
+                        {
+                            icon: FaCut,
+                            caption: 'Move to basket',
+                            action: (f) => cutFolderToBasket(folder),
+                            fab: 'M04',
+                            tbr: 'A'
+                        },
+                    */    {
+                            icon: FaTrash,
+                            action: (f) => askToDelete(folder),
+                            fab:'M30',
+                            tbr:'B'
                         }
-                        
                     ]
-                },
-                {
-                    icon: FaCaretDown,
-                    action: (f) => listComponent.moveDown(task)
-                },
-                {
-                    icon: FaCaretUp,
-                    action: (f) => listComponent.moveUp(task)
                 }
-            ];
-    }
-
-    let taskContextMenu = (task) => {
-        let editOperations = getEditOperations(task);
-        return {
-            grid: editOperations
+            ]
         }
     }
+
+    /*
+    async function copyFolderToBasket(folder)
+    {
+        await reef.post(`${folder.$ref}/CopyToBasket`, { }, onErrorShowAlert)
+        // not needed
+        //await reloadFolders(listComponent.SELECT_NEXT)
+    }
+
+    async function cutFolderToBasket(folder)
+    {
+        const res = await reef.post(`${user.$ref}/MoveFolderToBasket`, {folder: folder.$ref}, onErrorShowAlert)
+        if(res)
+            await reloadFolders(listComponent.SELECT_NEXT)
+    }
+    */
 
 </script>
 
@@ -237,41 +224,29 @@
             <section class="w-full place-self-center max-w-3xl">
         <List   self={user} 
                 a='Folders' 
-                toolbarOperations={taskOperations} 
-                contextMenu={taskContextMenu}
-                
+                toolbarOperations={folderOperations} 
+                orderAttrib='Order'                
                 bind:this={listComponent}>
             <ListTitle a='Title' hrefFunc={(folder) => `${folder.href}`}/>
             <ListSummary a='Summary'/>
-            <ListInserter action={addTask} icon/>
-
-           
+            <ListInserter action={addFolder} icon/>
 
             <span slot="left" let:element>
                 <Icon component={FaRegFolder} 
                     class="h-5 w-5  text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
             </span>
-           
             
         </List>
     </section>
     </Page>
 {:else}
-    Hello
     <Spinner delay={3000}/>
 {/if}
 
 
 <Modal  title="Delete"
-        content="Are you sure you want to delete selected task?"
+        content="Are you sure you want to delete selected folder?"
         icon={FaTrash}
-        onOkCallback={deleteTask}
+        onOkCallback={deleteFolder}
         bind:this={deleteModal}
-        />
-
-<Modal  title="Archive"
-        content="Are you sure you want to archive selected task?"
-        icon={FaArchive}
-        onOkCallback={archiveTask}
-        bind:this={archiveModal}
         />

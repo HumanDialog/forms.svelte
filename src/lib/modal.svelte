@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { afterUpdate, onMount, tick } from 'svelte';
 	  import Icon from './components/icon.svelte'
+    import {toolsActionsOperations} from './stores.js'
+    import {isDeviceSmallerThan} from './utils'
+    import {FaTimes} from 'svelte-icons/fa'
     
     export let title :string = '';
     export let open :boolean = false;
@@ -23,11 +26,32 @@
     {
         open = true;
         close_callback = on_close_callback;
+
+        if(isDeviceSmallerThan("sm"))
+        {    
+            $toolsActionsOperations = {
+                opver: 1,
+                operations: [
+                    {
+                        caption: 'Modal',
+                        operations: [
+                            {
+                                icon: FaTimes,
+                                action: (f) => { on_cancel(undefined); },
+                                fab: 'M00',
+                                tbr: 'A'
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
     }
 
     export function hide()
     {
         open = false;
+        $toolsActionsOperations = []
     }
 
     let root;
@@ -60,9 +84,9 @@
             close_callback('OK');
     }
 
-    function on_cancel(event :MouseEvent)
+    function on_cancel(event :MouseEvent|undefined)
     {
-        open = false;
+        hide();
 
         if(onCancelCallback)
             onCancelCallback();

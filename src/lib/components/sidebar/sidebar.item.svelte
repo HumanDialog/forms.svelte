@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {getContext} from 'svelte'
+    import {getContext, tick} from 'svelte'
     import Icon from '../icon.svelte'
     import {contextItemsStore, auto_hide_sidebar, contextToolbarOperations} from '../../stores'
     import {FaBars, FaEllipsisH} from 'svelte-icons/fa'

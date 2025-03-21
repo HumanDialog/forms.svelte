@@ -58,14 +58,14 @@ export function showFloatingToolbar(around :DOMRect|DOMPoint, toolbar, props = {
     }
     else if(toolbar_component)
     {
-        //if(toolbar_component.isVisible())
-        //{
-        //    toolbar_component.hide();
-        //}
-        //else
-        //{
+        if(toolbar_component.isVisible() && toolbar_component.isSameToolbar(toolbar))
+        {
+            toolbar_component.hide();
+        }
+        else
+        {
             toolbar_component.show(around, toolbar, props);
-        //}
+        }
     }
     else
         console.error('what now?')

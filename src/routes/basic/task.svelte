@@ -110,7 +110,7 @@
                         onErrorShowAlert)
         
         task = res.Task
-        if(task.TaskList.TaskStates)
+        if(task.TaskList?.TaskStates)
         {
             try{
                 availableStates = JSON.parse(task.TaskList.TaskStates);
@@ -126,6 +126,8 @@
                 availableStates = [];
             }
         }
+        else
+            availableStates = [];
 
         if(task.Steps == undefined)
             task.Steps = []
@@ -563,23 +565,44 @@
 
     function getPageOperationsWithFormattingTools()
     {
-        return [];
-        
-        return {
-            opver: 1,
-            operations: [
-                {
-                    caption: 'View',
-                    operations: [
-                        {
-                            icon: FaTimes,
-                            action: (f) => {},
-                            fab: 'M00',
-                            tbr: 'A'
-                        }
-                    ]
-                }
-            ]
+        const mobile = isDeviceSmallerThan("sm")
+        if(mobile)
+        {
+            return [ ]
+        }
+        else
+        {
+            const addOperation = {
+                icon: FaPen,
+                caption: '',
+                grid: addOperations,
+                fab: '',
+                tbr: 'A'
+            };
+
+            const saveOperation = {
+                icon: FaSave,
+                action: (f) => { description?.save() },
+                fab: '',
+                tbr: 'A'
+            }
+
+            const separator = {
+                separator: true
+            }
+
+            let formattingOperations = description.getFormattingOperations();
+            formattingOperations = [saveOperation, ...formattingOperations]
+
+            return {
+                opver: 1,
+                operations: [
+                    {
+                        caption: 'View',
+                        operations: [addOperation,  separator, ...formattingOperations]
+                    }
+                ]
+            }
         }
     }
 

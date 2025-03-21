@@ -121,7 +121,9 @@ export function restore_defults()
 
 export function toggle_sidebar(index)
 {
-    previously_visible_sidebar = get(main_sidebar_visible_store);
+    const prevVisile = get(main_sidebar_visible_store);
+    if(prevVisile != '*')
+        previously_visible_sidebar = prevVisile;
 
     //console.log('toggle_sidebar', previously_visible_sidebar, '=>', index)
 
@@ -133,6 +135,7 @@ export function toggle_sidebar(index)
 
 export function auto_hide_sidebar()
 {
+    
     //console.log('auto_hide_sidebar')
     //console.log("sw: " + window.innerWidth, SCREEN_SIZES.lg)
     if(window.innerWidth < SCREEN_SIZES.lg)
@@ -141,14 +144,21 @@ export function auto_hide_sidebar()
 
 export function hide_sidebar()
 {
-    previously_visible_sidebar = get(main_sidebar_visible_store);
+    
+    const prevVisile = get(main_sidebar_visible_store);
+    if(prevVisile != '*')
+        previously_visible_sidebar = prevVisile;
+
     main_sidebar_visible_store.set('*')
     //console.log("auto_hide_sidebar:" + get(main_sidebar_visible_store))
 }
 
 export function show_sidebar(index)
 {
-    previously_visible_sidebar = get(main_sidebar_visible_store);
+    const prevVisile = get(main_sidebar_visible_store);
+    if(prevVisile != '*')
+        previously_visible_sidebar = prevVisile;
+
     main_sidebar_visible_store.set(index)
 }
 

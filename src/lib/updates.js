@@ -122,6 +122,7 @@ update_request_ticket.subscribe(async (v) => {
             changes.push(value.item);
         });
 
+        
         /*
         const res = await reef.post('/Push', { Items: changes }, onErrorShowAlert);
 

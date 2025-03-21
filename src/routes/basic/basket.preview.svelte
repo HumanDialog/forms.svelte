@@ -2,27 +2,34 @@
 	import { reef } from "@humandialog/auth.svelte";
     import {
         onErrorShowAlert, Icon,
-        List, ListTitle, ListSummary
+        List, ListTitle, ListSummary, Spinner
     }   from '$lib'
     import {FaRegFolder, FaRegFile, FaRegCircle, FaRegCheckCircle} from 'svelte-icons/fa'
-	import { afterUpdate } from "svelte";
+	import { afterUpdate, onMount } from "svelte";
 	import { push } from "svelte-spa-router";
-
 
     export let destinationFolder = ''
     export let onHide = undefined
     export let onSizeChanged = undefined
     export let onRefreshView = undefined
-
+    
     let basketItem;
     let basketEntriesNo = 0
     
     const STATE_FINISHED = 1000;
 
+    let reloadTicket = -1
+    let lastReloadTicket = 0
+
     $: initData()
 
     async function initData(...args)
     {
+        if(lastReloadTicket == reloadTicket)
+            return;
+
+        lastReloadTicket = reloadTicket
+
         let res = await reef.post(`/user/BasketFolder/query`,
                             {
                                 Id: 1,
@@ -64,14 +71,36 @@
         if(res)
         {    
             basketItem = res.Folder;
-            basketEntriesNo = basketItem.Folders?.length + basketItem.Notes?.length + basketItem.Tasks?.length
+            basketEntriesNo = 0;
+            
+            if(basketItem.Folders && basketItem.Folders.length > 0)
+                basketEntriesNo += basketItem.Folders.length;
+
+            if(basketItem.Notes && basketItem.Notes.length > 0)
+                basketEntriesNo += basketItem.Notes.length;
+
+            if(basketItem.Tasks && basketItem.Tasks.length > 0)
+                basketEntriesNo += basketItem.Tasks.length;
+
         }
         else
         {
             basketItem = null
             basketEntriesNo = 0
         }
+    }
 
+    let foldersElement;
+    let notesElement;
+    let tasksElement;
+    export async function reload()
+    {
+        reloadTicket++;
+        await initData()
+
+        foldersElement.reload(basketItem);
+        notesElement.reload(basketItem);
+        tasksElement.reload(basketItem);
     }
 
     let rootElement;
@@ -129,13 +158,14 @@
 </script>
 
 <menu class="" bind:this={rootElement}>
-    <div class="w-full max-h-64 sm:max-h-96 overflow-y-auto overflow-x-clip
+    {#if basketItem}
+        <div class="w-full max-h-64 sm:max-h-96 overflow-y-auto overflow-x-clip
                 text-stone-600 dark:text-stone-400">
         
-        {#if basketItem}
             <List   self={basketItem} 
                     a='Folders'
-                    orderAttrib='Order'>
+                    orderAttrib='Order'
+                    bind:this={foldersElement}>
                 <ListTitle a='Title'/>
                 <ListSummary a='Summary'/>
 
@@ -147,7 +177,8 @@
         
             <List   self={basketItem} 
                     a='Notes'
-                    orderAttrib='Order'>
+                    orderAttrib='Order'
+                    bind:this={notesElement}>
                 <ListTitle a='Title'/>
                 <ListSummary a='Summary'/>
 
@@ -159,7 +190,8 @@
         
             <List   self={basketItem} 
                     a='Tasks'
-                    orderAttrib='Order'>
+                    orderAttrib='Order'
+                    bind:this={tasksElement}>
                 <ListTitle a='Title'/>
                 <ListSummary a='Summary'/>
 
@@ -175,55 +207,60 @@
                     {/if}
                 </span>
             </List>
-        {/if}
-    </div>
+        
+        </div>
 
-    <!-- Footer -->
-    <div class="mt-2 flex flex-row justify-stretch gap-2">
-        <button class=" py-2.5 px-5 
-                        text-base sm:text-xs font-medium 
-                        bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400
-                        hover:bg-stone-200 hover:dark:bg-stone-600
-                        disabled:bg-white/60 disabled:dark:bg-stone-700/60
-                        border rounded 
-                        border-stone-200 dark:border-stone-600 focus:outline-none
-                        disabled:border-stone-200/60 disabled:dark:border-stone-600/60
-                        inline-flex items-center justify-center"
-                        disabled={!basketItem}
-                        on:click={() => editBasket()}>
-                
-            Edit
-        </button>
+        <!-- Footer -->
+        
+            <div class="mt-2 flex flex-row justify-stretch gap-2">
+                <button class=" py-2.5 px-5 
+                                text-base sm:text-xs font-medium 
+                                bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400
+                                hover:bg-stone-200 hover:dark:bg-stone-600
+                                disabled:bg-white/60 disabled:dark:bg-stone-700/60
+                                border rounded 
+                                border-stone-200 dark:border-stone-600 focus:outline-none
+                                disabled:border-stone-200/60 disabled:dark:border-stone-600/60
+                                inline-flex items-center justify-center"
+                                disabled={!basketItem}
+                                on:click={() => editBasket()}>
+                        
+                    Edit
+                </button>
 
-        <button class=" py-2.5 px-5 
-                        text-base sm:text-xs font-medium 
-                        bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400
-                        hover:bg-stone-200 hover:dark:bg-stone-600
-                        disabled:bg-white/60 disabled:dark:bg-stone-700/60
-                        border rounded 
-                        border-stone-200 dark:border-stone-600 focus:outline-none
-                        disabled:border-stone-200/60 disabled:dark:border-stone-600/60
-                        inline-flex items-center justify-center"
-                        disabled={!basketEntriesNo}
-                        on:click={() => attachTo()}>
-                
-            Attach
-        </button>
+                <button class=" py-2.5 px-5 
+                                text-base sm:text-xs font-medium 
+                                bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400
+                                hover:bg-stone-200 hover:dark:bg-stone-600
+                                disabled:bg-white/60 disabled:dark:bg-stone-700/60
+                                border rounded 
+                                border-stone-200 dark:border-stone-600 focus:outline-none
+                                disabled:border-stone-200/60 disabled:dark:border-stone-600/60
+                                inline-flex items-center justify-center"
+                                disabled={!basketEntriesNo}
+                                on:click={() => attachTo()}>
+                        
+                    Attach
+                </button>
 
-        <button class=" py-2.5 px-5 
-                        text-base sm:text-xs font-medium 
-                        bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400
-                        hover:bg-stone-200 hover:dark:bg-stone-600
-                        disabled:bg-white/60 disabled:dark:bg-stone-700/60
-                        border rounded 
-                        border-stone-200 dark:border-stone-600 focus:outline-none
-                        disabled:border-stone-200/60 disabled:dark:border-stone-600/60
-                        inline-flex items-center justify-center"
-                        disabled={!basketEntriesNo}
-                        on:click={() => attachToAndClear()}>
-                
-            Attach and clear
-        </button>
-    </div>
+                <button class=" py-2.5 px-5 
+                                text-base sm:text-xs font-medium 
+                                bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400
+                                hover:bg-stone-200 hover:dark:bg-stone-600
+                                disabled:bg-white/60 disabled:dark:bg-stone-700/60
+                                border rounded 
+                                border-stone-200 dark:border-stone-600 focus:outline-none
+                                disabled:border-stone-200/60 disabled:dark:border-stone-600/60
+                                inline-flex items-center justify-center"
+                                disabled={!basketEntriesNo}
+                                on:click={() => attachToAndClear()}>
+                        
+                    Attach and clear
+                </button>
+            </div>
+        
+    {:else}
+        <Spinner delay={3000}/>
+    {/if}
 
 </menu>

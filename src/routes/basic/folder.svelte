@@ -15,7 +15,7 @@
                 onErrorShowAlert,
 				activateItem, UI,
 				showFloatingToolbar} from '$lib'
-    import {FaRegFile, FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaColumns, FaArchive, 
+    import {FaRegFile, FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaColumns, FaArchive, FaSync,
         FaList, FaEllipsisH, FaChevronRight, FaChevronLeft, FaRegShareSquare, FaLink, FaUnlink, FaRegStar, FaStar, FaShoppingBasket, FaCopy, FaCut} from 'svelte-icons/fa'
     import {location, pop, push, querystring} from 'svelte-spa-router'
     import BasketPreview from './basket.preview.svelte'
@@ -294,6 +294,14 @@
         tasksComponent.reload(contextItem, tasksComponent.CLEAR_SELECTION)
     }
 
+    async function refreshView() 
+    {
+        await fetchData();
+        subfoldersComponent.reload(contextItem, subfoldersComponent.KEEP_SELECTION)
+        notesComponent.reload(contextItem, notesComponent.KEEP_SELECTION)
+        tasksComponent.reload(contextItem, tasksComponent.KEEP_SELECTION)
+    }
+
     function getPageOperations()
     {
         if(!contextItem)
@@ -313,6 +321,12 @@
                                 action: async (f) => await dettachAllMyContent(),
                                 fab: 'M30',
                                 tbr: 'A'
+                            },
+                            {
+                                icon: FaSync,
+                                action: async (f) => await refreshView(),
+                                fab: 'S10',
+                                tbr: 'C'
                             }
                         ]
                     }
@@ -393,7 +407,13 @@
                                 fab: 'M01',
                                 tbr: 'A'
                             },
-                            pinOperation
+                            pinOperation,
+                            {
+                                icon: FaSync,
+                                action: async (f) => await refreshView(),
+                                fab: 'S10',
+                                tbr: 'C'
+                            }
                         
                         ]
                     }
@@ -553,7 +573,7 @@
                                 tbr:'A' 
                             },
                             {
-                                icon: FaCopy,
+                                icon: FaCopy,   // MdLibraryAdd
                                 caption: 'Copy to basket',
                                 action: (f) => copyElementToBasket(element, kind),
                                 fab: 'M05',

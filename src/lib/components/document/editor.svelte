@@ -77,7 +77,7 @@
     {
         let result = [];
 
-        if(isDeviceSmallerThan("sm"))
+        /*if(isDeviceSmallerThan("sm"))
         {
             result = [
                 {
@@ -90,6 +90,7 @@
                 }
             ]   
         }
+        */
 
         commands.forEach( c => {
             if(c.separator)
@@ -102,7 +103,8 @@
                     caption: withCaptions ? c.caption : '',
                     icon: c.icon,
                     action: (f) => c.on_choice(suggestionRange),
-                    activeFunc: c.is_active
+                    activeFunc: c.is_active,
+                    tbr: 'B'
                 })
             }
         })

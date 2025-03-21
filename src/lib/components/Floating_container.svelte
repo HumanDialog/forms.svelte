@@ -13,7 +13,8 @@
 
     let around_rect :DOMRect;
 
-    let root_element;
+    let rootElement;
+    let internalElement;
     
     //$: display = visible ? 'fixed' : 'hidden';
 
@@ -34,10 +35,15 @@
         
         const was_visible = visible;
 
+        if((!was_visible) && (toolbar == _toolbar) && internalElement && internalElement.reload)
+        {
+            internalElement.reload();
+        }
+
         visible = true;
         toolbar = _toolbar;
         props = _props;
-        
+
         cssPosition = calculatePosition(x, y, around_rect, true, true);
 
         props.onHide = () => {hide()};
@@ -69,7 +75,7 @@
         await tick();
 
         if(!was_visible)
-            root_element.addEventListener('click', on_before_container_click, true);
+            rootElement.addEventListener('click', on_before_container_click, true);
 
         cssPosition = calculatePosition(x, y, around_rect, true, false);
     }
@@ -86,7 +92,12 @@
         $toolsActionsOperations = []
         
         window.removeEventListener('click', on_before_window_click, true);
-        root_element.removeEventListener('click', on_before_container_click, true);
+        rootElement?.removeEventListener('click', on_before_container_click, true);
+    }
+
+    export function isSameToolbar(_toolbar)
+    {
+        return _toolbar == toolbar;
     }
 
     async function onSizeChanged()
@@ -116,10 +127,10 @@
 
     /*afterUpdate(() => 
     {
-        if(!root_element)
+        if(!rootElement)
             return;
 
-        let myRect :DOMRect = root_element.getBoundingClientRect()
+        let myRect :DOMRect = rootElement.getBoundingClientRect()
         if(myRect.height == 0)
             return;
 
@@ -162,7 +173,7 @@
             let myRect :DOMRect|null = null;
             if(!fresh)
             {
-                myRect = root_element.getBoundingClientRect()
+                myRect = rootElement.getBoundingClientRect()
                 if(myRect && myRect.height == 0)
                     myRect = null;
             }
@@ -196,7 +207,7 @@
 
             if(!fresh)
             {
-                myRect = root_element.getBoundingClientRect()
+                myRect = rootElement.getBoundingClientRect()
                 if(myRect && myRect.height == 0)
                     myRect = null;
             }
@@ -232,7 +243,7 @@
 <div    id="__hd_svelte_floating_container"
         class="p-2 bg-stone-100 dark:bg-stone-800 rounded-lg shadow  z-30 fixed"
         style={cssPosition}
-        bind:this={root_element}>
-    <svelte:component this={toolbar} {...props} />
+        bind:this={rootElement}>
+    <svelte:component this={toolbar} {...props} bind:this={internalElement} />
 </div>
 

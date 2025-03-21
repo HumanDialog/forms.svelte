@@ -91,13 +91,13 @@
 
         await fetchGroupFolders();
 
-        navGroupFolders.reload(groupFolders)
-        navPinnedFolders.reload(pinnedFolders)
+        navGroupFolders?.reload(groupFolders)
+        navPinnedFolders?.reload(pinnedFolders)
     }
 
     async function fetchGroupFolders()
     {
-        let res = await reef.get("/group/Folders?sort=Order&fields=Id,Title,Summary,Order,href,$type", onErrorShowAlert);
+        let res = await reef.get("/group/Folders?sort=Order&fields=Id,Title,Summary,Order,href,$type,$ref", onErrorShowAlert);
         if(res != null)
             groupFolders = res.Folder;
         else
@@ -112,15 +112,10 @@
 
     async function reloadPinnedFolders()
     {
-        //await fetchGroupFolders();
-        //navGroupFolders.reload(groupFolders)
+        await initNavigator();
     }
 
-    async function refreshNavigator()
-    {
-        
-    }
-
+    
     async function addFolder(folderName, order)
     {
         await reef.post("/group/Folders/new", 
@@ -130,27 +125,6 @@
                             },
                             onErrorShowAlert);
         reloadGroupFolders();
-    }
-
-    async function changeName(folder, name)
-    {
-        let res = await reef.post(`/group/Folders/${folder.Id}/set`, 
-                                {
-                                    Title: name
-                                },
-                                onErrorShowAlert);
-        return (res != null);
-    }
-
-    async function changeSummary(folder, summary)
-    {
-
-        let res = await reef.post(`/group/Folders/${folder.Id}/set`, 
-                                {
-                                    Summary: summary
-                                },
-                                onErrorShowAlert);
-        return (res != null);
     }
 
     
@@ -170,57 +144,21 @@
     }
 
     
-    function getMyFoldersOperations(domNode, dataItem)
-    {
-        let menuOperations = [];
-        if(dataItem == user)
-            menuOperations.push({
-                caption: 'Finish all',
-                icon: FaRegCheckCircle,
-                action: (f) => finishAllMyTasks()
-            });
 
-        return menuOperations;
+    export function requestAdd()
+    {
+        navGroupFolders.add(async (folderName, order) => {
+            await reef.post("/group/Folders/new", 
+                            { 
+                                Title: folderName,
+                                Order: order
+                            },
+                            onErrorShowAlert);
+            reloadGroupFolders();
+        })
     }
 
-    
-    let deleteModal;
-    let folderToDelete;
-    function askToDelete(folder)
-    {
-        folderToDelete = folder;
-        deleteModal.show()
-    }
-
-    let archiveModal;
-    let folderToArchive;
-    function askToArchive(folder)
-    {
-        folderToArchive = folder;
-        archiveModal.show();
-    }
-
-    async function archiveFolder()
-    {
-        if(!folderToArchive)
-            return;
-
-        await reef.post(`/group/Folders/${folderToArchive.Id}/Archive`, {}, onErrorShowAlert)
-        archiveModal.hide();
-
-        reloadGroupFolders();
-    }
-
-    async function deleteFolder()
-    {
-        if(!folderToDelete)
-            return;
-
-        await reef.delete(`/group/Folders/${folderToDelete.Id}`, onErrorShowAlert)
-        deleteModal.hide();
-
-        reloadGroupFolders();
-    }
+   
 
     function getFolderOperations(domNode, dataItem, navItem)
     {
@@ -264,40 +202,159 @@
         return menuOperations
     }
 
-   
-
-    export function requestAdd()
+    function getPinnedFolderOperations(domNode, dataItem, navItem)
     {
-        navGroupFolders.add(async (folderName, order) => {
-            await reef.post("/group/Folders/new", 
-                            { 
-                                Title: folderName,
-                                Order: order
-                            },
-                            onErrorShowAlert);
-            reloadGroupFolders();
-        })
+        return [
+            {
+                caption: 'Unpin',
+                icon: FaRegStar,
+                action: (f) => unpinFolder(dataItem)
+            },
+            {
+                caption: 'Move up',
+                icon: FaCaretUp,
+                action: (f) => navPinnedFolders.moveUp(dataItem)
+            },
+            {
+                caption: 'Move down',
+                icon: FaCaretDown,
+                action: (f) => navPinnedFolders.moveDown(dataItem)
+
+            },
+            {
+                separator: true
+            },
+            {
+                caption: 'Rename',
+                action: (f) => startEditing(domNode)
+            },
+            {
+                caption: 'Edit summary',
+                action: (f) => navItem.editSummary()
+            }, 
+            {
+                separator: true
+            },
+            {
+                caption: 'Delete',
+                action: (f) => askToDelete(dataItem, 'PinnedFolder')
+            }
+        ]
     }
 
-    let showGroupsSwitchMenu = false;
-    let canAddNewGroup = false;
-    let currentGroup = {}
+    function getGroupFolderOperations(domNode, dataItem, navItem)
+    {
+        return [
+            {
+                caption: 'Move up',
+                icon: FaCaretUp,
+                action: (f) => navGroupFolders.moveUp(dataItem)
+            },
+            {
+                caption: 'Move down',
+                icon: FaCaretDown,
+                action: (f) => navGroupFolders.moveDown(dataItem)
 
+            },
+            {
+                separator: true
+            },
+            {
+                caption: 'Rename',
+                action: (f) => startEditing(domNode)
+            },
+            {
+                caption: 'Edit summary',
+                action: (f) => navItem.editSummary()
+            }, 
+            {
+                separator: true
+            },
+            {
+                caption: 'Delete',
+                action: (f) => askToDelete(dataItem, 'GroupFolder')
+            }
+        ]
+    }
+
+    function getMyFoldersOperations(domNode, dataItem)
+    {
+        return []
+    }
 
     function getBasketOperations(domNode, dataItem)
     {
-        let menuOperations = [];
-        if(dataItem == user)
-            menuOperations.push({
-                caption: 'Finish all',
-                icon: FaRegCheckCircle,
-                action: (f) => finishAllMyTasks()
-            });
-
-        return menuOperations;
+        return [
+            {
+                caption: 'Clear basket',
+                icon: FaTrash,
+                action: (f) => clearFolder(dataItem)
+            }];;
     }
 
+    async function clearFolder(folder)
+    {
+        await reef.post(`${folder.$ref}/DettachAllContent`, {} , onErrorShowAlert)
+    }
+
+    async function unpinFolder(folder)
+    {
+        await reef.post(`${folder.$ref}/TogglePinned`, {}, onErrorShowAlert)
+        reloadPinnedFolders();
+    }
     
+
+    let deleteModal;
+    let folderToDelete;
+    let deleteFolderKind=''
+    function askToDelete(folder, kind)
+    {
+        folderToDelete = folder;
+        deleteFolderKind = kind;
+        deleteModal.show()
+    }
+
+    async function deleteFolder()
+    {
+        if(!folderToDelete)
+            return;
+
+        await reef.post(`${folderToDelete.$ref}/DeletePermanently`, { },  onErrorShowAlert)
+        deleteModal.hide();
+
+        switch(deleteFolderKind)
+        {
+        case 'GroupFolder':
+            reloadGroupFolders();
+            break;
+
+        case 'PinnedFolder':
+            reloadPinnedFolders();
+        }
+        
+    }
+
+    async function changeName(folder, name)
+    {
+        let res = await reef.post(`${folder.$ref}/set`, 
+                                {
+                                    Title: name
+                                },
+                                onErrorShowAlert);
+        return (res != null);
+    }
+
+    async function changeSummary(folder, summary)
+    {
+
+        let res = await reef.post(`${folder.$ref}/set`, 
+                                {
+                                    Summary: summary
+                                },
+                                onErrorShowAlert);
+        return (res != null);
+    }
+
 </script>
 
 {#if sidebar}
@@ -315,7 +372,7 @@
                                             icon={FaRegStar}
                                             bind:this={navPinnedItems[idx]}
                                             active={isRoutingTo(href, currentPath)}
-                                            operations={(node) => getFolderOperations(node, item, navPinnedItems[idx])}
+                                            operations={(node) => getPinnedFolderOperations(node, item, navPinnedItems[idx])}
                                             selectable={item}
                                             summary={{
                                                 editable: (text) => {changeSummary(item, text)},
@@ -353,7 +410,7 @@
                                     icon={FaRegFolder}
                                     bind:this={navGroupItems[idx]}
                                     active={isRoutingTo(href, currentPath)}
-                                    operations={(node) => getFolderOperations(node, item, navGroupItems[idx])}
+                                    operations={(node) => getGroupFolderOperations(node, item, navGroupItems[idx])}
                                     selectable={item}
                                     summary={{
                                         editable: (text) => {changeSummary(item, text)},
@@ -397,7 +454,7 @@
                             <SidebarItem   {href}
                                             icon={FaRegStar}
                                             bind:this={navPinnedItems[idx]}
-                                            operations={(node) => getFolderOperations(node, item, navPinnedItems[idx])}
+                                            operations={(node) => getPinnedFolderOperations(node, item, navPinnedItems[idx])}
                                             {item}
                                             summary={{
                                                 editable: (text) => {changeSummary(item, text)},
@@ -430,7 +487,7 @@
                     <SidebarItem   {href}
                                     icon={FaRegFolder}
                                     bind:this={navGroupItems[idx]}
-                                    operations={(node) => getFolderOperations(node, item, navGroupItems[idx])}
+                                    operations={(node) => getGroupFolderOperations(node, item, navGroupItems[idx])}
                                     {item}
                                     summary={{
                                         editable: (text) => {changeSummary(item, text)},
@@ -464,12 +521,5 @@
         icon={FaTrash}
         onOkCallback={deleteFolder}
         bind:this={deleteModal}
-        />
-
-<Modal  title="Archive"
-        content="Are you sure you want to archive selected folder?"
-        icon={FaArchive}
-        onOkCallback={archiveFolder}
-        bind:this={archiveModal}
         />
 
