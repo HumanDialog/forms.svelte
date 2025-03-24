@@ -333,7 +333,7 @@ export function editable(node, params)
 
     node.classList.add("editable")
     node.classList.add("focus:outline-none")
-    
+
     if(active)
     {
         node.contentEditable = "true"
@@ -350,6 +350,7 @@ export function editable(node, params)
         
         return {
             destroy() {
+
                 node.removeEventListener("edit", edit_listener)
                 node.classList.remove("editable")
                 node.contentEditable = "false"

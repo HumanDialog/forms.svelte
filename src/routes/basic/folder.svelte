@@ -284,6 +284,23 @@
         }
     }
 
+    async function changeElementProperty(item, value, propName)
+    {
+        item[propName] = value
+
+        switch(propName)
+        {
+        case 'Title':
+            await reef.post(`${item.$ref}/SetTitle`, { value: value }, onErrorShowAlert)
+            break;
+
+        case 'Summary':
+            await reef.post(`${item.$ref}/SetSummary`, { value: value }, onErrorShowAlert)
+            break;
+        }
+
+    }
+
     async function dettachAllMyContent()
     {
         await reef.post(`${contextItem.$ref}/DettachAllContent`, {} , onErrorShowAlert)
@@ -430,11 +447,6 @@
         tasksComponent.reload(contextItem, tasksComponent.CLEAR_SELECTION)
     }
     
-
-    function switchToKanban()
-    {
-        push(`/listboard/${contextItemId}`);
-    }
 
     function listComponent(kind)
     {
@@ -629,9 +641,14 @@
                     toolbarOperations={(el) => elementOperations(el, 'Folder')} 
                     orderAttrib='Order'
                     bind:this={subfoldersComponent}>
-                <ListTitle a='Title' hrefFunc={(folder) => `${folder.href}`}/>
-                <ListSummary a='Summary'/>
-                <ListInserter action={addFolder} icon/>
+                <ListTitle      a='Title' 
+                                hrefFunc={(folder) => `${folder.href}`}
+                                onChange={changeElementProperty}/>
+                
+                <ListSummary    a='Summary'
+                                onChange={changeElementProperty}/>
+                
+                <ListInserter   action={addFolder} icon/>
 
                 <span slot="left" let:element>
                     <Icon component={FaRegFolder} 
@@ -644,8 +661,11 @@
                     toolbarOperations={ (el) => elementOperations(el, 'Note')} 
                     orderAttrib='Order'
                     bind:this={notesComponent}>
-                <ListTitle a='Title' hrefFunc={(note) => `${note.href}`}/>
-                <ListSummary a='Summary'/>
+                <ListTitle      a='Title' 
+                                hrefFunc={(note) => `${note.href}`}
+                                onChange={changeElementProperty}/>
+                <ListSummary    a='Summary' 
+                                onChange={changeElementProperty}/>
                 <ListInserter action={addNote} icon/>
 
                 <span slot="left" let:element>
@@ -659,8 +679,12 @@
                     toolbarOperations={(el) => elementOperations(el, 'Task')} 
                     orderAttrib='Order'
                     bind:this={tasksComponent}>
-                <ListTitle a='Title' hrefFunc={(task) => `${task.href}`}/>
-                <ListSummary a='Summary'/>
+                <ListTitle      a='Title' 
+                                hrefFunc={(task) => `${task.href}`}
+                                onChange={changeElementProperty}/>
+                
+                <ListSummary    a='Summary'
+                                onChange={changeElementProperty}/>
                 <ListInserter action={addTask} icon/>
 
                 <span slot="left" let:element>

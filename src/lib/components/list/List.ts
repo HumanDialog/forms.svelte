@@ -51,6 +51,7 @@ export class rList_property_tags extends rList_property
 
 export class rList_definition
 {
+    public name                 :string = ''
     public title                :string = '';
     public title_editable       :boolean = false;
     public on_title_changed     :Function | undefined = undefined;

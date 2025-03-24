@@ -57,10 +57,10 @@
 
     let item_key :string = ''
     let keys = Object.keys(item);
-    if(keys.includes('Id'))
-        item_key = 'Id'
-    else if(keys.includes('$ref'))
+    if(keys.includes('$ref'))
         item_key = '$ref';
+    else if(keys.includes('Id'))
+        item_key = 'Id'
     else if(keys.length > 0)
         item_key = keys[0];
 

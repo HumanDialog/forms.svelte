@@ -40,6 +40,8 @@
     let definition :rList_definition = new rList_definition;
     setContext('rList-definition', definition);
     setContext('rIs-table-component', true);
+
+    definition.name = `List ${a}`
     
 
     let     item  :object | null = null
