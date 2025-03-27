@@ -55,6 +55,7 @@
     export let context = '';
     export let typename = '';
     export let compact = false;
+    export let onChange = undefined;
 
     export let onFocusCb = undefined;
     export let onBlurCb = undefined;
@@ -687,13 +688,18 @@
 			content: value,
             injectCSS: false,
 			onTransaction({ editor, transaction }) {
-				hasChangedValue = true;
-                changedValue = editor.getHTML()
-                handleImagesChanges(transaction)
+                const wasContentChanged = transaction.steps.length > 0
+                if(wasContentChanged)
+                {
+                    hasChangedValue = true;
+                    changedValue = editor.getHTML()
+                    handleImagesChanges(transaction)
+                }
                 refreshToolbarOperations()
 			},
             onFocus({ editor, event }) {
                 // The editor is focused.
+                on_focus();
                 if(onFocusCb)
                     onFocusCb();
             },
@@ -765,8 +771,29 @@
         }
     } */
 
+    const isAutoSaveEnabled = false;
+    let autoSaveTimerId = 0;
+    function on_focus()
+    {
+        if(isAutoSaveEnabled)
+        {
+            autoSaveTimerId = setInterval(() =>
+            {
+                if(hasChangedValue)
+                    saveData();
+            },
+            10000);
+        }
+    }
+
     function on_blur()
     {
+        if(autoSaveTimerId)
+        {
+            clearInterval(autoSaveTimerId)
+            autoSaveTimerId = 0;
+        }
+
         if(onFinishEditing)
         {
             onFinishEditing();
@@ -791,12 +818,23 @@
 
     function saveData()
     {
-        if(item && a && hasChangedValue)
+        if(!hasChangedValue)
+            return false;
+
+        hasChangedValue = false;
+
+        console.log('editor: saveData')
+
+        if(onChange)
+        {
+            onChange(changedValue) 
+            return true;
+        }
+        else  if(item && a)
         {
             item[a] = changedValue;
             //value = changed_value;
-            hasChangedValue = false;
-
+            
             if(typename)
                 informModification(item, a, typename);
             else
@@ -804,9 +842,9 @@
             
             if(pushChangesImmediately)
                 pushChanges();
-
             return true;
         }
+
         return false;
     }
 

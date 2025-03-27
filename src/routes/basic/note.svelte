@@ -16,22 +16,26 @@
             onErrorShowAlert,
             Modal,
 			Spinner,
-            resizeImage
+            resizeImage,
+
+			getNiceStringDate
+
             } from '$lib'
 	import { onMount, tick } from 'svelte';
     import {location, querystring, push} from 'svelte-spa-router'
     
     import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen, FaList} from 'svelte-icons/fa/'
 	
-    let taskRef = ''
+    let noteRef = ''
     let note = null;
     let allTags = '';
    
-    let allActors = [];
     let availableStates = [];
     let pendingUploading = false;
     let isReadOnly = false;
     const s = session;
+    let creationDate = null
+    let modificationDate = null
 
     $: onParamsChanged($location)
 
@@ -44,38 +48,19 @@
             return;
 
         const taskId = segments[segments.length-1]
-        taskRef = `./Note/${taskId}`
+        noteRef = `./Note/${taskId}`
 
         allTags = await reef.get('/group/AllTags', onErrorShowAlert);
 
-       
-
-        //res = await reef.get('/app/Users?fields=$ref,Name')
-        let res = await reef.post('group/query',
-                            {
-                                Id: 1,
-                                Name: 'Users',
-                                Tree:[
-                                    {
-                                        Id: 1,
-                                        Association: 'Members/User',
-                                        Expressions:['$ref', 'Name']
-                                    }
-                                ]                    
-                            },
-                            onErrorShowAlert
-                        )
-        allActors = res.User;
-
-        await reloadData();
+       await reloadData();
     }
 
     async function reloadData()
     {
-        if(!taskRef)
+        if(!noteRef)
             return;
         
-        let res = await reef.post(`${taskRef}/query`, 
+        let res = await reef.post(`${noteRef}/query`, 
                         {
                             Id: 1,
                             Name: "collector",
@@ -85,7 +70,19 @@
                                 {
                                     Id: 1,
                                     Association: '',
-                                    Expressions:['Id', 'Index', 'Title','Summary', 'Content', 'ModificationDate', 'Tags', 'Kind', 'State', '$ref', '$type', '$acc'],
+                                    Expressions:[   'Id', 
+                                                    'Index', 
+                                                    'Title',
+                                                    'Summary', 
+                                                    'Content', 
+                                                    'CreationDate',
+                                                    'ModificationDate', 
+                                                    'Tags', 
+                                                    'Kind', 
+                                                    'State', 
+                                                    '$ref', 
+                                                    '$type', 
+                                                    '$acc'],
                                     SubTree:[
                                         {
                                             Id: 11,
@@ -104,6 +101,16 @@
                         onErrorShowAlert)
         
         note = res.Note
+
+        if(note.CreationDate)
+            creationDate = new Date(note.CreationDate)
+        else
+            creationDate = null
+
+        if(note.ModificationDate)
+            modificationDate = new Date(note.ModificationDate)
+        else
+            modificationDate = null
         
         isReadOnly = note.$acc === 1
 
@@ -112,13 +119,13 @@
     async function onTitleChanged(text)
     {
         note.Title = text;
-        await reef.post(`${taskRef}/set`, {Title: text}, onErrorShowAlert)
+        await reef.post(`${noteRef}/SetTitle`, {val: text}, onErrorShowAlert)
     }
 
     async function onSummaryChanged(text)
     {
         note.Summary = text;
-        await reef.post(`${taskRef}/set`, {Summary: text}, onErrorShowAlert)
+        await reef.post(`${noteRef}/SetSummary`, {val: text}, onErrorShowAlert)
         
     }
 
@@ -128,6 +135,17 @@
         await reef.post('group/set', { AllTags: allTags}, onErrorShowAlert)
     }
 
+    async function onTagsChanged(tags)
+    {
+        note.Tags = tags;
+        await reef.post(`${noteRef}/SetTags`, {val: tags}, onErrorShowAlert)
+    }
+
+    async function onContentChanged(content)
+    {
+        note.Content = content;
+        await reef.post(`${noteRef}/SetContent`, {val: content}, onErrorShowAlert)
+    }
     
     
     let summary;
@@ -136,7 +154,6 @@
     let dueDate;
     let dueDatePlaceholder = false
 
-   
 
     let createdBy;
     let responsiblePlaceholder = false
@@ -206,26 +223,6 @@
         }
     ];
     
-    function getPageOperationsX()
-    {
-        let operations = [
-            {
-                icon: FaPlus,
-                grid: addOperations 
-            }
-        ]
-
-        if(!isDeviceSmallerThan('sm'))
-        {
-            operations.push({
-                icon: FaSave,
-                action: (f) => saveCurrentEditable()
-            })
-        }
-
-        return operations;
-    }
-
     function getPageOperations()
     {
         return {
@@ -324,7 +321,7 @@
             if(!resizedImage)
                 resizedImage = file
             
-            const res = await reef.post(`${taskRef}/Images/blob?name=${file.name}&size=${resizedImage.size}`, {}, onErrorShowAlert)
+            const res = await reef.post(`${noteRef}/Images/blob?name=${file.name}&size=${resizedImage.size}`, {}, onErrorShowAlert)
             if(res && res.key && res.uploadUrl)
             {
                 const newKey = res.key;
@@ -342,7 +339,7 @@
                     if(res.ok)
                     {
                         // todo: editor path imgPath
-                        const dataPath = `${taskRef}/Images/blob?key=${newKey}`
+                        const dataPath = `${noteRef}/Images/blob?key=${newKey}`
                             
                         //console.log('upload success for ', dataPath)
                         if(imgEditorActionAfterSuccess)
@@ -385,7 +382,7 @@
             clearsContext=''
             title={note.Title}>
     <section class="w-full flex justify-center">
-        <article class="w-full prose prose-base prose-zinc dark:prose-invert prose-img:rounded-xl prose-p:my-0">
+        <article class="w-full prose prose-base prose-zinc dark:prose-invert mx-2 prose-img:rounded-xl prose-p:my-0">
             <section class="w-full flex flex-row justify-between">
                     <p class="">
                         {note.Index}
@@ -408,9 +405,9 @@
                         {/if}
                     </div-->
                     <div>
-                        {#if note.CreationDate}
+                        {#if creationDate}
                             <p>
-                                {note.CreationDate}
+                                {getNiceStringDate(creationDate)}
                             </p>
                         {/if}
                     </div>
@@ -427,7 +424,7 @@
 
             {#if note.Summary || summaryPlaceholder}
                 {#key note.Summary}
-                    <lead  
+                    <p  class="lead"
                         use:editable={{
                             action: (text) => onSummaryChanged(text),
                             active: true,
@@ -435,7 +432,7 @@
                         tabindex="0"
                         bind:this={summary}>
                         {note.Summary}
-                    </lead>
+                    </p>
                 {/key}
                 
            {/if}
@@ -448,6 +445,7 @@
                 </div>
 
                 <div>
+                    <!--
                     {#if availableStates && availableStates.length > 0}
                         <Combo  compact={true} 
                                 inContext='data'
@@ -462,6 +460,7 @@
                                             icon="icon"/>
                         </Combo>
                     {/if}
+                    -->
                 </div>
 
                 <div>
@@ -469,6 +468,7 @@
                         <Tags class="w-full "
                             a='Tags'
                             s='prose'
+                            onSelect={onTagsChanged}
                             getGlobalTags={() => allTags}
                             {onUpdateAllTags}
                             canChangeColor
@@ -479,18 +479,17 @@
             
             
             
-            
                 
-            <!--{#if note.Description || descriptionPlaceholder}-->
+            <!--{#if note.Content || descriptionPlaceholder}-->
                 <hr/>    
                 <Editor   a='Content'
                             compact={true}
                             bind:this={description}
+                            onChange={onContentChanged}
                             onFocusCb={() => activateFormattingTools()}
                             onBlurCb={() => deactivateFormattingToolsIfNeeded()}
                             onAddImage={uploadImage}
                             onRemoveImage={removeImage}/>
-                 <hr/> 
             <!--{/if}-->
 
         </article>

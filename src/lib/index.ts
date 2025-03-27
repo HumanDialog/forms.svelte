@@ -97,6 +97,12 @@ export {
 }   from './utils'
 
 export {
+    getFormattedStringDate, 
+    getNiceStringDate,
+    dayName,
+    monthName} from './components/date_utils'
+
+export {
             mainContentPageReloader,
             reloadMainContentPage,
             reloadWholeApp,
@@ -109,6 +115,7 @@ export {    data_tick_store,    // tmp
             hasSelectedItem, 
             hasDataItem,
             setNavigatorTitle } from "./stores";
+            
 export { contextToolbarOperations, pageToolbarOperations, contextItemsStore, contextTypesStore } from './stores'   // tmp
 export { informModification, informModificationEx, informItem, pushChanges } from './updates'   // tmp
 
