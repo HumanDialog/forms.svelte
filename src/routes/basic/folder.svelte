@@ -32,7 +32,7 @@
 
     let users = [];
 
-    const STATE_FINISHED = 1000;
+    const STATE_FINISHED = 7000;
     
     $: onParamsChanged($location, $querystring, $mainContentPageReloader);
     
@@ -418,7 +418,7 @@
                                 icon: FaShoppingBasket, //FaLink, //aRegShareSquare, // 
                                 toolbar: BasketPreview,
                                 props: {
-                                    destinationFolder: contextItem.$ref,
+                                    destinationContainer: contextItem.$ref,
                                     onRefreshView: refreshViewAfterAttachingFromBasket
                                 },
                                 fab: 'M01',
@@ -588,7 +588,7 @@
                                 icon: FaCopy,   // MdLibraryAdd
                                 caption: 'Copy to basket',
                                 action: (f) => copyElementToBasket(element, kind),
-                                fab: 'M05',
+                                fab: 'M04',
                                 tbr: 'A'
 
                             },
@@ -596,7 +596,7 @@
                                 icon: FaCut,
                                 caption: 'Move to basket',
                                 action: (f) => cutElementToBasket(element, kind),
-                                fab: 'M04',
+                                fab: 'M05',
                                 tbr: 'A'
                             },
                             {
@@ -626,6 +626,13 @@
 
 </script>
 
+<svelte:head>
+    {#if contextItem && folderTitle}
+        <title>{folderTitle} | Octopus Basic</title>
+    {:else}
+        <title>Octopus Basic</title>
+    {/if}
+</svelte:head>
 
 {#if contextItem}
     <Page   self={contextItem} 

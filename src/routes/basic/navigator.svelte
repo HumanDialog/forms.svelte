@@ -61,12 +61,12 @@
 
     async function addList(listName, order)
     {
-        await reef.post("/group/Lists/new", 
-                            { 
-                                Name: listName,
-                                Order: order
-                            },
-                            onErrorShowAlert);
+        await reef.post('/group/CreateList', 
+                        { 
+                            Name: listName,
+                            Order: order
+                        },
+                        onErrorShowAlert);
         reload();
     }
 
@@ -247,13 +247,7 @@
     export function requestAdd()
     {
         navLists.add(async (listName, order) => {
-            await reef.post("/group/Lists/new", 
-                            { 
-                                Name: listName,
-                                Order: order
-                            },
-                            onErrorShowAlert);
-            reload();
+            await addList(listName, order)
         })
     }
 

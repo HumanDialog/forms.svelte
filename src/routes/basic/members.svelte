@@ -30,6 +30,10 @@
 
   </script>
 
+<svelte:head>
+    <title>Members | Octopus Basic</title>
+</svelte:head>
+
 {#if users && users.length > 0}
   <MembersPage {users} nameAttrib="Name" emailAttrib="login" refAttrib="$ref" showAccessRoles/>
 {/if}

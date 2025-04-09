@@ -373,6 +373,14 @@
 
 </script>
 
+<svelte:head>
+    {#if note && note.Title}
+        <title>{note.Title} | Octopus Basic</title>
+    {:else}
+        <title>Octopus Basic</title>
+    {/if}
+</svelte:head>
+
 {#if note != null}
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->

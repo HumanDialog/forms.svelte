@@ -19,9 +19,11 @@
             resizeImage
             } from '$lib'
 	import { onMount, tick } from 'svelte';
-    import {location, querystring, push} from 'svelte-spa-router'
+    import {location, querystring, push, link} from 'svelte-spa-router'
     import TaskSteps from './task.steps.svelte'
-    import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen, FaList, FaTimes} from 'svelte-icons/fa/'
+    import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont, 
+        FaPen, FaList, FaTimes, FaCopy, FaCut
+    } from 'svelte-icons/fa/'
 	
     let taskRef = ''
     let task = null;
@@ -215,54 +217,6 @@
         await reef.post(`${taskRef}/Steps/${taskStep.Id}/set`, {Done: value}, onErrorShowAlert)
     }
 
-    function getPageOperationsWithStepToolsX(step) 
-    {
-        let operations = [ 
-            {
-                icon: FaPlus,
-                caption: '',
-                grid: addOperations
-            }
-        ];
-
-        if(!isDeviceSmallerThan('sm'))
-        {
-            operations.push({
-                icon: FaSave,
-                action: (f) => saveCurrentEditable()
-            })
-        }
-
-        if(step.Done)
-        {
-            operations.push(
-                {
-                    icon: FaUndo,
-                    action: async (f) => 
-                    {  
-                        await setStepDone( false, step)
-                        activateItem('props', step, getPageOperationsWithStepTools(step))
-                    }
-                }
-            )
-        }
-        else
-        {
-            operations.push(
-                {
-                    icon: FaCheck,
-                    action: async (f) => 
-                    {  
-                        await setStepDone( true, step)
-                        activateItem('props', step, getPageOperationsWithStepTools(step))
-                    }
-                }
-            )
-        }
-
-        return operations
-    }
-
     function getPageOperationsWithStepTools(step) 
     {
         let checkOperation;
@@ -369,7 +323,7 @@
                     }
                 }
         },
-        {
+    /*    {
             caption: 'List',
             action: async (f) => 
                 {
@@ -382,7 +336,7 @@
                         onList?.show(undefined, () => {onListPlaceholder = false})
                     }
                 }
-        },
+        }, */
         {
             caption: 'Due Date',
             icon: FaCalendarAlt,
@@ -471,26 +425,7 @@
         }
     ];
     
-    function getPageOperationsX()
-    {
-        let operations = [
-            {
-                icon: FaPlus,
-                grid: addOperations 
-            }
-        ]
-
-        if(!isDeviceSmallerThan('sm'))
-        {
-            operations.push({
-                icon: FaSave,
-                action: (f) => saveCurrentEditable()
-            })
-        }
-
-        return operations;
-    }
-
+   
     function getPageOperations()
     {
         return {
@@ -512,56 +447,25 @@
                             tbr: 'A'
                         },
                         {
+                            icon: FaCopy,   // MdLibraryAdd
+                            caption: 'Copy to basket',
+                            action: (f) => copyTaskToBasket(),
+                            fab: 'M04',
+                            tbr: 'A'
+
+                        },
+                    /*    {
                             icon: FaList,
                             action: (f) => { push(task.TaskList.href) },
                             fab: 'C00',
                             tbr: 'C'
-                        }
+                        } */
                     ]
                 }
             ]
         }
     }
     
-
-    function getPageOperationsWithFormattingToolsX() 
-    {
-        const mobile = isDeviceSmallerThan("sm")
-        if(mobile)
-        {
-            return [
-                {
-                    icon: FaFont,
-                    //aboveKeyboard: true,
-                    menu: description.getFormattingOperations(true)
-                }
-            ]
-        }
-        else
-        {
-            const addOperation = {
-                icon: FaPen,
-                caption: '',
-                grid: addOperations
-            };
-
-            const saveOperation = {
-                icon: FaSave,
-                action: (f) => { description?.save() }
-            }
-
-            const separator = {
-                separator: true
-            }
-
-            let formattingOperations = description.getFormattingOperations();
-            if(!isDeviceSmallerThan('sm'))
-                formattingOperations = [saveOperation, ...formattingOperations]
-
-            let operations = [addOperation,  separator, ...formattingOperations]
-            return operations
-        }
-    }
 
     function getPageOperationsWithFormattingTools()
     {
@@ -687,7 +591,21 @@
         reef.delete(dataPath, onErrorShowAlert)
     }
 
+    async function copyTaskToBasket()
+    {
+        await reef.post(`${taskRef}/CopyToBasket`, { } , onErrorShowAlert);
+    }
+
+
 </script>
+
+<svelte:head>
+    {#if task && task.Title}
+        <title>{task.Title} | Octopus Basic</title>
+    {:else}
+        <title>Octopus Basic</title>
+    {/if}
+</svelte:head>
 
 {#if task != null}
 
@@ -705,7 +623,12 @@
                     </p>
                     <div>
                         {#if task.TaskList || onListPlaceholder}
-                            <Combo  compact
+                            <p>
+                                <a href={task.TaskList.href} use:link >
+                                    {task.TaskList.Name}
+                                </a>
+                            </p>
+                            <!--Combo  compact
                                     inContext='data'
                                     a='TaskList'
                                     isAssociation
@@ -717,8 +640,8 @@
                                 <ComboSource    objects={allLists} 
                                                 key="$ref" 
                                                 name='Name'/>
-                            </Combo>
-                        {/if}
+                            </Combo-->
+                        {/if} 
                     </div>
                     <div>
                         {#if task.DueDate || dueDatePlaceholder}

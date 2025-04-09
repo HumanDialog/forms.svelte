@@ -11,128 +11,61 @@
 <Header/>
 </section>
 
-<div class="antialiased overflow-hidden sm:overflow-auto  bg-white dark:bg-stone-900">
-    <div>
-        <div class="max-w-[1280px] mx-auto px-0 sm:px-0 md:px-0">
-            <div class=" sm:pl-10  lg:pl-[120px] xl:pr-[128px]">
-                <div class=" margin-x-auto h-[calc(100vh-40px)] sm:h-auto px-4 sm:px-8 lg:px-10 
-                             overflow-y-scroll sm:overflow-y-visible overflow-x-hidden ">
-                    <article class="prose prose-stone leading-normal text-xs max-w-none dark:prose-invert dark:text-stone-200 mb-20">
-                        <h1>Terms and Conditions</h1>
-                        <p>Effective date: August 24, 2023</p>
-                        <p>Please read these terms and conditions carefully before using Our Service.</p>
-                        
-                        <h2>Interpretation and Definitions</h2>
-                        <h3>Interpretation</h3>
-                            <p>The words of which the initial letter is capitalized have meanings defined under the following conditions. The following definitions shall have the same meaning regardless of whether they appear in singular or in plural.</p>
-                        <h3>Definitions</h3>
-                            <p>For the purposes of these Terms and Conditions:</p>
+<div class="antialiased  bg-white dark:bg-stone-900 w-full ">
+    <div class="flex justify-center">
+        <article class="   w-full prose prose-base prose-zinc dark:prose-invert mx-2">
+            <h1>Terms of Service of Octopus</h1>
+            <p>Effective date: March 31, 2025</p>
+            <p>Please read these terms and conditions carefully before using Our Service.</p>
+            
+            <h2>Welcome to Octopus</h2>
 
-                        <ul>
-                            <li>
-                                <b>Application</b> means the software program provided by the Company downloaded by You on any electronic device, named ObjectReef
-                            </li>
-                            <li>
-                                <b>Application Store</b> means the digital distribution service operated and developed by Human Dialog S.A. in which the Application has been downloaded.
-                            </li>
-                            <li>
-                                <b>Country</b> refers to: Poland
-                            </li>
-                            <li>
-                                <b>Company</b> (referred to as either "the Company", "We", "Us" or "Our" in this Agreement) refers to Human Dialog S.A., Kazimierza Wielkiego 27, 55-070 Wrocław, Poland.
-                            </li>
-                            <li>
-                                <b>Device</b> means any device that can access the Service such as a computer, a cellphone or a digital tablet.
-                            </li>
-                            <li>
-                                <b>Service</b> refers to the Application.
-                            </li>
-                            <li>
-                                <b>Terms and Conditions</b> (also referred as "Terms") mean these Terms and Conditions that form the entire agreement between You and the Company regarding the use of the Service.
-                            </li>
-                            <li>
-                                <b>You</b> means the individual accessing or using the Service, or the company, or other legal entity on behalf of which such individual is accessing or using the Service, as applicable.
-                            </li>
-                            <li>
-                                <b>Subscription Plan</b> mean the chosen option of paying for the Services usage.
-                            </li>
-                        </ul>
+            <p>Thank you for using our products and services (“Services”). The Services are provided by Human Dialog S.A. (“Human Dialog”). By using our Octopus Services, you accept these terms and conditions. Please read them carefully. IF YOU DO NOT AGREE WITH THESE TERMS AND CONDITIONS, PLEASE DO NOT USE OUR SERVICES.</p>
 
-                        <h2>Acknowledgment</h2>
-                        <p>These are the Terms and Conditions governing the use of this Service and the agreement that operates between You and the Company. These Terms and Conditions set out the rights and obligations of all users regarding the use of the Service.</p>
-                        <p>Your access to and use of the Service is conditioned on Your acceptance of and compliance with these Terms and Conditions. These Terms and Conditions apply to all visitors, users and others who access or use the Service.</p>
-                        <p>By accessing or using the Service You agree to be bound by these Terms and Conditions. If You disagree with any part of these Terms and Conditions then You may not access the Service. You represent that you are over the age of 18. The Company does not permit those under 18 to use the Service.</p>
-                        <p>Your access to and use of the Service is also conditioned on Your acceptance of and compliance with the Privacy Policy of the Company. Our Privacy Policy describes Our policies and procedures on the collection, use and disclosure of Your personal information when You use the Application or the Website and tells You about Your privacy rights and how the law protects You. Please read Our Privacy Policy carefully before using Our Service.</p>
+            <h2>Use of our Services</h2>
 
-                        <h2>Links to Other Websites</h2>
-                        <p>Our Service may contain links to third-party web sites or services that are not owned or controlled by the Company.</p>
-                        <p>The Company has no control over, and assumes no responsibility for, the content, privacy policies, or practices of any third party web sites or services. You further acknowledge and agree that the Company shall not be responsible or liable, directly or indirectly, for any damage or loss caused or alleged to be caused by or in connection with the use of or reliance on any such content, goods or services available on or through any such web sites or services.</p>
-                        <p>We strongly advise You to read the terms and conditions and privacy policies of any third-party web sites or services that You visit.</p>
+            <p>You must comply with all rules made available through the Services. You must not abuse our Services, such as tampering with them or attempting to access them in any way other than through the interface, provided API and instructions we provide. You may only use our Services in accordance with the law, including applicable export and re-export control laws. We may suspend or terminate our Services if you do not comply with our terms or policies, or if we are investigating suspected misconduct.</p>
+            <p>Your use of our Services does not give you any intellectual property rights in them or in the content you access. You may not use the content of our Services unless you have obtained permission to do so from the owner of the content or it is permitted by law. These Terms and Conditions do not grant you the right to use any trademarks or logos used in our Services. Do not remove, obscure or alter any legal notices displayed on or with our Services.</p>
+            <p>In connection with your use of the Services, we may send you service announcements, administrative messages and other information. You may opt out of some of these communications.</p>
+            <p>Most of our Services are available on mobile devices. Do not use such Services in a way that distracts you or prevents you from complying with traffic laws or safety rules.</p>
 
-                        <h2>Termination</h2>
-                        <p>We may terminate or suspend Your access immediately, without prior notice or liability, for any reason whatsoever, including without limitation if You breach these Terms and Conditions.</p>
-                        <p>Upon termination, Your right to use the Service will cease immediately.</p>
+            <h2>Your Octopus Account</h2>
+            <p>You may need an ObjectReef account to use the Octopus Services. To protect your account, you must keep your password confidential. You are responsible for actions taken on or through your account. Try not to use your account password in third-party applications.</p>
+            
+            <h2>Privacy and copyright protection</h2>
+            <p>The Octopus Privacy Policy explains how we treat your personal information and protect your privacy when you use our Services. By using our Services, you agree that Octopus may use such data in accordance with our privacy policies.</p>
+            
+            <h2>Your content in our Services</h2>
+            <p>Some of our Services allow you to create, upload, save, send or receive content. You retain the intellectual property rights that you own with respect to that content. In short, what belongs to you remains yours.</p>
+            <p>You can find more information about how Octopus uses and stores content in the Privacy Policy or additional terms and conditions for specific Services. If you send feedback or suggestions about our Services, we may use them without obligation to you.</p>
+    
+            <h2>Software in our Services</h2>
+            <p>When a Service requires or includes downloadable software, that software may automatically update on your device when a new version or feature becomes available. Some Services may allow you to customize automatic update settings.</p>
+            <p>Human Dialog grants you a personal, worldwide, royalty-free, non-transferable and non-exclusive license to use the software provided as part of the Octopus Services. This license is intended to enable you to use the Octopus Services in accordance with these terms. You may not copy, modify, distribute, sell or rent any part of our Services. </p>
+            <p>The Octopus source code is made available under the MIT open source license. Under this license, you may freely copy, modify and distribute the source code, in whole or in parts. </p>
+            
+            <h2>Modification and termination of our Services</h2>
+            <p>We may modify these terms or any additional terms that apply to a Service to, for example, reflect changes to the law or changes to our Services. You should look at the terms regularly. We'll post notice of modifications to these terms on this page. Changes will not apply retroactively and will become effective no sooner than fourteen days after they are posted. However, changes addressing new functions for a Service or changes made for legal reasons will be effective immediately. If you do not agree to the modified terms for a Service, you should discontinue your use of the Service.</p>
+            <p>If there is a conflict between these terms and the additional terms, the additional terms will control for that conflict.</p>
+            
+            <h2>Our Warranties and Disclaimers</h2>
+            <p>We provide our Services using a commercially reasonable level of skill and care and we hope that you will enjoy using them. But there are certain things that we don't promise about our Services. </p>
+            <p>OTHER THAN AS EXPRESSLY SET OUT IN THESE TERMS OR ADDITIONAL TERMS, NEITHER HUMAN DIALOG NOR ITS SUPPLIERS OR DISTRIBUTORS MAKE ANY SPECIFIC PROMISES ABOUT THE SERVICES.</p>
 
-                        <h2>Limitation of Liability</h2>
-                        <p>Notwithstanding any damages that You might incur, the entire liability of the Company and any of its suppliers under any provision of this Terms and Your exclusive remedy for all of the foregoing shall be limited to the amount actually paid by You through the Service.</p>
-                        <p>To the maximum extent permitted by applicable law, in no event shall the Company or its suppliers be liable for any special, incidental, indirect, or consequential damages whatsoever (including, but not limited to, damages for loss of profits, loss of data or other information, for business interruption, for personal injury, loss of privacy arising out of or in any way related to the use of or inability to use the Service, third-party software and/or third-party hardware used with the Service, or otherwise in connection with any provision of this Terms), even if the Company or any supplier has been advised of the possibility of such damages and even if the remedy fails of its essential purpose.</p>
-                        <p>Some states do not allow the exclusion of implied warranties or limitation of liability for incidental or consequential damages, which means that some of the above limitations may not apply. In these states, each party's liability will be limited to the greatest extent permitted by law.</p>
+            <p>SOME JURISDICTIONS PROVIDE FOR CERTAIN WARRANTIES, LIKE THE IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. TO THE EXTENT PERMITTED BY LAW, WE EXCLUDE ALL WARRANTIES.</p>
+            
+            <h2>Limits on Liability</h2>
+            <p>We work hard to provide the best Products we can and to specify clear guidelines for everyone who uses them. However, THE SERVICE IS PROVIDED "AS IS".</p>
+            <p>WE ARE UNABLE TO PREDICT WHEN PROBLEMS MAY OCCUR WITH OUR SERVICES. ACCORDINGLY, OUR LIABILITY IS LIMITED TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, AND IN NO EVENT WILL WE BE LIABLE TO YOU FOR ANY LOST PROFITS, REVENUES, INFORMATION OR DATA, OR FOR CONSEQUENTIAL, SPECIAL, INDIRECT, EXEMPLARY, PUNITIVE OR INCIDENTAL DAMAGES ARISING OUT OF OR IN CONNECTION WITH THESE TERMS AND CONDITIONS OR HUMAN DIALOG PRODUCTS, EVEN IF WE HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. YOU USE AND/OR PURCHASE THE SERVICE AT YOUR OWN RISK.</p>
+            
+            <h2>Business Uses of Our Services</h2>
+            <p>If you use our Services on behalf of a company, that company accepts these terms and conditions. It will indemnify and hold Human Dialog and its affiliates, officers, agents and employees harmless from any claim, suit or action arising out of or related to your use of the Services or violation of these terms and conditions, including any liability or expense arising out of claims, losses, damages, suits, judgments, litigation costs and attorneys' fees.</p>
+            
+            <h2>About These Terms</h2>
+            <p>These terms and conditions govern the relationship between Human Dialog and the user with respect to the use of Octopus services. They do not create any third-party beneficiary rights. If you do not comply with these terms and conditions and we do not act immediately, this does not mean that we give up any rights we may have (such as taking action in the future). If it turns out that a condition is not enforceable, no other conditions will be affected.</p>
+            <p>For more information, please <a href="mailto:legal@hdsa.pl">contact us</a>.</p>
 
-                        <h2>Usage of the demo version of the Service</h2>
-                        <p>The Company allows to download a free version of the Service. You can download it, try and use it for your purposes as long as it in accordance with these Terms and Conditions and it is not commercial usage. Monetizing the software based on the Service requires the Subscription Plan and registered account.</p>
-                        <p>You are not allowed to publish downloaded version of the Service on any accessible via Internet destinations (websites, ftp servers etc.). The only way to get the Service is to download it from the official Company webpage.</p>
-
-                        <h2>Payment Terms</h2>
-                        <p>You are able to buy the Service Subscription Plan once registered via the Company website. It is required to provide data necessary to generate the VAT invoice for the Service.</p>
-                        <p>The prices, features, and options of the Service depend on the Subscription Plan selected and load of the service. Please refer to the Company website to decide about the most suitable Subscription Plan.</p>
-                        <p>The Company does not ensures or warrant that a selected Subscription Plan will be offered indefinitely and, to the fullest extent permitted under applicable laws,  reserves the right to change the prices or alter the features and options in a particular Subscription Plan without prior notice.</p>
-
-                        <h2>Subscription Term and Automatic Renewals</h2>
-                        <p>The Service Subscription Plans renew automatically unless it is cancelled by You. By selecting the subscription plan You accept the price and the frequency of renewal and invoicing. </p>
-                        <p>Every time  the payment is made by You or automatically, the VAT invoice is generated and send electronically via the contact method provided in the user account data.</p>
-
-                        <h2>Service lockout and shutdown</h2>
-                        <p>If You have been invoiced and no payment has been made, the Service is blocked, meaning it is not responding to any request. Data is stored for the next 6 months and after that period, the Company can erase them at any moment.</p>
-                        <p>You might be informed via the given contact details, if no payment has been made.</p>
-
-                        <h2>"AS IS" and "AS AVAILABLE" Disclaimer</h2>
-                        <p>The Service is provided to You "AS IS" and "AS AVAILABLE" and with all faults and defects without warranty of any kind. To the maximum extent permitted under applicable law, the Company, on its own behalf and on behalf of its Affiliates and its and their respective licensors and service providers, expressly disclaims all warranties, whether express, implied, statutory or otherwise, with respect to the Service, including all implied warranties of merchantability, fitness for a particular purpose, title and non-infringement, and warranties that may arise out of course of dealing, course of performance, usage or trade practice. Without limitation to the foregoing, the Company provides no warranty or undertaking, and makes no representation of any kind that the Service will meet Your requirements, achieve any intended results, be compatible or work with any other software, applications, systems or services, operate without interruption, meet any performance or reliability standards or be error free or that any errors or defects can or will be corrected.</p>
-                        <p>Without limiting the foregoing, neither the Company nor any of the company's provider makes any representation or warranty of any kind, express or implied: (i) as to the operation or availability of the Service, or the information, content, and materials or products included thereon; (ii) that the Service will be uninterrupted or error-free; (iii) as to the accuracy, reliability, or currency of any information or content provided through the Service; or (iv) that the Service, its servers, the content, or e-mails sent from or on behalf of the Company are free of viruses, scripts, trojan horses, worms, malware, timebombs or other harmful components.</p>
-                        <p>Some jurisdictions do not allow the exclusion of certain types of warranties or limitations on applicable statutory rights of a consumer, so some or all of the above exclusions and limitations may not apply to You. But in such a case the exclusions and limitations set forth in this section shall be applied to the greatest extent enforceable under applicable law.</p>
-                        <p>However, the Company ensures that did their best to provide the Service without defects and is willing to provide new versions of the Service containing fixes for the reported problems and make new features available. The Service has been tested in all known to the Company use cases.</p>
-
-                        <h2>Governing Law</h2>
-                        <p>The laws of the Country, excluding its conflicts of law rules, shall govern this Terms and Your use of the Service. Your use of the Application may also be subject to other local, state, national, or international laws.</p>
-
-                        <h2>Disputes Resolution</h2>
-                        <p>If You have any concern or dispute about the Service, You agree to first try to resolve the dispute informally by contacting the Company.</p>
-
-                        <h2>For European Union (EU) Users</h2>
-                        <p>If You are a European Union consumer, you will benefit from any mandatory provisions of the law of the country in which you are resident in.</p>
-
-                        <h2>United States Legal Compliance</h2>
-                        <p>You represent and warrant that (i) You are not located in a country that is subject to the United States government embargo, or that has been designated by the United States government as a "terrorist supporting" country, and (ii) You are not listed on any United States government list of prohibited or restricted parties.</p>
-
-                        <h2>Severability and Waiver</h2>
-                        <h3>Severability</h3>
-                        <p>If any provision of these Terms is held to be unenforceable or invalid, such provision will be changed and interpreted to accomplish the objectives of such provision to the greatest extent possible under applicable law and the remaining provisions will continue in full force and effect.</p>
-                        
-                        <h3>Waiver</h3>
-                        <p>Except as provided herein, the failure to exercise a right or to require performance of an obligation under these Terms shall not effect a party's ability to exercise such right or require such performance at any time thereafter nor shall the waiver of a breach constitute a waiver of any subsequent breach.</p>
-
-                        <h2>Translation Interpretation</h2>
-                        <p>These Terms and Conditions may have been transtoned if We have made them available to You on our Service. You agree that the original English text shall prevail in the case of a dispute.</p>
-
-                        <h2>Changes to These Terms and Conditions</h2>
-                        <p>We reserve the right, at Our sole discretion, to modify or replace these Terms at any time. If a revision is material We will make reasonable efforts to provide at least 30 days' notice prior to any new terms taking effect. What constitutes a material change will be determined at Our sole discretion.</p>
-                        <p>By continuing to access or use Our Service after those revisions become effective, You agree to be bound by the revised terms. If You do not agree to the new terms, in whole or in part, please stop using the website and the Service.</p>
-
-                        <h2>Contact Us</h2>
-                        <p>If you have any questions about these Terms and Conditions, You can contact us by e-mail at <a href="mailto:legal@hdsa.pl">legal@hdsa.pl</a> </p>
-                    </article>
-                </div>    
-            </div>
-        </div>
+        </article>
     </div>
 
     <Footer />

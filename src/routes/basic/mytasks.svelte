@@ -22,7 +22,7 @@
     let listComponent;
     
     let lists = [];
-    const STATE_FINISHED = 1000;
+    const STATE_FINISHED = 7000;
 
     $: onParamsChanged($session, $mainContentPageReloader);
     
@@ -109,7 +109,8 @@
         if(!taskToDelete)
             return;
 
-        await reef.delete(taskToDelete.$ref, onErrorShowAlert);
+        //await reef.delete(taskToDelete.$ref, onErrorShowAlert);
+        await reef.post(`${taskToDelete.$ref}/DeletePermanently`, { } , onErrorShowAlert);
         deleteModal.hide();
 
         
@@ -268,6 +269,9 @@
 
 </script>
 
+<svelte:head>
+    <title>My Tasks | Octopus Basic</title>
+</svelte:head>
 
 {#if user}
     <Page   self={user} 

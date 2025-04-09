@@ -174,14 +174,14 @@
                             icon: FaCopy,   // MdLibraryAdd
                             caption: 'Copy to basket',
                             action: (f) => copyFolderToBasket(folder),
-                            fab: 'M05',
+                            fab: 'M04',
                             tbr: 'A'
                         },
                         {
                             icon: FaCut,
                             caption: 'Move to basket',
                             action: (f) => cutFolderToBasket(folder),
-                            fab: 'M04',
+                            fab: 'M05',
                             tbr: 'A'
                         },
                     */    {
@@ -214,6 +214,9 @@
 
 </script>
 
+<svelte:head>
+    <title>My Folders | Octopus Basic</title>
+</svelte:head>
 
 {#if user}
     

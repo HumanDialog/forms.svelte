@@ -12,8 +12,10 @@
                 ListComboProperty,
 				mainContentPageReloader,
                 Modal,
-                onErrorShowAlert} from '$lib'
-    import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaColumns, FaArchive, FaList, FaEllipsisH, FaChevronRight, FaChevronLeft} from 'svelte-icons/fa'
+                onErrorShowAlert, showMenu} from '$lib'
+    import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaColumns, FaArchive, FaList, 
+        FaEllipsisH, FaChevronRight, FaChevronLeft, FaRandom
+    } from 'svelte-icons/fa'
     import {location, pop, push, querystring, link} from 'svelte-spa-router'
 
     export let params = {}
@@ -30,7 +32,7 @@
     
     let users = [];
 
-    const STATE_FINISHED = 1000;
+    const STATE_FINISHED = 7000;
     
     $: onParamsChanged($location, $querystring, $mainContentPageReloader);
     
@@ -166,7 +168,8 @@
         if(!taskToDelete)
             return;
 
-        await reef.delete(taskToDelete.$ref, onErrorShowAlert);
+        //await reef.delete(taskToDelete.$ref, onErrorShowAlert);
+        await reef.post(`${taskToDelete.$ref}/DeletePermanently`, { } , onErrorShowAlert);
         deleteModal.hide();
 
         
@@ -233,12 +236,19 @@
                             tbr: 'A'
                         },
                         {
+                            icon: FaRandom,
+                            caption: 'Change kind',
+                            action: changeListKind,
+                            fab: 'S02',
+                            tbr: 'C'
+                        }
+                        /*{
                             icon: FaColumns,
                             right: true,
                             action: (f) => switchToKanban(),
-                            fab: 'A01',
+                            fab: 'S01',
                             tbr: 'C'
-                        }
+                        }*/
                     ]
                 }
             ]
@@ -281,52 +291,7 @@
     }
 
     
-    let taskOperationsX = (task) => { 
-        let editOperations = getEditOperations(task)
-        return [
-                {
-                    icon: FaPlus,
-                    action: (f) => { listComponent.addRowAfter(task) }
-                },
-                {
-                    toolbox:[
-                        {
-                            icon: FaPen,
-                            grid: editOperations
-                        },
-                        {
-                            icon: FaEllipsisH,
-                            menu:[
-                                {
-                                    icon: FaArchive,
-                                    caption: 'Archive',
-                                    action: (f) => askToArchive(task)
-                                },
-                                {
-                                    icon: FaTrash,
-                                    caption: 'Delete',
-                                    action: (f) => askToDelete(task)
-                                }
-                            ]
-                        }
-                        
-                    ]
-                },
-                {
-                    icon: FaCaretDown,
-                    action: (f) => listComponent.moveDown(task)
-                },
-                {
-                    icon: FaCaretUp,
-                    action: (f) => listComponent.moveUp(task)
-                },
-                {
-                    icon: FaColumns,
-                    right: true,
-                    action: (f) => switchToKanban()
-                }
-            ];
-    }
+    
 
     let taskOperations = (task) => {
         let editOperations = getEditOperations(task);
@@ -343,12 +308,19 @@
                             tbr: 'A'
                         },
                         {
+                            icon: FaRandom,
+                            caption: 'Change kind',
+                            action: changeListKind,
+                            fab: 'S02',
+                            tbr: 'C'
+                        }
+                        /*{
                             icon: FaColumns,
                             right: true,
                             action: (f) => switchToKanban(),
-                            fab: 'A01',
+                            fab: 'S01',
                             tbr: 'C'
-                        }
+                        }*/
                     ]
                 },
                 {
@@ -402,8 +374,87 @@
         }
     }
 
+    function getDefaultTypeSummary(list)
+    {
+        if(!list.TaskStates)
+            return '';
+
+        let result = ''
+        list.TaskStates.forEach(s => {
+            if(result)
+                result += ', '
+            result += s.name
+        })
+
+        return result
+    }
+
+    async function changeListKind(button)
+    {
+        const listTypes = await reef.get('group/GetTaskListTypes', onErrorShowAlert)
+        if(!listTypes || !Array.isArray(listTypes) || listTypes.length == 0)
+            return;
+
+        let menuOperations = []
+        let prevKind = 0;
+
+        listTypes.forEach(template => {
+            
+            //if(prevKind != template.Kind)
+            //    menuOperations.push({separator: true})
+            //prevKind = template.Kind
+
+            menuOperations.push({
+                caption: template.Name,
+                description: template.Summary ?? getDefaultTypeSummary(template),
+                action: (f) => askToChangeListKind(template)
+            })
+        })
+
+        if(menuOperations.length > 0)
+        {
+            let rect = button.getBoundingClientRect()
+            showMenu(rect, menuOperations)
+        }
+    }
+
+    let changeKindModal;
+    let changeListTo = null;
+    function askToChangeListKind(template)
+    {
+        changeListTo = template
+
+        changeKindModal.show();
+    }
+
+    async function handleChangeListKind()
+    {
+        changeKindModal.hide();
+
+        if(!changeListTo)
+            return
+
+        let newHref = await reef.post(`${listPath}/ChangeListKind`, {
+            template: changeListTo
+        }, onErrorShowAlert)
+        
+        changeListTo = null
+
+        if(!newHref)
+            return null;
+
+        push(newHref) 
+    }
+
 </script>
 
+<svelte:head>
+    {#if currentList && currentList.Name}
+        <title>{currentList.Name} | Octopus Basic</title>
+    {:else}
+        <title>Octopus Basic</title>
+    {/if}
+</svelte:head>
 
 {#if currentList}
     <Page   self={currentList} 
@@ -482,4 +533,12 @@
         icon={FaArchive}
         onOkCallback={archiveTask}
         bind:this={archiveModal}
+        />
+
+<Modal  title="Change list kind"
+        content="Are you sure you want to change current list kind?"
+        icon={FaRandom}
+        onOkCallback={handleChangeListKind}
+        okCaption="Change"
+        bind:this={changeKindModal}
         />

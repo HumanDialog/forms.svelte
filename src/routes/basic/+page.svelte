@@ -51,6 +51,11 @@
                                 username: "bob@example.com",
                                 role: 'GroupOwner',
                                 groupId: 13
+                            },
+                            {
+                                username: "aga@humandialog.com.pl",
+                                role: 'GroupOwner',
+                                groupId: 1
                             }
                         ],
                         apiVersion: "v001"}

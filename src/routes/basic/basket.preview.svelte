@@ -8,7 +8,7 @@
 	import { afterUpdate, onMount } from "svelte";
 	import { push } from "svelte-spa-router";
 
-    export let destinationFolder = ''
+    export let destinationContainer = ''
     export let onHide = undefined
     export let onSizeChanged = undefined
     export let onRefreshView = undefined
@@ -16,7 +16,7 @@
     let basketItem;
     let basketEntriesNo = 0
     
-    const STATE_FINISHED = 1000;
+    const STATE_FINISHED = 7000;
 
     let reloadTicket = -1
     let lastReloadTicket = 0
@@ -133,7 +133,10 @@
         if(onHide)
             onHide();
 
-        const res = await reef.post(`${basketItem.$ref}/AttachMyContentTo`, { destFolder: destinationFolder }, onErrorShowAlert)
+        if(!destinationContainer)
+            return;
+
+        const res = await reef.post(`${destinationContainer}/AttachBasketContent`, { }, onErrorShowAlert)
         if(res)
         {
             if(onRefreshView)
@@ -147,7 +150,10 @@
         if(onHide)
             onHide();
 
-        const res = await reef.post(`${basketItem.$ref}/AttachMyContentToAndClear`, { destFolder: destinationFolder }, onErrorShowAlert)
+        if(!destinationContainer)
+            return;
+
+        const res = await reef.post(`${destinationContainer}/AttachAndClearBasketContent`, { }, onErrorShowAlert)
         if(res)
         {
             if(onRefreshView)
