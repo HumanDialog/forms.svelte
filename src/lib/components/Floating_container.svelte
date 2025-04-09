@@ -2,7 +2,7 @@
 
     import {tick, afterUpdate} from 'svelte'
     import {isDeviceSmallerThan} from '../utils'
-    import {toolsActionsOperations} from '../stores'
+    import {pushToolsActionsOperations, popToolsActionsOperations} from '../stores'
     import {FaTimes} from 'svelte-icons/fa'
     
     let x :number;
@@ -54,7 +54,7 @@
 
         if(isDeviceSmallerThan("sm"))
         {    
-            $toolsActionsOperations = {
+            pushToolsActionsOperations( {
                 opver: 1,
                 operations: [
                     {
@@ -69,7 +69,7 @@
                         ]
                     }
                 ]
-            }
+            })
         }
                 
         await tick();
@@ -87,9 +87,11 @@
 
     export function hide()
     {
+        if(visible)
+            popToolsActionsOperations();
+
         visible = false;
         cssPosition = calculatePosition(x, y, around_rect, false, false);
-        $toolsActionsOperations = []
         
         window.removeEventListener('click', on_before_window_click, true);
         rootElement?.removeEventListener('click', on_before_container_click, true);

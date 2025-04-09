@@ -31,7 +31,7 @@
     import Gapcursor from '@tiptap/extension-gapcursor'
     import History from '@tiptap/extension-history'
     
-    import {data_tick_store, contextItemsStore, contextTypesStore, onErrorShowAlert, toolsActionsOperations} from '../../stores.js'
+    import {data_tick_store, contextItemsStore, contextTypesStore, onErrorShowAlert, pushToolsActionsOperations, popToolsActionsOperations} from '../../stores.js'
     import {informModification, pushChanges} from '../../updates.js'
     import {isDeviceSmallerThan, parseWidthDirective, refreshToolbarOperations, UI} from '../../utils.js'
     import Palette from './internal/palette.svelte'
@@ -882,7 +882,7 @@
 
         if(isDeviceSmallerThan("sm"))
         {    
-            $toolsActionsOperations = {
+            pushToolsActionsOperations({
                 opver: 1,
                 operations: [
                     {
@@ -897,15 +897,17 @@
                         ]
                     }
                 ]
-            }
+            })
         }
             
     }
 
     function on_palette_hidden()
     {
+        if(is_command_palette_visible)
+            popToolsActionsOperations()
+        
         is_command_palette_visible = false;
-        $toolsActionsOperations = []
 
         //clear_previous_text_and_position();
     }

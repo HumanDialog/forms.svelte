@@ -293,7 +293,7 @@
         {@const canOpen = isLinkLike || hasOpen}
         {@const openableClass = canOpen ? "sm:hover:cursor-pointer underline" : ""}
         {@const showIcon = showAttachementIcon()}
-            <h3 class=" text-base font-semibold pb-1
+            <h3 class=" h3 text-base font-semibold pb-1
                         whitespace-nowrap overflow-clip truncate w-full sm:flex-none
                         relative {openableClass}"
                 use:editable={{
@@ -307,7 +307,9 @@
                     condition: canOpen, 
                     callback: performOpen}}
                 bind:this={titleElement}>
+                <!--a href="#"-->
                     {item[definition.titleAttrib]}
+                <!--/a-->
 
                 {#if showIcon}
                     <span id="attachement" class="absolute top-1 right-0 w-5 h-5 sm:w-3 sm:h-3">

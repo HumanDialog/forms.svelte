@@ -4,6 +4,7 @@
 
     export let onAdd:       Function | undefined = undefined;
     export let onOpen:      Function | undefined = undefined;
+    export let onReplace:   Function | undefined = undefined;
     
     export let getCardOperations: Function | undefined = undefined;
     
@@ -11,6 +12,7 @@
     
     definition.onAdd = onAdd;
     definition.onOpen = onOpen;
+    definition.onReplace = onReplace;
     definition.getCardOperations = getCardOperations;
 
 </script>

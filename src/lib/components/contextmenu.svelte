@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { afterUpdate, tick} from 'svelte';
     import Icon from './icon.svelte'
-    import {contextItemsStore, toolsActionsOperations} from '../stores'
+    import {contextItemsStore, pushToolsActionsOperations, popToolsActionsOperations} from '../stores'
     import {isDeviceSmallerThan, isOnScreenKeyboardVisible} from '../utils'
     import {hideWholeContextMenu} from './menu'
     import {FaTimes} from 'svelte-icons/fa'
@@ -182,7 +182,7 @@
 
         if(isDeviceSmallerThan("sm"))
         {    
-            $toolsActionsOperations = {
+            pushToolsActionsOperations ({
                 opver: 1,
                 operations: [
                     {
@@ -197,7 +197,7 @@
                         ]
                     }
                 ]
-            }
+            })
         }
 
         await tick();       // render menu and fix position after rendering
@@ -223,7 +223,8 @@
 
     export function hide()
     {
-        $toolsActionsOperations = []
+        if(visible)
+            popToolsActionsOperations()
 
         visible = false;
         css_position = calculatePosition(x, y, around_rect, false, false);
@@ -468,8 +469,9 @@
                     <p> {operation.caption}</p>
                     {#if operation.description}
                         {@const shortcut_width_px = operation.shortcut ? 80 : 0}
-                        <p  class="text-sm font-normal text-stone-900 dark:text-stone-500 truncate inline-block"
-                            style:max-width={`calc(${width_px-shortcut_width_px} - 3rem)`} >{operation.description}</p>
+                        <p  class=" text-sm font-normal text-stone-900 dark:text-stone-500 truncate inline-block">
+                            {operation.description}
+                        </p>
                     {/if}
                 </div>
                 {#if has_submenu}

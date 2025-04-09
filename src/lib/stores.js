@@ -15,6 +15,31 @@ export const mainContentPageReloader = writable(1);
 export const wholeAppReloader = writable(1)
 export const alerts = writable([])
 
+
+let toolsActionsOperationsStack = []
+export function pushToolsActionsOperations(operations)
+{
+    toolsActionsOperationsStack.push(operations)
+    toolsActionsOperations.set(operations) 
+}
+
+export function popToolsActionsOperations()
+{
+    toolsActionsOperationsStack.pop();
+    const stackSize = toolsActionsOperationsStack.length;
+    if(stackSize == 0)
+    {
+        //console.log('stack empty')
+        toolsActionsOperations.set([]) 
+    }
+    else
+    {
+        const lastElement = toolsActionsOperationsStack[stackSize-1];
+        //console.log('stack not empty (stackSize)', lastElement)
+        toolsActionsOperations.set(lastElement) 
+    }
+}
+
 export const addAlert = (txt) => {
     let al = get(alerts)
     al = [txt, ...al];

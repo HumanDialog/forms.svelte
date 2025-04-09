@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { afterUpdate, onMount, tick } from 'svelte';
 	  import Icon from './components/icon.svelte'
-    import {toolsActionsOperations} from './stores.js'
+    import {pushToolsActionsOperations, popToolsActionsOperations} from './stores.js'
     import {isDeviceSmallerThan} from './utils'
     import {FaTimes} from 'svelte-icons/fa'
     
@@ -29,7 +29,7 @@
 
         if(isDeviceSmallerThan("sm"))
         {    
-            $toolsActionsOperations = {
+          pushToolsActionsOperations( {
                 opver: 1,
                 operations: [
                     {
@@ -44,14 +44,17 @@
                         ]
                     }
                 ]
-            }
+            })
         }
     }
 
     export function hide()
     {
-        open = false;
-        $toolsActionsOperations = []
+      if(!open)
+        return;
+
+      open = false;
+      popToolsActionsOperations()
     }
 
     let root;
@@ -123,8 +126,9 @@
             From: "opacity-100 translate-y-0 sm:scale-100"
             To: "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
         -->
-        <div class=" transform overflow-hidden rounded-lg bg-white dark:bg-stone-700 text-left shadow-xl transition-all 
-                    sm:my-8 w-full sm:max-w-lg">
+
+        <div class="  rounded-lg bg-white dark:bg-stone-700 text-left shadow-xl transition-all  
+                    sm:my-8 w-full sm:max-w-lg"> <!-- transform overflow-hidden -->
           <div class="bg-white dark:bg-stone-700 px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
             <div class="sm:flex sm:items-start">
               <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {data_tick_store, contextItemsStore, contextTypesStore, toolsActionsOperations} from '../../stores.js' 
+    import {data_tick_store, contextItemsStore, contextTypesStore, pushToolsActionsOperations, popToolsActionsOperations} from '../../stores.js' 
     import {informModification, pushChanges} from '../../updates.js'
     import {isDeviceSmallerThan, parseWidthDirective,shouldBeComapact} from '../../utils.js'
     import {afterUpdate, getContext, onMount, setContext} from 'svelte';
@@ -243,7 +243,12 @@
         client_rect.width = window.innerWidth;
         client_rect.height = window.innerHeight;
         
-        let rect = textbox.getBoundingClientRect();
+        let rect;
+        
+        if(is_compact)
+           rect = textbox.getBoundingClientRect();
+        else
+            rect = combo.getBoundingClientRect();
 
         let top_space = rect.y;
         let bottom_space = client_rect.height - (rect.y + rect.height);
@@ -306,6 +311,9 @@
             dropdown_position = `min-width: ${palette_width_px}px; max-height:${palette_max_height_px}px; position: fixed; left:${x}px; top:${y}px;`;
             if(show_above)
                 dropdown_position += ' transform: translate(0, -100%);'
+
+            if(!is_compact)
+                dropdown_position += `width: ${preferred_palette_width}px`
         }
 
         //
@@ -337,7 +345,7 @@
 
         if(isDeviceSmallerThan("sm"))
         {    
-            $toolsActionsOperations = {
+            pushToolsActionsOperations({
                 opver: 1,
                 operations: [
                     {
@@ -352,7 +360,7 @@
                         ]
                     }
                 ]
-            }
+            })
         }
         
         //filtered_source = definition.source.map( e => e);
@@ -361,11 +369,14 @@
 
     export function hide()
     {
+        if(!is_dropdown_open)
+            return;
+
         if(mutation_observer)
             mutation_observer.disconnect();
 
         is_dropdown_open = false;
-        $toolsActionsOperations = []
+        popToolsActionsOperations();
         dropdown_position = 'display: none;'
 
         combo_text = get_combo_text();
@@ -383,7 +394,7 @@
     function selected_item(itm, a) :rCombo_item
     {
         let choosed_value = itm[a];
-
+        
         if(typeof choosed_value === 'object' )
         {
             if(choosed_value)
@@ -904,7 +915,8 @@
                 {combo_text}</span>
 
             {#if can_be_activated }
-                <div class="w-3 h-3 no-print flex-none text-stone-700 dark:text-stone-300 {chevron_mt}">
+                <div class="w-3 h-3 no-print flex-none text-stone-700 dark:text-stone-300 {chevron_mt}"
+                    class:ms-auto={!is_compact}>
                     <FaChevronDown/>
                 </div>
             {/if}

@@ -128,20 +128,22 @@
         if(!operation)
             return;
 
-        if(operation.action)
-        {
-            let focused_item = null
-            if($contextItemsStore.focused)
-                focused_item = $contextItemsStore[$contextItemsStore.focused]
-        
-            operation.action(focused_item)
-        }
-
-
         let owner = e.target;
         while(owner && ((owner.tagName != 'BUTTON') && (owner.tagName != 'LI')))
             owner = owner.parentElement
 
+
+        if(operation.action)
+        {
+            //let focused_item = null
+            //if($contextItemsStore.focused)
+            //    focused_item = $contextItemsStore[$contextItemsStore.focused]
+        
+            operation.action(owner)
+        }
+
+
+        
         if(!owner)
             return;
 
