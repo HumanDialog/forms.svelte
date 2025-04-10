@@ -12,11 +12,13 @@
                 ListComboProperty,
 				mainContentPageReloader,
                 Modal,
-                onErrorShowAlert, showMenu} from '$lib'
+                onErrorShowAlert, showMenu,
+				UI} from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaColumns, FaArchive, FaList, 
         FaEllipsisH, FaChevronRight, FaChevronLeft, FaRandom
     } from 'svelte-icons/fa'
     import {location, pop, push, querystring, link} from 'svelte-spa-router'
+    import {cache} from './cache.js'
 
     export let params = {}
 
@@ -46,7 +48,7 @@
         if(users.length == 0)
         {
             //let res = await reef.get('/app/Users')
-            let res = await reef.post('group/query',
+            reef.post('group/query',
                             {
                                 Id: 1,
                                 Name: 'Users',
@@ -58,20 +60,18 @@
                                 ]                    
                             },
                             onErrorShowAlert
-                        )
-            if(res)
-                users = res.User;
+                        ).then((res) => {
+                            if(res)
+                                users = res.User;
+                        })
         }
         
         
         if(!segments.length)
-            listId = 'first';
+            listId = 1;
         else
-            listId = segments[segments.length-1]
-        
-        currentList = null
+            listId = parseInt(segments[segments.length-1])
 
-        
         const params = new URLSearchParams($querystring);
         isArchivedList = params.has('archivedList')
         isArchivedTasks = params.has('archivedTasks')
@@ -87,16 +87,51 @@
             assocName = 'Tasks'
             assocFilter = ''
         }
+        
+        //currentList = null
+
+        const cacheKey = `tasklist/${listId}`
+        const cachedValue = cache.get(cacheKey)
+        showCachedDataFirst(cachedValue);
 
         listPath = `/group/AllLists/${listId}`;
 
-            
-        await fetchData()
+        const readList = await readListItem();
+        if(readList && readList.Id != listId)
+            return;
+
+        currentList = readList
+        
+        if(currentList)
+        {
+            if(!isArchivedTasks)
+                listTitle = currentList.Name
+            else
+                listTitle = `Archive of ${currentList.Name}`
+        }
+
+
+        cache.set(cacheKey, currentList)
+
+        listComponent?.reload(currentList, listComponent.KEEP_SELECTION);
     }
 
-    async function fetchData()
+    function showCachedDataFirst(cachedValue)
     {
+        if(!cachedValue)
+            return;
 
+        currentList = cachedValue
+        if(!isArchivedTasks)
+            listTitle = currentList.Name
+        else
+            listTitle = `Archive of ${currentList.Name}`
+
+        listComponent?.reload(currentList, listComponent.KEEP_SELECTION);
+    }
+
+    async function readListItem() 
+    {
         let res = await reef.post(`${listPath}/query`,
                             {
                                 Id: 1,
@@ -134,10 +169,15 @@
                             },
                             onErrorShowAlert);
         if(res)
-            currentList = res.TaskList;
+            return res.TaskList;
         else
-            currentList = null
+            return null
+    }
 
+    async function fetchData()
+    {
+        currentList = await readListItem();
+        
         if(currentList)
         {
             if(!isArchivedTasks)
@@ -444,6 +484,8 @@
             return null;
 
         push(newHref) 
+        if(UI.navigator)
+            UI.navigator.refresh();
     }
 
 </script>

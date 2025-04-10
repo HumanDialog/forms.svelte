@@ -1,6 +1,6 @@
 <script>
     import {Sidebar, SidebarBrand} from '$lib'
-    import Navigator from "./navigator.svelte";
+	import Navigator from "./navigator.svelte";
     import {session} from '@humandialog/auth.svelte'
 
     /*let current_group_name = ""
@@ -14,6 +14,7 @@
             current_group_name = tInfo.name;
     }
     */
+
     
 </script>
   

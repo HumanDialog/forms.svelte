@@ -16,7 +16,10 @@
         startEditing,
 		getActive,
 
-		isOnNavigationPage
+		isOnNavigationPage,
+
+		UI
+
 
 
 
@@ -93,7 +96,25 @@
             return active;
 
         const activeItem = getActive('props')
-        if(activeItem == item)
+        if(item.$ref)
+        {
+            if(activeItem)
+            {
+                return item.$ref == activeItem.$ref        
+            }
+            else
+                return false;
+        }
+        else if(item.Id)
+        {
+            if(activeItem)
+            {
+                return item.Id == activeItem.Id        
+            }
+            else
+                return false;
+        }
+        else if(activeItem == item)
             return true;
         else
             return false;
@@ -147,14 +168,19 @@
             if(isRowActive)
             {
                 if(href)
+                {
                     push(href);
+                }
             }
         }
         else
         {
             auto_hide_sidebar();
             if(href)
+            {
                 push(href);
+        
+            }
         }
     }
 

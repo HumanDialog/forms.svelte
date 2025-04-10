@@ -13,6 +13,7 @@
     import {location, push} from 'svelte-spa-router'
     import {reef, session} from '@humandialog/auth.svelte'
 	import { onMount, tick } from 'svelte';
+    import { cache} from './cache.js'
 
     export let sidebar = true;
 
@@ -33,9 +34,9 @@
             }
     }
 
-    onMount( async () =>
+    onMount( () =>
     {
-        await initNavigator();
+        initNavigator();
 
         UI.navigator = navRefresher
         return () => {
@@ -44,11 +45,21 @@
         }        
     })
 
-    async function initNavigator()
+    function initNavigator()
     {
         if($session.isActive)
         {
-            let res = await reef.post('user/query', {
+            const cachedUser = cache.get('navFoldersUser')
+            if(cachedUser)
+            {
+                user = cachedUser;
+                basket = user.BasketFolder
+                pinnedFolders = user.PinnedFolders['Folders/Folder']
+
+                navPinnedFolders?.reload(pinnedFolders)   
+            }
+
+            reef.post('user/query', {
                 Id: 1,
                 Name: '',
                 Tree:[
@@ -78,21 +89,33 @@
                         ]
                     }
                 ]
+            }, onErrorShowAlert).then( (res) => {
+                if(res)
+                {
+                    user = res.User
+                    basket = user.BasketFolder
+                    pinnedFolders = user.PinnedFolders['Folders/Folder']
+
+                    navPinnedFolders?.reload(pinnedFolders)
+                    cache.set('navFoldersUser', user)
+                }
             })
-
-            if(res)
-            {
-                user = res.User
-                basket = user.BasketFolder
-                pinnedFolders = user.PinnedFolders['Folders/Folder']
-            }
-
         }
 
-        await fetchGroupFolders();
+        const cachedFolders = cache.get('navFolderFolders')
+        if(cachedFolders)
+        {
+            groupFolders = cachedFolders;
+            navGroupFolders?.reload(groupFolders)
+        }
 
-        navGroupFolders?.reload(groupFolders)
-        navPinnedFolders?.reload(pinnedFolders)
+        fetchGroupFolders().then(() => {
+            navGroupFolders?.reload(groupFolders)
+            cache.set('navFolderFolders', groupFolders)
+        })
+
+        
+        
     }
 
     async function fetchGroupFolders()
@@ -361,7 +384,7 @@
     {#if groupFolders && groupFolders.length > 0}
         {#if $session.isActive}
             {#if pinnedFolders && pinnedFolders.length > 0}
-                <SidebarGroup border>
+                <SidebarGroup >
             
                     <SidebarList    objects={pinnedFolders} 
                                     orderAttrib='Order'
@@ -445,7 +468,7 @@
 
         {#if $session.isActive}
             {#if pinnedFolders && pinnedFolders.length > 0}
-                <SidebarGroup border>
+                <SidebarGroup >
                     <SidebarList    objects={pinnedFolders} 
                                     orderAttrib='Order'
                                     bind:this={navPinnedFolders}>
@@ -466,6 +489,8 @@
                     </SidebarList> 
                 </SidebarGroup>
             {/if}
+            
+
 
             <SidebarGroup border>
                 <SidebarItem    href="/myfolders"

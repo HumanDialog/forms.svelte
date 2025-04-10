@@ -21,26 +21,24 @@
         onErrorShowAlert,
         Input,
 		showMenu,
-
-		ComboItem
-
-
-
-
+        Combo,
+		ComboItem,
+        UI
 	} from '$lib';
     import {FaPlus, FaList, FaPen, FaCaretLeft, FaCaretRight, FaTrash, FaArrowsAlt, FaArchive, FaCheck, FaEllipsisH, FaChevronRight,
         FaAngleDown, FaAngleUp, FaColumns, FaRandom, FaChevronLeft, FaCopy, FaShoppingBasket
     } from 'svelte-icons/fa'
     import MoveOperations from './list.board.move.svelte'
-	import Combo from '$lib/components/combo/combo.svelte';
-	import { tick } from 'svelte';
+	import { tick, onMount } from 'svelte';
     import BasketPreview from './basket.preview.svelte'
+    import FaBasketPlus from './icons/basket.plus.svelte'
+    import {cache} from './cache.js'
 	
     export let params = {}
 
     let currentList = null;
     
-    let listId = '';
+    let listId = 0;
     let listPath = '';
 
     let users = [];
@@ -52,7 +50,7 @@
     const TLK_KANBAN_CHECKLIST = 0
     const TLK_KANBAN_PROCESS = 1
     const TLK_LIST = 2
-    
+
     $: onParamsChanged($location, $mainContentPageReloader);
 
 	async function onParamsChanged(...args) 
@@ -66,7 +64,7 @@
         if(users.length == 0)
         {
             //let res = await reef.get('/app/Users')
-            let res = await reef.post('group/query',
+            reef.post('group/query',
                             {
                                 Id: 1,
                                 Name: 'Users',
@@ -78,28 +76,84 @@
                                 ]                    
                             },
                             onErrorShowAlert
-                        )
-            if(res)
-                users = res.User;
+                        ).then( (res) => {
+                            if(res)
+                            {
+                                users = res.User;
+                                // todo reload if needed
+                            }
+                        })
         }
 
-        allTags = await reef.get('/group/AllTags', onErrorShowAlert);
+        reef.get('/group/AllTags', onErrorShowAlert).then((res) => {
+            allTags = res;
+            // todo reload if needed
+        })
         
         if(!segments.length)
-            listId = 'first';
+            listId = 1;
         else
-            listId = segments[segments.length-1]
+            listId = parseInt(segments[segments.length-1])
         
-        if(listId == 'listboard')
-            listId = 'first'
-        
-        currentList = null
+        if(isNaN(listId))
+            listId = 1
+
+        let prevDef = currentList?.$ref
+
+        const cacheKey = `listboard/${listId}`
+        const cachedValue = cache.get(cacheKey)
+        prevDef = showCachedDataFirst(cachedValue, prevDef);
 
         listPath = `/group/Lists/${listId}`;
-        await fetchData()
+        const loadedItem = await readContextItem();
+        if(loadedItem)
+        {
+            if(loadedItem.Id != listId)
+                return;
+
+            currentList = loadedItem
+            if(currentList.GetTaskStates && Array.isArray( currentList.GetTaskStates))
+                taskStates = currentList.GetTaskStates
+            else
+                taskStates = [];
+        }
+
+        
+        cache.set(cacheKey, currentList)
+        //console.log('loaded new data')
+
+        if(currentList.$ref != prevDef)
+        {
+            definitionChangedTicket++;
+        }
+        else
+        {
+            kanban?.reload(currentList, kanban.KEEP_SELECTION);
+        }
     }
 
-    async function fetchData()
+    function showCachedDataFirst(cachedValue, prevDef)
+    {
+        //console.log(cachedValue)
+        if(!cachedValue)
+            return;
+
+        currentList = cachedValue
+        kanban?.reload(currentList, kanban.KEEP_SELECTION);
+        
+        if(currentList.GetTaskStates && Array.isArray( currentList.GetTaskStates))
+            taskStates = currentList.GetTaskStates
+        else
+            taskStates = [];
+
+        if(currentList.$ref != prevDef)
+            definitionChangedTicket++;
+
+        return currentList.$ref
+        
+    }
+
+    async function readContextItem() 
     {
         let res = await reef.post(`${listPath}/query`,
                             {
@@ -138,14 +192,19 @@
                             },
                             onErrorShowAlert);
         if(res)
-            currentList = res.TaskList;
+            return res.TaskList;
         else
-        {
-            currentList = null
-            return;
-        }
+            return null
+    }
 
-        let resetTaskStates = false;
+    async function fetchData()
+    {
+        let res = await readContextItem();
+
+        currentList = res;
+        if(!currentList)
+            return;
+        
         if(currentList.GetTaskStates && Array.isArray( currentList.GetTaskStates))
         {
             taskStates = currentList.GetTaskStates
@@ -153,22 +212,6 @@
         else
         {
             taskStates = [];
-            resetTaskStates = true;
-        }
-
-        if(resetTaskStates)
-        {
-            taskStates=[
-                {
-                    name: 'Preparing',
-                    state: 0
-                },
-                {
-                    name: 'Finished',
-                    state: STATE_FINISHED
-                }
-            ]
-            //await saveTaskStates();
         }
     }
 
@@ -321,6 +364,8 @@
         else
         {
             push(newHref)
+            if(UI.navigator)
+                UI.navigator.refresh();
         } 
     }
 
@@ -516,8 +561,8 @@
                             tbr: 'B'
                         } ],
                         {
-                            icon: FaCopy,   // MdLibraryAdd
-                            caption: 'Copy to basket',
+                            icon: FaBasketPlus, // FaCopy,   // MdLibraryAdd
+                       //     caption: 'Copy to basket',
                             action: (f) => copyTaskToBasket(task),
                             fab: 'M04',
                             tbr: 'B'

@@ -6,6 +6,7 @@
             selectable, 
             activateItem, 
             isActive, 
+            getActive,
             editable, 
             startEditing, 
     } from '../../../utils'
@@ -29,6 +30,8 @@
     export let typename :string | undefined = undefined;
     export let toolbarOperations = undefined;
     export let contextMenu = undefined;
+    
+    export let key: string = '';
 
     let definition :rList_definition = getContext("rList-definition");
     //console.log(definition.properties, item)
@@ -55,7 +58,7 @@
         }
     }
 
-    let item_key :string = ''
+    /*let item_key :string = ''
     let keys = Object.keys(item);
     if(keys.includes('$ref'))
         item_key = '$ref';
@@ -63,7 +66,7 @@
         item_key = 'Id'
     else if(keys.length > 0)
         item_key = keys[0];
-
+    */
 
     if(!title)
         title = definition.title;
@@ -94,7 +97,20 @@
 
     function calculate_active(...args)
     {
-        return isActive('props', item)
+        const activeItem = getActive('props')
+        if(!activeItem)
+            return false;
+        
+        const activeKey = getItemKey(activeItem);
+        const itemKey = getItemKey(item)
+        if(activeKey == itemKey)
+        {
+            console.log('active: ', itemKey)
+            return true;
+        }
+        else
+            return false;
+        //return isActive('props', item)
     }
 
     function selected(...args)
@@ -102,6 +118,17 @@
         return isSelected(item)
     }
 
+    function getItemKey(item: object): string | number
+    {
+        if(key)
+            return item[key];
+        else if(item.$ref)
+            return item.$ref;
+        else if(item.Id)
+            return item.Id;
+        else 
+            return 0;
+    }
     
     async function change_name(text)
     {
@@ -282,7 +309,7 @@
 
     async function force_editing(field :string)
     {
-        let element_id = `__hd_list_ctrl_${item[item_key]}_${field}`;
+        let element_id = `__hd_list_ctrl_${getItemKey(item)}_${field}`;
         let element_node = document.getElementById(element_id);
         if(!element_node)
         {
@@ -375,7 +402,7 @@
                                    
                                     whitespace-nowrap overflow-clip w-full sm:flex-none sm:{name_w}
                                     sm:hover:cursor-pointer underline"
-                                    id="__hd_list_ctrl_{item[item_key]}_Title"
+                                    id="__hd_list_ctrl_{getItemKey(item)}_Title"
                                     on:click|stopPropagation={followDefinedHRef}
                                     use:editable={{
                                         action: (text) => {change_name(text)},
@@ -390,7 +417,7 @@
                         <p  class=" text-base font-semibold 
                                     
                                     whitespace-nowrap overflow-clip w-full sm:flex-none sm:{name_w}"
-                            id="__hd_list_ctrl_{item[item_key]}_Title"
+                            id="__hd_list_ctrl_{getItemKey(item)}_Title"
                             use:editable={{
                                 action: (text) => {change_name(text)},
                                 active: true,
@@ -411,7 +438,7 @@
                 <p  class=" text-base font-semibold 
                              
                             whitespace-nowrap overflow-clip w-full sm:flex-none sm:{name_w}"
-                    id="__hd_list_ctrl_{item[item_key]}_Title"> 
+                    id="__hd_list_ctrl_{getItemKey(item)}_Title"> 
                     {element_title}
                 </p>
             {/if}
@@ -427,7 +454,7 @@
         </section>
 
         {#if summary && (item[summary] || placeholder=='Summary')}
-            {@const element_id = `__hd_list_ctrl_${item[item_key]}_Summary`}
+            {@const element_id = `__hd_list_ctrl_${getItemKey(item)}_Summary`}
             {#key item[summary] }           
                 {#if is_row_active}
                     <p  id={element_id} 

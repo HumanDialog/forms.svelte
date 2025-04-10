@@ -213,6 +213,8 @@
     }
 
     onMount( () => {
+        
+
         window.addEventListener('resize', on_resize)
         
         const vp = window.visualViewport;
@@ -223,6 +225,7 @@
         //document.addEventListener('focusout', onFocusOut)
 
         return () => {
+            
           //  document.removeEventListener('focusout', onFocusOut)
             document.removeEventListener('selectionchange', onSelectionChanged)
             vp?.removeEventListener('resize', onViewportResize)
@@ -429,7 +432,7 @@
                                     z-0 overflow-x-hidden 
                                     {content_height} sm:overflow-y-auto" 
                                     >
-                            <Configurable config={layout.mainContent} min_h_class="min-h-full">
+                            <Configurable config={layout.mainContent} min_h_class="min-h-screen">
                                 <div slot='alt'></div>
                             </Configurable>
                     </div>    

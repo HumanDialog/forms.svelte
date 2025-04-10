@@ -12,6 +12,7 @@
     import TermsAndConditions from './landing/terms.and.conditions.svelte'
     import NotFound from './landing/not.found.svelte'
     import AppView from './AppView.svelte';
+	import { onMount } from 'svelte';
 
     
     
@@ -24,6 +25,7 @@
     const clientSecret = 'SampleClientSecret'
     const website = 'http://localhost:5173'
 
+    console.log('App init')
    reef.configure( {
                     mode: mode,
                     remote: {
@@ -60,34 +62,20 @@
                         ],
                         apiVersion: "v001"}
                    });
+
+    const r = /^\/listboard|tasklist|task|note|folder|mytasks|myfolders|members\/(.*)\/?$/i
+
+    const routes = new Map()
+    routes.set('/',                     Main)
+    routes.set('/contact',              Contact)
+    routes.set('/privacy-policy',       PrivacyPolicy)
+    routes.set('/terms-and-conditions', TermsAndConditions)
+    routes.set(r, AppView)
+    routes.set('*', NotFound)
+
 </script>
 
 <AuthorizedView optionalGuestMode automaticallyRefreshTokens={true}>
-    <Router
-        routes = {{
-            '/' : Main,
-            '/contact': Contact,
-            '/privacy-policy': PrivacyPolicy,
-            '/terms-and-conditions': TermsAndConditions,
-            
-            '/tasklist':    AppView,
-            '/tasklist/*':  AppView,
-            '/task' :       AppView,
-            '/task/*' :     AppView,
-            '/note' :       AppView,
-            '/note/*' :     AppView,
-            '/listboard' :  AppView,
-            '/listboard/*': AppView,
-            '/mytasks' :    AppView,
-            '/mytasks/*' :  AppView,
-            '/folder'    :  AppView,
-            '/folder/*'  :  AppView,
-            '/myfolders' :  AppView,
-            '/myfolders/*': AppView,
-            '/members'   :  AppView,
-
-            '*': NotFound
-        }} 
-    />
+    <Router {routes} />
     <Cookies/>
 </AuthorizedView>

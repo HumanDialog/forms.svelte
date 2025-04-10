@@ -24,7 +24,8 @@
 	import { onMount, tick } from 'svelte';
     import {location, querystring, push} from 'svelte-spa-router'
     
-    import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen, FaList} from 'svelte-icons/fa/'
+    import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen, FaList, FaCopy} from 'svelte-icons/fa/'
+    import FaBasketPlus from './icons/basket.plus.svelte'
 	
     let noteRef = ''
     let note = null;
@@ -184,10 +185,6 @@
         
         
         {
-            separator: true
-        },
-        
-        {
             caption: 'Tag',
             icon: FaTag,
             action: async (f) => 
@@ -243,11 +240,23 @@
                             fab: 'S00',
                             tbr: 'A'
                         },
-                       
+                        {
+                            icon: FaBasketPlus,   // MdLibraryAdd
+                        //    caption: 'Copy to basket',
+                            action: (f) => copyTaskToBasket(),
+                            fab: 'M04',
+                            tbr: 'A'
+
+                        }
                     ]
                 }
             ]
         }
+    }
+
+    async function copyTaskToBasket()
+    {
+        await reef.post(`${noteRef}/CopyToBasket`, { } , onErrorShowAlert);
     }
     
 

@@ -10,6 +10,7 @@
     import {FaPlus} from 'svelte-icons/fa/'
     import {session, Authorized, NotAuthorized} from '@humandialog/auth.svelte'
     import Landing from './landing/landing.svelte'
+    import {onMount} from 'svelte'
 
     export let defaultPath = ''
 
@@ -43,15 +44,6 @@
     }
 
     let navigator;
-    function getPageOperationsX()
-    {
-        return [
-            {
-                icon: FaPlus,
-                action: (f) => navigator?.requestAdd()
-            }
-        ]
-    }
 
     function getPageOperations()
     {
@@ -73,6 +65,10 @@
     }
 
     const currentNav = {}
+
+    onMount( () => {
+        console.log('AppMain onMount')
+    })
 
 </script>
 

@@ -23,7 +23,7 @@
     import AppMain from './AppMain.svelte'
 
     import {Console} from '$lib'
-    import { tick } from 'svelte';
+    import { tick, onMount } from 'svelte';
 
     const objectreef_io = 'localhost:1996'
     const appId = 'octopus'
@@ -235,6 +235,7 @@
         else
             return false;
     }
+
 </script>
 
 <Authorized>

@@ -9,11 +9,12 @@
                 reloadWholeApp,
                 Input, 
                 onErrorShowAlert,
-                randomString} from '$lib'
+                randomString, UI} from '$lib'
     import {FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaArchive, FaUsers, FaPlus} from 'svelte-icons/fa'
     import {location, push} from 'svelte-spa-router'
     import {reef, session} from '@humandialog/auth.svelte'
-	import { onMount, tick } from 'svelte';
+	import { afterUpdate, onMount, tick } from 'svelte';
+    import {cache} from './cache.js'
 
     export let sidebar = true;
 
@@ -24,24 +25,49 @@
     
     $: currentPath = $location;
 
-    onMount( async () =>
+    const navRefresher = {
+        refresh: () => {
+                initNavigator();
+            }
+    }
+
+    onMount( () =>
     {
-        await initNavigator();
-        return () => {}        
+        initNavigator();
+        UI.navigator = navRefresher
+        
+        return () => {
+            if(UI.navigator == navRefresher)
+                UI.navigator = null
+        }      
     })
 
+    
     async function initNavigator()
     {
+        
         if($session.isActive)
         {
-            let res = await reef.get("/user", onErrorShowAlert);
-            if(res != null)
-                user = res.User;
+            reef.get("/user", onErrorShowAlert).then((res) => {
+                if(res != null)
+                    user = res.User;
+            })
+           
         }
 
         initGroupSelector();
 
+        const cacheKey = `listsNavigator`
+        const cachedValue = cache.get(cacheKey)
+        if(cachedValue)
+        {
+            taskLists = cachedValue;
+            navLists?.reload(taskLists)
+        }
+
         await fetchData()
+        navLists?.reload(taskLists)
+        cache.set(cacheKey, taskLists);
     }
 
     async function fetchData()
@@ -373,6 +399,7 @@
 
 </script>
 
+{#key currentPath}
 {#if sidebar}
     {#if taskLists && taskLists.length > 0}
         {#if showGroupsSwitchMenu}
@@ -412,7 +439,7 @@
                     <SidebarItem   {href}
                                     icon={FaList}
                                     bind:this={navItems[idx]}
-                                    active={isRoutingTo(`/tasklist/${item.Id}`, currentPath) || isRoutingTo(`/listboard/${item.Id}`, currentPath)}
+                                    active={isRoutingTo(href, currentPath)}
                                     operations={(node) => getTaskListOperations(node, item, navItems[idx])}
                                     selectable={item}
                                     summary={{
@@ -441,9 +468,9 @@
             
         </SidebarGroup>
 
-        {:else}
-            <Spinner delay={3000}/>
-        {/if}
+    {:else}
+        <Spinner delay={3000}/>
+    {/if}
 
 {:else} <!-- !sidebar -->
 
@@ -514,6 +541,7 @@
         <Spinner delay={3000}/>
     {/if}
 {/if}
+{/key}
 
 <Modal  title="Delete"
         content="Are you sure you want to delete selected list?"

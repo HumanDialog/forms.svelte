@@ -165,8 +165,14 @@
 
 <menu class="" bind:this={rootElement}>
     {#if basketItem}
-        <div class="w-full max-h-64 sm:max-h-96 overflow-y-auto overflow-x-clip
+        <div class="w-full h-64 sm:h-80 sm:max-w-sm overflow-y-auto overflow-x-clip
                 text-stone-600 dark:text-stone-400">
+
+            {#if basketEntriesNo==0}
+                <div class="h-full flex items-center justify-center">
+                    <p>Basket is empty</p>
+                </div>
+            {/if}
         
             <List   self={basketItem} 
                     a='Folders'

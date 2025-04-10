@@ -24,6 +24,7 @@
     import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont, 
         FaPen, FaList, FaTimes, FaCopy, FaCut
     } from 'svelte-icons/fa/'
+    import FaBasketPlus from './icons/basket.plus.svelte'
 	
     let taskRef = ''
     let task = null;
@@ -447,8 +448,8 @@
                             tbr: 'A'
                         },
                         {
-                            icon: FaCopy,   // MdLibraryAdd
-                            caption: 'Copy to basket',
+                            icon: FaBasketPlus,   // MdLibraryAdd
+                         //   caption: 'Copy to basket',
                             action: (f) => copyTaskToBasket(),
                             fab: 'M04',
                             tbr: 'A'

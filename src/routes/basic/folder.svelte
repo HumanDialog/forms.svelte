@@ -19,6 +19,10 @@
         FaList, FaEllipsisH, FaChevronRight, FaChevronLeft, FaRegShareSquare, FaLink, FaUnlink, FaRegStar, FaStar, FaShoppingBasket, FaCopy, FaCut} from 'svelte-icons/fa'
     import {location, pop, push, querystring} from 'svelte-spa-router'
     import BasketPreview from './basket.preview.svelte'
+    import FaBasketPlus from './icons/basket.plus.svelte'
+    import FaBasketCut from './icons/basket.cut.svelte'
+    import FaBasketTrash from './icons/basket.trash.svelte'
+    import {cache} from './cache.js'
 
     export let params = {}
 
@@ -45,20 +49,47 @@
         
         
         if(!segments.length)
-            contextItemId = 'first';
+            contextItemId = 1
         else
-            contextItemId = segments[segments.length-1]
-        
+            contextItemId = parseInt(segments[segments.length-1])
         
         
         contextItem = null
         contextPath = `/Folder/${contextItemId}` 
      
-            
-        await fetchData()
+        const cacheKey = `folder_${contextItemId}`
+        const cachedValue = cache.get(cacheKey)
+        if(cachedValue)
+        {
+            contextItem = cachedValue;
+            folderTitle = contextItem.Title;
+
+            subfoldersComponent?.reload(contextItem, subfoldersComponent.KEEP_SELECTION)
+            notesComponent?.reload(contextItem, notesComponent.KEEP_SELECTION)
+            tasksComponent?.reload(contextItem, tasksComponent.KEEP_SELECTION)
+        }
+           
+        const readItem = await readContextItem(contextItemId)
+        
+        // dodatkowe zabezpiecznie dla przypadku kiedy pokazalismy folder, ale jego wersje z cache'a
+        // i wciąż jeszcze czekamy na odpowiedź z serwisu. W międzyczasie user przeszedł do folderu niżej
+        // zostajemy więc w tym komponencie, ale zmienił się parametr folderu do załadowania
+        // wysyłamy więc nowe zapytanie, a to poprzednie, które wciąż jeszcze trwa, już nas nie interesuje 
+        if(readItem.Id != contextItemId)
+            return;
+
+        contextItem  = readItem
+        if(contextItem)
+            folderTitle = contextItem.Title;
+
+        cache.set(cacheKey, contextItem)
+
+        subfoldersComponent?.reload(contextItem, subfoldersComponent.KEEP_SELECTION)
+        notesComponent?.reload(contextItem, notesComponent.KEEP_SELECTION)
+        tasksComponent?.reload(contextItem, tasksComponent.KEEP_SELECTION)
     }
 
-    async function fetchData()
+    async function readContextItem(contextItemId) 
     {
         let res = await reef.post(`/Folder/${contextItemId}/query`,
                             {
@@ -104,12 +135,17 @@
                             onErrorShowAlert);
         if(res)
         {    
-            contextItem = res.Folder;
-            folderTitle = contextItem.Title;
+            return res.Folder;  
         }
         else
-            contextItem = null
+            return null;
+    }
 
+    async function fetchData()
+    {
+        contextItem = await readContextItem(contextItemId);
+        if(contextItem)
+            folderTitle = contextItem.Title;
     }
 
    
@@ -334,7 +370,7 @@
                         operations: [
                             {
                                 caption: 'Clear Basket',
-                                icon: FaTrash,
+                                icon: FaBasketTrash, //FaTrash,
                                 action: async (f) => await dettachAllMyContent(),
                                 fab: 'M30',
                                 tbr: 'A'
@@ -585,16 +621,16 @@
                                 tbr:'A' 
                             },
                             {
-                                icon: FaCopy,   // MdLibraryAdd
-                                caption: 'Copy to basket',
+                                icon: FaBasketPlus, //FaCopy,   // MdLibraryAdd
+                               // caption: 'Copy to basket',
                                 action: (f) => copyElementToBasket(element, kind),
                                 fab: 'M04',
                                 tbr: 'A'
 
                             },
                             {
-                                icon: FaCut,
-                                caption: 'Move to basket',
+                                icon: FaBasketCut, //FaCut,
+                               // caption: 'Move to basket',
                                 action: (f) => cutElementToBasket(element, kind),
                                 fab: 'M05',
                                 tbr: 'A'
@@ -659,7 +695,7 @@
 
                 <span slot="left" let:element>
                     <Icon component={FaRegFolder} 
-                        class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
+                        class="h-5 w-5 text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
                 </span>
             </List>
         
@@ -677,7 +713,7 @@
 
                 <span slot="left" let:element>
                     <Icon component={FaRegFile} 
-                        class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
+                        class="h-5 w-5 text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5 ml-2  mr-1"/>
                 </span>
             </List>
         
@@ -697,12 +733,12 @@
                 <span slot="left" let:element>
                     {#if element.State == STATE_FINISHED}
                         <Icon component={FaRegCheckCircle} 
-                        class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
+                        class="h-5 w-5  text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
                         
                     {:else}
                         <Icon component={FaRegCircle} 
                             on:click={(e) => finishTask(e, element)} 
-                            class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
+                            class="h-5 w-5 text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1 "/>
                         
                     {/if}
                 </span>

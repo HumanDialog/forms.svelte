@@ -243,7 +243,7 @@
 </script>
 
 <div    id="__hd_svelte_floating_container"
-        class="p-2 bg-stone-100 dark:bg-stone-800 rounded-lg shadow  z-30 fixed"
+        class="p-2 bg-stone-100 dark:bg-stone-800 rounded-lg shadow-md shadow-stone-500 dark:shadow-black z-30 fixed "
         style={cssPosition}
         bind:this={rootElement}>
     <svelte:component this={toolbar} {...props} bind:this={internalElement} />

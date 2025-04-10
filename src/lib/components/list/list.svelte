@@ -118,8 +118,11 @@
     export function reload(data: object|object[], selectElement=KEEP_SELECTION)
     {
         let currentSelectedItem = getActive('props');
-        let selectElementId = 0;
-        let altSelectElementId = 0;
+        let currentSelectedItemKey = currentSelectedItem ? getItemKey(currentSelectedItem) : null
+        let selectElementId: string|number|null = null;
+        let altSelectElementId: string|number|null = null;
+
+        //console.log('reload', currentSelectedItemKey, selectElement)
 
         switch(selectElement)
         {
@@ -127,23 +130,23 @@
             selectElementId = 0;
             break;
         case KEEP_SELECTION:
-            selectElementId = currentSelectedItem?.Id ?? 0;
+            selectElementId = currentSelectedItemKey;
             break;
         case SELECT_PREVIOUS:
             if(currentSelectedItem)
             {
-                const selectedItemIdx = items?.findIndex(e => e == currentSelectedItem)
+                const selectedItemIdx = items?.findIndex(e => getItemKey(e) == currentSelectedItemKey)
                 if(selectedItemIdx!= undefined && selectedItemIdx > 0)
-                    selectElementId = items[selectedItemIdx-1].Id ?? 0;
+                    selectElementId = getItemKey(items[selectedItemIdx-1]) ?? null;
             }
             break;
 
         case SELECT_NEXT:
             if(currentSelectedItem)
             {
-                const selectedItemIdx = items?.findIndex(e => e == currentSelectedItem)
+                const selectedItemIdx = items?.findIndex(e => getItemKey(e) == currentSelectedItemKey)
                 if(selectedItemIdx != undefined && selectedItemIdx >= 0 && selectedItemIdx < items.length-1)
-                    selectElementId = items[selectedItemIdx+1].Id ?? 0;
+                    selectElementId = getItemKey(items[selectedItemIdx+1]) ?? null;
             }
             break;
 
@@ -151,10 +154,10 @@
             {
                 if(currentSelectedItem)
                 {
-                    selectElementId = currentSelectedItem.Id ?? 0;
-                    const selectedItemIdx = items?.findIndex(e => e == currentSelectedItem)
+                    selectElementId = currentSelectedItemKey;
+                    const selectedItemIdx = items?.findIndex(e => getItemKey(e) == currentSelectedItemKey)
                     if(selectedItemIdx != undefined && selectedItemIdx >= 0 && selectedItemIdx < items.length-1)
-                        altSelectElementId = items[selectedItemIdx+1].Id ?? 0;
+                        altSelectElementId = getItemKey(items[selectedItemIdx+1]) ?? null;
                 }
                 
             }
@@ -164,7 +167,7 @@
             if( typeof selectElement === 'object' &&
                 !Array.isArray(selectElement) &&
                 selectElement !== null)
-                selectElementId = selectElement.Id;
+                selectElementId = getItemKey(selectElement);
             else
                 selectElementId = selectElement;
         }
@@ -178,16 +181,18 @@
         rereder();
         
 
-        if(selectElementId > 0)
+        if(selectElementId != null)
         {
-            let itemToActivate = items?.find(e => e.Id == selectElementId);
+            //console.log('reload items', items)
+            let itemToActivate = items?.find(e => getItemKey(e) == selectElementId);
             if(itemToActivate)
             {
+               // console.log('activate_after_dom_update', selectElementId)
                 activate_after_dom_update = itemToActivate;
             }
-            else if(altSelectElementId > 0)
+            else if(altSelectElementId != null)
             {
-                itemToActivate = items?.find(e => e.Id == altSelectElementId);
+                itemToActivate = items?.find(e => getItemKey(e) == altSelectElementId);
                 if(itemToActivate)
                 {
                     activate_after_dom_update = itemToActivate;
@@ -195,8 +200,8 @@
             }       
         }
 
-        if(!activate_after_dom_update)
-            activateItem('props', null, [])
+        //if(!activate_after_dom_update)
+        //    activateItem('props', null, [])
     }
 
     export async function moveUp(element: object)
@@ -441,6 +446,7 @@
             <List_element   item={element} 
                             {toolbarOperations}
                             {contextMenu}
+                            {key}
                             bind:this={rows[i]}
                             >
             
