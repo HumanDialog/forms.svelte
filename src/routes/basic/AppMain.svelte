@@ -7,6 +7,7 @@
     import {push } from "svelte-spa-router";
     import Navigator from "./navigator.svelte";
     import NavigatorFolders from "./navigator.group.folders.svelte";
+    import NavigatorMessages from './navigator.messages.svelte'
     import {FaPlus} from 'svelte-icons/fa/'
     import {session, Authorized, NotAuthorized} from '@humandialog/auth.svelte'
     import Landing from './landing/landing.svelte'
@@ -66,9 +67,7 @@
 
     const currentNav = {}
 
-    onMount( () => {
-        console.log('AppMain onMount')
-    })
+   
 
 </script>
 
@@ -81,6 +80,9 @@
 
             {#if $main_sidebar_visible_store == "Folders"}
                 <NavigatorFolders   sidebar={false}
+                                    bind:this={navigator} />
+            {:else if $main_sidebar_visible_store == "Messages"}
+                <NavigatorMessages   sidebar={false}
                                     bind:this={navigator} />
             {:else}
                 <Navigator  sidebar={false}

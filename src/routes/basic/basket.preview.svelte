@@ -12,6 +12,8 @@
     export let onHide = undefined
     export let onSizeChanged = undefined
     export let onRefreshView = undefined
+    export let onAttach = undefined
+    export let onAttachAndClear = undefined
     
     let basketItem;
     let basketEntriesNo = 0
@@ -134,13 +136,18 @@
             onHide();
 
         if(!destinationContainer)
-            return;
-
-        const res = await reef.post(`${destinationContainer}/AttachBasketContent`, { }, onErrorShowAlert)
-        if(res)
         {
-            if(onRefreshView)
-                onRefreshView(res);        
+            if(onAttach)
+                onAttach(basketItem)
+        }
+        else
+        {
+            const res = await reef.post(`${destinationContainer}/AttachBasketContent`, { }, onErrorShowAlert)
+            if(res)
+            {
+                if(onRefreshView)
+                    onRefreshView(res);        
+            }
         }
 
     }
@@ -151,13 +158,18 @@
             onHide();
 
         if(!destinationContainer)
-            return;
-
-        const res = await reef.post(`${destinationContainer}/AttachAndClearBasketContent`, { }, onErrorShowAlert)
-        if(res)
         {
-            if(onRefreshView)
-                onRefreshView(res);        
+            if(onAttachAndClear)
+                onAttachAndClear(basketItem)
+        }
+        else
+        {
+            const res = await reef.post(`${destinationContainer}/AttachAndClearBasketContent`, { }, onErrorShowAlert)
+            if(res)
+            {
+                if(onRefreshView)
+                    onRefreshView(res);        
+            }
         }
     }
 

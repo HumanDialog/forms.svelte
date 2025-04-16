@@ -65,6 +65,8 @@
     export let c='';
     export let pushChangesImmediately = true;
 
+    export let chat :object|undefined = undefined;
+
     let onFinishEditing = undefined;
     export function run(onStop=undefined)
     {
@@ -630,6 +632,46 @@
         }
     })
 
+    const chatShortcuts = Extension.create({
+        name: 'chatShortcuts',
+        addKeyboardShortcuts() {
+            return {
+                Enter: () => {
+
+                    if(chat && chat.onSubmit)
+                        chat.onSubmit(changedValue)
+
+                    return this.editor.commands.clearContent();
+                },
+
+                'Shift-Enter': () => {
+                    console.log('chatShortcut Shift-Enter')
+                    /**
+                     * currently we do not have an option to show a soft line break in the posts, so we overwrite
+                     * the behavior from tiptap with the default behavior on pressing enter
+                     */
+                    return this.editor.commands.first(({commands}) => [
+                        () => commands.newlineInCode(),
+                        () => commands.createParagraphNear(),
+                        () => commands.liftEmptyBlock(),
+                        () => commands.splitBlock(),
+                    ]);
+                }
+            }
+        }
+    })
+
+    const additionalShortcuts = Extension.create({
+        name: 'additionalShortcuts',
+        addKeyboardShortcuts() {
+            return {
+                'Mod-s': () => {
+                    console.log('todo: save content')
+                }
+            }
+        }
+    })
+
     onMount(() => {
 		editor = new Editor({
             editorProps: {
@@ -680,6 +722,8 @@
                 Dropcursor,
                 Gapcursor,
                 History,
+
+                ... chat ? [chatShortcuts] : [],
 
                 PalletePlugin.configure({
                     suggestion,

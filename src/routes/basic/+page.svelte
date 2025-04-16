@@ -63,7 +63,7 @@
                         apiVersion: "v001"}
                    });
 
-    const r = /^\/listboard|tasklist|task|note|folder|mytasks|myfolders|members\/(.*)\/?$/i
+    const r = /^\/listboard|tasklist|task|note|folder|mytasks|myfolders|members|chat\/(.*)\/?$/i
 
     const routes = new Map()
     routes.set('/',                     Main)

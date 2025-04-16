@@ -4,13 +4,14 @@
     import Sidebar from './sidebar.svelte'
     
     import SidebarFolders from './sidebar.folders.svelte'
+    import SidebarMessages from './sidebar.messages.svelte'
 
     import {push} from 'svelte-spa-router'
 
-    import Sidebar2 from './sidebar2.svelte'
+    
     import AppIcon from './appicon.svelte'
     import FaFolder from 'svelte-icons/fa/FaFolder.svelte'
-    import {FaUsersCog, FaSignOutAlt, FaList} from 'svelte-icons/fa/'
+    import {FaUsersCog, FaSignOutAlt, FaList, FaComments} from 'svelte-icons/fa/'
 
     import Tasklist from './tasklist.svelte';
     import Folder from './folder.svelte';
@@ -19,6 +20,7 @@
     import Board from './list.board.svelte';
     import MyTasks from './mytasks.svelte'
     import MyFolders from './myfolders.svelte'
+    import Chat from './chat.svelte'
     import Members from './members.svelte'
     import AppMain from './AppMain.svelte'
 
@@ -52,6 +54,11 @@
                     'Folders': {
                         icon: FaFolder,
                         component: SidebarFolders
+                    },
+
+                    'Messages': {
+                        icon: FaComments,
+                        component: SidebarMessages
                     }
                 },
                 mainContent : {
@@ -71,7 +78,8 @@
                         '/folder/*'  :  { component: Folder },
                         '/myfolders' :  { component: MyFolders },
                         '/myfolders/*': { component: MyFolders },
-                        '/members'   :  { component: Members }
+                        '/members'   :  { component: Members },
+                        '/chat/*':      { component: Chat }
                     }
                 },
                 mainToolbar : {

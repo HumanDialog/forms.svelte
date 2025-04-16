@@ -399,7 +399,7 @@
             clearsContext=''
             title={note.Title}>
     <section class="w-full flex justify-center">
-        <article class="w-full prose prose-base prose-zinc dark:prose-invert mx-2 prose-img:rounded-xl prose-p:my-0">
+        <article class="w-full prose prose-base prose-zinc dark:prose-invert mx-2 prose-img:rounded-xl ">
             <section class="w-full flex flex-row justify-between">
                     <p class="">
                         {note.Index}

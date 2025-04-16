@@ -415,7 +415,7 @@
         
         {#if $session.isActive}
             {@const border=showGroupsSwitchMenu}
-            <SidebarGroup {border}>
+            <SidebarGroup border>
                 <SidebarItem   href="/mytasks"
                                 icon={FaList}
                                 active={isRoutingTo("/mytasks", currentPath)}
@@ -489,7 +489,7 @@
         
         {#if $session.isActive}
             {@const border=showGroupsSwitchMenu}
-            <SidebarGroup {border}>
+            <SidebarGroup border>
                 <SidebarItem    href="/mytasks"
                                 icon={FaList}
                                 operations={(node) => getUserListOperations(node, user)}

@@ -271,7 +271,7 @@
 
     function onSelectionChanged(e)
     {
-        console.log('onSelectionChanged')
+        //console.log('onSelectionChanged')
         determineFABVisibilityAsync();
     }
 
