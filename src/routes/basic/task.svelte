@@ -22,9 +22,10 @@
     import {location, querystring, push, link} from 'svelte-spa-router'
     import TaskSteps from './task.steps.svelte'
     import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont, 
-        FaPen, FaList, FaTimes, FaCopy, FaCut
+        FaPen, FaList, FaTimes, FaCopy, FaCut,  FaFileDownload
     } from 'svelte-icons/fa/'
     import FaBasketPlus from './icons/basket.plus.svelte'
+	import AttachedFile from './attached.file.svelte'
 	
     let taskRef = ''
     let task = null;
@@ -33,6 +34,9 @@
     let allActors = [];
     let availableStates = [];
     let pendingUploading = false;
+
+    let attachedFiles = []
+    
     let isReadOnly = false;
     const s = session;
 
@@ -89,7 +93,7 @@
                                 {
                                     Id: 1,
                                     Association: '',
-                                    Expressions:['Id', 'Index', 'Title','Summary', 'Description', 'DueDate', 'Tags', 'State', '$ref', '$type', '$acc'],
+                                    Expressions:['Id', 'Index', 'Title','Summary', 'Description', 'DueDate', 'Tags', 'State', 'AttachedFiles', '$ref', '$type', '$acc'],
                                     SubTree:[
                                         {
                                             Id: 10,
@@ -136,6 +140,18 @@
             task.Steps = []
 
         isReadOnly = task.$acc === 1
+
+        if(task.AttachedFiles)
+        {
+            attachedFiles = []
+            const names = task.AttachedFiles.split(';');
+            names.forEach(n => {
+                attachedFiles.push({
+                    name: n,
+                    downloading: false
+                })
+            })
+        }
 
     }
 
@@ -410,6 +426,11 @@
             separator: true
         },
         {
+            caption: 'Attachement',
+            icon: FaFileDownload,
+            action: async (f) => runFileAttacher()
+        },
+        {
             caption: 'Description',
             icon: FaAlignLeft,
             action: async (f) => 
@@ -424,6 +445,7 @@
                     }
                 }
         }
+        
     ];
     
    
@@ -597,6 +619,67 @@
         await reef.post(`${taskRef}/CopyToBasket`, { } , onErrorShowAlert);
     }
 
+    
+    
+
+    let attInput;
+    function runFileAttacher()
+    {
+        attInput?.click();
+    }
+
+    async function onAttachementSelected()
+    {
+        const [file] = attInput.files;
+        if(file)
+        {
+            pendingUploading = true 
+
+            const res = await reef.post(`${taskRef}/AttachedFiles/blob?name=${file.name}&size=${file.size}`, {}, onErrorShowAlert)
+            if(res && res.key && res.uploadUrl)
+            {
+                const newKey = res.key;
+                const uploadUrl = res.uploadUrl
+                
+                try
+                {
+                    //const res = await new Promise(r => setTimeout(r, 10000));
+                    const res = await fetch(uploadUrl, {
+                                                method: 'PUT',
+                                                headers: new Headers({
+                                                    'Content-Type': file.type
+                                                }),
+                                                body: file})
+                    if(res.ok)
+                    {
+                        // todo: editor path imgPath
+                        /*const dataPath = `${taskRef}/Images/blob?key=${newKey}`
+                            
+                        //console.log('upload success for ', dataPath)
+                        if(imgEditorActionAfterSuccess)
+                            imgEditorActionAfterSuccess(dataPath)
+                        */
+                    }
+                    else
+                    {
+                        const err = await res.text()
+                        console.error(err)
+                        onErrorShowAlert(err)
+                    }
+                        
+                }
+                catch(err)
+                {
+                    console.error(err)
+                    onErrorShowAlert(err)
+                }
+            }
+
+            pendingUploading = false;
+
+            await reloadData();
+        }
+    }
 
 </script>
 
@@ -729,6 +812,14 @@
                     {/if}
                 </div>
             </section>
+
+            {#if attachedFiles && attachedFiles.length > 0}
+            <p>
+                {#each attachedFiles as fileInfo (fileInfo.name)}
+                    <AttachedFile self={task} a='AttachedFiles' {fileInfo}/>
+                {/each}
+            </p>
+            {/if}
             
             
             
@@ -763,11 +854,12 @@
     </section>
 
     <input hidden type="file" id="imageFile" accept="image/*" bind:this={imgInput} on:change={onImageSelected}/> <!-- capture="environment" -->
+    <input hidden type="file" id="attachementFile" accept="*/*" bind:this={attInput} on:change={onAttachementSelected}/>
 </Page>
 {/if}
 
 <Modal title='Uploading...' bind:open={pendingUploading} mode={3} icon={FaCloudUploadAlt}>
     <Spinner delay={0}/> 
-    <span class="ml-3">Your image is uploading to the server</span>
+    <span class="ml-3">Your file is uploading to the server</span>
 </Modal>
 

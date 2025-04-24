@@ -380,6 +380,7 @@
 
 </script>
 
+{#key currentPath}
 {#if sidebar}
     {#if groupFolders && groupFolders.length > 0}
         {#if $session.isActive}
@@ -540,6 +541,7 @@
         <Spinner delay={3000}/>
     {/if}
 {/if}
+{/key}
 
 <Modal  title="Delete"
         content="Are you sure you want to delete selected folder?"

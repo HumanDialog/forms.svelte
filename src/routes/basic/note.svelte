@@ -24,8 +24,9 @@
 	import { onMount, tick } from 'svelte';
     import {location, querystring, push} from 'svelte-spa-router'
     
-    import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen, FaList, FaCopy} from 'svelte-icons/fa/'
+    import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen, FaList, FaCopy, FaFileDownload} from 'svelte-icons/fa/'
     import FaBasketPlus from './icons/basket.plus.svelte'
+    import AttachedFile from './attached.file.svelte'
 	
     let noteRef = ''
     let note = null;
@@ -37,6 +38,7 @@
     const s = session;
     let creationDate = null
     let modificationDate = null
+    let attachedFiles = []
 
     $: onParamsChanged($location)
 
@@ -78,7 +80,8 @@
                                                     'Content', 
                                                     'CreationDate',
                                                     'ModificationDate', 
-                                                    'Tags', 
+                                                    'Tags',
+                                                    'AttachedFiles', 
                                                     'Kind', 
                                                     'State', 
                                                     '$ref', 
@@ -114,6 +117,18 @@
             modificationDate = null
         
         isReadOnly = note.$acc === 1
+
+        if(note.AttachedFiles)
+        {
+            attachedFiles = []
+            const names = note.AttachedFiles.split(';');
+            names.forEach(n => {
+                attachedFiles.push({
+                    name: n,
+                    downloading: false
+                })
+            })
+        }
 
     }
 
@@ -202,6 +217,11 @@
         
         {
             separator: true
+        },
+        {
+            caption: 'Attachement',
+            icon: FaFileDownload,
+            action: async (f) => runFileAttacher()
         },
         {
             caption: 'Content',
@@ -380,6 +400,65 @@
         reef.delete(dataPath, onErrorShowAlert)
     }
 
+    let attInput;
+    function runFileAttacher()
+    {
+        attInput?.click();
+    }
+
+    async function onAttachementSelected()
+    {
+        const [file] = attInput.files;
+        if(file)
+        {
+            pendingUploading = true 
+
+            const res = await reef.post(`${noteRef}/AttachedFiles/blob?name=${file.name}&size=${file.size}`, {}, onErrorShowAlert)
+            if(res && res.key && res.uploadUrl)
+            {
+                const newKey = res.key;
+                const uploadUrl = res.uploadUrl
+                
+                try
+                {
+                    //const res = await new Promise(r => setTimeout(r, 10000));
+                    const res = await fetch(uploadUrl, {
+                                                method: 'PUT',
+                                                headers: new Headers({
+                                                    'Content-Type': file.type
+                                                }),
+                                                body: file})
+                    if(res.ok)
+                    {
+                        // todo: editor path imgPath
+                        /*const dataPath = `${taskRef}/Images/blob?key=${newKey}`
+                            
+                        //console.log('upload success for ', dataPath)
+                        if(imgEditorActionAfterSuccess)
+                            imgEditorActionAfterSuccess(dataPath)
+                        */
+                    }
+                    else
+                    {
+                        const err = await res.text()
+                        console.error(err)
+                        onErrorShowAlert(err)
+                    }
+                        
+                }
+                catch(err)
+                {
+                    console.error(err)
+                    onErrorShowAlert(err)
+                }
+            }
+
+            pendingUploading = false;
+
+            await reloadData();
+        }
+    }
+
 </script>
 
 <svelte:head>
@@ -495,7 +574,13 @@
             </section>
             
             
-            
+            {#if attachedFiles && attachedFiles.length > 0}
+            <p>
+                {#each attachedFiles as fileInfo (fileInfo.name)}
+                    <AttachedFile self={note} a='AttachedFiles' {fileInfo}/>
+                {/each}
+            </p>
+            {/if}
                 
             <!--{#if note.Content || descriptionPlaceholder}-->
                 <hr/>    
@@ -516,6 +601,7 @@
     </section>
 
     <input hidden type="file" id="imageFile" accept="image/*" bind:this={imgInput} on:change={onImageSelected}/> <!-- capture="environment" -->
+    <input hidden type="file" id="attachementFile" accept="*/*" bind:this={attInput} on:change={onAttachementSelected}/>
 </Page>
 {/if}
 
