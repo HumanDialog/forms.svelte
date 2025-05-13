@@ -9,10 +9,11 @@
     let operations = [];
     let leftOperations = []
     let rightOperations = []
+    let hasOperations = false
 
     function update(...args)
     {
-        let isOpVer1 = false;
+        let opVer = 0
         if($contextToolbarOperations && Array.isArray($contextToolbarOperations) && $contextToolbarOperations.length > 0)
         { 
             operations = $contextToolbarOperations;
@@ -20,8 +21,7 @@
         else if($contextToolbarOperations && $contextToolbarOperations.operations && $contextToolbarOperations.operations.length > 0)
         {
             operations = $contextToolbarOperations.operations;
-            if($contextToolbarOperations.opver && $contextToolbarOperations.opver == 1)
-                isOpVer1 = true;
+            opVer = $contextToolbarOperations.opver ?? 0
         }
         else
         {
@@ -30,8 +30,7 @@
             else
             {
                 operations = $pageToolbarOperations.operations;
-                if($pageToolbarOperations.opver && $pageToolbarOperations.opver == 1)
-                    isOpVer1 = true;
+                opVer = $pageToolbarOperations.opver ?? 0
             }
         }
 
@@ -42,7 +41,7 @@
         let BOperations = []
         let COperations = []
 
-        if(isOpVer1)
+        if(opVer == 1)
         {
             // first level group 'View', 'File', etc
             operations.forEach(group => {
@@ -57,11 +56,74 @@
             leftOperations = [...AOperations, ...BOperations]
             rightOperations = [...COperations]
         }
+        else if(opVer == 2)
+        {
+            operations.forEach(group => {
+
+                if(group.tbr)
+                {
+                    const expandOperation = {
+                        caption: group.caption ?? '',
+                        icon: group.icon ?? undefined,
+                        preAction: group.preAction,
+                        activeFunc: group.activeFunc,
+                        menu: group.operations
+                    }
+
+                    switch(group.tbr)
+                    {
+                    case 'A':
+                        AOperations.push(expandOperation)
+                        break;
+
+                    case 'B':
+                        BOperations.push(expandOperation)
+                        break;
+
+                    case 'C':
+                        COperations.push(expandOperation)
+                        break;
+                    }        
+                }
+
+                group.operations.forEach(op => {
+                    if(op.tbr)
+                    {
+                        const tbrOperation = {
+                            ...op,
+                        }
+
+                        if(op.hideToolbarCaption)
+                            tbrOperation.caption = ''
+
+                        switch(op.tbr)
+                        {
+                        case 'A':
+                            AOperations.push(tbrOperation)
+                            break;
+
+                        case 'B':
+                            BOperations.push(tbrOperation)
+                            break;
+
+                        case 'C':
+                            COperations.push(tbrOperation)
+                            break;
+                        }
+                    }
+                })
+            })
+
+            leftOperations = [...AOperations, ...BOperations]
+            rightOperations = [...COperations]
+        }
         else
         {
             leftOperations = operations.filter(o => !o.right)
             rightOperations = operations.filter(o => o.right == true)
         }
+
+        hasOperations = leftOperations.length > 0 || rightOperations.length > 0
     }
 
     function on_click(e, operation)
@@ -72,6 +134,9 @@
         let owner = e.target;
         while(owner && owner.tagName != 'BUTTON')
             owner = owner.parentElement
+
+        if(operation.preAction)
+            operation.preAction(owner)
 
         if(operation.action)
         {
@@ -114,6 +179,7 @@
     }
 </script>
 
+{#if hasOperations}
 <section class="flex flex-row no-print h-10 bg-stone-600 dark:bg-stone-950 overflow-x-clip overflow-y-hidden py-0 text-xs whitespace-nowrap">
     <div    class="flex flex-row"
             class:flex-row-reverse={mobile}>
@@ -125,7 +191,7 @@
                     {#each operation.toolbox as operation}
                         <button type="button" 
                                 class="py-2.5 px-4 
-                                text-xs font-thin text-stone-100 dark:text-stone-300 dark:hover:text-white 
+                                text-sm font-thin text-stone-100 dark:text-stone-300 dark:hover:text-white 
                                 hover:bg-stone-700 dark:hover:bg-stone-800 active:bg-stone-300 dark:active:bg-stone-600
                                 border-stone-200 focus:outline-none dark:border-stone-600
                                 inline-flex items-center"
@@ -134,7 +200,7 @@
                                 on:click={(e) => {on_click(e, operation)}}
                                 on:mousedown={mousedown}>
                             {#if operation.icon}
-                                <div class="w-3.5 h-3.5 mr-1"><svelte:component this={operation.icon}/></div>
+                                <div class="w-5 h-5 mr-1"><svelte:component this={operation.icon}/></div>
                             {/if}
                             {#if operation.caption}
                                 <span class="ml-1">{operation.caption}</span>
@@ -145,7 +211,7 @@
                 
                     <button type="button" 
                             class="py-2.5 px-4
-                            text-xs font-thin text-stone-100 dark:text-stone-300 dark:hover:text-white 
+                            text-sm font-thin text-stone-100 dark:text-stone-300 dark:hover:text-white 
                             hover:bg-stone-700 dark:hover:bg-stone-800 active:bg-stone-300 dark:active:bg-stone-600
                             border-stone-200 focus:outline-none dark:border-stone-600
                             inline-flex items-center"
@@ -154,7 +220,7 @@
                             on:click={(e) => {on_click(e, operation)}}
                             on:mousedown={mousedown}>
                         {#if operation.icon}
-                            <div class="w-3.5 h-3.5 mr-1"><svelte:component this={operation.icon}/></div>
+                            <div class="w-5 h-5 mr-1"><svelte:component this={operation.icon}/></div>
                         {/if}
                         {#if operation.caption}
                             <span class="ml-1">{operation.caption}</span>
@@ -173,7 +239,7 @@
             {@const isActive=isOperationActivated(operation)}
                 <button type="button" 
                         class="py-2.5 px-4 
-                        text-xs font-thin text-stone-100 dark:text-stone-300 dark:hover:text-white 
+                        text-sm font-thin text-stone-100 dark:text-stone-300 dark:hover:text-white 
                         hover:bg-stone-700 dark:hover:bg-stone-800 active:bg-stone-300 dark:active:bg-stone-600
                         border-stone-200 focus:outline-none dark:border-stone-600
                         inline-flex items-center"
@@ -182,7 +248,7 @@
                         on:click={(e) => {on_click(e, operation)}}
                         on:mousedown={mousedown}>
                     {#if operation.icon}
-                        <div class="w-3.5 h-3.5 mr-1"><svelte:component this={operation.icon}/></div>
+                        <div class="w-5 h-5 mr-1"><svelte:component this={operation.icon}/></div>
                     {/if}
                     {#if operation.caption}
                         <span class="ml-1">{operation.caption}</span>
@@ -192,6 +258,7 @@
         {/each}
     </div>
 </section>
+{/if}
 
 <style>
     @media print

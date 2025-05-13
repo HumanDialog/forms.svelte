@@ -1,0 +1,191 @@
+<script>
+    import {    Spinner, 
+                startEditing, 
+                SidebarGroup, 
+                SidebarList, 
+                SidebarItem, 
+                reloadMainContentPage, 
+                Modal,
+                reloadWholeApp,
+                Input, 
+                onErrorShowAlert,
+                randomString, UI
+            } from '$lib'
+    import {FaHome, FaFolder, FaQuestion, FaDownload, FaAt, FaShoppingBasket, FaComments} from 'svelte-icons/fa'
+    import {location, push} from 'svelte-spa-router'
+    import {reef, session} from '@humandialog/auth.svelte'
+	import { afterUpdate, onMount, tick } from 'svelte';
+    import {cache} from './cache.js'
+
+    export let sidebar = true;
+
+    let rootFolders = [];
+    let user = {};
+    let navFolders;
+    let navItems = [];
+    
+    $: currentPath = $location;
+
+    const navRefresher = {
+        refresh: () => {
+                initNavigator();
+            }
+    }
+
+    onMount( () =>
+    {
+        initNavigator();
+        UI.navigator = navRefresher
+        
+        return () => {
+            if(UI.navigator == navRefresher)
+                UI.navigator = null
+        }      
+    })
+
+    
+    async function initNavigator()
+    {
+        
+        if($session.isActive)
+        {
+            reef.get("/user", onErrorShowAlert).then((res) => {
+                if(res != null)
+                    user = res.User;
+            })
+           
+        }
+
+        const cacheKey = `foldersNavigator`
+        const cachedValue = cache.get(cacheKey)
+        if(cachedValue)
+        {
+            rootFolders = cachedValue;
+            navFolders?.reload(rootFolders)
+        }
+
+        await fetchData()
+        navFolders?.reload(rootFolders)
+        cache.set(cacheKey, rootFolders);
+    }
+
+    async function fetchData()
+    {
+        let res = await reef.get("/group/Folders?sort=Order&fields=Id,Title,Summary,Order,href,icon,$type", onErrorShowAlert);
+        if(res != null)
+            rootFolders = res.Folder;
+        else
+            rootFolders = [];
+    }
+
+    async function reload()
+    {
+        await fetchData();
+        navFolders.reload(rootFolders)
+    }
+   
+    function isRoutingTo(href, currentPath)
+    {
+        if(!sidebar)
+            return false;
+
+        let linkPath = href;
+        if(linkPath.startsWith('#'))
+            linkPath = linkPath.substring(1)
+
+        
+
+        if(currentPath.startsWith(linkPath))
+            return true;
+        else
+            return false;
+    }
+
+    function getFolderIcon(folder)
+    {
+        if(folder.icon)
+        {
+            switch(folder.icon)
+            {
+            case 'FaFolder':
+                return FaFolder;
+            case 'FaShoppingBasket':
+                return FaShoppingBasket;
+            case 'FaComments':
+                return FaComments;
+            default:
+                return FaFolder
+            }
+        }
+        else
+            return FaFolder
+    }
+
+</script>
+
+{#key currentPath}
+{#if sidebar}
+    {#if rootFolders && rootFolders.length > 0}     
+    <SidebarGroup >
+        <SidebarItem    href="/tiloshome"
+                        icon={FaHome}
+                        active={isRoutingTo('/tiloshome', currentPath)}
+                        summary="The essentials in one place">
+            Home
+        </SidebarItem>
+    </SidebarGroup>
+
+        <SidebarGroup border>           
+            <SidebarList    objects={rootFolders} 
+                            orderAttrib='Order'
+                            bind:this={navFolders}>
+                <svelte:fragment let:item let:idx>
+                    {@const href = item.href}
+                    <SidebarItem   {href}
+                                    icon={getFolderIcon(item)}
+                                    bind:this={navItems[idx]}
+                                    active={isRoutingTo(href, currentPath)}
+                                    summary={item.Summary}
+                                    >
+                        {item.Title}
+                    </SidebarItem>
+                </svelte:fragment>
+            </SidebarList> 
+        </SidebarGroup>
+
+        <SidebarGroup border>
+            <SidebarItem    href="https://objectreef.dev/doc/reef-lang-guide-402"
+                            icon={FaQuestion}
+                            summary="How to get started and use Tilos">
+                Help
+            </SidebarItem>
+
+            <SidebarItem    href="https://objectreef.dev/download"
+                            icon={FaDownload}
+                            summary="Download the installer and check the release notes">
+                Downloads
+            </SidebarItem>
+
+            <SidebarItem    href="/contact"
+                            icon={FaAt}
+                            summary="Contact us directly">
+                Contact us
+            </SidebarItem>
+        </SidebarGroup>
+
+    {:else}
+        <Spinner delay={3000}/>
+    {/if}
+
+{:else} <!-- !sidebar -->
+
+    {#if rootFolders && rootFolders.length > 0}
+
+        todo
+
+    {:else}
+        <Spinner delay={3000}/>
+    {/if}
+{/if}
+{/key}
+

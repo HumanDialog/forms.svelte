@@ -8,6 +8,7 @@
     import Navigator from "./navigator.svelte";
     import NavigatorFolders from "./navigator.group.folders.svelte";
     import NavigatorMessages from './navigator.messages.svelte'
+    import NavigatorTilos from './navigator.tilos.svelte'
     import {FaPlus} from 'svelte-icons/fa/'
     import {session, Authorized, NotAuthorized} from '@humandialog/auth.svelte'
     import Landing from './landing/landing.svelte'
@@ -22,6 +23,7 @@
     let whatToShow = UNKNOWN;
 
     $: update($main_sidebar_visible_store, $session)
+        
     function update(...args)
     {
         if($session.isActive || $session.isUnauthorizedGuest)
@@ -35,61 +37,90 @@
                 whatToShow = REDIRECT;
 
                 if($session.isUnauthorizedGuest)
-                    push('/listboard');
+                    push(__APP_DEFAULT_GUEST_PAGE__);
                 else
-                    push('/mytasks');
+                    push(__APP_DEFAULT_PAGE__);
             }
         }
         else
             whatToShow = UNKNOWN;
     }
 
-    let navigator;
+    
 
-    function getPageOperations()
+    
+
+    let navigator;
+    const addOperation = {
+        opver: 1,
+        operations: [
+            {
+                caption: 'View',
+                operations: [
+                    {
+                        icon: FaPlus,
+                        action: (f) => navigator?.requestAdd(),
+                        fab: 'M10'
+                    }
+                ]
+            }
+        ]
+    }
+    
+
+    function getNavigator(name)
     {
-        return {
-            opver: 1,
-            operations: [
-                {
-                    caption: 'View',
-                    operations: [
-                        {
-                            icon: FaPlus,
-                            action: (f) => navigator?.requestAdd(),
-                            fab: 'M10'
-                        }
-                    ]
-                }
-            ]
+        switch(name)
+        {
+        case 'Folders':
+            return NavigatorFolders;
+
+        case 'Messages':
+            return NavigatorMessages;
+
+        case 'Tilos':
+            return NavigatorTilos;
+
+        default:
+            return Navigator;
+        }
+    }
+
+    function getOperations(name)
+    {
+        switch(name)
+        {
+        case 'Folders':
+            return addOperation;
+
+        case 'Messages':
+            return [];
+
+        case 'Tilos':
+            return [];
+
+        default:
+            return addOperation;
         }
     }
 
     const currentNav = {}
 
-   
-
 </script>
 
 <Authorized>
     {#if whatToShow == NAVIGATOR}
-        <Page   toolbarOperations={ getPageOperations() }
-                clearsContext='props sel'
-                self={currentNav} 
-                title="Octopus Basic">
+        {#key $main_sidebar_visible_store}
+            <Page   toolbarOperations={ getOperations($main_sidebar_visible_store) }
+                    clearsContext='props sel'
+                    self={currentNav} 
+                    title={__APP_TITLE__}>
 
-            {#if $main_sidebar_visible_store == "Folders"}
-                <NavigatorFolders   sidebar={false}
-                                    bind:this={navigator} />
-            {:else if $main_sidebar_visible_store == "Messages"}
-                <NavigatorMessages   sidebar={false}
-                                    bind:this={navigator} />
-            {:else}
-                <Navigator  sidebar={false}
-                            bind:this={navigator}/>
-            {/if}
-
-        </Page>
+                {@const navi=getNavigator($main_sidebar_visible_store)}
+            
+                <svelte:component this={navi} sidebar={false} bind:this={navigator} />
+            </Page>
+        {/key}
 
 
     {:else}

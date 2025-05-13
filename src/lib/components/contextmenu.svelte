@@ -423,10 +423,28 @@
         e.preventDefault()
     }
 
+    function calculateBackground(is_highlighted, active)
+    {
+        if(is_highlighted)
+        {   
+            if(active)
+                return 'bg-stone-400/40 dark:bg-stone-400/40';
+            else
+                return 'bg-stone-400/30 dark:bg-stone-400/30';
+        }
+        else
+        {
+            if(active)
+                return 'bg-stone-400/20 dark:bg-stone-400/20';
+            else
+                return '';
+        }
+    }
+
 </script>
 
 <div id="__hd_svelte_contextmenu" 
-    class=" bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-900 shadow-md 
+    class=" bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md 
             z-30 fixed min-w-[{min_width_px}px] w-max overflow-y-auto" 
     style={css_position}
     bind:this={menu_root}>
@@ -434,7 +452,9 @@
     {#each operations as operation, index}
         {@const is_separator = operation.separator}
         {#if is_separator}
-            <hr class="my-1 mx-0 border-1 dark:border-stone-900">
+            {#if index>0 && index < operations.length-1}
+                <hr class="my-1 mx-4 border-1 border-stone-300 dark:border-stone-700">
+            {/if}
         {:else}
             {@const mobile = isDeviceSmallerThan("sm")}
             {@const icon_placeholder_without_desc = mobile ? 12 : 10}
@@ -445,10 +465,10 @@
             {@const isBottom = index == operations.length-1}
             {@const isFocused = index == focused_index}
             {@const clipFocusedBorder = isFocused ? (isTop ? 'rounded-t-lg' : (isBottom ? 'rounded-b-lg' : '')) : ''}
-            {@const active = ((!mobile) && isFocused) ? `bg-stone-200 dark:bg-stone-600 ${clipFocusedBorder}` : ''}
+            {@const active = calculateBackground(isFocused, false)}
             {@const has_submenu = operation.menu !== undefined && operation.menu.length > 0}
             
-            <button class="font-medium m-0 py-2 pr-4 text-lg sm:text-sm w-full text-left flex flex-row cursor-context-menu {active} focus:outline-none"
+            <button class="block  w-full pr-4 text-left flex flex-row cursor-context-menu {active} focus:outline-none"
                     id={menu_item_id}
                     bind:this={menu_items[index]}
                     on:click|stopPropagation={(e) => { execute_action(operation, index) } } 
@@ -458,7 +478,7 @@
                     disabled={operation.disabled}
                     class:opacity-60={operation.disabled}>
                     
-                <div class="flex items-center justify-center mt-1 sm:mt-0.5" style:width={`${icon_placeholder_size*0.25}rem`}>
+                <div class="flex items-center justify-center space-x-10 px-4 py-2 ml-12 sm:ml-0" >
                     {#if operation.icon}
                         {@const cc = mobile ? 7 : 6}
                         {@const icon_size = icon_placeholder_size - cc}
@@ -469,7 +489,7 @@
                     <p> {operation.caption}</p>
                     {#if operation.description}
                         {@const shortcut_width_px = operation.shortcut ? 80 : 0}
-                        <p  class=" text-sm font-normal text-stone-900 dark:text-stone-500 truncate inline-block">
+                        <p  class="truncate inline-block">
                             {operation.description}
                         </p>
                     {/if}

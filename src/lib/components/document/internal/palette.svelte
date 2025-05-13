@@ -161,6 +161,36 @@
                 return true;
         })
 
+        // usuwamy separatory na początku i na koncu listy i zgrupowane obok siebie
+        let lastSeparatorIdx = -1;
+        let commandsNo = filtered_commands.length;
+        for(let i=0; i<commandsNo; i++)
+        {
+            if(filtered_commands[i].separator == true)
+            {
+                if(i == 0)
+                {
+                    filtered_commands.splice(i, 1);
+                    commandsNo--;
+                    i--;
+                }
+                else if(lastSeparatorIdx < 0)
+                    lastSeparatorIdx = i;
+                else if(lastSeparatorIdx == i-1)
+                {
+                    filtered_commands.splice(i, 1);
+                    commandsNo--;
+                    i--;
+                }   
+                else
+                    lastSeparatorIdx = i;     
+            }
+        }
+
+        if(filtered_commands[commandsNo-1].separator == true)
+            filtered_commands.splice(commandsNo-1, 1)
+
+        
         // jeśli poprzednio podświetlony element znalazł się w podownie nowym zestawie to zostaje dalej jako podświetlony
         // w przeciwym wypadku podświetlamy pierwszy element na liście.
         if(!current_command || filtered_commands.every( v => v != current_command))

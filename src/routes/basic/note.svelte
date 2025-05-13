@@ -17,7 +17,7 @@
             Modal,
 			Spinner,
             resizeImage,
-
+            reloadVisibleTags,
 			getNiceStringDate
 
             } from '$lib'
@@ -53,7 +53,10 @@
         const taskId = segments[segments.length-1]
         noteRef = `./Note/${taskId}`
 
-        allTags = await reef.get('/group/AllTags', onErrorShowAlert);
+        reef.get('/group/AllTags', onErrorShowAlert).then((res) => {
+            allTags = res
+            reloadVisibleTags()
+        })
 
        await reloadData();
     }
@@ -285,37 +288,44 @@
         const mobile = isDeviceSmallerThan("sm")
         if(mobile)
         {
-            return [
-                {
-                    icon: FaFont,
-                    //aboveKeyboard: true,
-                    menu: description.getFormattingOperations(true)
-                }
-            ]
+            return {
+                opver: 1,
+                operations: [
+                    {
+                        caption: 'Format',
+                        operations: description.getFormattingOperations(true)
+                    }
+                ]
+            }
         }
         else
         {
             const addOperation = {
                 icon: FaPen,
                 caption: '',
-                grid: addOperations
+                grid: addOperations,
+                tbr: 'A'
             };
 
             const saveOperation = {
                 icon: FaSave,
-                action: (f) => { description?.save() }
+                action: (f) => { description?.save() },
+                tbr: 'A'
             }
 
-            const separator = {
-                separator: true
+            return {
+                opver: 1,
+                operations: [
+                    {
+                        caption: 'View',
+                        operations: [addOperation, saveOperation]
+                    },
+                    {
+                        caption: 'Format',
+                        operations: description.getFormattingOperations()
+                    }
+                ]
             }
-
-            let formattingOperations = description.getFormattingOperations();
-            if(!isDeviceSmallerThan('sm'))
-                formattingOperations = [saveOperation, ...formattingOperations]
-
-            let operations = [addOperation,  separator, ...formattingOperations]
-            return operations
         }
     }
 
@@ -463,9 +473,9 @@
 
 <svelte:head>
     {#if note && note.Title}
-        <title>{note.Title} | Octopus Basic</title>
+        <title>{note.Title} | {__APP_TITLE__}</title>
     {:else}
-        <title>Octopus Basic</title>
+        <title>{__APP_TITLE__}</title>
     {/if}
 </svelte:head>
 
@@ -607,6 +617,6 @@
 
 <Modal title='Uploading...' bind:open={pendingUploading} mode={3} icon={FaCloudUploadAlt}>
     <Spinner delay={0}/> 
-    <span class="ml-3">Your image is uploading to the server</span>
+    <span class="ml-3">Your file is uploading to the server</span>
 </Modal>
 

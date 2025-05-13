@@ -664,9 +664,9 @@
 
 <svelte:head>
     {#if contextItem && folderTitle}
-        <title>{folderTitle} | Octopus Basic</title>
+        <title>{folderTitle} | {__APP_TITLE__}</title>
     {:else}
-        <title>Octopus Basic</title>
+        <title>{__APP_TITLE__}</title>
     {/if}
 </svelte:head>
 

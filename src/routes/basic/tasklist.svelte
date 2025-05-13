@@ -492,9 +492,9 @@
 
 <svelte:head>
     {#if currentList && currentList.Name}
-        <title>{currentList.Name} | Octopus Basic</title>
+        <title>{currentList.Name} | {__APP_TITLE__}</title>
     {:else}
-        <title>Octopus Basic</title>
+        <title>{__APP_TITLE__}</title>
     {/if}
 </svelte:head>
 

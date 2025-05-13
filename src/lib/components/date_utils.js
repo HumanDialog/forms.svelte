@@ -28,6 +28,16 @@ export function getFormattedStringDate(d, type = "datetime")
         return `${year}-${month}-${day}`;
 }
 
+export function getNiceStringDateTime(d)
+{
+    const dt = getNiceStringDate(d);
+    const tm = d.toLocaleTimeString(undefined, {
+        timeStyle: 'short'
+    })
+    return `${dt}, ${tm}`
+}
+
+
 export function getNiceStringDate(d)
 {
     if(!d)

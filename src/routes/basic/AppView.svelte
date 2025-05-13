@@ -5,11 +5,14 @@
     
     import SidebarFolders from './sidebar.folders.svelte'
     import SidebarMessages from './sidebar.messages.svelte'
+    import SidebarTilos from './sidebar.tilos.svelte'
 
     import {push} from 'svelte-spa-router'
 
     
     import AppIcon from './appicon.svelte'
+    import TilosIcon from './icons/tilos.icon.svelte'
+
     import FaFolder from 'svelte-icons/fa/FaFolder.svelte'
     import {FaUsersCog, FaSignOutAlt, FaList, FaComments} from 'svelte-icons/fa/'
 
@@ -23,14 +26,21 @@
     import Chat from './chat.svelte'
     import Members from './members.svelte'
     import AppMain from './AppMain.svelte'
+    import Thread from './thread.svelte'
+    import NewThread from './thread.new.svelte'
+    import Forum from './forum.svelte'
+    import RequestLicenseFile from './request.license.svelte'
+    import TilosHome from './tilos/dashboard.svelte'
+
 
     import {Console} from '$lib'
     import { tick, onMount } from 'svelte';
 
-    const objectreef_io = 'localhost:1996'
-    const appId = 'octopus'
-    const tenantId = 'octopus'
-    const proto = 'http'
+    const objectreef_io = __OBJECTREEF_IO__
+    const appId = __APP_ID__
+    const tenantId = __TENANT_ID__
+    const proto = __SERVICE_PROTOCOL__
+    const octopus_modules = __OCTOPUS_MODULES__
 
     $: init($session)
 
@@ -44,23 +54,56 @@
 
     }
 
-    const authorizedLayout = {
-                sidebar : {
-                    'TOC': {
-                        icon: FaList,
-                        component: Sidebar
-                    },
+    function defineModuleNavigator(module)
+    {
+        switch(module)
+        {
+        case 'tasklists':
+            return {
+                'TOC':{
+                    icon: FaList,
+                    component: Sidebar
+                }
+            }
 
-                    'Folders': {
-                        icon: FaFolder,
-                        component: SidebarFolders
-                    },
+        case 'folders':
+            return {
+                'Folders': {
+                    icon: FaFolder,
+                    component: SidebarFolders
+                }
+            }
 
-                    'Messages': {
+        case 'messages':
+            return {
+                'Messages': {
                         icon: FaComments,
                         component: SidebarMessages
                     }
-                },
+            }
+
+        case 'tilos':
+            return {
+                'Tilos': {
+                        icon: TilosIcon,
+                        component: SidebarTilos
+                    }
+            }
+        }
+    }
+
+    function defineNavigators(modules)
+    {
+        let navigators = {}
+        let mods = modules.split(',')
+        mods.forEach( module => 
+            navigators = {...navigators, ...defineModuleNavigator(module)}
+        )
+        return navigators
+    }
+
+    const authorizedLayout = {
+                sidebar : defineNavigators(octopus_modules),
                 mainContent : {
                     routes : {
                         '/' :           { component: AppMain},
@@ -79,7 +122,12 @@
                         '/myfolders' :  { component: MyFolders },
                         '/myfolders/*': { component: MyFolders },
                         '/members'   :  { component: Members },
-                        '/chat/*':      { component: Chat }
+                        '/chat/*':      { component: Chat },
+                        '/thread/*' :   { component: Thread },
+                        '/newthread/*' :{ component: NewThread },
+                        '/forum/*'   :  { component: Forum },
+                        '/request-license-file': {component: RequestLicenseFile},
+                        '/tiloshome':   {component : TilosHome}
                     }
                 },
                 mainToolbar : {
@@ -124,7 +172,8 @@
                         '/task' :       { component: Task },
                         '/task/*' :     { component: Task },
                         '/listboard' :  { component: Board},
-                        '/listboard/*': { component: Board}
+                        '/listboard/*': { component: Board},
+                        '/tiloshome':   {component : TilosHome}
                     }
                 },
                 mainToolbar : {

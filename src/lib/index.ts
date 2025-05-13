@@ -56,6 +56,7 @@ export { default as ListInserter} from './components/list/list.inserter.svelte'
 export { default as ListDateProperty} from './components/list/list.date.svelte'
 export { default as ListComboProperty} from './components/list/list.combo.svelte'
 export { default as ListStaticProperty} from './components/list/list.static.svelte'
+export { default as ListTags} from './components/list/list.tags.svelte'
 
 export { default as Modal} from './modal.svelte'
 export { default as MembersPage} from './tenant.members.svelte'
@@ -97,6 +98,7 @@ export {
 }   from './utils'
 
 export {
+    getNiceStringDateTime,
     getFormattedStringDate, 
     getNiceStringDate,
     dayName,
@@ -109,7 +111,9 @@ export {
             alerts,
             addAlert,
             onErrorShowAlert,
-            main_sidebar_visible_store } from './stores.js'
+            main_sidebar_visible_store,
+            tagsReloader,
+            reloadVisibleTags } from './stores.js'
 
 export {    data_tick_store,    // tmp
             hasSelectedItem, 
@@ -122,7 +126,10 @@ export { informModification, informModificationEx, informItem, pushChanges } fro
 
 
 
-
+export { default as IcH1 } from './components/document/internal/h1.icon.svelte'
+export { default as IcH2 } from './components/document/internal/h2.icon.svelte'
+export { default as IcH3 } from './components/document/internal/h3.icon.svelte'
+export { default as IcH4 } from './components/document/internal/h4.icon.svelte'
 
 
 

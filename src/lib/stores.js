@@ -14,6 +14,7 @@ export const nav_titles = writable({});
 export const mainContentPageReloader = writable(1);
 export const wholeAppReloader = writable(1)
 export const alerts = writable([])
+export const tagsReloader = writable(1)
 
 
 let toolsActionsOperationsStack = []
@@ -81,6 +82,12 @@ export function reloadWholeApp()
     wholeAppReloader.set(val);
 }
 
+export function reloadVisibleTags()
+{
+    let val = get(tagsReloader);
+    val += 1;
+    tagsReloader.set(val);
+}
 
 let has_saved_dark_mode = false;
 function create_dark_mode_store()

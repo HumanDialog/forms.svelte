@@ -8,6 +8,9 @@
     export let onSelect = undefined;
     export let association :boolean = false;
     export let hasNone:     boolean = association;
+    export let editable:    boolean = true
+    export let prefix:      string = ''
+    export let postfix:     string = ''
     
     let definition :rList_definition = getContext("rList-definition");
     
@@ -21,6 +24,9 @@
     combo_property.onSelect = onSelect
     combo_property.association = association;
     combo_property.hasNone = hasNone;
+    combo_property.readOnly = !editable
+    combo_property.prefix = prefix
+    combo_property.postfix = postfix
 
     definition.properties.push(combo_property)
 

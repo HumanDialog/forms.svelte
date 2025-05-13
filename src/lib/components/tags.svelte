@@ -4,7 +4,7 @@
     import FaPlus from 'svelte-icons/fa/FaPlus.svelte'
 	import Combo from './combo/combo.svelte'
     import ComboItem from './combo/combo.item.svelte'
-    import {contextItemsStore, data_tick_store, contextTypesStore} from '../stores.js'
+    import {contextItemsStore, data_tick_store, contextTypesStore, tagsReloader} from '../stores.js'
     import {informModification, pushChanges} from '../updates.js'
 
     export let tags: string = ''
@@ -23,6 +23,8 @@
     export let compact :boolean = true;
     export let inContext :string = ''   // in compact mode
     export let pushChangesImmediately: boolean = true;
+    export let allowNewTags = true;
+    export let readOnly: boolean = false
 
     export let changed = undefined;
     export let s: string = 'sm'
@@ -34,9 +36,9 @@
 
     let tagsTable = []
     let globalTagsTable = []
-    let isEditable: boolean = true;
+    let isEditable: boolean = !readOnly;
 
-    $: setup($data_tick_store, $contextItemsStore);
+    $: setup($data_tick_store, $contextItemsStore, $tagsReloader);
 
     function setup(...args)
     {
@@ -74,7 +76,7 @@
             isEditable = false;
 
             if(!inContext)
-                isEditable = true;
+                isEditable = !readOnly;
             else
             {
                 let contexts = inContext.split(' ');
@@ -82,12 +84,12 @@
                 {   
                     const selectedItem = $contextItemsStore[ctx];
                     if(selectedItem && selectedItem.Id == item.Id)
-                        isEditable = true;
+                        isEditable = !readOnly;
                 } )
             }
         }
         else
-            isEditable =  true;
+            isEditable =  !readOnly;
     }
 
     let addComboVisible: boolean = false;
@@ -164,6 +166,14 @@
         applyChange();
 
         onUpdateAllTags(globalTags)
+    }
+
+    function getCreateTagCallback()
+    {
+        if(allowNewTags)
+            return onNewTagCreated;
+        else
+            return undefined;
     }
 
     function onColorizeTag(name: string, color: string)
@@ -302,7 +312,7 @@
             <Combo  compact={true} 
                     inContext='data'
                     onSelect={onSelectTag}
-                    onNewItemCreated={onNewTagCreated}
+                    onNewItemCreated={getCreateTagCallback()}
                     s={s}
                     filtered
                     bind:this={addCombo}>

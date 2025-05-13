@@ -17,7 +17,7 @@
             Modal,
 			Spinner,
             resizeImage,
-
+            reloadVisibleTags,
 			getNiceStringDate,
             showFloatingToolbar
             } from '$lib'
@@ -48,7 +48,10 @@
         const channelId = segments[segments.length-1]
         channelRef = `./MessageChannel/${channelId}`
 
-        allTags = await reef.get('/group/AllTags', onErrorShowAlert);
+        reef.get('/group/AllTags', onErrorShowAlert).then((res) => {
+            allTags=res
+            reloadVisibleTags()
+        })
 
        await reloadData();
        scrollDown();
@@ -326,9 +329,9 @@
 
 <svelte:head>
     {#if channel && channel.Title}
-        <title>{channel.Title} | Octopus Basic</title>
+        <title>{channel.Title} | {__APP_TITLE__}</title>
     {:else}
-        <title>Octopus Basic</title>
+        <title>{__APP_TITLE__}</title>
     {/if}
 </svelte:head>
 

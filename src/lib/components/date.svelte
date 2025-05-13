@@ -4,7 +4,7 @@
     import {informModification, pushChanges} from '../updates.js'
     import { parseWidthDirective, isDeviceSmallerThan} from '../utils.js'
     import FaChevronDown from 'svelte-icons/fa/FaChevronDown.svelte'
-    import {getFormattedStringDate, getNiceStringDate} from './date_utils.js'
+    import {getFormattedStringDate, getNiceStringDate, getNiceStringDateTime} from './date_utils.js'
 
     
     export let self = null;
@@ -15,6 +15,7 @@
     export let onSelect = undefined;
     export let type = "date";   // datetime-local
     export let changed = undefined;
+    export let readOnly: boolean = false
 
     export  let s = 'sm'
     export let c=''
@@ -126,7 +127,7 @@
         style = `${font_size}`;
     }
 
-    let can_be_activated :boolean = true;
+    let can_be_activated :boolean = !readOnly;
 
     let  last_tick = -1;    
     $: setup($data_tick_store, $contextItemsStore);
@@ -169,7 +170,9 @@
         else
             value = date;
 
-        if(is_compact)
+        if(readOnly)
+            can_be_activated = false
+        else if(is_compact)
         {
             can_be_activated = false;
 
@@ -196,7 +199,11 @@
                     */
 
         rValue = getFormattedStringDate(value, type);
-        pretty_value = getNiceStringDate(value);
+
+        if(type == 'datetime-local')
+            pretty_value = getNiceStringDateTime(value);
+        else
+            pretty_value = getNiceStringDate(value);
         
         
     }

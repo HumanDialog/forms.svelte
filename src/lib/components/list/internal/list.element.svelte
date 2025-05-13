@@ -20,7 +20,7 @@
     import {rList_definition, rList_property_type} from '../List'
 	import { push } from 'svelte-spa-router';
     import {FaExternalLinkAlt} from 'svelte-icons/fa/'
-	import { readonly } from 'svelte/store';
+	import Tags from '../../tags.svelte'
     
     export let item     :object;
 
@@ -105,7 +105,7 @@
         const itemKey = getItemKey(item)
         if(activeKey == itemKey)
         {
-            console.log('active: ', itemKey)
+           // console.log('active: ', itemKey)
             return true;
         }
         else
@@ -379,10 +379,9 @@
 {@const element_title = item[title]}
 
 <section    class="my-1 flex flex-row w-full  text-stone-700 dark:text-stone-300 cursor-default rounded-md border border-transparent {selected_class} {focused_class} scroll-mt-[50px] sm:scroll-mt-[40px]"
-            on:contextmenu={on_contextmenu}
             role="menu"
             tabindex="-1"
-            bind:this={rootElement}>
+            bind:this={rootElement}> <!--  on:contextmenu={on_contextmenu} -->
 
     <slot name="left" element={item}/>
     
@@ -480,7 +479,21 @@
                 
         {/if}
 
-        
+        {#if definition.tags}
+                <Tags
+                    class="mt-1 mb-1"
+                    compact
+                    inContext="props"
+                    self={item}
+                    a={definition.tags.a}
+                    getGlobalTags={definition.tags.getAllTags}
+                    s="sm"
+                    onSelect={definition.tags.onSelect}
+                    onUpdateAllTags={definition.tags.onUpdateAllTags}
+                    canChangeColor={definition.tags.canChangeColor}
+                    readOnly={definition.tags.readOnly}
+                />
+            {/if}
 
     </div>
 </section>

@@ -34,6 +34,7 @@
     
     export let pushChangesImmediately: boolean = true;
     export let hasNone :boolean = isAssociation;
+    export let readOnly: boolean = false
     
     let userClass = $$restProps.class ?? '';
 
@@ -115,7 +116,7 @@
    
     let cs =  c ? parseWidthDirective(c) : 'col-span-1';
     let ctx = context ? context : getContext('ctx');
-    let can_be_activated :boolean  =true;
+    let can_be_activated :boolean  = !readOnly;
     
     let  last_tick = -1    
 
@@ -153,10 +154,13 @@
 
         tick_request_internal = tick_request_internal + 1;
         
-        if(is_compact)
+        if(readOnly)
+            can_be_activated = false
+        else if(is_compact)
         {
             can_be_activated = false;
 
+            
             let contexts = inContext.split(' ');
             contexts.forEach(ctx => 
             {
@@ -934,7 +938,8 @@
             {#if definition.source && definition.source.length}
                 {#if hasNone}
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
-                    <li class="rounded p-2 flex flex-row items-center {font_size}" 
+                    <li class="rounded flex flex-row items-center {font_size}
+                                space-x-10 px-4 py-2 ml-12 sm:ml-0" 
                         class:bg-stone-100={highlighted_option == null}
                         class:dark:bg-stone-700={highlighted_option == null}
                         class:dark:hover:bg-stone-700={highlighted_option == null}
@@ -942,46 +947,45 @@
                         on:click|preventDefault|stopPropagation={async () => await on_choose(null)}
                         tabindex="-1">
 
-                        <div class="ml-2">
+                        <h4 class="ml-2">
                             &lt;none&gt;
-                        </div>
+                        </h4>
                     </li>
                 {/if}
 
                 {@const _filtered_source = filtered_source ? filtered_source : definition.source}
                 {#if _filtered_source.length > 0}
                     {#each _filtered_source as item (item.Key)}
+                        {@const active=(highlighted_option == item) ? 'bg-stone-400/30 dark:bg-stone-400/30' : ''}
                         <!-- svelte-ignore a11y-click-events-have-key-events -->
-                        <li class="rounded p-2 flex flex-row items-center {font_size}" 
-                            class:bg-stone-100={highlighted_option == item}
-                            class:dark:bg-stone-700={highlighted_option == item}
-                            class:dark:hover:bg-stone-700={highlighted_option == item}
+                        <li class="rounded flex flex-row items-center {font_size}
+                                space-x-10 px-4 py-2 pl-12 sm:pl-2 {active}" 
                             on:mousemove={() => on_mouse_move(item)}
                             on:click|preventDefault|stopPropagation={async () => await on_choose(item)}
                             tabindex="-1">
 
                             {#if icon}
                                 {#if item.Color}
-                                    <Icon size={5} circle={true} color={item.Color}/>
+                                    <Icon size={4} circle={true} color={item.Color}/>
                                 {:else if item.Avatar} 
-                                    <Icon size={5} circle={true} symbol={item.Avatar}/>
+                                    <Icon size={4} circle={true} symbol={item.Avatar}/>
                                 {:else if item.Icon}
                                     <Icon size={4} component={item.Icon}/>
                                 {:else if item.Icon == null}
                                     <div class="w-4 h-4"></div>
                                 {:else if item.Name}
-                                    <Icon size={5} circle={true} label={item.Name}/>
+                                    <Icon size={4} circle={true} label={item.Name}/>
                                 {:else}
-                                    <Icon size={5} circle={true}/>
+                                    <Icon size={4} circle={true}/>
                                 {/if}
                             {/if}
-                            <div class="ml-2">
+                            <h4 class="ml-2">
                             {#if item.Name}
                                 {item.Name}
                             {:else if item.Key}
                                 {item.Key}
                             {/if}
-                            </div>
+                            </h4>
                         </li>
                     {/each}
                 {:else}

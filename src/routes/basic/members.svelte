@@ -31,7 +31,7 @@
   </script>
 
 <svelte:head>
-    <title>Members | Octopus Basic</title>
+    <title>Members | {__APP_TITLE__}</title>
 </svelte:head>
 
 {#if users && users.length > 0}

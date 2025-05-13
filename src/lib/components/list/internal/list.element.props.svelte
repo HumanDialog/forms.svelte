@@ -93,10 +93,11 @@
 
 <div class="text-base grid-{definition.properties.length}">
     {#each definition.properties as prop, prop_index}
-        <p class="col-span-1 w-full mr-auto mt-0.5">
+        <div class="col-span-1 w-full mr-auto mt-0.5">
             {#if item[prop.a] || placeholder == prop.name}
-                <span role="gridcell" tabindex="0">
+                <div role="gridcell" tabindex="0">
                     {#if prop.type == rList_property_type.Date}
+                        {@const pickerType = prop.detailed ? 'datetime-local' : 'date'}
                         <DatePicker self={item} 
                                     a={prop.a}
                                     compact={true}
@@ -105,6 +106,8 @@
                                     inContext="props sel"
                                     bind:this={props[prop_index]}
                                     changed={(value)=>{on_date_changed(value, prop.a)}}
+                                    readOnly={prop.readOnly}
+                                    type={pickerType}
                         />
                     {:else if prop.type == rList_property_type.Combo}
                         <Combo  self={item} 
@@ -118,15 +121,26 @@
                                 bind:this={props[prop_index]}
                                 definition={prop.combo_definition}
                                 changed={(key,name)=>{on_combo_changed(key, name, prop)}}
+                                readOnly={prop.readOnly}
                                 s="sm"/>
                     {:else if prop.type == rList_property_type.Static}
-                        <span class="dark:text-white text-stone-400 truncate  bg-stone-900/10 dark:bg-stone-100/10 rounded-lg">
+                        <p class="truncate text-sm">
+                            {#if prop.prefix}
+                                <span>{prop.prefix}</span>
+                            {/if}
+
                             {item[prop.a]}
-                        </span>
+
+                            {#if prop.postfix}
+                                <span>{prop.postfix}</span>
+                            {/if}
+
+                        </p>
                     {/if}
-                </span>
+
+                    </div>
             {/if}
-        </p>
+            </div>
     {/each}
 </div>
 

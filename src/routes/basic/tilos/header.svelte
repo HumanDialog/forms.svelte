@@ -1,6 +1,6 @@
 
 <script lang="ts">
-    import AppIcon from '../appicon.svelte'
+    import AppIcon from '../icons/tilos.icon.svelte'
     import { link } from 'svelte-spa-router';
     import {Authorized, NotAuthorized, signInHRef, signOutHRef, signUpHRef } from '@humandialog/auth.svelte'
 
@@ -13,21 +13,21 @@
       <a href="/" class="" use:link aria-label="Home page">
             <div class="flex flex-row">
                 <AppIcon class="block w-10 h-10"/>
-                <span class="ml-4 mt-1 text-2xl font-normal text-slate-200">Octopus</span>
+                <span class="ml-4 mt-1 text-2xl font-normal text-slate-200">Tilos</span>
             </div>
       </a>
        <div class="px-4 w-full block sm:w-auto">
             <ul class="flex flex-row pt-3  items-center justify-between mx-auto space-x-2 sm:space-x-12 mt-0 border-0 border-gray-700">
                 {#if main}
                     <NotAuthorized>
-                        <li><a class="block  rounded md:bg-transparent p-0  text-slate-200 hover:text-indigo-300" use:link href={$signInHRef}>Sign In</a></li>
+                        <li><a class="block  rounded md:bg-transparent p-0  text-slate-200 hover:text-indigo-300" use:link href={$signInHRef}>Community</a></li>
                     </NotAuthorized>
                     <NotAuthorized>
                         <li><a class="block rounded md:bg-transparent p-0 text-slate-200 hover:text-indigo-300" use:link href={$signUpHRef}>Get started</a></li>
                     </NotAuthorized>
                 {:else}
                     <Authorized>
-                        <li><a class="block  rounded md:bg-transparent p-0 text-slate-200 hover:text-indigo-300" use:link href='/'>App</a></li>
+                        <li><a class="block  rounded md:bg-transparent p-0 text-slate-200 hover:text-indigo-300" use:link href='/'>Community</a></li>
                     </Authorized>
                 {/if}
             </ul>

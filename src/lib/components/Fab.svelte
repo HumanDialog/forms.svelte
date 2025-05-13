@@ -2,7 +2,7 @@
     import { each } from 'svelte/internal';
     import {contextToolbarOperations, pageToolbarOperations, contextItemsStore, toolsActionsOperations} from '../stores.js'
     import { showFloatingToolbar, showMenu, showGridMenu } from './menu.js';
-    import {FaChevronUp, FaChevronDown, FaChevronLeft, FaChevronRight, FaCircle} from 'svelte-icons/fa/'
+    import {FaChevronUp, FaChevronDown, FaChevronLeft, FaChevronRight, FaCircle, FaEllipsisV} from 'svelte-icons/fa/'
     
     
     $: setupCurrentContextOperations($pageToolbarOperations, $contextToolbarOperations, $toolsActionsOperations);
@@ -19,7 +19,8 @@
 
     function setupCurrentContextOperations(...args)
     {
-        
+        let opVer = 0
+
         isDirectPositioningMode = false;
         if($toolsActionsOperations && Array.isArray($toolsActionsOperations) && toolsActionsOperations.length > 0)
         {
@@ -28,7 +29,8 @@
         else if($toolsActionsOperations && $toolsActionsOperations.operations && $toolsActionsOperations.operations.length > 0)
         {
             operations = $toolsActionsOperations.operations;
-            if($toolsActionsOperations.opver && $toolsActionsOperations.opver == 1)
+            opVer = $toolsActionsOperations.opver ?? 0
+            if(opVer > 0)
                 isDirectPositioningMode = true;
         }
         else if($contextToolbarOperations && Array.isArray($contextToolbarOperations) && $contextToolbarOperations.length > 0)
@@ -38,7 +40,8 @@
         else if($contextToolbarOperations && $contextToolbarOperations.operations && $contextToolbarOperations.operations.length > 0)
         {
             operations = $contextToolbarOperations.operations;
-            if($contextToolbarOperations.opver && $contextToolbarOperations.opver == 1)
+            opVer = $contextToolbarOperations.opver ?? 0
+            if(opVer > 0)
                 isDirectPositioningMode = true;
         }
         else
@@ -48,39 +51,84 @@
             else
             {
                 operations = $pageToolbarOperations.operations;
-                if($pageToolbarOperations.opver && $pageToolbarOperations.opver == 1)
+                opVer = $pageToolbarOperations.opver ?? 0
+                if(opVer > 0)
                     isDirectPositioningMode = true;
             }
         }
 
        
-
-        if(isDirectPositioningMode)
-            return;
-        
-        if(operations.length > 0)
-            mainOperation = operations[0];
-        else
-            mainOperation = null;
-
-        secondaryOperation = null;
-        toolboxOperations = [];
-        if(operations.length > 1)
+        if(opVer == 1)
         {
-            const operation = operations[1];
-            if(!operation.separator)
-            {
-                if(!operation.toolbox)
-                    secondaryOperation = operation;
-                else
-                    toolboxOperations = operation.toolbox
-            }
+            let flatOperations = []
+            operations.forEach(group => {
+                flatOperations = [...flatOperations, ...group.operations]
+            })
+
+            operations = flatOperations
         }
-        
-        if((operations.length == 3 && secondaryOperation!=null) || (operations.length > 3) || toolboxOperations.length > 0)
-            isExpandable = true;
-        else
-            isExpandable = false;
+        else if(opVer == 2)
+        {
+            let flatOperations = []
+            operations.forEach(group => {
+                flatOperations.push({
+                    caption: group.caption,
+                    separator: true
+                })
+
+                flatOperations = [...flatOperations, ...group.operations]
+            })
+
+            const realOps = flatOperations.filter((el) => !!el.separator == false)
+            if(realOps.length > 1)
+            {
+                
+                mainOperation = {
+                    icon: FaEllipsisV,
+                    menu: flatOperations,
+                    fab: 'M00'
+                }
+
+                operations = [mainOperation]
+            }
+            else if(realOps.length == 1)
+            {
+                mainOperation = realOps[0]
+                mainOperation['fab'] = 'M00'
+                operations = [mainOperation]
+            }
+            else
+                operations = []
+
+            
+            
+        }
+        else    // opVer == 0
+        {
+            if(operations.length > 0)
+                mainOperation = operations[0];
+            else
+                mainOperation = null;
+
+            secondaryOperation = null;
+            toolboxOperations = [];
+            if(operations.length > 1)
+            {
+                const operation = operations[1];
+                if(!operation.separator)
+                {
+                    if(!operation.toolbox)
+                        secondaryOperation = operation;
+                    else
+                        toolboxOperations = operation.toolbox
+                }
+            }
+            
+            if((operations.length == 3 && secondaryOperation!=null) || (operations.length > 3) || toolboxOperations.length > 0)
+                isExpandable = true;
+            else
+                isExpandable = false;
+        }
    }
 
    /*
@@ -132,6 +180,8 @@
         while(owner && ((owner.tagName != 'BUTTON') && (owner.tagName != 'LI')))
             owner = owner.parentElement
 
+        if(operation.preAction)
+            operation.preAction(owner)
 
         if(operation.action)
         {
@@ -297,29 +347,25 @@
 
 {#if isDirectPositioningMode}
     {#if operations && operations.length > 0}
-        {#each operations as group}
-            {#if group.operations && group.operations.length > 0}
-                {#each group.operations as operation}
-                    {#if operationVisible(operation)}
-                        {@const position = calculatePosition(operation)}
-                        {#if position}
-                            <button  
-                                class="text-white bg-blue-700/70 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 
-                                        font-medium rounded-full text-sm text-center shadow-md
-                                        w-[35px] h-[35px] 
-                                        fixed m-0  
-                                        dark:bg-blue-600/50 dark:hover:bg-blue-700 dark:focus:ring-blue-800
-                                        flex items-center justify-center
-                                        disable-dbl-tap-zoom
-                                        cursor-pointer z-40"
-                                        style={position}
-                                        on:click|stopPropagation={(e) => {on_click(e, operation)}} 
-                                        on:mousedown={mousedown} >
-                            <div class="w-5 h-5"><svelte:component this={operation.icon}/></div>
-                            </button>
-                        {/if}
-                    {/if}
-                {/each} 
+        {#each operations as operation}
+            {#if operationVisible(operation)}
+                {@const position = calculatePosition(operation)}
+                {#if position}
+                    <button  
+                        class="text-white bg-blue-700/70 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 
+                                font-medium rounded-full text-sm text-center shadow-md
+                                w-[35px] h-[35px] 
+                                fixed m-0  
+                                dark:bg-blue-600/50 dark:hover:bg-blue-700 dark:focus:ring-blue-800
+                                flex items-center justify-center
+                                disable-dbl-tap-zoom
+                                cursor-pointer z-40"
+                                style={position}
+                                on:click|stopPropagation={(e) => {on_click(e, operation)}} 
+                                on:mousedown={mousedown} >
+                    <div class="w-5 h-5"><svelte:component this={operation.icon}/></div>
+                    </button>
+                {/if}
             {/if}
         {/each}
     {/if}

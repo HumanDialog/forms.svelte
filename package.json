@@ -54,6 +54,7 @@
 		"@tiptap/suggestion": "^2.11.0",
 		"flowbite-svelte": "^0.44.4",
 		"pdfjs-dist": "^4.10.38",
+		"qs": "^6.14.0",
 		"svelte-icons": "^2.1.0",
 		"svelte-spa-router": "^4.0.1"
 	},

@@ -16,7 +16,8 @@
             onErrorShowAlert,
             Modal,
 			Spinner,
-            resizeImage
+            resizeImage,
+            reloadVisibleTags
             } from '$lib'
 	import { onMount, tick } from 'svelte';
     import {location, querystring, push, link} from 'svelte-spa-router'
@@ -53,7 +54,10 @@
         const taskId = segments[segments.length-1]
         taskRef = `./Task/${taskId}`
 
-        allTags = await reef.get('/group/AllTags', onErrorShowAlert);
+        reef.get('/group/AllTags', onErrorShowAlert).then((res) => {
+            allTags = res
+            reloadVisibleTags()
+        })
 
         let res = await reef.get('/group/Lists?fields=$ref,Name', onErrorShowAlert)
         allLists = res.TaskList
@@ -514,19 +518,16 @@
                 tbr: 'A'
             }
 
-            const separator = {
-                separator: true
-            }
-
-            let formattingOperations = description.getFormattingOperations();
-            formattingOperations = [saveOperation, ...formattingOperations]
-
             return {
                 opver: 1,
                 operations: [
                     {
                         caption: 'View',
-                        operations: [addOperation,  separator, ...formattingOperations]
+                        operations: [addOperation,  saveOperation]
+                    },
+                    {
+                        caption: 'Format',
+                        operations: description.getFormattingOperations()
                     }
                 ]
             }
@@ -685,9 +686,9 @@
 
 <svelte:head>
     {#if task && task.Title}
-        <title>{task.Title} | Octopus Basic</title>
+        <title>{task.Title} | {__APP_TITLE__}</title>
     {:else}
-        <title>Octopus Basic</title>
+        <title>{__APP_TITLE__}</title>
     {/if}
 </svelte:head>
 

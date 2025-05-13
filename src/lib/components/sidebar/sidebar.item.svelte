@@ -167,21 +167,26 @@
         {
             if(isRowActive)
             {
-                if(href)
-                {
-                    push(href);
-                }
+                redirect_to(href)
             }
         }
         else
         {
             auto_hide_sidebar();
-            if(href)
-            {
-                push(href);
-        
-            }
+            redirect_to(href)
         }
+    }
+
+    function redirect_to(href)
+    {
+        if(!href)
+            return;
+
+        let absolute_pattern = /^https?:\/\//i;
+        if (!absolute_pattern.test(href))
+            push(href);
+        else
+            window.location.href = href;
     }
 
     function on_contextmenu(e)
@@ -282,7 +287,6 @@
     <div
         on:click
         on:click={activateRow}
-        on:contextmenu={on_contextmenu}
         on:keydown
         on:keyup
         class="     mb-2
@@ -292,7 +296,7 @@
         class:sm:dark:hover:bg-stone-700={!!href}
         class:bg-stone-200={isRowActive}
         class:dark:bg-stone-700={isRowActive}
-        class:selected={selected(selectable, context_data)}>
+        class:selected={selected(selectable, context_data)}>  <!-- on:contextmenu={on_contextmenu} -->
             <div class="flex flex-row justify-between
                         text-base font-semibold">
                 {#if href}

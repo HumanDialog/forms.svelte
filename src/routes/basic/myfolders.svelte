@@ -215,7 +215,7 @@
 </script>
 
 <svelte:head>
-    <title>My Folders | Octopus Basic</title>
+    <title>My Folders | {__APP_TITLE__}</title>
 </svelte:head>
 
 {#if user}

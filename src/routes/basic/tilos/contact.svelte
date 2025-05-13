@@ -2,7 +2,7 @@
     import { afterUpdate, onMount, tick } from 'svelte';
     import Header from './header.svelte'
     import Footer from './footer.svelte';
-    import Obfuscator from './email.obfuscator.svelte'
+    import Obfuscator from '../landing/email.obfuscator.svelte'
 
     let captcha_element;
     let name;

@@ -270,7 +270,7 @@
 </script>
 
 <svelte:head>
-    <title>My Tasks | Octopus Basic</title>
+    <title>My Tasks | {__APP_TITLE__}</title>
 </svelte:head>
 
 {#if user}
@@ -298,7 +298,7 @@
             <span slot="left" let:element>
                 <Icon component={element.State == STATE_FINISHED ? FaRegCheckCircle : FaRegCircle} 
                     on:click={(e) => finishTask(e, element)} 
-                    class="h-6 w-6  text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
+                    class="h-5 w-5  text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
             </span>
 
             
