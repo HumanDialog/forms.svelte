@@ -14,10 +14,11 @@
             resizeImage,
 			getNiceStringDateTime,
             startEditing,
-            IcH1, IcH2, IcH3, IcH4
+            IcH1, IcH2, IcH3, IcH4,
+            addAlert
         } from '$lib'
 	import { tick } from 'svelte';
-    import {location, push, pop, replace} from 'svelte-spa-router'
+    import {location, push, pop, replace, link} from 'svelte-spa-router'
     
     import {    FaTimes, FaTag,  FaCloudUploadAlt, FaFont, FaBold, FaItalic, FaUnderline, FaStrikethrough,
                 FaRegStar, FaStar, FaPaperPlane, FaPaperclip, FaPlus, FaTable, FaImage,
@@ -51,7 +52,7 @@
 
         if(!user)
         {
-            reef.get('user?fields=$ref,Name,Email', onErrorShowAlert).then((res) => {
+            reef.get('user?fields=$ref,Name,Email,href', onErrorShowAlert).then((res) => {
                 if(res)
                 {
                     user = res.User;   
@@ -498,8 +499,26 @@
 
     async function postQuestion()
     {
-        pendingPosting = true;
+        if(!note.Title)
+        {
+            addAlert('Enter title and description first')
+            return;
+        }
+
+        if(!contentElement)
+        {
+            addAlert('Enter title and description first')
+            return
+        }
+
         const originalPostContent = contentElement.getInnerHtml()
+        if(!originalPostContent)
+        {
+            addAlert('Enter title and description first')
+            return
+        }
+
+        pendingPosting = true;
         note.Content = originalPostContent
 
         let newPostHRef = ''
@@ -582,6 +601,7 @@
                 }
             }
 
+            // 3. send attached files
             for(let i=0; i<selectedAttachements.length; i++)
             {
                 const file = selectedAttachements[i];
@@ -622,7 +642,7 @@
             
             note.Content = contentElement.getInnerHtml()
             
-
+            // 4. Attach post to folder
             const res2 = await reef.post(`${folderRef}/AttachPost`, {
                 note: questionRef,
                 title: note.Title,
@@ -742,7 +762,8 @@
             <section class="w-full flex flex-row flex-wrap justify-between">
                 <div class="grow-0">
                     {#if user}
-                        <p> {user.Name} </p>
+                        {@const href = user.href}
+                        <a {href} use:link> {user.Name} </a>
                     {/if}
                 </div>
 
@@ -813,8 +834,8 @@
                 </p>
             {/if}
 
-            {#if true || note.Title}
-            {@const disabled = !note.Title || !note.Content}
+            {#if true}
+            {@const disabled = false}
             {@const styleFont = disabled ? "text-stone-400 dark:text-stone-500" : "text-stone-700 dark:text-stone-300 dark:hover:text-white"}
             {@const styleBg = disabled ? "" : "hover:bg-stone-200 dark:hover:bg-stone-800"}
             <section class="mt-20 flex flex-row justify-end mr-2 ml-2 mb-1 gap-2">

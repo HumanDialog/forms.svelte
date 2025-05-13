@@ -22,7 +22,7 @@
 
             } from '$lib'
 	import { onMount, tick } from 'svelte';
-    import {location, querystring, push} from 'svelte-spa-router'
+    import {location, querystring, push, link} from 'svelte-spa-router'
     
     import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen, FaList, FaCopy, FaFileDownload} from 'svelte-icons/fa/'
     import FaBasketPlus from './icons/basket.plus.svelte'
@@ -94,7 +94,7 @@
                                         {
                                             Id: 11,
                                             Association: 'CreatedBy',
-                                            Expressions:['$ref', 'Name']
+                                            Expressions:['$ref', 'Name', 'href']
                                         },
                                         {
                                             Id: 12,
@@ -119,7 +119,7 @@
         else
             modificationDate = null
         
-        isReadOnly = note.$acc === 1
+        isReadOnly = (note.$acc & 0x2) == 0
 
         if(note.AttachedFiles)
         {
@@ -546,7 +546,8 @@
             <section class="w-full flex flex-row flex-wrap justify-between">
                 <div class="grow-0">
                     {#if note.CreatedBy}
-                    <p> {note.CreatedBy.Name} </p>
+                        {@const href = `${note.CreatedBy.href}`}
+                        <a {href} use:link> {note.CreatedBy.Name} </a>
                     {/if}
                 </div>
 

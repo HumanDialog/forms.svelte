@@ -24,8 +24,8 @@
             IcH4,
             reloadVisibleTags
             } from '$lib'
-	import { onMount, tick } from 'svelte';
-    import {location, querystring, push} from 'svelte-spa-router'
+	import { afterUpdate, tick } from 'svelte';
+    import {location, querystring, push, link} from 'svelte-spa-router'
     
     import {FaTimes, FaAlignLeft,FaCheck, FaTag, FaUser, FaCalendarAlt, FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen, 
         FaCommentMedical, FaRegStar, FaStar, FaPaperPlane, FaPaperclip, FaPlus, FaComment, FaQuoteRight, FaInfo, FaListUl,
@@ -54,6 +54,7 @@
 
     let postResponses = []
     let mobile = isDeviceSmallerThan("sm")
+    let scrollToPost = 0
 
     $: onParamsChanged($location)
 
@@ -75,7 +76,14 @@
             })
         }
 
-        const taskId = segments[segments.length-1]
+        const taskId = parseInt(segments[segments.length-1])
+
+        const params = new URLSearchParams($querystring);
+        if(params.has("res"))
+            scrollToPost = parseInt(params.get("res"))
+        else
+            scrollToPost = 0
+
         noteRef = `./Note/${taskId}`
 
         reef.get('/group/AllTags', onErrorShowAlert).then((res) => {
@@ -85,6 +93,18 @@
 
        await reloadData();
     }
+
+    afterUpdate(() => {
+        if(scrollToPost)
+        {
+            const answer = document.getElementById(`__hd_thread_answer_${scrollToPost}`)
+            if(answer)
+            {
+                answer?.scrollIntoView(true)
+                scrollToPost = 0   
+            }
+        }
+    })
 
     async function reloadData()
     {
@@ -120,12 +140,12 @@
                                         {
                                             Id: 11,
                                             Association: 'CreatedBy',
-                                            Expressions:['$ref', 'Name']
+                                            Expressions:['$ref', 'Name', 'href']
                                         },
                                         {
                                             Id: 12,
                                             Association: 'ModifiedBy',
-                                            Expressions:['$ref', 'Name']
+                                            Expressions:['$ref', 'Name', 'href']
                                         },
                                         {
                                             Id: 13,
@@ -170,7 +190,7 @@
             })
         }
         
-        isReadOnly = true; //note.$acc === 1
+        isReadOnly = true; //(note.$acc & 0x2) == 0
 
         postResponses = [];
         if(note.Notes && note.Notes.length > 0)
@@ -1206,7 +1226,8 @@
             <section class="w-full flex flex-row flex-wrap justify-between">
                 <div class="grow-0">
                     {#if note.CreatedBy}
-                    <p> {note.CreatedBy.Name} </p>
+                        {@const href = note.CreatedBy.href}
+                        <a {href} use:link> {note.CreatedBy.Name} </a>
                     {/if}
                 </div>
 
@@ -1268,7 +1289,7 @@
             
             {#if postResponses}
                 {#each postResponses as post}
-                    <hr/>
+                    <hr id="__hd_thread_answer_{post.Id}"/>
                     <AnswerPost note={post}/>
                 {/each}
             {/if}

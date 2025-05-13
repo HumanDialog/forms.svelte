@@ -45,7 +45,7 @@
                         apiVersion: "v001"}
                    });
 
-    const r = /^\/listboard|tasklist|task|note|folder|mytasks|myfolders|members|chat|thread|newthread|forum|tiloshome|request-license-file\/(.*)\/?$/i
+    const r = /^\/listboard|tasklist|task|note|folder|mytasks|myfolders|members|chat|thread|newthread|forum|tiloshome|profile|request-license-file\/(.*)\/?$/i
 
     const routes = new Map()
     routes.set('/',                     Main)

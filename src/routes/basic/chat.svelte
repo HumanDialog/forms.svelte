@@ -119,7 +119,7 @@
         if(channel.GetTitle)
             channel.Title = channel.GetTitle
 
-        isReadOnly = channel.$acc === 1
+        isReadOnly = (channel.$acc & 0x2) == 0
 
     }
 

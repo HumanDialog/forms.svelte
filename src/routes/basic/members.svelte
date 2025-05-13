@@ -15,7 +15,8 @@
                                 Tree:[
                                     {
                                         Id: 1,
-                                        Association: 'Members/User'
+                                        Association: 'Members/User',
+                                        Expressions: ['Name', 'login', '$ref', 'href', '$acc']
                                     }
                                 ]                    
                             },
@@ -35,5 +36,5 @@
 </svelte:head>
 
 {#if users && users.length > 0}
-  <MembersPage {users} nameAttrib="Name" emailAttrib="login" refAttrib="$ref" showAccessRoles/>
+  <MembersPage {users} nameAttrib="Name" emailAttrib="login" refAttrib="$ref" hrefAttrib="href" showAccessRoles/>
 {/if}

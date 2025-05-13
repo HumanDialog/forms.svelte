@@ -14,7 +14,7 @@
     import TilosIcon from './icons/tilos.icon.svelte'
 
     import FaFolder from 'svelte-icons/fa/FaFolder.svelte'
-    import {FaUsersCog, FaSignOutAlt, FaList, FaComments} from 'svelte-icons/fa/'
+    import {FaUsersCog, FaSignOutAlt, FaList, FaComments, FaUser} from 'svelte-icons/fa/'
 
     import Tasklist from './tasklist.svelte';
     import Folder from './folder.svelte';
@@ -31,6 +31,7 @@
     import Forum from './forum.svelte'
     import RequestLicenseFile from './request.license.svelte'
     import TilosHome from './tilos/dashboard.svelte'
+    import Profile from './profile.svelte'
 
 
     import {Console} from '$lib'
@@ -127,12 +128,19 @@
                         '/newthread/*' :{ component: NewThread },
                         '/forum/*'   :  { component: Forum },
                         '/request-license-file': {component: RequestLicenseFile},
-                        '/tiloshome':   {component : TilosHome}
+                        '/tiloshome':   {component : TilosHome},
+                        '/profile/*':   {component: Profile},
+                        '/profile':     {component: Profile},
                     }
                 },
                 mainToolbar : {
                     signin: true,
                     customOperations:[
+                        {
+                            caption: 'Profile',
+                            icon: FaUser,
+                            action: (f) => { push('/profile')}
+                        },
                         {
                             caption: 'Members',
                             icon: FaUsersCog,

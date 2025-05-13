@@ -143,7 +143,7 @@
         if(task.Steps == undefined)
             task.Steps = []
 
-        isReadOnly = task.$acc === 1
+        isReadOnly = (task.$acc & 0x2) == 0
 
         if(task.AttachedFiles)
         {

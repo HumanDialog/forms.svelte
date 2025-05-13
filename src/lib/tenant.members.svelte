@@ -32,6 +32,7 @@
     export let nameAttrib = "Name";
     export let emailAttrib = "login";
     export let refAttrib = "$ref";
+    export let hrefAttrib = ''
     export let showFiles = false;
     //export let show_admin = true;
     export let showAccessRoles = false;
@@ -101,7 +102,10 @@
                         avatar_url : "",
                         invitation_not_accepted: false,
                         removed: false,
-                        membership_tag: ""
+                        membership_tag: "",
+                        ... hrefAttrib ? { 
+                            [hrefAttrib]: u[hrefAttrib] 
+                         } : { }
                     }
                 )
             })
@@ -695,7 +699,13 @@
         create_new_user();
     }
 
-   
+   function getHRefFunc()
+   {
+        if(!hrefAttrib)
+            return undefined
+        else
+            return (user) => { return user[hrefAttrib]} 
+   }
     
 </script>
 
@@ -715,7 +725,7 @@
                 toolbarOperations={user_operations} 
                 contextMenu={user_context_menu}
                 bind:this={list}>
-            <ListTitle a={nameAttrib} onChange={on_name_changed}/>
+            <ListTitle a={nameAttrib} onChange={on_name_changed} hrefFunc={getHRefFunc()}/>
             <ListSummary a={emailAttrib} readonly/>
 
             <ListStaticProperty name="Membership" a="membership_tag"/>
