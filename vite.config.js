@@ -3,7 +3,7 @@ import { sveltekit } from '@sveltejs/kit/vite';
 
 export default defineConfig( ({command, mode}) => {
 
-	let finalApp = "tilos"	// "octopus" //
+	let finalApp = 	"octopus" //"tilos"
 	let buildConfig = {}
 
 	switch(finalApp)
@@ -19,7 +19,7 @@ export default defineConfig( ({command, mode}) => {
 			__CLIENT_SECRET__: '\'SampleClientSecret\'',
 			__WEBSITE__: '\'http://localhost:5174\'',
 			__GA_IDENTIFIER__: '\'\'',
-			
+
 			__OCTOPUS_MODULES__:'\'tasklists,folders,messages\'',
 			__APP_TITLE__: '\'Octopus Basic\'',
 			__APP_ICON__:'\'/ico/objectreeficon.png\'',
@@ -41,8 +41,8 @@ export default defineConfig( ({command, mode}) => {
 			__CLIENT_SECRET__: '\'SampleClientSecret\'',
 			__WEBSITE__: '\'http://localhost:5174\'',
 			__GA_IDENTIFIER__: '\'\'',
-			
-			__OCTOPUS_MODULES__:'\'tilos,messages,tasklists\'',
+
+			__OCTOPUS_MODULES__:'\'tilos,messages,tasklists,folders\'',
 			__APP_TITLE__: '\'Tilos\'',
 			__APP_ICON__:'\'/ico/TILOS-48.png\'',
 			__APP_DEFAULT_PAGE__: '\'/tiloshome\'',
@@ -64,7 +64,7 @@ export default defineConfig( ({command, mode}) => {
   {
     return {
       plugins: [sveltekit()],
-     
+
     }
   }
   else
@@ -73,5 +73,5 @@ export default defineConfig( ({command, mode}) => {
     return {
       plugins: [sveltekit()]
     }
-  } 
+  }
 })
