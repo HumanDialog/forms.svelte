@@ -4,6 +4,8 @@
                 Editor, activateItem, isActive, clearActiveItem, IcH1, IcH2, IcH3, IcH4
             } from '$lib'
 
+    import {link} from 'svelte-spa-router'
+
     import {FaFont, FaPen, FaSave, FaCloudUploadAlt, FaPaperclip, FaImage, FaTable, FaBold, FaItalic, FaUnderline,
         FaStrikethrough, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle, FaInfo, FaListUl
 
@@ -43,7 +45,7 @@
             })
         }
 
-        isReadOnly = true; //note.$acc === 1
+        isReadOnly = true; //(note.$acc & 0x2) == 0
     }
 
     async function reloadData()
@@ -77,12 +79,12 @@
                                         {
                                             Id: 11,
                                             Association: 'CreatedBy',
-                                            Expressions:['$ref', 'Name']
+                                            Expressions:['$ref', 'Name', 'href']
                                         },
                                         {
                                             Id: 12,
                                             Association: 'ModifiedBy',
-                                            Expressions:['$ref', 'Name']
+                                            Expressions:['$ref', 'Name', 'href']
                                         }
                                     ]
                                 }
@@ -409,8 +411,9 @@
         <section class="w-full flex flex-row justify-between">
                 <div class="grow-0">
                     {#if note.CreatedBy}
+                        {@const href = note.CreatedBy.href}
                         <h2 class="font-semibold"> 
-                            {note.CreatedBy.Name} 
+                            <a {href} use:link>{note.CreatedBy.Name}</a>
                         </h2>
                     {/if}
                 </div>

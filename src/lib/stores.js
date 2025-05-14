@@ -1,6 +1,6 @@
 
 import {writable, get} from 'svelte/store';
-import {SCREEN_SIZES} from './utils.js'
+import {SCREEN_SIZES, randomString} from './utils.js'
 
 export const data_tick_store = writable(1);
 export const contextItemsStore = writable({focused:'', data: null, sel: null})
@@ -43,8 +43,24 @@ export function popToolsActionsOperations()
 
 export const addAlert = (txt) => {
     let al = get(alerts)
-    al = [txt, ...al];
+    const alert = {
+        msg: txt,
+        id: randomString(6),
+        timeoutId: setTimeout(() => removeAlert(alert), 10000)
+    }
+    al = [alert, ...al];
     alerts.set(al);
+}
+
+export const removeAlert = (alert) => {
+    let al = get(alerts)
+    const idx = al.findIndex((a) => a.id == alert.id)
+    if(idx >= 0)
+    {
+        clearTimeout(alert.timeoutId)
+        al.splice(idx, 1)
+        alerts.set(al)
+    }
 }
 
 export const onErrorShowAlert = addAlert;

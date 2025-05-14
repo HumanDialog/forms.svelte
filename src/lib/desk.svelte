@@ -459,14 +459,14 @@
                             {#each $alerts as alert, idx}
                                 <Alert class="bg-red-900/40  shadow-lg shadow-stone-400 dark:shadow-black flex flex-row">
                                     <button class="sm:hidden font-bold  ml-auto"
-                                            on:click={() => {$alerts = removeAt($alerts, idx)}}>
+                                            on:click={() => {removeAlert(alert)}}>
                                         x
                                     </button>
                                     <p>
-                                        {alert}
+                                        {alert.msg}
                                     </p>
                                     <button class="hidden sm:block font-bold  ml-auto"
-                                            on:click={() => {$alerts = removeAt($alerts, idx)}}>
+                                            on:click={() => {removeAlert(alert)}}>
                                         x
                                     </button>
                                 </Alert>    
