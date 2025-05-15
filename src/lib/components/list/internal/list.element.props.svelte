@@ -94,7 +94,7 @@
 <div class="text-base grid-{definition.properties.length}">
     {#each definition.properties as prop, prop_index}
         <div class="col-span-1 w-full mr-auto mt-0.5">
-            {#if item[prop.a] || placeholder == prop.name}
+            {#if item[prop.a] || placeholder == prop.name || prop.getter}
                 <div role="gridcell" tabindex="0">
                     {#if prop.type == rList_property_type.Date}
                         {@const pickerType = prop.detailed ? 'datetime-local' : 'date'}
@@ -124,12 +124,13 @@
                                 readOnly={prop.readOnly}
                                 s="sm"/>
                     {:else if prop.type == rList_property_type.Static}
+                        {@const value = prop.getter ? prop.getter(item) : item[prop.a]}
                         <p class="truncate text-sm">
                             {#if prop.prefix}
                                 <span>{prop.prefix}</span>
                             {/if}
 
-                            {item[prop.a]}
+                            {value}
 
                             {#if prop.postfix}
                                 <span>{prop.postfix}</span>

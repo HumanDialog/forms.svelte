@@ -525,7 +525,8 @@
             </SidebarList> 
         </SidebarGroup>
 
-        <SidebarGroup border>
+        <!-- przeniesione do menu aplikacji (tam gdzie Sign out)-->
+        <!--SidebarGroup border>
             {@const href = `/folder/${basket.Id}`}
             <SidebarItem    {href}
                             icon={FaShoppingBasket}
@@ -534,7 +535,7 @@
                             item={basket}>
                 My Basket
             </SidebarItem>
-        </SidebarGroup>
+        </SidebarGroup-->
 
 
     {:else}

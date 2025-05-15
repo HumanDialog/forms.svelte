@@ -291,6 +291,7 @@
             operations: [
                 {
                     caption: 'Thread',
+                    tbr: 'B',
                     operations: [
                         {
                             caption: 'Reply',
@@ -310,20 +311,17 @@
                                 tbr: 'A'
                             }
                         ] : [],
-                       /* {
+                        {
                             caption: 'Follow',
                             icon: FaRegStar,        // FaStar
                             action: (f) => {} ,
-                            tbr: 'C'
-                        }, */
-                /*        {
+                        }, 
+                        {
                             icon: FaBasketPlus,   // MdLibraryAdd
-                        //    caption: 'Copy to basket',
+                            caption: 'Add to Basket',
                             action: (f) => copyTaskToBasket(),
-                            fab: 'M04',
-                            tbr: 'A'
-
-                        } */
+                            
+                        } 
                     ]
                 }
             ]
@@ -1349,7 +1347,7 @@
                             <button type="button" 
                                     class="
                                     py-2.5 px-4 
-                                    text-xs font-thin text-stone-700 dark:text-stone-300 dark:hover:text-white 
+                                    text-sm font-thin text-stone-700 dark:text-stone-300 dark:hover:text-white 
                                     hover:bg-stone-300 dark:hover:bg-stone-900 active:bg-stone-300 dark:active:bg-stone-600
                                     border border-stone-300 focus:outline-none dark:border-stone-600
                                     flex items-center rounded"
@@ -1360,7 +1358,7 @@
                             <button type="button" 
                                     class="
                                     py-2.5 px-4 
-                                    text-xs font-thin text-stone-700 dark:text-stone-300 dark:hover:text-white 
+                                    text-sm font-thin text-stone-700 dark:text-stone-300 dark:hover:text-white 
                                     hover:bg-stone-300 dark:hover:bg-stone-900 active:bg-stone-300 dark:active:bg-stone-600
                                     border border-stone-300 focus:outline-none dark:border-stone-600
                                     flex items-center rounded"
