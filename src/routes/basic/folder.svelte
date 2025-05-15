@@ -363,7 +363,7 @@
         if(contextItem.IsBasket)
         {
             return {
-                opver: 1,
+                opver: 2,
                 operations: [
                     {
                         caption: 'View',
@@ -376,10 +376,12 @@
                                 tbr: 'A'
                             },
                             {
+                                caption: 'Refresh',
                                 icon: FaSync,
                                 action: async (f) => await refreshView(),
                                 fab: 'S10',
-                                tbr: 'C'
+                                tbr: 'C',
+                                hideToolbarCaption: true
                             }
                         ]
                     }
@@ -392,6 +394,7 @@
             if(contextItem.IsPinned)
             {
                 pinOperation = {
+                    caption: 'Unpin folder',
                     icon: FaStar, //aRegShareSquare, // 
                     action: async (f) => { 
                         await toggleFolderPinned(contextItem); 
@@ -401,12 +404,14 @@
                             UI.navigator.refresh()
                       },
                     fab: 'S00',
-                    tbr: 'C'
+                    tbr: 'C',
+                    hideToolbarCaption: true
                 }
             }
             else
             {
                 pinOperation = {
+                    caption: 'Pin folder',
                     icon: FaRegStar, //aRegShareSquare, // 
                     action: async (f) => { 
                         await toggleFolderPinned(contextItem); 
@@ -416,38 +421,54 @@
                             UI.navigator.refresh()
                     },
                     fab: 'S00',
-                    tbr: 'C'
+                    tbr: 'C',
+                    hideToolbarCaption: true
                 }
             }
 
             
             return {
-                opver: 1,
+                opver: 2,
                 operations: [
                     {
                         caption: "View",
+                        tbr: 'B',
+                        operations: [
+                            pinOperation,
+                            {
+                                caption: 'Refresh',
+                                icon: FaSync,
+                                action: async (f) => await refreshView(),
+                                //fab: 'S10',
+                                //tbr: 'C',
+                                hideToolbarCaption: true
+                            }
+                        ]
+                    },
+                    {
+                        caption: "Add",
+                        tbr: 'B',
                         operations: [
                             {
-                                icon: FaPlus,
-                                menu: [
-                                    {
-                                        caption: 'New folder',
-                                        icon: FaRegFolder,
-                                        action: (f) => { subfoldersComponent.addRowAfter(null) }
-                                    },
-                                    {
-                                        caption: 'New note',
-                                        icon: FaRegFile,
-                                        action: (f) => { notesComponent.addRowAfter(null) }
-                                    },
-                                    {
-                                        caption: 'New task',
-                                        icon: FaRegCircle,
-                                        action: (f) => { tasksComponent.addRowAfter(null) }
-                                    }
-                                ],
-                                fab: 'M10',
+                                caption: 'New folder',
+                                icon: FaRegFolder,
+                                action: (f) => { subfoldersComponent.addRowAfter(null) },
                                 tbr: 'A'
+                            },
+                            {
+                                caption: 'New note',
+                                icon: FaRegFile,
+                                action: (f) => { notesComponent.addRowAfter(null) },
+                                tbr: 'A'
+                            },
+                            {
+                                caption: 'New task',
+                                icon: FaRegCircle,
+                                action: (f) => { tasksComponent.addRowAfter(null) },
+                                tbr: 'A'
+                            },
+                            {
+                                separator: true
                             },
                             {
                                 caption: 'Attach...',
@@ -457,17 +478,9 @@
                                     destinationContainer: contextItem.$ref,
                                     onRefreshView: refreshViewAfterAttachingFromBasket
                                 },
-                                fab: 'M01',
-                                tbr: 'A'
+                                //fab: 'M01',
+                                //tbr: 'A'
                             },
-                            pinOperation,
-                            {
-                                icon: FaSync,
-                                action: async (f) => await refreshView(),
-                                fab: 'S10',
-                                tbr: 'C'
-                            }
-                        
                         ]
                     }
                 ]
@@ -497,21 +510,7 @@
         }
     }
 
-    function getEditOperations(obj, kind)
-    {
-        return [
-            {
-                caption: 'Title',
-                action: (focused) =>  { listComponent(kind).edit(obj, 'Title') }
-            },
-            {
-                caption: 'Summary',
-                action: (focused) =>  { listComponent(kind).edit(obj, 'Summary') }
-            }
-        ];
-    }
-
-
+   
     async function dettachElement(element, kind)
     {
         switch(kind)
@@ -557,29 +556,33 @@
         if(contextItem.IsBasket)
         {
             return {
-                opver: 1,
+                opver: 2,
                 operations: [
                     {
                         caption: kind,
                         operations: [
                             {
+                                caption: 'Move down',
                                 icon: FaCaretDown,
                                 action: (f) => list.moveDown(element),
-                                fab:'M02',
-                                tbr:'A' 
+                            //    fab:'M02',
+                                tbr:'A',
+                                hideToolbarCaption: true
                             },
                             {
+                                caption: 'Move up',
                                 icon: FaCaretUp,
                                 action: (f) => list.moveUp(element),
-                                fab:'M03',
-                                tbr:'A' 
+                            //    fab:'M03',
+                                tbr:'A',
+                                hideToolbarCaption: true
                             },
                             {
                                 icon: FaTrash,
                                 caption: 'Remove from Basket',
                                 action: (f) => dettachElement(element, kind),
-                                fab:'M30',
-                                tbr:'B'
+                            //    fab:'M30',
+                                tbr:'A'
                             }
                         ]
                     }
@@ -588,69 +591,74 @@
         }
         else
         {
-            let editOperations = getEditOperations(element, kind)
-
             return {
-                opver: 1,
+                opver: 2,
                 operations: [
                     {
-                        caption: kind,
+                        caption: 'Element',
+                        tbr: 'B',
                         operations: [
                             {
+                                caption: `Add ${kind}`,
                                 icon: FaPlus,
                                 action: (f) => { list.addRowAfter(element) },
-                                fab:'M10',
-                                tbr:'A' 
+                            //    fab:'M10',
+                                tbr:'A',
                             },
                             {
+                                caption: 'Edit title',
                                 icon: FaPen,
-                                grid: editOperations,
-                                fab:'M20',
-                                tbr:'A' 
+                                action: (focused) =>  { listComponent(kind).edit(element, 'Title') },
+                                tbr:'A' ,
+                                hideToolbarCaption: true
                             },
                             {
+                                caption: 'Edit summary',
+                                action: (focused) =>  { listComponent(kind).edit(element, 'Summary') }
+                            },
+                            {
+                                caption: 'Move down',
                                 icon: FaCaretDown,
                                 action: (f) => list.moveDown(element),
-                                fab:'M02',
-                                tbr:'A' 
+                                //fab:'M02',
+                                tbr:'A' ,
+                                hideToolbarCaption: true
                             },
                             {
+                                caption: 'Move up',
                                 icon: FaCaretUp,
                                 action: (f) => list.moveUp(element),
-                                fab:'M03',
-                                tbr:'A' 
+                                //fab:'M03',
+                                tbr:'A',
+                                hideToolbarCaption: true
                             },
                             {
+                                caption: 'Add to Basket',
                                 icon: FaBasketPlus, //FaCopy,   // MdLibraryAdd
-                               // caption: 'Copy to basket',
                                 action: (f) => copyElementToBasket(element, kind),
-                                fab: 'M04',
-                                tbr: 'A'
+                                //fab: 'M04',
+                            //    tbr: 'A'
 
                             },
                             {
+                                caption: 'Move to Basket',
                                 icon: FaBasketCut, //FaCut,
-                               // caption: 'Move to basket',
                                 action: (f) => cutElementToBasket(element, kind),
-                                fab: 'M05',
-                                tbr: 'A'
+                            //    fab: 'M05',
+                            //    tbr: 'A'
                             },
                             {
+                                separator: true
+                            },
+                            {
+                                caption: 'Dettach',
+                          //      icon: FaUnlink,
+                                action: (f) => dettachElement(element, kind)
+                            },
+                            {
+                                caption: 'Delete permanently',
                                 icon: FaTrash,
-                                menu: [
-                                    {
-                                        caption: 'Dettach',
-                                        icon: FaUnlink,
-                                        action: (f) => dettachElement(element, kind)
-                                    },
-                                    {
-                                        caption: 'Delete permanently',
-                                        icon: FaTrash,
-                                        action: (f) => askToDelete(element, kind)
-                                    }
-                                ],
-                                fab:'M30',
-                                tbr:'B'
+                                action: (f) => askToDelete(element, kind)
                             }
                         ]
                     }

@@ -14,7 +14,7 @@
     import TilosIcon from './icons/tilos.icon.svelte'
 
     import FaFolder from 'svelte-icons/fa/FaFolder.svelte'
-    import {FaUsersCog, FaSignOutAlt, FaList, FaComments, FaUser} from 'svelte-icons/fa/'
+    import {FaUsersCog, FaSignOutAlt, FaList, FaComments, FaUser, FaShoppingBasket} from 'svelte-icons/fa/'
 
     import Tasklist from './tasklist.svelte';
     import Folder from './folder.svelte';
@@ -139,12 +139,20 @@
                         {
                             caption: 'Profile',
                             icon: FaUser,
-                            action: (f) => { push('/profile')}
+                            action: (f) => { push('/profile')},
+                            condition: () => $session.isActive
                         },
                         {
                             caption: 'Members',
                             icon: FaUsersCog,
-                            action: (f) => { push(`/members`) }
+                            action: (f) => { push(`/members`) },
+                            condition: () => $session.authAccessGroup() != 0
+                        },
+                        {
+                            caption: 'Basket',
+                            icon: FaShoppingBasket,
+                            action: (f) => showBasket(),
+                            condition: () => $session.isActive
                         }
                     ]
                 },
@@ -299,6 +307,15 @@
         }
         else
             return false;
+    }
+
+    async function showBasket()
+    {
+        const href = await reef.post('user/BasketFolder/href', {}, onErrorShowAlert)
+        if(!href)
+            return;
+
+        push(href)
     }
 
 </script>

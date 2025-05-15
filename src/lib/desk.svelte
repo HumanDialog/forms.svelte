@@ -17,7 +17,7 @@
             set_dark_mode_default,
             sidebar_left_pos,
             wholeAppReloader,
-            alerts } from './stores.js'
+            alerts, removeAlert } from './stores.js'
     
     //import { AuthorizedView} from '@humandialog/auth.svelte'
     import { handleSelect, isDeviceSmallerThan, isOnNavigationPage, isOnScreenKeyboardVisible, removeAt, UI } from './utils'

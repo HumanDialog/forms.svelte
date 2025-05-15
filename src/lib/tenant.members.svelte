@@ -4,7 +4,8 @@
                 FaPen,
                 FaInfoCircle,
                 FaUserSlash,
-                FaChevronDown} from 'svelte-icons/fa'
+                FaChevronDown,
+                FaInfo} from 'svelte-icons/fa'
     
     import Page from './page.svelte'
     import List from './components/list/list.svelte'
@@ -114,7 +115,7 @@
         //fake_users = [];
         //add_fake_users(fake_users);
 
-        await fetch_details();
+      //  await fetch_details();
  
     }
 
@@ -138,6 +139,13 @@
             }
         } )
 
+    }
+
+    async function fetch_user_details(reef_user)
+    {
+        let details = await reef.get(`/sys/user_details?email=${reef_user[emailAttrib]}`)
+        set_user_info(reef_user, details);
+        list?.reload(reef_users);
     }
 
     function set_user_info(user, info)
@@ -289,25 +297,26 @@
     }
 
     let page_operations={
-        opver: 1,
+        opver: 2,
         operations: [
             {
                 caption: 'View',
                 operations: [
                     {
                         icon: FaUserPlus,
-                        caption: '',
+                        caption: 'Add user',
                         action: (focused) => { create_new_user(); },
-                        fab: 'M10',
+                    //    fab: 'M10',
                         tbr: 'A'
                     },
-                    {
+                    // przenieść na stronie /profile
+                  /*  {
                         icon: FaUserSlash,
-                        caption: '',
+                        caption: 'Delete application account',
                         action: (f) => {askToDeleteApplicationAccount();},
-                        fab: 'S00',
+                        //fab: 'S00',
                         tbr: 'C'
-                    }
+                    }*/
                 ]
             }
         ]
@@ -321,18 +330,14 @@
                 action: (focused) =>  { list.edit(user, nameAttrib) }
             },
             {
-                caption: 'Users management',
+                caption: 'Users management (auth role)',
                 action: (focused) => { list.edit(user, 'Privileges') }
             }];
 
         if(showAccessRoles)
         {
             operations.push({
-                separator: true
-            });
-
-            operations.push({
-                caption: 'Access role',
+                caption: 'Access role (app role)',
                 action: (focused) => { list.edit(user, 'Access') }
             });
         }
@@ -340,7 +345,7 @@
         if(showFiles)
         {
             operations.push({
-                caption: 'External files',
+                caption: 'External files (files role)',
                 action: (focused) => { list.edit(user, 'Files') }
             });
         }
@@ -350,74 +355,62 @@
 
     let user_operations = (user) => { 
         
-        let operations = [];
+        let operations = [
+            {
+                caption: 'Fetch info',
+                icon: FaInfo,
+                action: (f) => fetch_user_details(user),
+                tbr: 'A'
+            }
+        ];
 
         if(user.removed)
         {
-            operations = [
+            operations = [ ...operations,
                 {
                     icon: FaUserPlus,
-                    caption: '',
+                    caption: 'Revert removing',
                     action: (f) => askToAddAgain(user),
-                    fab: 'M10',
-                    tbr: 'B'
+//                    fab: 'M10',
+                    tbr: 'A'
                 }
             ];
         }
         else
         {
             let edit_operations = get_edit_operations(user)
-            if(edit_operations.length == 1)
-            {
-                operations.push({
-                                    icon: FaPen,
-                                    caption: '',
-                                    action: edit_operations[0].action,
-                                    fab: 'M20',
-                                    tbr: 'B'
-                                });
-            }
-            else
-            {
-                operations.push({
-                                    icon: FaPen,
-                                    caption: '',
-                                    grid: edit_operations,
-                                    fab: 'M20',
-                                    tbr: 'B'
-                                });
-            }
-
+            
             operations.push({
-                                caption: '',
+                                icon: FaPen,
+                                caption: 'Change',
+                                menu: edit_operations,
+                                //fab: 'M20',
+                                tbr: 'A'
+                            });
+            
+            operations.push({
+                                caption: 'Remove user',
                                 icon: FaUserMinus,
                                 action: (focused) => askToRemove(user),
-                                fab: 'M30',
-                                tbr: 'B'
+                             //   fab: 'M30',
+                                tbr: 'A'
                             });
         }
 
         
         return {
-            opver: 1,
+            opver: 2,
             operations: [
                 {
                     caption: 'User',
+                 //   tbr: 'B',
                     operations: operations
                 }
             ]
         }
     }
 
-    let user_context_menu = (user) => {
-        if(user.removed)
-            return [];
-
-        let edit_operations = get_edit_operations(user);
-        return {
-            grid: edit_operations
-        }
-    }
+    
 
     let data_item = 
     { 
@@ -723,7 +716,6 @@
     <List       objects={reef_users} 
                 title='Members' 
                 toolbarOperations={user_operations} 
-                contextMenu={user_context_menu}
                 bind:this={list}>
             <ListTitle a={nameAttrib} onChange={on_name_changed} hrefFunc={getHRefFunc()}/>
             <ListSummary a={emailAttrib} readonly/>

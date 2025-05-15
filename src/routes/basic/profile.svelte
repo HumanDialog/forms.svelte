@@ -1,14 +1,16 @@
 <script>   
 	import { reef, session, signInHRef } from '@humandialog/auth.svelte';
     import { onErrorShowAlert, mainContentPageReloader, Spinner, Page, editable, getNiceStringDateTime, startEditing} from '$lib';
-	import { location, querystring, link } from 'svelte-spa-router';
+	import { location, querystring, link, push } from 'svelte-spa-router';
     import {tick} from 'svelte'
+    import {FaComments} from 'svelte-icons/fa'
 	
     $: onParamsChanged($location, $querystring, $mainContentPageReloader);
     
     let userRef = 'user'
     let user = null
     let isReadOnly = true
+    let isSelfProfile = false
 
     async function onParamsChanged(...args)
     {
@@ -25,9 +27,15 @@
         {
             const userId = parseInt(segments[segments.length-1])
             if(!userId)
+            {
                 userRef = 'user'
+                isSelfProfile = true
+            }
             else
+            {
                 userRef = `./User/${userId}`
+                isSelfProfile = false
+            }
         }
 
         const res = await reef.post(`${userRef}/query`, {
@@ -92,6 +100,21 @@
         }
     }
 
+    async function openChat()
+    {
+        const res = await reef.post(`user/AddDirectMesssageChannel`, {
+            toWhom: user.$ref
+        }, onErrorShowAlert)
+
+        if(!res)
+            return;
+
+        let channel = res.MessageChannel
+        const href = await reef.get(`${channel.$ref}/href`, onErrorShowAlert)
+        if(href)
+            push(href)
+    }
+
 </script>
 
 <svelte:head>
@@ -132,7 +155,7 @@
                                 {/if}
                             </span>
                         {:else}
-                            Enter your bio here
+                            Enter bio here
                         {/if}
                     </p>
                 {:else}
@@ -143,6 +166,21 @@
 
                 <h2>Contact information</h2>
                 <a href="mailto:{user.Email}">{user.Email}</a>
+
+                {#if !isSelfProfile}
+                    <button type="button" 
+                            class=" 
+                            py-2.5 px-4 
+                            text-sm  
+                            hover:bg-stone-200 dark:hover:bg-stone-800 
+                            border border-stone-300 focus:outline-none dark:border-stone-600
+                            flex items-center rounded"
+                            on:click={(e) => {openChat()}}>
+                        <div class="w-5 h-5 mr-1"><FaComments/></div>
+                        <span class="ml-1">Chat with {user.Name}</span>
+                        
+                    </button>
+                {/if}
 
                 <h2>Activity</h2>
                 {#if user.CreatedNotes && user.CreatedNotes.length > 0}

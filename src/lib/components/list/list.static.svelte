@@ -6,6 +6,7 @@
     export let a        :string = '';
     export let prefix   :string = ''
     export let postfix  :string = ''
+    export let getter   :Function|undefined = undefined
     
     let definition :rList_definition = getContext("rList-definition");
     
@@ -18,6 +19,7 @@
 
     date_property.prefix = prefix;
     date_property.postfix = postfix;
+    date_property.getter = getter
     
 
     definition.properties.push(date_property)

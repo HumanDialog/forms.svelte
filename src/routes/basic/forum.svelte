@@ -16,8 +16,9 @@
 				activateItem, UI,
 				showFloatingToolbar,
                 reloadVisibleTags,
-				ListStaticProperty
-
+				ListStaticProperty,
+                getNiceStringDateTime,
+                getNiceStringDate
             } from '$lib'
     import {FaSync, FaComments, FaComment} from 'svelte-icons/fa'
     import {location, pop, push, querystring} from 'svelte-spa-router'
@@ -112,7 +113,7 @@
                                                 Id: 2,
                                                 Association: 'Folders',
                                                 Sort: 'Order',
-                                                Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'icon', 'IsPinned']
+                                                Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'icon', 'IsPinned', 'GetLastForumActivity']
                                                 
                                             },
                                             {
@@ -191,6 +192,36 @@
         }
     }
 
+    function getActivityDate(item)
+    {
+        if(item && item.GetLastForumActivity && item.GetLastForumActivity.lastActivity)
+        {
+            let dt = new Date(item.GetLastForumActivity.lastActivity)
+            return getNiceStringDateTime(dt)
+        }
+        else
+            return ''
+    }
+
+    function getActivityUser(item)
+    {
+        if(item && item.GetLastForumActivity && item.GetLastForumActivity.lastUser)
+        {
+            return item.GetLastForumActivity.lastUser
+        }
+        else
+            return ''
+    }
+
+    function getActivityTitle(item)
+    {
+        if(item && item.GetLastForumActivity && item.GetLastForumActivity.title)
+        {
+            return item.GetLastForumActivity.title
+        }
+        else
+            return ''
+    }
 
 </script>
 
@@ -223,7 +254,11 @@
                     
                     <ListSummary    a='Summary'
                                     />
-                    
+
+                    <ListStaticProperty name="Author" getter={ (item) => getActivityTitle(item)}/>
+                    <ListStaticProperty name="Date" getter={ (item) => getActivityDate(item)}/>
+                    <!--ListStaticProperty name="Author" getter={ (item) => getActivityUser(item)}/-->
+
                     <span slot="left" let:element>
                         <Icon component={FaComments} 
                             class="h-5 w-5 text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>

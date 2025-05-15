@@ -27,6 +27,7 @@ export class rList_property
     public detailed     :boolean = false
     public prefix       :string = ''
     public postfix      :string = ''
+    public getter       :Function | undefined = undefined
 }
 
 export class rList_property_combo extends rList_property

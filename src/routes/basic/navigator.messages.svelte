@@ -84,7 +84,7 @@
 
     function fetchGeneralChannels()
     {
-        return reef.get("/group/MessageChannels?sort=Order&fields=$ref,Id,Title,Order,href,$type", onErrorShowAlert).then((res) =>
+        return reef.get("/group/MessageChannels?sort=Order&fields=$ref,Id,Title,Order,href,$type,GetUnreadMessagesNo", onErrorShowAlert).then((res) =>
         {
             if(res != null)
                 generalChannels = res.MessageChannel;
@@ -95,7 +95,7 @@
 
     function fetchDirectChannels()
     {
-        return reef.get("/user/MessageChannels?sort=Order&fields=$ref,Id,Title,Order,href,$type", onErrorShowAlert).then((res) =>
+        return reef.get("/user/MessageChannels?sort=Order&fields=$ref,Id,Title,Order,href,$type,UnreadMessagesNo", onErrorShowAlert).then((res) =>
         {
             if(res != null)
                 directChannels = res.MessageChannelUser;
@@ -360,7 +360,17 @@
                                             editable: (text) => {changeSummary(item, text)},
                                             content: item.Summary}}
                                         editable={(text) => {changeName(item, text)}}>
-                            {item.Title}
+                            <span class="relative">
+                                 {#if item.GetUnreadMessagesNo}
+                                    <div class="absolute 
+                                            inline-flex items-center justify-center 
+                                            w-5 h-5 
+                                            text-xs font-bold text-white bg-red-500 border-2 border-white rounded-full -top-1 -end-5 dark:border-gray-900">
+                                        {item.GetUnreadMessagesNo}
+                                    </div>
+                                {/if}
+                                {item.Title}
+                            </span>
                         </SidebarItem>
                     </svelte:fragment>
                 </SidebarList> 
@@ -384,8 +394,19 @@
                                         summary={{
                                             editable: (text) => {changeSummary(item, text)},
                                             content: item.Summary}}
-                                        editable={(text) => {changeName(item, text)}}>
-                            {item.Title}
+                                        editable={(text) => {changeName(item, text)}}
+                                        >
+                            <span class="relative">
+                                {item.Title}
+                                {#if item.UnreadMessagesNo}
+                                    <div class="absolute 
+                                            inline-flex items-center justify-center 
+                                            w-5 h-5 
+                                            text-xs font-bold text-white bg-red-500 border-2 border-white rounded-full -top-1 -end-5 dark:border-gray-900">
+                                        {item.UnreadMessagesNo}
+                                    </div>
+                                {/if}
+                            </span>
                         </SidebarItem>
                     </svelte:fragment>
                 </SidebarList> 

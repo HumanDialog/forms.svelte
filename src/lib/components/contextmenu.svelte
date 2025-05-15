@@ -483,6 +483,10 @@
                         {@const cc = mobile ? 7 : 6}
                         {@const icon_size = icon_placeholder_size - cc}
                         <Icon size={icon_size} component={operation.icon}/>
+                    {:else}
+                        {@const cc = mobile ? 7 : 6}
+                        {@const icon_size = icon_placeholder_size - cc}
+                        <div style="width: {icon_size*0.25}rem; height: {icon_size*0.25}rem;"></div>
                     {/if}
                 </div>
                 <div class="">

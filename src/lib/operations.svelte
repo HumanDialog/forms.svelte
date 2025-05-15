@@ -58,6 +58,7 @@
         }
         else if(opVer == 2)
         {
+           
             operations.forEach(group => {
 
                 if(group.tbr)
