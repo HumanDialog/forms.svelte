@@ -3,7 +3,7 @@ import { sveltekit } from '@sveltejs/kit/vite';
 
 export default defineConfig( ({command, mode}) => {
 
-	let finalApp = "tilos"	// "octopus" //
+	let finalApp = "octopus" // "tilos"	// 
 	let buildConfig = {}
 
 	let prod = false // true //  
