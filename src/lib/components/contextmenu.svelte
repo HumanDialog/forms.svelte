@@ -3,7 +3,7 @@
     import Icon from './icon.svelte'
     import {contextItemsStore, pushToolsActionsOperations, popToolsActionsOperations} from '../stores'
     import {isDeviceSmallerThan, isOnScreenKeyboardVisible} from '../utils'
-    import {hideWholeContextMenu} from './menu'
+    import {hideWholeContextMenu, showMenu, showFloatingToolbar, showGridMenu} from './menu'
     import {FaTimes} from 'svelte-icons/fa'
 
     export let widthPx     :number = 400;
@@ -283,7 +283,7 @@
             break;
 
         case 'Enter':
-            execute_action(operation, index);
+            execute_action(undefined, operation, index);
             e.preventDefault();
             e.stopPropagation();
             break;
@@ -336,7 +336,7 @@
             focus_menu_item(index);
     }
 
-    function execute_action(operation, index)
+    function execute_action(e, operation, index)
     {
         if(operation.menu)
         {
@@ -349,6 +349,9 @@
         if(!operation)
             return;
 
+        ////
+        
+        /*
         if(!operation.action)
             return;
 
@@ -358,6 +361,39 @@
         
         
         operation.action(context_item);
+        */
+        ////
+
+        let owner = e.target;
+        while(owner && owner.tagName != 'BUTTON')
+            owner = owner.parentElement
+
+        if(operation.preAction)
+            operation.preAction(owner)
+
+        if(operation.action)
+        {
+            //let focused_item = null
+            //if($contextItemsStore.focused)
+            //    focused_item = $contextItemsStore[$contextItemsStore.focused]
+            
+            operation.action(owner)
+        }
+        else
+        {
+            let rect;
+            if(around_rect)
+                rect = around_rect
+            else
+                rect = owner.getBoundingClientRect()
+
+            if(operation.toolbar)
+                showFloatingToolbar(rect, operation.toolbar, operation.props ?? {} )
+            else if(operation.grid)
+                showGridMenu(rect, operation.grid)
+        }
+
+
     }
 
     function focus_menu_item(index :number)
@@ -473,7 +509,7 @@
             <button class="block  w-full pr-4 text-left flex flex-row cursor-context-menu {active} focus:outline-none"
                     id={menu_item_id}
                     bind:this={menu_items[index]}
-                    on:click|stopPropagation={(e) => { execute_action(operation, index) } } 
+                    on:click|stopPropagation={(e) => { execute_action(e, operation, index) } } 
                     on:mouseenter = {(e) => {on_mouse_move(index)}}
                     on:keydown|stopPropagation={(e) => on_keydown(e, operation, index)}
                     on:mousedown={mousedown}
