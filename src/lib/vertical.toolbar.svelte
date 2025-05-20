@@ -28,10 +28,12 @@
 	import { popNavigationPage } from './utils';
     
 
-    export let appConfig;
+    export let appConfig = undefined;
     export let mobile=false;
     export let clearsContext = 'sel props'
     
+    export let definedTabs = undefined
+    export let mainToolbarConfig = undefined
     
     let tabs = new Array();
     let config = null;
@@ -46,10 +48,19 @@
     let can_add_new_group = false;
 
     $:  {
-        config = appConfig.mainToolbar;
-        has_selection_details = appConfig.selectionDetails;
-        if(has_selection_details)
-            selection_detils_caption = appConfig.selectionDetails.caption ?? 'Properties'
+        if(appConfig)
+        {
+            config = appConfig.mainToolbar;
+            has_selection_details = appConfig.selectionDetails;
+            if(has_selection_details)
+                selection_detils_caption = appConfig.selectionDetails.caption ?? 'Properties'
+        }
+        else
+        {
+            has_selection_details = false;
+            config = mainToolbarConfig;
+        }
+
         is_logged_in = $session.isActive;
         show_sign_in_out_icons = config.signin ? true : false;
         sign_in_href = $signInHRef;
@@ -57,23 +68,38 @@
 
         tabs = new Array();
 
-        Object.keys(appConfig.sidebar).forEach( (key) =>    
-            { 
-                const ctab = appConfig.sidebar[key];
-                const can_show = (ctab.authorized && is_logged_in) || (!ctab.authorized)
-                if(can_show)
-                    tabs.push({key: key, icon: ctab.icon}); 
-            });
-
-        // there is no current visible sidebar
-        if($main_sidebar_visible_store != '*')
+        if(definedTabs && Array.isArray(definedTabs) && definedTabs.length > 0)
         {
-            if(tabs.every( (e) => e.key != $main_sidebar_visible_store))
+            tabs = [...definedTabs]
+        }
+        else
+        {
+            Object.keys(appConfig.sidebar).forEach( (key) =>    
+                { 
+                    const ctab = appConfig.sidebar[key];
+                    const can_show = (ctab.authorized && is_logged_in) || (!ctab.authorized)
+                    if(can_show)
+                    {
+                        const tab = {
+                            key: key,
+                            icon: ctab.icon,
+                            onclick: (e) => on_navigator_tab_clicked(e, key)
+                        }
+
+                        tabs.push(tab); 
+                    }
+                });
+
+            // there is no current visible sidebar
+            if($main_sidebar_visible_store != '*')
             {
-                if(tabs.length)
-                    show_sidebar(tabs[0].key);
-                else
-                    hide_sidebar();
+                if(tabs.every( (e) => e.key != $main_sidebar_visible_store))
+                {
+                    if(tabs.length)
+                        show_sidebar(tabs[0].key);
+                    else
+                        hide_sidebar();
+                }
             }
         }
        
@@ -94,9 +120,11 @@
         
     }
 
-    function on_tab_clicked(key)
+    function on_navigator_tab_clicked(e, key)
     {
-        if(!mobile)
+        e.stopPropagation();
+       
+         if(!mobile)
             toggle_sidebar(key);
         else
         {
@@ -331,7 +359,7 @@
             <button
                 class="h-16 px-0 flex justify-center items-center w-full text-stone-300 hover:text-stone-100"
                 class:bg-orange-500={isSelected}
-                on:click|stopPropagation={()=> (on_tab_clicked(tab.key))}>
+                on:click={tab.onclick}>
                 
                 <Icon class="w-5 h-5" component={tab.icon}/>
             </button>

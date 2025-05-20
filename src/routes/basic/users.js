@@ -28,16 +28,16 @@ const hdTestUsers = [
 const tilosTestUsers = [
     //{ username: "alice@example.com",      role: "supervisor", groupId: 11   },
     //{ username: "bob@example.com",        role: "supervisor", groupId: 11   },
-    { username: "emma@example.com",       role: "supervisor", groupId: 14   },
-    { username: "jack@example.com",       role: "supervisor", groupId: 14   },
-    { username: "olivia@example.com",     role: "supervisor", groupId: 14   },
-    { username: "liam@example.com",       role: "supervisor", groupId: 14   },
-    { username: "ava@example.com",        role: "supervisor", groupId: 14   },
-    { username: "noah@example.com",       role: "supervisor", groupId: 14   },
-    { username: "mia@example.com",        role: "supervisor", groupId: 14   },
-    { username: "ethan@example.com",      role: "supervisor", groupId: 14   },
-    { username: "lily@example.com",       role: "supervisor", groupId: 14   },
-    { username: "mason@example.com",      role: "supervisor", groupId: 14   }
+    { username: "emma@example.com",       role: "supervisor", groupId: 13   },
+    { username: "jack@example.com",       role: "supervisor", groupId: 13   },
+    { username: "olivia@example.com",     role: "supervisor", groupId: 13   },
+    { username: "liam@example.com",       role: "supervisor", groupId: 13   },
+    { username: "ava@example.com",        role: "supervisor", groupId: 13   },
+    { username: "noah@example.com",       role: "supervisor", groupId: 13   },
+    { username: "mia@example.com",        role: "supervisor", groupId: 13   },
+    { username: "ethan@example.com",      role: "supervisor", groupId: 13   },
+    { username: "lily@example.com",       role: "supervisor", groupId: 13   },
+    { username: "mason@example.com",      role: "supervisor", groupId: 13   }
 ]
 
 function getAppUsers(setName)

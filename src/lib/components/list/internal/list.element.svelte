@@ -378,7 +378,7 @@
 {#if item}
 {@const element_title = item[title]}
 
-<section    class="my-1 flex flex-row w-full  text-stone-700 dark:text-stone-300 cursor-default rounded-md border border-transparent {selected_class} {focused_class} scroll-mt-[50px] sm:scroll-mt-[40px]"
+<section    class="my-1 flex flex-row w-full  text-stone-900 dark:text-stone-300 cursor-default rounded-md border border-transparent {selected_class} {focused_class} scroll-mt-[50px] sm:scroll-mt-[40px]"
             role="menu"
             tabindex="-1"
             bind:this={rootElement}> <!--  on:contextmenu={on_contextmenu} -->
@@ -458,7 +458,7 @@
                 {#if is_row_active}
                     <p  id={element_id} 
                         class=" text-sm                              
-                                text-stone-400"
+                                text-stone-600 dark:text-stone-400"
                             use:editable={{
                                 action: (text) => {change_summary(text)},
                                 readonly: definition.summary_readonly,
@@ -470,7 +470,7 @@
                 {:else}
                     <p  id={element_id} 
                         class=" text-sm 
-                                    text-stone-400"
+                                    text-stone-600 dark:text-stone-400"
                         on:click={(e) => on_active_row_clicked(e, 'bottom')}>
                         {item[summary]}
                     </p>

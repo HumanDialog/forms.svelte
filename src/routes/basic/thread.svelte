@@ -1294,7 +1294,7 @@
 
             {#if isAnswerEditorLaunched}
                 <hr/>
-                <div class="relative left-[-0.5rem] sm:left-[-1rem] pb-1 rounded-lg  bg-stone-100 dark:bg-stone-800">
+                <div class="relative left-[-0.5rem] sm:left-[-1rem] pb-1 rounded-lg  bg-stone-50 dark:bg-stone-800">
                     <div class="ml-2 sm:ml-5">
                         <section class="w-full flex flex-row justify-between">
                             <div class="grow-0">
@@ -1348,7 +1348,7 @@
                                     class="
                                     py-2.5 px-4 
                                     text-sm font-thin text-stone-700 dark:text-stone-300 dark:hover:text-white 
-                                    hover:bg-stone-300 dark:hover:bg-stone-900 active:bg-stone-300 dark:active:bg-stone-600
+                                    hover:bg-stone-200 dark:hover:bg-stone-900 active:bg-stone-200 dark:active:bg-stone-600
                                     border border-stone-300 focus:outline-none dark:border-stone-600
                                     flex items-center rounded"
                                     on:click={(e) => {askLeaveAnswer()}}>
@@ -1359,7 +1359,7 @@
                                     class="
                                     py-2.5 px-4 
                                     text-sm font-thin text-stone-700 dark:text-stone-300 dark:hover:text-white 
-                                    hover:bg-stone-300 dark:hover:bg-stone-900 active:bg-stone-300 dark:active:bg-stone-600
+                                    hover:bg-stone-200 dark:hover:bg-stone-900 active:bg-stone-200 dark:active:bg-stone-600
                                     border border-stone-300 focus:outline-none dark:border-stone-600
                                     flex items-center rounded"
                                     on:click={(e) => {postAnswer()}}>

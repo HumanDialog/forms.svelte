@@ -1,0 +1,272 @@
+{
+		"Book": {
+			"Title": "Tilos Release Notes",
+			"FirstPage": "tilos-11-1-mr4-new-improved-",
+			"ChaptersNo": "2",
+			"PagesNo": "5",
+			"Id" : "",
+			"Tags": { "MTR":"28 min" },
+			"TOC" : [
+            {
+                "Chapter": "Tilos 11.1 MR4",
+				"Id": "tilos-11-1-mr4-new-improved-",
+                "Pages": [
+	                    {
+                        "Page": "New & Improved ",
+                        "Id": "tilos-11-1-mr4-new-improved-",
+                        "Subjects": [
+							{
+								"Subject":"Licensing",
+								"Id":"licensing"
+							},
+							{
+								"Subject":"Calendars",
+								"Id":"calendars"
+							},
+							{
+								"Subject":"Activities and Links",
+								"Id":"activities-and-links"
+							},
+							{
+								"Subject":"Scheduling, Calculations, and Progress",
+								"Id":"scheduling-calculations-and-progress"
+							},
+							{
+								"Subject":"Gantt Charts",
+								"Id":"gantt-charts"
+							},
+							{
+								"Subject":"Views and Graphics",
+								"Id":"views-and-graphics"
+							},
+							{
+								"Subject":"Histograms",
+								"Id":"histograms"
+							},
+							{
+								"Subject":"Printing and Presentation",
+								"Id":"printing-and-presentation"
+							},
+							{
+								"Subject":"General",
+								"Id":"general"
+							}
+						]
+					},
+
+	                    {
+                        "Page": "Fixed",
+                        "Id": "tilos-11-1-mr4-fixed",
+                        "Subjects": [
+							{
+								"Subject":"Licensing",
+								"Id":"licensing"
+							},
+							{
+								"Subject":"Import/Export/Data Exchange",
+								"Id":"import-export-data-exchange"
+							},
+							{
+								"Subject":"Activities and Links",
+								"Id":"activities-and-links"
+							},
+							{
+								"Subject":"Scheduling, Calculations, and Progress",
+								"Id":"scheduling-calculations-and-progress"
+							},
+							{
+								"Subject":"Gantt Charts",
+								"Id":"gantt-charts"
+							},
+							{
+								"Subject":"Views and Graphics",
+								"Id":"views-and-graphics"
+							},
+							{
+								"Subject":"Histograms",
+								"Id":"histograms"
+							},
+							{
+								"Subject":"Mass Haul",
+								"Id":"mass-haul"
+							},
+							{
+								"Subject":"Printing and Presentation",
+								"Id":"printing-and-presentation"
+							},
+							{
+								"Subject":"General",
+								"Id":"general"
+							}
+						]
+					}
+                ]
+            },
+
+            {
+                "Chapter": "Tilos 11.1 MR2",
+				"Id": "tilos-11-1-mr2-new-improved",
+                "Pages": [
+	                    {
+                        "Page": "New & Improved",
+                        "Id": "tilos-11-1-mr2-new-improved",
+                        "Subjects": [
+							{
+								"Subject":"Printing and Presentation",
+								"Id":"printing-and-presentation"
+							},
+							{
+								"Subject":"Project Files",
+								"Id":"project-files"
+							},
+							{
+								"Subject":"Licensing",
+								"Id":"licensing"
+							}
+						]
+					},
+
+	                    {
+                        "Page": "Fixed",
+                        "Id": "tilos-11-1-mr2-fixed",
+                        "Subjects": [
+							{
+								"Subject":"Printing and Presentation",
+								"Id":"printing-and-presentation"
+							},
+							{
+								"Subject":"Graphics/Views",
+								"Id":"graphics-views"
+							},
+							{
+								"Subject":"Mass Haulage/Histograms",
+								"Id":"mass-haulage-histograms"
+							},
+							{
+								"Subject":"Activities, Scheduling, Calculations",
+								"Id":"activities-scheduling-calculations"
+							},
+							{
+								"Subject":"Annotations",
+								"Id":"annotations"
+							},
+							{
+								"Subject":"Gantt Charts",
+								"Id":"gantt-charts"
+							},
+							{
+								"Subject":"Data Exchange",
+								"Id":"data-exchange"
+							},
+							{
+								"Subject":"Activity Templates",
+								"Id":"activity-templates"
+							},
+							{
+								"Subject":"Histograms",
+								"Id":"histograms"
+							},
+							{
+								"Subject":"Resources",
+								"Id":"resources"
+							},
+							{
+								"Subject":"BIM Integrations",
+								"Id":"bim-integrations"
+							}
+						]
+					},
+
+	                    {
+                        "Page": "Other",
+                        "Id": "tilos-11-1-mr2-other",
+                        "Subjects": [
+							{
+								"Subject":"Known issues",
+								"Id":"known-issues"
+							}
+						]
+					}
+                ]
+            }
+        ],
+
+		"Content":{
+	            "tilos-11-1-mr4-new-improved-": {
+					"ChapterNo": 0,
+					"PageNo": 0,
+					"SubjectsNo": "9",
+					"PrevPage": "",
+					"PrevPageId": "",
+					"NextPage": "Fixed",
+					"NextPageId": "tilos-11-1-mr4-fixed",
+			"Page": [
+						{
+							"Kind": "HTML",
+							"HTML": "<h1 hidden>Tilos 11.1 MR4</h1><h2 id=\"tilos-11-1-mr4-new-improved-\">New & Improved </h2><p>This Tilos release includes these new features and enhancements. You can now:</p><h3 id=\"licensing\">Licensing</h3><p>Manage licenses more effectively - The license management workflow has been redesigned to be easier, more intuitive, and less trouble-prone. [TIL-1688]</p><p>The License Manager is now a standalone executable. Changing the License Mode must be done before starting the main application.</p><p>The main application will read the configuration and respond to the license mode accordingly when launched.</p><p>The Help &gt License Manager menu item has been replaced with Account Info.</p><p>Licensing scenarios</p><p><b>Clean installation licensing</b></p><p>After you install Tilos, the License Manager opens automatically.</p><p>Select the license mode you want and close the dialog.</p><p>Start Tilos and click Sign in (if using Named User licensing).</p><p>Sign in with your Trimble Identity (TID) credentials and close the browser tab.</p><p>Return to Tilos. You are now licensed for use.</p><p><b>Re-</b><b>installation</b><b> </b><b>licensing</b></p><p>After you install Tilos, do not open the program/close it if it opens automatically.</p><p>In the Windows Start box, type License Manager and click Start License Manager.</p><p>Select the license mode you want and close the dialog.</p><p>Start Tilos and click Sign in (if using Named User licensing).</p><p>Sign in with your Trimble Identity credentials and close the browser tab.</p><p>Return to Tilos. You are now licensed for use.</p><p><b>Upgrade from Classic license to Named user license</b></p><p>Use the same steps as re-installation above.</p><h3 id=\"calendars\">Calendars</h3><p>Have MS Project use a Project Calendar parallel to the Standard Calendar - In MS Project via Project Information, when you select a calendar other than the default standard calendar, this will become the calendar for each activity without calendar assignment. In the past Tilos did assign the Tilos default calendar to such imported activities. Tilos will now import this MS project calendar and set this as the activity calendar instead of the Tilos default standard calendar. [TIL-1591]</p><h3 id=\"activities-and-links\">Activities and Links</h3><p>Add a Noise level to resources, activities, and histograms to include noise predictions, especially for railways - Use the new Noise level (dB) field for permanent resources and the Calculated noise level field for activities. This field is calculated as the maximum of all assigned permanent resources noise level values.\u00a0This also enables you to report noise level in histograms (activity data fields in the list of report data fields). [TIL-1551, TIL-1637]</p><p>Use enhanced link options - These have been added to enhance and ease working with links:</p><p>Button to exchange predecessor and successor activity (in case you created the link in the wrong direction).</p><p>Buttons for predecessor and successor activities to jump to the task. [TIL-1225]</p><p>Keep activity direction when updating activity via imported sectors - When updating activities linked to an imported sector profile, the updated activities keep the direction you set prior to import, which helps avoid having to repeatedly set the desired activity direction after each update/import for sector-linked activities. TIL-1606]</p><h3 id=\"scheduling-calculations-and-progress\">Scheduling, Calculations, and Progress</h3><p>Get a warning in reschedule results - Warning message in reschedule results, when a used calendar has overlapping/wrong exceptions: \u201cThe calendars &ltlist&gt has incorrect exception settings. This can lead to wrong calculation results and other severe issues. Please correct the calendars\u201d. [TIL-1337]</p><h3 id=\"gantt-charts\">Gantt Charts</h3><p>Create links between multiple activities in a Gantt chart time view - If you have many activities in a Gantt chart time view, one after the other, you can now select all of the tasks, right-click and choose Link unlinked activities predecessor and successor by the order of the click. [TIL-958, TIL-960]</p><h3 id=\"views-and-graphics\">Views and Graphics</h3><p>You can now see and use new image details and options in the properties tab of a selected image:</p><p>Resolution - shows the height and width in pixels</p><p>Picture type - shows the image format (e.g., BMP, JPG, PNG, etc.)</p><p>Size - shows the storage size in KB or MB</p><p>Actual DPI - shows the calculated physical size on the screen</p><p>Save to disk - enables you to save the image file to your local drive [TIL-1697]</p><h3 id=\"histograms\">Histograms</h3><p>Font setting for a resource bar-chart like in histogram - The font for a resource bar chart legend can now be defined in the \"Chart object\" tab, in the same way as for a histogram. The font settings button has been removed from the resource bar chart setting; use the Chart object settings instead. [TIL-975]</p><h3 id=\"printing-and-presentation\">Printing and Presentation</h3><p>Picture scaling for presentations - When preparing a PDF presentation, you can now set the scaling for the images it includes. This is done by resampling the pictures in the presentation by a given DPI (dots per inch). The scaling you choose can affect the quality of images, so your choices are:</p><p>&ltnone&gt - Use the original picture resolution, which creates high quality images and the largest file size (~1.064 kB)</p><p>Best (300 dpi) - Create good quality images and a slightly smaller file size (~1.064 kB)</p><p>Medium (96 dpi) - Create moderate quality images and file size (~556 kB).</p><p>Low (60 dpi) - Create poor quality images, but the smallest, file size (~307 kB).\nSelecting &ltnone&gt creates the PDF the fastest; all other methods take 2 -10x the length of time to generate and open the PDF in Adobe Reader/Acrobat. Image scaling has no effect on the output of scalable vector graphics (SVGs). [TIL-1691]</p><p>Control presentation image quality - Reducing the quality of a presentation image (by resampling) reduces the size of the PDF. Using these settings can help you produce PDFs with smaller file sizes if a lower image quality is acceptable. [TIL-1338]</p><p>Select presentation detail level - When preparing to create a PDF presentation, you can now choose the level of detail:</p><p>Full details (default and recommended) - Prints the maximum level of detail based on your settings (independent from what is visible on the screen). This will create ALL details possible for this view.</p><p><b>Note:</b>\u00a0This will create the biggest output files and it may happen that objects (e.g calendar elements) get visible, that are NOT visible on the Tilos main screen.</p><p></p><p>As visible (zoom level)/Current visible details - This will take the current zoom (in the preview window) as a base for the details. This is the most flexible, as the user can choose the level of detail he wants to have. [TIL-1698] Line style not correctly printed in presentation mode. - Depending on the view zoom level, Tilos displays (on screen) only those objects that are still displayable. This option prints the level of details currently visible on screen.</p><p><b>Note:</b>\u00a0Sometimes, fine, detailed line styles are printed with a smaller resolution. Tilos always prints the level of details connected to the visibility on the screen.</p><p></p><p>100% - The details are printed, that are visible on screen, when having a 100% zoom: This is recommended, as it will probably create the most accurate result in quality and file size. [TIL-1698]</p><p>Enjoy improved Create presentation options - For better ergonomic work, especially on high resolution screens, the Level Description text and the Close button have been moved to the top of the screen so (especially at higher resolutions) UI elements are closer to each other. More lines have also been added to the Level Description to accommodate longer descriptions. [TIL-1735]</p><p>In a Gantt chart presentation, print the histogram only on the last page - If a Gantt presentation includes multiple pages and the diagram is visible, you can choose to print the diagram only on the last page. [TIL-1586]</p><p>Use enhancements in the Adjust to Template dialog - These options are new:</p><p>Resource assignments</p><p>Add/Replace - Add or overwrite the resource assignments in existing activities. In previous versions, resource assignments were just replaced.</p><p>Category assignments</p><p>Add/Replace - Add or overwrite the category assignments in existing activities. In previous versions, category assignments were just replaced.</p><p>Detail settings</p><p>Attributes - Define the specific details to copy to activities, including the Name, Calendar, Layer, Activity type, Custom activity fields, Consider for Clash detection, and File links.</p><p>Calculation data</p><p>Attributes - Define the specific details to copy to activities, including Calculated, Quantity, Planned work rate, and Quantity factor.</p><p>Progress settings</p><p>Attributes - Define the specific details to copy to activities, including Progress method, Assign activity quantity, and Total progress value.</p><h3 id=\"general\">General</h3><p>Delete unused library elements from the Tilos file - When you are working with complex template files, you can transfer just what is used in the project library when sending the file to a partner or client by deleting unused library elements. All unused elements can be deleted by selecting Help &gt Delete unused library elements. [TIL-1638]</p><p>Trimble Civil Product Service (TCPS) web page change - The TCPS web address (URL) has been changed. The old URL will stop working on May 31, 2023, which will cause previous versions (up to Tilos 11.1 MR3) using Named User license mode to stop working; you will need to upgrade to the latest Tilos version. [TIL-1744].</p><p>Use help on a new platform - Help has been moved to a live website (tiloshelp.trimble.com) that can host more media types, be updated at any time, and allows for user feedback. [TIL-1705]</p><p><b>Note:</b>\u00a0While the help platform/delivery system is new, not all content has been updated. Help edits are a work-in-progress. Thank you for your patience.</p><p>Reset toolbars - We added a feature to always reset to the default toolbars when opening the file. This helps users to have a defined workspace at every startup of the file. Especially when working on different computers/Screen setups this may be helpful.</p><p>Compress project files - You can now \u2018zip\u2019 project files to reduce their file size by checking the Compress project files box on the Tools &gt Options &gt Configuration tab.\u00a0The compressed files have the extension .hspzip and can be opened in Tilos. If you click Make backup of the existing file and overwrite:</p><p>The backup file is located in the same location as the file you are saving.</p><p>The backup file\u2019s name and extension are the same as the saved project file. The extension is .hsb when switched from uncompressed to compressed and .hsbzip when switched from compressed to uncompressed mode.</p><p>The backup file is stored in the same location as the project file. The backup file is a copy of the actual file before saving. Copying is done before saving the new file. [TIL-1393]</p>"
+						}
+					]
+				},
+	            "tilos-11-1-mr4-fixed": {
+					"ChapterNo": 0,
+					"PageNo": 1,
+					"SubjectsNo": "10",
+					"PrevPage": "New & Improved ",
+					"PrevPageId": "tilos-11-1-mr4-new-improved-",
+					"NextPage": "New & Improved",
+					"NextPageId": "tilos-11-1-mr2-new-improved",
+			"Page": [
+						{
+							"Kind": "HTML",
+							"HTML": "<h2 id=\"tilos-11-1-mr4-fixed\">Fixed</h2><p>\nThis Tilos release also includes fixes for reported or discovered cases in which:</p><h3 id=\"licensing\">Licensing</h3><p>A port 80 conflict stopped the Trimble Identity (TID) authentication process on some browsers, such as Microsoft Edge. [TIL-1677]</p><p>Named User licensing stopped working. The license mode could not be switched to the Named User, but stayed in Demo mode after browser sign in. [TIL-1728]</p><p>Trying to switch to a Named User license resulted in an endless loop connecting to the TID service. The only way of getting out of the loop was by killing the activity in Windows activity Manager.\" [TIL-1644]</p><h3 id=\"import-export-data-exchange\">Import/Export/Data Exchange</h3><p>Imported data had incorrect durations for activities, which resulted in wrong schedules. Now, projects deliver correct floats and the critical path in such circumstances. [TIL-1693]</p><p>When importing from more than one Microsoft Excel sheet at the same time, the parent ID/structure were lost. When you imported link and activity information at the same time, the summary was not built. [TIL-1615]</p><p>Sub-project IDs were ignored when importing from Primavera P6. This was potentially an issue with assigning activities to different sub-projects when importing from Primavera P6 (in this case from v18.8). [TIL-1507]</p><p>Activity durations were wrong when imported after the first import from MS Project. For example, an activity that had a duration of 40 days in Project, had a duration of 118 days in Tilos, even though the start and end dates were identical. [TIL-1527]</p><p>Quantity factor was not imported; it was always shown as 0.0, whether set in the import options or not. Even if the quantity factor was set inside the template, it was set to zero when created. If set, it should be imported. Quantity factor was also not imported when switching off all template settings. [TIL-1730, TIL-1715].</p><p>Export to Microsoft Project included links regardless of which options were set. [TIL-1725]</p><p>When doing a text-based resource import, the profile did not honor the Assign Sub-resources setting. When you changed a text import profile, the Assign Sub-Resources setting was not stored in the profile. When you used it the next time, the option was always off; the setting is now stored in the profile. [TIL-1672]</p><p>Default import profiles were missing after an installation/reinstallation. [TIL-1661]</p><p>When importing an xml file from Microsoft Project, some text information found in the xml (Text10) was not published. [TIL-1747]</p><p>During a text import, the quantity factor value was not imported into the activity. [TIL-1566]</p><p>Misc. issues were encountered exchanging data with Trimble Connect:</p><p>Additional attributes were added to the activity schema, but no values were transferred from Tilos.</p><p>Token names were shown in the Comment field.</p><p>Options in the Import dialog have been renamed to be more consistent. Doing this eliminated RIB iTwo (unsupported for years) from the Profile Editor. [TIL-1664]</p><h3 id=\"activities-and-links\">Activities and Links</h3><p>Enabling the Keep Distance Links option calculated an incorrect distance. [TIL-1646]</p><p>Drawing sector-based shapes for profiled activities resulted in an incorrect/negative activity direction. [TIL-1538]</p><p>Distance to successor links with lags were wrong when activities were drawn in a positive direction. The calculated lag was incorrect when activities went from left to right. [TIL-1211]</p><p>Distance to successor links on profiled activities were no longer working. When there were two profile-based activities going in different directions, and they were linked with a Keep Distance link, the successor distance from the predecessor was not accurately retained. If the activities went in the same direction, the lag existed,\u00a0 but the distance was too small. [TIL-1174]</p><p>Copy/pasting activities (and associated links) in a Gantt chart time or distance view\u00a0 did not work if done from the Bars panel. [TIL-1116]</p><p>Dragging-and-dropping from a time-distance view included no activities or links in the destination file. [TIL-1697]</p><h3 id=\"scheduling-calculations-and-progress\">Scheduling, Calculations, and Progress</h3><p>Activity milestones were added as 1 hour instead of 0 hours to the total sum of the\u00a0parent summary when Calculate progress by was set to Schedule (duration) in\u00a0Options. When the activity type was Start Milestone or End Milestone, the hour\u00a0value was added to the parent summaries total, which was wrong; it should have\u00a0been 0.0. [TIL-1431]</p><p>An XML file from Primavera P6 could not be imported. [TIL-1680]</p><p>When downloading changes, only \"Comment\" could be changed.</p><p>Quantities appeared in the change table, but were not visible in Connect.</p><p>The Start date was displayed incorrectly in Connect (but correct when you download it back to Tilos).</p><h3 id=\"gantt-charts\">Gantt Charts</h3><p>Gantt charts did not suppress units when summary values were hidden. When summaries had a hidden value in the Quantity column, units were still visible and could not be hidden for summaries. When the summary quantity was set to zero, the unit disappeared. [TIL-1736]</p><p>Selecting Display Dependency Table &gt Open as Gantt resulted in an empty Gantt chart. [TIL-1665]</p><p>The report date line in a Gantt chart was not transmitted to the summary. The report date line did not show information on the summary from an indented\u00a0 activity. [TIL-1623]</p><p>A fixed-size Gantt chart diagram got too big (bigger than the Gantt chart itself). In the Gantt chart object, if you chose to display with a fixed height (cm, not %) and entered a large size (e.g., 50 or even 100 cm), the diagram got too big/bigger than the entire screen. [TIL-1678]</p><h3 id=\"views-and-graphics\">Views and Graphics</h3><p>After embedding an OLE file, the program hung when you scrolled down. After a moment, an OLE server message popped up and Tilos crashed. [TIL-1629]</p><p>In rare cases, sector-based lines/shapes (as well as the duration calculation) were being drawn incorrectly. This issue only happened when activities were created in a \u2018negative\u2019 direction. With this fix, your overall schedule may be slightly different after upgrading if it includes these types of activities. [TIL-1538]</p><p>Using Copy Activity by ignoring the selected sub-project; the copied activity was in\u00a0 the original sub-project, but not the selected sub-project. [TIL-1305]</p><h3 id=\"histograms\">Histograms</h3><p>Histograms were not populating text from label groups; the text information from label groups was not shown, possibly when all histogram information was accumulated. Rebuilding the same cost + income histogram in a new cell did not change it. [TIL-1369]</p><h3 id=\"mass-haul\">Mass Haul</h3><p>Level from mass areas could not be updated; the right-most mass areas did not react to the level change. [TIL-1263]</p><p>Gaps were found between mass haulage areas, possibly because the zero level had an influence or the view was corrupted. [TIL-1439]</p><h3 id=\"printing-and-presentation\">Printing and Presentation</h3><p>Using Presentation Mode caused the program to crash in some circumstances. [TIL-1695]</p><p>When a file was printed via Presentation mode, the text information from a vertical Gantt chart overlapped the area from its cell. The PDF also took a long time to open, during which you saw \u201cNot Responding\" on the program\u2019s title bar. Beside this, the OLE bottom right is not published to any of the by presentation mode built PDFs. [TIL-1630]</p><p>Black squares appeared on the PDF while creating a PDF presentation. [TIL-1746]</p><h3 id=\"general\">General</h3><p>Table columns were hidden when scrolling and resizing grids. [TIL-1741]</p><p>When using Fill time profile zones by sector color, the sector coloring was shifted and incomplete or missing. [TIL-1552]</p><p>The view/user interface stayed in an undefined status when leaving the file from the Gantt presentation dialog. No explorer or properties bar was visible (apparently an undefined Gantt chart is opened). These improvements have been made:</p><p>The status of toolbars is not saved when leaving the file from the preview.</p><p>The Gantt Preview is not saved as the last chart.</p><p>All toolbars are returned to a default state.\" [TIL-1679]</p>"
+						}
+					]
+				},
+	            "tilos-11-1-mr2-new-improved": {
+					"ChapterNo": 1,
+					"PageNo": 0,
+					"SubjectsNo": "3",
+					"PrevPage": "Fixed",
+					"PrevPageId": "tilos-11-1-mr4-fixed",
+					"NextPage": "Fixed",
+					"NextPageId": "tilos-11-1-mr2-fixed",
+			"Page": [
+						{
+							"Kind": "HTML",
+							"HTML": "<h1 hidden>Tilos 11.1 MR2</h1><h2 id=\"tilos-11-1-mr2-new-improved\">New & Improved</h2><p>This Tilos release includes these new features and enhancements:</p><p>Activities and Scheduling</p><p><b>Update activities based on a template</b>\u00a0- You can now add filters and use additional options to update existing activities from an activity template such that:\u00a0</p><p>all assigned activities are updated based on the template</p><p>a new template is selected for one or more activities</p><p>To prevent the settings from overwriting activities in real subprojects, as well as activities in activity groups, you can opt:</p><p>Not to update 100%/progressed activities.\u00a0</p><p>Not to update activities in an activity groups library; when enabled (the default), subprojects containing activity groups are not updated.</p><p>To add a filter. If selected, only the filtered activities are updated.\n</p><p>In the Tilos Explorer, expand Library &gt Activity Libraries &gt Activity Templates. Right-click an activity Template and select Adjust Activity to Activity Template.</p><p>You now have more control over which values are copied from the activity template to the activity:</p><p><b>Detail settings, Calculation data, Progress settings</b>\u00a0- With the attribute check boxes for some data groups, you can now define specifically which fields should be copied or not.</p><p><b>Annotations</b>\u00a0- Options have been split into Text field and Text format. Now the Text field value can be copied independent of the formatting.</p><p><b>Resource assignments/Category assignments</b>\u00a0- In previous versions those assignments have been always replaced. There is a new option to Add the template assignments to the already existing activity assignments</p><p><b>Data exchange</b>\u00a0- When importing from Text, Microsoft Project, or Primavera P6,\u00a0 there is now an additional button: Adjust activities from template settings. The same selections as above appear here, giving\u00a0 you more control over how template data is copied from the template during import.\n\n</p><p><b>Prevent overlapping sectors in Profile calculated activities -\u00a0</b>Overlapping sectors in sector profiles are no longer supported. You are now prevented from creating overlapping sectors. Existing overlapping sectors will be changed during file conversion, when the project file is opened for the first time to a Sequence of sectors.</p><h3 id=\"printing-and-presentation\">Printing and Presentation</h3><p><b>Select presentation Picture Quality\u00a0</b>- When preparing to create a PDF presentation, you can now choose from these dpi (dots per inch) options for the image:</p><p>High (300 dpi)\u00a0</p><p>Medium (150 dpi)</p><p>Low (96 dpi)</p><p>No scaling (use picture resolution; this is the default setting)\u00a0</p><p>Reducing the quality of a presentation image (by resampling) reduces the size of the PDF. Using these settings can help you produce PDFs with smaller file sizes if a lower image quality is acceptable. [TIL-1338]</p><p><b>Select presentation Level of Detail</b>\u00a0- When preparing to create a PDF presentation, you can now choose the level of detail:</p><p><b>Full details</b>\u00a0(default and recommended) - Prints the maximum level of detail (grids, calendar, diagrams) based on your settings (independent from what is visible on the screen).</p><p><b>As visible (zoom level)</b>\u00a0- Depending on the view zoom level, Tilos displays (on screen) only those objects that are still displayable. This option prints the level of details according to the visibility on screen.</p><h3 id=\"project-files\">Project Files</h3><p><b>Unneeded data removed from project files</b>\u00a0- An automatic purge function has been added to remove deleted objects from an .hsp file. All unused fields from previous versions are removed from the database. Purging results in a smaller file size (~15%) and also lower memory consumption.\u00a0</p><h3 id=\"licensing\">Licensing</h3><p><b>Protect your Named User license</b>\u00a0- When running Tilos as a Named User via your Trimble Identity (TID), the program only allows one TID-based session to run at a time. While your Named User license allows you to run Tilos on different computers at different times, session management now protects you from someone else using your TID. If two Tilos sessions are running with the same Named User license, the older sessions are logged out. If this occurs you should change your TID password immediately. [TIL-1543]</p><p><b>Demo Mode</b>\u00a0- When opening a file in \u201cDemo Mode\u201d a popup message will appear and remind you of the limitations that apply. [TIL-1561]</p><p>Trimble General Product Terms</p><p>\n</p><p><b>Trimble General Product Terms</b>\u00a0- Because of the increasing number of integrations with other products in the Trimble ecosystem, the End User License Agreement (EULA), which previously covered only Tilos, has been enhanced (with synchronized terminology) to cover a wider range of Trimble software and services.\u00a0</p>"
+						}
+					]
+				},
+	            "tilos-11-1-mr2-fixed": {
+					"ChapterNo": 1,
+					"PageNo": 1,
+					"SubjectsNo": "11",
+					"PrevPage": "New & Improved",
+					"PrevPageId": "tilos-11-1-mr2-new-improved",
+					"NextPage": "Other",
+					"NextPageId": "tilos-11-1-mr2-other",
+			"Page": [
+						{
+							"Kind": "HTML",
+							"HTML": "<h2 id=\"tilos-11-1-mr2-fixed\">Fixed</h2><p>This Tilos release also includes fixes for reported or discovered cases in which:</p><p>When importing a standard calendar from Microsoft Project, cyclic exceptions did not include the first date of the periodic range. [TIL-1580]</p><p>Some fields (e.g., resources, filters) for column names in Gantt charts were inaccessible.\u00a0[TIL-1572]</p><h3 id=\"printing-and-presentation\">Printing and Presentation</h3><p>Line widths were sometimes unexpectedly thick in PDF presentations.\u00a0[TIL-1578]</p><p>When printing mass haulage data in a time-distance view, there were graphic issues in arrows, arc radii, and vertical lines. [TIL-1576]</p><p>Vertical Gantt charts in time-distance views were not displayed correctly in SVG or PDF presentations.\u00a0[TIL-1568]</p><p>Activities that used a double/parallel line style were missing one of the lines in PDF presentations. [TIL-1582]</p><p>In SVG and PDF presentations, some graphic files\u00a0appeared much larger than expected. [TIL-1569]</p><p>When creating a presentation from a Gantt Chart with multiple pages, some pages were missing.\u00a0[TIL-1564]</p><p>Parts of oversized PDF presentations were missing.\u00a0 [TIL-1398]</p><p>When creating a presentation from a Gantt chart with multiple pages, printing to different numbers of pages gave different\u00a0 results. [TIL-1399]</p><p>When creating a presentation from a Gantt chart with multiple pages, the preview for pages &gt1 showed only the header scale, but no activities in the Gantt chart table. [TIL-1400]</p><p>When creating a presentation of a profile diagram, cut/fill colors were incorrect. [TIL-1417]</p><p>Presentation setup options were missing these ANSI formats: A0 - A4, ANSI A - E. [TIL-1422]</p><p>The program crashed when attempting to print large, complex data to PDF, resulting in\u00a0missing Gantt chart data in the PDF.\u00a0[TIL-1390]</p><p>The program crashed when trying to build a PDF or SVG\u00a0 presentation from a time-distance diagram, even if you shrank the view to the selected size.\u00a0[TIL-1445]</p><p>Two tokens for numbering pages in presentations were not working. [TIL-1442]</p><p>When creating a presentation from a Gantt chart with multiple pages, page numbering began at 0 instead of 1. [TIL-1446]</p><p>Various issues were encountered when creating a presentation from a Gantt chart: activity bars overlapped the chart in the PDF, Gantt activity symbols had a white background when printed on a colored line, and links were drawn outside of the bar area (into the border). [TIL-1447]\u00a0</p><p>The program crashed when trying to create an SVG presentation with a specific fill pattern. [TIL-1453]</p><p>Line styles were clipped in PDF presentations. [TIL-1462]</p><p>In PDF presentations, text was missing and lines were too wide. [TIL-1545]\u00a0</p><p>When generating a PDF presentation, the cumulative line on the vertical histogram bled into the logo.\u00a0[TIL-1546]</p><p>The program crashed when creating presentations for large views and in other special circumstances such as:</p><p>when trying to print a time-distance view \"total\". [TIL-1470]\u00a0</p><p>after converting to the latest version and opening an Activity List. [TIL-1528]</p><p>when creating a PDF presentation with large images in a distance cell. [TIL-1533]</p><p>Progress lines were not correctly printed in presentation mode. [TIL-1536]</p><p>Some images were printed with inverted colors in PDF presentation mode. [TIL-1537]</p><p>Distance profile diagram colors disappeared in PDF presentations. [TIL-1515]</p><p>Graphics in a PDF presentation were mirrored if you selected the area for them from bottom right to top left (instead of from top left to bottom right).\u00a0[TIL-1505]</p><p>You could not create a PDF file using File &gt Create Presentations command because a few installation files were missing.\u00a0[TIL-1501]</p><p>Graphics in Gantt chart presentations included random, extraneous lines. [TIL-1494]</p><p>ANSI paper sizes showing inches have been added to the default setup. [TIL-1522]</p><p>Misc. issues involving vector lines are fixed [TIL-1590]</p><h3 id=\"graphics-views\">Graphics/Views</h3><p>There was no warning message when opening a file/view in which a linked graphic file had been deleted. [TIL-1131]</p><p>When inserting an OLE object into a graphic cell and enabling the Keep proportions option, the object resized to 0.0 and the size could not be restored.\u00a0The sizing and proportion behavior of inserted OLE objects has now been enhanced so that Keep proportions works as expected.\u00a0[TIL-1351]</p><p>Drawn activity lines were wrong when weekends were switched off.\u00a0 [TIL-1456]</p><p>Grids from sectors were not displayed at the correct points when the sector locations had decimals.\u00a0If you input sector profiles with decimal values, it was rounded off to the nearest integer value and displayed as such.\u00a0\u00a0[TIL-1459]</p><p>Reversing the order of a distance Gantt chart and scrolling vertically caused the bars to appear beneath the chart.\u00a0[TIL-1430]</p><p>Colored bars in legends were out of position/misaligned. [TIL-1478]</p><p>Unexpected graphic results occurred when displaying a sector profile in a distance scale; overlapping color bands were clipped.\u00a0[TIL-1019]</p><h3 id=\"mass-haulage-histograms\">Mass Haulage/Histograms</h3><p>You could not change the heading column width for mass types in a histogram. [TIL-1118]\u00a0</p><p>The Text 2 token was missing from the Mass Haulages table. [TIL-1397]</p><p>The strings displayed as \u201cConnected Activities\u201d was confusing and has been replaced with \u201cSource Tasks\u201d and \u201cDestination Tasks\u201d [TIL-1467]\u00a0</p><p>Two\u00a0 numeric mass haulage fields did not work in the histogram.Scheduled Qty (remaining) Reported Quantity remaining. [TIL-1498]</p><h3 id=\"activities-scheduling-calculations\">Activities, Scheduling, Calculations</h3><p>The Duration (Speed from Sector Profile) activity calculation type did not work for profiled activities with overlapping sectors. [TIL-1231]</p><p>Subactivity assignments disappeared when changing the subproject ID in a Task List.\u00a0 [TIL-1298]</p><p>When using a speed profile for activities, the first sector was not being considered until the start distance of the activity was before this sector. [TIL-1339]</p><p>When moving non-performed activities after a report date, the report date was not on the time project scope. If the report date is before the project start date, non-performed activities were moved after the project start date, without any notification. [TIL-1344]</p><p>When positioning activities after reporting progress, some activities were moved to another place/time.\u00a0[TIL-1468]</p><p>New created distance profiles are not assigned to \u201cWork rate profile as default. [TIL-1472]</p><p>When an activity had working time, but the display calendar collapsed parts of the working time, (weekends) the slope of the annotation was calculated incorrectly.\u00a0[TIL-1458]</p><h3 id=\"annotations\">Annotations</h3><p>When using the Repetitive Activity function in certain language versions, repetitive activity annotations were added to the activity (when they should have been absent).\u00a0[TIL-1252]\u00a0</p><p>Block annotations were incorrectly placed when creating a activity annotation with Adjust on change of direction enabled,\u00a0[TIL-1265]</p><p>Annotation angles saved to a template were not saved; they reverted to 0.0. [TIL-1266]</p><p>When creating an activity name with an auto-generated annotation based on data (e.g., coordinates), only the first annotation gets its own values (e.g., coordinates). The following activities include values from the previous annotation, plus their own. Other times,\u00a0the first activity in the sequence has no annotation, the second has one annotation, the third has two annotations, and so on.\u00a0[TIL-1347]</p><p>In rare cases, no annotations displayed in any time-distance chart, even though the layers were shown.\u00a0[TIL-1520]</p><h3 id=\"gantt-charts\">Gantt Charts</h3><p>A Gantt chart presentation did not show the same expanded/collapsed state of summary activities as your project view; in the presentation, all summary activities were expanded. There has been added options in the dialog for creating Gantt Chart presentations: Tree structure: Expand all or Keep state\u00a0 [TIL-1448]\u00a0</p><p>The program crashed when clicking a link from an intermediate activity in a Gantt chart view. [TIL-1451]</p><p>Information disappeared when scrolling in a distance Gantt chart. [TIL-1493]</p><p>An error was encountered when using a French token for income as Calculated Value for a Gantt chart column. [TIL-1479]</p><h3 id=\"data-exchange\">Data Exchange</h3><p>Link lags in calendar time/elapsed days were ignored when exchanging data with Microsoft Project. [TIL-1483]</p><p>When imported using the Primavera P6 XML format, new\u00a0activity templates were created rather than being reassigned.\u00a0[TIL-1486]</p><p>WBS levels divided by \".\" were no longer imported using the Plain Text Data (TXT) import format. [TIL-1310]</p><p>Categories defined in the template were not being created during text import. [TIL-1428]</p><p>When you copied and pasted a category, the category ID did not change, which generated an error, for example, when trying to export an XML for Primavera.\u00a0[TIL-1441]</p><p>Structure and activity types changed when importing from Microsoft Project. [TIL-1454]</p><p>Tilos 11 data could not be imported in Primavera P6 because some activity names exceeded 120 characters. [TIL-1473]</p><p>TID\u2019s were managed incorrectly when importing from Microsoft Project into existing sub-projects. [TIL-1581]</p><h3 id=\"activity-templates\">Activity Templates</h3><p>Objects, e.g., symbols, inserted into activity templates did not retain their sizes when activities were created/updated. [TIL-1324]</p><p>When associating a file link to an activity template and creating a new activity with a symbol, the symbol did not display in the activity template and updating an existing activity did not add the file link to the task. [TIL-1325]</p><p>When applying a new planned work rate from a template, the quantity was deleted (it reverted to 0.0).\u00a0 [TIL-1326]</p><p>After creating a new activity template, opening the editor with the new template selected opened a previous template instead. [TIL-1534]</p><h3 id=\"histograms\">Histograms</h3><p>After adding a distance histogram into a time-distance cell, the Position tab in the Object Properties pane disappeared, preventing edits from being made.\u00a0[TIL-1348]</p><p>The program crashed when\u00a0opening a project in which a histogram was sliced by a time profile with imported, empty time periods.\u00a0[TIL-1413]</p><h3 id=\"resources\">Resources</h3><p>When naming and adding IDs for newly created resources, you could enter an ID that duplicated the next auto-incremented ID. Now, you cannot manually enter a duplicate ID. [TIL-1350]</p><h3 id=\"bim-integrations\">BIM Integrations</h3><p>The program crashed when trying to synchronize information with Trimble Connect (after the Connect updated several of its certificates).\u00a0[TIL-1463]</p><p>An error was encountered when trying to launch Trimble Connect from within Tilos. [TIL-1464]\u00a0</p><p>The program could not exchange property set data with Trimble Connect because unique IDs were not generated. [TIL-1475]</p>"
+						}
+					]
+				},
+	            "tilos-11-1-mr2-other": {
+					"ChapterNo": 1,
+					"PageNo": 2,
+					"SubjectsNo": "1",
+					"PrevPage": "Fixed",
+					"PrevPageId": "tilos-11-1-mr2-fixed",
+					"NextPage": "",
+					"NextPageId": "",
+			"Page": [
+						{
+							"Kind": "HTML",
+							"HTML": "<h2 id=\"tilos-11-1-mr2-other\">Other</h2><h3 id=\"known-issues\">Known issues</h3><p>Using the Change Activity Direction option for profile-based activities might result in a different result than before.\u00a0Also, when a sector-based activity is drawn in a positive direction and Change Activity Direction is enabled, the results can become unpredictable, depending on the position of the activity over the sector profile. [TIL-1511] [TIL-1538]\u00a0</p><p>These issues might be encountered when creating PDF and SVG presentations from large, complex layouts:</p><p>The SVG presentation is created, but produces an error in the viewer program and may be incomplete (grid lines are missing on the edges).</p><p>The PDF is created, but Adobe Acrobat/Acrobat Reader crashes after opening it (the file size is larger and takes longer to create than expected, so Acrobat runs out of memory).\u00a0</p><p>If a PDF print contains dense grid lines (e.g., daily/hourly) and the lines are very fine, some PDF viewers may slow down when zooming far in to display those grid lines. [TIL-1585]</p><p><b>Workaround:</b>\u00a0These issues will be fixed and optimized in a later version. Until then, you can use the new Picture Quality and Level of Detail settings described at the top of page 4 in this document to bypass/prevent the issues.</p><p>User-defined fields (UDFs) were not being added from Asta Powerproject 15 when using the Powerproject macro. Distance information was transferred properly (without formatting problems) from Powerproject 14, but from versions 15+.\u00a0 Therefore, Powerproject versions above 14 are not supported unless you deploy a Tilos fix for Asta Powerproject 15; to do so, see the\u00a0<a href=\" https://community.trimble.com/viewdocument/deploying-the-asta-powerproject-v15?CommunityKey=9c4716e7-7e5e-4580-b4d6-525eeab9a385&tab=librarydocuments\">support note</a>\u00a0in the\u00a0<a href=\" https://community.trimble.com/communities/community-home?CommunityKey=9c4716e7-7e5e-4580-b4d6-525eeab9a385 \u201c>Tilos Community</a>. [TIL-1188]</p><p>In rare cases, inserting OLE objects into a graphic cell results in unexpected image sizes when the Keep proportions option is enabled.\u00a0[TIL-1351]</p><p></p>"
+					}
+				]
+			}
+		}
+	}
+}

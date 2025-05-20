@@ -512,10 +512,10 @@
                             mt-4  
                             min-h-20 w-full 
                             border border-stone-300 dark:border-stone-600 rounded-lg p-2
-                            bg-stone-100 dark:bg-stone-800"
+                            bg-stone-50 dark:bg-stone-800"
                             bind:this={newMessageElement}>
                             
-                <textarea   class="w-full min-h-40 bg-stone-100 dark:bg-stone-800 outline-none"
+                <textarea   class="w-full min-h-40 bg-stone-50 dark:bg-stone-800 outline-none"
                             bind:value={newMessageContent}
                             maxlength={196-additionalBytesSize(newMessageContent)}
                             placeholder="Type new message"
@@ -548,7 +548,7 @@
                             class=" 
                             py-2.5 px-4 
                             text-sm font-thin text-stone-700 dark:text-stone-300 dark:hover:text-white 
-                            hover:bg-stone-300 dark:hover:bg-stone-900 active:bg-stone-300 dark:active:bg-stone-600
+                            hover:bg-stone-200 dark:hover:bg-stone-900 active:bg-stone-200 dark:active:bg-stone-600
                             border border-stone-300 focus:outline-none dark:border-stone-600
                             flex items-center rounded"
                             on:click={showBasket}>
@@ -564,7 +564,7 @@
                             class=" 
                             py-2.5 px-4 
                             text-sm font-thin text-stone-700 dark:text-stone-300 dark:hover:text-white 
-                            hover:bg-stone-300 dark:hover:bg-stone-900 active:bg-stone-300 dark:active:bg-stone-600
+                            hover:bg-stone-200 dark:hover:bg-stone-900 active:bg-stone-200 dark:active:bg-stone-600
                             border border-stone-300 focus:outline-none dark:border-stone-600
                             flex items-center rounded"
                             on:click={onSubmitClick}>

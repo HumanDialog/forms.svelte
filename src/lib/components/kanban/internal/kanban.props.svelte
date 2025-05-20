@@ -146,7 +146,7 @@
                     class="     h-6
                                 text-sm sm:min-h-[1rem]
                                 text-base-sm min-h-[1.5rem]
-                                text-stone-400
+                                text-stone-600 dark:text-stone-400
                                 text-right"
                                 bind:this={propElements[idx]}>
                     {item[prop.a]}

@@ -27,8 +27,11 @@
 	import { isDeviceSmallerThan, isOnNavigationPage, pushNavigationPage, popNavigationPage } from './utils.js';
     
 
-    export let appConfig;
+    export let appConfig = undefined;
     export let clearsContext = 'sel props'
+
+    export let definedTabs = undefined
+    export let mainToolbarConfig = undefined
     
     let config = null;
     let has_selection_details = false;
@@ -45,23 +48,39 @@
 
     $:
     {
-        config = appConfig.mainToolbar;
-        has_selection_details = appConfig.selectionDetails;
-        if(has_selection_details)
-            selection_details_caption = appConfig.selectionDetails.caption ?? 'Properties';
+        if(appConfig)
+        {
+            config = appConfig.mainToolbar;
+            has_selection_details = appConfig.selectionDetails;
+            if(has_selection_details)
+                selection_details_caption = appConfig.selectionDetails.caption ?? 'Properties';
+        }
+        else
+        {
+            config = mainToolbarConfig
+            has_selection_details = false
+        }
+
         is_logged_in = $session.isActive;
         show_sign_in_out_icons = config.signin ? true : false;
         sign_in_href = $signInHRef;
         sign_out_href = $signOutHRef;
         //user_is_in_multiple_groups = $session.tenants.length > 1
 
-        tabs = Object.keys(appConfig.sidebar);
-        if(tabs.length > 1)
-            icon = FaBars;
-        else    
+        if(definedTabs && Array.isArray(definedTabs) && definedTabs.length > 0)
         {
-            let first_tab = appConfig.sidebar[tabs[0]];
-            icon = first_tab.icon;
+            
+        }
+        else
+        {
+            tabs = Object.keys(appConfig.sidebar);
+            if(tabs.length > 1)
+                icon = FaBars;
+            else    
+            {
+                let first_tab = appConfig.sidebar[tabs[0]];
+                icon = first_tab.icon;
+            }
         }
     }
 
@@ -283,9 +302,17 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class="no-print flex flex-row w-full" on:click={clearSelection}>
     <div class="flex-none left-0 flex h-12 sm:h-10">
-        <button class="w-12 sm:w-10 h-full flex justify-center items-center text-stone-300 hover:text-stone-100" on:click|stopPropagation={toggle_navigator}>
-            <Icon class="w-5 h-5" component={icon}/>
-        </button>
+        {#if definedTabs && definedTabs.length > 0}
+            {#each definedTabs as tab}
+                <button class="w-12 sm:w-10 h-full flex justify-center items-center text-stone-300 hover:text-stone-100" on:click={tab.onclick}>
+                    <Icon class="w-5 h-5" component={tab.icon}/>
+                </button>    
+            {/each}
+        {:else}
+            <button class="w-12 sm:w-10 h-full flex justify-center items-center text-stone-300 hover:text-stone-100" on:click|stopPropagation={toggle_navigator}>
+                <Icon class="w-5 h-5" component={icon}/>
+            </button>
+        {/if}
     </div>
 
     <div class="grow">

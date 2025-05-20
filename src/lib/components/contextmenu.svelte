@@ -444,7 +444,9 @@
 </script>
 
 <div id="__hd_svelte_contextmenu" 
-    class=" bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md 
+    class=" bg-white dark:bg-stone-800 
+            text-stone-800 dark:text-stone-400 rounded-lg border 
+            border-stone-200 dark:border-stone-700 shadow-md 
             z-30 fixed min-w-[{min_width_px}px] w-max overflow-y-auto" 
     style={css_position}
     bind:this={menu_root}>

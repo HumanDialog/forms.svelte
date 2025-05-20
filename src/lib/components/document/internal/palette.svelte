@@ -75,6 +75,9 @@
           if(/*isToolbox && */visible && paletteElement)
           {
               let layoutRoot = document.getElementById("__hd_svelte_layout_root")
+              if(!layoutRoot)
+                    layoutRoot = document.getElementById("app")
+
               if(!!layoutRoot && paletteElement.parentElement != layoutRoot)
               {
                 await tick();

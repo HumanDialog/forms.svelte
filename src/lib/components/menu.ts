@@ -11,6 +11,9 @@ export function showMenu(around :DOMRect|DOMPoint, operations)
     if(!menu_element)
     {
         let app_div = document.getElementById("__hd_svelte_layout_root")
+        if(!app_div)
+            app_div = document.getElementById("app")
+        
         menu_comopnent = new Menu({
             target: app_div,
             props: {
@@ -47,6 +50,9 @@ export function showFloatingToolbar(around :DOMRect|DOMPoint, toolbar, props = {
     if(!floating_container)
     {
         let app_div = document.getElementById("__hd_svelte_layout_root")
+        if(!app_div)
+            app_div = document.getElementById("app")
+        
         toolbar_component = new Floating_container({
             target: app_div,
             props: {

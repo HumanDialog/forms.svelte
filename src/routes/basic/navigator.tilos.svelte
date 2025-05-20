@@ -23,6 +23,7 @@
     let user = {};
     let navFolders;
     let navItems = [];
+    let waitForRequest = false
     
     $: currentPath = $location;
 
@@ -46,27 +47,30 @@
     
     async function initNavigator()
     {
-        
         if($session.isActive)
         {
+            waitForRequest = true
             reef.get("/user", onErrorShowAlert).then((res) => {
                 if(res != null)
                     user = res.User;
             })
            
-        }
+        
 
-        const cacheKey = `foldersNavigator`
-        const cachedValue = cache.get(cacheKey)
-        if(cachedValue)
-        {
-            rootFolders = cachedValue;
+            const cacheKey = `foldersNavigator`
+            const cachedValue = cache.get(cacheKey)
+            if(cachedValue)
+            {
+                rootFolders = cachedValue;
+                navFolders?.reload(rootFolders)
+            }
+
+            await fetchData()
             navFolders?.reload(rootFolders)
+            cache.set(cacheKey, rootFolders);
         }
-
-        await fetchData()
-        navFolders?.reload(rootFolders)
-        cache.set(cacheKey, rootFolders);
+        else
+            waitForRequest = false
     }
 
     async function fetchData()
@@ -125,56 +129,60 @@
 
 {#key currentPath}
 {#if sidebar}
-    {#if rootFolders && rootFolders.length > 0}     
-    <SidebarGroup >
-        <SidebarItem    href="/tiloshome"
-                        icon={FaHome}
-                        active={isRoutingTo('/tiloshome', currentPath)}
-                        summary="The essentials in one place">
-            Home
-        </SidebarItem>
-    </SidebarGroup>
-
-        <SidebarGroup border>           
-            <SidebarList    objects={rootFolders} 
-                            orderAttrib='Order'
-                            bind:this={navFolders}>
-                <svelte:fragment let:item let:idx>
-                    {@const href = item.href}
-                    <SidebarItem   {href}
-                                    icon={getFolderIcon(item)}
-                                    bind:this={navItems[idx]}
-                                    active={isRoutingTo(href, currentPath)}
-                                    summary={item.Summary}
-                                    >
-                        {item.Title}
-                    </SidebarItem>
-                </svelte:fragment>
-            </SidebarList> 
-        </SidebarGroup>
-
-        <SidebarGroup border>
-            <SidebarItem    href="https://objectreef.dev/doc/reef-lang-guide-402"
-                            icon={FaQuestion}
-                            summary="How to get started and use Tilos">
-                Help
-            </SidebarItem>
-
-            <SidebarItem    href="https://objectreef.dev/download"
-                            icon={FaDownload}
-                            summary="Download the installer and check the release notes">
-                Downloads
-            </SidebarItem>
-
-            <SidebarItem    href="/contact"
-                            icon={FaAt}
-                            summary="Contact us directly">
-                Contact us
-            </SidebarItem>
-        </SidebarGroup>
-
-    {:else}
+      
+    {#if waitForRequest && !rootFolders}
         <Spinner delay={3000}/>
+    {:else}
+        <SidebarGroup >
+            <SidebarItem    href="/thome"
+                            icon={FaHome}
+                            active={isRoutingTo('/thome', currentPath)}
+                            summary="The essentials in one place">
+                Home
+            </SidebarItem>
+        </SidebarGroup>
+
+        {#if rootFolders && rootFolders.length > 0}   
+            <SidebarGroup border>           
+                <SidebarList    objects={rootFolders} 
+                                orderAttrib='Order'
+                                bind:this={navFolders}>
+                    <svelte:fragment let:item let:idx>
+                        {@const href = item.href}
+                        <SidebarItem   {href}
+                                        icon={getFolderIcon(item)}
+                                        bind:this={navItems[idx]}
+                                        active={isRoutingTo(href, currentPath)}
+                                        summary={item.Summary}
+                                        >
+                            {item.Title}
+                        </SidebarItem>
+                    </svelte:fragment>
+                </SidebarList> 
+            </SidebarGroup>
+        {/if}
+
+            <SidebarGroup border>
+                <SidebarItem    href="/doc/reef-dev-tour-311"
+                                icon={FaQuestion}
+                                summary="How to get started and use Tilos">
+                    Help
+                </SidebarItem>
+
+                <SidebarItem    href="/tdownload"
+                                active={isRoutingTo("/tdownload", currentPath)}
+                                icon={FaDownload}
+                                summary="Download the installer and check the release notes">
+                    Downloads
+                </SidebarItem>
+
+                <SidebarItem    href="/tcontact"
+                                active={isRoutingTo("/tcontact", currentPath)}
+                                icon={FaAt}
+                                summary="Contact us directly">
+                    Contact us
+                </SidebarItem>
+            </SidebarGroup>
     {/if}
 
 {:else} <!-- !sidebar -->

@@ -1,6 +1,6 @@
 <script>
-    import {reef, session, Authorized} from '@humandialog/auth.svelte'
-	import {Layout, onErrorShowAlert} from '$lib';
+    import {reef, session, Authorized, NotAuthorized} from '@humandialog/auth.svelte'
+	import {Layout, onErrorShowAlert, Spinner} from '$lib';
     import Sidebar from './sidebar.svelte'
     
     import SidebarFolders from './sidebar.folders.svelte'
@@ -32,6 +32,9 @@
     import RequestLicenseFile from './request.license.svelte'
     import TilosHome from './tilos/dashboard.svelte'
     import Profile from './profile.svelte'
+    import TilosDownload from './tilos/download.svelte'
+    import TilosContact from './tilos/contact.svelte'
+    //import StaticDoc from './tilos/static.doc.svelte'
 
 
     import {Console} from '$lib'
@@ -43,67 +46,128 @@
     const proto = __SERVICE_PROTOCOL__
     const octopus_modules = __OCTOPUS_MODULES__
 
+    let layout = null
+
     $: init($session)
 
     async function init(...args)
     {
         if(!$session.isActive && !$session.isUnauthorizedGuest)
         {
-            await tick();
-            reef.redirectToSignIn();
+            const hasStaticContent = canShowStaticContent(octopus_modules)
+            if(!hasStaticContent)
+            {
+                await tick();
+                reef.redirectToSignIn();
+            }
+            else
+            {
+                layout = defineStaticLayout()
+            }
         }
-
-    }
-
-    function defineModuleNavigator(module)
-    {
-        switch(module)
+        else
         {
-        case 'tasklists':
-            return {
-                'TOC':{
-                    icon: FaList,
-                    component: Sidebar
-                }
+            if($session.isUnauthorizedGuest)
+            {
+                const hasPublicData = await configurePublicSession();
+                if(hasPublicData)
+                    layout = defineGuestLayout()
+                else
+                    layout = null
             }
-
-        case 'folders':
-            return {
-                'Folders': {
-                    icon: FaFolder,
-                    component: SidebarFolders
-                }
+            else if($session.isActive)
+            {
+                layout = defineAuthorizedLayout()
             }
+        }
 
-        case 'messages':
-            return {
-                'Messages': {
-                        icon: FaComments,
-                        component: SidebarMessages
+    }
+
+    function defineModuleNavigator(module, showStaticOnly=false)
+    {
+        if(!showStaticOnly)
+        {   
+            switch(module)
+            {
+            case 'tasklists':
+                return {
+                    'TOC':{
+                        icon: FaList,
+                        component: Sidebar
                     }
-            }
+                }
 
-        case 'tilos':
-            return {
-                'Tilos': {
-                        icon: TilosIcon,
-                        component: SidebarTilos
+            case 'folders':
+                return {
+                    'Folders': {
+                        icon: FaFolder,
+                        component: SidebarFolders
                     }
+                }
+
+            case 'messages':
+                return {
+                    'Messages': {
+                            icon: FaComments,
+                            component: SidebarMessages
+                        }
+                }
+
+            case 'tilos':
+                return {
+                    'Tilos': {
+                            icon: TilosIcon,
+                            component: SidebarTilos
+                        }
+                }
+
+            default:
+                return { }
+            }
+        }
+        else
+        {
+            // only tilos navigator has ability to show static content without sign-in need
+            switch(module)
+            {
+            case 'tilos':
+                return {
+                    'Tilos': {
+                            icon: TilosIcon,
+                            component: SidebarTilos
+                        }
+                }
+            default:
+                return { }
             }
         }
     }
 
-    function defineNavigators(modules)
+    function canShowStaticContent(modules)
     {
         let navigators = {}
         let mods = modules.split(',')
         mods.forEach( module => 
-            navigators = {...navigators, ...defineModuleNavigator(module)}
+            navigators = {...navigators, ...defineModuleNavigator(module, true)}
+        )
+
+        const staticNavigatos = Object.keys(navigators)
+        return staticNavigatos.length > 0
+    }
+
+    function defineNavigators(modules, showStaticOnly=false)
+    {
+        let navigators = {}
+        let mods = modules.split(',')
+        mods.forEach( module => 
+            navigators = {...navigators, ...defineModuleNavigator(module, showStaticOnly)}
         )
         return navigators
     }
 
-    const authorizedLayout = {
+    function defineAuthorizedLayout()
+    {
+        return {
                 sidebar : defineNavigators(octopus_modules),
                 mainContent : {
                     routes : {
@@ -128,9 +192,11 @@
                         '/newthread/*' :{ component: NewThread },
                         '/forum/*'   :  { component: Forum },
                         '/request-license-file': {component: RequestLicenseFile},
-                        '/tiloshome':   {component : TilosHome},
+                        '/thome':   {component : TilosHome},
                         '/profile/*':   {component: Profile},
                         '/profile':     {component: Profile},
+                        '/tdownload':   {component: TilosDownload},
+                        '/tcontact':    {component: TilosContact}
                     }
                 },
                 mainToolbar : {
@@ -171,9 +237,12 @@
                     default: true
                 }
 
+        }
     }
 
-    const guestLayout = {
+    function defineGuestLayout() 
+    {
+        return {
                 sidebar : {
                     'TOC': {
                         icon: FaList,
@@ -189,7 +258,7 @@
                         '/task/*' :     { component: Task },
                         '/listboard' :  { component: Board},
                         '/listboard/*': { component: Board},
-                        '/tiloshome':   {component : TilosHome}
+                        '/thome':   {component : TilosHome}
                     }
                 },
                 mainToolbar : {
@@ -219,18 +288,45 @@
                     default: true
                 },
                 autoRedirectToSignIn: false
+        }
     }
 
+    function defineStaticLayout()
+    {
+        return {
+                sidebar : defineNavigators(octopus_modules, true),
+                mainContent : {
+                    routes : {
+                        '/' :           { component: AppMain},
+                        '/request-license-file': {component: RequestLicenseFile},
+                        '/thome':   {component : TilosHome},
+                        '/tdownload':    {component: TilosDownload},
+                        '/tcontact':    {component: TilosContact}
+                    //    '/doc':         {component: StaticDoc},
+                    //    '/doc/*':       {component: StaticDoc}
+                    }
+                },
+                mainToolbar : {
+                    signin: true,
+                },
+                dark:
+                {
+                    optional: true,
+                    default: true
+                },
+                operations:
+                {
+                    optional: false,
+                    default: true
+                }
+
+        }
+    }
 	
-    let isAlreadyConfigured = false
-    let hasPublicContent = false
     async function configurePublicSession()
     {
-        if(isAlreadyConfigured)
-            return hasPublicContent;
-
-        isAlreadyConfigured = true
-
+        return false;
+        /*
         const lastChosenTenantId = $session.lastChosenTenantId;
         let result = null;
         try {
@@ -307,6 +403,7 @@
         }
         else
             return false;
+        */
     }
 
     async function showBasket()
@@ -320,18 +417,8 @@
 
 </script>
 
-<Authorized>
-    {#if $session.isUnauthorizedGuest}
-        {#await configurePublicSession()}
-            <p>Loading public content</p>
-        {:then hasContent} 
-            {#if hasContent}
-                <Layout layout={guestLayout}/>
-            {:else}
-                <p>There is no public content for this application</p>
-            {/if}
-        {/await}
-    {:else}
-        <Layout layout={authorizedLayout}/>
-    {/if}
-</Authorized>
+{#if layout}
+    <Layout {layout} />
+{:else}
+    <Spinner/>
+{/if}

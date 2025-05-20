@@ -703,7 +703,7 @@
 
                 <span slot="left" let:element>
                     <Icon component={FaRegFolder} 
-                        class="h-5 w-5 text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
+                        class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
                 </span>
             </List>
         
@@ -721,7 +721,7 @@
 
                 <span slot="left" let:element>
                     <Icon component={FaRegFile} 
-                        class="h-5 w-5 text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5 ml-2  mr-1"/>
+                        class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5 ml-2  mr-1"/>
                 </span>
             </List>
         
@@ -741,12 +741,12 @@
                 <span slot="left" let:element>
                     {#if element.State == STATE_FINISHED}
                         <Icon component={FaRegCheckCircle} 
-                        class="h-5 w-5  text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
+                        class="h-5 w-5  text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
                         
                     {:else}
                         <Icon component={FaRegCircle} 
                             on:click={(e) => finishTask(e, element)} 
-                            class="h-5 w-5 text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1 "/>
+                            class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1 "/>
                         
                     {/if}
                 </span>

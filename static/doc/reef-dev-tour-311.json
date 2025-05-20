@@ -1,0 +1,953 @@
+{
+		"Book": {
+			"Title": "Getting Started with ObjectReef",
+			"FirstPage": "introduction-about-this-tour",
+			"ChaptersNo": "4",
+			"PagesNo": "20",
+			"Id" : "",
+			"Tags": { "description":"How to create, launch and query simple web service in minutes", "MTR":"22 min" },
+			"TOC" : [
+            {
+                "Chapter": "Introduction",
+				"Id": "introduction-about-this-tour",
+                "Pages": [
+	                    {
+                        "Page": "About this tour",
+                        "Id": "introduction-about-this-tour"
+			          	},
+
+	                    {
+                        "Page": "The platform independence of ObjectReef",
+                        "Id": "introduction-the-platform-independence-of-objectreef"
+			          	},
+
+	                    {
+                        "Page": "Natural applications design process",
+                        "Id": "introduction-natural-applications-design-process",
+                        "Subjects": [
+							{
+								"Subject":"Data model",
+								"Id":"data-model"
+							},
+							{
+								"Subject":"Data operations",
+								"Id":"data-operations"
+							},
+							{
+								"Subject":"Presentation - User Interface",
+								"Id":"presentation-user-interface"
+							}
+						]
+					},
+
+	                    {
+                        "Page": "Model-compliant implementation",
+                        "Id": "introduction-model-compliant-implementation"
+			          	}
+                ]
+            },
+
+            {
+                "Chapter": "The ObjectReef general concepts",
+				"Id": "the-objectreef-general-concepts-hello-world",
+                "Pages": [
+	                    {
+                        "Page": "Hello World",
+                        "Id": "the-objectreef-general-concepts-hello-world"
+			          	},
+
+	                    {
+                        "Page": "Application data modeling",
+                        "Id": "the-objectreef-general-concepts-application-data-modeling",
+                        "Subjects": [
+							{
+								"Subject":"Class definition",
+								"Id":"class-definition"
+							},
+							{
+								"Subject":"class App",
+								"Id":"class-app"
+							},
+							{
+								"Subject":"class User",
+								"Id":"class-user"
+							},
+							{
+								"Subject":"class Task",
+								"Id":"class-task"
+							},
+							{
+								"Subject":"class TaskLink",
+								"Id":"class-tasklink"
+							}
+						]
+					},
+
+	                    {
+                        "Page": "Modeling relationships between classes",
+                        "Id": "the-objectreef-general-concepts-modeling-relationships-between-classes",
+                        "Subjects": [
+							{
+								"Subject":"Associations",
+								"Id":"associations"
+							}
+						]
+					},
+
+	                    {
+                        "Page": "Data navigation",
+                        "Id": "the-objectreef-general-concepts-data-navigation",
+                        "Subjects": [
+							{
+								"Subject":"Context",
+								"Id":"context"
+							},
+							{
+								"Subject":"REST API Navigation syntax",
+								"Id":"rest-api-navigation-syntax"
+							}
+						]
+					},
+
+	                    {
+                        "Page": "Data layer of application",
+                        "Id": "the-objectreef-general-concepts-data-layer-of-application",
+                        "Subjects": [
+							{
+								"Subject":"Writing, reading and modifying data",
+								"Id":"writing-reading-and-modifying-data"
+							},
+							{
+								"Subject":"Adding task for a user",
+								"Id":"adding-task-for-a-user"
+							},
+							{
+								"Subject":"Reading user tasks",
+								"Id":"reading-user-tasks"
+							}
+						]
+					},
+
+	                    {
+                        "Page": "Logic layer of applcation",
+                        "Id": "the-objectreef-general-concepts-logic-layer-of-applcation",
+                        "Subjects": [
+							{
+								"Subject":"Formal specification",
+								"Id":"formal-specification"
+							},
+							{
+								"Subject":"Sample calls",
+								"Id":"sample-calls"
+							}
+						]
+					},
+
+	                    {
+                        "Page": "Interface Layer",
+                        "Id": "the-objectreef-general-concepts-interface-layer",
+                        "Subjects": [
+							{
+								"Subject":"Rest API",
+								"Id":"rest-api"
+							}
+						]
+					}
+                ]
+            },
+
+            {
+                "Chapter": "Making first ObjectReef app",
+				"Id": "making-first-objectreef-app-first-steps-tutorial",
+                "Pages": [
+	                    {
+                        "Page": "First steps tutorial",
+                        "Id": "making-first-objectreef-app-first-steps-tutorial"
+			          	},
+
+	                    {
+                        "Page": "Installation",
+                        "Id": "making-first-objectreef-app-installation",
+                        "Subjects": [
+							{
+								"Subject":"Install ObjectReef",
+								"Id":"install-objectreef"
+							},
+							{
+								"Subject":"Install Visual Studio Code",
+								"Id":"install-visual-studio-code"
+							},
+							{
+								"Subject":"Install Visual Studio Code ObjectReef Extension",
+								"Id":"install-visual-studio-code-objectreef-extension"
+							}
+						]
+					},
+
+	                    {
+                        "Page": "Making application solution",
+                        "Id": "making-first-objectreef-app-making-application-solution",
+                        "Subjects": [
+							{
+								"Subject":"Create first Reef App",
+								"Id":"create-first-reef-app"
+							},
+							{
+								"Subject":"Open solution in Visual Studio Code",
+								"Id":"open-solution-in-visual-studio-code"
+							},
+							{
+								"Subject":"Run ObjectReef server in dev mode",
+								"Id":"run-objectreef-server-in-dev-mode"
+							},
+							{
+								"Subject":"Build ObjectReef solution",
+								"Id":"build-objectreef-solution"
+							}
+						]
+					},
+
+	                    {
+                        "Page": "Trying ObjectReef Console",
+                        "Id": "making-first-objectreef-app-trying-objectreef-console",
+                        "Subjects": [
+							{
+								"Subject":"ObjectReef Console vs. curl shell command",
+								"Id":"objectreef-console-vs-curl-shell-command"
+							},
+							{
+								"Subject":"Json vs. cons protocols",
+								"Id":"json-vs-cons-protocols"
+							}
+						]
+					},
+
+	                    {
+                        "Page": "ObjectReef solution source code",
+                        "Id": "making-first-objectreef-app-objectreef-solution-source-code",
+                        "Subjects": [
+							{
+								"Subject":"Complete source code of the app",
+								"Id":"complete-source-code-of-the-app"
+							},
+							{
+								"Subject":"Solution configuration file",
+								"Id":"solution-configuration-file"
+							}
+						]
+					},
+
+	                    {
+                        "Page": "Sample API requests",
+                        "Id": "making-first-objectreef-app-sample-api-requests",
+                        "Subjects": [
+							{
+								"Subject":"Gnerating sample data",
+								"Id":"gnerating-sample-data"
+							},
+							{
+								"Subject":"Reading  single objects",
+								"Id":"reading--single-objects"
+							},
+							{
+								"Subject":"Reading collections",
+								"Id":"reading-collections"
+							},
+							{
+								"Subject":"Updating object properties",
+								"Id":"updating-object-properties"
+							},
+							{
+								"Subject":"Operation call with arguments",
+								"Id":"operation-call-with-arguments"
+							},
+							{
+								"Subject":"Association ends navigation",
+								"Id":"association-ends-navigation"
+							},
+							{
+								"Subject":"Login simulation",
+								"Id":"login-simulation"
+							}
+						]
+					},
+
+	                    {
+                        "Page": "Executing tour algorithm",
+                        "Id": "making-first-objectreef-app-executing-tour-algorithm",
+                        "Subjects": [
+							{
+								"Subject":"Tasks before schedule",
+								"Id":"tasks-before-schedule"
+							},
+							{
+								"Subject":"Executing Rechedule",
+								"Id":"executing-rechedule"
+							}
+						]
+					}
+                ]
+            },
+
+            {
+                "Chapter": "Discussion",
+				"Id": "discussion-frontends",
+                "Pages": [
+	                    {
+                        "Page": "Frontends",
+                        "Id": "discussion-frontends",
+                        "Subjects": [
+							{
+								"Subject":"Why independent frontend",
+								"Id":"why-independent-frontend"
+							},
+							{
+								"Subject":"Many types of frontends in the same system",
+								"Id":"many-types-of-frontends-in-the-same-system"
+							}
+						]
+					},
+
+	                    {
+                        "Page": "Technological time-robustness",
+                        "Id": "discussion-technological-time-robustness"
+			          	}
+                ]
+            }
+        ],
+
+		"Content":{
+	            "introduction-about-this-tour": {
+					"ChapterNo": 0,
+					"PageNo": 0,
+					"SubjectsNo": "0",
+					"PrevPage": "",
+					"PrevPageId": "",
+					"NextPage": "The platform independence of ObjectReef",
+					"NextPageId": "introduction-the-platform-independence-of-objectreef",
+			"Page": [
+						{
+							"Kind": "HTML",
+							"HTML": "<h1 hidden>Introduction</h1><h2 id=\"introduction-about-this-tour\">About this tour</h2><p>We have tried to write this short guide to present ObjectReef as thoroughly as possible in as concise and quick a form as possible. </p><p>We strongly believe that this short tour of how and why you build solutions in ObjectReef is necessary and at the same time sufficient to form an opinion of what this system is and how to use it.</p><p>There are very many backend system solutions on the market today. Each of them has the same goals and promises to fulfill them, although their designs and approaches to problems are significantly different from each other. Often, you have to search deeply before you become orthogonal to the characteristics of a particular system.</p><p>Here, in the shortest possible pages, which can even be called slides, we present a set of key information about ObjectReef</p><p>The <a href=\"/doc/reef-dev-tour-311/general-concepts-hello-world\">General concepts </a> chapter describes all the key components of the application. Data model and operations.</p><p>The Tour App chapter describes how to install the software, how to make the first application and shows sample queries. </p><blockquote><p>Note: Tour App This is not a chapter exclusively for programmers. You don't need to install the system either. Nevertheless, we encourage you to read it for a precise understanding of the essence of the system.</p></blockquote>"
+						}
+					]
+				},
+	            "introduction-the-platform-independence-of-objectreef": {
+					"ChapterNo": 0,
+					"PageNo": 1,
+					"SubjectsNo": "0",
+					"PrevPage": "About this tour",
+					"PrevPageId": "introduction-about-this-tour",
+					"NextPage": "Natural applications design process",
+					"NextPageId": "introduction-natural-applications-design-process",
+			"Page": [
+						{
+							"Kind": "HTML",
+							"HTML": "<h2 id=\"introduction-the-platform-independence-of-objectreef\">The platform independence of ObjectReef</h2><p>ObjectReef is the sixth generation of a system that has been developed, tested and optimized for more than 20 years. From the very beginning the core idea of that system is absolute isolation between business logic of any application and technological aspects how that logic will be executed.</p><p></p>"
+						}
+					]
+				},
+	            "introduction-natural-applications-design-process": {
+					"ChapterNo": 0,
+					"PageNo": 2,
+					"SubjectsNo": "3",
+					"PrevPage": "The platform independence of ObjectReef",
+					"PrevPageId": "introduction-the-platform-independence-of-objectreef",
+					"NextPage": "Model-compliant implementation",
+					"NextPageId": "introduction-model-compliant-implementation",
+			"Page": [
+						{
+							"Kind": "HTML",
+							"HTML": "<h2 id=\"introduction-natural-applications-design-process\">Natural applications design process</h2><p>A natural approach to describing an application is to separately describe its three most essential aspects: the data model, logic (operations), and how it is presented to the user.</p><h3 id=\"data-model\">Data model</h3><p>The description of the model is the definition of structures and relationships between them. We most often think of structures in terms of tables, columns and keys in a relational database. Often they are also declarations of classes and their attributes. </p><h3 id=\"data-operations\">Data operations</h3><p>The second basic and often much more complex part of the specification is the description of all the actions that the user can perform. Only in the simplest applications does the logic consist only of directly adding, modifying and deleting information stored in tables, or objects. In most descriptions of applications supporting complex tasks of groups of people, we will find a huge number of often very complex operations. </p><h3 id=\"presentation-user-interface\">Presentation - User Interface</h3><p>This is, in the broadest terms, a drawing of what the user sees and what he can move when he works with the designed application. </p><p>Note that the same application can have very different interfaces. Nowadays, it's very common to have access through the browser and native apps written for iOs and Android.</p>"
+						}
+					]
+				},
+	            "introduction-model-compliant-implementation": {
+					"ChapterNo": 0,
+					"PageNo": 3,
+					"SubjectsNo": "0",
+					"PrevPage": "Natural applications design process",
+					"PrevPageId": "introduction-natural-applications-design-process",
+					"NextPage": "Hello World",
+					"NextPageId": "the-objectreef-general-concepts-hello-world",
+			"Page": [
+						{
+							"Kind": "HTML",
+							"HTML": "<h2 id=\"introduction-model-compliant-implementation\">Model-compliant implementation</h2><p>When implementing an application in ObjectReef, you define the data model and detail all the operations users will perform on it.</p><p>When implementing these two most important aspects, you can only describe data structures and operations on that data. You can only describe WHAT the application stores and WHAT it does with that data. </p><p>In a nutshell, you take the description of the structures and 'rewrite' them and then take the list of required operations and translate their description into formal language, with the formal description often being much more concise and taking up much less space than the original documentation!</p>"
+						}
+					]
+				},
+	            "the-objectreef-general-concepts-hello-world": {
+					"ChapterNo": 1,
+					"PageNo": 0,
+					"SubjectsNo": "0",
+					"PrevPage": "Model-compliant implementation",
+					"PrevPageId": "introduction-model-compliant-implementation",
+					"NextPage": "Application data modeling",
+					"NextPageId": "the-objectreef-general-concepts-application-data-modeling",
+			"Page": [
+						{
+							"Kind": "HTML",
+							"HTML": "<h1 hidden>The ObjectReef general concepts</h1><h2 id=\"the-objectreef-general-concepts-hello-world\">Hello World</h2><p>A good example of what ObjectReef is and isn't is the \"Hello World\" application usually presented first in most textbooks for subsequent programming languages. Its code usually looks something like this:</p>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "print(\"Hello, world!\") //Swift\n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p>Where in one line we read pure technical executive code manipulating directly computer screen.</p><p>It is impossible to write such a program in ObjectReef! A developer designing an application in ObjectReef has no access to databases, let alone the screen. If we really want to display \"Hello World\" obtained from ObjectReef somewhere, we need to define the operation resulting \u201cHello World\u201d text</p>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "context App::SayHello: string\npost:\n\tresult = \"Hello World\"\n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p>And then ask the server:</p>"
+						},
+						{
+							"Kind": "IMG",
+							"PATH": "image2.png",
+							"Caption": "<figcaption>Sample call to running local server from standard HTTP client \u2018curl\u2019</figcaption>"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p></p><p>ObjectReef is a classic backend. Where \"Hello World\" will appear depends on the frontend designer.</p>"
+						}
+					]
+				},
+	            "the-objectreef-general-concepts-application-data-modeling": {
+					"ChapterNo": 1,
+					"PageNo": 1,
+					"SubjectsNo": "5",
+					"PrevPage": "Hello World",
+					"PrevPageId": "the-objectreef-general-concepts-hello-world",
+					"NextPage": "Modeling relationships between classes",
+					"NextPageId": "the-objectreef-general-concepts-modeling-relationships-between-classes",
+			"Page": [
+						{
+							"Kind": "HTML",
+							"HTML": "<h2 id=\"the-objectreef-general-concepts-application-data-modeling\">Application data modeling</h2><p>Every application needs data model. In ObjectReef, we define the data model by defining the class structure.</p><h3 id=\"class-definition\">Class definition</h3><p>Defining class structures and relationships between them is a complete set of information for ObjectReef to create and manage data that is stored in the database in the background.  Just define the attributes and play with your data right away!</p><p>Let's define four classes: <code>App</code>, <code>User</code>, <code>Task</code> and <code>TaskLink</code>.</p><h3 id=\"class-app\">class App</h3>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "class App                   \n    Users (all):\t\tUser\n    Tasks (all):\t\tTask\nend class\n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p>Class <code>App</code> is predefined class representing single root of our application. There are no obligatory fields or operations which we should define in this class. It represents global object accessible by <code>app</code> keyword. </p><h3 id=\"class-user\">class User</h3>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "class User \n    login(64):       string -- This is system field, do not remove\n    MyTasks (0..n):  Task <backNav: Responsible>\nend class \n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p>Class <code>User</code> is second class in Reefs which has special role. Const variable:</p>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "user: User  \n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p>is referencing object in which we store data related to user.  We can add as many attributes and relations to other classes as we want. Here we have defined that <code>User</code> may have collection of <code>Tasks</code>: </p>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "Tasks (0..n):  Task  \n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<h3 id=\"class-task\">class Task</h3><p>Sample class storing basic attributes of a Task like <code>ToDo</code>, <code>StartDate</code>, <code>Duration</code>, <code>EndDate</code> and <code>OrderNo</code>.</p>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "class Task\n\tToDo:  \t\t\t\tstring\n\tStartDate: \t\t\tdate\n\tDuration:\t\t\ttimespan\n\tEndDate:\t\t \tdate\n\tOrderNo:\t\t\tinteger\n\tResponsible:\t   \tUser <backNav: MyTasks>\n\tPrevTasks [0..n]:\tTaskLink <backNav: NextTask>\n\tNextTasks [0..n]:\tTaskLink <backNav: PrevTask>\nend class\n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<h3 id=\"class-tasklink\">class TaskLink</h3><p>Every object of class <code>Task</code> may have successors and predecessors. We do link them using objects of class <code>TaskLink</code>:</p>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "class TaskLink\n\tNextTask: \t\t\tTask\n\tPrevTask:\t\t\tTask\nend class\n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": ""
+						}
+					]
+				},
+	            "the-objectreef-general-concepts-modeling-relationships-between-classes": {
+					"ChapterNo": 1,
+					"PageNo": 2,
+					"SubjectsNo": "1",
+					"PrevPage": "Application data modeling",
+					"PrevPageId": "the-objectreef-general-concepts-application-data-modeling",
+					"NextPage": "Data navigation",
+					"NextPageId": "the-objectreef-general-concepts-data-navigation",
+			"Page": [
+						{
+							"Kind": "HTML",
+							"HTML": "<h2 id=\"the-objectreef-general-concepts-modeling-relationships-between-classes\">Modeling relationships between classes</h2><p>There are no data containers like Arrays, Maps, Stacks. In Business models we just have associations.</p><h3 id=\"associations\">Associations</h3><p>In our example classes, in addition to simple attributes (<code>string</code>, <code>date</code>, <code>number</code>), we have declarations in which the type position includes the class name. This notation declares relationships between objects, which we call associations. </p>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "class User \n\t. . .\n\tTasks (0..n):   Task <backNav:Responsible>\n\t. . .\nend class \n\nclass Task\n\t.\t.\t.\n\tResponsible:\t  \tUser <backNav: MyTasks>\n\tPrevTasks [0..n]:\tTaskLink <backNav: NextTask>\n\tNextTasks [0..n]:\tTaskLink <backNav: PrevTask>\nend class\n\nclass TaskLink\n\tNextTask: \t\t\tTask\n\tPrevTask:\t\t\tTask\nend class\n\n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p> ObjectReef notation follows the definition of association in UML notation, which is usually represented in the form of class diagrams:</p>"
+						},
+						{
+							"Kind": "IMG",
+							"PATH": "image3.png",
+							"Caption": "<figcaption>UML Class Diagramm representing classes declared in this chapter.</figcaption>"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p>Both the text definitions and the class diagram read as follows:</p><ul><li>A User can be assigned any number of tasks, navigable through the <code>MyTasks</code> association. In turn, each task assigned to it has an association to that user via the <code>Responsible</code> navigation.</li><li>Each Task can be associated with any number of predecessors and successors through objects of the <code>TaskLink</code> class.</li></ul><p>Associations with multiplicity <code>0..n</code> are called in short Collections</p>"
+						}
+					]
+				},
+	            "the-objectreef-general-concepts-data-navigation": {
+					"ChapterNo": 1,
+					"PageNo": 3,
+					"SubjectsNo": "2",
+					"PrevPage": "Modeling relationships between classes",
+					"PrevPageId": "the-objectreef-general-concepts-modeling-relationships-between-classes",
+					"NextPage": "Data layer of application",
+					"NextPageId": "the-objectreef-general-concepts-data-layer-of-application",
+			"Page": [
+						{
+							"Kind": "HTML",
+							"HTML": "<h2 id=\"the-objectreef-general-concepts-data-navigation\">Data navigation</h2><h3 id=\"context\">Context</h3><p>When writing internal code we use Reefs Navigation. Every expression in Reefs is written in context of some class or variable. </p>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "app.SayHello \n\ncontext Task\n\tself.EndDate = self.StartDate + self.Duration \n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<h4>Associations with multiplicity 0..1 or 1</h4>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "context Task\n\tself.Responsible.login \n\ncontext TaskLink\n\tself.PrevTask.EndDate\n\tself.NextTask.StartDate\t\n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<h4>Colections (associations with multiplicity 0..n)</h4>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "context User\n\tself.MyTasks.first.ToDo\n\tself.MyTasks.count\n\tself.MyTasks.min(element.StartDate)\n\ncontext App\n\tself.Users.first.MyTasks.count\n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<h3 id=\"rest-api-navigation-syntax\">REST API Navigation syntax</h3><p>Objects and navigations are accessible by REST API. When ObjectReef server starts, we can access it from any HTTP client. ObjectReef server translates HTTP syntax into Reefs expression.</p><p>Reefs syntax:</p><pre>app.SayHello\n</pre><p>Rest API / HTTP syntax:</p><pre>app/SayHello\n</pre>"
+						}
+					]
+				},
+	            "the-objectreef-general-concepts-data-layer-of-application": {
+					"ChapterNo": 1,
+					"PageNo": 4,
+					"SubjectsNo": "3",
+					"PrevPage": "Data navigation",
+					"PrevPageId": "the-objectreef-general-concepts-data-navigation",
+					"NextPage": "Logic layer of applcation",
+					"NextPageId": "the-objectreef-general-concepts-logic-layer-of-applcation",
+			"Page": [
+						{
+							"Kind": "HTML",
+							"HTML": "<h2 id=\"the-objectreef-general-concepts-data-layer-of-application\">Data layer of application</h2><h3 id=\"writing-reading-and-modifying-data\">Writing, reading and modifying data</h3><p>Once we had defined our class structure, we can add, read and modify it immiediatelly. We use standard Rest API, which is automatically defined from our class structure. </p><h3 id=\"adding-task-for-a-user\">Adding task for a user</h3><p>Reefs Syntax:</p>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "app.Tasks.newElement(element.ToDo = \"Try ObjectReef\" \n\t\t\t\t\t\t\t\tand element.StartDate = 2023.11.30 \n\t\t\t\t\t\t\t\tand element.Duration = 2880)\n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p>Rest API / HTTP syntax: </p><pre>app/Tasks/new?ToDo=\"Try ObjectReef\";StartDate='2023-11-30T12:34Z';Duration='P2D'\n</pre><h3 id=\"reading-user-tasks\">Reading user tasks</h3><p>Query, which navigates to the <code>app.</code><code>Tasks</code> collection:</p>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "app/Tasks\n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p>results in all Tasks in a json format.</p>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "{\n  \"Task\": [\n    {\n      \"Id\": 1077936134,\n      \"ToDo\": \"Try ObjectReef\",\n      \"StartDate\": \"2023-11-30T12:34Z\",\n      \"Duration\": \"P2D\",\n      \"EndDate\": \"2023-12-02T12:34Z\",\n      \"OrderNo\": 0,\n      \"ResponsibleId\": 0,\n    }\n  ]\n}\n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p>ObjectReef gives full set of REST commands giving access to application data. For details read <a href=\"/doc/rest-api-311\">REST API documentation</a>.</p>"
+						}
+					]
+				},
+	            "the-objectreef-general-concepts-logic-layer-of-applcation": {
+					"ChapterNo": 1,
+					"PageNo": 5,
+					"SubjectsNo": "2",
+					"PrevPage": "Data layer of application",
+					"PrevPageId": "the-objectreef-general-concepts-data-layer-of-application",
+					"NextPage": "Interface Layer",
+					"NextPageId": "the-objectreef-general-concepts-interface-layer",
+			"Page": [
+						{
+							"Kind": "HTML",
+							"HTML": "<h2 id=\"the-objectreef-general-concepts-logic-layer-of-applcation\">Logic layer of applcation</h2><p>Fast structure definition is great, but this is just the beginning of ObjectReef power. While most backend servers are just giving access to read and write data, ObjectReef goes far beyond. </p><blockquote><p>ObjectReef has formal language which allows to specify all operations which users may perform in application.</p></blockquote><h3 id=\"formal-specification\">Formal specification</h3><p>Write elegant, self commenting code. Write pure specification. </p><p>As a short sample let us write few rules from project planning systems. </p><blockquote><p>Please take a while and look how easy to read is formal language used In ObjectReef.</p></blockquote><h4>EndDate equation</h4>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "------------------------------------------------------------\nEndDate of Task is always bigger from StartDate by Duration. \n------------------------------------------------------------\n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p>This we say to the system by writing invariant:</p>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "context Task\ninv:\n\tself.EndDate = self.StartDate + self.Duration\n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<blockquote><p>Look carefully. Reef code is the same length as English statement! </p></blockquote><p>Now let us do something more complex. In project managenment we often use reschedule method. Let us describe basic rules of this calculation.</p><h4>Scheduling Tasks</h4>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "Rescheduling task means\n\nif there are any tasks predecessors\ntask predecessors must be rescheduled first\t\ntask may start after latest of predecessor end\n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p>Reefs code says exactly the same with the same amount of lines:</p>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "\ncontext Task::Reschedule()\npost:\n\tif self.PrevTasks.exists then\n\t\tself.PrevTasks.forAll(element.PrevTask.Reschedule)\n        \n\t\tself.StartDate = self.PrevTasks.max(\n            element.PrevTask.EndDate)\n\tend if \n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p>Note, that end date of each task is automatically recalculated when the start date changes, because of our first rule! </p><h3 id=\"sample-calls\">Sample calls</h3><h4>Reefs syntax</h4>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "user.MyTasks.at(no).Reschedule \n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<h4>Rest API / HTTP syntax</h4><pre>user/MyTasks/at/1/Reschedule\n</pre>"
+						}
+					]
+				},
+	            "the-objectreef-general-concepts-interface-layer": {
+					"ChapterNo": 1,
+					"PageNo": 6,
+					"SubjectsNo": "1",
+					"PrevPage": "Logic layer of applcation",
+					"PrevPageId": "the-objectreef-general-concepts-logic-layer-of-applcation",
+					"NextPage": "First steps tutorial",
+					"NextPageId": "making-first-objectreef-app-first-steps-tutorial",
+			"Page": [
+						{
+							"Kind": "HTML",
+							"HTML": "<h2 id=\"the-objectreef-general-concepts-interface-layer\">Interface Layer</h2><h3 id=\"rest-api\">Rest API</h3><p>ObjectReef host a back-end service. In simplest configuration it is a single server running dedicated service, while in an advanced mode it may be a cluster of dynamic launched servers running different services for different organizations.</p><p>When building an application, the ObjectReef instance is run through a dedicated console. In this situation, the server is available at localhost on port 1996 (the default value):</p><pre>curl http://localhost:1996/cons/v001/app/SayHello\n</pre><p>When placed in the cloud, the ObjectReef service creates separate instances of the application for each company or group. When we put it in the cloud served in the <code>objectreef.io</code> domain, our full query will look like this:</p><pre>curl https://tourapp5y4e6hpt.objectreef.io/json/v001/app/SayHello\n</pre><p></p><p></p>"
+						}
+					]
+				},
+	            "making-first-objectreef-app-first-steps-tutorial": {
+					"ChapterNo": 2,
+					"PageNo": 0,
+					"SubjectsNo": "0",
+					"PrevPage": "Interface Layer",
+					"PrevPageId": "the-objectreef-general-concepts-interface-layer",
+					"NextPage": "Installation",
+					"NextPageId": "making-first-objectreef-app-installation",
+			"Page": [
+						{
+							"Kind": "HTML",
+							"HTML": "<h1 hidden>Making first ObjectReef app</h1><h2 id=\"making-first-objectreef-app-first-steps-tutorial\">First steps tutorial</h2><p>In this chapter we lead you step by step through installation and running simple <b>tourapp</b> generated from tour template. You may try it yourself, to check that it really works as is described or you can just take one minute to read how fast and easy is getting started.</p>"
+						}
+					]
+				},
+	            "making-first-objectreef-app-installation": {
+					"ChapterNo": 2,
+					"PageNo": 1,
+					"SubjectsNo": "3",
+					"PrevPage": "First steps tutorial",
+					"PrevPageId": "making-first-objectreef-app-first-steps-tutorial",
+					"NextPage": "Making application solution",
+					"NextPageId": "making-first-objectreef-app-making-application-solution",
+			"Page": [
+						{
+							"Kind": "HTML",
+							"HTML": "<h2 id=\"making-first-objectreef-app-installation\">Installation</h2><h3 id=\"install-objectreef\">Install ObjectReef</h3><p>First <a href=\"/download\">download</a> Windows, Ubuntu or macOS installer. A detailed description of the ObjectReef package installation is available <a href=\"/doc/installation-guide-312\">here</a>.</p><h3 id=\"install-visual-studio-code\">Install Visual Studio Code</h3><p>VSC is most popular source code editor. Propably you already use it. If not get it from <a href=\"https://code.visualstudio.com/download\">here</a>.</p><h3 id=\"install-visual-studio-code-objectreef-extension\">Install Visual Studio Code ObjectReef Extension</h3><p>The best way to install the <a href=\"https://marketplace.visualstudio.com/items?itemName=humandialog.object-reef\">extension</a> is to do it directly from the VS Code Marketplace panel.\u00a0</p><p>Run Visual Studio Code, go to the <b>Extensions</b> panel (<kbd>Ctrl+Shift+X</kbd> / <kbd>Shift+\u2318+X</kbd>) and type in Search input <i>ObjectReef</i>, and then click <i>Install</i>.\u00a0</p><p></p>"
+						},
+						{
+							"Kind": "IMG",
+							"PATH": "image4.png",
+							"Caption": ""
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<blockquote><p>Now we are ready to go!</p></blockquote>"
+						}
+					]
+				},
+	            "making-first-objectreef-app-making-application-solution": {
+					"ChapterNo": 2,
+					"PageNo": 2,
+					"SubjectsNo": "4",
+					"PrevPage": "Installation",
+					"PrevPageId": "making-first-objectreef-app-installation",
+					"NextPage": "Trying ObjectReef Console",
+					"NextPageId": "making-first-objectreef-app-trying-objectreef-console",
+			"Page": [
+						{
+							"Kind": "HTML",
+							"HTML": "<h2 id=\"making-first-objectreef-app-making-application-solution\">Making application solution</h2><h3 id=\"create-first-reef-app\">Create first Reef App</h3><p>Run command line (Powershell, terminal). </p><p>Go to the directory where you want to locate your reef projects files (type  <kbd>cd <i>myprojectspath</i></kbd>).</p><p>Create solution using template by running command <kbd>reef new-solution <i>name </i>-t <i>template</i></kbd></p><pre>reef new-solution tourapp.reef -t tour\n</pre><p>The reef new-solution creates folder with project name (tourapp.reef) and places inside all demanded source files. Option <code>-t </code><code>tour</code> prepares <b>app.</b><b>reef</b> file with declarations used in this tour.</p><p></p>"
+						},
+						{
+							"Kind": "IMG",
+							"PATH": "image5.png",
+							"Caption": "<figcaption>ObjectReef new-solution tourapp.reef -t tour output</figcaption>"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<h3 id=\"open-solution-in-visual-studio-code\">Open solution in Visual Studio Code</h3><h4>Open solution from command line</h4><p>Open newly created folder in Visual Studio Code (vscode). </p><pre>code tourapp.reef/\n</pre><h4>Open solution from Visual Studio Code</h4><p>Run Visual Studio Code, open menu \u2018File\u2019, execute \u2018Open Folder\u2019 command and select tourapp.reef folder.</p><h4>Open App.reef</h4><p>Just to verify, that everything is fine open template based <b>App.</b><b>reef</b> file.</p><p>To do this open 'Explorer' panel (press <kbd>ctrl+shift+E</kbd>) and select App.reef file. </p><p>You should see:</p>"
+						},
+						{
+							"Kind": "IMG",
+							"PATH": "image6.png",
+							"Caption": ""
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<h3 id=\"run-objectreef-server-in-dev-mode\">Run ObjectReef server in dev mode</h3><p>Activate terminal panel in vscode (press <kbd>ctrl+`</kbd>  to show terminal if it\u2019s hidden).</p><p>You should see your default OS shell prompt, when the current directory is our just created solution directory. Being in the solution directory type:</p><pre>reef dev\n</pre><p>You should see:</p>"
+						},
+						{
+							"Kind": "IMG",
+							"PATH": "image7.png",
+							"Caption": "<figcaption>Blinking cursor in a bottom of screen is ObjectReef Console command line.</figcaption>"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<h3 id=\"build-objectreef-solution\">Build ObjectReef solution</h3><p>To build the project just press <kbd>Shift+Ctr+B</kbd>. The ObjectReef extension will ask about options to build command:</p>"
+						},
+						{
+							"Kind": "IMG",
+							"PATH": "image8.png",
+							"Caption": ""
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p>Choose first option, et viola! The source code has been compiled. </p><p>Note that build command opens second integrated terminal, where build output is printed. After build move back to main terminal window.</p><p>Another method is typing special command in the reef dev integrated terminal:</p><p>Type <code>sys/build</code> in ObjectReef Console.</p><p>You shoud see SUCCESS message:</p><p></p>"
+						},
+						{
+							"Kind": "IMG",
+							"PATH": "image9.png",
+							"Caption": ""
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p></p>"
+						}
+					]
+				},
+	            "making-first-objectreef-app-trying-objectreef-console": {
+					"ChapterNo": 2,
+					"PageNo": 3,
+					"SubjectsNo": "2",
+					"PrevPage": "Making application solution",
+					"PrevPageId": "making-first-objectreef-app-making-application-solution",
+					"NextPage": "ObjectReef solution source code",
+					"NextPageId": "making-first-objectreef-app-objectreef-solution-source-code",
+			"Page": [
+						{
+							"Kind": "HTML",
+							"HTML": "<h2 id=\"making-first-objectreef-app-trying-objectreef-console\">Trying ObjectReef Console</h2><p>Type in Reef Console:</p><pre>Task/new?ToDo=\"Try ObjectReef\";StartDate=2023.11.30\n</pre><p>You should see response:</p><pre>Task id = 11 created.\n</pre><p>Like on this screen:</p><p></p>"
+						},
+						{
+							"Kind": "IMG",
+							"PATH": "image10.png",
+							"Caption": ""
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p>Type now: </p><pre>Task/count\n</pre><p>The result will be presented below</p><pre>&gt Task/count\n1\n&gt \n</pre><p>So, let\u2019s ask our task about <code>ToDo</code> property:</p><pre>Task/first/ToDo\n</pre><p>The result is as expected:</p><pre>&gt Task/first/ToDo\nTry ObjectReef\n&gt\n</pre><p>This are basic samples of commands which we can type in reef console.</p><h3 id=\"objectreef-console-vs-curl-shell-command\">ObjectReef Console vs. curl shell command</h3><p>ObjectReef console (reef.exe) is simple HTTP client similar to curl. It is just making commands more convenient by adding constant path elements to your request, before sending it to server.</p><p>Typing in Reef console:</p><pre>Task/count\n</pre><p>Is the same as executing curl with full path in system command line:</p>"
+						},
+						{
+							"Kind": "IMG",
+							"PATH": "image11.png",
+							"Caption": ""
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p></p><p>Details are described in <a href=\"/doc/rest-api-311\">Application API</a>. </p><blockquote><p>For quick tour it is enough to understand, that ObjectReef Console requests are direct REST API calls ready to use in final cloud application. </p></blockquote><h3 id=\"json-vs-cons-protocols\">Json vs. cons protocols</h3><h4>Json</h4><p>Type <code>json</code> to switch to json mode:</p><pre>&gt json\nJson mode. Http path start changed to: json/anyv/\n</pre><p>Server answers will be formatted in json format. Standard format for responses. </p><pre>&gt app/Tasks/first\n{\n  \"Task\": {\n    \"Id\": 1077936130,\n    \"ToDo\": \"Try ObjectReef\",\n    \"StartDate\": \"2023-11-30T00:00Z\",\n    \"Duration\": \"PT0M\",\n    \"EndDate\": \"2023-11-30T00:00Z\",\n    \"OrderNo\": 0,\n    \"ResponsibleId\": 0,\n    \"$type\": \"Task\",\n    \"$ref\": \"Task/1077936130\",\n    \"$display\": \"Task\"\n  }\n}\n&gt\n</pre><h4>Console</h4><p>Type <code>cons</code> to switch back to console mode. Responses are in free text easy readable for people. Convinient for debugging and data checking in console:</p><pre>&gt cons\nConsole mode. Http path start changed to: cons/anyv/\n&gt app/Tasks/first\nId              1077936130\nToDo            Try ObjectReef\nStartDate       2023-11-30 00:00\nDuration\nEndDate         2023-11-30 00:00\nOrderNo         0\nResponsibleId   0\n</pre><p></p>"
+						}
+					]
+				},
+	            "making-first-objectreef-app-objectreef-solution-source-code": {
+					"ChapterNo": 2,
+					"PageNo": 4,
+					"SubjectsNo": "2",
+					"PrevPage": "Trying ObjectReef Console",
+					"PrevPageId": "making-first-objectreef-app-trying-objectreef-console",
+					"NextPage": "Sample API requests",
+					"NextPageId": "making-first-objectreef-app-sample-api-requests",
+			"Page": [
+						{
+							"Kind": "HTML",
+							"HTML": "<h2 id=\"making-first-objectreef-app-objectreef-solution-source-code\">ObjectReef solution source code</h2><p><b>Tourapp.reef</b> project has only two files. </p><ul><li><b>App.</b><b>reef</b> \u2013 here is our application data structure and logic</li><li><b>Tourapp.refs</b> \u2013 simple config file, which you usually do not need to access.</li></ul><blockquote><p>There is nothing more. It is really oll what is needed to run that service.</p></blockquote><p>They are listed here for you in case, that you only read without trying ObjectReef yourself.</p><h3 id=\"complete-source-code-of-the-app\">Complete source code of the app</h3><p>Tempate <code>tour</code> generated an <b>App.reef</b> file, which contains both class definitions and operations. In our case, you'll find all the source code for our first application here, although in real cases you can split the code into as many <i>.reef</i> files as you want.</p>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "class App    \n\tUsers (all):\tUser\n    Tasks (all):\tTask\nend class \n\nclass User                  \n    login(64):       string --System field, do not remove\n    MyTasks (0..n):  Task <backNav: Responsible>\nend class    \n\nclass Task\n\tToDo:  \t\t\t\tstring\n\tStartDate: \t\t\tdate\n\tDuration:\t\t\ttimespan\n\tEndDate:\t\t \tdate\n\tOrderNo:\t\t\tinteger\n\tResponsible:\t   \tUser <backNav: MyTasks>\n\tPrevTasks [0..n]:\tTaskLink <backNav: NextTask>\n\tNextTasks [0..n]:\tTaskLink <backNav: PrevTask>\nend class\n    \nclass TaskLink\n\tNextTask: \t\t\tTask \n\tPrevTask:\t\t\tTask\nend class\n\ncontext Task\ninv:\n\tself.EndDate = self.StartDate + self.Duration\n\t\ncontext Task::SetResponsible(r: User): User\npost:\n\tself.Responsible = r\n\tresult = self.Responsible\t\n\ncontext Task::Reschedule()\npost:\n\tif self.PrevTasks.exists then\n\t\tself.PrevTasks.forAll(element.PrevTask.Reschedule)\n        \n\t\tself.StartDate = self.PrevTasks.max(\n            element.PrevTask.EndDate)\n\tend if \n\ncontext App::SayHello: string\npost:\n\tresult = \"Hello World\"\n\t\ncontext App::Init: string\npost:\n\tself.Users.newElement(element.login = \"Alice\")\t\n\tself.Users.newElement(element.login = \"Bob\")\n\tself.GenerateSampleTasks(5,2023.11.30)\n\tresult = \"Sample data prepared: \" + self.Users.count + \" users and \" + self.Tasks.count + \" tasks.\"\n        \ncontext App::GenerateSampleTasks(tasksNo: integer, start: date)\npost:\n\tlet task1: Task in\n\tlet task2: Task in\n\t\n\ttask1 = self.Tasks.newElement(element.StartDate = start and element.Duration = 1440)\n\t\n\tset(1 .. tasksNo - 1).forAll(i | \n\t\t\ttask2 = self.Tasks.newElement(element.StartDate = start and element.Duration = 1440) and \n\t\t\ttask1.NextTasks.newElement(element.NextTask = task2) and \n\t\t\ttask1 = task2)\n\n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<h3 id=\"solution-configuration-file\">Solution configuration file</h3><p>The second file, tourapp.refs, is the configuration file for the ObjectReef soluition. You don't need to go into details at this point, but its contents are below.</p>"
+						},
+						{
+							"Kind": "CODE",
+							"Type": "xml",
+							"Src": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<ReefSolution ProjectName=\"tourapp\">\n  <Info>This is auto generated Reef Solution (*.refs) file.</Info>\n  <Build>\n    <Output Folder=\"bin/\" File=\"tourapp.refr\"/>\n  </Build>\n  <Debug>\n    <SampleData Folder=\"bin/\" File=\"tourapp.refd\"/>\n  </Debug>\n  <AppSettings>\n    <API Version=\"v001\"/>\n  </AppSettings>\n</ReefSolution>\n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": ""
+						}
+					]
+				},
+	            "making-first-objectreef-app-sample-api-requests": {
+					"ChapterNo": 2,
+					"PageNo": 5,
+					"SubjectsNo": "7",
+					"PrevPage": "ObjectReef solution source code",
+					"PrevPageId": "making-first-objectreef-app-objectreef-solution-source-code",
+					"NextPage": "Executing tour algorithm",
+					"NextPageId": "making-first-objectreef-app-executing-tour-algorithm",
+			"Page": [
+						{
+							"Kind": "HTML",
+							"HTML": "<h2 id=\"making-first-objectreef-app-sample-api-requests\">Sample API requests</h2><p>Once we have build our app, we can start interaction. In final application with frontend our console requests will be used in some API. For browsers we do recommend Fetch API like:</p>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "JavaScript\n----------\nawait fetch(iopath + 'user/MyTasks/at/1/Reschedule')\n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p>Just for the tour and for immiediate verification of written code it is very convenient to call commands just from console in VSC Terminal</p><h3 id=\"gnerating-sample-data\">Gnerating sample data</h3><p>To continue we need some data. ObjectReef is ready and proven to work on millions of objects but for our initial calls we need only to:</p>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "Create user Alice\nCreate user Bob\nGenerateSampleTasks(5 tasks, starting at 30.11.2023)\nReturn count of users and tasks\n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p>Where <code>GenerateSampleTasks</code> creates chain of tasks connected with links. For this we have to invent some algorithm:</p>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "Create some Task and remember it as prevTask\nThan repeat:\n\t\tCreate next Task and remember it as nextTask \n\t\tIn collection of NextTasks in prevTask create TaskLink referencing nextTask\n\t\tStore nextTask as prevTask\n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p>In Reefs that looks as follows:</p>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "context App::Init: string\npost:\n\tself.Users.newElement(element.login = \"Alice\")\t\n\tself.Users.newElement(element.login = \"Bob\")\n\tself.GenerateSampleTasks(5,2023.11.30)\n\tresult = \"Sample data prepared: \" + self.Users.count + \" users and \" + self.Tasks.count + \" tasks.\"\n\ncontext App::GenerateSampleTasks(tasksNo: integer, start: date)\npost:\n\tlet prevTask: Task in\n\tlet nextTask: Task in\n\t\n\tprevTask = self.Tasks.newElement(element.StartDate = start and element.Duration = 1440)\n\t\n\tset(2 .. tasksNo).forAll(i | \n\t\t\tnextTask = self.Tasks.newElement(element.StartDate = start and element.Duration = 1440) and \n\t\t\tprevTask.NextTasks.newElement(element.NextTask = nextTask) and \n\t\t\tprevTask = nextTask)\n\n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p>Type in console <code>app/Init</code> to call <code>Init</code> operation of <code>app</code> global variable:</p><pre>&gt app/Init\nSample data prepared : 2 users and 6 tasks.\n&gt\n</pre><h3 id=\"reading--single-objects\">Reading  single objects</h3><p>To retur last object in <code>app.</code><code>Tasks</code> collection type <code>app/Tasks/last</code>:</p><pre>&gt app/Tasks/last\nId              16\nToDo            Task 5\nStartDate       2023-11-30 00:00\nDuration        1D\nEndDate         2023-12-01 00:00\nOrderNo         5\nResponsibleId   0\n$type           Task\n$ref            ./Task/16\n\n&gt\n</pre><p>When you want to access to objects of specified type, use type name as predefined collection. For example to access first object of type <code>User</code> type <code>User/first</code>:</p><pre>&gt User/first\nId      11\nlogin   Alice\n$type   User\n$ref    ./User/11 \n&gt\n</pre><h3 id=\"reading-collections\">Reading collections</h3><p>You can also list all elements of given type. When use the <code>fields</code> parameter only listed properties will be returned.</p><pre>&gt Task?fields=ToDo,Responsible,StartDate,Duration,EndDate\nToDo     Responsible StartDate          Duration EndDate\nTask 1   null        2023-11-30 00:00   1D       2023-12-01 00:00\nTask 2   null        2023-11-30 00:00   1D       2023-12-01 00:00\nTask 3   null        2023-11-30 00:00   1D       2023-12-01 00:00\nTask 4   null        2023-11-30 00:00   1D       2023-12-01 00:00\nTask 5   null        2023-11-30 00:00   1D       2023-12-01 00:00\n\n&gt \n</pre><h3 id=\"updating-object-properties\">Updating object properties</h3><p>To update one or more objet properties use the <code>set</code> keyword:</p><pre>&gt app/Tasks/last/set?ToDo=\"Mountain trip\";Duration=\"P5D\"\nDone. \n</pre><p>Let's check if the change has occurred:</p><pre>&gt app/Tasks/last?fields=ToDo,StartDate,Duration,EndDate\nToDo        Mountain trip\nStartDate   2023-11-30 00:00\nDuration    5D\nEndDate     2023-12-05 00:00\n</pre><h3 id=\"operation-call-with-arguments\">Operation call with arguments</h3><p>Operation <code>SetResponsible</code> in task assigns user passed in parameter to <code>Responsible</code> association and returns that responsible:</p>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "context Task::SetResponsible(user: User): User\npost:\n\tself.Responsible = user\n\tresult = self.Responsible\n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p>Request:</p><pre>&gt app/Tasks/last/SetResponsible?user=./User/11\nId      11\nlogin   Alice\n$type   User\n$ref    ./User/11\n</pre><p>Sets in last task <code>Responsible</code> object <code>User</code> with Id <code>11</code>.</p><h3 id=\"association-ends-navigation\">Association ends navigation</h3><p>Once we have assigned <code>Responsible</code>, we can navigate to it from <code>Task</code>:</p><pre>&gt app/Tasks/last/Responsible/login\nAlice\n</pre><p>Let us go back to <code>Task</code> declaration:</p>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "class Task\n\t.\t.\t.\n\tResponsible:\t   \t\tUser <backNav: MyTasks>\n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p>Assotiation <code>Responsible</code> has backward navigation (<code>backNav</code>) named <code>MyTasks</code></p><p>That means that once we assigned <code>Responsible</code> that task is navigable through <code>MyTasks</code> collection in User.</p><pre>&gt app/Users/first/MyTasks?fields=ToDo,StartDate,EndDate\nToDo            StartDate          EndDate\nMountain trip   2023-11-30 00:00   2023-12-05 00:00\n</pre><h3 id=\"login-simulation\">Login simulation</h3><p>Deployed application is protected by authentication server (OAuth2.0). Only authenticated and verified users may access data according to access rights.</p><p>While modelling we can simulate logging users by typing:</p><pre>&gt sys/login?user=Bob\nSUCCESS. Bob logged in.\n&gt user/MyTasks?fields=ToDo,EndDate  \nToDo EndDate\n\n&gt\n</pre><p>Bob has no tasks.</p><pre>&gt sys/login?user=Alice\nSUCCESS. Alice logged in.\n&gt user/MyTasks?fields=ToDo,EndDate\nToDo            EndDate\nMountain trip   2023-12-05 00:00\n&gt\n</pre><p>Alice has task \u201cMountain trip\u201d.</p>"
+						}
+					]
+				},
+	            "making-first-objectreef-app-executing-tour-algorithm": {
+					"ChapterNo": 2,
+					"PageNo": 6,
+					"SubjectsNo": "2",
+					"PrevPage": "Sample API requests",
+					"PrevPageId": "making-first-objectreef-app-sample-api-requests",
+					"NextPage": "Frontends",
+					"NextPageId": "discussion-frontends",
+			"Page": [
+						{
+							"Kind": "HTML",
+							"HTML": "<h2 id=\"making-first-objectreef-app-executing-tour-algorithm\">Executing tour algorithm</h2><h3 id=\"tasks-before-schedule\">Tasks before schedule</h3><pre>&gt app/Tasks?fields=ToDo,StartDate,Duration,EndDate,Responsible\nToDo            StartDate          Duration EndDate            Responsible\nTask 1          2023-11-30 00:00   1D       2023-12-01 00:00   null\nTask 2          2023-11-30 00:00   1D       2023-12-01 00:00   null\nTask 3          2023-11-30 00:00   1D       2023-12-01 00:00   null\nTask 4          2023-11-30 00:00   1D       2023-12-01 00:00   null\nMountain trip   2023-11-30 00:00   5D       2023-12-05 00:00   ./User/11\n</pre><p>All tasks start on 2023-11-30. Task \u201cMountain trip\u201d has 5 days duration, so it ends on 2023-12-05, all others where initiated to one day, do they end on 2023-12-01.</p><p>All generated tasks are connected by <code>TaskLinks</code>:</p><pre>&gt app/Tasks/at/2/PrevTasks/first/PrevTask/ToDo\nTask 2\n</pre><h3 id=\"executing-rechedule\">Executing Rechedule</h3><h4>Our very simplified scheduling algorithm is just aligning them according to links:</h4>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "\nif there are any tasks predecessors\ntask predecessors must be rescheduled first\ntask may start after latest of predecessor end \n\n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p>Reefs code says exactly the same with the same amount of lines:</p>"
+						},
+						{
+							"Kind": "CODE",
+							"Src": "\ncontext Task::Reschedule()\npost:\n\tif self.PrevTasks.exists then\n\t\tself.PrevTasks.forAll(element.PrevTask.Reschedule)\n        \n\t\tself.StartDate = self.PrevTasks.max(\n            element.PrevTask.EndDate)\n\tend if \n"
+						},
+						{
+							"Kind": "HTML",
+							"HTML": "<p>Type:</p><pre>&gt app/Tasks/last/Reschedule\n</pre><p>Now our tasks are scheduled one after another:</p><pre>&gt app/Tasks?fields=ToDo,StartDate,Duration,EndDate,Responsible\nToDo            StartDate          Duration EndDate            Responsible\nTask 1          2023-11-30 00:00   1D       2023-12-01 00:00   null\nTask 2          2023-12-01 00:00   1D       2023-12-02 00:00   null\nTask 3          2023-12-02 00:00   1D       2023-12-03 00:00   null\nTask 4          2023-12-03 00:00   1D       2023-12-04 00:00   null\nMountain trip   2023-12-04 00:00   5D       2023-12-09 00:00   ./User/11\n</pre>"
+						}
+					]
+				},
+	            "discussion-frontends": {
+					"ChapterNo": 3,
+					"PageNo": 0,
+					"SubjectsNo": "2",
+					"PrevPage": "Executing tour algorithm",
+					"PrevPageId": "making-first-objectreef-app-executing-tour-algorithm",
+					"NextPage": "Technological time-robustness",
+					"NextPageId": "discussion-technological-time-robustness",
+			"Page": [
+						{
+							"Kind": "HTML",
+							"HTML": "<h1 hidden>Discussion</h1><h2 id=\"discussion-frontends\">Frontends</h2><blockquote><p>You choose which frontend framework suits your project best. Be it React, Angular, Blazor, JQuery, Vue.js, Svelte, iOS, Android or any other - ObjectReef will work for them.</p></blockquote><h3 id=\"why-independent-frontend\">Why independent frontend</h3><p>There are many types of applications. They present data on different devices in a very different form. So far, no one has managed to create a universal system for building a user interface of any kind. We recommend choosing the tools most suitable for the solution being built.</p><h3 id=\"many-types-of-frontends-in-the-same-system\">Many types of frontends in the same system</h3><p>The data and logic of a complex system must be consistent. However, different users in different scenarios may only have access to parts of the system in the form that best fits the situation.</p><p>Imagine a system serving a hospital that handles administration, labs and appointment scheduling, among other things. A simple mobile app for a doctor might only give him access to his calendar.</p>"
+						}
+					]
+				},
+	            "discussion-technological-time-robustness": {
+					"ChapterNo": 3,
+					"PageNo": 1,
+					"SubjectsNo": "0",
+					"PrevPage": "Frontends",
+					"PrevPageId": "discussion-frontends",
+					"NextPage": "",
+					"NextPageId": "",
+			"Page": [
+						{
+							"Kind": "HTML",
+							"HTML": "<h2 id=\"discussion-technological-time-robustness\">Technological time-robustness</h2><p>Real-world rules that determine how data can be created, stored, and changed are the most important layer of most applications. When technology changes, moving them to a new environment can be an extremely difficult and costly process. </p><p></p><p></p><p>\n</p><p></p><p></p>"
+					}
+				]
+			}
+		}
+	}
+}

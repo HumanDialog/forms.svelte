@@ -1,0 +1,132 @@
+ [
+        {
+            "name": "Tilos 11.1 MR4",
+            "date": "2023-01-13T00:00Z",
+            "installers": [
+                {
+                    "name": "v11.1 MR4 Chinese",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/setup-tilos_11.1_mr4_en_20230113.exe"
+                },
+                {
+                    "name": "v11.1 MR4 German",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/setup-tilos_11.1_mr4_en_20230113.exe"
+                },
+                {
+                    "name": "v11.1 MR4 English",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/setup-tilos_11.1_mr4_en_20230113.exe"
+                },
+                {
+                    "name": "v11.1 MR4 Spanish",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/setup-tilos_11.1_mr4_en_20230113.exe"
+                },
+                {
+                    "name": "v11.1 MR4 French",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/setup-tilos_11.1_mr4_en_20230113.exe"
+                },
+                {
+                    "name": "v11.1 MR4 Italian",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/setup-tilos_11.1_mr4_en_20230113.exe"
+                },
+                {
+                    "name": "v11.1 MR4 Korean",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/setup-tilos_11.1_mr4_en_20230113.exe"
+                },
+                {
+                    "name": "v11.1 MR4 Polish",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/setup-tilos_11.1_mr4_en_20230113.exe"
+                },
+                {
+                    "name": "v11.1 MR4 Turkish",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/setup-tilos_11.1_mr4_en_20230113.exe"
+                }
+            ]
+        },
+        {
+            "name": "Tilos 11.1 MR3",
+            "date": "2022-03-24T00:00Z",
+            "installers": [
+                {
+                    "name": "v11.1 MR3 Chinese",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/setup-tilos_11.1_mr3_en_20220324.exe"
+                },
+                {
+                    "name": "v11.1 MR3 German",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/setup-tilos_11.1_mr3_en_20220324.exe"
+                },
+                {
+                    "name": "v11.1 MR3 English",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/setup-tilos_11.1_mr3_en_20220324.exe"
+                },
+                {
+                    "name": "v11.1 MR3 Spanish",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/setup-tilos_11.1_mr3_en_20220324.exe"
+                },
+                {
+                    "name": "v11.1 MR3 French",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/setup-tilos_11.1_mr3_en_20220324.exe"
+                },
+                {
+                    "name": "v11.1 MR3 Italian",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/setup-tilos_11.1_mr3_en_20220324.exe"
+                },
+                {
+                    "name": "v11.1 MR3 Korean",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/setup-tilos_11.1_mr3_en_20220324.exe"
+                },
+                {
+                    "name": "v11.1 MR3 Polish",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/setup-tilos_11.1_mr3_en_20220324.exe"
+                },
+                {
+                    "name": "v11.1 MR3 Turkish",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/setup-tilos_11.1_mr3_en_20220324.exe"
+                }
+            ]
+        },
+        {
+            "name": "Tilos 11.1 MR1",
+            "date": "2021-09-30T00:00Z",
+            "installers": [
+                {    
+                    "name": "v11.1 MR1 Chinese",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/Setup-Tilos11.1_MR1-EN_20210930.exe"
+                },
+                {
+                    "name": "v11.1 MR1 German",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/Setup-Tilos11.1_MR1-EN_20210930.exe"
+                },
+                {
+                    "name": "v11.1 MR1 English",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/Setup-Tilos11.1_MR1-EN_20210930.exe"
+                },
+                {
+                    "name": "v11.1 MR1 Spanish",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/Setup-Tilos11.1_MR1-EN_20210930.exe"
+                },
+                {
+                    "name": "v11.1 MR1 French",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/Setup-Tilos11.1_MR1-EN_20210930.exe"
+                },
+                {
+                    "name": "v11.1 MR1 Italian",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/Setup-Tilos11.1_MR1-EN_20210930.exe"
+                },
+                {
+                    "name": "v11.1 MR1 Korean",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/Setup-Tilos11.1_MR1-EN_20210930.exe"
+                },
+                {
+                    "name": "v11.1 MR1 Polish",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/Setup-Tilos11.1_MR1-EN_20210930.exe"
+                },
+                {
+                    "name": "v11.1 MR1 Russian",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/Setup-Tilos11.1_MR1-EN_20210930.exe"
+                },
+                {
+                    "name": "v11.1 MR1 Turkish",
+                    "href": "https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/Setup-Tilos11.1_MR1-EN_20210930.exe"
+                }
+            ]
+        }
+    ]

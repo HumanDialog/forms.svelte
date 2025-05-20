@@ -1,0 +1,10 @@
+ [
+        {
+            "name": "Patch file for Named User License Issue",
+            "desc": "To apply the Named User License Patch for version 11.1 MR3 (as a \"Named User\" licensee), you must download the file <a href=\"https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/hdprp010.zip\">found here</a>.<br>Then, follow the directions in this Tilos Support Note:  <a href=\"https://community.trimble.com/viewdocument/tilos-support-note-applying-the-n?CommunityKey=9c4716e7-7e5e-4580-b4d6-525eeab9a385&tab=librarydocuments\">Applying the Named User License Patch</a>."
+        },
+        {
+            "name": "Patch file for Graphic Object Insertion Bug",
+            "desc": "<a href=\"https://quadriupdateservice.blob.core.windows.net/installers/Tilos/Tilos/tilos_11-1_mr4_link_graphic_object_insertion_fix.zip\">Tilos 11.1 MR4 Graphic Object Isertion Patch</a>"
+        }
+    ]

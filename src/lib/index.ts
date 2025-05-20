@@ -12,6 +12,7 @@ export { default as Operations } from './operations.svelte'
 
 export {default as Layout } from './desk.svelte'
 export {default as VerticalToolbar} from './vertical.toolbar.svelte'
+export {default as HorizontalToolbar} from './horizontal.toolbar.svelte'
 
 // @ts-ignore
 export { default as Icon } from "./components/icon.svelte";
@@ -113,7 +114,8 @@ export {
             onErrorShowAlert,
             main_sidebar_visible_store,
             tagsReloader,
-            reloadVisibleTags } from './stores.js'
+            reloadVisibleTags,
+            dark_mode_store } from './stores.js'
 
 export {    data_tick_store,    // tmp
             hasSelectedItem, 

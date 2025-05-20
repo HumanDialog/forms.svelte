@@ -20,7 +20,7 @@
             <ul class="flex flex-row pt-3  items-center justify-between mx-auto space-x-2 sm:space-x-12 mt-0 border-0 border-gray-700">
                 {#if main}
                     <NotAuthorized>
-                        <li><a class="block  rounded md:bg-transparent p-0  text-slate-200 hover:text-indigo-300" use:link href={$signInHRef}>Community</a></li>
+                        <li><a class="block  rounded md:bg-transparent p-0  text-slate-200 hover:text-indigo-300" use:link href="/thome">Community</a></li>
                     </NotAuthorized>
                     <NotAuthorized>
                         <li><a class="block rounded md:bg-transparent p-0 text-slate-200 hover:text-indigo-300" use:link href={$signUpHRef}>Get started</a></li>

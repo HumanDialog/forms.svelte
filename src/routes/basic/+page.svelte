@@ -4,6 +4,7 @@
     import FaAmilia from 'svelte-icons/fa/FaAmilia.svelte'
 
     import Router from 'svelte-spa-router'
+    import {wrap} from 'svelte-spa-router/wrap'
     
     import Cookies from './cookies.svelte';
     import Main from './main.svelte'
@@ -11,6 +12,7 @@
     import PrivacyPolicy from './landing/privacy.policy.svelte'
     import TermsAndConditions from './landing/terms.and.conditions.svelte'
     import NotFound from './landing/not.found.svelte'
+    //import StaticDoc from './tilos/static.doc.svelte'
     import AppView from './AppView.svelte';
 	import {appUsers} from './users.js'
 
@@ -45,13 +47,14 @@
                         apiVersion: "v001"}
                    });
 
-    const r = /^\/listboard|tasklist|task|note|folder|mytasks|myfolders|members|chat|thread|newthread|forum|tiloshome|profile|request-license-file\/(.*)\/?$/i
+    const r = /^\/listboard|tdownload|tcontact|tasklist|task|note|folder|mytasks|myfolders|members|chat|thread|newthread|forum|thome|profile|doc|request-license-file\/(.*)\/?$/i
 
     const routes = new Map()
     routes.set('/',                     Main)
     routes.set('/contact',              Contact)
     routes.set('/privacy-policy',       PrivacyPolicy)
     routes.set('/terms-and-conditions', TermsAndConditions)
+    routes.set('/doc/*', wrap({ asyncComponent: () => import('./tilos/static.doc.svelte')}))
     routes.set(r, AppView)
     routes.set('*', NotFound)
 

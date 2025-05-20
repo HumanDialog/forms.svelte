@@ -346,7 +346,7 @@
             {#if isCardActive}
                 <p class="  text-sm sm:text-sm 
                             
-                            text-stone-400
+                            text-stone-600 dark:text-stone-400
                             
                             overflow-hidden"
                             use:editable={{
@@ -360,7 +360,7 @@
             {:else}
                 <p class=" text-sm  sm:text-sm 
                                
-                                text-stone-400
+                                text-stone-600 dark:text-stone-400
                                 
                                 overflow-hidden">
                     {item[definition.summaryAttrib]}
