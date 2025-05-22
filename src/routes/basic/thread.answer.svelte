@@ -108,6 +108,7 @@
     {
         return {
             opver: 2,
+            fab: 'M00',
             operations: [
                 {
                     caption: 'Post',

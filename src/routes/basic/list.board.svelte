@@ -24,7 +24,10 @@
         Combo,
 		ComboItem,
         UI,
-        reloadVisibleTags
+        reloadVisibleTags,
+
+		isDeviceSmallerThan
+
 	} from '$lib';
     import {FaPlus, FaList, FaPen, FaCaretLeft, FaCaretRight, FaTrash, FaArrowsAlt, FaArchive, FaCheck, FaEllipsisH, FaChevronRight,
         FaAngleDown, FaAngleUp, FaColumns, FaRandom, FaChevronLeft, FaCopy, FaShoppingBasket
@@ -244,16 +247,20 @@
     function getPageOperations()
     { 
         return {
-            opver: 1,
+            opver: 2,
+            fab: 'M00',
             operations: [
                 {
                     caption: 'View',
+                    tbr: 'B',
                     operations: [
                         {
+                            caption: 'Add',
                             icon: FaPlus,
                             action: (f) => kanban.add(KanbanColumnBottom, 0),
-                            fab: 'M10',
-                            tbr: 'A'
+                        //    fab: 'M10',
+                            tbr: 'A',
+                            hideToolbarCaption: true
                         },
                         {
                             caption: 'Attach...',
@@ -263,15 +270,15 @@
                                 destinationContainer: listPath,
                                 onRefreshView: (f) => reload(kanban.KEEP_SELECTION)
                             },
-                            fab: 'M01',
-                            tbr: 'A'
+                      //      fab: 'M01',
+                      //      tbr: 'A'
                         },
                         {
                             icon: FaRandom,
                             caption: 'Change kind',
                             action: changeListKind,
-                            fab: 'S02',
-                            tbr: 'C'
+                        //    fab: 'S02',
+                        //    tbr: 'C'
                         },
                         //switchToListOperation()
                     ]
@@ -301,7 +308,7 @@
         return result
     }
 
-    async function changeListKind(button)
+    async function changeListKind(button, aroundRect)
     {
         const listTypes = await reef.get('group/GetTaskListTypes', onErrorShowAlert)
         if(!listTypes || !Array.isArray(listTypes) || listTypes.length == 0)
@@ -325,7 +332,11 @@
 
         if(menuOperations.length > 0)
         {
-            let rect = button.getBoundingClientRect()
+            let rect;
+            if(aroundRect)
+                rect = aroundRect
+            else
+                rect = button.getBoundingClientRect()
             showMenu(rect, menuOperations)
         }
     }
@@ -455,7 +466,7 @@
         const isOutOfStates = columnIdx < 0
 
        
-        const moreOperation = {
+        /*const moreOperation = {
             icon: FaEllipsisH,
             menu:[
                 ... (task.State == STATE_FINISHED) ? [] : [
@@ -481,29 +492,59 @@
                     menu: getColumnContextMenu(columnIdx, taskStates)
                 }]
             ]
-        }
+        }*/
 
+        const mobile = isDeviceSmallerThan("sm")
         
         return {
-            opver: 1,
-            //operations: result,
+            opver: 2,
+            fab: 'M00',
             operations: [
                 {
-                    caption: "List",
+                    caption: "View",
+                    tbr: 'B',
                     operations:[
                         {
+                            caption: 'Add',
                             icon: FaPlus,
                             action: (f) => { kanban.add(task) }, 
-                            fab: "M10",
-                            tbr: 'A'
+                            //fab: "M10",
+                            tbr: 'A',
+                            hideToolbarCaption: true
+                        },
+                        {
+                            caption: 'Attach...',
+                            icon: FaShoppingBasket, //FaLink, //aRegShareSquare, // 
+                            toolbar: BasketPreview,
+                            props: {
+                                destinationContainer: listPath,
+                                onRefreshView: (f) => reload(kanban.KEEP_SELECTION)
+                            },
+                           // fab: 'M01',
+                           // tbr: 'A'
+                        },
+                        {
+                            icon: FaRandom,
+                            caption: 'Change kind',
+                            action: changeListKind,
+                        //    fab: 'S02',
+                        //    tbr: 'C'
                         },
                         //switchToListOperation()
                     ]
                 },
+                ... isOutOfStates ? [] : [
+                {
+                    caption: 'Column',
+                    tbr: 'B',
+                    operations: getColumnContextMenu(columnIdx, undefined, !mobile)
+                }],
                 {
                     caption: 'Task',
+                    tbr: 'B',
                     operations: [
                         {
+                            caption: 'Edit...',
                             icon: FaPen,
                             grid: [
                                 {
@@ -531,11 +572,12 @@
                                     action: (f) => { kanban.edit(task, 'Tags') }
                                 }
                             ],
-                            fab: 'M20',
-                            tbr: 'B'
-                        
+                        //    fab: 'M20',
+                            tbr: 'A',
+                            hideToolbarCaption: true
                         },
                         {
+                            caption: 'Move...',
                             icon: FaArrowsAlt,
                             toolbar: MoveOperations,
                             props: {
@@ -545,69 +587,54 @@
                                  //   onMoveUp: isOutOfStates ? undefined : kanban.moveUp,
                                  //   onMoveDown: isOutOfStates ? undefined : kanban.moveDown,
                                     onReplace: kanban.replace},
-                            fab: 'M01',
-                            tbr: 'B'
+                        //    fab: 'M01',
+                            tbr: 'A',
+                            hideToolbarCaption: true
                         },
                         ... (isOutOfStates) ? [] : [
                         {
+                            caption: 'Move up',
                             icon: FaAngleUp,
                             action: (f) => { kanban.moveUp(task); setTimeout(() => kanban.scrollViewToCard(), 0) },
-                            fab: 'M03',
-                            tbr: 'B'
+                            //fab: 'M03',
+                            tbr: 'A',
+                            hideToolbarCaption: true
                         },
                         {
+                            caption: 'Move down',
                             icon: FaAngleDown,
                             action: (f) => { kanban.moveDown(task); setTimeout(() => kanban.scrollViewToCard(), 0)},
-                            fab: 'M02',
-                            tbr: 'B'
+                            //fab: 'M02',
+                            tbr: 'A',
+                            hideToolbarCaption: true
                         } ],
                         {
                             icon: FaBasketPlus, // FaCopy,   // MdLibraryAdd
-                       //     caption: 'Copy to basket',
+                            caption: 'Add to basket',
                             action: (f) => copyTaskToBasket(task),
-                            fab: 'M04',
-                            tbr: 'B'
+                            //fab: 'M04',
+                            //tbr: 'B'
 
                         },
-                        {
-                            icon: FaEllipsisH,
-                            menu:[
-                                ... (task.State == STATE_FINISHED) ? [] : [
-                                        {
-                                            caption: 'Finish',
-                                            icon: FaCheck,
-                                            action: (f) => finishTask(task)
-                                        },
-                                ],
+                        ... (task.State == STATE_FINISHED) ? [] : [
                                 {
-                                    caption: 'Archive',
-                                    icon: FaArchive,
-                                    action: (f) => askToArchive(task)
-                                },
-                                {
-                                    caption: 'Delete',
-                                    icon: FaTrash,
-                                    action: (f) => askToDelete(task)
+                                    caption: 'Finish',
+                                    icon: FaCheck,
+                                    action: (f) => finishTask(task)
                                 }
-                            ],
-                            fab: 'M30',
-                            tbr: 'B'
-                        }
-                    ]
-                },
-                ... isOutOfStates ? [] : [
-                {
-                    caption: 'Column',
-                    operations: [
+                        ],
                         {
-                            caption: 'Column',
-                            icon: FaColumns,
-                            menu: getColumnContextMenu(columnIdx, taskStates),
-                            fab: 'S00',
-                            tbr: 'A'
+                            caption: 'Archive',
+                            icon: FaArchive,
+                            action: (f) => askToArchive(task)
+                        },
+                        {
+                            caption: 'Delete',
+                            icon: FaTrash,
+                            action: (f) => askToDelete(task)
                         }
                     ]
-                }]
+                }
             ]
 
         }
@@ -619,7 +646,7 @@
         return [
             {
                 caption: inColumnContext ? 'Edit name' : 'Edit column name',
-                icon: inColumnContext ? FaPen : undefined,
+                icon: FaPen, //inColumnContext ? FaPen : undefined,
                 action: (f) => kanban.editColumnName(columnIdx)
             },
             /*{
@@ -629,17 +656,17 @@
             },*/
             {
                 caption: inColumnContext ? 'Move left' : 'Move column left',
-                icon: inColumnContext ? FaCaretLeft : undefined,
+                icon: FaCaretLeft, //inColumnContext ? FaCaretLeft : undefined,
                 action: (f) => onColumnMoveLeft(columnIdx)
             },
             {
                 caption: inColumnContext ? 'Move right' : 'Move column right',
-                icon: inColumnContext ? FaCaretRight : undefined,
+                icon: FaCaretRight, //inColumnContext ? FaCaretRight : undefined,
                 action: (f) => onColumnMoveRight(columnIdx)
             },
             {
                 caption: inColumnContext ? 'Delete' : 'Delete column',
-                icon: inColumnContext ? FaTrash : undefined,
+                icon: FaTrash, //inColumnContext ? FaTrash : undefined,
                // menu: getColumnDeleteOptions(columnIdx, taskState)
                action: (f) => deleteColumnAndSetCardsState(columnIdx, 0)
             },
@@ -648,7 +675,7 @@
             },
             {
                 caption: 'Add column',
-                icon: inColumnContext ? FaPlus : undefined,
+                icon: FaPlus, //inColumnContext ? FaPlus : undefined,
                 action: (f) => addColumn("", columnIdx+1)
             }
         ];
@@ -658,17 +685,22 @@
 
     function getColumnOperations(columnIdx, taskState)
     {
+        const mobile = isDeviceSmallerThan("sm")
         return {
-            opver: 1,
+            opver: 2,
+            fab: 'M00',
             operations: [
                 {
                     caption: 'View',
+                    tbr: 'B',
                     operations: [
                         {
+                            caption: 'Add',
                             icon: FaPlus,
                             action: (f) => kanban.add(KanbanColumnBottom, columnIdx),
-                            fab: 'M10',
-                            tbr: 'A'
+                            //fab: 'M10',
+                            tbr: 'A',
+                            hideToolbarCaption: true
                         },
                         {
                             caption: 'Attach...',
@@ -678,30 +710,23 @@
                                 destinationContainer: listPath,
                                 onRefreshView: (f) => reload(kanban.KEEP_SELECTION)
                             },
-                            fab: 'M01',
-                            tbr: 'A'
+                           // fab: 'M01',
+                           // tbr: 'A'
                         },
                         {
                             icon: FaRandom,
                             caption: 'Change kind',
                             action: changeListKind,
-                            fab: 'S02',
-                            tbr: 'C'
+                        //    fab: 'S02',
+                        //    tbr: 'C'
                         },
                         //switchToListOperation()
                     ]
                 },
                 {
-                    captoion: 'Column',
-                    operations: [
-                        {
-                            caption: 'Column',
-                            icon: FaColumns,
-                            menu: getColumnContextMenu(columnIdx, taskState),
-                            fab: 'S00',
-                            tbr: 'A'
-                        }
-                    ]
+                    caption: 'Column',
+                    tbr: 'B',
+                    operations: getColumnContextMenu(columnIdx, taskState, !mobile)
                 }
             ]
         }

@@ -106,16 +106,18 @@
     }
 
     let pageOperations = {
-        opver: 1,
+        opver: 2,
+        fab: 'M00',
         operations: [
             {
                 caption: 'View',
                 operations: [
                     {
                         icon: FaPlus,
-                        caption: '',
+                        caption: 'Add',
+                        hideToolbarCaption: true,
                         action: (focused) => { listComponent.addRowAfter(null) },
-                        fab: 'M10',
+                        //fab: 'M10',
                         tbr: 'A'
                     }
                 ]
@@ -126,69 +128,72 @@
     function getEditOperations(folder)
     {
         return [
-            {
-                caption: 'Name',
-                action: (focused) =>  { listComponent.edit(folder, 'Title') }
-            },
-            {
-                caption: 'Summary',
-                action: (focused) =>  { listComponent.edit(folder, 'Summary') }
-            }
+            
         ];
     }
 
     let folderOperations = (folder) => { 
         let editOperations = getEditOperations(folder)
         return {
-            opver: 1,
+            opver: 2,
+            fab: 'M00',
             operations: [
                 {
                     caption: 'Folder',
+                    tbr: 'B',
                     operations: [
                         {
                             icon: FaPlus,
-                            caption: '',
+                            caption: 'Add',
+                            hideToolbarCaption: true,
                             action: (focused) => { listComponent.addRowAfter(folder) },
-                            fab: 'M10',
+                            //fab: 'M10',
                             tbr: 'A'
-                        },
+                        },       
                         {
-                            icon: FaPen,
-                            grid: editOperations,
-                            fab: 'M20',
-                            tbr: 'A',
-                        },
-                        {
-                            icon: FaCaretDown,
-                            action: (f) => listComponent.moveDown(folder),
-                            fab:'M02',
-                            tbr:'A' 
-                        },
-                        {
+                            caption: 'Move up',
+                            hideToolbarCaption: true,
                             icon: FaCaretUp,
                             action: (f) => listComponent.moveUp(folder),
-                            fab:'M03',
+                          //  fab:'M03',
                             tbr:'A' 
+                        },                
+                        {
+                            caption: 'Move down',
+                            hideToolbarCaption: true,
+                            icon: FaCaretDown,
+                            action: (f) => listComponent.moveDown(folder),
+                            //fab:'M02',
+                            tbr:'A' 
+                        },
+                        {
+                            caption: 'Change name',
+                            action: (f) =>  { listComponent.edit(folder, 'Title') }
+                        },
+                        {
+                            caption: 'Change summary',
+                            action: (f) =>  { listComponent.edit(folder, 'Summary') }
                         },
                     /*    {
                             icon: FaCopy,   // MdLibraryAdd
                             caption: 'Copy to basket',
                             action: (f) => copyFolderToBasket(folder),
-                            fab: 'M04',
+                        //    fab: 'M04',
                             tbr: 'A'
                         },
                         {
                             icon: FaCut,
                             caption: 'Move to basket',
                             action: (f) => cutFolderToBasket(folder),
-                            fab: 'M05',
+                        //    fab: 'M05',
                             tbr: 'A'
                         },
                     */    {
+                            caption: 'Delete',
                             icon: FaTrash,
                             action: (f) => askToDelete(folder),
-                            fab:'M30',
-                            tbr:'B'
+                            //fab:'M30',
+                            //tbr:'B'
                         }
                     ]
                 }

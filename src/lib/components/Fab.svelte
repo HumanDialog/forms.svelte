@@ -3,6 +3,7 @@
     import {contextToolbarOperations, pageToolbarOperations, contextItemsStore, toolsActionsOperations} from '../stores.js'
     import { showFloatingToolbar, showMenu, showGridMenu } from './menu.js';
     import {FaChevronUp, FaChevronDown, FaChevronLeft, FaChevronRight, FaCircle, FaEllipsisV} from 'svelte-icons/fa/'
+    import {isDeviceSmallerThan} from '../utils.js'
     
     
     $: setupCurrentContextOperations($pageToolbarOperations, $contextToolbarOperations, $toolsActionsOperations);
@@ -20,6 +21,7 @@
     function setupCurrentContextOperations(...args)
     {
         let opVer = 0
+        let main_FAB_position = ''
 
         isDirectPositioningMode = false;
         if($toolsActionsOperations && Array.isArray($toolsActionsOperations) && toolsActionsOperations.length > 0)
@@ -30,6 +32,7 @@
         {
             operations = $toolsActionsOperations.operations;
             opVer = $toolsActionsOperations.opver ?? 0
+            main_FAB_position = $toolsActionsOperations.fab ?? ''
             if(opVer > 0)
                 isDirectPositioningMode = true;
         }
@@ -41,6 +44,7 @@
         {
             operations = $contextToolbarOperations.operations;
             opVer = $contextToolbarOperations.opver ?? 0
+            main_FAB_position = $contextToolbarOperations.fab ?? ''
             if(opVer > 0)
                 isDirectPositioningMode = true;
         }
@@ -52,6 +56,7 @@
             {
                 operations = $pageToolbarOperations.operations;
                 opVer = $pageToolbarOperations.opver ?? 0
+                main_FAB_position = $pageToolbarOperations.fab ?? ''
                 if(opVer > 0)
                     isDirectPositioningMode = true;
             }
@@ -69,38 +74,49 @@
         }
         else if(opVer == 2)
         {
-            let flatOperations = []
-            operations.forEach(group => {
-                flatOperations.push({
-                    caption: group.caption,
-                    separator: true
+            const definedOperations = [...operations]
+            if(main_FAB_position)  // make one button for to show all operations as menu
+            {
+                let flatOperations = []
+                definedOperations.forEach(group => {
+                    flatOperations.push({
+                        caption: group.caption,
+                        separator: true
+                    })
+
+                    flatOperations = [...flatOperations, ...group.operations]
                 })
 
-                flatOperations = [...flatOperations, ...group.operations]
-            })
+                const realOps = flatOperations.filter((el) => !!el.separator == false)
+                if(realOps.length > 1)
+                {
+                    
+                    mainOperation = {
+                        icon: FaEllipsisV,
+                        menu: flatOperations,
+                        fab: main_FAB_position
+                    }
 
-            const realOps = flatOperations.filter((el) => !!el.separator == false)
-            if(realOps.length > 1)
-            {
-                
-                mainOperation = {
-                    icon: FaEllipsisV,
-                    menu: flatOperations,
-                    fab: 'M00'
+                    operations = [mainOperation]
                 }
-
-                operations = [mainOperation]
+                else if(realOps.length == 1)
+                {
+                    mainOperation = realOps[0]
+                    mainOperation['fab'] = main_FAB_position
+                    operations = [mainOperation]
+                }
+                else
+                    operations = []
             }
-            else if(realOps.length == 1)
-            {
-                mainOperation = realOps[0]
-                mainOperation['fab'] = 'M00'
-                operations = [mainOperation]
-            }
-            else
-                operations = []
-
             
+            definedOperations.forEach(group => {
+                group.operations.forEach( op => {
+                    if(op.fab)
+                    {
+                        operations = [...operations, op]
+                    }
+                })
+            })
             
         }
         else    // opVer == 0
@@ -205,13 +221,19 @@
         rect.width += 2*margin;
         rect.height += 2*margin;
 
+        const mobile = isDeviceSmallerThan("sm")
+
         if(operation.menu)
             showMenu(rect, operation.menu)
         else if(operation.toolbar)
             showFloatingToolbar(rect, operation.toolbar, operation.props ?? {})
         else if(operation.grid)
-            showMenu(rect, operation.grid)     // mobile screen too small
-            //showGridMenu(rect, operation.grid)
+        {
+            if(mobile)
+                showMenu(rect, operation.grid)     // mobile screen too small
+            else
+                showGridMenu(rect, operation.grid)
+        }
     }
 
     function toggleExpandToolboxV(e)

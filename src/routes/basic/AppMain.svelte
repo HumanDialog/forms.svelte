@@ -60,7 +60,7 @@
                     {
                         icon: FaPlus,
                         action: (f) => navigator?.requestAdd(),
-                        fab: 'M10'
+                        fab: 'M00'
                     }
                 ]
             }

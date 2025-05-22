@@ -34,6 +34,7 @@
     import Profile from './profile.svelte'
     import TilosDownload from './tilos/download.svelte'
     import TilosContact from './tilos/contact.svelte'
+    import Unauthorized from './tilos/unauthorized.access.svelte';
     //import StaticDoc from './tilos/static.doc.svelte'
 
 
@@ -301,7 +302,29 @@
                         '/request-license-file': {component: RequestLicenseFile},
                         '/thome':   {component : TilosHome},
                         '/tdownload':    {component: TilosDownload},
-                        '/tcontact':    {component: TilosContact}
+                        '/tcontact':    {component: TilosContact},
+                        
+                        '/tasklist':    { component: Unauthorized},
+                        '/tasklist/*':  { component: Unauthorized},
+                        '/task' :       { component: Unauthorized },
+                        '/task/*' :     { component: Unauthorized },
+                        '/note' :       { component: Unauthorized },
+                        '/note/*' :     { component: Unauthorized },
+                        '/listboard' :  { component: Unauthorized},
+                        '/listboard/*': { component: Unauthorized},
+                        '/mytasks' :    { component: Unauthorized },
+                        '/mytasks/*' :  { component: Unauthorized },
+                        '/folder'    :  { component: Unauthorized },
+                        '/folder/*'  :  { component: Unauthorized },
+                        '/myfolders' :  { component: Unauthorized },
+                        '/myfolders/*': { component: Unauthorized },
+                        '/members'   :  { component: Unauthorized },
+                        '/chat/*':      { component: Unauthorized },
+                        '/thread/*' :   { component: Unauthorized },
+                        '/newthread/*' :{ component: Unauthorized },
+                        '/forum/*'   :  { component: Unauthorized },
+                        '/profile/*':   {component: Unauthorized},
+                        '/profile':     {component: Unauthorized},
                     //    '/doc':         {component: StaticDoc},
                     //    '/doc/*':       {component: StaticDoc}
                     }

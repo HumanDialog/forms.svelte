@@ -23,7 +23,7 @@
     import FaBasketCut from './icons/basket.cut.svelte'
     import FaBasketTrash from './icons/basket.trash.svelte'
     import {cache} from './cache.js'
-
+    
     export let params = {}
 
     let contextItem = null;
@@ -38,7 +38,7 @@
 
     const STATE_FINISHED = 7000;
     
-    $: onParamsChanged($location, $querystring, $mainContentPageReloader);
+    $: onParamsChanged($location, $querystring, $mainContentPageReloader, $session);
     
     async function onParamsChanged(...args)
     {
@@ -364,6 +364,7 @@
         {
             return {
                 opver: 2,
+                fab: 'M00',
                 operations: [
                     {
                         caption: 'View',
@@ -372,14 +373,14 @@
                                 caption: 'Clear Basket',
                                 icon: FaBasketTrash, //FaTrash,
                                 action: async (f) => await dettachAllMyContent(),
-                                fab: 'M30',
+                          //      fab: 'M30',
                                 tbr: 'A'
                             },
                             {
                                 caption: 'Refresh',
                                 icon: FaSync,
                                 action: async (f) => await refreshView(),
-                                fab: 'S10',
+                            //    fab: 'S10',
                                 tbr: 'C',
                                 hideToolbarCaption: true
                             }
@@ -403,7 +404,7 @@
                         if(UI.navigator)
                             UI.navigator.refresh()
                       },
-                    fab: 'S00',
+                    //fab: 'S00',
                     tbr: 'C',
                     hideToolbarCaption: true
                 }
@@ -420,7 +421,7 @@
                         if(UI.navigator)
                             UI.navigator.refresh()
                     },
-                    fab: 'S00',
+                    //fab: 'S00',
                     tbr: 'C',
                     hideToolbarCaption: true
                 }
@@ -429,6 +430,7 @@
             
             return {
                 opver: 2,
+                fab: 'M00',
                 operations: [
                     {
                         caption: "View",
@@ -557,6 +559,7 @@
         {
             return {
                 opver: 2,
+                fab: 'M00',
                 operations: [
                     {
                         caption: kind,
@@ -593,6 +596,7 @@
         {
             return {
                 opver: 2,
+                fab: 'M00',
                 operations: [
                     {
                         caption: 'Element',
@@ -678,6 +682,7 @@
     {/if}
 </svelte:head>
 
+
 {#if contextItem}
     <Page   self={contextItem} 
             toolbarOperations={ getPageOperations() }
@@ -758,6 +763,7 @@
 {:else}
     <Spinner delay={3000}/>
 {/if}
+
 
 
 <Modal  title="Delete"

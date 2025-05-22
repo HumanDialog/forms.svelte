@@ -15,8 +15,8 @@ const octopusTestUsers = [
 const hdTestUsers = [
     {
         username: "aga@humandialog.com.pl",
-        role: 'supervisor',
-        groupId: 1
+        role: 'GroupOwner',
+        groupId: 4
     },
     {
         username: "akr@humandialog.com.pl",

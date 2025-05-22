@@ -298,6 +298,7 @@
 
     let page_operations={
         opver: 2,
+        fab: 'M00',
         operations: [
             {
                 caption: 'View',
@@ -400,6 +401,7 @@
         
         return {
             opver: 2,
+            fab: 'M00',
             operations: [
                 {
                     caption: 'User',

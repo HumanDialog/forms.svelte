@@ -144,6 +144,7 @@
     {
         return {
             opver: 2,
+            fab: 'M00',
             operations: [
                 {
                     caption: 'Thread',
@@ -188,6 +189,7 @@
     {
         let operations = {
             opver: 2,
+            fab: 'M00',
             operations: [
                 {
                     caption: 'Thread',

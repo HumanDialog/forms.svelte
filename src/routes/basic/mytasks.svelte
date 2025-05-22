@@ -156,16 +156,18 @@
     }
 
     let pageOperations = {
-            opver: 1,
+            opver: 2,
+            fab: 'M00',
             operations: [
                 {
                     caption: 'View',
                     operations: [
                         {
                             icon: FaPlus,
-                            caption: '',
+                            caption: 'Add',
+                            hideToolbarCaption: true,
                             action: (focused) => { listComponent.addRowAfter(null) },
-                            fab: 'M10',
+                            //fab: 'M10',
                             tbr: 'A'
                         }
                     ]
@@ -173,99 +175,90 @@
             ]
         }
 
-    function getEditOperations(task)
-    {
-        return [
-            {
-                caption: 'Name',
-                action: (focused) =>  { listComponent.edit(task, 'Title') }
-            },
-            {
-                caption: 'Summary',
-                action: (focused) =>  { listComponent.edit(task, 'Summary') }
-            },
-            {
-                separator: true
-            },
-            {
-                caption: 'List',
-                action: (focused) => { listComponent.edit(task, 'TaskList') }
-            },
-            {
-                caption: 'Due Date',
-                action: (focused) => { listComponent.edit(task, 'DueDate') }
-            }
-
-        ];
-    }
-
     let taskOperations = (task) => { 
-        let editOperations = getEditOperations(task)
         return {
-            opver: 1,
+            opver: 2,
+            fab: 'M00',
             operations: [
                 {
                     caption: 'View',
                     operations: [
                         {
+                            caption: 'Add',
+                            hideToolbarCaption: true,
                             icon: FaPlus,
-                            caption: '',
                             action: (focused) => { listComponent.addRowAfter(task) },
-                            fab: 'M10',
+                          //  fab: 'M10',
                             tbr: 'A'
                         }
                     ]
                 },
                 {
                     caption: 'Task',
+                    tbr: 'B',
                     operations: [
                         {
-                            icon: FaPen,
-                            grid: editOperations,
-                            fab: 'M20',
-                            tbr: 'B'
-                        },
-                        {
-                            icon: FaEllipsisH,
-                            menu:[
-                            /* {
-                                    icon: FaArchive,
-                                    caption: 'Archive',
-                                    action: (f) => askToArchive(task)
-                                },*/
-                                {
-                                    icon: FaTrash,
-                                    caption: 'Delete',
-                                    action: (f) => askToDelete(task)
-                                }
-                            ],
-                            fab: 'M30',
-                            tbr: 'B'
-                        },
-                        {
-                            icon: FaCaretDown,
-                            action: (f) => listComponent.moveDown(task),
-                            fab: 'M02',
-                            tbr: 'B'
-                        },
-                        {
+                            caption: 'Move up',
+                            hideToolbarCaption: true,
                             icon: FaCaretUp,
                             action: (f) => listComponent.moveUp(task),
-                            fab: 'M03',
-                            tbr: 'B'
+                            //fab: 'M03',
+                            tbr: 'A'
+                        },
+                        {
+                            caption: 'Move down',
+                            hideToolbarCaption: true,
+                            icon: FaCaretDown,
+                            action: (f) => listComponent.moveDown(task),
+                            //fab: 'M02',
+                            tbr: 'A'
+                        },
+                        {
+                            caption: 'Edit...',
+                            hideToolbarCaption: true,
+                            icon: FaPen,
+                            grid: [
+                                    {
+                                        caption: 'Name',
+                                        action: (focused) =>  { listComponent.edit(task, 'Title') }
+                                    },
+                                    {
+                                        caption: 'Summary',
+                                        action: (focused) =>  { listComponent.edit(task, 'Summary') }
+                                    },
+                                    {
+                                        separator: true
+                                    },
+                                    {
+                                        caption: 'List',
+                                        action: (focused) => { listComponent.edit(task, 'TaskList') }
+                                    },
+                                    {
+                                        caption: 'Due Date',
+                                        action: (focused) => { listComponent.edit(task, 'DueDate') }
+                                    }
+                            ],
+                        //    fab: 'M20',
+                            tbr: 'A'
+                        },
+                        /* {
+                            icon: FaArchive,
+                            caption: 'Archive',
+                            action: (f) => askToArchive(task)
+                        },*/
+                        {
+                            icon: FaTrash,
+                            caption: 'Delete',
+                            action: (f) => askToDelete(task)
                         }
+                        
                     ]
                 }
             ]
         }
     }
 
-    let taskContextMenu = (task) => {
-        let editOperations = getEditOperations(task);
-        return {
-            grid: editOperations
-        }
-    }
+    
 
 </script>
 
@@ -282,7 +275,6 @@
         <List   self={user} 
                 a='MyTasks' 
                 toolbarOperations={taskOperations} 
-                contextMenu={taskContextMenu}
                 orderAttrib='UserOrder'
                 bind:this={listComponent}>
             <ListTitle a='Title' hrefFunc={(task) => `/task/${task.Id}`}/>

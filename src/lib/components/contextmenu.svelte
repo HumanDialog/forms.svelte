@@ -371,13 +371,15 @@
         if(operation.preAction)
             operation.preAction(owner)
 
+        const mobile = isDeviceSmallerThan("sm")
+
         if(operation.action)
         {
             //let focused_item = null
             //if($contextItemsStore.focused)
             //    focused_item = $contextItemsStore[$contextItemsStore.focused]
             
-            operation.action(owner)
+            operation.action(owner, around_rect)
         }
         else
         {
@@ -390,7 +392,12 @@
             if(operation.toolbar)
                 showFloatingToolbar(rect, operation.toolbar, operation.props ?? {} )
             else if(operation.grid)
-                showGridMenu(rect, operation.grid)
+            {
+                if(mobile)
+                    showMenu(rect, operation.grid)
+                else
+                    showGridMenu(rect, operation.grid)
+            }
         }
 
 

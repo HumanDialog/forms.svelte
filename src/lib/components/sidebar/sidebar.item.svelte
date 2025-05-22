@@ -2,7 +2,7 @@
     import {getContext, tick} from 'svelte'
     import Icon from '../icon.svelte'
     import {contextItemsStore, auto_hide_sidebar, contextToolbarOperations} from '../../stores'
-    import {FaBars, FaEllipsisH} from 'svelte-icons/fa'
+    import {FaBars, FaEllipsisV} from 'svelte-icons/fa'
     import {link, push} from 'svelte-spa-router'
     //import FaBars from 'svelte-icons/fa/FaBars.svelte'
 
@@ -261,9 +261,9 @@
                         caption: 'View',
                         operations: [
                             {
-                                icon: FaEllipsisH,
+                                icon: FaEllipsisV,
                                 menu: operationsList,
-                                fab: 'M10'
+                                fab: 'M00'
                             }
                         ]
                     }

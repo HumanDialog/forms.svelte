@@ -15,10 +15,11 @@
                 onErrorShowAlert, showMenu,
 				UI} from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaColumns, FaArchive, FaList, 
-        FaEllipsisH, FaChevronRight, FaChevronLeft, FaRandom
+        FaEllipsisH, FaChevronRight, FaChevronLeft, FaRandom, FaShoppingBasket
     } from 'svelte-icons/fa'
     import {location, pop, push, querystring, link} from 'svelte-spa-router'
     import {cache} from './cache.js'
+    import BasketPreview from './basket.preview.svelte'
 
     export let params = {}
 
@@ -264,31 +265,39 @@
             return [];
 
         return {
-            opver: 1,
+            opver: 2,
+            fab: 'M00',
             operations: [
                 {
                     caption: 'View',
+                    tbr: 'B',
                     operations: [
                         {
+                            caption: 'Add',
                             icon: FaPlus,
                             action: (f) => { listComponent.addRowAfter(null) },
-                            fab: 'M10',
-                            tbr: 'A'
+                            //fab: 'M10',
+                            tbr: 'A',
+                            hideToolbarCaption: true
+                        },
+                        {
+                            caption: 'Attach...',
+                            icon: FaShoppingBasket, //FaLink, //aRegShareSquare, // 
+                            toolbar: BasketPreview,
+                            props: {
+                                destinationContainer: listPath,
+                                onRefreshView: (f) => istComponent?.reload(currentList, listComponent.KEEP_SELECTION)
+                            },
+                      //      fab: 'M01',
+                      //      tbr: 'A'
                         },
                         {
                             icon: FaRandom,
                             caption: 'Change kind',
                             action: changeListKind,
-                            fab: 'S02',
-                            tbr: 'C'
+                        //    fab: 'S02',
+                        //    tbr: 'C'
                         }
-                        /*{
-                            icon: FaColumns,
-                            right: true,
-                            action: (f) => switchToKanban(),
-                            fab: 'S01',
-                            tbr: 'C'
-                        }*/
                     ]
                 }
             ]
@@ -304,113 +313,108 @@
         push(`/listboard/${listId}`);
     }
 
-    function getEditOperations(task)
-    {
-        return [
-            {
-                caption: 'Name',
-                action: (focused) =>  { listComponent.edit(task, 'Title') }
-            },
-            {
-                caption: 'Summary',
-                action: (focused) =>  { listComponent.edit(task, 'Summary') }
-            },
-            {
-                separator: true
-            },
-            {
-                caption: 'Responsible',
-                action: (focused) => { listComponent.edit(task, 'Actor') }
-            },
-            {
-                caption: 'Due Date',
-                action: (focused) => { listComponent.edit(task, 'DueDate') }
-            }
-
-        ];
-    }
-
-    
+      
     
 
     let taskOperations = (task) => {
-        let editOperations = getEditOperations(task);
         return {
-            opver: 1,
+            opver: 2,
+            fab: 'M00',
             operations: [
                 {
                     caption: 'View',
+                    tbr: 'B',
                     operations: [
                         {
+                            caption: 'Add',
                             icon: FaPlus,
                             action: (f) => { listComponent.addRowAfter(task) },
-                            fab: 'M10',
-                            tbr: 'A'
+                         //   fab: 'M10',
+                            tbr: 'A',
+                            hideToolbarCaption: true
+                        },
+                        {
+                            caption: 'Attach...',
+                            icon: FaShoppingBasket, //FaLink, //aRegShareSquare, // 
+                            toolbar: BasketPreview,
+                            props: {
+                                destinationContainer: listPath,
+                                onRefreshView: (f) => istComponent?.reload(currentList, listComponent.KEEP_SELECTION)
+                            },
+                      //      fab: 'M01',
+                      //      tbr: 'A'
                         },
                         {
                             icon: FaRandom,
                             caption: 'Change kind',
                             action: changeListKind,
-                            fab: 'S02',
-                            tbr: 'C'
+                        //    fab: 'S02',
+                        //    tbr: 'C'
                         }
-                        /*{
-                            icon: FaColumns,
-                            right: true,
-                            action: (f) => switchToKanban(),
-                            fab: 'S01',
-                            tbr: 'C'
-                        }*/
                     ]
                 },
                 {
                     caption: 'Task',
+                    tbr: 'B',
                     operations: [
                         {
+                            caption: 'Edit...',
+                            hideToolbarCaption: true,
                             icon: FaPen,
-                            grid: editOperations,
-                            fab: 'M20',
-                            tbr: 'B'
-                        },
-                        {
-                            icon: FaEllipsisH,
-                            menu:[
+                        //    fab: 'M20',
+                            tbr: 'A',
+                            grid: [
                                 {
-                                    icon: FaArchive,
-                                    caption: 'Archive',
-                                    action: (f) => askToArchive(task)
+                                    caption: 'Name',
+                                    action: (focused) =>  { listComponent.edit(task, 'Title') }
                                 },
                                 {
-                                    icon: FaTrash,
-                                    caption: 'Delete',
-                                    action: (f) => askToDelete(task)
+                                    caption: 'Summary',
+                                    action: (focused) =>  { listComponent.edit(task, 'Summary') }
+                                },
+                                {
+                                    separator: true
+                                },
+                                {
+                                    caption: 'Responsible',
+                                    action: (focused) => { listComponent.edit(task, 'Actor') }
+                                },
+                                {
+                                    caption: 'Due Date',
+                                    action: (focused) => { listComponent.edit(task, 'DueDate') }
                                 }
-                            ],
-                            fab: 'M30',
-                            tbr: 'B'
+
+                            ]
                         },
                         {
-                            icon: FaCaretDown,
-                            action: (f) => listComponent.moveDown(task),
-                            fab: 'M02',
-                            tbr: 'B'
-                        },
-                        {
+                            caption: 'Move up',
                             icon: FaCaretUp,
                             action: (f) => listComponent.moveUp(task),
-                            fab: 'M03',
-                            tbr: 'B'
+                            //fab: 'M03',
+                            tbr: 'A',
+                            hideToolbarCaption: true
                         },
+                        {
+                            caption: 'Move down',
+                            icon: FaCaretDown,
+                            action: (f) => listComponent.moveDown(task),
+                            //fab: 'M02',
+                            tbr: 'A',
+                            hideToolbarCaption: true
+                        },
+                        {
+                            icon: FaArchive,
+                            caption: 'Archive',
+                            action: (f) => askToArchive(task)
+                        },
+                        {
+                            icon: FaTrash,
+                            caption: 'Delete',
+                            action: (f) => askToDelete(task)
+                        }
                     ]
                 }
             ]
-        }
-    }
-
-    let taskContextMenu = (task) => {
-        let editOperations = getEditOperations(task);
-        return {
-            grid: editOperations
         }
     }
 
@@ -429,7 +433,7 @@
         return result
     }
 
-    async function changeListKind(button)
+    async function changeListKind(button, aroundRect)
     {
         const listTypes = await reef.get('group/GetTaskListTypes', onErrorShowAlert)
         if(!listTypes || !Array.isArray(listTypes) || listTypes.length == 0)
@@ -453,7 +457,11 @@
 
         if(menuOperations.length > 0)
         {
-            let rect = button.getBoundingClientRect()
+            let rect;
+            if(aroundRect)
+                rect = aroundRect
+            else
+                rect = button.getBoundingClientRect()
             showMenu(rect, menuOperations)
         }
     }
@@ -508,7 +516,6 @@
                 a={assocName}
                 title={listTitle} 
                 toolbarOperations={taskOperations} 
-                contextMenu={taskContextMenu}
                 orderAttrib='ListOrder'
                 bind:this={listComponent}>
             <ListTitle a='Title' hrefFunc={(task) => `/task/${task.Id}`}/>

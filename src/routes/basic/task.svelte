@@ -17,13 +17,16 @@
             Modal,
 			Spinner,
             resizeImage,
-            reloadVisibleTags
+            reloadVisibleTags,
+            IcH1, IcH2, IcH3, IcH4
             } from '$lib'
 	import { onMount, tick } from 'svelte';
     import {location, querystring, push, link} from 'svelte-spa-router'
     import TaskSteps from './task.steps.svelte'
     import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont, 
-        FaPen, FaList, FaTimes, FaCopy, FaCut,  FaFileDownload
+        FaPen, FaList, FaTimes, FaCopy, FaCut,  FaFileDownload, FaImage, FaTable, FaPaperclip, FaBold, FaItalic, 
+        FaUnderline, FaStrikethrough, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle, FaInfo,
+        FaListUl
     } from 'svelte-icons/fa/'
     import FaBasketPlus from './icons/basket.plus.svelte'
 	import AttachedFile from './attached.file.svelte'
@@ -245,51 +248,70 @@
         {
             checkOperation =
                 {
+                    caption: 'Undo',
                     icon: FaUndo,
                     action: async (f) => 
                     {  
                         await setStepDone( false, step)
                         activateItem('props', step, getPageOperationsWithStepTools(step))
                     },
-                    fab: 'M02',
-                    tbr: 'B'
+               //     fab: 'M02',
+                    tbr: 'A'
                 }
         }
         else
         {
             checkOperation =
                 {
+                    caption: 'Done',
                     icon: FaCheck,
                     action: async (f) => 
                     {  
                         await setStepDone( true, step)
                         activateItem('props', step, getPageOperationsWithStepTools(step))
                     },
-                    fab: 'M02',
-                    tbr: 'B'
+                //    fab: 'M02',
+                    tbr: 'A'
                 }
         }
 
         return {
-            opver: 1,
+            opver: 2,
+            fab: 'M00',
             operations: [
                 {
-                    caption: 'View',
+                    caption: 'Task',
+                    tbr: 'B',
                     operations: [
                         {
-                            icon: FaPen,
-                            grid: addOperations,
-                            fab: 'M10',
+                            caption: "Save",
+                            hideToolbarCaption: true,
+                            icon: FaSave,
+                            action: (f) => saveCurrentEditable(),
+                            //fab: 'S00',
                             tbr: 'A'
                         },
                         {
-                            icon: FaSave,
-                            action: (f) => saveCurrentEditable(),
-                            fab: 'S00',
+                            caption: 'Edit...',
+                            hideToolbarCaption: true,
+                            icon: FaPen,
+                            grid: addOperations,
+                       //     fab: 'M10',
                             tbr: 'A'
                         },
-                        checkOperation
+                        {
+                            caption: 'Add to basket',
+                            icon: FaBasketPlus,   // MdLibraryAdd
+                            action: (f) => copyTaskToBasket(),
+                        //    fab: 'M04',
+                        //    tbr: 'A'
+
+                        }
                     ]
+                },
+                {
+                    caption: 'Step',
+                    operations: [checkOperation]
                 }
             ]
         }
@@ -395,17 +417,7 @@
         {
             caption: 'Tag',
             icon: FaTag,
-            action: async (f) => 
-                {
-                    if(tags)
-                        tags.show();
-                    else
-                    {
-                        tagsPlaceholder = true;
-                        await tick();
-                        tags?.show(undefined, () => {tagsPlaceholder = false})
-                    }
-                }
+            action: async (f) => runTagInserter()
         },
         {
             caption: 'Step',
@@ -456,37 +468,38 @@
     function getPageOperations()
     {
         return {
-            opver: 1,
+            opver: 2,
+            fab: 'M00',
             operations: [
                 {
-                    caption: 'View',
+                    caption: 'Task',
+                    tbr: 'B',
                     operations: [
                         {
-                            icon: FaPen,
-                            grid: addOperations,
-                            fab: 'M10',
-                            tbr: 'A'
-                        },
-                        {
+                            caption: "Save",
+                            hideToolbarCaption: true,
                             icon: FaSave,
                             action: (f) => saveCurrentEditable(),
-                            fab: 'S00',
+                            //fab: 'S00',
                             tbr: 'A'
                         },
                         {
-                            icon: FaBasketPlus,   // MdLibraryAdd
-                         //   caption: 'Copy to basket',
-                            action: (f) => copyTaskToBasket(),
-                            fab: 'M04',
+                            caption: 'Edit...',
+                            hideToolbarCaption: true,
+                            icon: FaPen,
+                            grid: addOperations,
+                       //     fab: 'M10',
                             tbr: 'A'
+                        },
+                        
+                        {
+                            caption: 'Add to basket',
+                            icon: FaBasketPlus,   // MdLibraryAdd
+                            action: (f) => copyTaskToBasket(),
+                        //    fab: 'M04',
+                        //    tbr: 'A'
 
                         },
-                    /*    {
-                            icon: FaList,
-                            action: (f) => { push(task.TaskList.href) },
-                            fab: 'C00',
-                            tbr: 'C'
-                        } */
                     ]
                 }
             ]
@@ -497,42 +510,217 @@
     function getPageOperationsWithFormattingTools()
     {
         const mobile = isDeviceSmallerThan("sm")
-        if(mobile)
-        {
-            return [ ]
-        }
-        else
-        {
-            const addOperation = {
-                icon: FaPen,
-                caption: '',
-                grid: addOperations,
-                fab: '',
-                tbr: 'A'
-            };
+        
+        return {
+            opver: 2,
+            fab: 'M00',
+            operations: [
+                {
+                    caption: 'Task',
+                    tbr: 'B',
+                    operations: [
+                        {
+                            caption: "Save",
+                            hideToolbarCaption: true,
+                            icon: FaSave,
+                            action: (f) => description?.save(),
+                            //fab: 'S00',
+                            tbr: 'A'
+                        },
+                        {
+                            caption: 'Edit...',
+                            hideToolbarCaption: true,
+                            icon: FaPen,
+                            grid: addOperations,
+                       //     fab: 'M10',
+                            tbr: 'A'
+                        },
+                        
+                        {
+                            caption: 'Add to basket',
+                            icon: FaBasketPlus,   // MdLibraryAdd
+                            action: (f) => copyTaskToBasket(),
+                        //    fab: 'M04',
+                        //    tbr: 'A'
 
-            const saveOperation = {
-                icon: FaSave,
-                action: (f) => { description?.save() },
-                fab: '',
-                tbr: 'A'
-            }
-
-            return {
-                opver: 1,
-                operations: [
-                    {
-                        caption: 'View',
-                        operations: [addOperation,  saveOperation]
-                    },
-                    {
-                        caption: 'Format',
-                        operations: description.getFormattingOperations()
-                    }
-                ]
-            }
+                        },
+                    ]
+                },
+                {
+                    caption: 'Insert',
+                    tbr: 'B',
+                    preAction: description.preventBlur,
+                    operations: [
+                        {
+                            caption: 'Image',
+                            icon: FaImage,
+                            action: (f) => description.setImage(),
+                            activeFunc: description.isActiveImage,
+                            tbr: 'A',
+                            hideToolbarCaption: true
+                        },
+                        {
+                            caption: 'Table',
+                            icon: FaTable,
+                            action: (f) => description.setTable(),
+                            activeFunc: description.isActiveTable
+                        },
+                        {
+                            caption: 'Attachement',
+                            icon: FaPaperclip,
+                            action: (f) => runFileAttacher(),
+                            tbr: 'A',
+                            hideToolbarCaption: true
+                        },
+                        {
+                            caption: 'Tag',
+                            icon: FaTag,
+                            action: (f) => runTagInserter()
+                        }
+                    ]
+                },
+                {
+                    caption: 'Text',
+                    tbr: 'B',
+                    preAction: description.preventBlur,
+                    operations: [
+                        {
+                            caption: 'Bold',
+                            icon: FaBold,
+                            action: (f) => description.setBold(),
+                            activeFunc: description.isActiveBold,
+                            tbr: 'A',
+                            hideToolbarCaption: true
+                        },
+                        {
+                            caption: 'Italic',
+                            icon: FaItalic,
+                            action: (f) => description.setItalic(),
+                            activeFunc: description.isActiveItalic,
+                            tbr: 'A',
+                            hideToolbarCaption: true
+                        },
+                        {
+                            caption: 'Underline',
+                            icon: FaUnderline,
+                            action: (f) => description.setUnderline(),
+                            activeFunc: description.isActiveUnderline,
+                            tbr: 'A',
+                            hideToolbarCaption: true
+                        },
+                        {
+                            caption: 'Strikethrough',
+                            icon: FaStrikethrough,
+                            action: (f) => description.setStrikethrough(),
+                            activeFunc: description.isActiveStrikethrough,
+                        },
+                    ]
+                },
+                {
+                    caption: 'Styles',
+                    tbr: 'B',
+                    preAction: description.preventBlur,
+                    operations: [
+                        {
+                            caption: 'Normal',
+                            icon: FaRemoveFormat,
+                            action: (f) => description.setNormal(),
+                            activeFunc: description.isActiveNormal,
+                        },
+                        {
+                            caption: 'Heading 1',
+                            icon: IcH1,
+                            action: (f) => description.setHeading(1),
+                            activeFunc: () => description.isActiveHeading(1)
+                        },
+                        {
+                            caption: 'Heading 2',
+                            icon: IcH2,
+                            action: (f) => description.setHeading(2),
+                            activeFunc: () => description.isActiveHeading(2)
+                        },
+                        {
+                            caption: 'Heading 3',
+                            icon: IcH3,
+                            action: (f) => description.setHeading(3),
+                            activeFunc: () => description.isActiveHeading(3)
+                        },
+                        {
+                            caption: 'Heading 4',
+                            icon: IcH4,
+                            action: (f) => description.setHeading(4),
+                            activeFunc: () => description.isActiveHeading(4)
+                        },
+                        {
+                            caption: 'Code',
+                            icon: FaCode,
+                            action: (f) => description.setCode(),
+                            activeFunc: description.isActiveCode,
+                        },
+                        {
+                            caption: 'Comment',
+                            icon: FaComment,
+                            action: (f) => description.setComment(),
+                            activeFunc: description.isActiveComment,
+                        },
+                        {
+                            caption: 'Quote',
+                            icon: FaQuoteRight,
+                            action: (f) => description.setQuote(),
+                            activeFunc: description.isActiveQuote,
+                        },
+                        {
+                            caption: 'Warning',
+                            icon: FaExclamationTriangle,
+                            action: (f) => description.setWarning(),
+                            activeFunc: description.isActiveWarning,
+                        },
+                        {
+                            caption: 'Info',
+                            icon: FaInfo,
+                            action: (f) => description.setInfo(),
+                            activeFunc: description.isActiveInfo,
+                        },
+                        {
+                            caption: 'BulletList',
+                            icon: FaListUl,
+                            action: (f) => description.setBulletList(),
+                            activeFunc: description.isActiveBulletList,
+                            tbr: 'A',
+                            hideToolbarCaption: true
+                        },
+                    ]
+                }
+            ]
         }
+        
     }
+
+    const extraPaletteCommands = [
+        {
+            caption: 'Save',           
+            icon: FaSave,
+            action: () => description?.save(),
+        },
+        {
+            caption: 'Add to basket',
+            icon: FaBasketPlus,   // MdLibraryAdd
+            action: () => copyTaskToBasket(),
+        }
+    ]
+
+    const extraInsertPalletteCommands = [
+        {
+            caption: 'Attachement',
+            icon: FaPaperclip,
+            action: runFileAttacher
+        },
+        {
+            caption: 'Tag',
+            icon: FaTag,
+            action: () => setTimeout(() => runTagInserter(), 500)
+        }
+    ]
 
     const descriptionActive = { }
     function activateFormattingTools()
@@ -679,6 +867,18 @@
             pendingUploading = false;
 
             await reloadData();
+        }
+    }
+
+    async function runTagInserter()
+    {
+        if(tags)
+            tags.show();
+        else
+        {
+            tagsPlaceholder = true;
+            await tick();
+            tags?.show(undefined, () => {tagsPlaceholder = false})
         }
     }
 
@@ -844,7 +1044,9 @@
                             onFocusCb={() => activateFormattingTools()}
                             onBlurCb={() => deactivateFormattingToolsIfNeeded()}
                             onAddImage={uploadImage}
-                            onRemoveImage={removeImage}/>
+                            onRemoveImage={removeImage}
+                            extraFrontPaletteCommands={extraPaletteCommands}
+                            extraInsertPaletteCommands={extraInsertPalletteCommands}/>
 
             {/if}
 
