@@ -1,8 +1,8 @@
 <script>
     import {reef, session} from '@humandialog/auth.svelte'
-    import {    Spinner, 
-                Page, 
-                Icon, 
+    import {    Spinner,
+                Page,
+                Icon,
                 ComboSource,
                 List,
                 ListTitle,
@@ -19,10 +19,10 @@
 
     let user = null;
     let listComponent;
-    
+
 
     $: onParamsChanged($session, $mainContentPageReloader);
-    
+
     async function onParamsChanged(...args)
     {
         if(!$session.isActive)
@@ -30,7 +30,7 @@
             user = null;
             return;
         }
-        
+
         await fetchData()
     }
 
@@ -57,7 +57,7 @@
                                                 }
                                             ]
                                         }
-                                    ]   
+                                    ]
                                 },
                                 onErrorShowAlert);
         if(res)
@@ -71,7 +71,7 @@
         await fetchData();
         listComponent.reload(user, selectRecommendation);
     }
-    
+
 
     let deleteModal;
     let folderToDelete;
@@ -81,7 +81,7 @@
         deleteModal.show()
     }
 
-    
+
     async function deleteFolder()
     {
         if(!folderToDelete)
@@ -90,11 +90,11 @@
         await reef.post(`${folderToDelete.$ref}/DeletePermanently`, { }, onErrorShowAlert);
         deleteModal.hide();
 
-        
+
         await reloadFolders(listComponent.SELECT_NEXT)
     }
 
-    
+
     async function addFolder(newFolderAttribs)
     {
         let res = await reef.post(`/user/Folders/new`, newFolderAttribs, onErrorShowAlert)
@@ -114,8 +114,8 @@
                 operations: [
                     {
                         icon: FaPlus,
-                        caption: 'Add',
-                        hideToolbarCaption: true,
+                        caption: 'Add Personal Folder',
+                        //hideToolbarCaption: true,
                         action: (focused) => { listComponent.addRowAfter(null) },
                         //fab: 'M10',
                         tbr: 'A'
@@ -128,11 +128,11 @@
     function getEditOperations(folder)
     {
         return [
-            
+
         ];
     }
 
-    let folderOperations = (folder) => { 
+    let folderOperations = (folder) => {
         let editOperations = getEditOperations(folder)
         return {
             opver: 2,
@@ -149,22 +149,22 @@
                             action: (focused) => { listComponent.addRowAfter(folder) },
                             //fab: 'M10',
                             tbr: 'A'
-                        },       
+                        },
                         {
                             caption: 'Move up',
                             hideToolbarCaption: true,
                             icon: FaCaretUp,
                             action: (f) => listComponent.moveUp(folder),
                           //  fab:'M03',
-                            tbr:'A' 
-                        },                
+                            tbr:'A'
+                        },
                         {
                             caption: 'Move down',
                             hideToolbarCaption: true,
                             icon: FaCaretDown,
                             action: (f) => listComponent.moveDown(folder),
                             //fab:'M02',
-                            tbr:'A' 
+                            tbr:'A'
                         },
                         {
                             caption: 'Change name',
@@ -224,26 +224,26 @@
 </svelte:head>
 
 {#if user}
-    
-    <Page   self={user} 
+
+    <Page   self={user}
             toolbarOperations={pageOperations}
             clearsContext='props sel'
             title='My Folders'>
             <section class="w-full place-self-center max-w-3xl">
-        <List   self={user} 
-                a='Folders' 
-                toolbarOperations={folderOperations} 
-                orderAttrib='Order'                
+        <List   self={user}
+                a='Folders'
+                toolbarOperations={folderOperations}
+                orderAttrib='Order'
                 bind:this={listComponent}>
             <ListTitle a='Title' hrefFunc={(folder) => `${folder.href}`}/>
             <ListSummary a='Summary'/>
             <ListInserter action={addFolder} icon/>
 
             <span slot="left" let:element>
-                <Icon component={FaRegFolder} 
+                <Icon component={FaRegFolder}
                     class="h-5 w-5  text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
             </span>
-            
+
         </List>
     </section>
     </Page>

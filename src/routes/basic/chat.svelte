@@ -1,6 +1,6 @@
 <script>
     import {reef, session} from '@humandialog/auth.svelte'
-	import  { 
+	import  {
             Page,
             activateItem,
 			onErrorShowAlert,
@@ -11,20 +11,20 @@
             } from '$lib'
 	import { afterUpdate, tick } from 'svelte';
     import {location, link, querystring} from 'svelte-spa-router'
-    
+
     import {FaShoppingBasket, FaArrowCircleRight, FaTimes, FaRegFile, FaRegCircle, FaPaperPlane, FaRegStar, FaStar} from 'svelte-icons/fa/'
     import BasketPreview from './basket.preview.svelte'
-	
+
     let channelRef = ''
     let channel = null;
     let allTags = '';
-   
+
     let pendingUploading = false;
     let isReadOnly = false;
     let unreadMessagesNo = 0
     let selectedMessageId = 0
-    
-    
+
+
     $: onParamsChanged($location, $querystring)
 
     async function onParamsChanged(...args)
@@ -45,7 +45,7 @@
             selectedMessageId = parseInt(params.get("res"))
             scrollToPost = -1
         }
-        
+
 
         reef.get('/group/AllTags', onErrorShowAlert).then((res) => {
             allTags=res
@@ -67,7 +67,7 @@
                         scrollToPost = -1
                         selectedMessageId = firstUnreadMessage.Id
                     }
-                    
+
                 }
             }
        }
@@ -88,7 +88,7 @@
         {
             const indicator = document.getElementById(`__hd_unread_indicator`)
             if(indicator)
-                indicator?.scrollIntoView(true)      
+                indicator?.scrollIntoView(true)
         }
         else
         {
@@ -103,8 +103,8 @@
     {
         if(!channelRef)
             return;
-        
-        let res = await reef.post(`${channelRef}/query`, 
+
+        let res = await reef.post(`${channelRef}/query`,
                         {
                             Id: 1,
                             Name: "collector",
@@ -114,16 +114,16 @@
                                 {
                                     Id: 1,
                                     Association: '',
-                                    Expressions:[   'Id', 
+                                    Expressions:[   'Id',
                                                     'Title',
                                                     'GetTitle',
-                                                    'Summary', 
+                                                    'Summary',
                                                     'Status',
-                                                    'Order', 
+                                                    'Order',
                                                     'IsSubscribed',
                                                     'GetUnreadMessagesNo',
-                                                    '$ref', 
-                                                    '$type', 
+                                                    '$ref',
+                                                    '$type',
                                                     '$acc'],
                                     SubTree:[
                                         {
@@ -155,7 +155,7 @@
                             ]
                         },
                         onErrorShowAlert)
-        
+
         channel = res.MessageChannel
 
         if(channel.GetTitle)
@@ -166,7 +166,7 @@
         isReadOnly = (channel.$acc & 0x2) == 0
     }
 
-    
+
     async function markRead()
     {
         unreadMessagesNo = 0
@@ -246,14 +246,14 @@
     let newMessageElement;
     let newMessageContent = ''
 
-   
+
     function scrollDown()
     {
         newMessageElement?.scrollIntoView(
                 {
                     block: "end"
                 });
-       
+
     }
 
     let messageElements = [];
@@ -263,7 +263,7 @@
             text: messageText,
             attachements: newMessageAttachements
         }, onErrorShowAlert)
-        
+
         if(res)
         {
             await reloadData();
@@ -279,11 +279,11 @@
             if(newMessageContent)
             {
                 onSubmit(newMessageContent)
-                newMessageContent = ''  
+                newMessageContent = ''
                 newMessageAttachements = []
             }
             e.stopPropagation()
-            e.preventDefault() 
+            e.preventDefault()
         }
     }
 
@@ -292,15 +292,15 @@
         if(newMessageContent)
         {
             onSubmit(newMessageContent)
-            newMessageContent = ''  
+            newMessageContent = ''
             newMessageAttachements = []
         }
     }
 
-    function byteLengthUTF8(str) 
+    function byteLengthUTF8(str)
     {
         let s = str.length;
-        for (let i=str.length-1; i>=0; i--) 
+        for (let i=str.length-1; i>=0; i--)
         {
             const code = str.charCodeAt(i);
             if (code > 0x7f && code <= 0x7ff) s++;
@@ -310,10 +310,10 @@
         return s;
     }
 
-    function additionalBytesSize(str) 
+    function additionalBytesSize(str)
     {
         let no = 0;
-        for (let i=str.length-1; i>=0; i--) 
+        for (let i=str.length-1; i>=0; i--)
         {
             const code = str.charCodeAt(i);
             if (code > 0x7f && code <= 0x7ff) no++;
@@ -343,7 +343,7 @@
         showFloatingToolbar(rect, BasketPreview, {
                         onAttach: onAttachBasket,
                         onAttachAndClear: onAttachAndClearBasket
-                        
+
                     });
     }
 
@@ -372,7 +372,7 @@
        {
             newMessageAttachements = [...res]
        }
-    } 
+    }
 
     async function onAttachAndClearBasket(basketItem)
     {
@@ -391,7 +391,7 @@
         newMessageAttachements = []
     }
 
-    
+
 
 </script>
 
@@ -408,7 +408,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex-->
-<Page   self={channel} 
+<Page   self={channel}
             toolbarOperations={getPageOperations()}
             clearsContext=''
             title={channel.Title}>
@@ -436,7 +436,7 @@
                     {channel.Summary}
                 </p>
            {/if}
-            
+
             {#if channel.Messages && channel.Messages.length > 0}
                 {#each channel.Messages as message, idx}
                     {@const dt = new Date(message.Date)}
@@ -445,8 +445,8 @@
                     {@const messageElementId = `__hd_channel_msg_${message.Id}`}
                         {#if message.Id == selectedMessageId}
                             <p  id="__hd_unread_indicator"
-                                class="  separator 
-                                        before:border before:dark:border-red-800 before:border-red-200 
+                                class="  separator
+                                        before:border before:dark:border-red-800 before:border-red-200
                                         after:border after:dark:border-red-800 after:border-red-200
                                         text-red-400 dark:text-red-600">
                                         Unread messages
@@ -455,19 +455,19 @@
                         <!--    border-bottom: 1px solid #000; -->
                         <h4 id={messageElementId}>
                             <a href={message.Author.href} use:link>
-                                {message.Author.Name} 
+                                {message.Author.Name}
                             </a>
                             <span class="ml-2 text-xs font-normal opacity-70">
-                                {printTime(dt)},   {getNiceStringDate(dt)} 
+                                {printTime(dt)},   {getNiceStringDate(dt)}
                             </span>
                         </h4>
 
                         <p class="whitespace-pre-wrap">
                             {message.Text}
                             <br>
-                            <span class="text-xs whitespace-normal">  
+                            <span class="text-xs whitespace-normal">
                                 {#if notesNo>0 || tasksNo>0}
-                                    
+
                                         {#if notesNo>0}
                                             {#each message.Notes as att}
                                                 <a      class="mr-2 font-normal whitespace-nowrap"
@@ -495,12 +495,12 @@
                                                 </a>
                                             {/each}
                                         {/if}
-                                        
-                                    
+
+
                                 {/if}
                             </span>
-                        </p>  
-                    
+                        </p>
+
                     <!---/section-->
                 {/each}
             {:else}
@@ -508,22 +508,22 @@
             {/if}
             <!--p class="h-20"></p-->
 
-            
+
             <section class="not-prose
-                            mt-4  
-                            min-h-20 w-full 
+                            mt-4
+                            min-h-20 w-full
                             border border-stone-300 dark:border-stone-600 rounded-lg p-2
                             bg-stone-50 dark:bg-stone-800"
                             bind:this={newMessageElement}>
-                            
+
                 <textarea   class="w-full min-h-40 bg-stone-50 dark:bg-stone-800 outline-none"
                             bind:value={newMessageContent}
                             maxlength={196-additionalBytesSize(newMessageContent)}
                             placeholder="Type new message"
                             on:keydown={onKeyDown}/>
 
-                
-                    
+
+
                 {#if newMessageAttachements.length > 0}
                     <section class="flex flex-row gap-2 flex-wrap mb-2">
                         {#each newMessageAttachements as att}
@@ -542,52 +542,52 @@
                         </button>
                     </section>
                 {/if}
-                
-                    
+
+
                 <div class="w-full flex flex-row gap-2">
-                    <button type="button" 
-                            class=" 
-                            py-2.5 px-4 
-                            text-sm font-thin text-stone-700 dark:text-stone-300 dark:hover:text-white 
+                    <button type="button"
+                            class="
+                            py-2.5 px-4
+                            text-sm font-thin text-stone-700 dark:text-stone-300 dark:hover:text-white
                             hover:bg-stone-200 dark:hover:bg-stone-900 active:bg-stone-200 dark:active:bg-stone-600
-                            border border-stone-300 focus:outline-none dark:border-stone-600
+                            focus:outline-none dark:border-stone-600
                             flex items-center rounded"
                             on:click={showBasket}>
                         <div class="w-5 h-5 mr-1"><FaShoppingBasket/></div>
                         <span class="ml-2">Attach...</span>
                     </button>
 
-                    <p class="flex-none ml-auto pt-6 mr-1 text-xs m-0">
+                    <p class="flex-none ml-auto py-2.5 mr-1 text-xs m-0">
                         {byteLengthUTF8(newMessageContent)}/196
                     </p>
-                    
-                    <button type="button" 
-                            class=" 
-                            py-2.5 px-4 
-                            text-sm font-thin text-stone-700 dark:text-stone-300 dark:hover:text-white 
+
+                    <button type="button"
+                            class="
+                            py-2.5 px-4
+                            text-sm font-thin text-stone-700 dark:text-stone-300 dark:hover:text-white
                             hover:bg-stone-200 dark:hover:bg-stone-900 active:bg-stone-200 dark:active:bg-stone-600
-                            border border-stone-300 focus:outline-none dark:border-stone-600
+                            focus:outline-none dark:border-stone-600
                             flex items-center rounded"
                             on:click={onSubmitClick}>
                         <div class="w-5 h-5 mr-1"><FaPaperPlane/></div>
                         <span class="ml-2">Send</span>
-                        
+
                     </button>
-                    
+
                 </div>
 
-                
+
 
             </section>
 
         </article>
 
-    
+
 
     </section>
 
-    
-    
+
+
     <!--input hidden type="file" id="imageFile" accept="image/*" bind:this={imgInput} on:change={onImageSelected}/--> <!-- capture="environment" -->
 </Page>
 {/key}
@@ -607,7 +607,7 @@
     .separator::after {
         content: '';
         flex: 1;
-     
+
     }
 
     .separator:not(:empty)::before {

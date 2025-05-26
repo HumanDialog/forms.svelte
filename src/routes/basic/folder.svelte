@@ -1,8 +1,8 @@
 <script>
     import {reef, session} from '@humandialog/auth.svelte'
-    import {    Spinner, 
-                Page, 
-                Icon, 
+    import {    Spinner,
+                Page,
+                Icon,
                 ComboSource,
                 List,
                 ListTitle,
@@ -23,7 +23,7 @@
     import FaBasketCut from './icons/basket.cut.svelte'
     import FaBasketTrash from './icons/basket.trash.svelte'
     import {cache} from './cache.js'
-    
+
     export let params = {}
 
     let contextItem = null;
@@ -37,26 +37,26 @@
     let users = [];
 
     const STATE_FINISHED = 7000;
-    
+
     $: onParamsChanged($location, $querystring, $mainContentPageReloader, $session);
-    
+
     async function onParamsChanged(...args)
     {
         const segments = $location.split('/');
         const foundIdx = segments.findIndex( s => s == 'folder');
         if(foundIdx < 0)
             return;
-        
-        
+
+
         if(!segments.length)
             contextItemId = 1
         else
             contextItemId = parseInt(segments[segments.length-1])
-        
-        
+
+
         contextItem = null
-        contextPath = `/Folder/${contextItemId}` 
-     
+        contextPath = `/Folder/${contextItemId}`
+
         const cacheKey = `folder_${contextItemId}`
         const cachedValue = cache.get(cacheKey)
         if(cachedValue)
@@ -68,13 +68,13 @@
             notesComponent?.reload(contextItem, notesComponent.KEEP_SELECTION)
             tasksComponent?.reload(contextItem, tasksComponent.KEEP_SELECTION)
         }
-           
+
         const readItem = await readContextItem(contextItemId)
-        
+
         // dodatkowe zabezpiecznie dla przypadku kiedy pokazalismy folder, ale jego wersje z cache'a
         // i wciąż jeszcze czekamy na odpowiedź z serwisu. W międzyczasie user przeszedł do folderu niżej
         // zostajemy więc w tym komponencie, ale zmienił się parametr folderu do załadowania
-        // wysyłamy więc nowe zapytanie, a to poprzednie, które wciąż jeszcze trwa, już nas nie interesuje 
+        // wysyłamy więc nowe zapytanie, a to poprzednie, które wciąż jeszcze trwa, już nas nie interesuje
         if(readItem.Id != contextItemId)
             return;
 
@@ -89,7 +89,7 @@
         tasksComponent?.reload(contextItem, tasksComponent.KEEP_SELECTION)
     }
 
-    async function readContextItem(contextItemId) 
+    async function readContextItem(contextItemId)
     {
         let res = await reef.post(`/Folder/${contextItemId}/query`,
                             {
@@ -110,7 +110,7 @@
                                                 //Filter: 'State <> STATE_FINISHED',
                                                 Sort: 'Order',
                                                 Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'IsPinned']
-                                                
+
                                             },
                                             {
                                                 Id: 3,
@@ -118,7 +118,7 @@
                                                 //Filter: 'State <> STATE_FINISHED',
                                                 Sort: 'Order',
                                                 Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href']
-                                                
+
                                             },
                                             {
                                                 Id: 4,
@@ -126,7 +126,7 @@
                                                 //Filter: 'State <> STATE_FINISHED',
                                                 Sort: 'Order',
                                                 Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'href']
-                                                
+
                                             }
                                         ]
                                     }
@@ -134,8 +134,8 @@
                             },
                             onErrorShowAlert);
         if(res)
-        {    
-            return res.Folder;  
+        {
+            return res.Folder;
         }
         else
             return null;
@@ -148,7 +148,7 @@
             folderTitle = contextItem.Title;
     }
 
-   
+
 
     let deleteModal;
     let objectToDelete;
@@ -160,7 +160,7 @@
         deleteModal.show()
     }
 
-    
+
     async function deleteElement()
     {
         if(!objectToDelete)
@@ -176,7 +176,7 @@
             break;
 
         case 'Note':
-            await reef.post(`${contextItem.$ref}/DeletePermanentlyNote`, { noteLink: objectToDelete.$ref } , onErrorShowAlert);  
+            await reef.post(`${contextItem.$ref}/DeletePermanentlyNote`, { noteLink: objectToDelete.$ref } , onErrorShowAlert);
             deleteModal.hide();
             await fetchData();
             notesComponent.reload(contextItem, notesComponent.SELECT_NEXT);
@@ -189,7 +189,7 @@
             subfoldersComponent.reload(contextItem, subfoldersComponent.SELECT_NEXT);
             break;
         }
-        
+
     }
 
     async function dettachSubFolder(folder)
@@ -340,14 +340,14 @@
     async function dettachAllMyContent()
     {
         await reef.post(`${contextItem.$ref}/DettachAllContent`, {} , onErrorShowAlert)
-        
+
         await fetchData();
         subfoldersComponent.reload(contextItem, subfoldersComponent.CLEAR_SELECTION)
         notesComponent.reload(contextItem, notesComponent.CLEAR_SELECTION)
         tasksComponent.reload(contextItem, tasksComponent.CLEAR_SELECTION)
     }
 
-    async function refreshView() 
+    async function refreshView()
     {
         await fetchData();
         subfoldersComponent.reload(contextItem, subfoldersComponent.KEEP_SELECTION)
@@ -368,6 +368,7 @@
                 operations: [
                     {
                         caption: 'View',
+                        menu: 'FT',
                         operations: [
                             {
                                 caption: 'Clear Basket',
@@ -396,9 +397,9 @@
             {
                 pinOperation = {
                     caption: 'Unpin folder',
-                    icon: FaStar, //aRegShareSquare, // 
-                    action: async (f) => { 
-                        await toggleFolderPinned(contextItem); 
+                    icon: FaStar, //aRegShareSquare, //
+                    action: async (f) => {
+                        await toggleFolderPinned(contextItem);
                         // refreshing operations
                         activateItem('data', contextItem, getPageOperations());
                         if(UI.navigator)
@@ -413,10 +414,10 @@
             {
                 pinOperation = {
                     caption: 'Pin folder',
-                    icon: FaRegStar, //aRegShareSquare, // 
-                    action: async (f) => { 
-                        await toggleFolderPinned(contextItem); 
-                        // refreshing operations 
+                    icon: FaRegStar, //aRegShareSquare, //
+                    action: async (f) => {
+                        await toggleFolderPinned(contextItem);
+                        // refreshing operations
                         activateItem('data', contextItem, getPageOperations());
                         if(UI.navigator)
                             UI.navigator.refresh()
@@ -427,14 +428,14 @@
                 }
             }
 
-            
+
             return {
                 opver: 2,
                 fab: 'M00',
                 operations: [
                     {
                         caption: "View",
-                        tbr: 'B',
+                        //tbr: 'B',
                         operations: [
                             pinOperation,
                             {
@@ -442,46 +443,49 @@
                                 icon: FaSync,
                                 action: async (f) => await refreshView(),
                                 //fab: 'S10',
-                                //tbr: 'C',
+                                tbr: 'C',
                                 hideToolbarCaption: true
                             }
                         ]
                     },
                     {
                         caption: "Add",
-                        tbr: 'B',
+                       // tbr: 'B',
                         operations: [
                             {
                                 caption: 'New folder',
                                 icon: FaRegFolder,
                                 action: (f) => { subfoldersComponent.addRowAfter(null) },
-                                tbr: 'A'
+                                tbr: 'A',
+                                fab: 'S10'
                             },
                             {
                                 caption: 'New note',
                                 icon: FaRegFile,
                                 action: (f) => { notesComponent.addRowAfter(null) },
-                                tbr: 'A'
+                                tbr: 'A',
+                                fab: 'S20'
                             },
                             {
                                 caption: 'New task',
                                 icon: FaRegCircle,
                                 action: (f) => { tasksComponent.addRowAfter(null) },
-                                tbr: 'A'
+                                tbr: 'A',
+                                fab: 'S30'
                             },
                             {
                                 separator: true
                             },
                             {
                                 caption: 'Attach...',
-                                icon: FaShoppingBasket, //FaLink, //aRegShareSquare, // 
+                                icon: FaShoppingBasket, //FaLink, //aRegShareSquare, //
                                 toolbar: BasketPreview,
                                 props: {
                                     destinationContainer: contextItem.$ref,
                                     onRefreshView: refreshViewAfterAttachingFromBasket
                                 },
                                 //fab: 'M01',
-                                //tbr: 'A'
+                                tbr: 'A'
                             },
                         ]
                     }
@@ -497,7 +501,7 @@
         notesComponent.reload(contextItem, notesComponent.CLEAR_SELECTION)
         tasksComponent.reload(contextItem, tasksComponent.CLEAR_SELECTION)
     }
-    
+
 
     function listComponent(kind)
     {
@@ -508,11 +512,11 @@
         case 'Note':
             return notesComponent;
         case 'Folder':
-            return subfoldersComponent
+            return subfoldersComponent;
         }
     }
 
-   
+
     async function dettachElement(element, kind)
     {
         switch(kind)
@@ -523,9 +527,9 @@
             return dettachNote(element)
         case 'Task':
             return dettachTask(element)
-        }   
+        }
     }
-    
+
     async function copyElementToBasket(element, kind)
     {
         switch(kind)
@@ -536,7 +540,7 @@
             return copyNoteToBasket(element)
         case 'Task':
             return copyTaskToBasket(element)
-        }   
+        }
     }
 
     async function cutElementToBasket(element, kind)
@@ -549,15 +553,13 @@
             return cutNoteToBasket(element)
         case 'Task':
             return cutTaskToBasket(element)
-        }   
+        }
     }
 
-    let elementOperations = (element, kind) => {
-        let list = listComponent(kind)
-        
-        if(contextItem.IsBasket)
-        {
-            return {
+    function basketElementOperations(element, kind)
+    {
+        let list = listComponent(kind);
+        return {
                 opver: 2,
                 fab: 'M00',
                 operations: [
@@ -568,7 +570,7 @@
                                 caption: 'Move down',
                                 icon: FaCaretDown,
                                 action: (f) => list.moveDown(element),
-                            //    fab:'M02',
+                                fab:'M02',
                                 tbr:'A',
                                 hideToolbarCaption: true
                             },
@@ -576,7 +578,7 @@
                                 caption: 'Move up',
                                 icon: FaCaretUp,
                                 action: (f) => list.moveUp(element),
-                            //    fab:'M03',
+                                fab:'M03',
                                 tbr:'A',
                                 hideToolbarCaption: true
                             },
@@ -591,16 +593,117 @@
                     }
                 ]
             }
-        }
-        else
-        {
-            return {
+    }
+
+    function folderElementOperations(element, kind)
+    {
+        let list = listComponent(kind);
+        return {
                 opver: 2,
                 fab: 'M00',
+                tbr: 'A',
                 operations: [
                     {
                         caption: 'Element',
-                        tbr: 'B',
+                        tbr: 'C',
+                        icon: FaPlus,
+                        hideToolbarCaption: true,
+                        operations: [
+                            {
+                                caption: `Add ${kind}`,
+                                icon: FaPlus,
+                                action: (f) => { list.addRowAfter(element) },
+                            //    fab:'M10',
+                                tbr:'A',
+                            }]
+                        },
+                    {
+                        caption: 'Element',
+                        tbr: 'C',
+                        //icon: FaPlus,
+                        //hideToolbarCaption: true,
+                        operations: [
+                            {
+                                caption: 'Edit',
+                                icon: FaPen,
+                                tbr: 'A',
+                                //action: (focused) =>  { listComponent(kind).edit(element, 'Title') },
+                                menu:[
+                                    {
+                                        caption: 'Edit Title',
+                                        action: (focused) =>  { listComponent(kind).edit(element, 'Title') },
+                                        tbr: 'A'
+                                    },
+                                    {
+                                        caption: 'Edit summary',
+                                        action: (focused) =>  { listComponent(kind).edit(element, 'Summary') }
+                                    }
+                                ]
+
+                            },
+                            {
+                                caption: 'Move down',
+                                icon: FaCaretDown,
+                                action: (f) => list.moveDown(element),
+                                //fab:'M02',
+                                tbr:'A' ,
+                                hideToolbarCaption: true
+                            },
+                            {
+                                caption: 'Move up',
+                                icon: FaCaretUp,
+                                action: (f) => list.moveUp(element),
+                                //fab:'M03',
+                                tbr:'A',
+                                hideToolbarCaption: true
+                            },
+                            {
+                                caption: 'Add to Basket',
+                                icon: FaBasketPlus, //FaCopy,   // MdLibraryAdd
+                                action: (f) => copyElementToBasket(element, kind),
+                                //fab: 'M04',
+                                tbr: 'A'
+
+                            },
+                            {
+                                caption: 'Move to Basket',
+                                icon: FaBasketCut, //FaCut,
+                                action: (f) => cutElementToBasket(element, kind),
+                            //    fab: 'M05',
+                            //    tbr: 'A'
+                            },
+                            {
+                                separator: true
+                            },
+                            {
+                                caption: 'Dettach',
+                          //      icon: FaUnlink,
+                                action: (f) => dettachElement(element, kind)
+                            },
+                            {
+                                caption: 'Delete permanently',
+                                icon: FaTrash,
+                                action: (f) => askToDelete(element, kind)
+                            }
+                        ]
+                    }
+                ]
+            }
+    }
+
+    function folderElementOperations_original(element, kind)
+    {
+        let list = listComponent(kind);
+        return {
+                opver: 2,
+                fab: 'M00',
+                tbr: 'A',
+                operations: [
+                    {
+                        caption: 'Element',
+                        tbr: 'C',
+                        icon: FaPlus,
+                        hideToolbarCaption: true,
                         operations: [
                             {
                                 caption: `Add ${kind}`,
@@ -641,7 +744,7 @@
                                 icon: FaBasketPlus, //FaCopy,   // MdLibraryAdd
                                 action: (f) => copyElementToBasket(element, kind),
                                 //fab: 'M04',
-                            //    tbr: 'A'
+                                tbr: 'A'
 
                             },
                             {
@@ -668,6 +771,97 @@
                     }
                 ]
             }
+    }
+
+    function folderElementOperations_bug(element, kind)
+    {
+        let list = listComponent(kind);
+        return {
+                opver: 2,
+                fab: 'M00',
+                tbr: 'A',
+                operations: [
+
+
+                            {
+                                caption: `Add ${kind}`,
+                                icon: FaPlus,
+                                action: (f) => { list.addRowAfter(element) },
+                            //    fab:'M10',
+                                tbr:'A',
+                            },
+                            {
+                                caption: 'Edit title',
+                                icon: FaPen,
+                                action: (focused) =>  { listComponent(kind).edit(element, 'Title') },
+                                tbr:'A' ,
+                                hideToolbarCaption: true
+                            },
+                            {
+                                caption: 'Edit summary',
+                                action: (focused) =>  { listComponent(kind).edit(element, 'Summary') }
+                            },
+                            {
+                                caption: 'Move down',
+                                icon: FaCaretDown,
+                                action: (f) => list.moveDown(element),
+                                //fab:'M02',
+                                tbr:'A' ,
+                                hideToolbarCaption: true
+                            },
+                            {
+                                caption: 'Move up',
+                                icon: FaCaretUp,
+                                action: (f) => list.moveUp(element),
+                                //fab:'M03',
+                                tbr:'A',
+                                hideToolbarCaption: true
+                            },
+                            {
+                                caption: 'Add to Basket',
+                                icon: FaBasketPlus, //FaCopy,   // MdLibraryAdd
+                                action: (f) => copyElementToBasket(element, kind),
+                                //fab: 'M04',
+                                tbr: 'A'
+
+                            },
+                            {
+                                caption: 'Move to Basket',
+                                icon: FaBasketCut, //FaCut,
+                                action: (f) => cutElementToBasket(element, kind),
+                            //    fab: 'M05',
+                            //    tbr: 'A'
+                            },
+                            {
+                                separator: true
+                            },
+                            {
+                                caption: 'Dettach',
+                          //      icon: FaUnlink,
+                                action: (f) => dettachElement(element, kind)
+                            },
+                            {
+                                caption: 'Delete permanently',
+                                icon: FaTrash,
+                                action: (f) => askToDelete(element, kind)
+                            }
+
+
+                ]
+            }
+    }
+
+
+    let elementOperations = (element, kind) => {
+
+
+        if(contextItem.IsBasket)
+        {
+            return basketElementOperations(element, kind)
+        }
+        else
+        {
+            return folderElementOperations(element, kind)
         }
     }
 
@@ -684,79 +878,79 @@
 
 
 {#if contextItem}
-    <Page   self={contextItem} 
+    <Page   self={contextItem}
             toolbarOperations={ getPageOperations() }
             clearsContext='props sel'
             title={folderTitle}>
 
             <section class="w-full place-self-center max-w-3xl">
-        
-            <List   self={contextItem} 
+
+            <List   self={contextItem}
                     a='Folders'
-                    title={folderTitle} 
-                    toolbarOperations={(el) => elementOperations(el, 'Folder')} 
+                    title={folderTitle}
+                    toolbarOperations={(el) => elementOperations(el, 'Folder')}
                     orderAttrib='Order'
                     bind:this={subfoldersComponent}>
-                <ListTitle      a='Title' 
+                <ListTitle      a='Title'
                                 hrefFunc={(folder) => `${folder.href}`}
                                 onChange={changeElementProperty}/>
-                
+
                 <ListSummary    a='Summary'
                                 onChange={changeElementProperty}/>
-                
+
                 <ListInserter   action={addFolder} icon/>
 
                 <span slot="left" let:element>
-                    <Icon component={FaRegFolder} 
+                    <Icon component={FaRegFolder}
                         class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
                 </span>
             </List>
-        
-            <List   self={contextItem} 
+
+            <List   self={contextItem}
                     a='Notes'
-                    toolbarOperations={ (el) => elementOperations(el, 'Note')} 
+                    toolbarOperations={ (el) => elementOperations(el, 'Note')}
                     orderAttrib='Order'
                     bind:this={notesComponent}>
-                <ListTitle      a='Title' 
+                <ListTitle      a='Title'
                                 hrefFunc={(note) => `${note.href}`}
                                 onChange={changeElementProperty}/>
-                <ListSummary    a='Summary' 
+                <ListSummary    a='Summary'
                                 onChange={changeElementProperty}/>
                 <ListInserter action={addNote} icon/>
 
                 <span slot="left" let:element>
-                    <Icon component={FaRegFile} 
+                    <Icon component={FaRegFile}
                         class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5 ml-2  mr-1"/>
                 </span>
             </List>
-        
-            <List   self={contextItem} 
+
+            <List   self={contextItem}
                     a='Tasks'
-                    toolbarOperations={(el) => elementOperations(el, 'Task')} 
+                    toolbarOperations={(el) => elementOperations(el, 'Task')}
                     orderAttrib='Order'
                     bind:this={tasksComponent}>
-                <ListTitle      a='Title' 
+                <ListTitle      a='Title'
                                 hrefFunc={(task) => `${task.href}`}
                                 onChange={changeElementProperty}/>
-                
+
                 <ListSummary    a='Summary'
                                 onChange={changeElementProperty}/>
                 <ListInserter action={addTask} icon/>
 
                 <span slot="left" let:element>
                     {#if element.State == STATE_FINISHED}
-                        <Icon component={FaRegCheckCircle} 
+                        <Icon component={FaRegCheckCircle}
                         class="h-5 w-5  text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
-                        
+
                     {:else}
-                        <Icon component={FaRegCircle} 
-                            on:click={(e) => finishTask(e, element)} 
+                        <Icon component={FaRegCircle}
+                            on:click={(e) => finishTask(e, element)}
                             class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1 "/>
-                        
+
                     {/if}
                 </span>
             </List>
-        
+
     </section>
 
     </Page>
@@ -772,4 +966,3 @@
         onOkCallback={deleteElement}
         bind:this={deleteModal}
         />
-
