@@ -18,7 +18,7 @@
     import { isDeviceSmallerThan } from '../../../utils'
                 
     import {rList_definition, rList_property_type} from '../List'
-	import { push } from 'svelte-spa-router';
+	import { push, link } from 'svelte-spa-router';
     import {FaExternalLinkAlt} from 'svelte-icons/fa/'
 	import Tags from '../../tags.svelte'
     
@@ -399,18 +399,19 @@
                     {#if is_link_like}
                         <p  class=" text-base font-semibold 
                                    
-                                    whitespace-nowrap overflow-clip w-full sm:flex-none sm:{name_w}
-                                    sm:hover:cursor-pointer underline"
+                                    whitespace-nowrap overflow-clip w-full sm:flex-none sm:{name_w}"
                                     id="__hd_list_ctrl_{getItemKey(item)}_Title"
-                                    on:click|stopPropagation={followDefinedHRef}
                                     use:editable={{
                                         action: (text) => {change_name(text)},
                                         active: false,
                                         readonly: definition.title_readonly,
                                         onSoftEnter: (text) => {change_name(text); editProperty('Summary')}
                                     }}
-                            > 
-                            {element_title}
+                            >  <!--on:click|stopPropagation={followDefinedHRef}-->
+                            <a  class="sm:hover:cursor-pointer underline" 
+                                href={getHRef()} use:link>
+                                {element_title}
+                            </a>
                         </p>
                     {:else}
                         <p  class=" text-base font-semibold 
