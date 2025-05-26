@@ -300,19 +300,52 @@
             <div class="flex flex-row justify-between
                         text-base font-semibold">
                 {#if href}
-                    <a  href={href} 
-                        on:click={on_link_clicked} 
-                        class="flex-1 ml-2 inline-flex items-center group"
-                        >
-                        {#if icon}
-                            <Icon class="w-5 h-5 mt-0.5 ml-2 mr-1" component={icon}/>
-                            
+                    {#if isOnPage}
+                        {#if isRowActive}
+                            <a  on:click={on_link_clicked} 
+                                href={href} 
+                                use:link
+                                class="flex-1 ml-2 inline-flex items-center underline"
+                                >
+                                {#if icon}
+                                    <Icon class="w-5 h-5 mt-0.5 ml-2 mr-1" component={icon}/>
+                                    
+                                {/if}
+                                <span   class="ml-3"
+                                        use:editable_if_needed={editable}>
+                                    <slot/>
+                                </span>
+                            </a>
+                        {:else}
+                            <span  on:click={on_link_clicked} 
+                                class="flex-1 ml-2 inline-flex items-center"
+                                >
+                                {#if icon}
+                                    <Icon class="w-5 h-5 mt-0.5 ml-2 mr-1" component={icon}/>
+                                    
+                                {/if}
+                                <span   class="ml-3"
+                                        use:editable_if_needed={editable}>
+                                    <slot/>
+                                </span>
+                            </span>
                         {/if}
-                        <span   class="ml-3 group-hover:underline"
-                                use:editable_if_needed={editable}>
-                            <slot/>
-                        </span>
-                    </a>
+                    {:else}
+                        <a  on:click={on_link_clicked} 
+                            href={href} 
+                            use:link
+                            class="flex-1 ml-2 inline-flex items-center group"
+                            >
+                            {#if icon}
+                                <Icon class="w-5 h-5 mt-0.5 ml-2 mr-1" component={icon}/>
+                                
+                            {/if}
+                            <span   class="ml-3 group-hover:underline"
+                                    use:editable_if_needed={editable}>
+                                <slot/>
+                            </span>
+                        </a>
+                    {/if}
                 {:else}
                     <p  class="flex-1 ml-2 inline-flex items-center group cursor-default"
                         use:selectable_if_needed={selectable}>

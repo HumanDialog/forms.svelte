@@ -1026,7 +1026,7 @@
 
 			<KanbanTitle    a="Title" 
                             hrefFunc={(task) => `/task/${task.Id}`}
-                            hasAttachment={(task) => task.Description || (task.Steps && task.Steps.length > 0) }/>
+                            hasAttachment={(task) => task.Description || (task.Steps && task.Steps.length > 0) || task.AttachedFiles }/>
 			<KanbanSummary a="Summary" />
 
             <KanbanStaticProperty top a='Index'/>

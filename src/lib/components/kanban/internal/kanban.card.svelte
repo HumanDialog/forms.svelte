@@ -1,6 +1,6 @@
 <script lang="ts">
 	import {getContext, tick} from 'svelte'
-    import{ push } from 'svelte-spa-router'
+    import{ push, link } from 'svelte-spa-router'
     import {    contextItemsStore, 
                 isActive, 
                 isSelected, 
@@ -304,12 +304,18 @@
                     onSoftEnter: async (text) => { onTitleChanged(text); await editProperty('Summary') }
                     }}
                 use:conditionalClick={{
-                    condition: canOpen, 
+                    condition: hasOpen, 
                     callback: performOpen}}
                 bind:this={titleElement}>
-                <!--a href="#"-->
+
+                {#if isLinkLike}
+                    <a href={getHRef()} use:link>
+                        {item[definition.titleAttrib]}    
+                    </a>
+                {:else}
                     {item[definition.titleAttrib]}
-                <!--/a-->
+                {/if}
+
 
                 {#if showIcon}
                     <span id="attachement" class="absolute top-1 right-0 w-5 h-5 sm:w-3 sm:h-3">

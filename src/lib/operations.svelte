@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { showFloatingToolbar, showMenu, showGridMenu } from './components/menu.js';
     import {contextToolbarOperations, pageToolbarOperations, contextItemsStore} from './stores.js'
+    import {FaEllipsisV} from 'svelte-icons/fa'
 
     export let mobile :boolean = false
 
@@ -14,6 +15,7 @@
     function update(...args)
     {
         let opVer = 0
+        let operationsRoot = null
         if($contextToolbarOperations && Array.isArray($contextToolbarOperations) && $contextToolbarOperations.length > 0)
         { 
             operations = $contextToolbarOperations;
@@ -22,6 +24,7 @@
         {
             operations = $contextToolbarOperations.operations;
             opVer = $contextToolbarOperations.opver ?? 0
+            operationsRoot = $contextToolbarOperations
         }
         else
         {
@@ -31,6 +34,7 @@
             {
                 operations = $pageToolbarOperations.operations;
                 opVer = $pageToolbarOperations.opver ?? 0
+                operationsRoot = $pageToolbarOperations
             }
         }
 
@@ -58,6 +62,41 @@
         }
         else if(opVer == 2)
         {
+
+            if(operationsRoot && operationsRoot.tbr)
+            {
+                let allFlatOperations = []
+                operationsRoot.operations.forEach(g => 
+                    allFlatOperations = [...allFlatOperations,
+                        {
+                            separator: true
+                        },
+                        ...g.operations
+                    ]
+                )
+                
+                const allOperationsMenu = {
+                    caption: operationsRoot.caption ?? '',
+                    icon: operationsRoot.icon ?? FaEllipsisV,
+                    menu: allFlatOperations,
+                    tbr: operationsRoot.tbr
+                }
+
+                switch(operationsRoot.tbr)
+                {
+                case 'A':
+                    AOperations.push(allOperationsMenu)
+                    break;
+
+                case 'B':
+                    BOperations.push(allOperationsMenu)
+                    break;
+
+                case 'C':
+                    COperations.push(allOperationsMenu)
+                    break;
+                }  
+            }
            
             operations.forEach(group => {
 
