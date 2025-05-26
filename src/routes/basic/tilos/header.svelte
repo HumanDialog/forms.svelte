@@ -12,8 +12,10 @@
     <div class="max-w-screen-xl flex flex-col sm:flex-row items-center justify-between mx-auto p-4">
       <a href="/" class="" use:link aria-label="Home page">
             <div class="flex flex-row">
-                <AppIcon class="block w-10 h-10"/>
-                <span class="ml-4 mt-1 text-2xl font-normal text-slate-200">Tilos</span>
+                <div class="w-6 h-6 sm:w-10 sm:h-10 ">
+                    <AppIcon class="text-white"/>
+                </div>
+                <span class="ml-4 text-2xl sm:text-4xl font-bold text-slate-200">TILOS</span>
             </div>
       </a>
        <div class="px-4 w-full block sm:w-auto">
@@ -23,11 +25,11 @@
                         <li><a class="block  rounded md:bg-transparent p-0  text-slate-200 hover:text-indigo-300" use:link href="/thome">Community</a></li>
                     </NotAuthorized>
                     <NotAuthorized>
-                        <li><a class="block rounded md:bg-transparent p-0 text-slate-200 hover:text-indigo-300" use:link href={$signUpHRef}>Get started</a></li>
+                        <li><a class="block rounded md:bg-transparent p-0 text-slate-200 hover:text-indigo-300" use:link href="/tdownload">Download</a></li>
                     </NotAuthorized>
                 {:else}
                     <Authorized>
-                        <li><a class="block  rounded md:bg-transparent p-0 text-slate-200 hover:text-indigo-300" use:link href='/'>Community</a></li>
+                        <li><a class="block  rounded md:bg-transparent p-0 text-slate-200 hover:text-indigo-300" use:link href='/thome'>Community</a></li>
                     </Authorized>
                 {/if}
             </ul>

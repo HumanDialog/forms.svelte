@@ -24,7 +24,7 @@
             </div>
             <div class="grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-3 text-xs sm:text-base">
                 <div>
-                    <h2 class="mb-3 sm:mb-6  text-xs sm:text-sm font-semibold text-gray-900 uppercase dark:text-white">Follow us
+                    <!--h2 class="mb-3 sm:mb-6  text-xs sm:text-sm font-semibold text-gray-900 uppercase dark:text-white">Follow us
                     </h2>
                     <ul class="text-gray-600 dark:text-gray-400">
                         <li class="mb-2 sm:mb-4">
@@ -36,7 +36,7 @@
                         <li class="mb-2 sm:mb-4">
                             <a href="https://github.com/HumanDialog/octopus.basic.svelte" class="hover:underline ">GitHub</a>
                         </li>
-                    </ul>
+                    </ul-->
                 </div>
                 <div>
                     <h2 class="mb-3 sm:mb-6 text-xs sm:text-sm font-semibold text-gray-900 uppercase dark:text-white">Company</h2>
@@ -60,13 +60,6 @@
                     class="hover:underline">Human Dialog</a>.
             </span>
             <div class="flex space-x-6 justify-center mt-0">
-                <!--a href="#" class="text-gray-500 hover:text-gray-900 dark:hover:text-white" aria-label="facebook">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path fill-rule="evenodd"
-                            d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"
-                            clip-rule="evenodd" /></svg>
-                </a-->
-                
                 <a href="https://twitter.com/ObjectReef" class="text-gray-500 hover:text-gray-900 dark:hover:text-white" aria-label="twitter">
                     <svg class="w-4 h-5" fill="currentColor" viewBox="0 0 300 300"  version="1.1" xmlns="http://www.w3.org/2000/svg">
                         <path d="M178.57 127.15 290.27 0h-26.46l-97.03 110.38L89.34 0H0l117.13 166.93L0 300.25h26.46l102.4-116.59 81.8 116.59h89.34M36.01 19.54H76.66l187.13 262.13h-40.66"/>
