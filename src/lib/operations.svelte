@@ -58,7 +58,7 @@
             })
 
             leftOperations = [...AOperations, ...BOperations]
-            rightOperations = [...COperations]
+            rightOperations = COperations.toReversed()
         }
         else if(opVer == 2)
         {
@@ -155,7 +155,7 @@
             })
 
             leftOperations = [...AOperations, ...BOperations]
-            rightOperations = [...COperations]
+            rightOperations = COperations.toReversed()
         }
         else
         {
