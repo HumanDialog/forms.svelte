@@ -231,7 +231,7 @@
                     {#each operation.toolbox as operation}
                         <button type="button"
                                 class="py-2.5 px-4
-                                text-sm font-thin
+                                text-xs font-thin
                                 text-stone-800 hover:bg-stone-700 active:bg-stone-300 border-stone-200
                                 dark:text-stone-300 dark:hover:text-white dark:hover:bg-stone-800 dark:active:bg-stone-600 dark:border-stone-600
                                 focus:outline-none
@@ -252,7 +252,7 @@
 
                     <button type="button"
                             class="py-2.5 px-4
-                            text-sm font-thin
+                            text-xs font-thin
                             text-stone-600 hover:text-stone-800 hover:bg-stone-200 active:bg-stone-200 border-stone-200
                             dark:text-stone-300 dark:hover:text-white dark:hover:bg-stone-800 dark:active:bg-stone-600 dark:border-stone-600
                             focus:outline-none
@@ -281,7 +281,7 @@
             {@const isActive=isOperationActivated(operation)}
                 <button type="button"
                         class="py-2.5 px-4
-                        text-sm font-thin
+                        text-xs font-thin
                         text-stone-600 hover:text-stone-800 hover:bg-stone-200 active:bg-stone-200 border-stone-200
                         dark:text-stone-300 dark:hover:text-white dark:hover:bg-stone-800 dark:active:bg-stone-600 dark:border-stone-600
                         focus:outline-none
