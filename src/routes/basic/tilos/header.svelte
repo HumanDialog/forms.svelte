@@ -2,7 +2,7 @@
 <script lang="ts">
     import AppIcon from '../icons/tilos.icon.svelte'
     import { link } from 'svelte-spa-router';
-    import {Authorized, NotAuthorized, signInHRef, signOutHRef, signUpHRef } from '@humandialog/auth.svelte'
+    import {Authorized, NotAuthorized } from '@humandialog/auth.svelte'
 
     export let main = false;
     

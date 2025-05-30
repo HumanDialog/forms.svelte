@@ -29,6 +29,8 @@ export default defineConfig( ({command, mode}) => {
 			__APP_DEFAULT_GUEST_PAGE__: '\'/listboard\'',
 			__USERS_SET__: '\'octopus\'',
 			__LANDING__: '\'octopus\'',
+			__PRIVACY_PAGE__: '\'/privacy-policy\'',
+			__TERMS_PAGE__:'\'/terms-and-conditions\''
 		}
 		break;
 
@@ -51,6 +53,8 @@ export default defineConfig( ({command, mode}) => {
 			__APP_DEFAULT_GUEST_PAGE__: '\'/thome\'',
 			__USERS_SET__: '\'tilos\'',
 			__LANDING__: '\'tilos\'',
+			__PRIVACY_PAGE__: '\'/doc/legal-privacy-policy\'',
+			__TERMS_PAGE__:'\'/doc/legal/legal-terms-of-service-\''
 		}
 		break;
 	}

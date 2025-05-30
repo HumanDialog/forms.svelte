@@ -6,6 +6,9 @@
 
     let classes = $$props.class ?? '';
 
+    const privacy = __PRIVACY_PAGE__
+    const terms = __TERMS_PAGE__
+
     function setup_cookies()
     {
         $cookies_valid_until='';
@@ -45,10 +48,10 @@
                             <a href="/tcontact" use:link  class="hover:underline">Contact us</a>
                         </li>
                         <li class="mb-2 sm:mb-4">
-                            <a href="/doc/legal-privacy-policy" use:link  class="hover:underline">Privacy Policy</a>
+                            <a href={privacy} use:link  class="hover:underline">Privacy Policy</a>
                         </li>
                         <li>
-                            <a href="/doc/legal/legal-terms-of-service-" use:link class="hover:underline">Terms &amp; Conditions</a>
+                            <a href={terms} use:link class="hover:underline">Terms &amp; Conditions</a>
                         </li>
                     </ul>
                 </div>

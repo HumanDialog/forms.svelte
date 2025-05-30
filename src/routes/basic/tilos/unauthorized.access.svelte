@@ -2,7 +2,8 @@
     import {Page
         } from '$lib'
 
-    import {signInHRef, signUpHRef} from '@humandialog/auth.svelte'
+    import {link} from 'svelte-spa-router'
+    import {signInHRef} from '@humandialog/auth.svelte'
     
     function getPageOperations() 
     {
@@ -28,7 +29,7 @@
 
             <p>
                 <a href={$signInHRef}>Sign in</a> to see page content.<br>
-                If you don't have an account yet, you can <a href={$signUpHRef}>Sign up</a> for free.
+                If you don't have an account yet, <a href="/tcontact" use:link>contact us</a> so we can send you an invitation link for free.
             </p>
 
         </article>

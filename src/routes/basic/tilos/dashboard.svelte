@@ -2,7 +2,7 @@
     import {Page, onErrorShowAlert, List, ListTitle, ListSummary, ListStaticProperty, ListDateProperty, ListComboProperty, ComboSource, Icon
         } from '$lib'
 
-    import {reef, session, signInHRef, signUpHRef} from '@humandialog/auth.svelte'
+    import {reef, session, signInHRef} from '@humandialog/auth.svelte'
     import {FaComment} from 'svelte-icons/fa'
     import {link} from 'svelte-spa-router'
 	
@@ -140,7 +140,7 @@
             {:else}
                 <p>
                     <a href={$signInHRef}>Sign in</a> first to see whole community content.
-                    If you don't have an account yet, you can <a href={$signUpHRef}>Sign up</a> for free
+                    If you don't have an account yet, <a href="/tcontact" use:link>contact us</a> so we can send you an invitation link for free.
                 </p>
             {/if}
 

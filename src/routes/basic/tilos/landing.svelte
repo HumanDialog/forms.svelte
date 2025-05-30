@@ -1,6 +1,5 @@
 <script>
-	import { signUpHRef } from '@humandialog/auth.svelte';
-    import Header from './header.svelte'
+	import Header from './header.svelte'
     import Footer  from './footer.svelte';
     import {link} from 'svelte-spa-router'
 	
