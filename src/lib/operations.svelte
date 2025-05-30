@@ -11,13 +11,13 @@
     let leftOperations = []
     let rightOperations = []
     let hasOperations = false
-
+    //op
     function update(...args)
     {
         let opVer = 0
         let operationsRoot = null
         if($contextToolbarOperations && Array.isArray($contextToolbarOperations) && $contextToolbarOperations.length > 0)
-        { 
+        {
             operations = $contextToolbarOperations;
         }
         else if($contextToolbarOperations && $contextToolbarOperations.operations && $contextToolbarOperations.operations.length > 0)
@@ -66,7 +66,7 @@
             if(operationsRoot && operationsRoot.tbr)
             {
                 let allFlatOperations = []
-                operationsRoot.operations.forEach(g => 
+                operationsRoot.operations.forEach(g =>
                     allFlatOperations = [...allFlatOperations,
                         {
                             separator: true
@@ -74,7 +74,7 @@
                         ...g.operations
                     ]
                 )
-                
+
                 const allOperationsMenu = {
                     caption: operationsRoot.caption ?? '',
                     icon: operationsRoot.icon ?? FaEllipsisV,
@@ -95,9 +95,9 @@
                 case 'C':
                     COperations.push(allOperationsMenu)
                     break;
-                }  
+                }
             }
-           
+
             operations.forEach(group => {
 
                 if(group.tbr)
@@ -123,7 +123,7 @@
                     case 'C':
                         COperations.push(expandOperation)
                         break;
-                    }        
+                    }
                 }
 
                 group.operations.forEach(op => {
@@ -183,7 +183,7 @@
             //let focused_item = null
             //if($contextItemsStore.focused)
             //    focused_item = $contextItemsStore[$contextItemsStore.focused]
-            
+
             operation.action(owner)
             return;
         }
@@ -206,7 +206,7 @@
     function mousedown(e)
     {
         // preventDefault on mousedown avoids focusing the button
-        // so it keeps focus (and text selection) 
+        // so it keeps focus (and text selection)
         e.preventDefault()
     }
 
@@ -214,7 +214,7 @@
     {
         if(operation.activeFunc)
             return operation.activeFunc();
-        else 
+        else
             return operation.active ?? false;
     }
 </script>
@@ -223,18 +223,18 @@
 <section class="flex flex-row no-print h-10 bg-stone-50 dark:bg-stone-950 overflow-x-clip overflow-y-hidden py-0 text-xs whitespace-nowrap">
     <div    class="flex flex-row"
             class:flex-row-reverse={mobile}>
-        
+
         {#each leftOperations as operation}
             {#if !operation.separator}
                 {@const isActive=isOperationActivated(operation)}
                 {#if operation.toolbox}
                     {#each operation.toolbox as operation}
-                        <button type="button" 
-                                class="py-2.5 px-4 
-                                text-sm font-thin 
+                        <button type="button"
+                                class="py-2.5 px-4
+                                text-sm font-thin
                                 text-stone-800 hover:bg-stone-700 active:bg-stone-300 border-stone-200
                                 dark:text-stone-300 dark:hover:text-white dark:hover:bg-stone-800 dark:active:bg-stone-600 dark:border-stone-600
-                                focus:outline-none 
+                                focus:outline-none
                                 inline-flex items-center"
                                 class:bg-stone-700={isActive}
                                 class:dark:bg-stone-800={isActive}
@@ -249,13 +249,13 @@
                         </button>
                     {/each}
                 {:else}
-                
-                    <button type="button" 
+
+                    <button type="button"
                             class="py-2.5 px-4
-                            text-sm font-thin 
+                            text-sm font-thin
                             text-stone-600 hover:text-stone-800 hover:bg-stone-200 active:bg-stone-200 border-stone-200
                             dark:text-stone-300 dark:hover:text-white dark:hover:bg-stone-800 dark:active:bg-stone-600 dark:border-stone-600
-                            focus:outline-none 
+                            focus:outline-none
                             inline-flex items-center"
                             class:bg-stone-700={isActive}
                             class:dark:bg-stone-800={isActive}
@@ -268,7 +268,7 @@
                             <span class="ml-1">{operation.caption}</span>
                         {/if}
                     </button>
-                {/if} 
+                {/if}
             {:else}
                 <!--div class="border-l my-2"></div-->
             {/if}
@@ -279,12 +279,12 @@
         {#each rightOperations as operation}
             {#if !operation.separator}
             {@const isActive=isOperationActivated(operation)}
-                <button type="button" 
-                        class="py-2.5 px-4 
-                        text-sm font-thin 
+                <button type="button"
+                        class="py-2.5 px-4
+                        text-sm font-thin
                         text-stone-600 hover:text-stone-800 hover:bg-stone-200 active:bg-stone-200 border-stone-200
                         dark:text-stone-300 dark:hover:text-white dark:hover:bg-stone-800 dark:active:bg-stone-600 dark:border-stone-600
-                        focus:outline-none 
+                        focus:outline-none
                         inline-flex items-center"
                         class:bg-stone-700={isActive}
                         class:dark:bg-stone-800={isActive}
@@ -296,7 +296,7 @@
                     {#if operation.caption}
                         <span class="ml-1">{operation.caption}</span>
                     {/if}
-                </button>    
+                </button>
             {/if}
         {/each}
     </div>

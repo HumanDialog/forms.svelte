@@ -4,8 +4,8 @@
     import { showFloatingToolbar, showMenu, showGridMenu } from './menu.js';
     import {FaChevronUp, FaChevronDown, FaChevronLeft, FaChevronRight, FaCircle, FaEllipsisV} from 'svelte-icons/fa/'
     import {isDeviceSmallerThan} from '../utils.js'
-    
-    
+
+
     $: setupCurrentContextOperations($pageToolbarOperations, $contextToolbarOperations, $toolsActionsOperations);
 
     let operations :object[] = [];
@@ -15,9 +15,9 @@
     let isExpandable: boolean = false;
     let vToolboxExpanded :boolean = false;
     let hToolboxExpanded: boolean = false;
-    
-    let isDirectPositioningMode = false;
 
+    let isDirectPositioningMode = false;
+    //..
     function setupCurrentContextOperations(...args)
     {
         let opVer = 0
@@ -62,7 +62,7 @@
             }
         }
 
-       
+
         if(opVer == 1)
         {
             let flatOperations = []
@@ -90,7 +90,7 @@
                 const realOps = flatOperations.filter((el) => !!el.separator == false)
                 if(realOps.length > 1)
                 {
-                    
+
                     mainOperation = {
                         icon: FaEllipsisV,
                         menu: flatOperations,
@@ -108,7 +108,7 @@
                 else
                     operations = []
             }
-            
+
             definedOperations.forEach(group => {
                 group.operations.forEach( op => {
                     if(op.fab)
@@ -117,7 +117,7 @@
                     }
                 })
             })
-            
+
         }
         else    // opVer == 0
         {
@@ -139,7 +139,7 @@
                         toolboxOperations = operation.toolbox
                 }
             }
-            
+
             if((operations.length == 3 && secondaryOperation!=null) || (operations.length > 3) || toolboxOperations.length > 0)
                 isExpandable = true;
             else
@@ -164,7 +164,7 @@
                 operations = [...ops.operations]
                 if(ops.opver == 1)
                 {
-                    isDirectPositioningMode = true;   
+                    isDirectPositioningMode = true;
                 }
             }
         }
@@ -188,7 +188,7 @@
     function on_click(e, operation)
     {
         //vToolboxExpanded = false;
-        
+
         if(!operation)
             return;
 
@@ -204,12 +204,12 @@
             //let focused_item = null
             //if($contextItemsStore.focused)
             //    focused_item = $contextItemsStore[$contextItemsStore.focused]
-        
+
             operation.action(owner)
         }
 
 
-        
+
         if(!owner)
             return;
 
@@ -251,7 +251,7 @@
     function mousedown(e)
     {
         // preventDefault on mousedown avoids focusing the button
-        // so it keeps focus (and text selection) 
+        // so it keeps focus (and text selection)
         e.preventDefault()
     }
 
@@ -260,9 +260,9 @@
         const selection = window.getSelection();
         if(selection?.rangeCount > 0)
         {
-            
+
             const range = selection.getRangeAt(0);
-            
+
             let rect :DOMRect;
             rect = range.getBoundingClientRect();
             let result = window.innerHeight - rect.top;
@@ -273,7 +273,7 @@
         else
             return 0;
     }
-    
+
     function calculatePosition(operation) : string
     {
         const isLeftHanded = false;
@@ -286,15 +286,15 @@
         const section = fab[0]
         const col_no = parseInt(fab[1]);
         const row_no = parseInt(fab[2]);
-        
+
         if((col_no == NaN) || (row_no == NaN))
             return '';
-        
+
         const width = 55;   //px
         const height = 55;   //px
         const margin = 10;
 
-       
+
         if(!isLeftHanded)
         {
             switch(section)
@@ -356,7 +356,7 @@
 
         return result
     }
-    
+
     function operationVisible(operation): boolean
     {
         if(!operation.fab)
@@ -364,7 +364,7 @@
 
         return true;
     }
-    
+
 </script>
 
 {#if isDirectPositioningMode}
@@ -373,17 +373,17 @@
             {#if operationVisible(operation)}
                 {@const position = calculatePosition(operation)}
                 {#if position}
-                    <button  
-                        class="text-white bg-blue-700/70 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 
+                    <button
+                        class="text-white bg-blue-700/70 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300
                                 font-medium rounded-full text-sm text-center shadow-md
-                                w-[35px] h-[35px] 
-                                fixed m-0  
+                                w-[35px] h-[35px]
+                                fixed m-0
                                 dark:bg-blue-600/50 dark:hover:bg-blue-700 dark:focus:ring-blue-800
                                 flex items-center justify-center
                                 disable-dbl-tap-zoom
                                 cursor-pointer z-40"
                                 style={position}
-                                on:click|stopPropagation={(e) => {on_click(e, operation)}} 
+                                on:click|stopPropagation={(e) => {on_click(e, operation)}}
                                 on:mousedown={mousedown} >
                     <div class="w-5 h-5"><svelte:component this={operation.icon}/></div>
                     </button>
@@ -397,34 +397,34 @@
         {@const topPosition = 350}
         {@const verticalPosition = mainOperation.aboveKeyboard ? `bottom: ${topPosition}px` : "bottom: 10px"}
         <button     id="__hd_fab_mainOperation"
-                    class="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 
+                    class="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300
                         font-medium rounded-full text-sm text-center shadow-md
-                        w-[55px] h-[55px] 
+                        w-[55px] h-[55px]
                         fixed m-0 bottom-0 right-[0px]
                         dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800
                         flex items-center justify-center
                         disable-dbl-tap-zoom"
                         style={verticalPosition}
-                        on:click|stopPropagation={(e) => {on_click(e, mainOperation)}} 
+                        on:click|stopPropagation={(e) => {on_click(e, mainOperation)}}
                         on:mousedown={mousedown} >
             <div class="w-7 h-7"><svelte:component this={mainOperation.icon}/></div>
         </button>
 
         {#if secondaryOperation || isExpandable}
-            
+
             <!-- horizontal container -->
             <div class="flex flex-row m-0 fixed bottom-[10px] right-[60px]">
-            
+
                 {#if isExpandable}
                     <!-- Expander -->
                     <button class=" bg-transparent mr-2
-                                    w-[55px] h-[55px] 
+                                    w-[55px] h-[55px]
                                     flex items-center justify-center
                                     disable-dbl-tap-zoom"
                                     on:click|stopPropagation={toggleExpandToolboxH}
                                     on:mousedown={mousedown}>
                         <div class="    w-10 h-10
-                                        text-white bg-zinc-500 hover:bg-zinc-500 
+                                        text-white bg-zinc-500 hover:bg-zinc-500
                                         font-medium rounded-full text-sm text-center shadow-md
                                         dark:bg-zinc-500 dark:hover:bg-zinc-500
                                         flex items-center justify-center">
@@ -441,13 +441,13 @@
                     {#if hToolboxExpanded}
                         {#if secondaryOperation}
                             <button class="     bg-transparent
-                                                mx-0 mr-2 w-[55px] h-[55px] 
+                                                mx-0 mr-2 w-[55px] h-[55px]
                                                 flex items-center justify-center
                                                 disable-dbl-tap-zoom"
                                                 on:click|stopPropagation={(e) => {on_click(e, secondaryOperation)}}
                                                 on:mousedown={mousedown}>
                                 <div class="    w-10 h-10
-                                                text-white bg-zinc-500 group-hover:bg-zinc-500 
+                                                text-white bg-zinc-500 group-hover:bg-zinc-500
                                                 dark:bg-zinc-500 dark:group-hover:bg-zinc-500
                                                 font-medium rounded-full text-sm text-center shadow-md
                                                 flex items-center justify-center">
@@ -460,13 +460,13 @@
                                 {#if !operation.separator}
                                     <!-- svelte-ignore a11y-click-events-have-key-events -->
                                     <button class=" bg-transparent
-                                                        mx-0 mr-2 w-[55px] h-[55px] 
+                                                        mx-0 mr-2 w-[55px] h-[55px]
                                                         flex items-center justify-center
                                                         disable-dbl-tap-zoom"
                                                         on:click|stopPropagation={(e) => {on_click(e, operation)}}
                                                         on:mousedown={mousedown}>
                                         <div class="    w-10 h-10
-                                                        text-white bg-zinc-500 group-hover:bg-zinc-500 
+                                                        text-white bg-zinc-500 group-hover:bg-zinc-500
                                                         dark:bg-zinc-500 dark:group-hover:bg-zinc-500
                                                         font-medium rounded-full text-sm text-center shadow-md
                                                         flex items-center justify-center">
@@ -480,13 +480,13 @@
                     {/if}
                 {:else}
                     <button class=" bg-transparent
-                                    mx-0 mr-2 w-[55px] h-[55px] 
+                                    mx-0 mr-2 w-[55px] h-[55px]
                                     flex items-center justify-center
                                     disable-dbl-tap-zoom"
                             on:click|stopPropagation={(e) => {on_click(e, secondaryOperation)}}
                             on:mousedown={mousedown}>
                         <div class="    w-10 h-10
-                                        text-white bg-zinc-500 group-hover:bg-zinc-500 
+                                        text-white bg-zinc-500 group-hover:bg-zinc-500
                                         dark:bg-zinc-500 dark:group-hover:bg-zinc-500
                                         font-medium rounded-full text-sm text-center shadow-md
                                         flex items-center justify-center">
@@ -515,11 +515,11 @@
                                     </div>
                                 {/if}
                                 <button class=" bg-transparent
-                                                mx-0 mb-2 w-[55px] h-[55px] 
+                                                mx-0 mb-2 w-[55px] h-[55px]
                                                 flex items-center justify-center
                                                 disable-dbl-tap-zoom">
                                     <div class="    w-10 h-10
-                                                    text-white bg-zinc-500 group-hover:bg-zinc-500 
+                                                    text-white bg-zinc-500 group-hover:bg-zinc-500
                                                     dark:bg-zinc-500 dark:group-hover:bg-zinc-500
                                                     font-medium rounded-full text-sm text-center shadow-md
                                                     flex items-center justify-center">

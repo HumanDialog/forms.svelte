@@ -355,143 +355,161 @@
         tasksComponent.reload(contextItem, tasksComponent.KEEP_SELECTION)
     }
 
+    function pinOp()
+    {
+        let pinOperation;
+        if(contextItem.IsPinned)
+        {
+            pinOperation = {
+                caption: 'Unpin folder',
+                icon: FaStar, //aRegShareSquare, //
+                action: async (f) => {
+                    await toggleFolderPinned(contextItem);
+                    // refreshing operations
+                    activateItem('data', contextItem, getPageOperations());
+                    if(UI.navigator)
+                        UI.navigator.refresh()
+                    },
+                //fab: 'S00',
+                tbr: 'C',
+                hideToolbarCaption: true
+            }
+        }
+        else
+        {
+            pinOperation = {
+                caption: 'Pin folder',
+                icon: FaRegStar, //aRegShareSquare, //
+                action: async (f) => {
+                    await toggleFolderPinned(contextItem);
+                    // refreshing operations
+                    activateItem('data', contextItem, getPageOperations());
+                    if(UI.navigator)
+                        UI.navigator.refresh()
+                },
+                //fab: 'S00',
+                tbr: 'C',
+                hideToolbarCaption: true
+            }
+        }
+        return pinOperation;
+    }
+
+    function basketPageOperations()
+    {
+        return {
+            opver: 2,
+            fab: 'M00',
+            tbr: 'C',
+            operations: [
+                {
+                    caption: 'View',
+                    menu: 'FT',
+                    operations: [
+                        {
+                            caption: 'Clear Basket',
+                            icon: FaBasketTrash, //FaTrash,
+                            action: async (f) => await dettachAllMyContent(),
+                        //      fab: 'M30',
+                            tbr: 'A'
+                        },
+                        {
+                            caption: 'Refresh',
+                            icon: FaSync,
+                            action: async (f) => await refreshView(),
+                        //    fab: 'S10',
+                            tbr: 'C',
+                            hideToolbarCaption: true
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+
+    function newElementOperations()
+    {
+        return {
+            caption: "Add",
+            // tbr: 'B',
+            operations: [
+                {
+                    caption: 'New folder',
+                    icon: FaRegFolder,
+                    action: (f) => { subfoldersComponent.addRowAfter(null) },
+                    tbr: 'A',
+                    fab: 'S10'
+                },
+                {
+                    caption: 'New note',
+                    icon: FaRegFile,
+                    action: (f) => { notesComponent.addRowAfter(null) },
+                    tbr: 'A',
+                    fab: 'S20'
+                },
+                {
+                    caption: 'New task',
+                    icon: FaRegCircle,
+                    action: (f) => { tasksComponent.addRowAfter(null) },
+                    tbr: 'A',
+                    fab: 'S30'
+                },
+                {
+                    separator: true
+                },
+                {
+                    caption: 'Attach...',
+                    icon: FaShoppingBasket, //FaLink, //aRegShareSquare, //
+                    toolbar: BasketPreview,
+                    props: {
+                        destinationContainer: contextItem.$ref,
+                        onRefreshView: refreshViewAfterAttachingFromBasket
+                    },
+                    //fab: 'M01',
+                    tbr: 'A'
+                },
+            ]
+        }
+    }
+
+    function  folderPageOperations()
+    {
+        return {
+            opver: 2,
+            fab: 'M00',
+            tbr: 'C',
+            operations: [
+                newElementOperations(),
+                {
+                    caption: "View",
+                    //tbr: 'B',
+                    operations: [
+                        pinOp(),
+                        {
+                            caption: 'Refresh',
+                            icon: FaSync,
+                            action: async (f) => await refreshView(),
+                            //fab: 'S10',
+                            tbr: 'C',
+                            hideToolbarCaption: true
+                        }
+                    ]
+                }
+
+            ]
+        }
+    }
+
     function getPageOperations()
     {
         if(!contextItem)
             return [];
 
         if(contextItem.IsBasket)
-        {
-            return {
-                opver: 2,
-                fab: 'M00',
-                operations: [
-                    {
-                        caption: 'View',
-                        menu: 'FT',
-                        operations: [
-                            {
-                                caption: 'Clear Basket',
-                                icon: FaBasketTrash, //FaTrash,
-                                action: async (f) => await dettachAllMyContent(),
-                          //      fab: 'M30',
-                                tbr: 'A'
-                            },
-                            {
-                                caption: 'Refresh',
-                                icon: FaSync,
-                                action: async (f) => await refreshView(),
-                            //    fab: 'S10',
-                                tbr: 'C',
-                                hideToolbarCaption: true
-                            }
-                        ]
-                    }
-                ]
-            }
-        }
+            return basketPageOperations();
         else
-        {
-            let pinOperation;
-            if(contextItem.IsPinned)
-            {
-                pinOperation = {
-                    caption: 'Unpin folder',
-                    icon: FaStar, //aRegShareSquare, //
-                    action: async (f) => {
-                        await toggleFolderPinned(contextItem);
-                        // refreshing operations
-                        activateItem('data', contextItem, getPageOperations());
-                        if(UI.navigator)
-                            UI.navigator.refresh()
-                      },
-                    //fab: 'S00',
-                    tbr: 'C',
-                    hideToolbarCaption: true
-                }
-            }
-            else
-            {
-                pinOperation = {
-                    caption: 'Pin folder',
-                    icon: FaRegStar, //aRegShareSquare, //
-                    action: async (f) => {
-                        await toggleFolderPinned(contextItem);
-                        // refreshing operations
-                        activateItem('data', contextItem, getPageOperations());
-                        if(UI.navigator)
-                            UI.navigator.refresh()
-                    },
-                    //fab: 'S00',
-                    tbr: 'C',
-                    hideToolbarCaption: true
-                }
-            }
+            return folderPageOperations();
 
-
-            return {
-                opver: 2,
-                fab: 'M00',
-                operations: [
-                    {
-                        caption: "View",
-                        //tbr: 'B',
-                        operations: [
-                            pinOperation,
-                            {
-                                caption: 'Refresh',
-                                icon: FaSync,
-                                action: async (f) => await refreshView(),
-                                //fab: 'S10',
-                                tbr: 'C',
-                                hideToolbarCaption: true
-                            }
-                        ]
-                    },
-                    {
-                        caption: "Add",
-                       // tbr: 'B',
-                        operations: [
-                            {
-                                caption: 'New folder',
-                                icon: FaRegFolder,
-                                action: (f) => { subfoldersComponent.addRowAfter(null) },
-                                tbr: 'A',
-                                fab: 'S10'
-                            },
-                            {
-                                caption: 'New note',
-                                icon: FaRegFile,
-                                action: (f) => { notesComponent.addRowAfter(null) },
-                                tbr: 'A',
-                                fab: 'S20'
-                            },
-                            {
-                                caption: 'New task',
-                                icon: FaRegCircle,
-                                action: (f) => { tasksComponent.addRowAfter(null) },
-                                tbr: 'A',
-                                fab: 'S30'
-                            },
-                            {
-                                separator: true
-                            },
-                            {
-                                caption: 'Attach...',
-                                icon: FaShoppingBasket, //FaLink, //aRegShareSquare, //
-                                toolbar: BasketPreview,
-                                props: {
-                                    destinationContainer: contextItem.$ref,
-                                    onRefreshView: refreshViewAfterAttachingFromBasket
-                                },
-                                //fab: 'M01',
-                                tbr: 'A'
-                            },
-                        ]
-                    }
-                ]
-            }
-        }
     }
 
     async function refreshViewAfterAttachingFromBasket(f)
@@ -601,25 +619,12 @@
         return {
                 opver: 2,
                 fab: 'M00',
-                tbr: 'A',
+                tbr: 'C',
                 operations: [
+                    newElementOperations(),
                     {
                         caption: 'Element',
-                        tbr: 'C',
-                        icon: FaPlus,
-                        hideToolbarCaption: true,
-                        operations: [
-                            {
-                                caption: `Add ${kind}`,
-                                icon: FaPlus,
-                                action: (f) => { list.addRowAfter(element) },
-                            //    fab:'M10',
-                                tbr:'A',
-                            }]
-                        },
-                    {
-                        caption: 'Element',
-                        tbr: 'C',
+
                         //icon: FaPlus,
                         //hideToolbarCaption: true,
                         operations: [
@@ -628,7 +633,7 @@
                                 icon: FaPen,
                                 tbr: 'A',
                                 //action: (focused) =>  { listComponent(kind).edit(element, 'Title') },
-                                menu:[
+                                grid:[
                                     {
                                         caption: 'Edit Title',
                                         action: (focused) =>  { listComponent(kind).edit(element, 'Title') },
@@ -642,19 +647,19 @@
 
                             },
                             {
-                                caption: 'Move down',
-                                icon: FaCaretDown,
-                                action: (f) => list.moveDown(element),
-                                //fab:'M02',
-                                tbr:'A' ,
-                                hideToolbarCaption: true
-                            },
-                            {
                                 caption: 'Move up',
                                 icon: FaCaretUp,
                                 action: (f) => list.moveUp(element),
-                                //fab:'M03',
+                                fab:'M03',
                                 tbr:'A',
+                                hideToolbarCaption: true
+                            },
+                            {
+                                caption: 'Move down',
+                                icon: FaCaretDown,
+                                action: (f) => list.moveDown(element),
+                                fab:'M02',
+                                tbr:'A' ,
                                 hideToolbarCaption: true
                             },
                             {

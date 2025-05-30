@@ -25,8 +25,8 @@
     let css_position = ''
 
     $: display = visible ? 'block' : 'none';
-
-    /* afterUpdate(() => 
+//
+    /* afterUpdate(() =>
     {
         console.log('menu afterUpdate', around_rect)
 
@@ -36,7 +36,7 @@
 
         if(isDeviceSmallerThan("sm"))
         {
-            
+
         }
         else
         {
@@ -72,14 +72,14 @@
                     myRect = null;
                 }
             }
-            
+
             if(myRect)
             {
                 let maxHeight = screenRect.height / 2 - margin;
 
                 if(myRect.height < maxHeight)
                     maxHeight = myRect.height
-                
+
                 const width = screenRect.width - 2*margin;
                 x = margin;
                 y = screenRect.bottom - maxHeight - margin;
@@ -95,10 +95,10 @@
 
                 result = `left: ${x}px; top: ${y}px; width: ${width}px; max-height: ${maxHeight}px; display: block`
             }
-            
+
         }
         else
-        {   
+        {
             let myRect :DOMRect|null = null;
             if(!fresh)
             {
@@ -147,7 +147,7 @@
 
         return result;
     }
-    
+
     export async function show(around :DOMRect|DOMPoint, _operations)
     {
         if(around instanceof DOMRect)
@@ -165,7 +165,7 @@
 
         visible = true;
         css_position = calculatePosition(x, y, around_rect, true, true);
-        
+
 
         operations = [..._operations];
         focused_index = operations.findIndex(o => !o.disabled)
@@ -178,10 +178,10 @@
             hide_window_indicator = 0;
             window.addEventListener('click', on_before_window_click, true)
         }
-        
+
 
         if(isDeviceSmallerThan("sm"))
-        {    
+        {
             pushToolsActionsOperations ({
                 opver: 1,
                 operations: [
@@ -207,14 +207,14 @@
         if(is_root_menu)
             menu_root.addEventListener('click', on_before_container_click, true)
 
-        
+
         if(menu_items.length && !isDeviceSmallerThan("sm"))
             focus_menu_item(focused_index);
 
-        
+
     }
 
-    
+
 
     export function isVisible()
     {
@@ -301,7 +301,7 @@
             {
                 focus_menu_item(index);
                 break;
-            } 
+            }
         }
     }
 
@@ -350,7 +350,7 @@
             return;
 
         ////
-        
+
         /*
         if(!operation.action)
             return;
@@ -358,8 +358,8 @@
         let context_item = null
         if($contextItemsStore.focused)
             context_item = $contextItemsStore[$contextItemsStore.focused]
-        
-        
+
+
         operation.action(context_item);
         */
         ////
@@ -378,7 +378,7 @@
             //let focused_item = null
             //if($contextItemsStore.focused)
             //    focused_item = $contextItemsStore[$contextItemsStore.focused]
-            
+
             operation.action(owner, around_rect)
         }
         else
@@ -413,7 +413,7 @@
         let element :HTMLElement = menu_items[focused_index];
         element.focus();
 
-        if(submenus && submenus.length) 
+        if(submenus && submenus.length)
         {
             if(submenus[focused_index])
             {
@@ -458,18 +458,18 @@
         owner_menu_item.focus();
         hide();
     }
-    
+
     function mousedown(e)
     {
         // preventDefault on mousedown avoids focusing the button
-        // so it keeps focus (and text selection) 
+        // so it keeps focus (and text selection)
         e.preventDefault()
     }
 
     function calculateBackground(is_highlighted, active)
     {
         if(is_highlighted)
-        {   
+        {
             if(active)
                 return 'bg-stone-400/40 dark:bg-stone-400/40';
             else
@@ -486,11 +486,11 @@
 
 </script>
 
-<div id="__hd_svelte_contextmenu" 
-    class=" bg-white dark:bg-stone-800 
-            text-stone-800 dark:text-stone-400 rounded-lg border 
-            border-stone-200 dark:border-stone-700 shadow-md 
-            z-30 fixed min-w-[{min_width_px}px] w-max overflow-y-auto" 
+<div id="__hd_svelte_contextmenu"
+    class=" bg-white dark:bg-stone-800
+            text-stone-800 dark:text-stone-400 rounded-lg border
+            border-stone-200 dark:border-stone-700 shadow-md
+            z-30 fixed min-w-[{min_width_px}px] w-max overflow-y-auto"
     style={css_position}
     bind:this={menu_root}>
 
@@ -512,17 +512,17 @@
             {@const clipFocusedBorder = isFocused ? (isTop ? 'rounded-t-lg' : (isBottom ? 'rounded-b-lg' : '')) : ''}
             {@const active = calculateBackground(isFocused, false)}
             {@const has_submenu = operation.menu !== undefined && operation.menu.length > 0}
-            
+
             <button class="block  w-full pr-4 text-left flex flex-row cursor-context-menu {active} focus:outline-none"
                     id={menu_item_id}
                     bind:this={menu_items[index]}
-                    on:click|stopPropagation={(e) => { execute_action(e, operation, index) } } 
+                    on:click|stopPropagation={(e) => { execute_action(e, operation, index) } }
                     on:mouseenter = {(e) => {on_mouse_move(index)}}
                     on:keydown|stopPropagation={(e) => on_keydown(e, operation, index)}
                     on:mousedown={mousedown}
                     disabled={operation.disabled}
                     class:opacity-60={operation.disabled}>
-                    
+
                 <div class="flex items-center justify-center space-x-10 px-4 py-2 ml-12 sm:ml-0" >
                     {#if operation.icon}
                         {@const cc = mobile ? 7 : 6}
