@@ -1,17 +1,14 @@
 <script>
-    import {reef, session, AuthorizedView, signInHRef, signUpHRef, Authorized, NotAuthorized} from '@humandialog/auth.svelte'
-	import {Layout, onErrorShowAlert} from '$lib';
-    import FaAmilia from 'svelte-icons/fa/FaAmilia.svelte'
-
+    import {reef,  AuthorizedView} from '@humandialog/auth.svelte'
+	
     import Router from 'svelte-spa-router'
+    import {wrap} from 'svelte-spa-router/wrap'
     
     import Cookies from './cookies.svelte';
     import Main from './main.svelte'
-    import Contact from './landing/contact.svelte';
-    import PrivacyPolicy from './landing/privacy.policy.svelte'
-    import TermsAndConditions from './landing/terms.and.conditions.svelte'
     import NotFound from './landing/not.found.svelte'
     import AppView from './AppView.svelte';
+	import {appUsers} from './users.js'
 
     import { GoogleAnalytics } from '@beyonk/svelte-google-analytics'
     import {cookies_allow_analytics} from './landing/cookie.preferences'
@@ -25,6 +22,9 @@
     const clientID = __CLIENT_ID__
     const clientSecret = __CLIENT_SECRET__
     const website = __WEBSITE__
+    const octopus_modules = __OCTOPUS_MODULES__
+    const privacy = __PRIVACY_PAGE__
+    const terms = __TERMS_PAGE__
 
    reef.configure( {
                     mode: mode,
@@ -36,25 +36,13 @@
                         apiVersion: 'v001',
                         tenant: `${tenantId}`,
                         groupsOnly: true,
-                        termsAndConditionsHRef: `${website}/#/terms-and-conditions`,
-                        privacyPolicyHRef: `${website}/#/privacy-policy`
+                        termsAndConditionsHRef: `${website}/#/${terms}`,
+                        privacyPolicyHRef: `${website}/#/${privacy}`
                     },
                     local: {
                         api:    "http://127.0.0.1:1996/",
                         //api:    "http://192.168.0.103:1996/",
-                        users:
-                        [
-                            {
-                                username: "alice@example.com",
-                                role: 'GroupOwner',
-                                groupId: 13
-                            },
-                            {
-                                username: "bob@example.com",
-                                role: 'GroupOwner',
-                                groupId: 13
-                            }
-                        ],
+                        users: appUsers,
                         apiVersion: "v001"}
                    });
 
@@ -74,7 +62,22 @@
             google_analytics.init();
     }
 
+    const r = /^\/listboard|tdownload|tcontact|tasklist|task|note|folder|mytasks|myfolders|members|chat|thread|newthread|forum|thome|profile|doc|request-license-file\/(.*)\/?$/i
+
+    const routes = new Map()
+    routes.set('/',                     Main)
+    routes.set('/contact',              wrap({ asyncComponent: () => import('./landing/contact.svelte')}))
+    routes.set('/privacy-policy',       wrap({ asyncComponent: () => import('./landing/privacy.policy.svelte')})) 
+    routes.set('/terms-and-conditions', wrap({ asyncComponent: () => import('./landing/terms.and.conditions.svelte')}))
+    routes.set('/doc/*',                wrap({ asyncComponent: () => import('./tilos/static.doc.svelte')}))
+    routes.set(r, AppView)
+    routes.set('*', NotFound)
+
 </script>
+
+<svelte:head>
+    <link rel="icon" type="image/png" href={__APP_ICON__} />
+</svelte:head>
 
 <GoogleAnalytics 
     bind:this={google_analytics}
@@ -82,31 +85,7 @@
     enabled={enable_google_analytics}/>
 
 <AuthorizedView optionalGuestMode automaticallyRefreshTokens={true}>
-    <Router
-        routes = {{
-            '/' : Main,
-            '/contact': Contact,
-            '/privacy-policy': PrivacyPolicy,
-            '/terms-and-conditions': TermsAndConditions,
-            
-            '/tasklist':    AppView,
-            '/tasklist/*':  AppView,
-            '/task' :       AppView,
-            '/task/*' :     AppView,
-            '/note' :       AppView,
-            '/note/*' :     AppView,
-            '/listboard' :  AppView,
-            '/listboard/*': AppView,
-            '/mytasks' :    AppView,
-            '/mytasks/*' :  AppView,
-            '/folder'    :  AppView,
-            '/folder/*'  :  AppView,
-            '/myfolders' :  AppView,
-            '/myfolders/*': AppView,
-            '/members'   :  AppView,
-
-            '*': NotFound
-        }} 
-    />
+    <Router {routes} />
     <Cookies/>
 </AuthorizedView>
+

@@ -1,6 +1,7 @@
 <script lang="ts">
     import {Toggle} from 'flowbite-svelte';
     import {cookies_saved_at, cookies_valid_until, cookies_allow_essential, cookies_allow_preferences, cookies_allow_analytics, cookies_allow_marketing} from './landing/cookie.preferences'
+    import {link} from 'svelte-spa-router'
 
     let show: boolean = false;
     
@@ -10,6 +11,9 @@
     let marketing :boolean = false;
 
     let customize :boolean = false;
+
+    const privacy = __PRIVACY_PAGE__
+    const terms = __TERMS_PAGE__
 
     $: init($cookies_valid_until);
 
@@ -88,7 +92,9 @@
             z-30 m-1">
     <div class="flex flex-row h-10 ">
         <div class="">
-            <p class="text-xs my-1 mx-4 text-ellipsis"><span class="font-semibold">This website uses cookies </span>for user session maintenance, analytics and remarketing. Read our <a href="/#/privacy-policy" class="whitespace-nowrap underline">Privacy Policy</a> to learn more.</p>
+            <p class="text-xs my-1 mx-4 text-ellipsis"><span class="font-semibold">This website uses cookies </span>for user session maintenance, analytics and remarketing. Read our 
+                <a href={privacy} use:link class="whitespace-nowrap underline">Privacy Policy</a> 
+                to learn more.</p>
         </div>
         <div class="ml-auto text-right shrink-0 mx-4">
             <button class="font-semibold pt-1 pb-2 mb-0 mx-1 w-20 text-sm px-1 bg-zinc-100  hover:bg-zinc-300 dark:bg-zinc-700 hover:dark:bg-zinc-600 rounded-md text-slate-900 dark:text-slate-100" on:click={on_deny}>Deny</button>
@@ -119,7 +125,9 @@
         z-30 m-1">
 <!--div class="flex flex-col sm:hidden bottom-0 fixed h-30 w-full bg-slate-900 dark:bg-slate-200 text-zinc-100 dark:text-zinc-900 z-30 m-1"-->
     <div>
-        <p class="text-xs m-1 text-ellipsis"><span class="font-semibold">This website uses cookies </span>for user session maintenance, analytics and remarketing. Read our <a href="/#/privacy-policy" class="whitespace-nowrap underline">Privacy Policy</a> to learn more.</p>
+        <p class="text-xs m-1 text-ellipsis"><span class="font-semibold">This website uses cookies </span>for user session maintenance, analytics and remarketing. Read our 
+            <a href={privacy} use:link class="whitespace-nowrap underline">Privacy Policy</a> 
+        to learn more.</p>
     </div>
     <div class="flex flex-row justify-around">
         <button class="font-semibold pt-1 pb-2 mb-0 mx-1 w-20 text-sm px-1 bg-zinc-100  hover:bg-zinc-300 dark:bg-zinc-700 hover:dark:bg-zinc-600 rounded-md text-slate-900 dark:text-slate-100" on:click={on_deny}>Deny</button>

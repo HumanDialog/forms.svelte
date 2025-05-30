@@ -1,18 +1,12 @@
 <script>
-    import {reef, session, AuthorizedView, signInHRef, signUpHRef, Authorized, NotAuthorized} from '@humandialog/auth.svelte'
-	import {Layout, onErrorShowAlert} from '$lib';
-    import FaAmilia from 'svelte-icons/fa/FaAmilia.svelte'
-
+    import {reef, AuthorizedView} from '@humandialog/auth.svelte'
+	
     import Router from 'svelte-spa-router'
     import {wrap} from 'svelte-spa-router/wrap'
     
     import Cookies from './cookies.svelte';
     import Main from './main.svelte'
-    import Contact from './landing/contact.svelte';
-    import PrivacyPolicy from './landing/privacy.policy.svelte'
-    import TermsAndConditions from './landing/terms.and.conditions.svelte'
     import NotFound from './landing/not.found.svelte'
-    //import StaticDoc from './tilos/static.doc.svelte'
     import AppView from './AppView.svelte';
 	import {appUsers} from './users.js'
 
@@ -25,6 +19,8 @@
     const clientSecret = __CLIENT_SECRET__
     const website = __WEBSITE__
     const octopus_modules = __OCTOPUS_MODULES__
+    const privacy = __PRIVACY_PAGE__
+    const terms = __TERMS_PAGE__
 
     
     reef.configure( {
@@ -37,8 +33,8 @@
                         apiVersion: 'v001',
                         tenant: `${tenantId}`,
                         groupsOnly: true,
-                        termsAndConditionsHRef: `${website}/#/terms-and-conditions`,
-                        privacyPolicyHRef: `${website}/#/privacy-policy`
+                        termsAndConditionsHRef: `${website}/#/${terms}`,
+                        privacyPolicyHRef: `${website}/#/${privacy}`
                     },
                     local: {
                         api:    "http://127.0.0.1:1996/",
@@ -51,10 +47,10 @@
 
     const routes = new Map()
     routes.set('/',                     Main)
-    routes.set('/contact',              Contact)
-    routes.set('/privacy-policy',       PrivacyPolicy)
-    routes.set('/terms-and-conditions', TermsAndConditions)
-    routes.set('/doc/*', wrap({ asyncComponent: () => import('./tilos/static.doc.svelte')}))
+    routes.set('/contact',              wrap({ asyncComponent: () => import('./landing/contact.svelte')}))
+    routes.set('/privacy-policy',       wrap({ asyncComponent: () => import('./landing/privacy.policy.svelte')})) 
+    routes.set('/terms-and-conditions', wrap({ asyncComponent: () => import('./landing/terms.and.conditions.svelte')}))
+    routes.set('/doc/*',                wrap({ asyncComponent: () => import('./tilos/static.doc.svelte')}))
     routes.set(r, AppView)
     routes.set('*', NotFound)
 

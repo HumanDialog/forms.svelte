@@ -3,6 +3,7 @@
     import Obfuscator from '../landing/email.obfuscator.svelte'
 	import {Page, dark_mode_store} from '$lib';
     import {FaPaperPlane} from 'svelte-icons/fa'
+    import {link} from 'svelte-spa-router'
 
     let captcha_element;
     let name;
@@ -14,6 +15,9 @@
     let success_msg = ''
 
     let show_spinner :boolean = false;
+
+    const privacy = __PRIVACY_PAGE__
+    const terms = __TERMS_PAGE__
 
     onMount(() => {
             setTimeout( () =>
@@ -211,7 +215,7 @@
                 <div bind:this={captcha_element} class="ml-auto h-[78px]"></div>
 
                 <p class="text-sm text-stone-600  dark:text-stone-400 text-right">
-                    By clicking <span class="font-semibold">Submit</span> you agree with our <a href="/privacy-policy" class="underline">Privacy Policy</a>.
+                    By clicking <span class="font-semibold">Submit</span> you agree with our <a href={privacy} use:link class="underline">Privacy Policy</a>.
                 </p>
                 <button type="button" 
                         class=" block h-10 w-30 ml-auto

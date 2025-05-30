@@ -16,7 +16,7 @@ const hdTestUsers = [
     {
         username: "aga@humandialog.com.pl",
         role: 'GroupOwner',
-        groupId: 4
+        groupId: 1
     },
     {
         username: "akr@humandialog.com.pl",
