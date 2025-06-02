@@ -220,7 +220,7 @@
             <div class=" sm:pl-10  lg:pl-[360px] {right_xl_padding}">
 
                 <!--div class="min-w-0 {content_class} flex-auto px-4 py-16  lg:px-8 overflow-y-auto overflow-x-hidden"-->
-                <div class=" margin-x-auto h-[calc(100vh-40px)] sm:h-auto px-4 sm:px-8 lg:px-10 
+                <div class=" margin-x-auto h-[calc(100vh-50px)] sm:h-auto px-4 sm:px-8 lg:px-10 
                              overflow-y-scroll sm:overflow-y-visible overflow-x-hidden " bind:this={box}>
                     <article>
                         <header id="top" class="mb-9 space-y-1">

@@ -125,6 +125,11 @@
             return FaFolder
     }
 
+    const home = {}
+    const help = {}
+    const download = {}
+    const contact = {}
+
 </script>
 
 {#key currentPath}
@@ -187,13 +192,62 @@
 
 {:else} <!-- !sidebar -->
 
-    {#if rootFolders && rootFolders.length > 0}
-
-        todo
-
-    {:else}
+    {#if waitForRequest && !rootFolders}
         <Spinner delay={3000}/>
+    {:else}
+        <SidebarGroup >
+            <SidebarItem    href="/thome"
+                            icon={FaHome}
+                            item={home}
+                            summary="The essentials in one place">
+                Home
+            </SidebarItem>
+        </SidebarGroup>
+
+        {#if rootFolders && rootFolders.length > 0}   
+            <SidebarGroup border>           
+                <SidebarList    objects={rootFolders} 
+                                orderAttrib='Order'
+                                bind:this={navFolders}>
+                    <svelte:fragment let:item let:idx>
+                        {@const href = item.href}
+                        <SidebarItem   {href}
+                                        icon={getFolderIcon(item)}
+                                        bind:this={navItems[idx]}
+                                        {item}
+                                        summary={item.Summary}
+                                        >
+                            {item.Title}
+                        </SidebarItem>
+                    </svelte:fragment>
+                </SidebarList> 
+            </SidebarGroup>
+        {/if}
+
+            <SidebarGroup border>
+                <SidebarItem    href="/doc/reef-dev-tour-311"
+                                icon={FaQuestion}
+                                item={help}
+                                summary="How to get started and use Tilos">
+                    Help
+                </SidebarItem>
+
+                <SidebarItem    href="/tdownload"
+                                icon={FaDownload}
+                                item={download}
+                                summary="Download the installer and check the release notes">
+                    Downloads
+                </SidebarItem>
+
+                <SidebarItem    href="/tcontact"
+                                icon={FaAt}
+                                item={contact}
+                                summary="Contact us directly">
+                    Contact us
+                </SidebarItem>
+            </SidebarGroup>
     {/if}
+
 {/if}
 {/key}
 
