@@ -165,7 +165,7 @@
 <!--##  HORIZONTAL TOOLBAR (FOR PHONES)  ######################-->
 <!--###########################################################-->
     <!--HorizontalToolbar {catalog_href}/ -->
-    <header class="sm:hidden w-screen top-0 h-[50px] sm:h-[40px] z-20 shadow  shadow-stone-900/5 dark:shadow-none     overflow-auto" >
+    <header class="sm:hidden w-screen top-0 h-[50px] sm:h-[50px] z-20 shadow  shadow-stone-900/5 dark:shadow-none     overflow-auto" >
         <div class=" flex flex-row justify-between  h-full  bg-stone-950   text-stone-100 ">
             <HorizontalToolbar {definedTabs} {mainToolbarConfig} />
         </div>

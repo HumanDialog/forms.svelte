@@ -88,12 +88,12 @@
     
 </script>
 
-<div  class="bg-stone-50 dark:bg-stone-800 w-screen sm:w-[320px] top-10 sm:top-0 {main_side_panel_class} 
+<div  class="bg-stone-50 dark:bg-stone-800 w-screen sm:w-[320px] top-12 sm:top-0 {main_side_panel_class} 
                 lg:block fixed z-20 inset-0 lg:left-[max(40px,calc(50vw-720px))]  right-auto pb-10 px-0"
    >
 
     <div
-        class=" sticky  h-[calc(100vh-40px)] sm:h-screen overflow-y-auto overflow-x-hidden py-4 px-4">
+        class=" sticky  h-[calc(100vh-50px)] sm:h-screen overflow-y-auto overflow-x-hidden py-4 px-4">
         <!--button class="w-4 h-4 text-stone-600  dark:text-stone-300 hover:text-stone-900 dark:hover:text-stone-100"
                 on:click={navigate_up}><FaArrowLeft/></button-->
         <p class = "inline-block text-xl sm:text-2xl font-extrabold text-stone-900 tracking-tight dark:text-stone-200 mb-4">{book_title}</p>
