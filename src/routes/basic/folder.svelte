@@ -430,7 +430,7 @@
     function newElementOperations()
     {
         return {
-            caption: "Add",
+            caption: "File",
             // tbr: 'B',
             operations: [
                 {
@@ -438,21 +438,21 @@
                     icon: FaRegFolder,
                     action: (f) => { subfoldersComponent.addRowAfter(null) },
                     tbr: 'A',
-                    fab: 'S10'
+                    fab: 'M40'
                 },
                 {
                     caption: 'New note',
                     icon: FaRegFile,
                     action: (f) => { notesComponent.addRowAfter(null) },
                     tbr: 'A',
-                    fab: 'S20'
+                    fab: 'M20'
                 },
                 {
                     caption: 'New task',
                     icon: FaRegCircle,
                     action: (f) => { tasksComponent.addRowAfter(null) },
                     tbr: 'A',
-                    fab: 'S30'
+                    fab: 'M30'
                 },
                 {
                     separator: true
@@ -466,7 +466,7 @@
                         onRefreshView: refreshViewAfterAttachingFromBasket
                     },
                     //fab: 'M01',
-                    tbr: 'A'
+                    //tbr: 'A'
                 },
             ]
         }
@@ -632,12 +632,14 @@
                                 caption: 'Edit',
                                 icon: FaPen,
                                 tbr: 'A',
+                                fab:'M04',
                                 //action: (focused) =>  { listComponent(kind).edit(element, 'Title') },
                                 grid:[
                                     {
                                         caption: 'Edit Title',
                                         action: (focused) =>  { listComponent(kind).edit(element, 'Title') },
-                                        tbr: 'A'
+                                        tbr: 'A',
+
                                     },
                                     {
                                         caption: 'Edit summary',
@@ -666,6 +668,7 @@
                                 caption: 'Add to Basket',
                                 icon: FaBasketPlus, //FaCopy,   // MdLibraryAdd
                                 action: (f) => copyElementToBasket(element, kind),
+                                hideToolbarCaption: true,
                                 //fab: 'M04',
                                 tbr: 'A'
 
@@ -674,6 +677,7 @@
                                 caption: 'Move to Basket',
                                 icon: FaBasketCut, //FaCut,
                                 action: (f) => cutElementToBasket(element, kind),
+                                hideToolbarCaption: true
                             //    fab: 'M05',
                             //    tbr: 'A'
                             },

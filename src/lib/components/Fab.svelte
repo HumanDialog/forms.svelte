@@ -374,18 +374,19 @@
                 {@const position = calculatePosition(operation)}
                 {#if position}
                     <button
-                        class="text-white bg-blue-700/70 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300
+                        class="text-stone-700 bg-stone-300/70 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300
                                 font-medium rounded-full text-sm text-center shadow-md
-                                w-[35px] h-[35px]
+                                w-[30px] h-[30px]
                                 fixed m-0
-                                dark:bg-blue-600/50 dark:hover:bg-blue-700 dark:focus:ring-blue-800
+                                dark:text-stone-400
+                                dark:bg-stone-700/50 dark:hover:bg-blue-700 dark:focus:ring-blue-800
                                 flex items-center justify-center
                                 disable-dbl-tap-zoom
                                 cursor-pointer z-40"
                                 style={position}
                                 on:click|stopPropagation={(e) => {on_click(e, operation)}}
                                 on:mousedown={mousedown} >
-                    <div class="w-5 h-5"><svelte:component this={operation.icon}/></div>
+                        <div class="w-5 h-5"><svelte:component this={operation.icon}/></div>
                     </button>
                 {/if}
             {/if}
@@ -511,7 +512,8 @@
                                 on:mousedown={mousedown}>
                                 {#if operation.caption}
                                     <div>
-                                        <span class="block whitespace-nowrap text-sm mt-3 font-semibold text-white mr-3     select-none bg-stone-700 group-hover:bg-stone-800 px-1 shadow-lg rounded">{operation.caption}</span>
+                                        <span class="block whitespace-nowrap text-sm mt-3 font-semibold text-white mr-3
+                                        select-none bg-stone-700 group-hover:bg-stone-800 px-1 shadow-lg rounded">{operation.caption}</span>
                                     </div>
                                 {/if}
                                 <button class=" bg-transparent

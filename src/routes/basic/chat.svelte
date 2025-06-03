@@ -200,7 +200,7 @@
 
         return {
             opver: 2,
-            fab: 'M00',
+            fab: 'T01',
             operations: [
                 {
                     caption: 'Channel',
@@ -464,9 +464,10 @@
 
                         <p class="whitespace-pre-wrap">
                             {message.Text}
+                            {#if notesNo>0 || tasksNo>0}
                             <br>
                             <span class="text-xs whitespace-normal">
-                                {#if notesNo>0 || tasksNo>0}
+
 
                                         {#if notesNo>0}
                                             {#each message.Notes as att}
@@ -497,8 +498,10 @@
                                         {/if}
 
 
-                                {/if}
+
                             </span>
+
+                            {/if}
                         </p>
 
                     <!---/section-->
@@ -516,11 +519,15 @@
                             bg-stone-50 dark:bg-stone-800"
                             bind:this={newMessageElement}>
 
-                <textarea   class="w-full min-h-40 bg-stone-50 dark:bg-stone-800 outline-none"
-                            bind:value={newMessageContent}
-                            maxlength={196-additionalBytesSize(newMessageContent)}
+                <p   class="w-full min-h-40 bg-stone-50 dark:bg-stone-800 outline-none
+                            overflow-x-clip text-wrap break-words"
+                            bind:innerText={newMessageContent}
+                            contenteditable="true"
+
                             placeholder="Type new message"
-                            on:keydown={onKeyDown}/>
+                            on:keydown={onKeyDown}>
+                    </p> <!--maxlength={196-additionalBytesSize(newMessageContent)} -->
+
 
 
 

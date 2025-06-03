@@ -220,7 +220,7 @@
 </script>
 
 {#if hasOperations}
-<section class="flex flex-row no-print h-10 bg-stone-50 dark:bg-stone-950 overflow-x-clip overflow-y-hidden py-0 text-xs whitespace-nowrap">
+<section class="flex flex-row no-print h-10 bg-stone-50 dark:bg-stone-950 overflow-x-clip overflow-y-scroll py-0 text-xs whitespace-nowrap">
     <div    class="flex flex-row"
             class:flex-row-reverse={mobile}>
 
@@ -230,7 +230,7 @@
                 {#if operation.toolbox}
                     {#each operation.toolbox as operation}
                         <button type="button"
-                                class="py-2.5 px-4
+                                class="py-2.5 px-1
                                 text-xs font-thin
                                 text-stone-800 hover:bg-stone-700 active:bg-stone-300 border-stone-200
                                 dark:text-stone-300 dark:hover:text-white dark:hover:bg-stone-800 dark:active:bg-stone-600 dark:border-stone-600
@@ -251,7 +251,7 @@
                 {:else}
 
                     <button type="button"
-                            class="py-2.5 px-4
+                            class="py-2.5 px-2
                             text-xs font-thin
                             text-stone-600 hover:text-stone-800 hover:bg-stone-200 active:bg-stone-200 border-stone-200
                             dark:text-stone-300 dark:hover:text-white dark:hover:bg-stone-800 dark:active:bg-stone-600 dark:border-stone-600
