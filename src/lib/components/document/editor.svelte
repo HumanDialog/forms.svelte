@@ -2,7 +2,7 @@
     import { onMount, onDestroy,  getContext, afterUpdate, tick } from 'svelte';
     import {reef, session} from '@humandialog/auth.svelte'
 	import { Editor } from '@tiptap/core';
-	
+
     import StarterKit from '@tiptap/starter-kit';
     import Document from '@tiptap/extension-document'
     import Paragraph from '@tiptap/extension-paragraph'
@@ -16,7 +16,7 @@
     import CodeBlock from '@tiptap/extension-code-block'
     import BulletList from '@tiptap/extension-bullet-list'
     import ListItem from '@tiptap/extension-list-item'
-    
+
     import Table from '@tiptap/extension-table'
     import TableCell from '@tiptap/extension-table-cell'
     import TableHeader from '@tiptap/extension-table-header'
@@ -30,7 +30,7 @@
     import Dropcursor from '@tiptap/extension-dropcursor'
     import Gapcursor from '@tiptap/extension-gapcursor'
     import History from '@tiptap/extension-history'
-    
+
     import {data_tick_store, contextItemsStore, contextTypesStore, onErrorShowAlert, pushToolsActionsOperations, popToolsActionsOperations} from '../../stores.js'
     import {informModification, pushChanges} from '../../updates.js'
     import {isDeviceSmallerThan, parseWidthDirective, refreshToolbarOperations, UI} from '../../utils.js'
@@ -38,7 +38,7 @@
 
     import {FaFont, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle, FaInfo, FaImage,
             FaBold, FaItalic, FaUnderline, FaStrikethrough, FaArrowLeft, FaGripLines, FaListUl, FaTable, FaTimes } from 'svelte-icons/fa'
-            
+
     import IcH1 from './internal/h1.icon.svelte'
     import IcH2 from './internal/h2.icon.svelte'
     import IcH3 from './internal/h3.icon.svelte'
@@ -46,10 +46,10 @@
 
     import { Extension } from '@tiptap/core'
     import {Suggestion} from './internal/suggestion'
-	
+
     export let value = '';
     export let placeholder = '';
-    
+
     export let self = null;
     export let a = '';
     export let context = '';
@@ -66,7 +66,7 @@
     export let pushChangesImmediately = true;
 
     export let chat :object|undefined = undefined;
-    export let readOnly = false; 
+    export let readOnly = false;
 
     export let extraFrontPaletteCommands = []
     export let extraBackPaletteCommands = []
@@ -96,7 +96,7 @@
                 {
                     separator: true
                 }
-            ]   
+            ]
         }
         */
 
@@ -116,7 +116,7 @@
                 })
             }
         })
-        
+
         return result;
     }
 
@@ -198,7 +198,7 @@
         }
     }
 
-    
+
 
     export function scrollIntoView(param)
     {
@@ -217,8 +217,8 @@
     if(compact)
         appearance_class = "";
     else
-        appearance_class = `bg-stone-50 border border-stone-300 rounded-md 
-                            dark:bg-stone-700 dark:border-stone-600 
+        appearance_class = `bg-stone-50 border border-stone-300 rounded-md
+                            dark:bg-stone-700 dark:border-stone-600
                             px-2.5`;
 
     let  last_tick = -1;
@@ -244,13 +244,13 @@
         if(a)
         {
             if(self)
-                item = self   
+                item = self
             else
                 item = $contextItemsStore[ctx];
-                
+
             if(!typename)
                 typename = $contextTypesStore[ctx];
-            
+
             if(item != null)
                 value = item[a]
         }
@@ -275,7 +275,7 @@
                 decorationTag: 'span',
                 decorationClass: 'suggestion',
                 startOfLine: false,
-                allowSpaces: false, 
+                allowSpaces: false,
                 //prefixSpace: false,
                 allowedPrefixes: null,
                 command: ({ editor, range, props }) => {
@@ -297,14 +297,14 @@
 
     const suggestion = {
         items: ({ query }) => {
-            
+
         },
 
         render: () => {
-            
+
             return {
             onStart: props => {
-                
+
                 if (!props.clientRect) {
                     return
                 }
@@ -336,7 +336,7 @@
                     palette.set_current_editor_range(props.range)
                     palette.filter(props.query);
                 }
-                
+
             },
 
             onKeyDown(props) {
@@ -526,7 +526,7 @@
     const QuoteBlock = Paragraph.extend({
         name: 'QuoteBlock',
         priority: 998,
-        
+
         renderHTML({ HTMLAttributes }) {
             return ['blockquote', HTMLAttributes, 0]
         },
@@ -578,17 +578,17 @@
                     fullPath = fullPath + '/' + url;
             }
         }
-        else    
+        else
             fullPath = url;
 
-        
+
 
         if($session.tenants.length > 0)
         {
             const currentGroupInfo = $session.tenants.find(t => t.id == $session.tid)
             if(currentGroupInfo && currentGroupInfo.headers && currentGroupInfo.headers.length > 0)
             {
-                
+
                 const paramsNo = currentGroupInfo.headers.length
                 for(let i=0; i<paramsNo; i++)
                 {
@@ -598,7 +598,7 @@
                         if(fullPath.includes('?'))     // has other params
                         {
                             fullPath += '&'
-                        }   
+                        }
                         else
                         {
                             fullPath += '?'
@@ -606,7 +606,7 @@
                     }
                     else
                         fullPath += '&';
-                   
+
                     fullPath += param.key.toLowerCase()
                     fullPath += '=' + param.value;
                 }
@@ -615,12 +615,12 @@
         else
         {
             const user = $session.localDevCurrentUser;
-            if (user) 
+            if (user)
             {
                 if(fullPath.includes('?'))     // has other params
                 {
                     fullPath += '&'
-                }   
+                }
                 else
                 {
                     fullPath += '?'
@@ -658,11 +658,11 @@
 
                 dataPath: {
                     default: null,
-                    parseHTML: (element) => 
+                    parseHTML: (element) =>
                     {
-                        return element.getAttribute('data-path') 
+                        return element.getAttribute('data-path')
                     },
-                    
+
                     renderHTML: (attributes) => {
                         const dataPath = attributes.dataPath;
                         if(dataPath)
@@ -682,7 +682,7 @@
                                 }
 
                                 downloadedImages.push(newEntry)
-                                
+
                                 reef.fetch(`/json/anyv/${dataPath}`).then( (res) => {
                                     if(res.ok)
                                     {
@@ -694,14 +694,14 @@
                                                 if(img.getAttribute('data-path') == dataPath)
                                                     img.src = newEntry.url
                                             })
-                                        })        
+                                        })
                                     }
-                                    else    
+                                    else
                                     {
                                         res.text().then( err => onErrorShowAlert(err))
                                     }
                                 },
-                                
+
                                 (err) => {
                                     onErrorShowAlert(err)
                                 })
@@ -717,17 +717,17 @@
                         else
                         {
                             return {
-                                    
+
                             }
                         }
-                    } 
+                    }
                 },
 
                 temporary: {
                     default: '',
-                    parseHTML: (element) => 
+                    parseHTML: (element) =>
                     {
-                        return element.getAttribute('temporary') 
+                        return element.getAttribute('temporary')
                     },
                     renderHTML: (attributes) => {
                             const temporary = attributes.temporary;
@@ -811,21 +811,21 @@
                 CrossImage,
                 HardBreak,
                 HorizontalRule,
-                BulletList, 
+                BulletList,
                 ListItem,
-                
+
                 Table.configure({
                     resizable: true,
                 }),
                 TableRow,
                 TableHeader,
                 TableCell,
-                
+
                 // custom
                 CodeBlock,
-                CommentBlock,
-                WarningBlock,
-                InfoBlock,
+                //CommentBlock,
+                //WarningBlock,
+                //InfoBlock,
                 QuoteBlock,
 
                 Bold,
@@ -923,8 +923,8 @@
                 const res = await reef.fetch(`json/anyv/${dataPath}`)
                 if(res.ok)
                 {
-                    const blob = await res.blob() 
-                    img.src = URL.createObjectURL(blob)  
+                    const blob = await res.blob()
+                    img.src = URL.createObjectURL(blob)
                 }
             }
             //    img.src = prepareFullImagePath(dataPath)
@@ -987,19 +987,19 @@
 
         if(onChange)
         {
-            onChange(changedValue) 
+            onChange(changedValue)
             return true;
         }
         else  if(item && a)
         {
             item[a] = changedValue;
             //value = changed_value;
-            
+
             if(typename)
                 informModification(item, a, typename);
             else
                 informModification(item, a);
-            
+
             if(pushChangesImmediately)
                 pushChanges();
             return true;
@@ -1016,7 +1016,7 @@
     {
         const selection = window.getSelection();
         const range = selection.getRangeAt(0);
-        
+
         const rect = range.getBoundingClientRect();
         return rect;
     }
@@ -1041,7 +1041,7 @@
         is_command_palette_visible = true;
 
         if(isDeviceSmallerThan("sm"))
-        {    
+        {
             pushToolsActionsOperations({
                 opver: 1,
                 operations: [
@@ -1059,35 +1059,35 @@
                 ]
             })
         }
-            
+
     }
 
     function on_palette_hidden()
     {
         if(is_command_palette_visible)
             popToolsActionsOperations()
-        
+
         is_command_palette_visible = false;
 
         //clear_previous_text_and_position();
     }
-    
+
     function show_command_palette(cursor_rect)
     {
         let client_rect = get_window_box();
-        
+
         if(isDeviceSmallerThan("sm"))
             show_small_command_palette(client_rect)
         else
-            show_big_command_palette(cursor_rect, client_rect)        
+            show_big_command_palette(cursor_rect, client_rect)
     }
-    
+
     function show_small_command_palette(client_rect)
     {
         //palette.max_height_px = client_rect.height - 64;
         //palette.width_px = client_rect.width - 96;
         //let x=64, y=32;
-        //let show_above = false;        
+        //let show_above = false;
 
         const margin = 5
 
@@ -1095,7 +1095,7 @@
         palette.width_px = client_rect.width - 2*margin;
         let x=margin;
         let y = client_rect.bottom - margin;
-        let show_above = true;        
+        let show_above = true;
 
         palette.show(x, y, show_above);
     }
@@ -1105,11 +1105,11 @@
         //editor.commands.blur();
         //return;
         let rect = cursor_rect; //get_selection_bbox();
-        
+
         let top_space = rect.y;
         let bottom_space = client_rect.height - (rect.y + rect.height);
         //console.log('cu:', rect, ' cl:', client_rect)
-        
+
         palette.max_height_px = 500;
         palette.width_px = 200;
 
@@ -1148,7 +1148,7 @@
             x = rect.x + 5;
             y = rect.y - (preferred_palette_height - bottom_space)
         }
-        else 
+        else
             show_fullscreen = true;
 
         const isSmallDevice = isDeviceSmallerThan("sm")
@@ -1191,7 +1191,7 @@
         const image = editor.$node('image', {temporary: temporarySrc})
         if(!image)
             return;
-        
+
         editor.commands.deleteRange(image.range)
     }
 
@@ -1211,22 +1211,22 @@
         editor.commands.insertContent({
                 type: 'image',
                 attrs: {
-                    src: '', 
+                    src: '',
                     dataPath: dataPath
                 },
             })
         /*
-        
+
         const res = await reef.fetch(`json/anyv/${dataPath}`)
         if(res.ok)
         {
-            const blob = await res.blob() 
+            const blob = await res.blob()
             const src = URL.createObjectURL(blob)
-            
+
             editor.commands.insertContent({
                 type: 'image',
                 attrs: {
-                    src: src, 
+                    src: src,
                     dataPath: dataPath
                 },
             })
@@ -1236,7 +1236,7 @@
             editor.commands.insertContent({
                 type: 'image',
                 attrs: {
-                    src: 'file://_hd_force_img_error', 
+                    src: 'file://_hd_force_img_error',
                     dataPath: dataPath
                 },
             })
@@ -1301,91 +1301,91 @@
 
     export function setNormal()
     {
-        if(suggestionRange) 
-            editor.chain().focus().deleteRange(suggestionRange).setParagraph().run(); 
-        else 
+        if(suggestionRange)
+            editor.chain().focus().deleteRange(suggestionRange).setParagraph().run();
+        else
             editor.chain().focus().setParagraph().run()
     }
 
     export function setHeading(level)
     {
-        if(suggestionRange) 
-            editor.chain().focus().deleteRange(suggestionRange).setHeading({level: level}).run(); 
-        else 
+        if(suggestionRange)
+            editor.chain().focus().deleteRange(suggestionRange).setHeading({level: level}).run();
+        else
             editor.chain().focus().setHeading({ level: level }).run()
     }
 
-    
+
     export function setCode()
     {
-        if(suggestionRange) 
-            editor.chain().focus().deleteRange(suggestionRange).setCodeBlock().run(); 
-        else 
+        if(suggestionRange)
+            editor.chain().focus().deleteRange(suggestionRange).setCodeBlock().run();
+        else
             editor.chain().focus().setCodeBlock().run()
     }
 
     export function setComment()
     {
-        if(suggestionRange) 
-            editor.chain().focus().deleteRange(suggestionRange).setAsComment().run(); 
-        else 
+        if(suggestionRange)
+            editor.chain().focus().deleteRange(suggestionRange).setAsComment().run();
+        else
             editor.chain().focus().setAsComment().run()
     }
 
     export function setQuote()
     {
-        if(suggestionRange) 
-            editor.chain().focus().deleteRange(suggestionRange).setAsQuote().run(); 
-        else 
+        if(suggestionRange)
+            editor.chain().focus().deleteRange(suggestionRange).setAsQuote().run();
+        else
             editor.chain().focus().setAsQuote().run()
     }
 
     export function setWarning()
     {
-        if(suggestionRange) 
-            editor.chain().focus().deleteRange(suggestionRange).setAsWarning().run(); 
-        else 
+        if(suggestionRange)
+            editor.chain().focus().deleteRange(suggestionRange).setAsWarning().run();
+        else
             editor.chain().focus().setAsWarning().run()
     }
 
     export function setInfo()
     {
-        if(suggestionRange) 
-            editor.chain().focus().deleteRange(suggestionRange).setAsInfo().run(); 
-        else 
+        if(suggestionRange)
+            editor.chain().focus().deleteRange(suggestionRange).setAsInfo().run();
+        else
             editor.chain().focus().setAsInfo().run()
     }
 
     export function setBulletList()
     {
-        if(suggestionRange) 
-            editor.chain().focus().deleteRange(suggestionRange).toggleBulletList().run(); 
-        else 
+        if(suggestionRange)
+            editor.chain().focus().deleteRange(suggestionRange).toggleBulletList().run();
+        else
             editor.chain().focus().toggleBulletList().run()
     }
 
     export function setImage()
     {
-        if(suggestionRange) 
-            editor.chain().focus().deleteRange(suggestionRange).run(); 
-        
-        if(onAddImage) 
+        if(suggestionRange)
+            editor.chain().focus().deleteRange(suggestionRange).run();
+
+        if(onAddImage)
             onAddImage(onAddedImageReady);
     }
 
     export function setTable()
     {
-        if(suggestionRange) 
-            editor.chain().focus().deleteRange(suggestionRange).insertTable().run(); 
-        else 
+        if(suggestionRange)
+            editor.chain().focus().deleteRange(suggestionRange).insertTable().run();
+        else
             editor.chain().focus().insertTable().run()
     }
 
     export function setHorizontalRule()
-    {   
-        if(suggestionRange) 
-            editor.chain().focus().deleteRange(suggestionRange).setHorizontalRule().run(); 
-        else 
+    {
+        if(suggestionRange)
+            editor.chain().focus().deleteRange(suggestionRange).setHorizontalRule().run();
+        else
             editor.chain().focus().setHorizontalRule().run();
     }
 
@@ -1411,12 +1411,12 @@
 
     export function isActiveNormal()
     {
-        return editor?.isActive('paragraph') 
+        return editor?.isActive('paragraph')
     }
 
     export function isActiveHeading(level)
     {
-        return editor?.isActive('heading', {level: level}) 
+        return editor?.isActive('heading', {level: level})
     }
 
     export function isActiveCode()
@@ -1475,7 +1475,7 @@
         {    caption: 'Bold',        description: 'Marks text as bolded',            tags: 'strong', icon: FaBold,                       on_choice: makeBold,            is_active: () => editor?.isActive('bold')  },
         {    caption: 'Italic',      description: 'Marks text as italic',            tags: 'strong', icon: FaItalic,                     on_choice: makeItalic,          is_active: () => editor?.isActive('italic')  },
         {    caption: 'Underlie',    description: 'Marks text as underlined',                        icon: FaUnderline,                  on_choice: makeUnderline,       is_active: () => editor?.isActive('underline')    },
-        {    caption: 'Strikethrough',description: 'Marks text as strikethrough',                    icon: FaStrikethrough,              on_choice: makeStrikethrough,   is_active: () => editor?.isActive('strike')},    
+        {    caption: 'Strikethrough',description: 'Marks text as strikethrough',                    icon: FaStrikethrough,              on_choice: makeStrikethrough,   is_active: () => editor?.isActive('strike')},
     ]
 
     const paletteStylesCommands = [
@@ -1484,33 +1484,33 @@
         {   caption: 'Heading 2',      description: 'Secondary heading',             tags: 'h2',      icon: IcH2,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 2}).run(); else editor.chain().focus().setHeading({ level: 2 }).run() },   is_active: () => editor?.isActive('heading', {level: 2}) } ,
         {   caption: 'Heading 3',      description: 'Secondary heading',             tags: 'h3',      icon: IcH3,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 3}).run(); else editor.chain().focus().setHeading({ level: 3 }).run() },   is_active: () => editor?.isActive('heading', {level: 3}) } ,
         {   caption: 'Heading 4',      description: 'Secondary heading',             tags: 'h4',      icon: IcH4,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 4}).run(); else editor.chain().focus().setHeading({ level: 4 }).run() },   is_active: () => editor?.isActive('heading', {level: 4}) } ,
-        
+
         {   caption: 'Code',         description: 'Source code monospace text',                      icon: FaCode,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setCodeBlock().run(); else editor.chain().focus().setCodeBlock().run() }, is_active: () => editor?.isActive('CodeBlock') },
-        {   caption: 'Comment',      description: 'With this you can comment the above paragraph',   icon: FaComment,                    on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsComment().run(); else editor.chain().focus().setAsComment().run() }, is_active: () => editor?.isActive('CommentBlock')  } ,
+    //    {   caption: 'Comment',      description: 'With this you can comment the above paragraph',   icon: FaComment,                    on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsComment().run(); else editor.chain().focus().setAsComment().run() }, is_active: () => editor?.isActive('CommentBlock')  } ,
         {   caption: 'Quote',        description: 'To quote someone',                                icon: FaQuoteRight,                 on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsQuote().run(); else editor.chain().focus().setAsQuote().run() }, is_active: () => editor?.isActive('QuoteBlock')  } ,
-        {   caption: 'Warning',      description: 'An important warning to above paragraph',         icon: FaExclamationTriangle,        on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsWarning().run(); else editor.chain().focus().setAsWarning().run() }, is_active: () => editor?.isActive('WarningBlock')  } ,
-        {   caption: 'Info',         description: 'An important info about above paragraph',         icon: FaInfo,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsInfo().run(); else editor.chain().focus().setAsInfo().run() }, is_active: () => editor?.isActive('InfoBlock')  }, 
-        {   caption: 'Bullet list',  description: 'Unordered list of items',                         icon: FaListUl,                     on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).toggleBulletList().run(); else editor.chain().focus().toggleBulletList().run() }, is_active: () => editor?.isActive('bulletList')  }, 
+    //    {   caption: 'Warning',      description: 'An important warning to above paragraph',         icon: FaExclamationTriangle,        on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsWarning().run(); else editor.chain().focus().setAsWarning().run() }, is_active: () => editor?.isActive('WarningBlock')  } ,
+    //    {   caption: 'Info',         description: 'An important info about above paragraph',         icon: FaInfo,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsInfo().run(); else editor.chain().focus().setAsInfo().run() }, is_active: () => editor?.isActive('InfoBlock')  },
+        {   caption: 'Bullet list',  description: 'Unordered list of items',                         icon: FaListUl,                     on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).toggleBulletList().run(); else editor.chain().focus().toggleBulletList().run() }, is_active: () => editor?.isActive('bulletList')  },
     ]
 
     const paletteInsertCommands = [
         {   caption: 'Image',        description: 'Add image to document',           tags:'img,picture',      icon: FaImage,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).run(); if(onAddImage) onAddImage(onAddedImageReady);  } } ,
-        {   caption: 'Table',        description: 'Table',                                                    icon: FaTable,                      on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).insertTable().run(); else editor.chain().focus().insertTable().run() }, is_active: () => editor?.isActive('table')  }, 
-        {   caption: 'Horizontal rule', description: 'Add horizonal role',           tags: 'hr',              icon: FaGripLines,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHorizontalRule().run(); else editor.chain().focus().setHorizontalRule().run();  } } 
+        {   caption: 'Table',        description: 'Table',                                                    icon: FaTable,                      on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).insertTable().run(); else editor.chain().focus().insertTable().run() }, is_active: () => editor?.isActive('table')  },
+        {   caption: 'Horizontal rule', description: 'Add horizonal role',           tags: 'hr',              icon: FaGripLines,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHorizontalRule().run(); else editor.chain().focus().setHorizontalRule().run();  } }
     ]
-    
+
     const paletteCommands  = [
-             
+
                 {    caption: 'Text',         separator: true },
                 ...paletteMarksCommands,
-             
+
                 {    caption: 'Styles',       separator: true },
                 ...paletteStylesCommands,
-               
+
                 {   caption: 'Insert',        separator: true },
-                ...paletteInsertCommands   
+                ...paletteInsertCommands
             ];
-    
+
     function makeBold(range)
     {
         if(range)
@@ -1520,7 +1520,7 @@
         else
         {
             editor.chain().focus().toggleBold().run()
-        }   
+        }
     }
 
     function makeItalic(range)
@@ -1532,7 +1532,7 @@
         else
         {
             editor.chain().focus().toggleItalic().run()
-        } 
+        }
     }
 
     function makeUnderline(range)
@@ -1570,13 +1570,13 @@
                     description: exc.description,
                     tags: exc.tags,
                     icon: exc.icon,
-                    on_choice: (range) => 
-                        { 
-                            if(range) 
-                                editor.chain().focus().deleteRange(range).run(); 
-                            
+                    on_choice: (range) =>
+                        {
+                            if(range)
+                                editor.chain().focus().deleteRange(range).run();
+
                             if(exc.action)
-                                exc.action();  
+                                exc.action();
                         },
                     is_active: () => {
                         if(exc.is_active)
@@ -1595,7 +1595,7 @@
         commands = [...commands, ...paletteMarksCommands]
         commands = [...commands, { caption: 'Styles',   separator: true }]
         commands = [...commands, ...paletteStylesCommands]
-        
+
         commands = [...commands, {   caption: 'Insert',  separator: true }]
         if(extraInsertPaletteCommands && extraInsertPaletteCommands.length > 0)
         {
@@ -1605,13 +1605,13 @@
                     description: exc.description,
                     tags: exc.tags,
                     icon: exc.icon,
-                    on_choice: (range) => 
-                        { 
-                            if(range) 
-                                editor.chain().focus().deleteRange(range).run(); 
-                            
+                    on_choice: (range) =>
+                        {
+                            if(range)
+                                editor.chain().focus().deleteRange(range).run();
+
                             if(exc.action)
-                                exc.action();  
+                                exc.action();
                         },
                     is_active: () => {
                         if(exc.is_active)
@@ -1635,13 +1635,13 @@
                     description: exc.description,
                     tags: exc.tags,
                     icon: exc.icon,
-                    on_choice: (range) => 
-                        { 
-                            if(range) 
-                                editor.chain().focus().deleteRange(range).run(); 
-                            
+                    on_choice: (range) =>
+                        {
+                            if(range)
+                                editor.chain().focus().deleteRange(range).run();
+
                             if(exc.action)
-                                exc.action();  
+                                exc.action();
                         },
                     is_active: () => {
                         if(exc.is_active)
@@ -1656,25 +1656,25 @@
         return commands;
     }
 
-    
+
 </script>
 
 
 
 <div bind:this={editorElement} />
 
-<Palette    commands={getPaletteCommands()} 
-            bind:this={palette} 
+<Palette    commands={getPaletteCommands()}
+            bind:this={palette}
             on:palette_shown={on_palette_shown}
             on:palette_hidden={on_palette_hidden}
             on:palette_mouse_click={on_palette_mouse_click}/>
 
-<!--div    contenteditable="true" 
+<!--div    contenteditable="true"
         bind:this={editorElement}
         on:keyup={on_keyup}
         on:keydown={on_keydown}
         on:mouseup={on_mouseup}
-        class="{cs}     {appearance_class} 
+        class="{cs}     {appearance_class}
                         prose prose-base sm:prose-base dark:prose-invert {additional_class} overflow-y-auto whitespace-pre-wrap"
         on:blur={on_blur}
         on:focus={on_focus}
