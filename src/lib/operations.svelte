@@ -270,6 +270,7 @@
                     </button>
                 {/if}
             {:else}
+                <div class="border-l py-4"></div>
                 <!--div class="border-l my-2"></div-->
             {/if}
         {/each}

@@ -257,7 +257,7 @@
                             icon: FaSave,
                             action: (f) => saveCurrentEditable(),
                             fab: 'T02',
-                            tbr: 'C'
+                            tbr: 'A'
                         },
                         {
                             caption: 'Edit...',
@@ -306,7 +306,7 @@
                             icon: FaSave,
                             action: (f) => description?.save(),
                        //     fab: 'S00',
-                            tbr: 'C'
+                            tbr: 'A'
                         },
                         {
                             caption: 'Edit...',
@@ -336,8 +336,7 @@
                             icon: FaImage,
                             action: (f) => description.setImage(),
                             activeFunc: description.isActiveImage,
-                            //tbr: 'A',
-                            hideToolbarCaption: true
+                            tbr: 'A', hideToolbarCaption: true
                         },
                         {
                             caption: 'Table',
@@ -349,7 +348,7 @@
                             caption: 'Attachement',
                             icon: FaPaperclip,
                             action: (f) => runFileAttacher(),
-                            //tbr: 'A',
+                            tbr: 'A',
                             hideToolbarCaption: true
                         },
                         {
@@ -434,6 +433,7 @@
                         {
                             caption: 'Heading 4',
                             icon: IcH4,
+                            tbr: 'A',hideToolbarCaption: true,
                             action: (f) => description.setHeading(4),
                             activeFunc: () => description.isActiveHeading(4)
                         },
@@ -442,41 +442,22 @@
                             icon: FaCode,
                             tbr: 'A',hideToolbarCaption: true,
                             action: (f) => description.setCode(),
-                            activeFunc: description.isActiveCode,
-                        },
-                        {
-                            caption: 'Comment',
-                            icon: FaComment,hideToolbarCaption: true,
-                            action: (f) => description.setComment(),
-                            activeFunc: description.isActiveComment,
+                            activeFunc: description.isActiveCode
                         },
                         {
                             caption: 'Quote',
                             icon: FaQuoteRight,
                             tbr: 'A',hideToolbarCaption: true,
                             action: (f) => description.setQuote(),
-                            activeFunc: description.isActiveQuote,
-                        },
-                        {
-                            caption: 'Warning',
-                            icon: FaExclamationTriangle,
-                            action: (f) => description.setWarning(),
-                            activeFunc: description.isActiveWarning,
-                        },
-                        {
-                            caption: 'Info',
-                            icon: FaInfo,
-                            action: (f) => description.setInfo(),
-                            activeFunc: description.isActiveInfo,
+                            activeFunc: description.isActiveQuote
                         },
                         {
                             caption: 'BulletList',
                             icon: FaListUl,
                             tbr: 'A',hideToolbarCaption: true,
                             action: (f) => description.setBulletList(),
-                            activeFunc: description.isActiveBulletList,
-                            //tbr: 'A',
-                            hideToolbarCaption: true
+                            activeFunc: description.isActiveBulletList
+
                         },
                     ]
                 }
