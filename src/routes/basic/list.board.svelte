@@ -37,11 +37,11 @@
     import BasketPreview from './basket.preview.svelte'
     import FaBasketPlus from './icons/basket.plus.svelte'
     import {cache} from './cache.js'
-	
+
     export let params = {}
 
     let currentList = null;
-    
+
     let listId = 0;
     let listPath = '';
 
@@ -57,10 +57,10 @@
 
     $: onParamsChanged($location, $mainContentPageReloader);
 
-	async function onParamsChanged(...args) 
+	async function onParamsChanged(...args)
     {
         const segments = $location.split('/');
-        
+
         const foundIdx = segments.findIndex( s => s == 'listboard');
         if(foundIdx < 0)
             return;
@@ -77,7 +77,7 @@
                                         Id: 1,
                                         Association: 'Members/User'
                                     }
-                                ]                    
+                                ]
                             },
                             onErrorShowAlert
                         ).then( (res) => {
@@ -93,12 +93,12 @@
             allTags = res;
             reloadVisibleTags()
         })
-        
+
         if(!segments.length)
             listId = 1;
         else
             listId = parseInt(segments[segments.length-1])
-        
+
         if(isNaN(listId))
             listId = 1
 
@@ -122,7 +122,7 @@
                 taskStates = [];
         }
 
-        
+
         cache.set(cacheKey, currentList)
         //console.log('loaded new data')
 
@@ -144,7 +144,7 @@
 
         currentList = cachedValue
         kanban?.reload(currentList, kanban.KEEP_SELECTION);
-        
+
         if(currentList.GetTaskStates && Array.isArray( currentList.GetTaskStates))
             taskStates = currentList.GetTaskStates
         else
@@ -154,10 +154,10 @@
             definitionChangedTicket++;
 
         return currentList.$ref
-        
+
     }
 
-    async function readContextItem() 
+    async function readContextItem()
     {
         let res = await reef.post(`${listPath}/query`,
                             {
@@ -208,7 +208,7 @@
         currentList = res;
         if(!currentList)
             return;
-        
+
         if(currentList.GetTaskStates && Array.isArray( currentList.GetTaskStates))
         {
             taskStates = currentList.GetTaskStates
@@ -229,7 +229,7 @@
     /*const switchToListOperation = () => {
         if(!currentList)
             return { }
-        
+
         if(currentList.Kind == TLK_KANBAN_CHECKLIST)
         {
             return {
@@ -244,27 +244,23 @@
             return { }
     }
     */
-    function getPageOperations()
-    { 
+    function getViewOperationsP()
+    {
         return {
-            opver: 2,
-            fab: 'M00',
-            operations: [
-                {
                     caption: 'View',
-                    tbr: 'B',
+
                     operations: [
                         {
-                            caption: 'Add',
+                            caption: 'New Task',
                             icon: FaPlus,
                             action: (f) => kanban.add(KanbanColumnBottom, 0),
-                        //    fab: 'M10',
+                            fab: 'M01',
                             tbr: 'A',
                             hideToolbarCaption: true
                         },
                         {
                             caption: 'Attach...',
-                            icon: FaShoppingBasket, //FaLink, //aRegShareSquare, // 
+                            icon: FaShoppingBasket, //FaLink, //aRegShareSquare, //
                             toolbar: BasketPreview,
                             props: {
                                 destinationContainer: listPath,
@@ -283,6 +279,16 @@
                         //switchToListOperation()
                     ]
                 }
+    }
+
+    function getPageOperations()
+    {
+        return {
+            opver: 2,
+            fab: 'M00',
+            tbr: 'C',
+            operations: [
+                getViewOperationsP()
             ]
         }
     }
@@ -290,7 +296,7 @@
     function switchToList()
     {
         reef.post(`${listPath}/SwitchToList`,{  }, onErrorShowAlert)
-        push(`/tasklist/${listId}`);      
+        push(`/tasklist/${listId}`);
     }
 
     function getDefaultTypeSummary(list)
@@ -318,7 +324,7 @@
         let prevKind = 0;
 
         listTypes.forEach(template => {
-            
+
             //if(prevKind != template.Kind)
             //    menuOperations.push({separator: true})
             //prevKind = template.Kind
@@ -360,7 +366,7 @@
         let newHref = await reef.post(`${listPath}/ChangeListKind`, {
             template: changeListTo
         }, onErrorShowAlert)
-        
+
         changeListTo = null
 
         if(!newHref)
@@ -378,15 +384,15 @@
             push(newHref)
             if(UI.navigator)
                 UI.navigator.refresh();
-        } 
+        }
     }
 
-    async function onReplace(moveParams) 
+    async function onReplace(moveParams)
     {
         let res = await reef.post(`${listPath}/ChangeTaskColumn`, {
             task: moveParams.item.$ref,
             columnNo: moveParams.toColumn
-        }, onErrorShowAlert)    
+        }, onErrorShowAlert)
 
         if(!res)
             return null;
@@ -395,11 +401,11 @@
         await reload(newTask.Id)
     }
 
-    async function onAdd(newTaskAttribs, columnIdx) 
+    async function onAdd(newTaskAttribs, columnIdx)
     {
-        let res = await reef.post(`${listPath}/CreateTaskInColumn`, { 
+        let res = await reef.post(`${listPath}/CreateTaskInColumn`, {
                 properties: newTaskAttribs,
-                pos: columnIdx }, 
+                pos: columnIdx },
                 onErrorShowAlert)
         if(!res)
             return null;
@@ -442,30 +448,30 @@
 
         await reef.post(`${taskToArchive.$ref}/Archive`, {}, onErrorShowAlert)
         archiveModal.hide();
-        
+
         reload(kanban.SELECT_NEXT);
     }
 
     async function finishTask(task)
     {
         await reef.post(`${task.$ref}/Finish`, {}, onErrorShowAlert);
-        reload(task.Id); 
+        reload(task.Id);
     }
 
-	
+
     async function onUpdateAllTags(allAllTags)
     {
         allTags = allAllTags
         await reef.post('group/set', { AllTags: allTags}, onErrorShowAlert)
     }
 
-    
+
     function getCardOperations(task)
     {
         const columnIdx = taskStates.findIndex(s => s.state == task.State)
         const isOutOfStates = columnIdx < 0
 
-       
+
         /*const moreOperation = {
             icon: FaEllipsisH,
             menu:[
@@ -495,50 +501,11 @@
         }*/
 
         const mobile = isDeviceSmallerThan("sm")
-        
+
         return {
             opver: 2,
             fab: 'M00',
             operations: [
-                {
-                    caption: "View",
-                    tbr: 'B',
-                    operations:[
-                        {
-                            caption: 'Add',
-                            icon: FaPlus,
-                            action: (f) => { kanban.add(task) }, 
-                            //fab: "M10",
-                            tbr: 'A',
-                            hideToolbarCaption: true
-                        },
-                        {
-                            caption: 'Attach...',
-                            icon: FaShoppingBasket, //FaLink, //aRegShareSquare, // 
-                            toolbar: BasketPreview,
-                            props: {
-                                destinationContainer: listPath,
-                                onRefreshView: (f) => reload(kanban.KEEP_SELECTION)
-                            },
-                           // fab: 'M01',
-                           // tbr: 'A'
-                        },
-                        {
-                            icon: FaRandom,
-                            caption: 'Change kind',
-                            action: changeListKind,
-                        //    fab: 'S02',
-                        //    tbr: 'C'
-                        },
-                        //switchToListOperation()
-                    ]
-                },
-                ... isOutOfStates ? [] : [
-                {
-                    caption: 'Column',
-                    tbr: 'B',
-                    operations: getColumnContextMenu(columnIdx, undefined, !mobile)
-                }],
                 {
                     caption: 'Task',
                     tbr: 'B',
@@ -572,7 +539,7 @@
                                     action: (f) => { kanban.edit(task, 'Tags') }
                                 }
                             ],
-                        //    fab: 'M20',
+                            fab: 'M10',
                             tbr: 'A',
                             hideToolbarCaption: true
                         },
@@ -587,7 +554,7 @@
                                  //   onMoveUp: isOutOfStates ? undefined : kanban.moveUp,
                                  //   onMoveDown: isOutOfStates ? undefined : kanban.moveDown,
                                     onReplace: kanban.replace},
-                        //    fab: 'M01',
+                            fab: 'M04',
                             tbr: 'A',
                             hideToolbarCaption: true
                         },
@@ -596,7 +563,7 @@
                             caption: 'Move up',
                             icon: FaAngleUp,
                             action: (f) => { kanban.moveUp(task); setTimeout(() => kanban.scrollViewToCard(), 0) },
-                            //fab: 'M03',
+                            fab: 'M03',
                             tbr: 'A',
                             hideToolbarCaption: true
                         },
@@ -604,7 +571,7 @@
                             caption: 'Move down',
                             icon: FaAngleDown,
                             action: (f) => { kanban.moveDown(task); setTimeout(() => kanban.scrollViewToCard(), 0)},
-                            //fab: 'M02',
+                            fab: 'M02',
                             tbr: 'A',
                             hideToolbarCaption: true
                         } ],
@@ -634,11 +601,51 @@
                             action: (f) => askToDelete(task)
                         }
                     ]
-                }
+                },
+                {
+                    caption: "View",
+                    tbr: 'B',
+                    operations:[
+                        {
+                            caption: 'New Task',
+                            icon: FaPlus,
+                            action: (f) => { kanban.add(task) },
+                            fab: "M01",
+                            tbr: 'A',
+                            hideToolbarCaption: true
+                        },
+                        {
+                            caption: 'Attach...',
+                            icon: FaShoppingBasket, //FaLink, //aRegShareSquare, //
+                            toolbar: BasketPreview,
+                            props: {
+                                destinationContainer: listPath,
+                                onRefreshView: (f) => reload(kanban.KEEP_SELECTION)
+                            },
+                           // fab: 'M01',
+                           // tbr: 'A'
+                        },
+                        {
+                            icon: FaRandom,
+                            caption: 'Change kind',
+                            action: changeListKind,
+                        //    fab: 'S02',
+                        //    tbr: 'C'
+                        },
+                        //switchToListOperation()
+                    ]
+                },
+                ... isOutOfStates ? [] : [
+                {
+                    caption: 'Column',
+                    tbr: 'B',
+                    operations: getColumnContextMenu(columnIdx, undefined, !mobile)
+                }]
+
             ]
 
         }
-        
+
     }
 
     function getColumnContextMenu(columnIdx, taskState, inColumnContext=true)
@@ -681,7 +688,7 @@
         ];
     }
 
-   
+
 
     function getColumnOperations(columnIdx, taskState)
     {
@@ -695,7 +702,7 @@
                     tbr: 'B',
                     operations: [
                         {
-                            caption: 'Add',
+                            caption: 'New Task',
                             icon: FaPlus,
                             action: (f) => kanban.add(KanbanColumnBottom, columnIdx),
                             //fab: 'M10',
@@ -704,7 +711,7 @@
                         },
                         {
                             caption: 'Attach...',
-                            icon: FaShoppingBasket, //FaLink, //aRegShareSquare, // 
+                            icon: FaShoppingBasket, //FaLink, //aRegShareSquare, //
                             toolbar: BasketPreview,
                             props: {
                                 destinationContainer: listPath,
@@ -738,21 +745,21 @@
             return [];
 
         let moveTos = taskStates.filter(c => c.state != taskState.state).map(
-            ({name, state}) => 
-                ({  caption: `Move items to ${name}`, 
+            ({name, state}) =>
+                ({  caption: `Move items to ${name}`,
                     action: (f) => deleteColumnAndSetCardsState(columnIdx, state)}))
-                    
+
         return moveTos;
     }
 
     async function deleteColumnAndSetCardsState(columnIdx, newState)
     {
-        
+
         const res = await reef.post(`${currentList.$ref}/RemoveColumn`, {
                         pos: columnIdx,
                         moveTasksTo: newState
                     }, onErrorShowAlert);
-        
+
         if(res && Array.isArray(res))
         {
             taskStates = [...res]
@@ -778,7 +785,7 @@
                         pos: columnIdx,
                         newName: name
                     }, onErrorShowAlert);
-        
+
         if(res && Array.isArray(res))
         {
             taskStates = [...res]
@@ -798,7 +805,7 @@
                         pos: columnIdx,
                         shift: -1
                     }, onErrorShowAlert);
-        
+
         if(res && Array.isArray(res))
         {
             taskStates = [...res]
@@ -816,7 +823,7 @@
                         pos: columnIdx,
                         shift: 1
                     }, onErrorShowAlert);
-        
+
         if(res && Array.isArray(res))
         {
             taskStates = [...res]
@@ -862,7 +869,7 @@
         const tasks = currentList.Tasks.filter(t => t.State == taskState.state)
         kanban.setCardsState(tasks, STATE_FINISHED)
         taskState.state = STATE_FINISHED
-        
+
         await saveTaskStates();
         taskStates = [...taskStates]
         await kanban.rerender(columnIdx);
@@ -886,7 +893,7 @@
                             name: ""
                         }, onErrorShowAlert);
 
-            
+
             if(res && Array.isArray(res))
             {
                 taskStates = [...res]
@@ -902,7 +909,7 @@
     async function saveTaskStates()
     {
         currentList.TaskStates = JSON.stringify(taskStates);
-        
+
         await reef.post(`${listPath}/set`,
                     {
                         TaskStates: currentList.TaskStates
@@ -927,12 +934,12 @@
         newColumnPos = pos;
         if(!newColumnStates.length)
         {
-            newColumnStates = await reef.get(`group/GetPredefinedTaskStates`, onErrorShowAlert)        
+            newColumnStates = await reef.get(`group/GetPredefinedTaskStates`, onErrorShowAlert)
             await tick();
         }
 
         addColumnDialog.show();
-        
+
     }
 
     async function onNewProcessColumnRequested()
@@ -953,7 +960,7 @@
 
         newColumnProps.name = 'New column'
         newColumnProps.state = 0
-            
+
         if(res && Array.isArray(res))
         {
             taskStates = [...res]
@@ -998,9 +1005,9 @@
 		clearsContext="props sel"
 		title={currentList.Name}
 	>
-        
-		<Kanban class="grow-0" 
-                title={currentList.Name} 
+
+		<Kanban class="grow-0"
+                title={currentList.Name}
                 bind:this={kanban}>
 
             <KanbanSource self={currentList}
@@ -1008,15 +1015,15 @@
                           stateAttrib='State'
                           orderAttrib='ListOrder'/>
 
-            
+
                 {#each taskStates as taskState, columnIdx (taskState.name+taskState.state)}
-                    <KanbanColumn   title={taskState.name} 
-                                    state={taskState.state} 
+                    <KanbanColumn   title={taskState.name}
+                                    state={taskState.state}
                                     operations={getColumnOperations(columnIdx, taskState)}
                                     onTitleChanged={(title) => onColumnNameChanged(columnIdx, title)}
                                     finishing={taskState.state == STATE_FINISHED}/>
                 {/each}
-            
+
 
             <KanbanColumn   title="<Other>"
                             state={-1} />
@@ -1024,7 +1031,7 @@
 
 			<KanbanCallbacks {onAdd} {getCardOperations} {onReplace}/>
 
-			<KanbanTitle    a="Title" 
+			<KanbanTitle    a="Title"
                             hrefFunc={(task) => `/task/${task.Id}`}
                             hasAttachment={(task) => task.Description || (task.Steps && task.Steps.length > 0) || task.AttachedFiles }/>
 			<KanbanSummary a="Summary" />
@@ -1036,17 +1043,17 @@
                 <ComboSource objects={users} key="$ref" name='Name'/>
             </KanbanComboProperty>
 
-            <KanbanTagsProperty bottom a='Tags' 
+            <KanbanTagsProperty bottom a='Tags'
                                 getAllTags={() => allTags}
                                 {onUpdateAllTags}
                                 canChangeColor/>
         </Kanban>
-        
+
         <div class="ml-3 mt-20 mb-10">
-            <a  href={`/tasklist/${listId}?archivedTasks`} 
+            <a  href={`/tasklist/${listId}?archivedTasks`}
                 use:link
                 class="hover:underline">
-                    Show archived tasks 
+                    Show archived tasks
                     <div class="inline-block mt-1.5 w-3 h-3"><FaChevronRight/></div>
             </a>
         </div>
@@ -1086,10 +1093,10 @@
         onCancelCallback={onNewProcessColumnCanceled}
         icon={FaColumns}
         bind:this={addColumnDialog}>
-    
-    <Input  label='Name' 
-        placeholder='' 
-        self={newColumnProps} 
+
+    <Input  label='Name'
+        placeholder=''
+        self={newColumnProps}
         a="name"/>
 
     <section class="mt-2 grid grid-cols-2 gap-2">
@@ -1099,7 +1106,7 @@
                 changed={onNewColumnStateSelected}>
 
             {#each newColumnStates as column}
-                <ComboItem key={column.state} name={column.name}/>    
+                <ComboItem key={column.state} name={column.name}/>
             {/each}
         </Combo>
 
@@ -1110,19 +1117,19 @@
                 {:else}
                     <FaChevronRight/>
                 {/if}
-                
+
             </button>
 
             {#if stateValueVisible}
                 <Input class="inline-block"
-                    label='State value' 
-                    placeholder='' 
-                    self={newColumnProps} 
+                    label='State value'
+                    placeholder=''
+                    self={newColumnProps}
                     a="state"
                     bind:this={numericStateElement}/>
             {/if}
         </div>
-        
+
     </section>
 
 </Modal>
