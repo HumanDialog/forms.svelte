@@ -79,7 +79,8 @@
                     caption: operationsRoot.caption ?? '',
                     icon: operationsRoot.icon ?? FaEllipsisV,
                     menu: allFlatOperations,
-                    tbr: operationsRoot.tbr
+                    tbr: operationsRoot.tbr,
+                    preAction: operationsRoot.preAction ?? undefined
                 }
 
                 switch(operationsRoot.tbr)
@@ -172,11 +173,11 @@
         if(!operation)
             return;
 
-        console.log('on_click', operation, isDisabled)
+        //console.log('on_click', operation, isDisabled)
 
         if(isDisabled)
         {
-            console.log('onClick isDisabled')
+            //console.log('onClick isDisabled')
             e.preventDefault()
             e.stopPropagation()
             return;   
@@ -216,7 +217,7 @@
 
     function mousedown(e, operation)
     {
-        console.log('mousdown', operation)
+        //console.log('mousdown', operation)
         // preventDefault on mousedown avoids focusing the button
         // so it keeps focus (and text selection)
         e.preventDefault()

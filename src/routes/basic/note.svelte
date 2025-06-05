@@ -294,6 +294,7 @@
             opver: 2,
             fab: 'M00',
             tbr: 'C',
+            preAction: description.preventBlur,
             operations: [
                 {
                     caption: 'Note',

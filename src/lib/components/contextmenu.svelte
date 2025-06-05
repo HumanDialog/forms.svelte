@@ -124,13 +124,13 @@
                 let yShifted = false;
                 if(myRect.bottom > screenRect.bottom)
                 {
-                    y = screenRect.bottom - myRect.height-m;
+                    y = screenRect.bottom - myRect.height;
                     if(around)
                     {
                         if(xShifted)    // possible covers around rect
                             x -= around.width;
                         else
-                            y -= around.height-m;
+                            y -= around.height;
                     }
                     yShifted = true;
                 }
@@ -142,7 +142,7 @@
                     y = screenRect.top
             }
 
-            result = `left:${x}px; top:${y}px; display: block`
+            result = `left:${x}px; top:${y}px; display: block; min-width: 15rem`
         }
 
         return result;
@@ -230,7 +230,7 @@
         css_position = calculatePosition(x, y, around_rect, false, false);
 
         window.removeEventListener('click', on_before_window_click, true);
-        menu_root.removeEventListener('click', on_before_container_click, true);
+        menu_root?.removeEventListener('click', on_before_container_click, true);
     }
 
     export function getRenderedRect() :DOMRect | undefined
@@ -293,30 +293,14 @@
 
     function navigate_up()
     {
-        let index = focused_index;
-        while(index > 0 && menu_items.length > 0)
-        {
-            let prev_item = menu_items[--index];
-            if(prev_item)
-            {
-                focus_menu_item(index);
-                break;
-            }
-        }
+        let index = get_this_or_prev_valid_index(focused_index-1);
+        focus_menu_item(index);
     }
 
     function navigate_down()
     {
-        let index = focused_index;
-        while(index+1 < menu_items.length)
-        {
-            let next_item = menu_items[++index];
-            if(next_item)
-            {
-                focus_menu_item(index);
-                break;
-            }
-        }
+        let index = get_this_or_next_valid_index(focused_index+1);
+        focus_menu_item(index); 
     }
 
     function on_change_focus(e)
@@ -403,13 +387,55 @@
 
     }
 
+    function get_this_or_next_valid_index(index: number): number
+    {
+        if(!operations)
+            return 0;
+
+        if(operations.length == 0)
+            return 0;
+
+        if(index >= operations.length)
+            return operations.length-1;
+
+        if(index < 0)
+            return 0;
+
+        const op = operations[index]
+        if(op.separator || op.disabled)
+            return get_this_or_next_valid_index(index+1)
+        else
+            return index;
+    }
+
+    function get_this_or_prev_valid_index(index: number): number
+    {
+        if(!operations)
+            return 0;
+
+        if(operations.length == 0)
+            return 0;
+
+        if(index >= operations.length)
+            return operations.length-1;
+
+        if(index < 0)
+            return 0;
+
+        const op = operations[index]
+        if(op.separator || op.disabled)
+            return get_this_or_prev_valid_index(index-1)
+        else
+            return index;
+    }
+
     function focus_menu_item(index :number)
     {
         const operation = operations[index]
         if(operation.disabled)
             return;
 
-        focused_index = index;
+        focused_index = get_this_or_next_valid_index(index)
         let element :HTMLElement = menu_items[focused_index];
         element.focus();
 
@@ -490,7 +516,7 @@
     class=" bg-white dark:bg-stone-800
             text-stone-800 dark:text-stone-400 rounded-lg border
             border-stone-200 dark:border-stone-700 shadow-md
-            z-30 fixed min-w-[{min_width_px}px] w-max overflow-y-auto"
+            z-30 fixed min-w-60 max-h-screen overflow-y-auto"
     style={css_position}
     bind:this={menu_root}>
 
