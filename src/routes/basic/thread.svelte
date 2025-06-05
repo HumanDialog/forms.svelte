@@ -26,21 +26,21 @@
             } from '$lib'
 	import { afterUpdate, tick } from 'svelte';
     import {location, querystring, push, link} from 'svelte-spa-router'
-    
-    import {FaTimes, FaAlignLeft,FaCheck, FaTag, FaUser, FaCalendarAlt, FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen, 
+
+    import {FaTimes, FaAlignLeft,FaCheck, FaTag, FaUser, FaCalendarAlt, FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen,
         FaCommentMedical, FaRegStar, FaStar, FaPaperPlane, FaPaperclip, FaPlus, FaComment, FaQuoteRight, FaInfo, FaListUl,
         FaImage, FaTable, FaBold, FaItalic, FaUnderline, FaStrikethrough, FaRemoveFormat, FaCode, FaExclamationTriangle
     } from 'svelte-icons/fa/'
-        
+
     import FaBasketPlus from './icons/basket.plus.svelte'
     import FaCommentPlus from './icons/post.plus.svelte'
     import AnswerPost from './thread.answer.svelte'
     import AttachedFile from './attached.file.svelte'
-	
+
     let noteRef = ''
     let note = null;
     let allTags = '';
-   
+
     let attachedFiles = []
     let pendingResizing = false;
     let pendingPosting = false;
@@ -71,7 +71,7 @@
             reef.get('user?fields=$ref,Name,Email', onErrorShowAlert).then((res) => {
                 if(res)
                 {
-                    user = res.User;   
+                    user = res.User;
                 }
             })
         }
@@ -101,7 +101,7 @@
             if(answer)
             {
                 answer?.scrollIntoView(true)
-                scrollToPost = 0   
+                scrollToPost = 0
             }
         }
     })
@@ -110,8 +110,8 @@
     {
         if(!noteRef)
             return;
-        
-        let res = await reef.post(`${noteRef}/query`, 
+
+        let res = await reef.post(`${noteRef}/query`,
                         {
                             Id: 1,
                             Name: "collector",
@@ -121,20 +121,20 @@
                                 {
                                     Id: 1,
                                     Association: '',
-                                    Expressions:[   'Id', 
-                                                    'Index', 
+                                    Expressions:[   'Id',
+                                                    'Index',
                                                     'Title',
-                                            //      'Summary', 
-                                                    'Content', 
+                                            //      'Summary',
+                                                    'Content',
                                                     'CreationDate',
                                                     'ModificationDate',
                                                     'Images',
-                                                    'AttachedFiles', 
-                                                    'Tags', 
-                                                    'Kind', 
-                                                    'State', 
-                                                    '$ref', 
-                                                    '$type', 
+                                                    'AttachedFiles',
+                                                    'Tags',
+                                                    'Kind',
+                                                    'State',
+                                                    '$ref',
+                                                    '$type',
                                                     '$acc'],
                                     SubTree:[
                                         {
@@ -165,7 +165,7 @@
                             ]
                         },
                         onErrorShowAlert)
-        
+
         note = res.Note
 
         if(note.CreationDate)
@@ -189,7 +189,7 @@
                 })
             })
         }
-        
+
         isReadOnly = true; //(note.$acc & 0x2) == 0
 
         postResponses = [];
@@ -215,7 +215,7 @@
     {
         note.Summary = text;
         await reef.post(`${noteRef}/SetSummary`, {val: text}, onErrorShowAlert)
-        
+
     }
     */
 
@@ -236,20 +236,20 @@
         note.Content = content;
         await reef.post(`${noteRef}/SetContent`, {val: content}, onErrorShowAlert)
     }
-    
-    
+
+
     let tags;
     let tagsPlaceholder = false
 
-   
+
     let questionElement;
     let descriptionPlaceholder = false;
-    
+
     let addOperations = [
         /*{
             caption: 'Summary',
-            action: async (f) => 
-                { 
+            action: async (f) =>
+                {
                     if(summary)
                         summary.focus();
                     else
@@ -269,7 +269,7 @@
         {
             caption: 'Tag',
             icon: FaTag,
-            action: async (f) => 
+            action: async (f) =>
                 {
                     if(tags)
                         tags.show();
@@ -281,48 +281,53 @@
                     }
                 }
         },
-        
+
     ];
-    
+
     function getPageOperations()
     {
         return {
             opver: 2,
             fab: 'M00',
+            tbr: 'C',
             operations: [
                 {
                     caption: 'Thread',
-                    tbr: 'B',
+                    //tbr: 'B',
                     operations: [
                         {
                             caption: 'Reply',
                             icon: FaCommentPlus,
                             action: (f) => runAnswerEditor(),
-                            tbr: 'A'
-                        }, 
+                            tbr: 'A',
+                            fab: 'M02'
+
+                        },
                         ... !isReadOnly ? [
                             {
                                icon: FaSave,
                                 action: (f) => saveCurrentEditable(),
-                                tbr: 'A'
+                                tbr: 'A',
+                                fab: 'M03'
                             },
                             {
                                 icon: FaPen,
                                 grid: addOperations,
-                                tbr: 'A'
+                                tbr: 'A',
+                                fab: 'M03'
                             }
                         ] : [],
                         {
                             caption: 'Follow',
                             icon: FaRegStar,        // FaStar
                             action: (f) => {} ,
-                        }, 
+                        },
                         {
                             icon: FaBasketPlus,   // MdLibraryAdd
                             caption: 'Add to Basket',
                             action: (f) => copyTaskToBasket(),
-                            
-                        } 
+
+                        }
                     ]
                 }
             ]
@@ -333,7 +338,7 @@
     {
         await reef.post(`${noteRef}/CopyToBasket`, { } , onErrorShowAlert);
     }
-    
+
 
     function getPageOperationsWithFormattingTools()
     {
@@ -347,7 +352,7 @@
                     operations: [
                         {
                             caption: "Save",
-                            icon: FaSave, 
+                            icon: FaSave,
                             action: (f) => { questionElement?.save() },
                             tbr: 'A'
                         }
@@ -381,7 +386,7 @@
                         {
                             caption: 'Tag',
                             icon: FaTag,
-                            action: async (f) => 
+                            action: async (f) =>
                                 {
                                     if(tags)
                                         tags.show();
@@ -509,7 +514,7 @@
                 }
             ]
         }
-        
+
     }
 
     const descriptionActive = { }
@@ -532,9 +537,9 @@
     let selectedImages = []
     let selectedAttachements = []
     let imgInput;
-    let attInput;   
+    let attInput;
     let imgEditorActionAfterSuccess;
-  
+
     function selectImage(finishEditorCb, mode)
     {
         imgEditorActionAfterSuccess = finishEditorCb;
@@ -542,8 +547,8 @@
 
         imgInput?.click();
     }
-    
-    async function onImageSelected() 
+
+    async function onImageSelected()
     {
         switch(selectImageMode)
         {
@@ -552,7 +557,7 @@
 
         case SELECT_IMAGE_TEMPORARY:
             return await onImageSelected_Temporary();
-        }    
+        }
     }
 
     async function onImageSelected_Temporary()
@@ -560,12 +565,12 @@
         const [file] = imgInput.files;
         if(file)
         {
-            pendingResizing = true 
+            pendingResizing = true
 
             let resizedImage = await resizeImage(file, 1024, 1024)
             if(!resizedImage)
                 resizedImage = file
-            
+
             const selectedImageInfo = {
                 image: resizedImage,
                 name: file.name,
@@ -584,18 +589,18 @@
         const [file] = imgInput.files;
         if(file)
         {
-            pendingUploading = true 
+            pendingUploading = true
 
             let resizedImage = await resizeImage(file, 1024, 1024)
             if(!resizedImage)
                 resizedImage = file
-            
+
             const res = await reef.post(`${noteRef}/Images/blob?name=${file.name}&size=${resizedImage.size}`, {}, onErrorShowAlert)
             if(res && res.key && res.uploadUrl)
             {
                 const newKey = res.key;
                 const uploadUrl = res.uploadUrl
-                
+
                 try
                 {
                     //const res = await new Promise(r => setTimeout(r, 10000));
@@ -609,7 +614,7 @@
                     {
                         // todo: editor path imgPath
                         const dataPath = `${noteRef}/Images/blob?key=${newKey}`
-                            
+
                         //console.log('upload success for ', dataPath)
                         if(imgEditorActionAfterSuccess)
                             imgEditorActionAfterSuccess(dataPath)
@@ -620,7 +625,7 @@
                         console.error(err)
                         onErrorShowAlert(err)
                     }
-                        
+
                 }
                 catch(err)
                 {
@@ -687,14 +692,14 @@
         const [file] = attInput.files;
         if(file)
         {
-            pendingUploading = true 
+            pendingUploading = true
 
             const res = await reef.post(`${noteRef}/AttachedFiles/blob?name=${file.name}&size=${file.size}`, {}, onErrorShowAlert)
             if(res && res.key && res.uploadUrl)
             {
                 const newKey = res.key;
                 const uploadUrl = res.uploadUrl
-                
+
                 try
                 {
                     //const res = await new Promise(r => setTimeout(r, 10000));
@@ -708,7 +713,7 @@
                     {
                         // todo: editor path imgPath
                         /*const dataPath = `${taskRef}/Images/blob?key=${newKey}`
-                            
+
                         //console.log('upload success for ', dataPath)
                         if(imgEditorActionAfterSuccess)
                             imgEditorActionAfterSuccess(dataPath)
@@ -720,7 +725,7 @@
                         console.error(err)
                         onErrorShowAlert(err)
                     }
-                        
+
                 }
                 catch(err)
                 {
@@ -767,8 +772,8 @@
 
             selectedImages = []
             selectedAttachements = []
-            
-            isAnswerEditorLaunched = true;    
+
+            isAnswerEditorLaunched = true;
         }
 
         if(answerElement)
@@ -789,7 +794,7 @@
         }
     }
 
-    
+
     let leaveModal;
     function askLeaveAnswer()
     {
@@ -812,8 +817,8 @@
 
         if(selectedImages.length==0 && selectedAttachements.length==0)
         {
-            const res = await reef.post(`${noteRef}/AddPost`, { 
-                    content: answerNote.Content 
+            const res = await reef.post(`${noteRef}/AddPost`, {
+                    content: answerNote.Content
                 }, onErrorShowAlert)
 
             if(!res)
@@ -824,9 +829,9 @@
         }
         else
         {
-        
+
         //1. create note
-            
+
             const res = await reef.post(`${user.$ref}/AddWorkingPost`, { }, onErrorShowAlert)
             if(!res)
             {
@@ -840,7 +845,7 @@
             for(let i=0; i<selectedImages.length; i++)
             {
                 let imageInfo = selectedImages[i];
-                
+
                 const res = await reef.post(`${answerRef}/Images/blob?name=${imageInfo.name}&size=${imageInfo.image.size}`, {}, onErrorShowAlert)
                 if(res && res.key && res.uploadUrl)
                 {
@@ -858,14 +863,14 @@
 
                         const dataPath = `${answerRef}/Images/blob?key=${newKey}`
                         answerElement.replaceTemporaryImage(imageInfo.url, dataPath)
-                        
+
                         if(!res || !res.ok)
                         {
                             const err = await res.text()
                             console.error(err)
                             onErrorShowAlert(err)
                         }
-                            
+
                     }
                     catch(err)
                     {
@@ -889,7 +894,7 @@
                 {
                     const newKey = res.key;
                     const uploadUrl = res.uploadUrl
-                    
+
                     try
                     {
                         const res = await fetch(uploadUrl, {
@@ -904,7 +909,7 @@
                             console.error(err)
                             onErrorShowAlert(err)
                         }
-                            
+
                     }
                     catch(err)
                     {
@@ -918,9 +923,9 @@
                     // nothing to do
                 }
             }
-            
+
             answerNote.Content = answerElement.getInnerHtml()
-            
+
 
             const res2 = await reef.post(`${noteRef}/AttachPost`, {
                 note: answerRef,
@@ -1116,7 +1121,7 @@
                 }
                 ]
             }
-        
+
 
         activateItem('props', answerNote, operations)
     }
@@ -1162,7 +1167,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex-->
-<Page   self={note} 
+<Page   self={note}
             toolbarOperations={getPageOperations()}
             clearsContext=''
             title={note.Title}>
@@ -1183,8 +1188,8 @@
                                     s='prose'
                                     hasNone={false}
                                     bind:this={onList}>
-                                <ComboSource    objects={allLists} 
-                                                key="$ref" 
+                                <ComboSource    objects={allLists}
+                                                key="$ref"
                                                 name='Name'/>
                             </Combo>
                         {/if}
@@ -1200,7 +1205,7 @@
 
             <h1     class=""
                     use:editable={{
-                        action: (text) => onTitleChanged(text), 
+                        action: (text) => onTitleChanged(text),
                         active: true,
                         readonly: isReadOnly}}
                         tabindex="0">
@@ -1220,10 +1225,10 @@
                         {note.Summary}
                     </p>
                 {/key}
-                
+
            {/if}
            -->
-            
+
             <section class="w-full flex flex-row flex-wrap justify-between">
                 <div class="grow-0">
                     {#if note.CreatedBy}
@@ -1235,7 +1240,7 @@
                 <div>
                     <!--
                     {#if availableStates && availableStates.length > 0}
-                        <Combo  compact={true} 
+                        <Combo  compact={true}
                                 inContext='data'
                                 a='State'
                                 icon
@@ -1243,7 +1248,7 @@
                                 hasNone={false}
                                 s='prose'>
                             <ComboSource    objects={availableStates}
-                                            key="state" 
+                                            key="state"
                                             name="name"
                                             icon="icon"/>
                         </Combo>
@@ -1267,8 +1272,8 @@
                     {/if}
                 </div>
             </section>
-            
-            
+
+
             {#if attachedFiles && attachedFiles.length > 0}
                 <p>
                     {#each attachedFiles as fileInfo (fileInfo.name)}
@@ -1276,8 +1281,8 @@
                     {/each}
                 </p>
             {/if}
-                
-                <hr/>    
+
+                <hr/>
                 <Editor     readOnly={isReadOnly}
                             a='Content'
                             compact={true}
@@ -1287,7 +1292,7 @@
                             onBlurCb={() => deactivateFormattingToolsIfNeeded()}
                             onAddImage={(editorCB) => selectImage(editorCB, SELECT_IMAGE_DIRECT)}
                             onRemoveImage={(url) => removeImage(url, SELECT_IMAGE_DIRECT)}/>
-            
+
             {#if postResponses}
                 {#each postResponses as post}
                     <hr id="__hd_thread_answer_{post.Id}"/>
@@ -1302,7 +1307,7 @@
                         <section class="w-full flex flex-row justify-between">
                             <div class="grow-0">
                                 {#if user}
-                                    <h2 class="font-semibold"> 
+                                    <h2 class="font-semibold">
                                         {user.Name}
                                     </h2>
                                 {/if}
@@ -1316,7 +1321,7 @@
 
                         <Editor
                                 self={answerNote}
-                                a='Content' 
+                                a='Content'
                                 compact
                                 bind:this={answerElement}
                                 onChange={onAnswerEdit}
@@ -1335,52 +1340,52 @@
                                                 border rounded border-stone-300 dark:border-stone-600
                                                 text-xs">
                                         {att.name}
-                                    </span>    
+                                    </span>
                                 {/each}
 
                                 <button class="w-3 h-3 mt-0.5" on:click={clearAttachements}>
                                     <FaTimes/>
                                 </button>
-                                
+
                             {/if}
-                            
+
                         </p>
-                        
+
                         <section class="flex flex-row justify-end mr-2 ml-2 mb-1 gap-2">
-                            <button type="button" 
+                            <button type="button"
                                     class="
-                                    py-2.5 px-4 
-                                    text-sm font-thin text-stone-700 dark:text-stone-300 dark:hover:text-white 
+                                    py-2.5 px-4
+                                    text-sm font-thin text-stone-700 dark:text-stone-300 dark:hover:text-white
                                     hover:bg-stone-200 dark:hover:bg-stone-900 active:bg-stone-200 dark:active:bg-stone-600
                                     border border-stone-300 focus:outline-none dark:border-stone-600
                                     flex items-center rounded"
                                     on:click={(e) => {askLeaveAnswer()}}>
                                 <span class="ml-1">Cancel</span>
-                                
+
                             </button>
-                            <button type="button" 
+                            <button type="button"
                                     class="
-                                    py-2.5 px-4 
-                                    text-sm font-thin text-stone-700 dark:text-stone-300 dark:hover:text-white 
+                                    py-2.5 px-4
+                                    text-sm font-thin text-stone-700 dark:text-stone-300 dark:hover:text-white
                                     hover:bg-stone-200 dark:hover:bg-stone-900 active:bg-stone-200 dark:active:bg-stone-600
                                     border border-stone-300 focus:outline-none dark:border-stone-600
                                     flex items-center rounded"
                                     on:click={(e) => {postAnswer()}}>
                                 <div class="w-5 h-5 mr-1"><FaPaperPlane/></div>
                                 <span class="ml-2">Publish</span>
-                                
+
                             </button>
                         </section>
-                        
+
                     </div>
                 </div>
             {:else}
                 {#if !mobile}
                     <section class="mt-20 flex flex-row justify-end mr-2 ml-2 mb-1 gap-2">
-                        <button type="button" 
+                        <button type="button"
                                 class="
-                                py-2.5 px-4 
-                                text-sm 
+                                py-2.5 px-4
+                                text-sm
                                 text-stone-700 dark:text-stone-300 dark:hover:text-white
                                 hover:bg-stone-200 dark:hover:bg-stone-800
                                 border border-stone-300 focus:outline-none dark:border-stone-600
@@ -1389,14 +1394,14 @@
                                 >
                             <div class="w-5 h-5 mr-1"><FaCommentPlus/></div>
                             <span class="ml-2">Reply</span>
-                            
+
                         </button>
                     </section>
                 {/if}
             {/if}
 
         </article>
-        
+
     </section>
 
     <input hidden type="file" id="imageFile" accept="image/*" bind:this={imgInput} on:change={onImageSelected}/>
@@ -1405,17 +1410,17 @@
 {/if}
 
 <Modal title='Preparing...' bind:open={pendingResizing} mode={3} icon={FaCloudUploadAlt}>
-    <Spinner delay={0}/> 
+    <Spinner delay={0}/>
     <span class="ml-3">Your image is preparing</span>
 </Modal>
 
 <Modal title='Uploading...' bind:open={pendingUploading} mode={3} icon={FaCloudUploadAlt}>
-    <Spinner delay={0}/> 
+    <Spinner delay={0}/>
     <span class="ml-3">Your file is uploading to the server</span>
 </Modal>
 
 <Modal title='Posting...' bind:open={pendingPosting} mode={3} icon={FaCloudUploadAlt}>
-    <Spinner delay={0}/> 
+    <Spinner delay={0}/>
     <span class="ml-3">Your post is saved on the server</span>
 </Modal>
 

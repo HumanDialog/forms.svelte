@@ -23,14 +23,14 @@
 	import { onMount, tick } from 'svelte';
     import {location, querystring, push, link} from 'svelte-spa-router'
     import TaskSteps from './task.steps.svelte'
-    import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont, 
-        FaPen, FaList, FaTimes, FaCopy, FaCut,  FaFileDownload, FaImage, FaTable, FaPaperclip, FaBold, FaItalic, 
+    import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont,
+        FaPen, FaList, FaTimes, FaCopy, FaCut,  FaFileDownload, FaImage, FaTable, FaPaperclip, FaBold, FaItalic,
         FaUnderline, FaStrikethrough, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle, FaInfo,
         FaListUl
     } from 'svelte-icons/fa/'
     import FaBasketPlus from './icons/basket.plus.svelte'
 	import AttachedFile from './attached.file.svelte'
-	
+
     let taskRef = ''
     let task = null;
     let allTags = '';
@@ -40,7 +40,7 @@
     let pendingUploading = false;
 
     let attachedFiles = []
-    
+
     let isReadOnly = false;
     const s = session;
 
@@ -76,7 +76,7 @@
                                         Association: 'Members/User',
                                         Expressions:['$ref', 'Name']
                                     }
-                                ]                    
+                                ]
                             },
                             onErrorShowAlert
                         )
@@ -89,8 +89,8 @@
     {
         if(!taskRef)
             return;
-        
-        let res = await reef.post(`${taskRef}/query`, 
+
+        let res = await reef.post(`${taskRef}/query`,
                         {
                             Id: 1,
                             Name: "collector",
@@ -122,7 +122,7 @@
                             ]
                         },
                         onErrorShowAlert)
-        
+
         task = res.Task
         if(task.TaskList?.TaskStates)
         {
@@ -172,7 +172,7 @@
     {
         task.Summary = text;
         await reef.post(`${taskRef}/set`, {Summary: text}, onErrorShowAlert)
-        
+
     }
 
     async function onUpdateAllTags(newAllTags)
@@ -200,7 +200,7 @@
             task.Steps.forEach(s => {
                 if(s.Order > maxOrder)
                     maxOrder = s.Order;});
-            
+
             newStep.Order = maxOrder + 64;
         }
         else
@@ -224,13 +224,13 @@
     {
         const taskStep = task.Steps[idx];
         taskStep.Label = txt;
-        await reef.post(`${taskRef}/Steps/${taskStep.Id}/set`, { Label: txt}, onErrorShowAlert) 
+        await reef.post(`${taskRef}/Steps/${taskStep.Id}/set`, { Label: txt}, onErrorShowAlert)
     }
 
     async function onRemoveStep(idx)
     {
         const taskStep = task.Steps[idx];
-        await reef.delete(`${taskRef}/Steps/${taskStep.Id}`, onErrorShowAlert) 
+        await reef.delete(`${taskRef}/Steps/${taskStep.Id}`, onErrorShowAlert)
         await reloadData();
     }
 
@@ -241,7 +241,7 @@
         await reef.post(`${taskRef}/Steps/${taskStep.Id}/set`, {Done: value}, onErrorShowAlert)
     }
 
-    function getPageOperationsWithStepTools(step) 
+    function getPageOperationsWithStepTools(step)
     {
         let checkOperation;
         if(step.Done)
@@ -250,8 +250,8 @@
                 {
                     caption: 'Undo',
                     icon: FaUndo,
-                    action: async (f) => 
-                    {  
+                    action: async (f) =>
+                    {
                         await setStepDone( false, step)
                         activateItem('props', step, getPageOperationsWithStepTools(step))
                     },
@@ -265,8 +265,8 @@
                 {
                     caption: 'Done',
                     icon: FaCheck,
-                    action: async (f) => 
-                    {  
+                    action: async (f) =>
+                    {
                         await setStepDone( true, step)
                         activateItem('props', step, getPageOperationsWithStepTools(step))
                     },
@@ -288,7 +288,7 @@
                             hideToolbarCaption: true,
                             icon: FaSave,
                             action: (f) => saveCurrentEditable(),
-                            //fab: 'S00',
+                            fab: 'T02',
                             tbr: 'A'
                         },
                         {
@@ -296,15 +296,15 @@
                             hideToolbarCaption: true,
                             icon: FaPen,
                             grid: addOperations,
-                       //     fab: 'M10',
+                            fab: 'M10',
                             tbr: 'A'
                         },
                         {
                             caption: 'Add to basket',
                             icon: FaBasketPlus,   // MdLibraryAdd
                             action: (f) => copyTaskToBasket(),
-                        //    fab: 'M04',
-                        //    tbr: 'A'
+                            fab: 'M04',
+                            tbr: 'A', hideToolbarCaption: true
 
                         }
                     ]
@@ -332,7 +332,7 @@
 
     let summary;
     let summaryPlaceholder = false;
-    
+
     let dueDate;
     let dueDatePlaceholder = false
 
@@ -350,12 +350,12 @@
 
     let description;
     let descriptionPlaceholder = false;
-    
+
     let addOperations = [
         {
             caption: 'Summary',
-            action: async (f) => 
-                { 
+            action: async (f) =>
+                {
                     if(summary)
                         summary.focus();
                     else
@@ -368,7 +368,7 @@
         },
     /*    {
             caption: 'List',
-            action: async (f) => 
+            action: async (f) =>
                 {
                     if(onList)
                         onList.show();
@@ -383,7 +383,7 @@
         {
             caption: 'Due Date',
             icon: FaCalendarAlt,
-            action: async (f) => 
+            action: async (f) =>
                 {
                     if(dueDate)
                         dueDate.show();
@@ -401,7 +401,7 @@
         {
             caption: 'Responsible',
             icon: FaUser,
-            action: async (f) => 
+            action: async (f) =>
                 {
                     if(responsible)
                         responsible.show();
@@ -413,7 +413,7 @@
                     }
                 }
         },
-        
+
         {
             caption: 'Tag',
             icon: FaTag,
@@ -422,14 +422,14 @@
         {
             caption: 'Step',
             icon: FaCheck,
-            action: async (f) => 
+            action: async (f) =>
                 {
                     if(steps)
                         steps.run();
                     else
                     {
                         stepsPlaceholder = true;
-                        
+
                         if(task.Steps == undefined)
                             task.Steps = []
 
@@ -449,7 +449,7 @@
         {
             caption: 'Description',
             icon: FaAlignLeft,
-            action: async (f) => 
+            action: async (f) =>
                 {
                     if(description)
                         description.run();
@@ -461,26 +461,27 @@
                     }
                 }
         }
-        
+
     ];
-    
-   
+
+
     function getPageOperations()
     {
         return {
             opver: 2,
             fab: 'M00',
+            tbr: 'C',
             operations: [
                 {
                     caption: 'Task',
-                    tbr: 'B',
+                    //tbr: 'B',
                     operations: [
                         {
                             caption: "Save",
                             hideToolbarCaption: true,
                             icon: FaSave,
                             action: (f) => saveCurrentEditable(),
-                            //fab: 'S00',
+                            fab: 'T02',
                             tbr: 'A'
                         },
                         {
@@ -488,16 +489,16 @@
                             hideToolbarCaption: true,
                             icon: FaPen,
                             grid: addOperations,
-                       //     fab: 'M10',
+                            fab: 'M10',
                             tbr: 'A'
                         },
-                        
+
                         {
                             caption: 'Add to basket',
                             icon: FaBasketPlus,   // MdLibraryAdd
                             action: (f) => copyTaskToBasket(),
-                        //    fab: 'M04',
-                        //    tbr: 'A'
+                            fab: 'M04',
+                            tbr: 'A',hideToolbarCaption: true
 
                         },
                     ]
@@ -505,19 +506,20 @@
             ]
         }
     }
-    
+
 
     function getPageOperationsWithFormattingTools()
     {
         const mobile = isDeviceSmallerThan("sm")
-        
+
         return {
             opver: 2,
             fab: 'M00',
+            tbr: 'C',
             operations: [
                 {
                     caption: 'Task',
-                    tbr: 'B',
+                    //tbr: 'B',
                     operations: [
                         {
                             caption: "Save",
@@ -533,9 +535,9 @@
                             icon: FaPen,
                             grid: addOperations,
                        //     fab: 'M10',
-                            tbr: 'A'
+                        //    tbr: 'A'
                         },
-                        
+
                         {
                             caption: 'Add to basket',
                             icon: FaBasketPlus,   // MdLibraryAdd
@@ -548,7 +550,7 @@
                 },
                 {
                     caption: 'Insert',
-                    tbr: 'B',
+                    //tbr: 'B',
                     preAction: description.preventBlur,
                     operations: [
                         {
@@ -581,7 +583,7 @@
                 },
                 {
                     caption: 'Text',
-                    tbr: 'B',
+                    //tbr: 'B',
                     preAction: description.preventBlur,
                     operations: [
                         {
@@ -605,8 +607,7 @@
                             icon: FaUnderline,
                             action: (f) => description.setUnderline(),
                             activeFunc: description.isActiveUnderline,
-                            tbr: 'A',
-                            hideToolbarCaption: true
+                            tbr: 'A', hideToolbarCaption: true
                         },
                         {
                             caption: 'Strikethrough',
@@ -618,68 +619,57 @@
                 },
                 {
                     caption: 'Styles',
-                    tbr: 'B',
+                    //tbr: 'B',
                     preAction: description.preventBlur,
                     operations: [
                         {
                             caption: 'Normal',
                             icon: FaRemoveFormat,
+                            tbr: 'A', hideToolbarCaption: true,
                             action: (f) => description.setNormal(),
                             activeFunc: description.isActiveNormal,
                         },
                         {
                             caption: 'Heading 1',
                             icon: IcH1,
+                            tbr: 'A', hideToolbarCaption: true,
                             action: (f) => description.setHeading(1),
                             activeFunc: () => description.isActiveHeading(1)
                         },
                         {
                             caption: 'Heading 2',
                             icon: IcH2,
+                            tbr: 'A', hideToolbarCaption: true,
                             action: (f) => description.setHeading(2),
                             activeFunc: () => description.isActiveHeading(2)
                         },
                         {
                             caption: 'Heading 3',
                             icon: IcH3,
+                            tbr: 'A', hideToolbarCaption: true,
                             action: (f) => description.setHeading(3),
                             activeFunc: () => description.isActiveHeading(3)
                         },
                         {
                             caption: 'Heading 4',
                             icon: IcH4,
+                            tbr: 'A', hideToolbarCaption: true,
                             action: (f) => description.setHeading(4),
                             activeFunc: () => description.isActiveHeading(4)
                         },
                         {
                             caption: 'Code',
                             icon: FaCode,
+                            tbr: 'A', hideToolbarCaption: true,
                             action: (f) => description.setCode(),
                             activeFunc: description.isActiveCode,
                         },
                         {
-                            caption: 'Comment',
-                            icon: FaComment,
-                            action: (f) => description.setComment(),
-                            activeFunc: description.isActiveComment,
-                        },
-                        {
                             caption: 'Quote',
                             icon: FaQuoteRight,
+                            tbr: 'A', hideToolbarCaption: true,
                             action: (f) => description.setQuote(),
                             activeFunc: description.isActiveQuote,
-                        },
-                        {
-                            caption: 'Warning',
-                            icon: FaExclamationTriangle,
-                            action: (f) => description.setWarning(),
-                            activeFunc: description.isActiveWarning,
-                        },
-                        {
-                            caption: 'Info',
-                            icon: FaInfo,
-                            action: (f) => description.setInfo(),
-                            activeFunc: description.isActiveInfo,
                         },
                         {
                             caption: 'BulletList',
@@ -693,12 +683,12 @@
                 }
             ]
         }
-        
+
     }
 
     const extraPaletteCommands = [
         {
-            caption: 'Save',           
+            caption: 'Save',
             icon: FaSave,
             action: () => description?.save(),
         },
@@ -741,24 +731,24 @@
         imgEditorActionAfterSuccess = editorActionAfterSuccess;
         imgInput?.click();
     }
-    
+
     async function onImageSelected()
     {
         const [file] = imgInput.files;
         if(file)
         {
-            pendingUploading = true 
+            pendingUploading = true
 
             let resizedImage = await resizeImage(file, 1024, 1024)
             if(!resizedImage)
                 resizedImage = file
-            
+
             const res = await reef.post(`${taskRef}/Images/blob?name=${file.name}&size=${resizedImage.size}`, {}, onErrorShowAlert)
             if(res && res.key && res.uploadUrl)
             {
                 const newKey = res.key;
                 const uploadUrl = res.uploadUrl
-                
+
                 try
                 {
                     //const res = await new Promise(r => setTimeout(r, 10000));
@@ -772,7 +762,7 @@
                     {
                         // todo: editor path imgPath
                         const dataPath = `${taskRef}/Images/blob?key=${newKey}`
-                            
+
                         //console.log('upload success for ', dataPath)
                         if(imgEditorActionAfterSuccess)
                             imgEditorActionAfterSuccess(dataPath)
@@ -783,7 +773,7 @@
                         console.error(err)
                         onErrorShowAlert(err)
                     }
-                        
+
                 }
                 catch(err)
                 {
@@ -808,8 +798,8 @@
         await reef.post(`${taskRef}/CopyToBasket`, { } , onErrorShowAlert);
     }
 
-    
-    
+
+
 
     let attInput;
     function runFileAttacher()
@@ -822,14 +812,14 @@
         const [file] = attInput.files;
         if(file)
         {
-            pendingUploading = true 
+            pendingUploading = true
 
             const res = await reef.post(`${taskRef}/AttachedFiles/blob?name=${file.name}&size=${file.size}`, {}, onErrorShowAlert)
             if(res && res.key && res.uploadUrl)
             {
                 const newKey = res.key;
                 const uploadUrl = res.uploadUrl
-                
+
                 try
                 {
                     //const res = await new Promise(r => setTimeout(r, 10000));
@@ -843,7 +833,7 @@
                     {
                         // todo: editor path imgPath
                         /*const dataPath = `${taskRef}/Images/blob?key=${newKey}`
-                            
+
                         //console.log('upload success for ', dataPath)
                         if(imgEditorActionAfterSuccess)
                             imgEditorActionAfterSuccess(dataPath)
@@ -855,7 +845,7 @@
                         console.error(err)
                         onErrorShowAlert(err)
                     }
-                        
+
                 }
                 catch(err)
                 {
@@ -896,7 +886,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex-->
-<Page   self={task} 
+<Page   self={task}
             toolbarOperations={getPageOperations()}
             clearsContext=''
             title={task.Title}>
@@ -922,11 +912,11 @@
                                     s='prose'
                                     hasNone={false}
                                     bind:this={onList}>
-                                <ComboSource    objects={allLists} 
-                                                key="$ref" 
+                                <ComboSource    objects={allLists}
+                                                key="$ref"
                                                 name='Name'/>
                             </Combo-->
-                        {/if} 
+                        {/if}
                     </div>
                     <div>
                         {#if task.DueDate || dueDatePlaceholder}
@@ -942,7 +932,7 @@
 
             <h1     class=""
                     use:editable={{
-                        action: (text) => onTitleChanged(text), 
+                        action: (text) => onTitleChanged(text),
                         active: true,
                         readonly: isReadOnly}}
                         tabindex="0">
@@ -961,13 +951,13 @@
                         {task.Summary}
                     </p>
                 {/key}
-                
+
             {/if}
-            
+
             <section class="w-full flex flex-row flex-wrap justify-between">
                 <div class="grow-0">
                     {#if task.Actor || responsiblePlaceholder}
-                        <Combo  compact={true} 
+                        <Combo  compact={true}
                                 inContext='data'
                                 a='Actor'
                                 isAssociation
@@ -975,10 +965,10 @@
                                 placeholder='Responsible'
                                 s='prose'
                                 hasNone
-                                changed={(k,n) => { /*fake assignment for component rer-ender*/ task.Actor = task.Actor; }} 
+                                changed={(k,n) => { /*fake assignment for component rer-ender*/ task.Actor = task.Actor; }}
                                 bind:this={responsible}>
                             <ComboSource    objects={allActors}
-                                            key="$ref" 
+                                            key="$ref"
                                             name='Name'/>
                         </Combo>
                     {/if}
@@ -986,7 +976,7 @@
 
                 <div>
                     {#if availableStates && availableStates.length > 0}
-                        <Combo  compact={true} 
+                        <Combo  compact={true}
                                 inContext='data'
                                 a='State'
                                 icon
@@ -994,7 +984,7 @@
                                 hasNone={false}
                                 s='prose'>
                             <ComboSource    objects={availableStates}
-                                            key="state" 
+                                            key="state"
                                             name="name"
                                             icon="icon"/>
                         </Combo>
@@ -1021,9 +1011,9 @@
                 {/each}
             </p>
             {/if}
-            
-            
-            
+
+
+
             {#if (task.Steps && task.Steps.length > 0) || stepsPlaceholder}
                 <TaskSteps steps={task.Steps}
                                 a='Label'
@@ -1035,9 +1025,9 @@
                                 onUnselect={onUnselectStep}
                                 bind:this={steps}/>
             {/if}
-                
+
             {#if task.Description || descriptionPlaceholder}
-                <hr/>    
+                <hr/>
                 <Editor   a='Description'
                             compact={true}
                             bind:this={description}
@@ -1051,9 +1041,9 @@
             {/if}
 
         </article>
-        
-        
-        
+
+
+
     </section>
 
     <input hidden type="file" id="imageFile" accept="image/*" bind:this={imgInput} on:change={onImageSelected}/> <!-- capture="environment" -->
@@ -1062,7 +1052,6 @@
 {/if}
 
 <Modal title='Uploading...' bind:open={pendingUploading} mode={3} icon={FaCloudUploadAlt}>
-    <Spinner delay={0}/> 
+    <Spinner delay={0}/>
     <span class="ml-3">Your file is uploading to the server</span>
 </Modal>
-
