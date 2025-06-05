@@ -79,7 +79,8 @@
                     caption: operationsRoot.caption ?? '',
                     icon: operationsRoot.icon ?? FaEllipsisV,
                     menu: allFlatOperations,
-                    tbr: operationsRoot.tbr
+                    tbr: operationsRoot.tbr,
+                    preAction: operationsRoot.preAction ?? undefined
                 }
 
                 switch(operationsRoot.tbr)
@@ -166,10 +167,21 @@
         hasOperations = leftOperations.length > 0 || rightOperations.length > 0
     }
 
-    function on_click(e, operation)
+    function on_click(e, operation, isDisabled)
     {
+        
         if(!operation)
             return;
+
+        //console.log('on_click', operation, isDisabled)
+
+        if(isDisabled)
+        {
+            //console.log('onClick isDisabled')
+            e.preventDefault()
+            e.stopPropagation()
+            return;   
+        }
 
         let owner = e.target;
         while(owner && owner.tagName != 'BUTTON')
@@ -203,11 +215,13 @@
 
     }
 
-    function mousedown(e)
+    function mousedown(e, operation)
     {
+        //console.log('mousdown', operation)
         // preventDefault on mousedown avoids focusing the button
         // so it keeps focus (and text selection)
         e.preventDefault()
+        e.stopPropagation();
     }
 
     function isOperationActivated(operation)
@@ -217,29 +231,40 @@
         else
             return operation.active ?? false;
     }
+
+    function isOperationDisabled(operation)
+    {
+        if(operation.disabledFunc)
+            return operation.disabledFunc();
+        else
+            return operation.disabled ?? false;
+    }
 </script>
 
 {#if hasOperations}
-<section class="flex flex-row no-print h-10 bg-stone-50 dark:bg-stone-950 overflow-x-clip overflow-y-scroll py-0 text-xs whitespace-nowrap">
+<section class="flex flex-row no-print h-10 bg-stone-50 dark:bg-stone-950 overflow-x-hidden overflow-y-clip py-0 text-xs whitespace-nowrap">
     <div    class="flex flex-row"
             class:flex-row-reverse={mobile}>
 
         {#each leftOperations as operation}
             {#if !operation.separator}
                 {@const isActive=isOperationActivated(operation)}
+                {@const isDisabled=isOperationDisabled(operation)}
                 {#if operation.toolbox}
                     {#each operation.toolbox as operation}
+                        {@const textColor= isDisabled ? 'text-stone-600 dark:text-stone-500' : 'text-stone-800 dark:text-stone-300 dark:hover:text-white '}
                         <button type="button"
                                 class="py-2.5 px-1
                                 text-xs font-thin
-                                text-stone-800 hover:bg-stone-700 active:bg-stone-300 border-stone-200
-                                dark:text-stone-300 dark:hover:text-white dark:hover:bg-stone-800 dark:active:bg-stone-600 dark:border-stone-600
+                                {textColor}
+                                hover:bg-stone-700 active:bg-stone-300 border-stone-200
+                                dark:hover:bg-stone-800 dark:active:bg-stone-600 dark:border-stone-600
                                 focus:outline-none
                                 inline-flex items-center"
                                 class:bg-stone-700={isActive}
                                 class:dark:bg-stone-800={isActive}
-                                on:click={(e) => {on_click(e, operation)}}
-                                on:mousedown={mousedown}>
+                                on:mousedown={(e) => mousedown(e, operation)}
+                                on:click={(e) => {on_click(e, operation, isDisabled)}}>
                             {#if operation.icon}
                                 <div class="w-5 h-5 mr-1"><svelte:component this={operation.icon}/></div>
                             {/if}
@@ -249,18 +274,27 @@
                         </button>
                     {/each}
                 {:else}
+                    {@const enabledLightColors ='text-stone-600 hover:text-stone-800 hover:bg-stone-200 active:bg-stone-200 border-stone-200'}
+                    {@const disabledLightColors ='text-stone-400 border-stone-200'}
+
+                    {@const enabledDarkColors ='dark:text-stone-300 dark:hover:text-white dark:hover:bg-stone-800 dark:active:bg-stone-600 dark:border-stone-600'}
+                    {@const disabledDarkColors ='dark:text-stone-500 dark:border-stone-600'}
+                    
+                    {@const disabledColors =`${disabledLightColors} ${disabledDarkColors}`}
+                    {@const enabledColors =`${enabledLightColors} ${enabledDarkColors}`}
+                    {@const colors = isDisabled ? disabledColors : enabledColors}
 
                     <button type="button"
                             class="py-2.5 px-2
                             text-xs font-thin
-                            text-stone-600 hover:text-stone-800 hover:bg-stone-200 active:bg-stone-200 border-stone-200
-                            dark:text-stone-300 dark:hover:text-white dark:hover:bg-stone-800 dark:active:bg-stone-600 dark:border-stone-600
                             focus:outline-none
-                            inline-flex items-center"
+                            inline-flex items-center
+                            {colors}"
                             class:bg-stone-700={isActive}
                             class:dark:bg-stone-800={isActive}
-                            on:click={(e) => {on_click(e, operation)}}
-                            on:mousedown={mousedown}>
+                            disabled={isDisabled}
+                            on:mousedown={(e) => mousedown(e, operation)}
+                            on:click={(e) => {on_click(e, operation, isDisabled)}}>
                         {#if operation.icon}
                             <div class="w-5 h-5 mr-1"><svelte:component this={operation.icon}/></div>
                         {/if}
@@ -280,17 +314,29 @@
         {#each rightOperations as operation}
             {#if !operation.separator}
             {@const isActive=isOperationActivated(operation)}
+            {@const isDisabled=isOperationDisabled(operation)}
+
+            {@const enabledLightColors ='text-stone-600 hover:text-stone-800 hover:bg-stone-200 active:bg-stone-200 border-stone-200'}
+            {@const disabledLightColors ='text-stone-400 border-stone-200'}
+
+            {@const enabledDarkColors ='dark:text-stone-300 dark:hover:text-white dark:hover:bg-stone-800 dark:active:bg-stone-600 dark:border-stone-600'}
+            {@const disabledDarkColors ='dark:text-stone-500 dark:border-stone-600'}
+            
+            {@const disabledColors =`${disabledLightColors} ${disabledDarkColors}`}
+            {@const enabledColors =`${enabledLightColors} ${enabledDarkColors}`}
+            {@const colors = isDisabled ? disabledColors : enabledColors}
+
                 <button type="button"
                         class="py-2.5 px-4
                         text-xs font-thin
-                        text-stone-600 hover:text-stone-800 hover:bg-stone-200 active:bg-stone-200 border-stone-200
-                        dark:text-stone-300 dark:hover:text-white dark:hover:bg-stone-800 dark:active:bg-stone-600 dark:border-stone-600
+                        {colors}
                         focus:outline-none
                         inline-flex items-center"
                         class:bg-stone-700={isActive}
                         class:dark:bg-stone-800={isActive}
-                        on:click={(e) => {on_click(e, operation)}}
-                        on:mousedown={mousedown}>
+                        disabled={isDisabled}
+                        on:mousedown={(e) => mousedown(e, operation)}
+                        on:click={(e) => {on_click(e, operation, isDisabled)}}>
                     {#if operation.icon}
                         <div class="w-5 h-5 mr-1"><svelte:component this={operation.icon}/></div>
                     {/if}

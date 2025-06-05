@@ -462,8 +462,8 @@
                             </span>
                         </h4>
 
-                        <p class="whitespace-pre-wrap">
-                            {message.Text}
+                        <p class="break-words">
+                            {@html message.Text}
                             {#if notesNo>0 || tasksNo>0}
                             <br>
                             <span class="text-xs whitespace-normal">
@@ -521,7 +521,7 @@
 
                 <p   class="w-full min-h-40 bg-stone-50 dark:bg-stone-800 outline-none
                             overflow-x-clip text-wrap break-words"
-                            bind:innerText={newMessageContent}
+                            bind:innerHTML={newMessageContent}
                             contenteditable="true"
 
                             placeholder="Type new message"

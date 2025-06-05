@@ -973,6 +973,7 @@
         {
             last_tick = $data_tick_store + 1;
             $data_tick_store = last_tick;
+            refreshToolbarOperations();
         }
     }
 
@@ -1468,6 +1469,11 @@
     {
         if(editor.isFocused)
             lockNextBlurCallbacks++;
+    }
+
+    export function hasChanged()
+    {
+        return hasChangedValue
     }
 
 
