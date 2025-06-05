@@ -114,10 +114,10 @@
                 operations: [
                     {
                         icon: FaPlus,
-                        caption: 'Add Personal Folder',
+                        caption: 'New Personal Folder',
                         //hideToolbarCaption: true,
                         action: (focused) => { listComponent.addRowAfter(null) },
-                        //fab: 'M10',
+                        fab: 'M01',
                         tbr: 'A'
                     }
                 ]
@@ -137,25 +137,19 @@
         return {
             opver: 2,
             fab: 'M00',
+            tbr: 'C',
             operations: [
                 {
                     caption: 'Folder',
-                    tbr: 'B',
+                    //tbr: 'B',
                     operations: [
-                        {
-                            icon: FaPlus,
-                            caption: 'Add',
-                            hideToolbarCaption: true,
-                            action: (focused) => { listComponent.addRowAfter(folder) },
-                            //fab: 'M10',
-                            tbr: 'A'
-                        },
+
                         {
                             caption: 'Move up',
                             hideToolbarCaption: true,
                             icon: FaCaretUp,
                             action: (f) => listComponent.moveUp(folder),
-                          //  fab:'M03',
+                            fab:'M03',
                             tbr:'A'
                         },
                         {
@@ -163,15 +157,18 @@
                             hideToolbarCaption: true,
                             icon: FaCaretDown,
                             action: (f) => listComponent.moveDown(folder),
-                            //fab:'M02',
+                            fab:'M02',
                             tbr:'A'
                         },
                         {
-                            caption: 'Change name',
+                            caption: 'Edit name',
+                            icon: FaPen,
+                            fab: 'M20',
+                            tbr: 'A',hideToolbarCaption: true,
                             action: (f) =>  { listComponent.edit(folder, 'Title') }
                         },
                         {
-                            caption: 'Change summary',
+                            caption: 'Edit summary',
                             action: (f) =>  { listComponent.edit(folder, 'Summary') }
                         },
                     /*    {
@@ -190,10 +187,18 @@
                         },
                     */    {
                             caption: 'Delete',
-                            icon: FaTrash,
+                            //icon: FaTrash,
                             action: (f) => askToDelete(folder),
                             //fab:'M30',
                             //tbr:'B'
+                        },
+                        {
+                            icon: FaPlus,
+                            caption: 'New Personal Folder',
+                            hideToolbarCaption: true,
+                            action: (focused) => { listComponent.addRowAfter(folder) },
+                            //fab: 'M10',
+                            tbr: 'A'
                         }
                     ]
                 }

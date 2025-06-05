@@ -362,7 +362,7 @@
         {
             pinOperation = {
                 caption: 'Unpin folder',
-                icon: FaStar, //aRegShareSquare, //
+                //icon: FaStar, //aRegShareSquare, //
                 action: async (f) => {
                     await toggleFolderPinned(contextItem);
                     // refreshing operations
@@ -371,7 +371,7 @@
                         UI.navigator.refresh()
                     },
                 //fab: 'S00',
-                tbr: 'C',
+                //tbr: 'C',
                 hideToolbarCaption: true
             }
         }
@@ -388,7 +388,7 @@
                         UI.navigator.refresh()
                 },
                 //fab: 'S00',
-                tbr: 'C',
+                //tbr: 'C',
                 hideToolbarCaption: true
             }
         }
@@ -415,10 +415,10 @@
                         },
                         {
                             caption: 'Refresh',
-                            icon: FaSync,
+                            //icon: FaSync,
                             action: async (f) => await refreshView(),
                         //    fab: 'S10',
-                            tbr: 'C',
+                            //tbr: 'C',
                             hideToolbarCaption: true
                         }
                     ]
@@ -438,28 +438,28 @@
                     icon: FaRegFolder,
                     action: (f) => { subfoldersComponent.addRowAfter(null) },
                     tbr: 'A',
-                    fab: 'M40'
+                    fab: 'M03'
                 },
                 {
                     caption: 'New note',
                     icon: FaRegFile,
                     action: (f) => { notesComponent.addRowAfter(null) },
                     tbr: 'A',
-                    fab: 'M20'
+                    fab: 'M02'
                 },
                 {
                     caption: 'New task',
                     icon: FaRegCircle,
                     action: (f) => { tasksComponent.addRowAfter(null) },
                     tbr: 'A',
-                    fab: 'M30'
+                    fab: 'M01'
                 },
                 {
                     separator: true
                 },
                 {
-                    caption: 'Attach...',
-                    icon: FaShoppingBasket, //FaLink, //aRegShareSquare, //
+                    caption: 'Add elements from Basket',
+                    //icon: FaShoppingBasket, //FaLink, //aRegShareSquare, //
                     toolbar: BasketPreview,
                     props: {
                         destinationContainer: contextItem.$ref,
@@ -487,10 +487,10 @@
                         pinOp(),
                         {
                             caption: 'Refresh',
-                            icon: FaSync,
+                            //icon: FaSync,
                             action: async (f) => await refreshView(),
                             //fab: 'S10',
-                            tbr: 'C',
+                            //tbr: 'C',
                             hideToolbarCaption: true
                         }
                     ]
@@ -585,18 +585,18 @@
                         caption: kind,
                         operations: [
                             {
-                                caption: 'Move down',
-                                icon: FaCaretDown,
-                                action: (f) => list.moveDown(element),
-                                fab:'M02',
+                                caption: 'Move up',
+                                icon: FaCaretUp,
+                                action: (f) => list.moveUp(element),
+                                fab:'M05',
                                 tbr:'A',
                                 hideToolbarCaption: true
                             },
                             {
-                                caption: 'Move up',
-                                icon: FaCaretUp,
-                                action: (f) => list.moveUp(element),
-                                fab:'M03',
+                                caption: 'Move down',
+                                icon: FaCaretDown,
+                                action: (f) => list.moveDown(element),
+                                fab:'M04',
                                 tbr:'A',
                                 hideToolbarCaption: true
                             },
@@ -632,7 +632,7 @@
                                 caption: 'Edit',
                                 icon: FaPen,
                                 tbr: 'A',
-                                fab:'M04',
+                                fab:'M20',
                                 //action: (focused) =>  { listComponent(kind).edit(element, 'Title') },
                                 grid:[
                                     {
@@ -652,7 +652,7 @@
                                 caption: 'Move up',
                                 icon: FaCaretUp,
                                 action: (f) => list.moveUp(element),
-                                fab:'M03',
+                                fab:'M05',
                                 tbr:'A',
                                 hideToolbarCaption: true
                             },
@@ -660,7 +660,7 @@
                                 caption: 'Move down',
                                 icon: FaCaretDown,
                                 action: (f) => list.moveDown(element),
-                                fab:'M02',
+                                fab:'M04',
                                 tbr:'A' ,
                                 hideToolbarCaption: true
                             },
@@ -669,13 +669,13 @@
                                 icon: FaBasketPlus, //FaCopy,   // MdLibraryAdd
                                 action: (f) => copyElementToBasket(element, kind),
                                 hideToolbarCaption: true,
-                                //fab: 'M04',
+                                fab: 'S10',
                                 tbr: 'A'
 
                             },
                             {
                                 caption: 'Move to Basket',
-                                icon: FaBasketCut, //FaCut,
+                            //    icon: FaBasketCut, //FaCut,
                                 action: (f) => cutElementToBasket(element, kind),
                                 hideToolbarCaption: true
                             //    fab: 'M05',
@@ -691,7 +691,7 @@
                             },
                             {
                                 caption: 'Delete permanently',
-                                icon: FaTrash,
+                             //   icon: FaTrash,
                                 action: (f) => askToDelete(element, kind)
                             }
                         ]
@@ -718,7 +718,7 @@
                                 caption: `Add ${kind}`,
                                 icon: FaPlus,
                                 action: (f) => { list.addRowAfter(element) },
-                            //    fab:'M10',
+                                fab:'M10',
                                 tbr:'A',
                             },
                             {
@@ -726,6 +726,7 @@
                                 icon: FaPen,
                                 action: (focused) =>  { listComponent(kind).edit(element, 'Title') },
                                 tbr:'A' ,
+                                fab:'M20',
                                 hideToolbarCaption: true
                             },
                             {
@@ -733,32 +734,32 @@
                                 action: (focused) =>  { listComponent(kind).edit(element, 'Summary') }
                             },
                             {
-                                caption: 'Move down',
-                                icon: FaCaretDown,
-                                action: (f) => list.moveDown(element),
-                                //fab:'M02',
-                                tbr:'A' ,
-                                hideToolbarCaption: true
-                            },
-                            {
                                 caption: 'Move up',
                                 icon: FaCaretUp,
                                 action: (f) => list.moveUp(element),
-                                //fab:'M03',
+                                fab:'M05',
                                 tbr:'A',
+                                hideToolbarCaption: true
+                            },
+                            {
+                                caption: 'Move down',
+                                icon: FaCaretDown,
+                                action: (f) => list.moveDown(element),
+                                fab:'M04',
+                                tbr:'A' ,
                                 hideToolbarCaption: true
                             },
                             {
                                 caption: 'Add to Basket',
                                 icon: FaBasketPlus, //FaCopy,   // MdLibraryAdd
                                 action: (f) => copyElementToBasket(element, kind),
-                                //fab: 'M04',
+                                fab: 'S10',
                                 tbr: 'A'
 
                             },
                             {
                                 caption: 'Move to Basket',
-                                icon: FaBasketCut, //FaCut,
+                                //icon: FaBasketCut, //FaCut,
                                 action: (f) => cutElementToBasket(element, kind),
                             //    fab: 'M05',
                             //    tbr: 'A'
@@ -811,32 +812,32 @@
                                 action: (focused) =>  { listComponent(kind).edit(element, 'Summary') }
                             },
                             {
-                                caption: 'Move down',
-                                icon: FaCaretDown,
-                                action: (f) => list.moveDown(element),
-                                //fab:'M02',
-                                tbr:'A' ,
-                                hideToolbarCaption: true
-                            },
-                            {
                                 caption: 'Move up',
                                 icon: FaCaretUp,
                                 action: (f) => list.moveUp(element),
-                                //fab:'M03',
+                                fab:'M05',
                                 tbr:'A',
+                                hideToolbarCaption: true
+                            },
+                            {
+                                caption: 'Move down',
+                                icon: FaCaretDown,
+                                action: (f) => list.moveDown(element),
+                                fab:'M04',
+                                tbr:'A' ,
                                 hideToolbarCaption: true
                             },
                             {
                                 caption: 'Add to Basket',
                                 icon: FaBasketPlus, //FaCopy,   // MdLibraryAdd
                                 action: (f) => copyElementToBasket(element, kind),
-                                //fab: 'M04',
+                                fab: 'S10',
                                 tbr: 'A'
 
                             },
                             {
                                 caption: 'Move to Basket',
-                                icon: FaBasketCut, //FaCut,
+                                //icon: FaBasketCut, //FaCut,
                                 action: (f) => cutElementToBasket(element, kind),
                             //    fab: 'M05',
                             //    tbr: 'A'

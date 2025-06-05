@@ -260,7 +260,7 @@
                         },
                         {
                             caption: 'Attach...',
-                            icon: FaShoppingBasket, //FaLink, //aRegShareSquare, //
+                            //icon: FaShoppingBasket, //FaLink, //aRegShareSquare, //
                             toolbar: BasketPreview,
                             props: {
                                 destinationContainer: listPath,
@@ -270,8 +270,8 @@
                       //      tbr: 'A'
                         },
                         {
-                            icon: FaRandom,
-                            caption: 'Change kind',
+                            //icon: FaRandom,
+                            caption: 'Change task list kind',
                             action: changeListKind,
                         //    fab: 'S02',
                         //    tbr: 'C'
@@ -505,10 +505,11 @@
         return {
             opver: 2,
             fab: 'M00',
+            tbr: 'C',
             operations: [
                 {
                     caption: 'Task',
-                    tbr: 'B',
+                    //tbr: 'B',
                     operations: [
                         {
                             caption: 'Edit...',
@@ -539,7 +540,7 @@
                                     action: (f) => { kanban.edit(task, 'Tags') }
                                 }
                             ],
-                            fab: 'M10',
+                            fab: 'M20',
                             tbr: 'A',
                             hideToolbarCaption: true
                         },
@@ -577,34 +578,36 @@
                         } ],
                         {
                             icon: FaBasketPlus, // FaCopy,   // MdLibraryAdd
-                            caption: 'Add to basket',
+                            caption: 'Add to Basket',
                             action: (f) => copyTaskToBasket(task),
-                            //fab: 'M04',
-                            //tbr: 'B'
+                            fab: 'S10',
+                            tbr: 'A', hideToolbarCaption: true
 
                         },
                         ... (task.State == STATE_FINISHED) ? [] : [
                                 {
                                     caption: 'Finish',
                                     icon: FaCheck,
-                                    action: (f) => finishTask(task)
+                                    action: (f) => finishTask(task),
+                                    fab: 'S20',
+                                    tbr: 'A', hideToolbarCaption: true
                                 }
                         ],
                         {
                             caption: 'Archive',
-                            icon: FaArchive,
+                            //icon: FaArchive,
                             action: (f) => askToArchive(task)
                         },
                         {
                             caption: 'Delete',
-                            icon: FaTrash,
+                            //icon: FaTrash,
                             action: (f) => askToDelete(task)
                         }
                     ]
                 },
                 {
-                    caption: "View",
-                    tbr: 'B',
+                    caption: 'View',
+                    //tbr: 'B',
                     operations:[
                         {
                             caption: 'New Task',
@@ -616,7 +619,7 @@
                         },
                         {
                             caption: 'Attach...',
-                            icon: FaShoppingBasket, //FaLink, //aRegShareSquare, //
+                            //icon: FaShoppingBasket, //FaLink, //aRegShareSquare, //
                             toolbar: BasketPreview,
                             props: {
                                 destinationContainer: listPath,
@@ -626,8 +629,8 @@
                            // tbr: 'A'
                         },
                         {
-                            icon: FaRandom,
-                            caption: 'Change kind',
+                            //icon: FaRandom,
+                            caption: 'Change task list kind',
                             action: changeListKind,
                         //    fab: 'S02',
                         //    tbr: 'C'
@@ -638,7 +641,7 @@
                 ... isOutOfStates ? [] : [
                 {
                     caption: 'Column',
-                    tbr: 'B',
+                    //tbr: 'B',
                     operations: getColumnContextMenu(columnIdx, undefined, !mobile)
                 }]
 
@@ -652,8 +655,8 @@
     {
         return [
             {
-                caption: inColumnContext ? 'Edit name' : 'Edit column name',
-                icon: FaPen, //inColumnContext ? FaPen : undefined,
+                caption: 'Edit column name',
+                //icon: FaPen, //inColumnContext ? FaPen : undefined,
                 action: (f) => kanban.editColumnName(columnIdx)
             },
             /*{
@@ -662,18 +665,18 @@
                 action: (f) => setColumnAsFinishing(columnIdx)
             },*/
             {
-                caption: inColumnContext ? 'Move left' : 'Move column left',
-                icon: FaCaretLeft, //inColumnContext ? FaCaretLeft : undefined,
+                caption: 'Move column left',
+                //icon: FaCaretLeft, //inColumnContext ? FaCaretLeft : undefined,
                 action: (f) => onColumnMoveLeft(columnIdx)
             },
             {
-                caption: inColumnContext ? 'Move right' : 'Move column right',
-                icon: FaCaretRight, //inColumnContext ? FaCaretRight : undefined,
+                caption: 'Move column right',
+                //icon: FaCaretRight, //inColumnContext ? FaCaretRight : undefined,
                 action: (f) => onColumnMoveRight(columnIdx)
             },
             {
-                caption: inColumnContext ? 'Delete' : 'Delete column',
-                icon: FaTrash, //inColumnContext ? FaTrash : undefined,
+                caption:  'Delete column',
+                //icon: FaTrash, //inColumnContext ? FaTrash : undefined,
                // menu: getColumnDeleteOptions(columnIdx, taskState)
                action: (f) => deleteColumnAndSetCardsState(columnIdx, 0)
             },
@@ -682,7 +685,7 @@
             },
             {
                 caption: 'Add column',
-                icon: FaPlus, //inColumnContext ? FaPlus : undefined,
+                //icon: FaPlus, //inColumnContext ? FaPlus : undefined,
                 action: (f) => addColumn("", columnIdx+1)
             }
         ];
@@ -696,33 +699,34 @@
         return {
             opver: 2,
             fab: 'M00',
+            tbr: 'C',
             operations: [
                 {
                     caption: 'View',
-                    tbr: 'B',
+                    //tbr: 'B',
                     operations: [
                         {
                             caption: 'New Task',
                             icon: FaPlus,
                             action: (f) => kanban.add(KanbanColumnBottom, columnIdx),
-                            //fab: 'M10',
+                            fab: 'M01',
                             tbr: 'A',
                             hideToolbarCaption: true
                         },
                         {
                             caption: 'Attach...',
-                            icon: FaShoppingBasket, //FaLink, //aRegShareSquare, //
+                            //icon: FaShoppingBasket, //FaLink, //aRegShareSquare, //
                             toolbar: BasketPreview,
                             props: {
                                 destinationContainer: listPath,
                                 onRefreshView: (f) => reload(kanban.KEEP_SELECTION)
                             },
-                           // fab: 'M01',
+                            //fab: 'M01',
                            // tbr: 'A'
                         },
                         {
-                            icon: FaRandom,
-                            caption: 'Change kind',
+                            //icon: FaRandom,
+                            caption: 'Change task list kind',
                             action: changeListKind,
                         //    fab: 'S02',
                         //    tbr: 'C'
@@ -732,7 +736,7 @@
                 },
                 {
                     caption: 'Column',
-                    tbr: 'B',
+                    //tbr: 'B',
                     operations: getColumnContextMenu(columnIdx, taskState, !mobile)
                 }
             ]

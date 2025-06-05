@@ -374,12 +374,12 @@
                 {@const position = calculatePosition(operation)}
                 {#if position}
                     <button
-                        class="text-stone-700 bg-stone-300/70 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300
-                                font-medium rounded-full text-sm text-center shadow-md
+                        class="text-stone-500 bg-stone-200/70 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300
+                                font-medium rounded-full text-sm text-center
                                 w-[30px] h-[30px]
                                 fixed m-0
-                                dark:text-stone-400
-                                dark:bg-stone-700/50 dark:hover:bg-blue-700 dark:focus:ring-blue-800
+                                dark:text-stone-500
+                                dark:bg-stone-700/80 dark:hover:bg-blue-700 dark:focus:ring-blue-800
                                 flex items-center justify-center
                                 disable-dbl-tap-zoom
                                 cursor-pointer z-40"

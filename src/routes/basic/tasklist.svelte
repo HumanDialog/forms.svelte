@@ -1,8 +1,8 @@
 <script>
     import {reef, session} from '@humandialog/auth.svelte'
-    import {    Spinner, 
-                Page, 
-                Icon, 
+    import {    Spinner,
+                Page,
+                Icon,
                 ComboSource,
                 List,
                 ListTitle,
@@ -14,7 +14,7 @@
                 Modal,
                 onErrorShowAlert, showMenu,
 				UI} from '$lib'
-    import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaColumns, FaArchive, FaList, 
+    import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaColumns, FaArchive, FaList,
         FaEllipsisH, FaChevronRight, FaChevronLeft, FaRandom, FaShoppingBasket
     } from 'svelte-icons/fa'
     import {location, pop, push, querystring, link} from 'svelte-spa-router'
@@ -32,13 +32,13 @@
     let assocName = 'Tasks'
     let assocFilter = ''
     let listTitle = ''
-    
+
     let users = [];
 
     const STATE_FINISHED = 7000;
-    
+
     $: onParamsChanged($location, $querystring, $mainContentPageReloader);
-    
+
     async function onParamsChanged(...args)
     {
         const segments = $location.split('/');
@@ -58,7 +58,7 @@
                                         Id: 1,
                                         Association: 'Members/User'
                                     }
-                                ]                    
+                                ]
                             },
                             onErrorShowAlert
                         ).then((res) => {
@@ -66,8 +66,8 @@
                                 users = res.User;
                         })
         }
-        
-        
+
+
         if(!segments.length)
             listId = 1;
         else
@@ -88,7 +88,7 @@
             assocName = 'Tasks'
             assocFilter = ''
         }
-        
+
         //currentList = null
 
         const cacheKey = `tasklist/${listId}`
@@ -102,7 +102,7 @@
             return;
 
         currentList = readList
-        
+
         if(currentList)
         {
             if(!isArchivedTasks)
@@ -131,7 +131,7 @@
         listComponent?.reload(currentList, listComponent.KEEP_SELECTION);
     }
 
-    async function readListItem() 
+    async function readListItem()
     {
         let res = await reef.post(`${listPath}/query`,
                             {
@@ -178,7 +178,7 @@
     async function fetchData()
     {
         currentList = await readListItem();
-        
+
         if(currentList)
         {
             if(!isArchivedTasks)
@@ -193,7 +193,7 @@
         await fetchData();
         listComponent.reload(currentList, selectRecommendation);
     }
-    
+
 
     let deleteModal;
     let taskToDelete;
@@ -203,7 +203,7 @@
         deleteModal.show()
     }
 
-    
+
     async function deleteTask()
     {
         if(!taskToDelete)
@@ -213,7 +213,7 @@
         await reef.post(`${taskToDelete.$ref}/DeletePermanently`, { } , onErrorShowAlert);
         deleteModal.hide();
 
-        
+
         await reloadTasks(listComponent.SELECT_NEXT)
     }
 
@@ -232,7 +232,7 @@
 
         await reef.post(`${taskToArchive.$ref}/Archive`, {}, onErrorShowAlert)
         archiveModal.hide();
-        
+
         await reloadTasks(listComponent.SELECT_NEXT)
     }
 
@@ -243,7 +243,7 @@
 
         let result = await reef.post(`${task.$ref}/Finish`, {}, onErrorShowAlert);
         if(result)
-            await reloadTasks(listComponent.KEEP_OR_SELECT_NEXT)   
+            await reloadTasks(listComponent.KEEP_OR_SELECT_NEXT)
     }
 
     async function addTask(newTaskAttribs)
@@ -267,22 +267,23 @@
         return {
             opver: 2,
             fab: 'M00',
+            tbr: 'C',
             operations: [
                 {
                     caption: 'View',
-                    tbr: 'B',
+                    //tbr: 'B',
                     operations: [
                         {
-                            caption: 'Add',
+                            caption: 'New task',
                             icon: FaPlus,
                             action: (f) => { listComponent.addRowAfter(null) },
-                            //fab: 'M10',
+                            fab: 'M01',
                             tbr: 'A',
                             hideToolbarCaption: true
                         },
                         {
-                            caption: 'Attach...',
-                            icon: FaShoppingBasket, //FaLink, //aRegShareSquare, // 
+                            caption: 'Add tasks from Basket',
+                            //icon: FaShoppingBasket, //FaLink, //aRegShareSquare, //
                             toolbar: BasketPreview,
                             props: {
                                 destinationContainer: listPath,
@@ -292,8 +293,8 @@
                       //      tbr: 'A'
                         },
                         {
-                            icon: FaRandom,
-                            caption: 'Change kind',
+                            //icon: FaRandom,
+                            caption: 'Change Task List kind',
                             action: changeListKind,
                         //    fab: 'S02',
                         //    tbr: 'C'
@@ -302,9 +303,9 @@
                 }
             ]
         }
-        
-       
-        
+
+
+
     }
 
     async function switchToKanban()
@@ -313,55 +314,24 @@
         push(`/listboard/${listId}`);
     }
 
-      
-    
+
+
 
     let taskOperations = (task) => {
         return {
             opver: 2,
             fab: 'M00',
+            tbr: 'C',
             operations: [
                 {
-                    caption: 'View',
-                    tbr: 'B',
-                    operations: [
-                        {
-                            caption: 'Add',
-                            icon: FaPlus,
-                            action: (f) => { listComponent.addRowAfter(task) },
-                         //   fab: 'M10',
-                            tbr: 'A',
-                            hideToolbarCaption: true
-                        },
-                        {
-                            caption: 'Attach...',
-                            icon: FaShoppingBasket, //FaLink, //aRegShareSquare, // 
-                            toolbar: BasketPreview,
-                            props: {
-                                destinationContainer: listPath,
-                                onRefreshView: (f) => istComponent?.reload(currentList, listComponent.KEEP_SELECTION)
-                            },
-                      //      fab: 'M01',
-                      //      tbr: 'A'
-                        },
-                        {
-                            icon: FaRandom,
-                            caption: 'Change kind',
-                            action: changeListKind,
-                        //    fab: 'S02',
-                        //    tbr: 'C'
-                        }
-                    ]
-                },
-                {
                     caption: 'Task',
-                    tbr: 'B',
+                    //tbr: 'B',
                     operations: [
                         {
                             caption: 'Edit...',
                             hideToolbarCaption: true,
                             icon: FaPen,
-                        //    fab: 'M20',
+                            fab: 'M20',
                             tbr: 'A',
                             grid: [
                                 {
@@ -390,7 +360,7 @@
                             caption: 'Move up',
                             icon: FaCaretUp,
                             action: (f) => listComponent.moveUp(task),
-                            //fab: 'M03',
+                            fab: 'M03',
                             tbr: 'A',
                             hideToolbarCaption: true
                         },
@@ -398,22 +368,55 @@
                             caption: 'Move down',
                             icon: FaCaretDown,
                             action: (f) => listComponent.moveDown(task),
-                            //fab: 'M02',
+                            fab: 'M02',
                             tbr: 'A',
                             hideToolbarCaption: true
                         },
                         {
-                            icon: FaArchive,
-                            caption: 'Archive',
+                            //icon: FaArchive,
+                            caption: 'Archive task',
                             action: (f) => askToArchive(task)
                         },
                         {
-                            icon: FaTrash,
-                            caption: 'Delete',
+                            //icon: FaTrash,
+                            caption: 'Delete task',
                             action: (f) => askToDelete(task)
                         }
                     ]
+                },
+                {
+                    caption: 'View',
+                    //tbr: 'B',
+                    operations: [
+                        {
+                            caption: 'New task',
+                            icon: FaPlus,
+                            action: (f) => { listComponent.addRowAfter(task) },
+                            fab: 'M01',
+                            tbr: 'A',
+                            hideToolbarCaption: true
+                        },
+                        {
+                            caption: 'Add tasks from Basket',
+                        //    icon: FaShoppingBasket, //FaLink, //aRegShareSquare, //
+                            toolbar: BasketPreview,
+                            props: {
+                                destinationContainer: listPath,
+                                onRefreshView: (f) => istComponent?.reload(currentList, listComponent.KEEP_SELECTION)
+                            },
+                      //      fab: 'M01',
+                      //      tbr: 'A'
+                        },
+                        {
+                            //icon: FaRandom,
+                            caption: 'Change Task List kind',
+                            action: changeListKind,
+                        //    fab: 'S02',
+                        //    tbr: 'C'
+                        }
+                    ]
                 }
+
             ]
         }
     }
@@ -443,7 +446,7 @@
         let prevKind = 0;
 
         listTypes.forEach(template => {
-            
+
             //if(prevKind != template.Kind)
             //    menuOperations.push({separator: true})
             //prevKind = template.Kind
@@ -485,13 +488,13 @@
         let newHref = await reef.post(`${listPath}/ChangeListKind`, {
             template: changeListTo
         }, onErrorShowAlert)
-        
+
         changeListTo = null
 
         if(!newHref)
             return null;
 
-        push(newHref) 
+        push(newHref)
         if(UI.navigator)
             UI.navigator.refresh();
     }
@@ -507,15 +510,15 @@
 </svelte:head>
 
 {#if currentList}
-    <Page   self={currentList} 
+    <Page   self={currentList}
             toolbarOperations={ getPageOperations() }
             clearsContext='props sel'
             title={listTitle}>
             <section class="w-full place-self-center max-w-3xl">
-        <List   self={currentList} 
+        <List   self={currentList}
                 a={assocName}
-                title={listTitle} 
-                toolbarOperations={taskOperations} 
+                title={listTitle}
+                toolbarOperations={taskOperations}
                 orderAttrib='ListOrder'
                 bind:this={listComponent}>
             <ListTitle a='Title' hrefFunc={(task) => `/task/${task.Id}`}/>
@@ -530,27 +533,27 @@
 
             <span slot="left" let:element>
                 {#if element.State == STATE_FINISHED}
-                    <Icon component={FaRegCheckCircle} 
+                    <Icon component={FaRegCheckCircle}
                     class="h-5 w-5  text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
-                      
+
                 {:else}
-                    <Icon component={FaRegCircle} 
-                        on:click={(e) => finishTask(e, element)} 
+                    <Icon component={FaRegCircle}
+                        on:click={(e) => finishTask(e, element)}
                         class="h-5 w-5  text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
-                    
+
                 {/if}
             </span>
 
-            
+
         </List>
     </section>
         {#if !isArchivedTasks}
             {#if !isArchivedList}
                 <div class="ml-3 mt-20 mb-10">
-                    <a  href={`/tasklist/${listId}?archivedTasks`} 
+                    <a  href={`/tasklist/${listId}?archivedTasks`}
                         class="hover:underline"
                         use:link>
-                            Show archived tasks 
+                            Show archived tasks
                             <div class="inline-block mt-1.5 w-3 h-3"><FaChevronRight/></div>
                     </a>
                 </div>
@@ -559,7 +562,7 @@
             <div class="ml-3 mt-20  mb-10">
                 <button on:click={(e) => pop() }>
                     <div class="inline-block mt-1.5 w-3 h-3"><FaChevronLeft/></div>
-                    Back 
+                    Back
                 </button>
 
             </div>
