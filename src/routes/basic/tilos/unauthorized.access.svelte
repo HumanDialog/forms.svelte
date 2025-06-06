@@ -24,7 +24,7 @@
             </h1>
 
             <p class="lead">
-                You want to see content that is available disabled for logged-in users. 
+                Want to see content that is only available to signed-in users.  
             </p>
 
             <p>

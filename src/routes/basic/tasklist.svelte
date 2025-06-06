@@ -34,6 +34,7 @@
     let listTitle = ''
 
     let users = [];
+    let usersComboSource;
 
     const STATE_FINISHED = 7000;
 
@@ -64,6 +65,7 @@
                         ).then((res) => {
                             if(res)
                                 users = res.User;
+                                usersComboSource?.updateObjects(users);
                         })
         }
 
@@ -526,7 +528,7 @@
             <ListInserter action={addTask} icon/>
 
             <ListComboProperty  name="Actor" association hasNone>
-                <ComboSource objects={users} key="$ref" name='Name'/>
+                <ComboSource objects={users} key="$ref" name='Name' bind:this={usersComboSource}/>
             </ListComboProperty>
 
             <ListDateProperty name="DueDate"/>
