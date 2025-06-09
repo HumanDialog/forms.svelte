@@ -14,7 +14,7 @@
                 Modal,
                 onErrorShowAlert, showMenu,
 				UI} from '$lib'
-    import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaColumns, FaArchive, FaList,
+    import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaList,
         FaEllipsisH, FaChevronRight, FaChevronLeft, FaRandom, FaShoppingBasket
     } from 'svelte-icons/fa'
     import {location, pop, push, querystring, link} from 'svelte-spa-router'
@@ -536,11 +536,11 @@
 
             <span slot="left" let:element>
                 {#if element.State == STATE_FINISHED}
-                    <Icon component={FaRegCheckCircle}
+                    <Icon component={FaRegCalendarCheck}
                     class="h-5 w-5  text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
 
                 {:else}
-                    <Icon component={FaRegCircle}
+                    <Icon component={FaRegCalendar}
                         on:click={(e) => finishTask(e, element)}
                         class="h-5 w-5  text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
 
