@@ -12,7 +12,7 @@
 	import { afterUpdate, tick } from 'svelte';
     import {location, link, querystring} from 'svelte-spa-router'
 
-    import {FaShoppingBasket, FaArrowCircleRight, FaTimes, FaRegFile, FaRegCircle, FaPaperPlane, FaRegStar, FaStar} from 'svelte-icons/fa/'
+    import {FaShoppingBasket, FaArrowCircleRight, FaTimes, FaRegFile, FaRegCalendar, FaPaperPlane, FaRegStar, FaStar} from 'svelte-icons/fa/'
     import BasketPreview from './basket.preview.svelte'
 
     let channelRef = ''
@@ -490,7 +490,7 @@
                                                         use:link
                                                         >
                                                     <span class="inline-block w-3 h-3">
-                                                        <FaRegCircle/>
+                                                        <FaRegCalendar/>
                                                     </span>
                                                     {att.Title}
                                                 </a>

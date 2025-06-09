@@ -4,7 +4,7 @@
         onErrorShowAlert, Icon,
         List, ListTitle, ListSummary, Spinner
     }   from '$lib'
-    import {FaRegFolder, FaRegFile, FaRegCircle, FaRegCheckCircle} from 'svelte-icons/fa'
+    import {FaRegFolder, FaRegFile, FaRegCalendarCheck, FaRegCalendar} from 'svelte-icons/fa'
 	import { afterUpdate, onMount } from "svelte";
 	import { push } from "svelte-spa-router";
 
@@ -14,10 +14,10 @@
     export let onRefreshView = undefined
     export let onAttach = undefined
     export let onAttachAndClear = undefined
-    
+
     let basketItem;
     let basketEntriesNo = 0
-    
+
     const STATE_FINISHED = 7000;
 
     let reloadTicket = -1
@@ -49,21 +49,21 @@
                                                 Association: 'Folders',
                                                 Sort: 'Order',
                                                 Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'IsPinned']
-                                                
+
                                             },
                                             {
                                                 Id: 3,
                                                 Association: 'Notes',
                                                 Sort: 'Order',
                                                 Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href']
-                                                
+
                                             },
                                             {
                                                 Id: 4,
                                                 Association: 'Tasks',
                                                 Sort: 'Order',
                                                 Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'href']
-                                                
+
                                             }
                                         ]
                                     }
@@ -71,10 +71,10 @@
                             },
                             onErrorShowAlert);
         if(res)
-        {    
+        {
             basketItem = res.Folder;
             basketEntriesNo = 0;
-            
+
             if(basketItem.Folders && basketItem.Folders.length > 0)
                 basketEntriesNo += basketItem.Folders.length;
 
@@ -107,7 +107,7 @@
 
     let rootElement;
     let prevHeight = 0
-    afterUpdate( () => 
+    afterUpdate( () =>
     {
         if(rootElement)
         {
@@ -130,7 +130,7 @@
             push(basketItem.href)
     }
 
-    async function attachTo() 
+    async function attachTo()
     {
         if(onHide)
             onHide();
@@ -146,7 +146,7 @@
             if(res)
             {
                 if(onRefreshView)
-                    onRefreshView(res);        
+                    onRefreshView(res);
             }
         }
 
@@ -168,7 +168,7 @@
             if(res)
             {
                 if(onRefreshView)
-                    onRefreshView(res);        
+                    onRefreshView(res);
             }
         }
     }
@@ -185,8 +185,8 @@
                     <p>Basket is empty</p>
                 </div>
             {/if}
-        
-            <List   self={basketItem} 
+
+            <List   self={basketItem}
                     a='Folders'
                     orderAttrib='Order'
                     bind:this={foldersElement}>
@@ -194,12 +194,12 @@
                 <ListSummary a='Summary'/>
 
                 <span slot="left" let:element>
-                    <Icon component={FaRegFolder} 
+                    <Icon component={FaRegFolder}
                         class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
                 </span>
             </List>
-        
-            <List   self={basketItem} 
+
+            <List   self={basketItem}
                     a='Notes'
                     orderAttrib='Order'
                     bind:this={notesElement}>
@@ -207,12 +207,12 @@
                 <ListSummary a='Summary'/>
 
                 <span slot="left" let:element>
-                    <Icon component={FaRegFile} 
+                    <Icon component={FaRegFile}
                         class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
                 </span>
             </List>
-        
-            <List   self={basketItem} 
+
+            <List   self={basketItem}
                     a='Tasks'
                     orderAttrib='Order'
                     bind:this={tasksElement}>
@@ -221,68 +221,68 @@
 
                 <span slot="left" let:element>
                     {#if element.State == STATE_FINISHED}
-                        <Icon component={FaRegCheckCircle} 
+                        <Icon component={FaRegCalendarCheck}
                         class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
-                        
+
                     {:else}
-                        <Icon component={FaRegCircle}  
+                        <Icon component={FaRegCalendar}
                             class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
-                        
+
                     {/if}
                 </span>
             </List>
-        
+
         </div>
 
         <!-- Footer -->
-        
+
             <div class="mt-2 flex flex-row justify-stretch gap-2">
-                <button class=" py-2.5 px-5 
-                                text-base sm:text-xs font-medium 
+                <button class=" py-2.5 px-5
+                                text-base sm:text-xs font-medium
                                 bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400
                                 hover:bg-stone-200 hover:dark:bg-stone-600
                                 disabled:bg-white/60 disabled:dark:bg-stone-700/60
-                                border rounded 
+                                border rounded
                                 border-stone-200 dark:border-stone-600 focus:outline-none
                                 disabled:border-stone-200/60 disabled:dark:border-stone-600/60
                                 inline-flex items-center justify-center"
                                 disabled={!basketItem}
                                 on:click={() => editBasket()}>
-                        
+
                     Edit
                 </button>
 
-                <button class=" py-2.5 px-5 
-                                text-base sm:text-xs font-medium 
+                <button class=" py-2.5 px-5
+                                text-base sm:text-xs font-medium
                                 bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400
                                 hover:bg-stone-200 hover:dark:bg-stone-600
                                 disabled:bg-white/60 disabled:dark:bg-stone-700/60
-                                border rounded 
+                                border rounded
                                 border-stone-200 dark:border-stone-600 focus:outline-none
                                 disabled:border-stone-200/60 disabled:dark:border-stone-600/60
                                 inline-flex items-center justify-center"
                                 disabled={!basketEntriesNo}
                                 on:click={() => attachTo()}>
-                        
+
                     Attach
                 </button>
 
-                <button class=" py-2.5 px-5 
-                                text-base sm:text-xs font-medium 
+                <button class=" py-2.5 px-5
+                                text-base sm:text-xs font-medium
                                 bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400
                                 hover:bg-stone-200 hover:dark:bg-stone-600
                                 disabled:bg-white/60 disabled:dark:bg-stone-700/60
-                                border rounded 
+                                border rounded
                                 border-stone-200 dark:border-stone-600 focus:outline-none
                                 disabled:border-stone-200/60 disabled:dark:border-stone-600/60
                                 inline-flex items-center justify-center"
                                 disabled={!basketEntriesNo}
                                 on:click={() => attachToAndClear()}>
-                        
+
                     Attach and clear
                 </button>
             </div>
-        
+
     {:else}
         <Spinner delay={3000}/>
     {/if}

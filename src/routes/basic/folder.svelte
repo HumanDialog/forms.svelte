@@ -15,8 +15,15 @@
                 onErrorShowAlert,
 				activateItem, UI,
 				showFloatingToolbar} from '$lib'
-    import {FaRegFile, FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaColumns, FaArchive, FaSync,
+    import {FaRegFile, FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaSync,
         FaList, FaEllipsisH, FaChevronRight, FaChevronLeft, FaRegShareSquare, FaLink, FaUnlink, FaRegStar, FaStar, FaShoppingBasket, FaCopy, FaCut} from 'svelte-icons/fa'
+
+        import {FaEdit} from 'svelte-icons/fa'
+        import FaHighlighter from 'svelte-icons/fa/FaHighlighter.svelte'
+
+        import MdContentCopy from 'svelte-icons/md/MdContentCopy.svelte'
+        import MdContentCut from 'svelte-icons/md/MdContentCut.svelte'
+
     import {location, pop, push, querystring} from 'svelte-spa-router'
     import BasketPreview from './basket.preview.svelte'
     import FaBasketPlus from './icons/basket.plus.svelte'
@@ -47,7 +54,7 @@
         if(foundIdx < 0)
             return;
 
-        
+
 
 
         if(!segments.length)
@@ -55,7 +62,7 @@
         else
             contextItemId = parseInt(segments[segments.length-1])
 
-        
+
         contextItem = null
         contextPath = `/Folder/${contextItemId}`
 
@@ -451,7 +458,7 @@
                 },
                 {
                     caption: 'New task',
-                    icon: FaRegCircle,
+                    icon: FaRegCalendar,
                     action: (f) => { tasksComponent.addRowAfter(null) },
                     tbr: 'A',
                     fab: 'M01'
@@ -952,11 +959,11 @@
 
                 <span slot="left" let:element>
                     {#if element.State == STATE_FINISHED}
-                        <Icon component={FaRegCheckCircle}
+                        <Icon component={FaRegCalendarCheck}
                         class="h-5 w-5  text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
 
                     {:else}
-                        <Icon component={FaRegCircle}
+                        <Icon component={FaRegCalendar}
                             on:click={(e) => finishTask(e, element)}
                             class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1 "/>
 
