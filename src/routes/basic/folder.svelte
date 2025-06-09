@@ -47,13 +47,15 @@
         if(foundIdx < 0)
             return;
 
+        
+
 
         if(!segments.length)
             contextItemId = 1
         else
             contextItemId = parseInt(segments[segments.length-1])
 
-
+        
         contextItem = null
         contextPath = `/Folder/${contextItemId}`
 
@@ -462,7 +464,7 @@
                     //icon: FaShoppingBasket, //FaLink, //aRegShareSquare, //
                     toolbar: BasketPreview,
                     props: {
-                        destinationContainer: contextItem.$ref,
+                        destinationContainer: contextPath,
                         onRefreshView: refreshViewAfterAttachingFromBasket
                     },
                     //fab: 'M01',
@@ -888,6 +890,7 @@
 
 
 {#if contextItem}
+    {#key contextPath}  <!-- to force new page operations -->
     <Page   self={contextItem}
             toolbarOperations={ getPageOperations() }
             clearsContext='props sel'
@@ -964,6 +967,7 @@
     </section>
 
     </Page>
+    {/key}
 {:else}
     <Spinner delay={3000}/>
 {/if}

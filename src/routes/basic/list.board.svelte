@@ -50,6 +50,7 @@
     let allTags = ''
     let kanban;
     let definitionChangedTicket = 1
+    let usersComboSource;
 
     const TLK_KANBAN_CHECKLIST = 0
     const TLK_KANBAN_PROCESS = 1
@@ -84,7 +85,7 @@
                             if(res)
                             {
                                 users = res.User;
-                                // todo reload if needed
+                                usersComboSource?.updateObjects(users);
                             }
                         })
         }
@@ -1044,9 +1045,9 @@
             <KanbanDateProperty top a='DueDate'/>
 
             <KanbanComboProperty middle a='Actor' association>
-                <ComboSource objects={users} key="$ref" name='Name'/>
+                <ComboSource objects={users} key="$ref" name='Name' bind:this={usersComboSource}/>
             </KanbanComboProperty>
-
+            
             <KanbanTagsProperty bottom a='Tags'
                                 getAllTags={() => allTags}
                                 {onUpdateAllTags}

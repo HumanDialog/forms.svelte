@@ -34,6 +34,7 @@
     let listTitle = ''
 
     let users = [];
+    let usersComboSource;
 
     const STATE_FINISHED = 7000;
 
@@ -64,6 +65,7 @@
                         ).then((res) => {
                             if(res)
                                 users = res.User;
+                                usersComboSource?.updateObjects(users);
                         })
         }
 
@@ -287,7 +289,7 @@
                             toolbar: BasketPreview,
                             props: {
                                 destinationContainer: listPath,
-                                onRefreshView: (f) => istComponent?.reload(currentList, listComponent.KEEP_SELECTION)
+                                onRefreshView: (f) => reloadTasks(listComponent.KEEP_SELECTION)
                             },
                       //      fab: 'M01',
                       //      tbr: 'A'
@@ -402,7 +404,7 @@
                             toolbar: BasketPreview,
                             props: {
                                 destinationContainer: listPath,
-                                onRefreshView: (f) => istComponent?.reload(currentList, listComponent.KEEP_SELECTION)
+                                onRefreshView: (f) => reloadTasks(listComponent.KEEP_SELECTION)
                             },
                       //      fab: 'M01',
                       //      tbr: 'A'
@@ -510,6 +512,7 @@
 </svelte:head>
 
 {#if currentList}
+    {#key listPath} <!-- to force new page operations -->
     <Page   self={currentList}
             toolbarOperations={ getPageOperations() }
             clearsContext='props sel'
@@ -526,7 +529,7 @@
             <ListInserter action={addTask} icon/>
 
             <ListComboProperty  name="Actor" association hasNone>
-                <ComboSource objects={users} key="$ref" name='Name'/>
+                <ComboSource objects={users} key="$ref" name='Name' bind:this={usersComboSource}/>
             </ListComboProperty>
 
             <ListDateProperty name="DueDate"/>
@@ -568,6 +571,7 @@
             </div>
         {/if}
     </Page>
+    {/key}
 {:else}
     <Spinner delay={3000}/>
 {/if}
