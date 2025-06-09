@@ -23,6 +23,7 @@
     import { handleSelect, isDeviceSmallerThan, isOnNavigationPage, isOnScreenKeyboardVisible, removeAt, UI } from './utils'
     import { afterUpdate, onMount } from 'svelte';
     import {location} from 'svelte-spa-router'
+    import {FaCopy, FaTimes} from 'svelte-icons/fa'
     
     export let layout;
 
@@ -457,17 +458,19 @@
                     <section class="fixed left-2 sm:left-auto sm:right-2 bottom-2 flex flex-col gap-2">
                         {#if $alerts && $alerts.length > 0}
                             {#each $alerts as alert, idx}
-                                <Alert class="bg-red-900/40  shadow-lg shadow-stone-400 dark:shadow-black flex flex-row">
-                                    <button class="sm:hidden font-bold  ml-auto"
-                                            on:click={() => {removeAlert(alert)}}>
-                                        x
-                                    </button>
-                                    <p>
+                                <Alert class="bg-red-900/40  shadow-lg shadow-stone-400 dark:shadow-black flex flex-row-reverse sm:flex-row">
+                                    {@const text_max_width = is_small ? '60vw' : '75vw'}
+                                    
+                                    <p class="flex-none truncate" style="max-width: {text_max_width}">
                                         {alert.msg}
                                     </p>
-                                    <button class="hidden sm:block font-bold  ml-auto"
+                                    <button class="block sm:ml-auto w-3 mx-1"
+                                            on:click={() => {navigator.clipboard.writeText(alert.msg)}}>
+                                        <FaCopy/>
+                                    </button>
+                                    <button class="block w-3 mx-1"
                                             on:click={() => {removeAlert(alert)}}>
-                                        x
+                                        <FaTimes/>
                                     </button>
                                 </Alert>    
                             {/each}
