@@ -289,7 +289,7 @@
                             toolbar: BasketPreview,
                             props: {
                                 destinationContainer: listPath,
-                                onRefreshView: (f) => istComponent?.reload(currentList, listComponent.KEEP_SELECTION)
+                                onRefreshView: (f) => reloadTasks(listComponent.KEEP_SELECTION)
                             },
                       //      fab: 'M01',
                       //      tbr: 'A'
@@ -404,7 +404,7 @@
                             toolbar: BasketPreview,
                             props: {
                                 destinationContainer: listPath,
-                                onRefreshView: (f) => istComponent?.reload(currentList, listComponent.KEEP_SELECTION)
+                                onRefreshView: (f) => reloadTasks(listComponent.KEEP_SELECTION)
                             },
                       //      fab: 'M01',
                       //      tbr: 'A'
@@ -512,6 +512,7 @@
 </svelte:head>
 
 {#if currentList}
+    {#key listPath} <!-- to force new page operations -->
     <Page   self={currentList}
             toolbarOperations={ getPageOperations() }
             clearsContext='props sel'
@@ -570,6 +571,7 @@
             </div>
         {/if}
     </Page>
+    {/key}
 {:else}
     <Spinner delay={3000}/>
 {/if}
