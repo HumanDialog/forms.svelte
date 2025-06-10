@@ -12,7 +12,7 @@
 	import { afterUpdate, tick } from 'svelte';
     import {location, link, querystring} from 'svelte-spa-router'
 
-    import {FaShoppingBasket, FaArrowCircleRight, FaTimes, FaRegFile, FaRegCalendar, FaPaperPlane, FaRegStar, FaStar} from 'svelte-icons/fa/'
+    import {FaPaste, FaArrowCircleRight, FaTimes, FaRegFile, FaRegCalendar, FaPaperPlane, FaRegStar, FaStar} from 'svelte-icons/fa/'
     import BasketPreview from './basket.preview.svelte'
 
     let channelRef = ''
@@ -560,8 +560,8 @@
                             focus:outline-none dark:border-stone-600
                             flex items-center rounded"
                             on:click={showBasket}>
-                        <div class="w-5 h-5 mr-1"><FaShoppingBasket/></div>
-                        <span class="ml-2">Attach...</span>
+                        <div class="w-5 h-5 mr-1"><FaPaste/></div>
+                        <span class="ml-2">Paste...</span>
                     </button>
 
                     <p class="flex-none ml-auto py-2.5 mr-1 text-xs m-0">

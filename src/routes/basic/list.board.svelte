@@ -30,7 +30,7 @@
 
 	} from '$lib';
     import {FaPlus, FaList, FaPen, FaCaretLeft, FaCaretRight, FaTrash, FaArrowsAlt, FaArchive, FaCheck, FaEllipsisH, FaChevronRight,
-        FaAngleDown, FaAngleUp, FaColumns, FaRandom, FaChevronLeft, FaCopy, FaShoppingBasket
+        FaAngleDown, FaAngleUp, FaColumns, FaRandom, FaChevronLeft, FaCopy
     } from 'svelte-icons/fa'
     import MoveOperations from './list.board.move.svelte'
 	import { tick, onMount } from 'svelte';
@@ -260,8 +260,8 @@
                             hideToolbarCaption: true
                         },
                         {
-                            caption: 'Attach...',
-                            //icon: FaShoppingBasket, //FaLink, //aRegShareSquare, //
+                            caption: 'Add tasks from Clipboard',
+                            //icon: FaRegClipboard, //FaLink, //aRegShareSquare, //
                             toolbar: BasketPreview,
                             props: {
                                 destinationContainer: listPath,
@@ -619,8 +619,8 @@
                             hideToolbarCaption: true
                         },
                         {
-                            caption: 'Attach...',
-                            //icon: FaShoppingBasket, //FaLink, //aRegShareSquare, //
+                            caption: 'Add tasks from Clipboard',
+                            //icon: FaRegClipboard, //FaLink, //aRegShareSquare, //
                             toolbar: BasketPreview,
                             props: {
                                 destinationContainer: listPath,
@@ -715,8 +715,8 @@
                             hideToolbarCaption: true
                         },
                         {
-                            caption: 'Attach...',
-                            //icon: FaShoppingBasket, //FaLink, //aRegShareSquare, //
+                            caption: 'Add tasks from Clipboard',
+                            //icon: FaRegClipboard, //FaLink, //aRegShareSquare, //
                             toolbar: BasketPreview,
                             props: {
                                 destinationContainer: listPath,
@@ -1047,7 +1047,7 @@
             <KanbanComboProperty middle a='Actor' association>
                 <ComboSource objects={users} key="$ref" name='Name' bind:this={usersComboSource}/>
             </KanbanComboProperty>
-            
+
             <KanbanTagsProperty bottom a='Tags'
                                 getAllTags={() => allTags}
                                 {onUpdateAllTags}

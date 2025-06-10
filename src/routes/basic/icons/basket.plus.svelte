@@ -1,5 +1,5 @@
 <script>
-    import FaShoppingBasket from 'svelte-icons/fa/FaShoppingBasket.svelte'
+    import FaRegClipboard from 'svelte-icons/fa/FaRegClipboard.svelte'
     import FaPlus from 'svelte-icons/fa/FaPlus.svelte'
 </script>
 
@@ -8,6 +8,6 @@
         <FaPlus/>
     </div>
     <div class="absolute left-2/3 top-2/3 w-2/3 h-2/3">
-        <FaShoppingBasket/>
+        <FaRegClipboard/>
     </div>
 </div>
