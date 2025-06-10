@@ -37,7 +37,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@humandialog/auth.svelte": "^1.8.10",
+		"@humandialog/auth.svelte": "^1.8.12",
 		"@tiptap/core": "^2.11.0",
 		"@tiptap/extension-bullet-list": "^2.11.5",
 		"@tiptap/extension-code-block": "^2.11.5",

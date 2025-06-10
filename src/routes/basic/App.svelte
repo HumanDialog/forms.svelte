@@ -9,6 +9,7 @@
     import NotFound from './landing/not.found.svelte'
     import AppView from './AppView.svelte';
 	import {appUsers} from './users.js'
+    import {dark_mode_store} from '$lib'
 
     import { GoogleAnalytics } from '@beyonk/svelte-google-analytics'
     import {cookies_allow_analytics} from './landing/cookie.preferences'
@@ -73,6 +74,17 @@
     routes.set(r, AppView)
     routes.set('*', NotFound)
 
+    const authTemporaryPageClass = 'bg-white dark:bg-stone-900 dark:text-white sm:overflow-y-clip absolute top-0 left-0 w-screen h-screen'
+    const authButtonClass = `py-2.5 px-4 my-1
+                                text-sm
+                                text-stone-700 dark:text-stone-300 dark:hover:text-white
+                                bg-stone-200 dark:bg-stone-700
+                                hover:bg-stone-300 dark:hover:bg-stone-800
+                                border border-stone-300 focus:outline-none dark:border-stone-600
+                                flex items-center rounded`
+    const authNormalClass = 'ml-5 mt-5 text-sm'
+    const authErrorClass = ' ml-5 mt-5 text-sm text-red-500 dark:text-red-700'
+
 </script>
 
 <svelte:head>
@@ -84,7 +96,12 @@
     properties={[ google_analytics_identifier ]}
     enabled={enable_google_analytics}/>
 
-<AuthorizedView optionalGuestMode automaticallyRefreshTokens={true}>
+<AuthorizedView optionalGuestMode automaticallyRefreshTokens={true}
+        layoutTheme={$dark_mode_store}
+        layoutClass={authTemporaryPageClass}
+        buttonClass={authButtonClass}
+        normalTextClass={authNormalClass}
+        errorTextClass={authErrorClass}>
     <Router {routes} />
     <Cookies/>
 </AuthorizedView>
