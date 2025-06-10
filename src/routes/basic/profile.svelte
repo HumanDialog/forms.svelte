@@ -35,6 +35,13 @@
             {
                 userRef = `./User/${userId}`
                 isSelfProfile = false
+
+                reef.get('user/Id', onErrorShowAlert).then((currentUserId) => {
+                    if(currentUserId == userId)
+                        isSelfProfile = true
+                })
+
+                
             }
         }
 
