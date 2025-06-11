@@ -203,25 +203,25 @@
                             caption: 'Heading 1',
                             icon: IcH1,
                             action: (f) => contentElement.setHeading(1),
-                            activeFunc: () => contentElement.isActiveHeading(1)
+                            activeFunc: contentElement.isActiveH1
                         },
                         {
                             caption: 'Heading 2',
                             icon: IcH2,
                             action: (f) => contentElement.setHeading(2),
-                            activeFunc: () => contentElement.isActiveHeading(2)
+                            activeFunc: contentElement.isActiveH2
                         },
                         {
                             caption: 'Heading 3',
                             icon: IcH3,
                             action: (f) => contentElement.setHeading(3),
-                            activeFunc: () => contentElement.isActiveHeading(3)
+                            activeFunc: contentElement.isActiveH3
                         },
                         {
                             caption: 'Heading 4',
                             icon: IcH4,
                             action: (f) => contentElement.setHeading(4),
-                            activeFunc: () => contentElement.isActiveHeading(4)
+                            activeFunc: contentElement.isActiveH4
                         },
                         {
                             caption: 'Code',

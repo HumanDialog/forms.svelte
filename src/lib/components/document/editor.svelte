@@ -1420,6 +1420,26 @@
         return editor?.isActive('heading', {level: level})
     }
 
+    export function isActiveH1()
+    {
+        return editor?.isActive('heading', {level: 1})
+    }
+
+    export function isActiveH2()
+    {
+        return editor?.isActive('heading', {level: 2})
+    }
+
+    export function isActiveH3()
+    {
+        return editor?.isActive('heading', {level: 3})
+    }
+
+    export function isActiveH4()
+    {
+        return editor?.isActive('heading', {level: 4})
+    }
+
     export function isActiveCode()
     {
         return editor?.isActive('CodeBlock')

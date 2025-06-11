@@ -635,28 +635,28 @@
                             icon: IcH1,
                             tbr: 'A', hideToolbarCaption: true,
                             action: (f) => description.setHeading(1),
-                            activeFunc: () => description.isActiveHeading(1)
+                            activeFunc: description.isActiveH1
                         },
                         {
                             caption: 'Heading 2',
                             icon: IcH2,
                             tbr: 'A', hideToolbarCaption: true,
                             action: (f) => description.setHeading(2),
-                            activeFunc: () => description.isActiveHeading(2)
+                            activeFunc: description.isActiveH2
                         },
                         {
                             caption: 'Heading 3',
                             icon: IcH3,
                             tbr: 'A', hideToolbarCaption: true,
                             action: (f) => description.setHeading(3),
-                            activeFunc: () => description.isActiveHeading(3)
+                            activeFunc: description.isActiveH3
                         },
                         {
                             caption: 'Heading 4',
                             icon: IcH4,
                             tbr: 'A', hideToolbarCaption: true,
                             action: (f) => description.setHeading(4),
-                            activeFunc: () => description.isActiveHeading(4)
+                            activeFunc: description.isActiveH4
                         },
                         {
                             caption: 'Code',

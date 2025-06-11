@@ -453,25 +453,25 @@
                             caption: 'Heading 1',
                             icon: IcH1,
                             action: (f) => questionElement.setHeading(1),
-                            activeFunc: () => questionElement.isActiveHeading(1)
+                            activeFunc: questionElement.isActiveH1
                         },
                         {
                             caption: 'Heading 2',
                             icon: IcH2,
                             action: (f) => questionElement.setHeading(2),
-                            activeFunc: () => questionElement.isActiveHeading(2)
+                            activeFunc: questionElement.isActiveH2
                         },
                         {
                             caption: 'Heading 3',
                             icon: IcH3,
                             action: (f) => questionElement.setHeading(3),
-                            activeFunc: () => questionElement.isActiveHeading(3)
+                            activeFunc: questionElement.isActiveH3
                         },
                         {
                             caption: 'Heading 4',
                             icon: IcH4,
                             action: (f) => questionElement.setHeading(4),
-                            activeFunc: () => questionElement.isActiveHeading(4)
+                            activeFunc: questionElement.isActiveH4
                         },
                         {
                             caption: 'Code',
@@ -1059,25 +1059,25 @@
                             caption: 'Heading 1',
                             icon: IcH1,
                             action: (f) => answerElement.setHeading(1),
-                            activeFunc: () => answerElement.isActiveHeading(1)
+                            activeFunc: answerElement.isActiveH1
                         },
                         {
                             caption: 'Heading 2',
                             icon: IcH2,
                             action: (f) => answerElement.setHeading(2),
-                            activeFunc: () => answerElement.isActiveHeading(2)
+                            activeFunc: answerElement.isActiveH2
                         },
                         {
                             caption: 'Heading 3',
                             icon: IcH3,
                             action: (f) => answerElement.setHeading(3),
-                            activeFunc: () => answerElement.isActiveHeading(3)
+                            activeFunc: answerElement.isActiveH3
                         },
                         {
                             caption: 'Heading 4',
                             icon: IcH4,
                             action: (f) => answerElement.setHeading(4),
-                            activeFunc: () => answerElement.isActiveHeading(4)
+                            activeFunc: answerElement.isActiveH4
                         },
                         {
                             caption: 'Code',
