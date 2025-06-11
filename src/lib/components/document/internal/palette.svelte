@@ -424,7 +424,7 @@
                                 {@const cc = mobile ? 7 : 6}
                                 {@const default_icon_size = icon_placeholder_size - cc}
                                 {@const icon_size = cmd.icon_size ? cmd.icon_size : default_icon_size}
-                                <Icon size={icon_size} component={cmd.icon}/>
+                                <Icon s="md" component={cmd.icon}/>
                             {/if}
                         </div>
                     </button>

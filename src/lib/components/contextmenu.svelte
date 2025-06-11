@@ -553,11 +553,11 @@
                     {#if operation.icon}
                         {@const cc = mobile ? 7 : 6}
                         {@const icon_size = icon_placeholder_size - cc}
-                        <Icon size={icon_size} component={operation.icon}/>
+                        <Icon s="md" component={operation.icon}/>
                     {:else}
                         {@const cc = mobile ? 7 : 6}
                         {@const icon_size = icon_placeholder_size - cc}
-                        <div style="width: {icon_size*0.25}rem; height: {icon_size*0.25}rem;"></div>
+                        <div class="w-4 h-4"></div>
                     {/if}
                 </div>
                 <div class="">

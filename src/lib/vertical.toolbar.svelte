@@ -361,7 +361,7 @@
                 class:bg-orange-500={isSelected}
                 on:click={tab.onclick}>
                 
-                <Icon class="w-5 h-5" component={tab.icon}/>
+                <Icon s="xl" component={tab.icon}/>
             </button>
         {/each}
     </div>
@@ -373,7 +373,7 @@
             {#if show_groups_switch_menu}
                 <button class="h-12 px-0 flex justify-center items-center w-full text-stone-300 hover:text-stone-100"
                         on:click|stopPropagation={show_groups}>
-                    <Icon size={4} component={FaUsers} />
+                    <Icon s="md" component={FaUsers} />
                 </button>
             {/if}
 
@@ -381,7 +381,7 @@
                 class="h-12  px-0 flex justify-center items-center w-full text-stone-300 hover:text-stone-100"
                 on:click|stopPropagation={show_options}>
 
-                <Icon size={4} component={FaCog} />
+                <Icon s="md" component={FaCog} />
             </button>
 
         </div>

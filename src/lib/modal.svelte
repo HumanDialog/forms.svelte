@@ -133,7 +133,7 @@
             <div class="sm:flex sm:items-start">
               <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
                 {#if icon}
-                    <Icon component={icon} size={6} class="text-stone-700"/>
+                    <Icon component={icon} s="2xl" class="text-stone-700"/>
                 {/if}
               </div>
               <div class="grow mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">

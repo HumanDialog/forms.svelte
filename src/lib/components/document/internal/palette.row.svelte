@@ -10,8 +10,8 @@
     export let active       :boolean = false;
     
     
-    let icon_size = cmd.icon_size ? cmd.icon_size : 4;
-    let icon_placeholder_size = icon_size + 4
+    //let icon_size = cmd.icon_size ? cmd.icon_size : 4;
+    //let icon_placeholder_size = icon_size + 4
     
     let cl = $$props.class ?? '';
     
@@ -54,7 +54,7 @@
      bind:this={element}>
     <div class="flex items-center justify-center space-x-10 px-4 py-2 ml-12 sm:ml-0" >
         {#if cmd.icon}
-            <Icon size={icon_size} component={cmd.icon}/>
+            <Icon s="md" component={cmd.icon}/>
         {/if}
     </div>
     

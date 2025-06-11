@@ -305,12 +305,12 @@
         {#if definedTabs && definedTabs.length > 0}
             {#each definedTabs as tab}
                 <button class="w-12 sm:w-10 h-full flex justify-center items-center text-stone-300 hover:text-stone-100" on:click={tab.onclick}>
-                    <Icon class="w-5 h-5" component={tab.icon}/>
+                    <Icon s="xl" component={tab.icon}/>
                 </button>    
             {/each}
         {:else}
             <button class="w-12 sm:w-10 h-full flex justify-center items-center text-stone-300 hover:text-stone-100" on:click|stopPropagation={toggle_navigator}>
-                <Icon class="w-5 h-5" component={icon}/>
+                <Icon s="xl" component={icon}/>
             </button>
         {/if}
     </div>
@@ -324,7 +324,7 @@
         {#if user_is_in_multiple_groups}
             <button class="h-full w-12 sm:w-10 px-0 flex justify-center items-center   text-stone-300 hover:text-stone-100"
                     on:click|stopPropagation={show_groups}>
-                <Icon class="w-5  h-5 " component={FaUsers} />
+                <Icon s="xl" component={FaUsers} />
             </button>
         {/if}
 
@@ -332,7 +332,7 @@
             class="h-full w-12 sm:w-10 px-0 flex justify-center items-center   text-stone-300 hover:text-stone-100"
             on:click|stopPropagation={show_options}>
 
-            <Icon class="w-5  h-5 " component={FaCog} />
+            <Icon s="xl" component={FaCog} />
         </button>
     </div>
 

@@ -776,7 +776,7 @@
             <!--Checkbox class="mt-2 text-xs font-normal" self={new_user} a="maintainer">
                 <div class="flex flex-row items-center">
                     <span class="">Maintainer</span>
-                    <Icon id="b1" size={4} component={FaInfoCircle} class="text-stone-400 ml-5 pt-0 mt-1"/>
+                    <Icon id="b1" s="md" component={FaInfoCircle} class="text-stone-400 ml-5 pt-0 mt-1"/>
                     <Popover class="w-64 text-sm font-light text-stone-500 bg-white dark:bg-stone-800 dark:border-stone-600 dark:text-stone-400" triggeredBy="#b1" color="dropdown">
                         Means that the invited user will be able to add/remove others and manage permissions in this organization.
                     </Popover>

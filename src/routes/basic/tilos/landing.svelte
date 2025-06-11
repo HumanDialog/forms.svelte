@@ -17,12 +17,12 @@
     </section>
 
 
-    <div class="bg-stone-50 dark:bg-stone-900 mx-4">
+    <div class="bg-stone-50  mx-4">
         <section class="w-full  flex justify-center">
             <section class="max-w-5xl ">
-            <article class=" prose prose-lg prose-zinc dark:prose-invert !max-w-none">
+            <article class=" prose prose-lg prose-zinc !max-w-none">
         
-                <section class="dark:bg-black bg-local bg-cover">
+                <section class=" bg-local bg-cover">
                     <div class="">
                         <h1 class="text-center text-7xl mt-10 sm:mt-20">
                             Tilos
@@ -36,7 +36,7 @@
                                 class=" h-10 sm:h-12 px-6 pt-3 sm:pt-2.5 justify-center
                                         bg-slate-900 hover:bg-slate-700/ focus:outline-none focus:ring-2 focus:ring-slate-400
                                         focus:ring-offset-2 focus:ring-offset-slate-50 text-white text-xs sm:text-base whitespace-nowrap font-semibold rounded-lg
-                                        dark:bg-indigo-600 dark:highlight-white/20 dark:hover:bg-indigo-400">
+                                        ">
                             Download
                             </a>
                         </div>
@@ -63,7 +63,7 @@
                             class=" h-10 sm:h-12 px-6 pt-3 sm:pt-2.5 justify-center
                                     bg-slate-900 hover:bg-slate-700/ focus:outline-none focus:ring-2 focus:ring-slate-400
                                     focus:ring-offset-2 focus:ring-offset-slate-50 text-white text-xs sm:text-base whitespace-nowrap font-semibold rounded-lg
-                                    dark:bg-indigo-600 dark:highlight-white/20 dark:hover:bg-indigo-400">
+                                    ">
                         Contact Us
                         </a>
                     </div>
@@ -151,7 +151,7 @@
                         class=" h-10 sm:h-12 px-6 pt-3 sm:pt-2.5 justify-center
                                 bg-slate-900 hover:bg-slate-700/ focus:outline-none focus:ring-2 focus:ring-slate-400
                                 focus:ring-offset-2 focus:ring-offset-slate-50 text-white text-xs sm:text-base whitespace-nowrap font-semibold rounded-lg
-                                dark:bg-indigo-600 dark:highlight-white/20 dark:hover:bg-indigo-400">
+                                ">
                     Contact Us
                     </a>
                 </div>

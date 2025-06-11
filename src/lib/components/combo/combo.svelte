@@ -895,13 +895,13 @@
             {#if true || !is_dropdown_open}
                 {#if icon && sel_item}
                     {#if sel_item.Color}
-                        <Icon size={5} circle={true} color={sel_item.Color}/>
+                        <Icon s="xl" circle={true} color={sel_item.Color}/>
                     {:else if sel_item.Icon}
-                        <Icon size={4} component={sel_item.Icon}/>
+                        <Icon s="md" component={sel_item.Icon}/>
                     {:else if sel_item.Icon == null}
                         <div class="w-4 h-4"></div>
                     {:else}
-                        <Icon size={5} circle={true} symbol={sel_item.Avatar} label={sel_item.Name}/>
+                        <Icon s="xl" circle={true} symbol={sel_item.Avatar} label={sel_item.Name}/>
                     {/if}
                 {/if}
             {/if}
@@ -966,17 +966,17 @@
 
                             {#if icon}
                                 {#if item.Color}
-                                    <Icon size={4} circle={true} color={item.Color}/>
+                                    <Icon s="md" circle={true} color={item.Color}/>
                                 {:else if item.Avatar} 
-                                    <Icon size={4} circle={true} symbol={item.Avatar}/>
+                                    <Icon s="md" circle={true} symbol={item.Avatar}/>
                                 {:else if item.Icon}
-                                    <Icon size={4} component={item.Icon}/>
+                                    <Icon s="md" component={item.Icon}/>
                                 {:else if item.Icon == null}
                                     <div class="w-4 h-4"></div>
                                 {:else if item.Name}
-                                    <Icon size={4} circle={true} label={item.Name}/>
+                                    <Icon s="md" circle={true} label={item.Name}/>
                                 {:else}
-                                    <Icon size={4} circle={true}/>
+                                    <Icon s="md" circle={true}/>
                                 {/if}
                             {/if}
                             <h4 class="ml-2">
