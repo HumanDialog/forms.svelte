@@ -396,7 +396,14 @@
             return false
         }
         else
-            return true;
+        {
+            if(operation.disabledFunc)
+                return !operation.disabledFunc();
+            else if(operation.disabled)
+                return false
+
+            return true
+        }
     }
 
 </script>

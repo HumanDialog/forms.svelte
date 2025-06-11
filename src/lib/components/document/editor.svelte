@@ -55,7 +55,8 @@
     export let context = '';
     export let typename = '';
     export let compact = false;
-    export let onChange = undefined;
+    export let onSingleChange: Function|undefined = undefined
+    export let onApplyChanges: Function|undefined = undefined;
 
     export let onFocusCb = undefined;
     export let onBlurCb = undefined;
@@ -853,6 +854,12 @@
                 {
                     hasChangedValue = true;
                     changedValue = editor.getHTML()
+
+                    if(onSingleChange)
+                        onSingleChange(changedValue)
+                    else
+                        logChanges()
+
                     handleImagesChanges(transaction)
                 }
                 refreshToolbarOperations()
@@ -967,13 +974,12 @@
         }
     }
 
-    export function save()
+    export async function save()
     {
         if(saveData())
         {
             last_tick = $data_tick_store + 1;
             $data_tick_store = last_tick;
-            refreshToolbarOperations();
         }
     }
 
@@ -986,27 +992,31 @@
 
         //console.log('editor: saveData')
 
-        if(onChange)
+        if(onApplyChanges)
         {
-            onChange(changedValue)
+            onApplyChanges(changedValue)
             return true;
         }
         else  if(item && a)
         {
-            item[a] = changedValue;
-            //value = changed_value;
-
-            if(typename)
-                informModification(item, a, typename);
-            else
-                informModification(item, a);
-
+            logChanges()
             if(pushChangesImmediately)
-                pushChanges();
+                pushChanges(refreshToolbarOperations);
             return true;
         }
 
         return false;
+    }
+
+    function logChanges()
+    {
+        item[a] = changedValue;
+        //value = changed_value;
+
+        if(typename)
+            informModification(item, a, typename);
+        else
+            informModification(item, a);
     }
 
     // =========================================== Palette ===========================================================================

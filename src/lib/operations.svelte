@@ -173,11 +173,8 @@
         if(!operation)
             return;
 
-        //console.log('on_click', operation, isDisabled)
-
         if(isDisabled)
         {
-            //console.log('onClick isDisabled')
             e.preventDefault()
             e.stopPropagation()
             return;   

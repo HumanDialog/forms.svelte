@@ -19,7 +19,12 @@
             resizeImage,
             reloadVisibleTags,
 			getNiceStringDate,
-            IcH1, IcH2, IcH3, IcH4
+            IcH1, IcH2, IcH3, IcH4,
+            informModification,
+			pushChanges,
+            hasModifications,
+            refreshToolbarOperations,
+            informModificationEx
             } from '$lib'
 	import { onMount, tick } from 'svelte';
     import {location, querystring, push, link} from 'svelte-spa-router'
@@ -142,14 +147,26 @@
     async function onTitleChanged(text)
     {
         note.Title = text;
-        await reef.post(`${noteRef}/SetTitle`, {val: text}, onErrorShowAlert)
+        informModification(note, 'Title')
+        pushChanges(refreshToolbarOperations)
+        //await reef.post(`${noteRef}/SetTitle`, {val: text}, onErrorShowAlert)
     }
 
     async function onSummaryChanged(text)
     {
         note.Summary = text;
-        await reef.post(`${noteRef}/SetSummary`, {val: text}, onErrorShowAlert)
+        informModification(note, 'Summary')
+        pushChanges(refreshToolbarOperations)
+        //await reef.post(`${noteRef}/SetSummary`, {val: text}, onErrorShowAlert)
 
+    }
+
+    function onPropertySingleChange(txt, attrib)
+    {
+        //note[attrib] = txt
+        //informModification(note, attrib)
+        informModificationEx(note.$type, note.Id, attrib, txt)
+        refreshToolbarOperations()
     }
 
     async function onUpdateAllTags(newAllTags)
@@ -161,16 +178,12 @@
     async function onTagsChanged(tags)
     {
         note.Tags = tags;
-        await reef.post(`${noteRef}/SetTags`, {val: tags}, onErrorShowAlert)
+        informModification(note, 'Tags')
+        pushChanges(refreshToolbarOperations)
+        //await reef.post(`${noteRef}/SetTags`, {val: tags}, onErrorShowAlert)
     }
 
-    async function onContentChanged(content)
-    {
-        note.Content = content;
-        await reef.post(`${noteRef}/SetContent`, {val: content}, onErrorShowAlert)
-    }
-
-
+    
     let summary;
     let summaryPlaceholder = false;
 
@@ -256,7 +269,8 @@
                             icon: FaSave,
                             action: (f) => saveCurrentEditable(),
                             fab: 'T02',
-                            tbr: 'C'
+                            tbr: 'C',
+                            disabledFunc: () => !hasModifications()
                         },
                         {
                             caption: 'Edit...',
@@ -441,7 +455,8 @@
                             icon: FaSave,
                             action: (f) => description?.save(),
                        //     fab: 'S00',
-                            tbr: 'C'
+                            tbr: 'C',
+                            disabledFunc: () => !hasModifications()
                         },
                         {
                             caption: 'Edit...',
@@ -699,6 +714,7 @@
             <h1     class=""
                     use:editable={{
                         action: (text) => onTitleChanged(text),
+                        onSingleChange: (txt) => onPropertySingleChange(txt, 'Title'),
                         active: true,
                         readonly: isReadOnly}}
                         tabindex="0">
@@ -710,6 +726,7 @@
                     <p  class="lead"
                         use:editable={{
                             action: (text) => onSummaryChanged(text),
+                            onSingleChange: (txt) => onPropertySingleChange(txt, 'Summary'),
                             active: true,
                             readonly: isReadOnly}}
                         tabindex="0"
@@ -775,7 +792,6 @@
                 <Editor   a='Content'
                             compact={true}
                             bind:this={description}
-                            onChange={onContentChanged}
                             onFocusCb={() => activateFormattingTools()}
                             onBlurCb={() => deactivateFormattingToolsIfNeeded()}
                             onAddImage={uploadImage}

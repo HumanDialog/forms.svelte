@@ -18,7 +18,12 @@
 			Spinner,
             resizeImage,
             reloadVisibleTags,
-            IcH1, IcH2, IcH3, IcH4
+            IcH1, IcH2, IcH3, IcH4,
+            informModification,
+			pushChanges,
+            hasModifications,
+            refreshToolbarOperations,
+            informModificationEx
             } from '$lib'
 	import { onMount, tick } from 'svelte';
     import {location, querystring, push, link} from 'svelte-spa-router'
@@ -164,14 +169,24 @@
     async function onTitleChanged(text)
     {
         task.Title = text;
-        await reef.post(`${taskRef}/set`, {Title: text}, onErrorShowAlert)
+        informModification(task, 'Title')
+        pushChanges(refreshToolbarOperations)
+        //await reef.post(`${taskRef}/set`, {Title: text}, onErrorShowAlert)
     }
 
     async function onSummaryChanged(text)
     {
         task.Summary = text;
-        await reef.post(`${taskRef}/set`, {Summary: text}, onErrorShowAlert)
+        informModification(task, 'Summary'),
+        pushChanges(refreshToolbarOperations)
+        //await reef.post(`${taskRef}/set`, {Summary: text}, onErrorShowAlert)
 
+    }
+
+    function onPropertySingleChange(txt, attrib)
+    {
+        informModificationEx(task.$type, task.Id, attrib, txt)
+        refreshToolbarOperations()
     }
 
     async function onUpdateAllTags(newAllTags)
@@ -288,7 +303,8 @@
                             icon: FaSave,
                             action: (f) => saveCurrentEditable(),
                             fab: 'T02',
-                            tbr: 'C'
+                            tbr: 'C',
+                            disabledFunc: () => !hasModifications()
                         },
                         {
                             caption: 'Edit...',
@@ -481,7 +497,8 @@
                             icon: FaSave,
                             action: (f) => saveCurrentEditable(),
                             fab: 'T02',
-                            tbr: 'C'
+                            tbr: 'C',
+                            disabledFunc: () => !hasModifications()
                         },
                         {
                             caption: 'Edit...',
@@ -660,7 +677,8 @@
                             icon: FaSave,
                             action: (f) => description?.save(),
                             //fab: 'S00',
-                            tbr: 'C'
+                            tbr: 'C',
+                            disabledFunc: () => !hasModifications()
                         },
                         {
                             caption: 'Edit...',
@@ -692,6 +710,7 @@
             caption: 'Save',
             icon: FaSave,
             action: () => description?.save(),
+            disabledFunc: () => !hasModifications()
         },
         {
             caption: 'Add to Clipboard',
@@ -934,6 +953,7 @@
             <h1     class=""
                     use:editable={{
                         action: (text) => onTitleChanged(text),
+                        onSingleChange: (txt) => onPropertySingleChange(txt, 'Title'),
                         active: true,
                         readonly: isReadOnly}}
                         tabindex="0">
@@ -945,6 +965,7 @@
                     <p  class="lead"
                         use:editable={{
                             action: (text) => onSummaryChanged(text),
+                            onSingleChange: (txt) => onPropertySingleChange(txt, 'Summary'),
                             active: true,
                             readonly: isReadOnly}}
                         tabindex="0"

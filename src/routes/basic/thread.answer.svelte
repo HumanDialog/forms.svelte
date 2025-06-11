@@ -442,7 +442,7 @@
                     self={note}
                     compact={true}
                     bind:this={contentElement}
-                    onChange={onContentChanged}
+                    onApplyChanges={onContentChanged}
                     onFocusCb={activateFormattingTools}
                     onBlurCb={deactivateFormattingToolsIfNeeded}
                     onAddImage={selectImage}

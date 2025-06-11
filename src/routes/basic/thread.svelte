@@ -1286,7 +1286,7 @@
                             a='Content'
                             compact={true}
                             bind:this={questionElement}
-                            onChange={onContentChanged}
+                            onApplyChanges={onContentChanged}
                             onFocusCb={() => activateFormattingTools()}
                             onBlurCb={() => deactivateFormattingToolsIfNeeded()}
                             onAddImage={(editorCB) => selectImage(editorCB, SELECT_IMAGE_DIRECT)}
@@ -1323,7 +1323,7 @@
                                 a='Content'
                                 compact
                                 bind:this={answerElement}
-                                onChange={onAnswerEdit}
+                                onApplyChanges={onAnswerEdit}
                                 onFocusCb={() => activateAnswerTools()}
                                 onBlurCb={() => deactivateAnswerToolsIfNeeded()}
                                 onAddImage={(editorCB) => selectImage(editorCB, SELECT_IMAGE_TEMPORARY)}

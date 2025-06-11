@@ -123,7 +123,7 @@ export {    data_tick_store,    // tmp
             setNavigatorTitle } from "./stores";
             
 export { contextToolbarOperations, pageToolbarOperations, contextItemsStore, contextTypesStore } from './stores'   // tmp
-export { informModification, informModificationEx, informItem, pushChanges } from './updates'   // tmp
+export { informModification, informModificationEx, informItem, pushChanges, hasModifications } from './updates'   // tmp
 
 
 

@@ -24,6 +24,7 @@
         import MdContentCopy from 'svelte-icons/md/MdContentCopy.svelte'
         import MdContentCut from 'svelte-icons/md/MdContentCut.svelte'
 
+    import {onMount} from 'svelte'
     import {location, pop, push, querystring} from 'svelte-spa-router'
     import BasketPreview from './basket.preview.svelte'
     import FaBasketTrash from './icons/basket.trash.svelte'
@@ -155,7 +156,46 @@
             folderTitle = contextItem.Title;
     }
 
+    /*onMount( () => {
+        document.addEventListener('keydown', onKeyDown)
+        return () => {
+            document.removeEventListener('keydown', onKeyDown)
+        }
+    })
 
+    function onKeyDown(e)
+    {
+        switch(e.key)
+        {
+        case 'c':
+            if(e.ctrlKey || e.metaKey)
+            {
+                console.log('handle Ctrl+C')   
+                e.stopPropagation()
+                e.preventDefault()
+            }
+            break;  
+            
+        case 'x':
+            if(e.ctrlKey || e.metaKey)
+            {
+                console.log('handle Ctrl+X')   
+                e.stopPropagation()
+                e.preventDefault()
+            }
+            break;  
+
+        case 'v':
+            if(e.ctrlKey || e.metaKey)
+            {
+                console.log('handle Ctrl+V')   
+                e.stopPropagation()
+                e.preventDefault()
+            }
+            break;  
+        }
+    }
+    */
 
     let deleteModal;
     let objectToDelete;

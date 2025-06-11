@@ -84,21 +84,32 @@ export function clearActiveItem(context_level)
 
 export function refreshToolbarOperations()
 {
+    
+    let refreshed = false
+
     const contextOperations = get(contextToolbarOperations)
     if(contextOperations)
     {
+        
         if(Array.isArray(contextOperations))
         {
-            if(contextOperations.length)
+            if(contextOperations.length > 0)
+            {
                 contextToolbarOperations.set([...contextOperations])
+                refreshed = true
+            }
         }
         else
         {
-            if(contextOperations.operations.length)
+            if(contextOperations.operations && contextOperations.operations.length > 0)
+            {
                 contextToolbarOperations.set({...contextOperations})
+                refreshed = true
+            }
         }
     }
-    else
+    
+    if(!refreshed)
     {
         const pageOperations = get(pageToolbarOperations);
         if(pageOperations)
@@ -108,6 +119,7 @@ export function refreshToolbarOperations()
                 if(pageOperations.length > 0)
                 {
                     pageToolbarOperations.set([...pageOperations])
+                    refreshed = true
                 }
             }
             else
@@ -115,6 +127,7 @@ export function refreshToolbarOperations()
                 if(pageOperations.operations && pageOperations.operations.length > 0)
                 {
                     pageToolbarOperations.set({...pageOperations})
+                    refreshed = true
                 }
             }
         }
@@ -159,6 +172,7 @@ export function editable(node, params)
     let onRemove = undefined;
     let onFinish = undefined;
     let onSoftEnter = undefined;
+    let onSingleChange = undefined
     if(params instanceof Object)
     {
         action = params.action ?? params;
@@ -166,6 +180,7 @@ export function editable(node, params)
         onRemove = params.remove ?? undefined
         onFinish = params.onFinish ?? undefined
         onSoftEnter = params.onSoftEnter ?? undefined;
+        onSingleChange = params.onSingleChange ?? undefined
        
         if(params.readonly)
             return;
@@ -323,7 +338,12 @@ export function editable(node, params)
         currentEditable = node;
         node.addEventListener("save", save_listener)
         
-        observer = new MutationObserver(() => { has_changed = true; });
+        observer = new MutationObserver(() => { 
+            has_changed = true; 
+            if(onSingleChange)
+                onSingleChange(node.textContent)
+        });
+
         observer.observe(   node,  {
                                 childList: true,
                                 attributes: true,
