@@ -1,12 +1,12 @@
 <script lang="ts">
     import { each } from 'svelte/internal';
-    import {contextToolbarOperations, pageToolbarOperations, contextItemsStore, toolsActionsOperations} from '../stores.js'
+    import {contextToolbarOperations, pageToolbarOperations, contextItemsStore, toolsActionsOperations, fabCollapsed} from '../stores.js'
     import { showFloatingToolbar, showMenu, showGridMenu } from './menu.js';
-    import {FaChevronUp, FaChevronDown, FaChevronLeft, FaChevronRight, FaCircle, FaEllipsisV} from 'svelte-icons/fa/'
+    import {FaChevronUp, FaChevronDown, FaChevronLeft, FaChevronRight, FaCircle, FaEllipsisV, FaRegDotCircle, FaDotCircle} from 'svelte-icons/fa/'
     import {isDeviceSmallerThan} from '../utils.js'
 
 
-    $: setupCurrentContextOperations($pageToolbarOperations, $contextToolbarOperations, $toolsActionsOperations);
+    $: setupCurrentContextOperations($pageToolbarOperations, $contextToolbarOperations, $toolsActionsOperations, $fabCollapsed);
 
     let operations :object[] = [];
     let mainOperation :object|null = null;
@@ -15,7 +15,7 @@
     let isExpandable: boolean = false;
     let vToolboxExpanded :boolean = false;
     let hToolboxExpanded: boolean = false;
-
+    
     let isDirectPositioningMode = false;
     //..
     function setupCurrentContextOperations(...args)
@@ -75,6 +75,7 @@
         else if(opVer == 2)
         {
             const definedOperations = [...operations]
+            // ************************* MAIN FAB MENU ******************************
             if(main_FAB_position)  // make one button for to show all operations as menu
             {
                 let flatOperations = []
@@ -109,6 +110,9 @@
                     operations = []
             }
 
+            
+            // ************************* USER DEFINED FABs *******************************
+
             definedOperations.forEach(group => {
                 group.operations.forEach( op => {
                     if(op.fab)
@@ -117,6 +121,20 @@
                     }
                 })
             })
+            
+            // ************************* COLLAPSE FAB ***********************************
+            if(operations.length > 1)
+            {
+                if(!operations.find(op => op.fab == 'M10'))
+                {
+                    const collapseFAB = {
+                        icon: $fabCollapsed  ? FaRegDotCircle : FaDotCircle,
+                        fab: 'M10',
+                        action: (f) => toggleExpandAdditionalOperations()
+                    }
+                    operations = [...operations, collapseFAB]
+                }
+            }
 
         }
         else    // opVer == 0
@@ -145,6 +163,11 @@
             else
                 isExpandable = false;
         }
+   }
+
+   function toggleExpandAdditionalOperations()
+   {
+        $fabCollapsed = !$fabCollapsed
    }
 
    /*
@@ -362,7 +385,18 @@
         if(!operation.fab)
             return false;
 
-        return true;
+        if($fabCollapsed)
+        {
+            if(operation.fab == 'M00')
+                return true;
+
+            if(operation.fab == 'M10')
+                return true;
+
+            return false
+        }
+        else
+            return true;
     }
 
 </script>
@@ -374,12 +408,12 @@
                 {@const position = calculatePosition(operation)}
                 {#if position}
                     <button
-                        class="text-stone-500 bg-stone-200/70 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300
-                                font-medium rounded-full text-sm text-center
+                        class=" text-stone-500 bg-stone-200/70 hover:bg-stone-200
+                                focus:outline-none font-medium rounded-full text-sm text-center
+                                dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700 
+                                focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800
                                 w-[30px] h-[30px]
-                                fixed m-0
-                                dark:text-stone-500
-                                dark:bg-stone-700/80 dark:hover:bg-blue-700 dark:focus:ring-blue-800
+                                fixed m-0                            
                                 flex items-center justify-center
                                 disable-dbl-tap-zoom
                                 cursor-pointer z-40"

@@ -157,6 +157,9 @@ bottom_bar_visible_store.subscribe( (value) => { localStorage.bottom_bar_visible
 export const right_sidebar_visible_store = writable(false)
 export const visible_property_tab_store = writable('');
 
+export const fabCollapsed = writable( (localStorage.fabCollapsed && localStorage.fabCollapsed == 'true') || false )
+fabCollapsed.subscribe( (value) => { localStorage.fabCollapsed = (value ? 'true' : '') } );
+
 export function restore_defults()
 {
     
@@ -165,6 +168,7 @@ export function restore_defults()
     bottom_bar_visible_store.set(false);
     right_sidebar_visible_store.set(false);
     visible_property_tab_store.set('');
+    fabCollapsed.set(false)
 }
 
 export function toggle_sidebar(index)

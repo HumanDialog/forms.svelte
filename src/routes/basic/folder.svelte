@@ -727,7 +727,7 @@
                                 caption: `Add ${kind}`,
                                 icon: FaPlus,
                                 action: (f) => { list.addRowAfter(element) },
-                                fab:'M10',
+                                fab:'M20',
                                 tbr:'A',
                             },
                             {
@@ -735,7 +735,7 @@
                                 icon: FaPen,
                                 action: (focused) =>  { listComponent(kind).edit(element, 'Title') },
                                 tbr:'A' ,
-                                fab:'M20',
+                                fab:'M30',
                                 hideToolbarCaption: true
                             },
                             {

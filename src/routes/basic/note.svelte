@@ -264,7 +264,7 @@
                             hideToolbarCaption: true,
                             icon: FaPen,
                             grid: addOperations,
-                            fab: 'M10',
+                            fab: 'M20',
                             tbr: 'A'
                         },
                         {
