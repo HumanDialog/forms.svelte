@@ -4,8 +4,10 @@
     import FaPlus from 'svelte-icons/fa/FaPlus.svelte'
 	import Combo from './combo/combo.svelte'
     import ComboItem from './combo/combo.item.svelte'
+    import TagsPalette from './tags.palette.svelte'
     import {contextItemsStore, data_tick_store, contextTypesStore, tagsReloader} from '../stores.js'
     import {informModification, pushChanges} from '../updates.js'
+	import { showFloatingToolbar } from './menu';
 
     export let tags: string = ''
     export let getGlobalTags :Function
@@ -94,7 +96,7 @@
 
     let addComboVisible: boolean = false;
     let addCombo;
-    export async function show(event, hideCallback)
+    /*export async function show(event, hideCallback)
     {
         if(event)
         {
@@ -113,7 +115,45 @@
         }
         
         addCombo?.show(undefined, onAfterCloseCombo);
-    } 
+    } */
+
+    let rootElement;
+    export async function show(event, hideCallback)
+    {
+        if(event)
+        {
+            event.stopPropagation();
+            event.preventDefault();        
+        }
+
+        addComboVisible = true;
+        await tick();
+
+        const onAfterCloseCombo = () => {
+            addComboVisible = false
+            if(hideCallback)
+                hideCallback()
+        }
+
+        let owner = rootElement
+        let rect = owner.getBoundingClientRect()
+
+        if(tagsTable.length == 0)
+        {
+            const m = 15
+            rect.x -= m; rect.width += 2*m;
+            rect.y -= m; rect.height += 2*m;
+        }
+
+        showFloatingToolbar(rect, TagsPalette,
+            {
+                usedTags: tagsTable,
+                allTags: globalTagsTable,
+                onSelect: onSelectTag,
+                onNewTag: getCreateTagCallback()
+            }
+        )
+    }
 
     function applyChange()
     {
@@ -139,6 +179,10 @@
 
     function onSelectTag(itm: object, key: string, name: string)
     {
+        const idx = tagsTable.findIndex(e => e.label == key)
+        if(idx >= 0)
+            return;
+
         tags += `#${key} `
         tagsTable = decomposeTags(tags, globalTagsTable)
 
@@ -153,12 +197,15 @@
         applyChange();
     }
 
-    function onNewTagCreated(key :string, name :string)
+    function onNewTagCreated(key :string, name :string, color: string = '')
     {
         tags += `#${key} `
 
         let globalTags = getGlobalTags();
-        globalTags += `#${key} `
+        if(color)
+            globalTags += `#${key}:${color} `
+        else
+            globalTags += `#${key} `
         
         globalTagsTable = decomposeTags(globalTags)
         tagsTable = decomposeTags(tags, globalTagsTable)
@@ -178,9 +225,11 @@
 
     function onColorizeTag(name: string, color: string)
     {
+
         let globalTags = getGlobalTags();
         globalTagsTable = decomposeTags(globalTags)
         const srcGlobalTag = globalTagsTable.find(i => i.label == name)
+
         srcGlobalTag.color = color;
 
         tagsTable = decomposeTags(tags, globalTagsTable)
@@ -287,17 +336,21 @@
 
 </script>
 
-<section class="{userClass} flex flex-row {gap} flex-wrap mr-1 sm:mr-0">
+<section class="{userClass} flex flex-row {gap} flex-wrap mr-1 sm:mr-0" bind:this={rootElement}>
     <p class="flex flex-row {gap} flex-wrap ">
-        {#each tagsTable as tag}
-            {#if isEditable}
-                <Tag name={tag.label} color={tag.color} {s}
-                    onRemove={(e) => {onRemoveTag(tag.label)}}
-                    onColor={canChangeColor ? onColorizeTag : null}/>
-            {:else}
-                <Tag name={tag.label} color={tag.color} {s}/>
-            {/if}
-        {/each}
+        {#if tagsTable.length > 0}
+            {#each tagsTable as tag}
+                {#if isEditable}
+                    <Tag name={tag.label} color={tag.color} {s}
+                        onRemove={(e) => {onRemoveTag(tag.label)}}
+                        onColor={canChangeColor ? onColorizeTag : null}/>
+                {:else}
+                    <Tag name={tag.label} color={tag.color} {s}/>
+                {/if}
+            {/each}
+        {:else}
+            <!--p>&ZeroWidthSpace;</p-->
+        {/if}
     </p>
 
     {#if isEditable}
@@ -309,7 +362,7 @@
                 </button>
             {/if}
         {:else}
-            <Combo  compact={true} 
+            <!--Combo  compact={true} 
                     inContext='data'
                     onSelect={onSelectTag}
                     onNewItemCreated={getCreateTagCallback()}
@@ -320,7 +373,7 @@
                 {#each not_used_tags as tag}
                     <ComboItem key={tag.label}/>
                 {/each}
-            </Combo>
+            </Combo-->
         {/if}
     {/if}
 </section>

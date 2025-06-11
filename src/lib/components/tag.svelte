@@ -10,8 +10,9 @@
 	export let onRemove: any | undefined = undefined;
     export let onColor: any | undefined = undefined;
 	export let s: string = 'sm';
+	export let onCustomClick: any | undefined = undefined
 
-    onMount( () => {
+   /* onMount( () => {
 
         if(onColor && rootElement)
         {
@@ -23,6 +24,7 @@
             
         }
     })
+*/
 
 	let pr = onRemove ? 'pr-1' : 'pr-2';
 
@@ -67,11 +69,38 @@
         onColor(name, color)
         colorPicker?.hide();
     }
+
+	function conditionalClick(node, {condition, callback})
+    {
+        if(condition)
+        {
+            node.addEventListener('click', callback)
+            return {
+                destroy() {
+                    node.removeEventListener('click', callback)
+                }
+            }
+        }
+    }
+
+	const hasClick = (onColor != undefined) || (onCustomClick != undefined)
+	function handleClick(e)
+	{
+		if(onColor)
+			showColorPicker(e)		
+		else if(onCustomClick)
+			onCustomClick(e)
+	}
+
 </script>
 
 <span
 	class=" pl-2 {pr} rounded text-white flex flex-row {color}  items-center"
-	
+	class:cursor-pointer={hasClick}
+	use:conditionalClick={{
+		condition: hasClick, 
+		callback: handleClick
+	}}
 	bind:this={rootElement}>
 	<span class={font}>{name}</span>
 	{#if onRemove}

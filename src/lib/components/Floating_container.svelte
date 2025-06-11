@@ -37,7 +37,7 @@
 
         if((!was_visible) && (toolbar == _toolbar) && internalElement && internalElement.reload)
         {
-            internalElement.reload();
+            internalElement.reload(_props);
         }
 
         visible = true;

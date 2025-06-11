@@ -79,6 +79,15 @@ export function showFloatingToolbar(around :DOMRect|DOMPoint, toolbar, props = {
     return toolbar_component;
 }
 
+export function hideFloatingToolbar()
+{
+    if(toolbar_component)
+    {
+        if(toolbar_component.isVisible())
+            toolbar_component.hide();
+    }
+}
+
 export function showGridMenu(around :DOMRect|DOMPoint, operations)
 {
     showFloatingToolbar(around, Grid, {operations: operations})
