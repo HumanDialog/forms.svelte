@@ -35,7 +35,6 @@
     import MoveOperations from './list.board.move.svelte'
 	import { tick, onMount } from 'svelte';
     import BasketPreview from './basket.preview.svelte'
-    import FaBasketPlus from './icons/basket.plus.svelte'
     import {cache} from './cache.js'
 
     export let params = {}
@@ -578,7 +577,7 @@
                             hideToolbarCaption: true
                         } ],
                         {
-                            icon: FaBasketPlus, // FaCopy,   // MdLibraryAdd
+                            icon: FaCopy,   // MdLibraryAdd
                             caption: 'Add to Clipboard',
                             action: (f) => copyTaskToBasket(task),
                             fab: 'S10',

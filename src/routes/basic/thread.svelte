@@ -29,10 +29,9 @@
 
     import {FaTimes, FaAlignLeft,FaCheck, FaTag, FaUser, FaCalendarAlt, FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen,
         FaCommentMedical, FaRegStar, FaStar, FaPaperPlane, FaPaperclip, FaPlus, FaComment, FaQuoteRight, FaInfo, FaListUl,
-        FaImage, FaTable, FaBold, FaItalic, FaUnderline, FaStrikethrough, FaRemoveFormat, FaCode, FaExclamationTriangle
+        FaImage, FaTable, FaBold, FaItalic, FaUnderline, FaStrikethrough, FaRemoveFormat, FaCode, FaExclamationTriangle, FaCopy
     } from 'svelte-icons/fa/'
 
-    import FaBasketPlus from './icons/basket.plus.svelte'
     import FaCommentPlus from './icons/post.plus.svelte'
     import AnswerPost from './thread.answer.svelte'
     import AttachedFile from './attached.file.svelte'
@@ -323,7 +322,7 @@
                             action: (f) => {} ,
                         },
                         {
-                            icon: FaBasketPlus,   // MdLibraryAdd
+                            icon: FaCopy,   // MdLibraryAdd
                             caption: 'Add to Clipboard',
                             action: (f) => copyTaskToBasket(),
 

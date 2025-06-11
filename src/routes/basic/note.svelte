@@ -30,7 +30,6 @@
     } from 'svelte-icons/fa/'
 
 
-    import FaBasketPlus from './icons/basket.plus.svelte'
     import AttachedFile from './attached.file.svelte'
 
     let noteRef = ''
@@ -269,7 +268,7 @@
                         },
                         {
                             caption: 'Add to Clipboard',
-                            icon: FaBasketPlus,   // MdLibraryAdd
+                            icon: FaCopy,   // MdLibraryAdd
                             action: (f) => copyTaskToBasket(),
                             fab: 'M03',
                             tbr: 'A'
@@ -454,7 +453,7 @@
                         },
                         {
                             caption: 'Add to Clipboard',
-                            icon: FaBasketPlus,   // MdLibraryAdd
+                            icon: FaCopy,   // MdLibraryAdd
                             action: (f) => copyTaskToBasket(),
                         //    fab: 'M04',
                         //    tbr: 'A'
@@ -476,7 +475,7 @@
         },
         {
             caption: 'Add to Clipboard',
-            icon: FaBasketPlus,   // MdLibraryAdd
+            icon: FaCopy,   // MdLibraryAdd
             action: () => copyTaskToBasket(),
         }
     ]

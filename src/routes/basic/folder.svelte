@@ -26,8 +26,6 @@
 
     import {location, pop, push, querystring} from 'svelte-spa-router'
     import BasketPreview from './basket.preview.svelte'
-    import FaBasketPlus from './icons/basket.plus.svelte'
-    import FaBasketCut from './icons/basket.cut.svelte'
     import FaBasketTrash from './icons/basket.trash.svelte'
     import {cache} from './cache.js'
 

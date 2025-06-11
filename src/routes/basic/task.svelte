@@ -28,8 +28,7 @@
         FaUnderline, FaStrikethrough, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle, FaInfo,
         FaListUl
     } from 'svelte-icons/fa/'
-    import FaBasketPlus from './icons/basket.plus.svelte'
-	import AttachedFile from './attached.file.svelte'
+    import AttachedFile from './attached.file.svelte'
 
     let taskRef = ''
     let task = null;
@@ -301,7 +300,7 @@
                         },
                         {
                             caption: 'Add to Clipboard',
-                            icon: FaBasketPlus,   // MdLibraryAdd
+                            icon: FaCopy,   // MdLibraryAdd
                             action: (f) => copyTaskToBasket(),
                             fab: 'M04',
                             tbr: 'A', hideToolbarCaption: true
@@ -495,7 +494,7 @@
 
                         {
                             caption: 'Add to Clipboard',
-                            icon: FaBasketPlus,   // MdLibraryAdd
+                            icon: FaCopy,   // MdLibraryAdd
                             action: (f) => copyTaskToBasket(),
                             fab: 'M04',
                             tbr: 'A',hideToolbarCaption: true
@@ -674,7 +673,7 @@
 
                         {
                             caption: 'Add to Clipboard',
-                            icon: FaBasketPlus,   // MdLibraryAdd
+                            icon: FaCopy,   // MdLibraryAdd
                             action: (f) => copyTaskToBasket(),
                         //    fab: 'M04',
                         //    tbr: 'A'
@@ -696,7 +695,7 @@
         },
         {
             caption: 'Add to Clipboard',
-            icon: FaBasketPlus,   // MdLibraryAdd
+            icon: FaCopy,   // MdLibraryAdd
             action: () => copyTaskToBasket(),
         }
     ]
