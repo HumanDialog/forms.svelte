@@ -9,6 +9,8 @@
     let inputElement;
     let protocol = 'cons';
     let protoButtonBorderClass = ''
+    let history = []
+    let currentHistoryElementIdx = -1
 
     async function onKeyDown(e)
     {
@@ -32,18 +34,74 @@
                     input = input.replace('self', navItem)
             }
 
+            const req = input;
+            input = "";
+
             const apiVer = $session.configuration.api_version;
-            const result = await reef.fetch(`/${protocol}/${apiVer}/${input}`)
+            const result = await reef.fetch(`/${protocol}/${apiVer}/${req}`)
             const res = await result.text();
             prevLines = [...prevLines, res]
-
             
-            input = "";
+            updateHistory(req)
         }
         else if(e.key == 'Esc' || e.key == 'Escape')
         {
             input = "";
         }
+        else if(e.key == 'ArrowUp')
+        {
+            if(history.length > 0)
+            {
+                if(currentHistoryElementIdx < 0)
+                {
+                    currentHistoryElementIdx = history.length-1
+                    input = history[currentHistoryElementIdx]
+                }
+                else if(currentHistoryElementIdx > 0)
+                {
+                    currentHistoryElementIdx--;
+                    input = history[currentHistoryElementIdx]
+                }
+                else
+                {
+                    
+                }
+                moveCursorAtEnd()
+            }
+        }
+        else if(e.key == 'ArrowDown')
+        {
+            if(history.length > 0)
+            {
+                if(currentHistoryElementIdx >= 0)
+                {
+                    currentHistoryElementIdx++
+                    if(currentHistoryElementIdx >= history.length)
+                    {
+                        currentHistoryElementIdx = -1
+                        input = ''
+                    }
+                    else
+                        input = history[currentHistoryElementIdx]
+                }  
+                moveCursorAtEnd()
+            }
+        }
+    }
+
+    
+    function updateHistory(command)
+    {
+        const idx = history.findIndex(c => c == command)
+        if(idx < 0)
+            history.push(command)
+        else
+        {
+            history.splice(idx, 1)
+            history.push(command)
+        }
+
+        currentHistoryElementIdx = -1
     }
 
     function getNav(contextLevel)
@@ -67,9 +125,30 @@
         return navItem;
     }
 
+    function moveCursorAtEnd()
+    {
+        return;
+        setTimeout( () => 
+        {
+            const sel = window.getSelection();
+            if(!sel)
+                return;
+            if(sel.focusNode == inputElement)
+                console.log(sel.focusOffset)    
+            //sel.setPosition(inputElement, input.length)        
+        }, 100)
+    } 
+
     afterUpdate(() =>
     {
         inputElement?.scrollIntoView();
+        
+            //const selection = window.getSelection()
+            //if(selection?.focusNode == inputElement)
+            //{
+            //    selection?.setPosition(inputElement, input.length-1)        
+            //}
+           
     })
 
 
