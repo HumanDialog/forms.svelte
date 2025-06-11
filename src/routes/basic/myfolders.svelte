@@ -173,14 +173,14 @@
                         },
                     /*    {
                             icon: FaCopy,   // MdLibraryAdd
-                            caption: 'Copy to basket',
+                            caption: 'Copy to Clipboard',
                             action: (f) => copyFolderToBasket(folder),
                         //    fab: 'M04',
                             tbr: 'A'
                         },
                         {
                             icon: FaCut,
-                            caption: 'Move to basket',
+                            caption: 'Move to Clipboard',
                             action: (f) => cutFolderToBasket(folder),
                         //    fab: 'M05',
                             tbr: 'A'

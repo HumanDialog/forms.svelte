@@ -560,7 +560,7 @@
                         <div class="w-4 h-4"></div>
                     {/if}
                 </div>
-                <div class="">
+                <div class="flex items-center ">
                     <p> {operation.caption}</p>
                     {#if operation.description}
                         {@const shortcut_width_px = operation.shortcut ? 80 : 0}

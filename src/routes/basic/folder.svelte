@@ -416,7 +416,7 @@
                     menu: 'FT',
                     operations: [
                         {
-                            caption: 'Clear Basket',
+                            caption: 'Clear Clipboard',
                             icon: FaBasketTrash, //FaTrash,
                             action: async (f) => await dettachAllMyContent(),
                         //      fab: 'M30',
@@ -611,7 +611,7 @@
                             },
                             {
                                 icon: FaTrash,
-                                caption: 'Remove from Basket',
+                                caption: 'Remove from Clipboard',
                                 action: (f) => dettachElement(element, kind),
                             //    fab:'M30',
                                 tbr:'A'
@@ -759,7 +759,7 @@
                                 hideToolbarCaption: true
                             },
                             {
-                                caption: 'Add to Basket',
+                                caption: 'Add to Clipboard',
                                 icon: FaBasketPlus, //FaCopy,   // MdLibraryAdd
                                 action: (f) => copyElementToBasket(element, kind),
                                 fab: 'S10',
@@ -767,7 +767,7 @@
 
                             },
                             {
-                                caption: 'Move to Basket',
+                                caption: 'Move to Clipboard',
                                 //icon: FaBasketCut, //FaCut,
                                 action: (f) => cutElementToBasket(element, kind),
                             //    fab: 'M05',
@@ -837,7 +837,7 @@
                                 hideToolbarCaption: true
                             },
                             {
-                                caption: 'Add to Basket',
+                                caption: 'Add to Clipboard',
                                 icon: FaBasketPlus, //FaCopy,   // MdLibraryAdd
                                 action: (f) => copyElementToBasket(element, kind),
                                 fab: 'S10',
@@ -845,7 +845,7 @@
 
                             },
                             {
-                                caption: 'Move to Basket',
+                                caption: 'Move to Clipboard',
                                 //icon: FaBasketCut, //FaCut,
                                 action: (f) => cutElementToBasket(element, kind),
                             //    fab: 'M05',

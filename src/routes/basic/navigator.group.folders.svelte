@@ -309,7 +309,7 @@
     {
         return [
             {
-                caption: 'Clear basket',
+                caption: 'Clear Clipboard',
                 icon: FaTrash,
                 action: (f) => clearFolder(dataItem)
             }];;
@@ -454,7 +454,7 @@
                             operations={(node) => getBasketOperations(node, basket)}
                             summary="List of selected items for quick operations"
                             selectable={basket}>
-                My Basket
+                My Clipboard
             </SidebarItem>
         </SidebarGroup>
 
@@ -533,7 +533,7 @@
                             operations={(node) => getBasketOperations(node, basket)}
                             summary="List of selected items for quick operations"
                             item={basket}>
-                My Basket
+                My Clipboard
             </SidebarItem>
         </SidebarGroup-->
 

@@ -268,7 +268,7 @@
                             tbr: 'A'
                         },
                         {
-                            caption: 'Add to basket',
+                            caption: 'Add to Clipboard',
                             icon: FaBasketPlus,   // MdLibraryAdd
                             action: (f) => copyTaskToBasket(),
                             fab: 'M03',
@@ -318,7 +318,7 @@
                         //    tbr: 'A'
                         },
                         {
-                            caption: 'Add to basket',
+                            caption: 'Add to Clipboard',
                             icon: FaBasketPlus,   // MdLibraryAdd
                             action: (f) => copyTaskToBasket(),
                         //    fab: 'M04',
@@ -475,7 +475,7 @@
             action: () => description?.save(),
         },
         {
-            caption: 'Add to basket',
+            caption: 'Add to Clipboard',
             icon: FaBasketPlus,   // MdLibraryAdd
             action: () => copyTaskToBasket(),
         }

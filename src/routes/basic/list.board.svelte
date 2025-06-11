@@ -579,7 +579,7 @@
                         } ],
                         {
                             icon: FaBasketPlus, // FaCopy,   // MdLibraryAdd
-                            caption: 'Add to Basket',
+                            caption: 'Add to Clipboard',
                             action: (f) => copyTaskToBasket(task),
                             fab: 'S10',
                             tbr: 'A', hideToolbarCaption: true

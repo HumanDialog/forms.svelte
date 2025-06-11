@@ -182,7 +182,7 @@
 
             {#if basketEntriesNo==0}
                 <div class="h-full flex items-center justify-center">
-                    <p>Basket is empty</p>
+                    <p>Clipboard is empty</p>
                 </div>
             {/if}
 

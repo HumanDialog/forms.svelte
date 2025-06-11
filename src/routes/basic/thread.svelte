@@ -324,7 +324,7 @@
                         },
                         {
                             icon: FaBasketPlus,   // MdLibraryAdd
-                            caption: 'Add to Basket',
+                            caption: 'Add to Clipboard',
                             action: (f) => copyTaskToBasket(),
 
                         }
