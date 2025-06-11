@@ -257,7 +257,7 @@
                             icon: FaSave,
                             action: (f) => saveCurrentEditable(),
                             fab: 'T02',
-                            tbr: 'A'
+                            tbr: 'C'
                         },
                         {
                             caption: 'Edit...',
@@ -296,106 +296,6 @@
             tbr: 'C',
             preAction: description.preventBlur,
             operations: [
-                {
-                    caption: 'Note',
-                    //tbr: 'B',
-                    preAction: description.preventBlur,
-                    operations: [
-                        {
-                            caption: 'Save',
-                            hideToolbarCaption: true,
-                            icon: FaSave,
-                            action: (f) => description?.save(),
-                       //     fab: 'S00',
-                            tbr: 'A'
-                        },
-                        {
-                            caption: 'Edit...',
-                            hideToolbarCaption: true,
-                            icon: FaPen,
-                            grid: addOperations,
-                        //    fab: 'M10',
-                        //    tbr: 'A'
-                        },
-                        {
-                            caption: 'Add to Clipboard',
-                            icon: FaBasketPlus,   // MdLibraryAdd
-                            action: (f) => copyTaskToBasket(),
-                        //    fab: 'M04',
-                        //    tbr: 'A'
-
-                        }
-                    ]
-                },
-                {
-                    caption: 'Insert',
-                    //tbr: 'B',
-                    preAction: description.preventBlur,
-                    operations: [
-                        {
-                            caption: 'Image',
-                            icon: FaImage,
-                            action: (f) => description.setImage(),
-                            activeFunc: description.isActiveImage,
-                            tbr: 'A', hideToolbarCaption: true
-                        },
-                        {
-                            caption: 'Table',
-                            icon: FaTable,
-                            action: (f) => description.setTable(),
-                            activeFunc: description.isActiveTable
-                        },
-                        {
-                            caption: 'Attachement',
-                            icon: FaPaperclip,
-                            action: (f) => runFileAttacher(),
-                            tbr: 'A',
-                            hideToolbarCaption: true
-                        },
-                        {
-                            caption: 'Tag',
-                            icon: FaTag,
-                            action: (f) => runTagInserter()
-                        }
-                    ]
-                },
-                {
-                    caption: 'Text',
-                    //tbr: 'B',
-                    preAction: description.preventBlur,
-                    operations: [
-                        {
-                            caption: 'Bold',
-                            icon: FaBold,
-                            action: (f) => description.setBold(),
-                            activeFunc: description.isActiveBold,
-                            tbr: 'A',
-                            hideToolbarCaption: true
-                        },
-                        {
-                            caption: 'Italic',
-                            icon: FaItalic,
-                            action: (f) => description.setItalic(),
-                            activeFunc: description.isActiveItalic,
-                            tbr: 'A',
-                            hideToolbarCaption: true
-                        },
-                        {
-                            caption: 'Underline',
-                            icon: FaUnderline,
-                            action: (f) => description.setUnderline(),
-                            activeFunc: description.isActiveUnderline,
-                            tbr: 'A',
-                            hideToolbarCaption: true
-                        },
-                        {
-                            caption: 'Strikethrough',
-                            icon: FaStrikethrough,
-                            action: (f) => description.setStrikethrough(),
-                            activeFunc: description.isActiveStrikethrough,
-                        },
-                    ]
-                },
                 {
                     caption: 'Styles',
                     //tbr: 'B',
@@ -460,6 +360,106 @@
                             activeFunc: description.isActiveBulletList
 
                         },
+                    ]
+                },
+                {
+                    caption: 'Text',
+                    //tbr: 'B',
+                    preAction: description.preventBlur,
+                    operations: [
+                        {
+                            caption: 'Bold',
+                            icon: FaBold,
+                            action: (f) => description.setBold(),
+                            activeFunc: description.isActiveBold,
+                            tbr: 'A',
+                            hideToolbarCaption: true
+                        },
+                        {
+                            caption: 'Italic',
+                            icon: FaItalic,
+                            action: (f) => description.setItalic(),
+                            activeFunc: description.isActiveItalic,
+                            tbr: 'A',
+                            hideToolbarCaption: true
+                        },
+                        {
+                            caption: 'Underline',
+                            icon: FaUnderline,
+                            action: (f) => description.setUnderline(),
+                            activeFunc: description.isActiveUnderline,
+                            tbr: 'A',
+                            hideToolbarCaption: true
+                        },
+                        {
+                            caption: 'Strikethrough',
+                            icon: FaStrikethrough,
+                            action: (f) => description.setStrikethrough(),
+                            activeFunc: description.isActiveStrikethrough,
+                        },
+                    ]
+                },
+                {
+                    caption: 'Insert',
+                    //tbr: 'B',
+                    preAction: description.preventBlur,
+                    operations: [
+                        {
+                            caption: 'Image',
+                            icon: FaImage,
+                            action: (f) => description.setImage(),
+                            activeFunc: description.isActiveImage,
+                            tbr: 'A', hideToolbarCaption: true
+                        },
+                        {
+                            caption: 'Table',
+                            icon: FaTable,
+                            action: (f) => description.setTable(),
+                            activeFunc: description.isActiveTable
+                        },
+                        {
+                            caption: 'Attachement',
+                            icon: FaPaperclip,
+                            action: (f) => runFileAttacher(),
+                            tbr: 'A',
+                            hideToolbarCaption: true
+                        },
+                        {
+                            caption: 'Tag',
+                            icon: FaTag,
+                            action: (f) => runTagInserter()
+                        }
+                    ]
+                },
+                {
+                    caption: 'Note',
+                    //tbr: 'B',
+                    preAction: description.preventBlur,
+                    operations: [
+                        {
+                            caption: 'Save',
+                            hideToolbarCaption: true,
+                            icon: FaSave,
+                            action: (f) => description?.save(),
+                       //     fab: 'S00',
+                            tbr: 'C'
+                        },
+                        {
+                            caption: 'Edit...',
+                            hideToolbarCaption: true,
+                            icon: FaPen,
+                            grid: addOperations,
+                        //    fab: 'M10',
+                        //    tbr: 'A'
+                        },
+                        {
+                            caption: 'Add to Clipboard',
+                            icon: FaBasketPlus,   // MdLibraryAdd
+                            action: (f) => copyTaskToBasket(),
+                        //    fab: 'M04',
+                        //    tbr: 'A'
+
+                        }
                     ]
                 }
             ]
