@@ -15,7 +15,7 @@
                 onErrorShowAlert, showMenu,
 				UI} from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaList,
-        FaEllipsisH, FaChevronRight, FaChevronLeft, FaRandom, FaShoppingBasket
+        FaEllipsisH, FaChevronRight, FaChevronLeft, FaRandom, FaRegClipboard
     } from 'svelte-icons/fa'
     import {location, pop, push, querystring, link} from 'svelte-spa-router'
     import {cache} from './cache.js'
@@ -284,8 +284,8 @@
                             hideToolbarCaption: true
                         },
                         {
-                            caption: 'Add tasks from Basket',
-                            //icon: FaShoppingBasket, //FaLink, //aRegShareSquare, //
+                            caption: 'Add tasks from Clipboard',
+                            //icon: FaRegClipboard, //FaLink, //aRegShareSquare, //
                             toolbar: BasketPreview,
                             props: {
                                 destinationContainer: listPath,
@@ -399,8 +399,8 @@
                             hideToolbarCaption: true
                         },
                         {
-                            caption: 'Add tasks from Basket',
-                        //    icon: FaShoppingBasket, //FaLink, //aRegShareSquare, //
+                            caption: 'Add tasks from Clipboard',
+                        //    icon: FaRegClipboard, //FaLink, //aRegShareSquare, //
                             toolbar: BasketPreview,
                             props: {
                                 destinationContainer: listPath,

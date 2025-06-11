@@ -16,7 +16,7 @@
 				activateItem, UI,
 				showFloatingToolbar} from '$lib'
     import {FaRegFile, FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaSync,
-        FaList, FaEllipsisH, FaChevronRight, FaChevronLeft, FaRegShareSquare, FaLink, FaUnlink, FaRegStar, FaStar, FaShoppingBasket, FaCopy, FaCut} from 'svelte-icons/fa'
+        FaList, FaEllipsisH, FaChevronRight, FaChevronLeft, FaRegShareSquare, FaLink, FaUnlink, FaRegStar, FaStar, FaCopy, FaCut} from 'svelte-icons/fa'
 
         import {FaEdit} from 'svelte-icons/fa'
         import FaHighlighter from 'svelte-icons/fa/FaHighlighter.svelte'
@@ -467,8 +467,8 @@
                     separator: true
                 },
                 {
-                    caption: 'Add elements from Basket',
-                    //icon: FaShoppingBasket, //FaLink, //aRegShareSquare, //
+                    caption: 'Add elements from Clipboard',
+
                     toolbar: BasketPreview,
                     props: {
                         destinationContainer: contextPath,
@@ -674,21 +674,21 @@
                                 hideToolbarCaption: true
                             },
                             {
-                                caption: 'Add to Basket',
-                                icon: FaBasketPlus, //FaCopy,   // MdLibraryAdd
+                                caption: 'Add to Clipboard',
+                                icon: FaCopy, //FaCopy,   // MdLibraryAdd
                                 action: (f) => copyElementToBasket(element, kind),
                                 hideToolbarCaption: true,
-                                fab: 'S10',
+                                fab: 'M30',
                                 tbr: 'A'
 
                             },
                             {
-                                caption: 'Move to Basket',
-                            //    icon: FaBasketCut, //FaCut,
+                                caption: 'Move to Clipboard',
+                                icon: FaCut, //FaCut,
                                 action: (f) => cutElementToBasket(element, kind),
-                                hideToolbarCaption: true
-                            //    fab: 'M05',
-                            //    tbr: 'A'
+                                hideToolbarCaption: true,
+                                fab: 'M40',
+                                tbr: 'A'
                             },
                             {
                                 separator: true

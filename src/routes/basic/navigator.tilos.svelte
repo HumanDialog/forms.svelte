@@ -1,17 +1,17 @@
 <script>
-    import {    Spinner, 
-                startEditing, 
-                SidebarGroup, 
-                SidebarList, 
-                SidebarItem, 
-                reloadMainContentPage, 
+    import {    Spinner,
+                startEditing,
+                SidebarGroup,
+                SidebarList,
+                SidebarItem,
+                reloadMainContentPage,
                 Modal,
                 reloadWholeApp,
-                Input, 
+                Input,
                 onErrorShowAlert,
                 randomString, UI
             } from '$lib'
-    import {FaHome, FaFolder, FaQuestion, FaDownload, FaAt, FaShoppingBasket, FaComments} from 'svelte-icons/fa'
+    import {FaHome, FaFolder, FaQuestion, FaDownload, FaAt, FaRegClipboard, FaComments} from 'svelte-icons/fa'
     import {location, push} from 'svelte-spa-router'
     import {reef, session} from '@humandialog/auth.svelte'
 	import { afterUpdate, onMount, tick } from 'svelte';
@@ -24,7 +24,7 @@
     let navFolders;
     let navItems = [];
     let waitForRequest = false
-    
+
     $: currentPath = $location;
 
     const navRefresher = {
@@ -37,14 +37,14 @@
     {
         initNavigator();
         UI.navigator = navRefresher
-        
+
         return () => {
             if(UI.navigator == navRefresher)
                 UI.navigator = null
-        }      
+        }
     })
 
-    
+
     async function initNavigator()
     {
         if($session.isActive)
@@ -54,8 +54,8 @@
                 if(res != null)
                     user = res.User;
             })
-           
-        
+
+
 
             const cacheKey = `foldersNavigator`
             const cachedValue = cache.get(cacheKey)
@@ -87,7 +87,7 @@
         await fetchData();
         navFolders.reload(rootFolders)
     }
-   
+
     function isRoutingTo(href, currentPath)
     {
         if(!sidebar)
@@ -97,7 +97,7 @@
         if(linkPath.startsWith('#'))
             linkPath = linkPath.substring(1)
 
-        
+
 
         if(currentPath.startsWith(linkPath))
             return true;
@@ -111,11 +111,11 @@
         {
             switch(folder.icon)
             {
-            case 'FaFolder':
+            case 'Folder':
                 return FaFolder;
-            case 'FaShoppingBasket':
-                return FaShoppingBasket;
-            case 'FaComments':
+            case 'Clipboard':
+                return FaRegClipboard;
+            case 'Discussion':
                 return FaComments;
             default:
                 return FaFolder
@@ -134,7 +134,7 @@
 
 {#key currentPath}
 {#if sidebar}
-      
+
     {#if waitForRequest && !rootFolders}
         <Spinner delay={3000}/>
     {:else}
@@ -147,9 +147,9 @@
             </SidebarItem>
         </SidebarGroup>
 
-        {#if rootFolders && rootFolders.length > 0}   
-            <SidebarGroup border>           
-                <SidebarList    objects={rootFolders} 
+        {#if rootFolders && rootFolders.length > 0}
+            <SidebarGroup border>
+                <SidebarList    objects={rootFolders}
                                 orderAttrib='Order'
                                 bind:this={navFolders}>
                     <svelte:fragment let:item let:idx>
@@ -163,7 +163,7 @@
                             {item.Title}
                         </SidebarItem>
                     </svelte:fragment>
-                </SidebarList> 
+                </SidebarList>
             </SidebarGroup>
         {/if}
 
@@ -204,9 +204,9 @@
             </SidebarItem>
         </SidebarGroup>
 
-        {#if rootFolders && rootFolders.length > 0}   
-            <SidebarGroup border>           
-                <SidebarList    objects={rootFolders} 
+        {#if rootFolders && rootFolders.length > 0}
+            <SidebarGroup border>
+                <SidebarList    objects={rootFolders}
                                 orderAttrib='Order'
                                 bind:this={navFolders}>
                     <svelte:fragment let:item let:idx>
@@ -220,7 +220,7 @@
                             {item.Title}
                         </SidebarItem>
                     </svelte:fragment>
-                </SidebarList> 
+                </SidebarList>
             </SidebarGroup>
         {/if}
 
@@ -250,4 +250,3 @@
 
 {/if}
 {/key}
-

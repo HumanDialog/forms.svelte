@@ -1,15 +1,15 @@
 <script>
-    import {    Spinner, 
-                startEditing, 
-                SidebarGroup, 
-                SidebarList, 
-                SidebarItem, 
-                reloadMainContentPage, 
+    import {    Spinner,
+                startEditing,
+                SidebarGroup,
+                SidebarList,
+                SidebarItem,
+                reloadMainContentPage,
                 Modal,
                 reloadWholeApp,
-                Input, 
+                Input,
                 onErrorShowAlert, UI} from '$lib'
-    import {FaRegFolder, FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaArchive, FaUsers, FaPlus, FaRegStar, FaStar, FaShoppingBasket} from 'svelte-icons/fa'
+    import {FaRegFolder, FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaArchive, FaUsers, FaPlus, FaRegStar, FaStar, FaPaste} from 'svelte-icons/fa'
     import {location, push} from 'svelte-spa-router'
     import {reef, session} from '@humandialog/auth.svelte'
 	import { onMount, tick } from 'svelte';
@@ -25,7 +25,7 @@
     let navPinnedFolders;
     let navGroupItems = [];
     let navPinnedItems = [];
-    
+
     $: currentPath = $location;
 
     const navRefresher = {
@@ -42,7 +42,7 @@
         return () => {
             if(UI.navigator == navRefresher)
                 UI.navigator = null
-        }        
+        }
     })
 
     function initNavigator()
@@ -56,7 +56,7 @@
                 basket = user.BasketFolder
                 pinnedFolders = user.PinnedFolders['Folders/Folder']
 
-                navPinnedFolders?.reload(pinnedFolders)   
+                navPinnedFolders?.reload(pinnedFolders)
             }
 
             reef.post('user/query', {
@@ -114,8 +114,8 @@
             cache.set('navFolderFolders', groupFolders)
         })
 
-        
-        
+
+
     }
 
     async function fetchGroupFolders()
@@ -138,11 +138,11 @@
         await initNavigator();
     }
 
-    
+
     async function addFolder(folderName, order)
     {
-        await reef.post("/group/Folders/new", 
-                            { 
+        await reef.post("/group/Folders/new",
+                            {
                                 Title: folderName,
                                 Order: order
                             },
@@ -150,7 +150,7 @@
         reloadGroupFolders();
     }
 
-    
+
     function isRoutingTo(href, currentPath)
     {
         if(!sidebar)
@@ -166,13 +166,13 @@
             return false;
     }
 
-    
+
 
     export function requestAdd()
     {
         navGroupFolders.add(async (folderName, order) => {
-            await reef.post("/group/Folders/new", 
-                            { 
+            await reef.post("/group/Folders/new",
+                            {
                                 Title: folderName,
                                 Order: order
                             },
@@ -181,7 +181,7 @@
         })
     }
 
-   
+
 
     function getFolderOperations(domNode, dataItem, navItem)
     {
@@ -194,7 +194,7 @@
             {
                 caption: 'Edit summary',
                 action: (f) => navItem.editSummary()
-            },           
+            },
             {
                 caption: 'Move on top',
                 action: (f) => navGroupFolders.moveTop(dataItem)
@@ -254,7 +254,7 @@
             {
                 caption: 'Edit summary',
                 action: (f) => navItem.editSummary()
-            }, 
+            },
             {
                 separator: true
             },
@@ -289,7 +289,7 @@
             {
                 caption: 'Edit summary',
                 action: (f) => navItem.editSummary()
-            }, 
+            },
             {
                 separator: true
             },
@@ -325,7 +325,7 @@
         await reef.post(`${folder.$ref}/TogglePinned`, {}, onErrorShowAlert)
         reloadPinnedFolders();
     }
-    
+
 
     let deleteModal;
     let folderToDelete;
@@ -354,12 +354,12 @@
         case 'PinnedFolder':
             reloadPinnedFolders();
         }
-        
+
     }
 
     async function changeName(folder, name)
     {
-        let res = await reef.post(`${folder.$ref}/set`, 
+        let res = await reef.post(`${folder.$ref}/set`,
                                 {
                                     Title: name
                                 },
@@ -370,7 +370,7 @@
     async function changeSummary(folder, summary)
     {
 
-        let res = await reef.post(`${folder.$ref}/set`, 
+        let res = await reef.post(`${folder.$ref}/set`,
                                 {
                                     Summary: summary
                                 },
@@ -386,8 +386,8 @@
         {#if $session.isActive}
             {#if pinnedFolders && pinnedFolders.length > 0}
                 <SidebarGroup >
-            
-                    <SidebarList    objects={pinnedFolders} 
+
+                    <SidebarList    objects={pinnedFolders}
                                     orderAttrib='Order'
                                     bind:this={navPinnedFolders}>
                         <svelte:fragment let:item let:idx>
@@ -405,14 +405,14 @@
                                 {item.Title}
                             </SidebarItem>
                         </svelte:fragment>
-                    </SidebarList> 
+                    </SidebarList>
                 </SidebarGroup>
             {/if}
 
             <SidebarGroup border>
                 <SidebarItem   href="/myfolders"
                                 icon={FaRegFolder}
-                                active={isRoutingTo("/myfolders", currentPath)} 
+                                active={isRoutingTo("/myfolders", currentPath)}
                                 operations={(node) => getMyFoldersOperations(node, user)}
                                 summary="Personal folders"
                                 selectable={user}>
@@ -422,10 +422,10 @@
         {/if}
 
         <SidebarGroup border>
-           
-            <SidebarList    objects={groupFolders} 
+
+            <SidebarList    objects={groupFolders}
                             orderAttrib='Order'
-                            inserter={addFolder} 
+                            inserter={addFolder}
                             inserterPlaceholder='New folder'
                             bind:this={navGroupFolders}>
                 <svelte:fragment let:item let:idx>
@@ -443,14 +443,14 @@
                         {item.Title}
                     </SidebarItem>
                 </svelte:fragment>
-            </SidebarList> 
+            </SidebarList>
         </SidebarGroup>
 
         <SidebarGroup border>
             {@const href = `/folder/${basket.Id}`}
             <SidebarItem   {href}
-                            icon={FaShoppingBasket}
-                            active={isRoutingTo(href, currentPath)} 
+                            icon={FaPaste}
+                            active={isRoutingTo(href, currentPath)}
                             operations={(node) => getBasketOperations(node, basket)}
                             summary="List of selected items for quick operations"
                             selectable={basket}>
@@ -458,7 +458,7 @@
             </SidebarItem>
         </SidebarGroup>
 
-       
+
         {:else}
             <Spinner delay={3000}/>
         {/if}
@@ -470,7 +470,7 @@
         {#if $session.isActive}
             {#if pinnedFolders && pinnedFolders.length > 0}
                 <SidebarGroup >
-                    <SidebarList    objects={pinnedFolders} 
+                    <SidebarList    objects={pinnedFolders}
                                     orderAttrib='Order'
                                     bind:this={navPinnedFolders}>
                         <svelte:fragment let:item let:idx>
@@ -487,10 +487,10 @@
                                 {item.Title}
                             </SidebarItem>
                         </svelte:fragment>
-                    </SidebarList> 
+                    </SidebarList>
                 </SidebarGroup>
             {/if}
-            
+
 
 
             <SidebarGroup border>
@@ -503,9 +503,9 @@
                 </SidebarItem>
             </SidebarGroup>
         {/if}
-        
+
         <SidebarGroup border>
-            <SidebarList    objects={groupFolders} 
+            <SidebarList    objects={groupFolders}
                             orderAttrib='Order'
                             bind:this={navGroupFolders}>
                 <svelte:fragment let:item let:idx>
@@ -522,14 +522,14 @@
                         {item.Title}
                     </SidebarItem>
                 </svelte:fragment>
-            </SidebarList> 
+            </SidebarList>
         </SidebarGroup>
 
         <!-- przeniesione do menu aplikacji (tam gdzie Sign out)-->
         <!--SidebarGroup border>
             {@const href = `/folder/${basket.Id}`}
             <SidebarItem    {href}
-                            icon={FaShoppingBasket}
+                            icon={FaPaste}
                             operations={(node) => getBasketOperations(node, basket)}
                             summary="List of selected items for quick operations"
                             item={basket}>
@@ -550,4 +550,3 @@
         onOkCallback={deleteFolder}
         bind:this={deleteModal}
         />
-

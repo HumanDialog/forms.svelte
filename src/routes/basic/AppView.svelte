@@ -2,19 +2,19 @@
     import {reef, session, Authorized, NotAuthorized} from '@humandialog/auth.svelte'
 	import {Layout, onErrorShowAlert, Spinner} from '$lib';
     import Sidebar from './sidebar.svelte'
-    
+
     import SidebarFolders from './sidebar.folders.svelte'
     import SidebarMessages from './sidebar.messages.svelte'
     import SidebarTilos from './sidebar.tilos.svelte'
 
     import {push} from 'svelte-spa-router'
 
-    
+
     import AppIcon from './appicon.svelte'
     import TilosIcon from './icons/tilos.icon.svelte'
 
     import FaFolder from 'svelte-icons/fa/FaFolder.svelte'
-    import {FaUsersCog, FaSignOutAlt, FaList, FaComments, FaUser, FaShoppingBasket} from 'svelte-icons/fa/'
+    import {FaUsersCog, FaSignOutAlt, FaList, FaComments, FaUser, FaPaste} from 'svelte-icons/fa/'
 
     import Tasklist from './tasklist.svelte';
     import Folder from './folder.svelte';
@@ -87,7 +87,7 @@
     function defineModuleNavigator(module, showStaticOnly=false)
     {
         if(!showStaticOnly)
-        {   
+        {
             switch(module)
             {
             case 'tasklists':
@@ -148,7 +148,7 @@
     {
         let navigators = {}
         let mods = modules.split(',')
-        mods.forEach( module => 
+        mods.forEach( module =>
             navigators = {...navigators, ...defineModuleNavigator(module, true)}
         )
 
@@ -160,7 +160,7 @@
     {
         let navigators = {}
         let mods = modules.split(',')
-        mods.forEach( module => 
+        mods.forEach( module =>
             navigators = {...navigators, ...defineModuleNavigator(module, showStaticOnly)}
         )
         return navigators
@@ -216,8 +216,8 @@
                             condition: () => $session.authAccessGroup() != 0
                         },
                         {
-                            caption: 'Basket',
-                            icon: FaShoppingBasket,
+                            caption: 'Clipboard',
+                            icon: FaPaste,
                             action: (f) => showBasket(),
                             condition: () => $session.isActive
                         }
@@ -241,7 +241,7 @@
         }
     }
 
-    function defineGuestLayout() 
+    function defineGuestLayout()
     {
         return {
                 sidebar : {
@@ -267,8 +267,8 @@
                         {
                             caption: 'Leave guest session',
                             icon: FaSignOutAlt,
-                            action: (f) => { 
-                                $session.isUnauthorizedGuest = false 
+                            action: (f) => {
+                                $session.isUnauthorizedGuest = false
                                 push('/');
                             }
                         }
@@ -303,7 +303,7 @@
                         '/thome':   {component : TilosHome},
                         '/tdownload':    {component: TilosDownload},
                         '/tcontact':    {component: TilosContact},
-                        
+
                         '/tasklist':    { component: Unauthorized},
                         '/tasklist/*':  { component: Unauthorized},
                         '/task' :       { component: Unauthorized },
@@ -345,7 +345,7 @@
 
         }
     }
-	
+
     async function configurePublicSession()
     {
         return false;
@@ -404,7 +404,7 @@
                 $session.tenants = groupInfos;
 
                 let currentTenant;
-                
+
                 if(lastChosenTenantId)
                 {
                     currentTenant = groupInfos.find(t => t.id == lastChosenTenantId)
