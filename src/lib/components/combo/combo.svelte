@@ -930,7 +930,7 @@
     </div>
 
     <div    hidden={!is_dropdown_open} 
-            class="not-prose {cs} bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md overflow-y-auto cursor-pointer z-30"
+            class="not-prose {cs} bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md overflow-y-auto cursor-pointer z-30 sm:z-40"
             style={dropdown_position}
             use:dropdown_action>
         <ul class="py-1">

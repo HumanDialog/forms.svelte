@@ -396,7 +396,7 @@
 
 {#if isToolbox}
     <menu   class="  bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md 
-                    z-30
+                    z-30 sm:z-40
                     flex flex-row flex-nowrap"
             style={css_style}
             hidden={!visible}

@@ -19,13 +19,15 @@
             context_info_store,
             contextToolbarOperations,
             data_tick_store,
-            reloadWholeApp
+            reloadWholeApp,
+            showFABAlways,
+            leftHandedFAB
         } from "./stores.js";     
     import Icon from './components/icon.svelte';
     import {session, signInHRef, signOutHRef} from '@humandialog/auth.svelte'
 	import { pop, push } from 'svelte-spa-router';
 	import { tick } from 'svelte';
-	import { popNavigationPage } from './utils';
+	import { isDeviceSmallerThan, popNavigationPage } from './utils';
     
 
     export let appConfig = undefined;
@@ -216,6 +218,22 @@
                     icon: $tools_visible_store ? FaToggleOn : FaToggleOff,
                     action: (focused) => { $tools_visible_store = !$tools_visible_store; }
                 });
+        }
+
+        if(!isDeviceSmallerThan("sm"))
+        {
+            options.push({
+                caption: 'Floating actions',
+                icon: $showFABAlways ? FaToggleOn : FaToggleOff,
+                action: (f) => { $showFABAlways = !$showFABAlways; }
+            })
+
+            options.push({
+                caption: 'Left-handed floating actions',
+                icon: $leftHandedFAB ? FaToggleOn : FaToggleOff,
+                disabled: !$showFABAlways,
+                action: (f) => { $leftHandedFAB = !$leftHandedFAB; }
+            })
         }
 
         if(has_selection_details)

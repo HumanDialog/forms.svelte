@@ -1,12 +1,21 @@
 <script lang="ts">
-    import { each } from 'svelte/internal';
-    import {contextToolbarOperations, pageToolbarOperations, contextItemsStore, toolsActionsOperations, fabCollapsed} from '../stores.js'
+    import {contextToolbarOperations, pageToolbarOperations, leftHandedFAB, toolsActionsOperations, fabCollapsed, bottom_bar_visible_store, main_sidebar_visible_store} from '../stores.js'
     import { showFloatingToolbar, showMenu, showGridMenu } from './menu.js';
     import {FaChevronUp, FaChevronDown, FaChevronLeft, FaChevronRight, FaCircle, FaEllipsisV, FaRegDotCircle, FaDotCircle} from 'svelte-icons/fa/'
     import {isDeviceSmallerThan} from '../utils.js'
+	import { tick } from 'svelte';
 
 
-    $: setupCurrentContextOperations($pageToolbarOperations, $contextToolbarOperations, $toolsActionsOperations, $fabCollapsed);
+    export let mainPageCoords = undefined
+    
+
+    $: setupCurrentContextOperations(   $pageToolbarOperations, 
+                                        $contextToolbarOperations, 
+                                        $toolsActionsOperations, 
+                                        $fabCollapsed,
+                                        $bottom_bar_visible_store,
+                                        $main_sidebar_visible_store,
+                                        $leftHandedFAB);
 
     let operations :object[] = [];
     let mainOperation :object|null = null;
@@ -18,8 +27,10 @@
     
     let isDirectPositioningMode = false;
     //..
-    function setupCurrentContextOperations(...args)
+    async function setupCurrentContextOperations(...args)
     {
+        await tick(); // to force mainContent re-render first. We need its bounding rect
+
         let opVer = 0
         let main_FAB_position = ''
 
@@ -165,6 +176,8 @@
         }
    }
 
+  
+
    function toggleExpandAdditionalOperations()
    {
         $fabCollapsed = !$fabCollapsed
@@ -299,7 +312,6 @@
 
     function calculatePosition(operation) : string
     {
-        const isLeftHanded = false;
         let result = '';
 
         const fab = operation.fab;
@@ -317,33 +329,55 @@
         const height = 55;   //px
         const margin = 10;
 
+        let lShift = 0
+        let tShift = 0
+        let rShift = 0
+        let bShift = 0
+        let vMiddle = '50vh'
+        
 
-        if(!isLeftHanded)
+        // na razie tylko dla >= sm.
+        if(!isDeviceSmallerThan('sm'))
+        {
+            
+            const container = document.getElementById("__hd_svelte_main_content_container")
+            if(container)
+            {
+                const containerRect = container?.getBoundingClientRect();
+                lShift = containerRect.x
+                tShift = containerRect.y
+                bShift = window.innerHeight - containerRect.bottom
+                rShift = window.innerWidth - containerRect.right
+                vMiddle = `${containerRect.x + containerRect.width / 2}px`
+            }
+        }
+        
+        if(!$leftHandedFAB)
         {
             switch(section)
             {
             case 'M':
-                result = `right: ${margin + col_no * width}px; bottom: ${margin + row_no * height}px`
+                result = `right: ${rShift + margin + col_no * width}px; bottom: ${bShift + margin + row_no * height}px`
                 break;
 
             case 'S':
-                result = `left: ${margin + col_no * width}px; bottom: ${margin + row_no * height}px`
+                result = `left: ${lShift + margin + col_no * width}px; bottom: ${bShift + margin + row_no * height}px`
                 break;
 
             case 'A':
-                result = `right: ${margin + col_no * width}px; top: calc(50vh - ${row_no * height}px)`
+                result = `right: ${rShift + margin + col_no * width}px; top: calc(${vMiddle} - ${row_no * height}px)`
                 break;
 
             case 'C':
-                result = `left: ${margin + col_no * width}px; top: calc(50vh - ${row_no * height}px)`
+                result = `left: ${lShift + margin + col_no * width}px; top: calc(${vMiddle} - ${row_no * height}px)`
                 break;
 
             case 'T':
-                result = `right: ${margin + col_no * width}px; top: ${margin + row_no * height}px`
+                result = `right: ${rShift + margin + col_no * width}px; top: ${tShift + margin + row_no * height}px`
                 break;
 
             case 'F':
-                result = `left: ${margin + col_no * width}px; top: ${margin + row_no * height}px`
+                result = `left: ${lShift + margin + col_no * width}px; top: ${tShift + margin + row_no * height}px`
                 break;
             }
         }
@@ -352,27 +386,27 @@
             switch(section)
             {
             case 'M':
-                result = `left: ${margin + col_no * width}px; bottom: ${margin + row_no * height}px`
+                result = `left: ${lShift + margin + col_no * width}px; bottom: ${bShift + margin + row_no * height}px`
                 break;
 
             case 'S':
-                result = `right: ${margin + col_no * width}px; bottom: ${margin + row_no * height}px`
+                result = `right: ${rShift+ margin + col_no * width}px; bottom: ${bShift + margin + row_no * height}px`
                 break;
 
             case 'A':
-                result = `left: ${margin + col_no * width}px; top: calc(50vh - ${row_no * height}px)`
+                result = `left: ${lShift + margin + col_no * width}px; top: calc(${vMiddle} - ${row_no * height}px)`
                 break;
 
             case 'C':
-                result = `right: ${margin + col_no * width}px; top: calc(50vh - ${row_no * height}px)`
+                result = `right: ${rShift + margin + col_no * width}px; top: calc(${vMiddle} - ${row_no * height}px)`
                 break;
 
             case 'T':
-                result = `left: ${margin + col_no * width}px; top: ${margin + row_no * height}px`
+                result = `left: ${lShift + margin + col_no * width}px; top: ${tShift + margin + row_no * height}px`
                 break;
 
             case 'F':
-                result = `right: ${margin + col_no * width}px; top: ${margin + row_no * height}px`
+                result = `right: ${rShift + margin + col_no * width}px; top: ${tShift + margin + row_no * height}px`
                 break;
             }
         }
@@ -423,7 +457,7 @@
                                 fixed m-0                            
                                 flex items-center justify-center
                                 disable-dbl-tap-zoom
-                                cursor-pointer z-40"
+                                cursor-pointer z-40 sm:z-30"
                                 style={position}
                                 on:click|stopPropagation={(e) => {on_click(e, operation)}}
                                 on:mousedown={mousedown} >

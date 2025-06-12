@@ -115,7 +115,8 @@ export {
             main_sidebar_visible_store,
             tagsReloader,
             reloadVisibleTags,
-            dark_mode_store } from './stores.js'
+            dark_mode_store,
+            showFABAlways } from './stores.js'
 
 export {    data_tick_store,    // tmp
             hasSelectedItem, 

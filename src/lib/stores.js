@@ -160,6 +160,12 @@ export const visible_property_tab_store = writable('');
 export const fabCollapsed = writable( (localStorage.fabCollapsed && localStorage.fabCollapsed == 'true') || false )
 fabCollapsed.subscribe( (value) => { localStorage.fabCollapsed = (value ? 'true' : '') } );
 
+export const showFABAlways = writable( (localStorage.showFABAlways && localStorage.showFABAlways == 'true') || false )
+showFABAlways.subscribe( (value) => { localStorage.showFABAlways = (value ? 'true' : '') } );
+
+export const leftHandedFAB = writable( (localStorage.leftHandedFAB && localStorage.leftHandedFAB == 'true') || false )
+leftHandedFAB.subscribe( (value) => { localStorage.leftHandedFAB = (value ? 'true' : '') } );
+
 export function restore_defults()
 {
     
@@ -169,6 +175,8 @@ export function restore_defults()
     right_sidebar_visible_store.set(false);
     visible_property_tab_store.set('');
     fabCollapsed.set(false)
+    showFABAlways.set(false)
+    leftHandedFAB.set(false)
 }
 
 export function toggle_sidebar(index)

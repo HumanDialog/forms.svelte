@@ -3,7 +3,7 @@
     //import GoPrimitiveDot from 'svelte-icons/go/GoPrimitiveDot.svelte'
     import {showMenu} from '$lib/components/menu'
     import {push, pop, location} from 'svelte-spa-router'
-    import {contextItemsStore, context_info_store, contextToolbarOperations, data_tick_store} from './stores.js'
+    import {contextItemsStore, context_info_store, contextToolbarOperations, data_tick_store, leftHandedFAB} from './stores.js'
     //import Menu from '$lib/components/contextmenu.svelte'
 
     import {
@@ -237,6 +237,12 @@
                     action: (focused) => { $tools_visible_store = !$tools_visible_store; }
                 });
         }
+
+         options.push({
+                caption: 'Left-handed floating actions',
+                icon: $leftHandedFAB ? FaToggleOn : FaToggleOff,
+                action: (f) => { $leftHandedFAB = !$leftHandedFAB; }
+            })
 
         if(has_selection_details)
         {

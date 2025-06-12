@@ -17,7 +17,7 @@
             set_dark_mode_default,
             sidebar_left_pos,
             wholeAppReloader,
-            alerts, removeAlert } from './stores.js'
+            alerts, removeAlert, showFABAlways} from './stores.js'
     
     //import { AuthorizedView} from '@humandialog/auth.svelte'
     import { handleSelect, isDeviceSmallerThan, isOnNavigationPage, isOnScreenKeyboardVisible, removeAt, UI } from './utils'
@@ -130,17 +130,31 @@
 
         if(tools_visible)
         {
-            tools_visibility = "hidden sm:block sm:fixed"
-            //fab_base_visibility = "fixed sm:hidden"
-            fab_visibility_mode = FAB_VISIBLE_ON_MOBILE
-
-            content_top = 'top-[50px] sm:top-[40px]'
             
-            if(bottom_bar_visible)
-                content_height = `min-h-[calc(100vh-290px)] sm:h-[calc(100vh-280px)]`
-            else    
-                content_height = `min-h-[calc(100vh-50px)] sm:h-[calc(100vh-40px)]` 
-               
+            const alwaysShowFAB = (!is_small) && $showFABAlways
+
+            if(alwaysShowFAB)
+            {
+                fab_visibility_mode = FAB_VISIBLE_ALWAYS
+                tools_visibility = "hidden"
+                content_top = 'top-[50px] sm:top-[0px]'
+                
+                if(bottom_bar_visible)
+                    content_height = `min-h-[calc(100vh-290px)] sm:h-[calc(100vh-240px)]`
+                else    
+                    content_height = `min-h-[calc(100vh-50px)] sm:h-[calc(100vh-0px)]` 
+            }
+            else
+            {
+                fab_visibility_mode = FAB_VISIBLE_ON_MOBILE
+                tools_visibility = "hidden sm:block sm:fixed"
+                content_top = 'top-[50px] sm:top-[40px]'
+                
+                if(bottom_bar_visible)
+                    content_height = `min-h-[calc(100vh-290px)] sm:h-[calc(100vh-280px)]`
+                else    
+                    content_height = `min-h-[calc(100vh-50px)] sm:h-[calc(100vh-40px)]` 
+            }
         }
         else
         {
@@ -414,11 +428,7 @@
                         <Operations bind:this={operationsComponent} />
                     </div>
 
-                    {#if is_fab_visible}
-                    <!--div class="{fab_visibility} left-3 {fab_bottom} mb-1 cursor-pointer z-10"-->
-                        <Fab bind:this={fabComponent}/>
-                    <!---/div-->
-                    {/if}
+                   
 
                     <!--#######################################################-->
                     <!--##  CONTENT                          ##################-->
@@ -438,7 +448,11 @@
                             </Configurable>
                     </div>    
 
-
+                     {#if is_fab_visible}
+                    <!--div class="{fab_visibility} left-3 {fab_bottom} mb-1 cursor-pointer z-10"-->
+                        <Fab bind:this={fabComponent} />
+                    <!---/div-->
+                    {/if}
 
                     <!--###########################################################-->
                     <!--##  BOTTOM SIDEBAR          ###############################-->
@@ -480,7 +494,7 @@
                     <!-- #########################################################-->
                     <!-- ## MODAL DIALOG #########################################-->
                     <!-- #########################################################-->
-                    <div id="__hd_svelte_modal_root" class="z-30">
+                    <div id="__hd_svelte_modal_root" class="z-30 sm:z-40">
                         <!-- after <Modal/> component is shown it's rettached to above div
                             see: modal.svelte afterUpdate -->
                     </div>
