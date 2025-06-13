@@ -457,7 +457,7 @@
                                 fixed m-0                            
                                 flex items-center justify-center
                                 disable-dbl-tap-zoom
-                                cursor-pointer z-40 sm:z-30"
+                                cursor-pointer z-20"
                                 style={position}
                                 on:click|stopPropagation={(e) => {on_click(e, operation)}}
                                 on:mousedown={mousedown} >

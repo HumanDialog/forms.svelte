@@ -23,6 +23,7 @@
     let submenus = [];
     let around_rect :DOMRect;
     let css_position = ''
+    let closeButtonPos = ''
 
     $: display = visible ? 'block' : 'none';
 //
@@ -96,6 +97,8 @@
                 result = `left: ${x}px; top: ${y}px; width: ${width}px; max-height: ${maxHeight}px; display: block`
             }
 
+            closeButtonPos = `right: ${margin}px; top: calc(${y}px - 1.75rem)`
+
         }
         else
         {
@@ -143,6 +146,7 @@
             }
 
             result = `left:${x}px; top:${y}px; display: block; min-width: 15rem`
+            closeButtonPos = ''
         }
 
         return result;
@@ -180,7 +184,7 @@
         }
 
 
-        if(isDeviceSmallerThan("sm"))
+        if(false && isDeviceSmallerThan("sm"))
         {
             pushToolsActionsOperations ({
                 opver: 1,
@@ -223,7 +227,7 @@
 
     export function hide()
     {
-        if(visible)
+        if(false && visible)
             popToolsActionsOperations()
 
         visible = false;
@@ -512,13 +516,26 @@
 
 </script>
 
+
 <div id="__hd_svelte_contextmenu"
     class=" bg-white dark:bg-stone-800
             text-stone-800 dark:text-stone-400 rounded-lg border
             border-stone-200 dark:border-stone-700 shadow-md
-            z-30 sm:z-40 fixed min-w-60 max-h-screen overflow-y-auto"
+            z-40 fixed min-w-60 max-h-screen overflow-y-auto"
     style={css_position}
     bind:this={menu_root}>
+
+    {#if closeButtonPos}
+        <button class="     fixed w-6 h-6 flex items-center justify-center
+                            text-stone-500 bg-stone-200/70 hover:bg-stone-200
+                            focus:outline-none font-medium rounded-full text-sm text-center
+                            dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700 
+                            focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800" 
+                style={closeButtonPos}
+                on:click={ hide }>
+            <Icon component={FaTimes} s="md"/>
+        </button>
+    {/if}
 
     {#each operations as operation, index}
         {@const is_separator = operation.separator}

@@ -4,7 +4,8 @@
     import {isDeviceSmallerThan} from '../utils'
     import {pushToolsActionsOperations, popToolsActionsOperations} from '../stores'
     import {FaTimes} from 'svelte-icons/fa'
-    
+    import Icon from './icon.svelte'
+
     let x :number;
     let y :number;
     let visible :boolean = false;
@@ -15,6 +16,7 @@
 
     let rootElement;
     let internalElement;
+    let closeButtonPos = ''
     
     //$: display = visible ? 'fixed' : 'hidden';
 
@@ -52,7 +54,7 @@
         hide_window_indicator = 0;
         window.addEventListener('click', on_before_window_click, true);
 
-        if(isDeviceSmallerThan("sm"))
+        if(false && isDeviceSmallerThan("sm"))
         {    
             pushToolsActionsOperations( {
                 opver: 1,
@@ -87,7 +89,7 @@
 
     export function hide()
     {
-        if(visible)
+        if(false && visible)
             popToolsActionsOperations();
 
         visible = false;
@@ -202,6 +204,8 @@
 
                 result = `left: ${x}px; top: ${y}px; width: ${width}px; max-height: ${maxHeight}px; display: block`
             }
+
+            closeButtonPos = `right: ${margin}px; top: calc(${y}px - 1.75rem)`
         }
         else
         {
@@ -233,6 +237,7 @@
             }
 
             result = `left:${x}px; top:${y}px; width: max-content; height:max-content; display: block`
+            closeButtonPos = ``
             
         }
 
@@ -243,9 +248,21 @@
 </script>
 
 <div    id="__hd_svelte_floating_container"
-        class="p-2 bg-stone-100 dark:bg-stone-800 rounded-lg shadow-md shadow-stone-500 dark:shadow-black z-30 sm:z-40 fixed "
+        class="p-2 bg-stone-100 dark:bg-stone-800 rounded-lg shadow-md shadow-stone-500 dark:shadow-black z-40 fixed "
         style={cssPosition}
         bind:this={rootElement}>
+        {#if closeButtonPos}
+    <button class="     fixed w-6 h-6 flex items-center justify-center
+                        text-stone-500 bg-stone-200/70 hover:bg-stone-200
+                        focus:outline-none font-medium rounded-full text-sm text-center
+                        dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700 
+                        focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800" 
+            style={closeButtonPos}
+            on:click={ hide }>
+            <Icon component={FaTimes} s="md"/>
+        </button>
+    {/if}
+
     <svelte:component this={toolbar} {...props} bind:this={internalElement} />
 </div>
 

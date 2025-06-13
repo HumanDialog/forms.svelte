@@ -1051,7 +1051,7 @@
     {
         is_command_palette_visible = true;
 
-        if(isDeviceSmallerThan("sm"))
+        if(false && isDeviceSmallerThan("sm"))
         {
             pushToolsActionsOperations({
                 opver: 1,
@@ -1075,8 +1075,10 @@
 
     function on_palette_hidden()
     {
-        if(is_command_palette_visible)
+        if(false && is_command_palette_visible)
             popToolsActionsOperations()
+
+        editor?.commands.focus()
 
         is_command_palette_visible = false;
 
