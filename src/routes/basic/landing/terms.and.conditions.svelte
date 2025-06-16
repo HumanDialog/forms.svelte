@@ -11,9 +11,9 @@
 <Header/>
 </section>
 
-<div class="antialiased  bg-white dark:bg-stone-900 w-full ">
+<div class="antialiased  bg-white  w-full ">
     <div class="flex justify-center">
-        <article class="   w-full prose prose-base prose-zinc dark:prose-invert mx-2">
+        <article class="   w-full prose prose-base prose-zinc  mx-2">
             <h1>Terms of Service of Octopus</h1>
             <p>Effective date: March 31, 2025</p>
             <p>Please read these terms and conditions carefully before using Our Service.</p>

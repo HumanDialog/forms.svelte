@@ -11,9 +11,9 @@
     <Header/>
 </section>
 
-<div class="antialiased  bg-white dark:bg-stone-900 w-full ">
+<div class="antialiased  bg-white w-full ">
     <div class="flex justify-center">
-        <article class="   w-full prose prose-base prose-zinc dark:prose-invert mx-2">
+        <article class="   w-full prose prose-base prose-zinc mx-2">
             <h1>Privacy Policy</h1>
             <p>Effective date: February 01, 2025</p>                        
             <p>This page informs you of our policies regarding the collection, use and disclosure of personal data when you use our Service and the choices you have associated with that data.</p>

@@ -18,14 +18,14 @@
     </section>
 
 
-    <div class="bg-stone-50 dark:bg-stone-900">
-        <section class="dark:bg-black bg-local bg-cover">
+    <div class="bg-stone-50 ">
+        <section class="bg-local bg-cover">
             <div class="relative max-w-5xl mx-auto pt-20 sm:pt-24 lg:pt-32 pb-8 sm-pb-16">
                 <h1
-                    class="px-8 sm:px-20 text-slate-900 font-extrabold text-4xl sm:text-5xl lg:text-6xl tracking-tight text-center dark:text-white">
+                    class="px-8 sm:px-20 text-slate-900 font-extrabold text-4xl sm:text-5xl lg:text-6xl tracking-tight text-center ">
                     OCTOPUS
                 </h1>
-                <h2 class="px-2 sm:px-10 mt-6 pb-10 text-xl sm:text-2xl text-slate-600 dark:text-slate-200 text-center max-w-5xl mx-2 ">
+                <h2 class="px-2 sm:px-10 mt-6 pb-10 text-xl sm:text-2xl text-slate-600 text-center max-w-5xl mx-2 ">
                     A simple task and note organizer for developers and teams.
                 </h2>
                 
@@ -34,7 +34,7 @@
                         class=" h-10 sm:h-12 px-6 pt-3 sm:pt-2.5 justify-center
                                 bg-slate-900 hover:bg-slate-700/ focus:outline-none focus:ring-2 focus:ring-slate-400
                                 focus:ring-offset-2 focus:ring-offset-slate-50 text-white text-xs sm:text-base whitespace-nowrap font-semibold rounded-lg
-                                dark:bg-indigo-600 dark:highlight-white/20 dark:hover:bg-indigo-400">
+                                ">
                     Get Started
                     </a>
                 </div>
@@ -59,7 +59,7 @@
             <div class="mx-auto py-8 px-4 max-w-screen-xl sm:py-16 lg:px-6">
                 <div class="flex flex-col sm:flex-row justify-center gap-6 md:gap-12 text-lg font-normal">
                     <div>
-                        <ul class="text-gray-500 dark:text-gray-400">
+                        <ul class="text-gray-500 ">
                             <li>Minimalist design</li>
                             <li>Convenient kanban boards </li>
                             <li>Intuitive interface</li>
@@ -68,7 +68,7 @@
                     </div>
 
                     <div>
-                        <ul class="text-gray-500 dark:text-gray-400 ">
+                        <ul class="text-gray-500 ">
                             <li>Work with the whole team</li>
                             <li>As many lists as you need</li>
                             <li>Task steps</li>
@@ -81,10 +81,10 @@
         </section>
 
         <div class="relative max-w-5xl mx-auto">
-            <h2 class="mx-2 text-center text-4xl font-extrabold text-gray-900 dark:text-white">
+            <h2 class="mx-2 text-center text-4xl font-extrabold text-gray-900 ">
                 Register for free and get started!
             </h2>
-            <p class="text-center mx-2 mb-4 font-light text-gray-500 sm:text-lg dark:text-gray-400">
+            <p class="text-center mx-2 mb-4 font-light text-gray-500 sm:text-lg ">
                 Don't wait any longer to organize your work
             </p>
         
@@ -93,7 +93,7 @@
                     class=" h-10 sm:h-12 px-6 pt-3 sm:pt-2.5 justify-center
                             bg-slate-900 hover:bg-slate-700/ focus:outline-none focus:ring-2 focus:ring-slate-400
                             focus:ring-offset-2 focus:ring-offset-slate-50 text-white text-xs sm:text-base whitespace-nowrap font-semibold rounded-lg
-                            dark:bg-indigo-600 dark:highlight-white/20 dark:hover:bg-indigo-400">
+                            ">
                 Get Started
                 </a>
             </div>
