@@ -78,6 +78,8 @@ export {default as KanbanTagsProperty} from './components/kanban/kanban.tags.sve
 export {default as KanbanCallbacks} from './components/kanban/kanban.callbacks.svelte'
 export {KanbanColumnTop, KanbanColumnBottom} from './components/kanban/Kanban'
 
+export {default as Paginator} from './components/paginator.svelte'
+
 export {
     selectItem,
     activateItem,

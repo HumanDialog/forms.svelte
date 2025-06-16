@@ -18,7 +18,8 @@
                 reloadVisibleTags,
 				ListStaticProperty,
                 getNiceStringDateTime,
-                getNiceStringDate
+                getNiceStringDate,
+                Paginator
             } from '$lib'
     import {FaSync, FaComments, FaComment} from 'svelte-icons/fa'
     import {location, pop, push, querystring} from 'svelte-spa-router'
@@ -36,6 +37,9 @@
     let folderTitle = ''
     let isRootFolder = false
     let allTags = ''
+    let pageNo = 0
+    let allPagesNo = 1
+    let pageElementsNo = 25
     
     $: onParamsChanged($location, $querystring, $mainContentPageReloader);
     
@@ -55,6 +59,12 @@
         
         contextItem = null
         contextPath = `/Folder/${contextItemId}` 
+
+        const params = new URLSearchParams($querystring);
+        if(params.has("page"))
+            pageNo = parseInt(params.get("page"))
+        else
+            pageNo = 0
      
         const cacheKey = `forum_${contextItemId}`
         const cachedValue = cache.get(cacheKey)
@@ -86,6 +96,19 @@
         {
             folderTitle = contextItem.Title;
             isRootFolder = !!contextItem.IsRoot
+
+            const allElementsNo = contextItem.NotesCount + contextItem.FoldersCount
+            allPagesNo = Math.floor(allElementsNo / pageElementsNo)
+            if(allElementsNo % pageElementsNo)
+                allPagesNo += 1
+
+           pageNo = Math.max(0, Math.min(pageNo, allPagesNo-1))
+
+            paginatorTop?.updatePageNo(pageNo)
+            paginatorTop?.updateAllPagesNo(allPagesNo)
+            paginatorBtt?.updatePageNo(pageNo)
+            paginatorBtt?.updateAllPagesNo(allPagesNo)
+
         }
 
         cache.set(cacheKey, contextItem)
@@ -96,6 +119,9 @@
 
     async function readContextItem(contextItemId) 
     {
+        if(pageNo < 0)
+            pageNo = 0
+        const pageOffset = pageNo * pageElementsNo
         let res = await reef.post(`/Folder/${contextItemId}/query`,
                             {
                                 Id: 1,
@@ -106,7 +132,9 @@
                                     {
                                         Id: 1,
                                         Association: '',
-                                        Expressions:['Id', '$ref','Title','Summary', 'IsPinned', 'IsRoot', 'href', 'icon'],
+                                        Expressions:['Id', '$ref','Title','Summary', 'IsPinned', 'IsRoot', 'href', 'icon', 'FoldersCount', 'NotesCount'],
+                                        SubTreeOffset: pageOffset,
+                                        SubTreeLimit: pageElementsNo,
                                         SubTree:
                                         [
                                             {
@@ -119,7 +147,7 @@
                                             {
                                                 Id: 3,
                                                 Association: 'Notes',
-                                                Sort: '-ModificationDate',
+                                                Sort: '-ModificationDate, Id',
                                                 Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href', 'ModificationDate', 'Tags', 'NotesCount'],
                                                 SubTree:[
                                                     {
@@ -136,6 +164,7 @@
                             onErrorShowAlert);
         if(res)
         {    
+
             return res.Folder;  
         }
         else
@@ -149,6 +178,18 @@
         {
             folderTitle = contextItem.Title;
             isRootFolder = !!contextItem.IsRoot
+
+            const allElementsNo = contextItem.NotesCount + contextItem.FoldersCount
+            allPagesNo = Math.floor(allElementsNo / pageElementsNo)
+            if(allElementsNo % pageElementsNo)
+                allPagesNo += 1
+
+            pageNo = Math.max(0, Math.min(pageNo, allPagesNo-1))
+
+            paginatorTop?.updatePageNo(pageNo)
+            paginatorTop?.updateAllPagesNo(allPagesNo)
+            paginatorBtt?.updatePageNo(pageNo)
+            paginatorBtt?.updateAllPagesNo(allPagesNo)
         }
     }
 
@@ -224,6 +265,17 @@
             return ''
     }
 
+    let paginatorTop
+    let paginatorBtt
+    function onPage(page)
+    {
+        pageNo = page
+
+        const path = $location
+        const loc = `${path}?page=${pageNo}`
+        push(loc)
+    }
+
 </script>
 
 <svelte:head>
@@ -241,7 +293,13 @@
                 clearsContext='props sel'
                 title={folderTitle}>
 
-                <section class="w-full place-self-center max-w-3xl">
+                <section class="w-full place-self-center max-w-3xl relative">
+                    <!-- paginator -->
+                    <div class="flex flex-row  mt-2 ">
+                        <section class="ml-auto mr-2">
+                            <Paginator {onPage} {pageNo} {allPagesNo} bind:this={paginatorTop}/>
+                        </section>
+                    </div>
             
                 <List   self={contextItem} 
                         a='Folders'
@@ -294,6 +352,12 @@
                             class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5 ml-2  mr-1"/>
                     </span>
                 </List>
+
+                <div class="flex flex-row  mt-10 mb-10">
+                    <section class="ml-auto mr-2">
+                        <Paginator {onPage} {pageNo} {allPagesNo} bind:this={paginatorBtt}/>
+                    </section>
+                </div>
         </section>
 
         </Page>
