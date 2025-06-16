@@ -72,7 +72,7 @@
 
     async function fetchData()
     {
-        let res = await reef.get("/group/Lists?sort=Order&fields=Id,Name,Order,href,$type", onErrorShowAlert);
+        let res = await reef.get("/group/Lists?sort=Order&fields=Id,Name,Summary,Order,href,$type", onErrorShowAlert);
         if(res != null)
             taskLists = res.TaskList;
         else
@@ -106,9 +106,10 @@
         return (res != null);
     }
 
-    async function changeSummary(list, summary)
+    async function changeSummary(list, summary, navItem)
     {
-
+        list.Summary = summary
+        navItem.updateSummary(summary)
         let res = await reef.post(`/group/Lists/${list.Id}/set`, 
                                 {
                                     Summary: summary
@@ -443,7 +444,7 @@
                                     operations={(node) => getTaskListOperations(node, item, navItems[idx])}
                                     selectable={item}
                                     summary={{
-                                        editable: (text) => {changeSummary(item, text)},
+                                        editable: (text) => {changeSummary(item, text, navItems[idx])},
                                         content: item.Summary}}
                                     editable={(text) => {changeName(item, text)}}>
                         {item.Name}
@@ -512,7 +513,7 @@
                                     operations={(node) => getTaskListOperations(node, item, navItems[idx])}
                                     {item}
                                     summary={{
-                                        editable: (text) => {changeSummary(item, text)},
+                                        editable: (text) => {changeSummary(item, text, navItems[idx])},
                                         content: item.Summary}}
                                     editable={(text) => {changeName(item, text)}}>
                         {item.Name}

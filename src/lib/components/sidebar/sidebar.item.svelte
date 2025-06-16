@@ -68,6 +68,7 @@
             return summary;
         }
     }
+
     
     export async function editSummary()
     {
@@ -75,13 +76,19 @@
             return;
 
         if(!!summaryElement)
-            startEditing(summaryElement, (d) => {summaryPlaceholder = false})
+            startEditing(summaryElement, (d) => { summaryPlaceholder = false })
         else
         {
             summaryPlaceholder = true;
             await tick();
-            startEditing(summaryElement, (d) => {summaryPlaceholder = false})
+            startEditing(summaryElement, (d) => { summaryPlaceholder = false })
         }
+    }
+
+    export function updateSummary(txt)
+    {
+        console.log('updateSummary', txt)
+        summaryText = txt
     }
 
     let user_class = $$props.class ?? ""
@@ -371,7 +378,7 @@
                 {/if}
             </div>
 
-            {#if summaryText}
+            {#if summaryText || summaryPlaceholder}
                 <p class="ml-14 mt-1
                         text-stone-900 dark:text-stone-400
                         cursor-default
