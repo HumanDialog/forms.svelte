@@ -1,6 +1,6 @@
 
 import {writable, get} from 'svelte/store';
-import {SCREEN_SIZES} from './utils.js'
+import {SCREEN_SIZES, randomString} from './utils.js'
 
 export const data_tick_store = writable(1);
 export const contextItemsStore = writable({focused:'', data: null, sel: null})
@@ -8,16 +8,59 @@ export const context_info_store = writable({data: '', sel: ''})
 export const contextTypesStore = writable({focused:'', data: null, sel: null})
 export const contextToolbarOperations = writable([]);
 export const pageToolbarOperations = writable([]);
+export const toolsActionsOperations = writable([]);
 export const page_title = writable('');
 export const nav_titles = writable({});
 export const mainContentPageReloader = writable(1);
 export const wholeAppReloader = writable(1)
 export const alerts = writable([])
+export const tagsReloader = writable(1)
+
+
+let toolsActionsOperationsStack = []
+export function pushToolsActionsOperations(operations)
+{
+    toolsActionsOperationsStack.push(operations)
+    toolsActionsOperations.set(operations) 
+}
+
+export function popToolsActionsOperations()
+{
+    toolsActionsOperationsStack.pop();
+    const stackSize = toolsActionsOperationsStack.length;
+    if(stackSize == 0)
+    {
+        //console.log('stack empty')
+        toolsActionsOperations.set([]) 
+    }
+    else
+    {
+        const lastElement = toolsActionsOperationsStack[stackSize-1];
+        //console.log('stack not empty (stackSize)', lastElement)
+        toolsActionsOperations.set(lastElement) 
+    }
+}
 
 export const addAlert = (txt) => {
     let al = get(alerts)
-    al = [txt, ...al];
+    const alert = {
+        msg: txt,
+        id: randomString(6),
+        timeoutId: setTimeout(() => removeAlert(alert), 10000)
+    }
+    al = [alert, ...al];
     alerts.set(al);
+}
+
+export const removeAlert = (alert) => {
+    let al = get(alerts)
+    const idx = al.findIndex((a) => a.id == alert.id)
+    if(idx >= 0)
+    {
+        clearTimeout(alert.timeoutId)
+        al.splice(idx, 1)
+        alerts.set(al)
+    }
 }
 
 export const onErrorShowAlert = addAlert;
@@ -55,6 +98,12 @@ export function reloadWholeApp()
     wholeAppReloader.set(val);
 }
 
+export function reloadVisibleTags()
+{
+    let val = get(tagsReloader);
+    val += 1;
+    tagsReloader.set(val);
+}
 
 let has_saved_dark_mode = false;
 function create_dark_mode_store()
@@ -80,7 +129,7 @@ export const main_sidebar_visible_store = writable((localStorage.main_sidebar_vi
 main_sidebar_visible_store.subscribe( (value) => { localStorage.main_sidebar_visible_store = value });
 
 export let previously_visible_sidebar = "";
-export let sidebar_left_pos = writable(0)
+export const sidebar_left_pos = writable(0)
 
 let has_saved_tools_visible = false;
 function create_tools_visible_store()
@@ -108,18 +157,35 @@ bottom_bar_visible_store.subscribe( (value) => { localStorage.bottom_bar_visible
 export const right_sidebar_visible_store = writable(false)
 export const visible_property_tab_store = writable('');
 
+export const fabCollapsed = writable( (localStorage.fabCollapsed && localStorage.fabCollapsed == 'true') || false )
+fabCollapsed.subscribe( (value) => { localStorage.fabCollapsed = (value ? 'true' : '') } );
+
+export const showFABAlways = writable( (localStorage.showFABAlways && localStorage.showFABAlways == 'true') || false )
+showFABAlways.subscribe( (value) => { localStorage.showFABAlways = (value ? 'true' : '') } );
+
+export const leftHandedFAB = writable( (localStorage.leftHandedFAB && localStorage.leftHandedFAB == 'true') || false )
+leftHandedFAB.subscribe( (value) => { localStorage.leftHandedFAB = (value ? 'true' : '') } );
+
 export function restore_defults()
 {
+    
     main_sidebar_visible_store.set('*');
     tools_visible_store.set(false);
     bottom_bar_visible_store.set(false);
     right_sidebar_visible_store.set(false);
     visible_property_tab_store.set('');
+    fabCollapsed.set(false)
+    showFABAlways.set(false)
+    leftHandedFAB.set(false)
 }
 
 export function toggle_sidebar(index)
 {
-    previously_visible_sidebar = get(main_sidebar_visible_store);
+    const prevVisile = get(main_sidebar_visible_store);
+    if(prevVisile != '*')
+        previously_visible_sidebar = prevVisile;
+
+    //console.log('toggle_sidebar', previously_visible_sidebar, '=>', index)
 
     if(get(main_sidebar_visible_store) == index)
         main_sidebar_visible_store.set('*')
@@ -129,22 +195,30 @@ export function toggle_sidebar(index)
 
 export function auto_hide_sidebar()
 {
-    //console.log("sw: " + window.innerWidth, SCREEN_SIZES.lg)
     
+    //console.log('auto_hide_sidebar')
+    //console.log("sw: " + window.innerWidth, SCREEN_SIZES.lg)
     if(window.innerWidth < SCREEN_SIZES.lg)
         hide_sidebar()
 }
 
 export function hide_sidebar()
 {
-    previously_visible_sidebar = get(main_sidebar_visible_store);
+    
+    const prevVisile = get(main_sidebar_visible_store);
+    if(prevVisile != '*')
+        previously_visible_sidebar = prevVisile;
+
     main_sidebar_visible_store.set('*')
     //console.log("auto_hide_sidebar:" + get(main_sidebar_visible_store))
 }
 
 export function show_sidebar(index)
 {
-    previously_visible_sidebar = get(main_sidebar_visible_store);
+    const prevVisile = get(main_sidebar_visible_store);
+    if(prevVisile != '*')
+        previously_visible_sidebar = prevVisile;
+
     main_sidebar_visible_store.set(index)
 }
 

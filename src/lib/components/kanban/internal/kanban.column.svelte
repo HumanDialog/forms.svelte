@@ -349,7 +349,7 @@
         on:click={activate}
         on:dblclick={dblclick}>
     <header class:cursor-pointer={!is_row_active && columnDef.operations} bind:this={headerElement}>
-        <h2 class="mt-2 mb-2 text-lg sm:text-xs uppercase w-full min-h-[1rem] text-center whitespace-nowrap relative">
+        <h2 class="mt-2 mb-2 text-base sm:text-base uppercase w-full min-h-[1rem] text-center whitespace-nowrap relative">
             <span 
                 use:editable={{
                     action: (text) => onTitleChanged(text),

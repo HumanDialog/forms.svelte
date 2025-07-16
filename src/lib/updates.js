@@ -1,5 +1,6 @@
 import {writable} from 'svelte/store';
 import {reef} from '@humandialog/auth.svelte/dist/index'
+import {onErrorShowAlert} from './stores.js'
 
 
 const modified_item_store = writable(null);
@@ -50,6 +51,12 @@ export function informModificationEx(typeName, itemId, attribName, attribValue)
     return true;
 }
 
+export function hasModifications()
+{
+    //console.log('hasModifications', modified_items_map.size)
+    return modified_items_map.size > 0
+}
+
 export function informItem(itm, type_name=undefined)
 {
     if(type_name == undefined)
@@ -80,8 +87,15 @@ export function informItem(itm, type_name=undefined)
 
 const update_request_ticket = writable(0);
 let last_update_ticket = 0;
-export function pushChanges()
+let afterPushCallbacks = []
+
+export function pushChanges(afterPushCallback=undefined)
 {
+    //console.trace()
+
+    if(afterPushCallback)
+        afterPushCallbacks.push(afterPushCallback);
+
     update_request_ticket.update(n => n + 1);
 }
 
@@ -121,19 +135,47 @@ update_request_ticket.subscribe(async (v) => {
             changes.push(value.item);
         });
 
-        try
-        {
-            //console.log('push: ', changes);
-            const res = await reef.post('/Push', { Items: changes });
+        
+        /*
+        const res = await reef.post('/Push', { Items: changes }, onErrorShowAlert);
 
-            if(res)
-            {
+        //if(res)
+        //{
+            modified_items_map.clear();
+        //}
+        */
+        
+        let path = reef.correct_path_with_api_version_if_needed('/Push')
+
+        try {
+            let res = await reef.fetch(path, {
+                method: 'POST',
+                body: JSON.stringify( { Items: changes } )
+            })
+            if (res.ok) {
+
                 modified_items_map.clear();
+                afterPushCallbacks.forEach( cb => cb())
+                afterPushCallbacks = []
+            }
+            else
+            {
+                if(res.status == 400)   // basic exception like access rights 
+                {
+                    modified_items_map.clear();
+                    afterPushCallbacks.forEach( cb => cb())
+                    afterPushCallbacks = []
+                }
+
+                const err = await res.text()
+                console.error(err)
+                onErrorShowAlert(err)
             }
         }
-        catch(err)
-        {
+        catch (err) {
             console.error(err);
+            onErrorShowAlert(err)
         }
+        
     }
 })

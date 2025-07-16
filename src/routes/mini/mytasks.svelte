@@ -1,8 +1,8 @@
 <script>
     import {reef, session} from '@humandialog/auth.svelte'
-    import {    Spinner, 
-                Page, 
-                Icon, 
+    import {    Spinner,
+                Page,
+                Icon,
                 ComboSource,
                 List,
                 ListTitle,
@@ -11,8 +11,8 @@
                 ListDateProperty,
                 ListComboProperty,
 				mainContentPageReloader} from '$lib'
-    import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen} from 'svelte-icons/fa'
-    
+    import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCalendar, FaPen} from 'svelte-icons/fa'
+
     export let params = {}
 
     let user = null;
@@ -22,7 +22,7 @@
     const STATUS_CLOSED = 2;
 
     $: onParamsChanged($session, $mainContentPageReloader);
-    
+
     async function onParamsChanged(...args)
     {
         if(!$session.isActive)
@@ -37,8 +37,8 @@
             if(res)
                 lists = res.TaskList;
         }
-        
-        
+
+
         await fetchData()
     }
 
@@ -77,7 +77,7 @@
                                                 }
                                             ]
                                         }
-                                    ]   
+                                    ]
                                 });
         if(res)
             user = res.User;
@@ -90,7 +90,7 @@
         await fetchData();
         listComponent.reload(user, selectRecommendation);
     }
-    
+
 
     async function deleteTask(task)
     {
@@ -105,7 +105,7 @@
 
         let result = await reef.post(`${task.$ref}/Finish`, {});
         if(result)
-            await reloadTasks(listComponent.KEEP_OR_SELECT_NEXT)   
+            await reloadTasks(listComponent.KEEP_OR_SELECT_NEXT)
     }
 
     async function addTask(newTaskAttribs)
@@ -151,7 +151,7 @@
         ];
     }
 
-    let taskOperations = (task) => { 
+    let taskOperations = (task) => {
         let editOperations = getEditOperations(task)
         return [
                 {
@@ -193,14 +193,14 @@
 
 
 {#if user}
-    <Page   self={user} 
-            cl="!bg-white dark:!bg-stone-900 w-full flex flex-col overflow-x-hidden py-1 px-1 border-0" 
+    <Page   self={user}
+            cl="!bg-white dark:!bg-stone-900 w-full flex flex-col overflow-x-hidden py-1 px-1 border-0"
             toolbarOperations={pageOperations}
             clearsContext='props sel'>
 
-        <List   self={user} 
-                a='MyTasks' 
-                toolbarOperations={taskOperations} 
+        <List   self={user}
+                a='MyTasks'
+                toolbarOperations={taskOperations}
                 contextMenu={taskContextMenu}
                 orderAttrib='UserOrder'
                 bind:this={listComponent}>
@@ -215,16 +215,14 @@
             <ListDateProperty name="DueDate"/>
 
             <span slot="left" let:element>
-                <Icon component={element.Status == STATUS_CLOSED ? FaRegCheckCircle : FaRegCircle} 
-                    on:click={(e) => finishTask(e, element)} 
+                <Icon component={element.Status == STATUS_CLOSED ? FaRegCheckCircle : FaRegCalendar}
+                    on:click={(e) => finishTask(e, element)}
                     class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
             </span>
 
-            
+
         </List>
     </Page>
 {:else}
     <Spinner delay={3000}/>
 {/if}
-
-

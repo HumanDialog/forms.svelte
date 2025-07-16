@@ -6,6 +6,7 @@
             selectable, 
             activateItem, 
             isActive, 
+            getActive,
             editable, 
             startEditing, 
     } from '../../../utils'
@@ -17,9 +18,9 @@
     import { isDeviceSmallerThan } from '../../../utils'
                 
     import {rList_definition, rList_property_type} from '../List'
-	import { push } from 'svelte-spa-router';
+	import { push, link } from 'svelte-spa-router';
     import {FaExternalLinkAlt} from 'svelte-icons/fa/'
-	import { readonly } from 'svelte/store';
+	import Tags from '../../tags.svelte'
     
     export let item     :object;
 
@@ -27,8 +28,10 @@
     export let summary  :string = '';
     
     export let typename :string | undefined = undefined;
-    export let toolbarOperations;
-    export let contextMenu;
+    export let toolbarOperations = undefined;
+    export let contextMenu = undefined;
+    
+    export let key: string = '';
 
     let definition :rList_definition = getContext("rList-definition");
     //console.log(definition.properties, item)
@@ -55,15 +58,15 @@
         }
     }
 
-    let item_key :string = ''
+    /*let item_key :string = ''
     let keys = Object.keys(item);
-    if(keys.includes('Id'))
-        item_key = 'Id'
-    else if(keys.includes('$ref'))
+    if(keys.includes('$ref'))
         item_key = '$ref';
+    else if(keys.includes('Id'))
+        item_key = 'Id'
     else if(keys.length > 0)
         item_key = keys[0];
-
+    */
 
     if(!title)
         title = definition.title;
@@ -94,7 +97,20 @@
 
     function calculate_active(...args)
     {
-        return isActive('props', item)
+        const activeItem = getActive('props')
+        if(!activeItem)
+            return false;
+        
+        const activeKey = getItemKey(activeItem);
+        const itemKey = getItemKey(item)
+        if(activeKey == itemKey)
+        {
+           // console.log('active: ', itemKey)
+            return true;
+        }
+        else
+            return false;
+        //return isActive('props', item)
     }
 
     function selected(...args)
@@ -102,6 +118,17 @@
         return isSelected(item)
     }
 
+    function getItemKey(item: object): string | number
+    {
+        if(key)
+            return item[key];
+        else if(item.$ref)
+            return item.$ref;
+        else if(item.Id)
+            return item.Id;
+        else 
+            return 0;
+    }
     
     async function change_name(text)
     {
@@ -228,10 +255,13 @@
 
     function activate_row(e, item)
     {
-        activateItem('props', item, toolbarOperations(item));
-        
-        if(e)
-            e.stopPropagation();
+        if(toolbarOperations)
+        {
+            activateItem('props', item, toolbarOperations(item));
+            
+            if(e)
+                e.stopPropagation();
+        }
     }
 
     
@@ -279,7 +309,7 @@
 
     async function force_editing(field :string)
     {
-        let element_id = `__hd_list_ctrl_${item[item_key]}_${field}`;
+        let element_id = `__hd_list_ctrl_${getItemKey(item)}_${field}`;
         let element_node = document.getElementById(element_id);
         if(!element_node)
         {
@@ -348,17 +378,16 @@
 {#if item}
 {@const element_title = item[title]}
 
-<section    class="mt-3 flex flex-row my-0  w-full text-sm text-stone-700 dark:text-stone-300 cursor-default rounded-md border border-transparent {selected_class} {focused_class} scroll-mt-[50px] sm:scroll-mt-[40px]"
-            on:contextmenu={on_contextmenu}
+<section    class="my-1 flex flex-row w-full  text-stone-900 dark:text-stone-300 cursor-default rounded-md border border-transparent {selected_class} {focused_class} scroll-mt-[50px] sm:scroll-mt-[40px]"
             role="menu"
             tabindex="-1"
-            bind:this={rootElement}>
+            bind:this={rootElement}> <!--  on:contextmenu={on_contextmenu} -->
 
     <slot name="left" element={item}/>
     
     <i class="hidden sm:w-1/2 sm:w-2/3 sm:w-1/3"></i>   <!-- just to force tailwind classes including -->
     
-    <div    class="ml-3 w-full py-1" 
+    <div    class="ml-3 w-full py-0" 
             use:selectable={item} 
             on:click={(e) => {activate_row(e, item)}} 
             role="row" 
@@ -368,26 +397,27 @@
             {#if is_row_active}
                 {#key item[title]}      <!-- Wymusza pełne wyrenderowanie zwłasza po zmiane z pustego na tekst  -->
                     {#if is_link_like}
-                        <p  class=" text-lg font-semibold min-h-[1.75rem]
-                                    sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
-                                    whitespace-nowrap overflow-clip w-full sm:flex-none sm:{name_w}
-                                    sm:hover:cursor-pointer underline"
-                                    id="__hd_list_ctrl_{item[item_key]}_Title"
-                                    on:click|stopPropagation={followDefinedHRef}
+                        <p  class=" text-base font-semibold 
+                                   
+                                    whitespace-nowrap overflow-clip w-full sm:flex-none sm:{name_w}"
+                                    id="__hd_list_ctrl_{getItemKey(item)}_Title"
                                     use:editable={{
                                         action: (text) => {change_name(text)},
                                         active: false,
                                         readonly: definition.title_readonly,
                                         onSoftEnter: (text) => {change_name(text); editProperty('Summary')}
                                     }}
-                            > 
-                            {element_title}
+                            >  <!--on:click|stopPropagation={followDefinedHRef}-->
+                            <a  class="sm:hover:cursor-pointer underline" 
+                                href={getHRef()} use:link>
+                                {element_title}
+                            </a>
                         </p>
                     {:else}
-                        <p  class=" text-lg font-semibold min-h-[1.75rem]
-                                    sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
+                        <p  class=" text-base font-semibold 
+                                    
                                     whitespace-nowrap overflow-clip w-full sm:flex-none sm:{name_w}"
-                            id="__hd_list_ctrl_{item[item_key]}_Title"
+                            id="__hd_list_ctrl_{getItemKey(item)}_Title"
                             use:editable={{
                                 action: (text) => {change_name(text)},
                                 active: true,
@@ -405,10 +435,10 @@
                     {/if}
                 {/key}
             {:else}
-                <p  class=" text-lg font-semibold min-h-[1.75rem]
-                            sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
+                <p  class=" text-base font-semibold 
+                             
                             whitespace-nowrap overflow-clip w-full sm:flex-none sm:{name_w}"
-                    id="__hd_list_ctrl_{item[item_key]}_Title"> 
+                    id="__hd_list_ctrl_{getItemKey(item)}_Title"> 
                     {element_title}
                 </p>
             {/if}
@@ -419,26 +449,17 @@
             </section>
         </div>
 
-        {#if summary && (item[summary] || placeholder=='Summary')}
-            {@const element_id = `__hd_list_ctrl_${item[item_key]}_Summary`}
-            {#key item[summary]}
-                
-            <!--Summary
-                    id={element_id}
-                    on:click={(e) => on_active_row_clicked(e, 'bottom')}
-                    text={item[summary]}
-                    readonly={definition.summary_readonly}
-                    placeholder={placeholder == 'Summary'}
-                    editable={(text) => {change_summary(text)}}
-                    active={is_row_active}
-                /-->
+        <section class="block sm:hidden w-full">
+            <Properties {definition} {item} {placeholder} bind:this={props_sm}/>
+        </section>
 
-                
+        {#if summary && (item[summary] || placeholder=='Summary')}
+            {@const element_id = `__hd_list_ctrl_${getItemKey(item)}_Summary`}
+            {#key item[summary] }           
                 {#if is_row_active}
                     <p  id={element_id} 
-                        class=" sm:text-xs sm:min-h-[1rem]
-                                    text-base min-h-[1.5rem]
-                                    text-stone-400"
+                        class=" text-sm                              
+                                text-stone-600 dark:text-stone-400"
                             use:editable={{
                                 action: (text) => {change_summary(text)},
                                 readonly: definition.summary_readonly,
@@ -449,9 +470,8 @@
                     </p>
                 {:else}
                     <p  id={element_id} 
-                        class=" sm:text-xs sm:min-h-[1rem]
-                                    text-base min-h-[1.5rem]
-                                    text-stone-400"
+                        class=" text-sm 
+                                    text-stone-600 dark:text-stone-400"
                         on:click={(e) => on_active_row_clicked(e, 'bottom')}>
                         {item[summary]}
                     </p>
@@ -460,9 +480,21 @@
                 
         {/if}
 
-        <section class="block sm:hidden w-full sm:flex-none sm:w-2/3">
-            <Properties {definition} {item} {placeholder} bind:this={props_sm}/>
-        </section>
+        {#if definition.tags}
+                <Tags
+                    class="mt-1 mb-1"
+                    compact
+                    inContext="props"
+                    self={item}
+                    a={definition.tags.a}
+                    getGlobalTags={definition.tags.getAllTags}
+                    s="sm"
+                    onSelect={definition.tags.onSelect}
+                    onUpdateAllTags={definition.tags.onUpdateAllTags}
+                    canChangeColor={definition.tags.canChangeColor}
+                    readOnly={definition.tags.readOnly}
+                />
+            {/if}
 
     </div>
 </section>

@@ -11,9 +11,12 @@ export { default as Box } from "./form.box.svelte";
 export { default as Operations } from './operations.svelte'
 
 export {default as Layout } from './desk.svelte'
+export {default as VerticalToolbar} from './vertical.toolbar.svelte'
+export {default as HorizontalToolbar} from './horizontal.toolbar.svelte'
 
 // @ts-ignore
 export { default as Icon } from "./components/icon.svelte";
+export { default as IconT } from "./components/icon.ex.svelte";
 
 export { default as Button } from './components/button.svelte';
 export { default as Checkbox } from './components/checkbox.svelte';
@@ -54,6 +57,7 @@ export { default as ListInserter} from './components/list/list.inserter.svelte'
 export { default as ListDateProperty} from './components/list/list.date.svelte'
 export { default as ListComboProperty} from './components/list/list.combo.svelte'
 export { default as ListStaticProperty} from './components/list/list.static.svelte'
+export { default as ListTags} from './components/list/list.tags.svelte'
 
 export { default as Modal} from './modal.svelte'
 export { default as MembersPage} from './tenant.members.svelte'
@@ -74,6 +78,15 @@ export {default as KanbanTagsProperty} from './components/kanban/kanban.tags.sve
 export {default as KanbanCallbacks} from './components/kanban/kanban.callbacks.svelte'
 export {KanbanColumnTop, KanbanColumnBottom} from './components/kanban/Kanban'
 
+export {default as Paginator} from './components/paginator.svelte'
+export {default as Breadcrumb} from './components/breadcrumb.svelte'
+export {
+    breadcrumbAdd,
+    breadcrumbParse,
+    breadcrumbStringify,
+    breadcrumbClipName
+}   from './components/breadcrumb_utils'
+
 export {
     selectItem,
     activateItem,
@@ -86,8 +99,20 @@ export {
     saveCurrentEditable,
     selectable,
     handleSelect,
-    isDeviceSmallerThan
+    isDeviceSmallerThan,
+    resizeImage,
+    refreshToolbarOperations,
+    isOnScreenKeyboardVisible,
+    randomString,
+    UI,
 }   from './utils'
+
+export {
+    getNiceStringDateTime,
+    getFormattedStringDate, 
+    getNiceStringDate,
+    dayName,
+    monthName} from './components/date_utils'
 
 export {
             mainContentPageReloader,
@@ -95,19 +120,28 @@ export {
             reloadWholeApp,
             alerts,
             addAlert,
-            onErrorShowAlert } from './stores.js'
+            onErrorShowAlert,
+            main_sidebar_visible_store,
+            tagsReloader,
+            reloadVisibleTags,
+            dark_mode_store,
+            showFABAlways } from './stores.js'
 
 export {    data_tick_store,    // tmp
             hasSelectedItem, 
             hasDataItem,
             setNavigatorTitle } from "./stores";
+            
 export { contextToolbarOperations, pageToolbarOperations, contextItemsStore, contextTypesStore } from './stores'   // tmp
-export { informModification, informModificationEx, informItem, pushChanges } from './updates'   // tmp
+export { informModification, informModificationEx, informItem, pushChanges, hasModifications } from './updates'   // tmp
 
 
 
 
-
+export { default as IcH1 } from './components/document/internal/h1.icon.svelte'
+export { default as IcH2 } from './components/document/internal/h2.icon.svelte'
+export { default as IcH3 } from './components/document/internal/h3.icon.svelte'
+export { default as IcH4 } from './components/document/internal/h4.icon.svelte'
 
 
 

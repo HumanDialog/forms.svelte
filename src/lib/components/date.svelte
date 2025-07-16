@@ -4,6 +4,7 @@
     import {informModification, pushChanges} from '../updates.js'
     import { parseWidthDirective, isDeviceSmallerThan} from '../utils.js'
     import FaChevronDown from 'svelte-icons/fa/FaChevronDown.svelte'
+    import {getFormattedStringDate, getNiceStringDate, getNiceStringDateTime} from './date_utils.js'
 
     
     export let self = null;
@@ -14,6 +15,7 @@
     export let onSelect = undefined;
     export let type = "date";   // datetime-local
     export let changed = undefined;
+    export let readOnly: boolean = false
 
     export  let s = 'sm'
     export let c=''
@@ -55,7 +57,7 @@
 
     let input_pt = 'pt-0.5'
     let input_pb = 'pb-1'
-    let font_size = 'text-lg sm:text-sm'
+    let font_size = 'text-base'
     let line_h = 'h-7 sm:h-5'
     let chevron_mt = 'mt-2 sm:mt-1' 
     
@@ -64,24 +66,43 @@
         case 'md':
             input_pt = 'pt-2.5'
             input_pb = 'pb-2.5';  
-            font_size = 'text-lg sm:text-sm'       
+            font_size = 'text-md'       
             if(!is_compact)
                 line_h = 'h-12 sm:h-10'  
             else
                 line_h = 'h-7 sm:h-5'  
             chevron_mt = 'mt-2 sm:mt-1'      
             break;
-
+            
+        case 'sm':
+            input_pt = 'pt-2.5'
+            input_pb = 'pb-2.5';  
+            font_size = 'text-sm'       
+            if(!is_compact)
+                line_h = 'h-12 sm:h-10'  
+            else
+                line_h = 'h-7 sm:h-5'  
+            chevron_mt = 'mt-2 sm:mt-1'      
+        
+            break;
         case 'xs':
             input_pt = 'pt-0.5'
             input_pb = 'pb-0.5';
-            font_size = 'text-base sm:text-xs'   
+            font_size = 'text-xs'   
             if(!is_compact)        
                 line_h = 'h-7 sm:h-7'
             else
                 line_h = 'h-6 sm:h-6'
             chevron_mt = 'mt-1.5 sm:mt-0.5' 
             break;
+
+        default:
+            //label_mb =  'mb-0.5';
+            input_pt =  ''
+            input_pb =  '';
+            font_size = ''           
+            line_h =    ''
+            chevron_mt = ''
     }
 
     let   item = null
@@ -106,7 +127,7 @@
         style = `${font_size}`;
     }
 
-    let can_be_activated :boolean = true;
+    let can_be_activated :boolean = !readOnly;
 
     let  last_tick = -1;    
     $: setup($data_tick_store, $contextItemsStore);
@@ -149,7 +170,9 @@
         else
             value = date;
 
-        if(is_compact)
+        if(readOnly)
+            can_be_activated = false
+        else if(is_compact)
         {
             can_be_activated = false;
 
@@ -175,190 +198,17 @@
                     }).format(value);
                     */
 
-        rValue = get_formatted_date(value);
-        pretty_value = get_pretty_value(value);
-        
-        
-    }
+        rValue = getFormattedStringDate(value, type);
 
-    function get_pretty_value(d: Date) :string
-    {
-        if(!d)
-            return '';
-
-        let month = d.getMonth();
-        let day = d.getDate();
-        let year = d.getFullYear();
-
-        const now = new Date( Date.now())
-        let current_month = now.getMonth();
-        let current_day = now.getDate();
-        let current_year = now.getFullYear();
-
-        let is_far_date :boolean = true;
-        const far_date_threshold = 14*24*60*60*1000; // 14 days
-        if(Math.abs( now.getTime() - d.getTime()) < far_date_threshold)
-            is_far_date = false;
-
-        if(year != current_year)
-        {
-            if(is_far_date)
-                return `${day} ${month_name(month)} ${year}`
-            else
-                return `${day_name(d.getDay())}, ${day} ${month_name(month)}`
-        }
-
-        if(month != current_month)
-        {
-            if(is_far_date)
-                return `${day} ${month_name(month)}`   
-            else
-                return `${day_name(d.getDay())}, ${day} ${month_name(month)}`
-        }
+        if(type == 'datetime-local')
+            pretty_value = getNiceStringDateTime(value);
         else
-        {
-            let day_of_week = d.getDay() // 0 == Sunday
-            let current_day_of_week = now.getDay()
-
-            if(day_of_week == 0)
-                day_of_week = 7
-
-            if(current_day_of_week == 0)
-                current_day_of_week = 7;
-
-            
-            let days_diff = day - current_day;
-            if(days_diff == 0)
-                return 'Today';
-            else if(days_diff == 1)
-                return 'Tomorrow';
-            else if(days_diff == -1)
-                return 'Yesterday';
-            else if(days_diff > 0 && days_diff <= 7)
-            {
-                if(day_of_week > current_day_of_week)
-                    return day_name(day_of_week);
-                else
-                    return `${day_name(day_of_week)}, ${d.getDate()} ${month_name(d.getMonth())}`
-            }
-            else if(days_diff > 0)
-            {
-                if(is_far_date)
-                    return `${d.getDate()} ${month_name(d.getMonth())}`
-                else
-                    return `${day_name(day_of_week)}, ${d.getDate()} ${month_name(d.getMonth())}`
-            }
-            else if(days_diff < 0 && days_diff > -7)
-            {
-                if(day_of_week < current_day_of_week)
-                    return day_name(day_of_week);
-                else
-                    return `${day_name(day_of_week)}, ${d.getDate()} ${month_name(d.getMonth())}`
-            }
-            else
-            {
-                if(is_far_date)
-                    return `${d.getDate()} ${month_name(d.getMonth())}`
-                else
-                    return `${day_name(day_of_week)}, ${d.getDate()} ${month_name(d.getMonth())}`
-            }
-        }
-    }
-
-    function day_name(d: number) :string
-    {
-        switch(d)
-        {
-        case 0:
-            return 'Sun';
+            pretty_value = getNiceStringDate(value);
         
-        case 1:
-            return 'Mon';
-
-        case 2:
-            return 'Tue';
-
-        case 3:
-            return 'Wed';
-
-        case 4:
-            return 'Thu';
-
-        case 5:
-            return 'Fri';
-
-        case 6:
-            return 'Sat';
         
-        case 7:
-            return 'Sun';
-        }
-
-        return '';
     }
 
-    function month_name(m :number)
-    {
-        switch(m)
-        {
-            case 0:
-                return "Jan";
-            case 1:
-                return "Feb";
-            case 2:
-                return "Mar";
-            case 3:
-                return "Apr";
-            case 4:
-                return "May";
-            case 5:
-                return "Jun";
-            case 6:
-                return "Jul";
-            case 7:
-                return "Aug";
-            case 8:
-                return "Sep";
-            case 9:
-                return "Oct";
-            case 10:
-                return "Nov";
-            case 11:
-                return "Dec";
-        }
-
-        return '';
-    }
-
-    function get_formatted_date(d :Date) :string
-    {
-        if(!d)
-            return '';
-
-        let month = '' + (d.getMonth() + 1);
-        let day = '' + d.getDate();
-        let year = d.getFullYear();
-        let hour = '' + d.getHours();
-        let minutes = '' + d.getMinutes();
-
-        if(day.length < 2)
-            day = '0' + day;
-
-        if(month.length < 2)
-            month = '0' + month;
-
-        if(hour.length < 2)
-            hour = '0' + hour;
-
-        if(minutes.length < 2)
-            minutes = '0' + minutes;
-
-        if(type == "datetime-local")
-            return `${year}-${month}-${day} ${hour}:${minutes}`;
-        else
-            return `${year}-${month}-${day}`;
-    }
-
+   
     async function on_changed()
     {
         if(!rValue)
@@ -402,40 +252,44 @@
 </script>
 
 {#if is_compact}
-    <div class="inline-block relative {line_h}">
+    <div class="inline-block  {line_h}">
        <div class="dark:text-stone-300 {font_size} truncate  
                     pl-0 pr-0
-                    h-full flex flex-row" >
-            <div class="grow-1 pr-2.5">
-                {pretty_value}
-            </div>
+                    h-full " >
+            <p >
+                <span class="inline-block relative flex flex-row  items-center">
+                    <span class="grow-1 pr-2.5 ">
+                        {pretty_value}
+                    </span>
 
-            {#if can_be_activated}
-                <div class="no-print ml-auto w-3 h-3 {chevron_mt} text-stone-700 dark:text-stone-300">
-                    <FaChevronDown/>
-                </div>
-            {/if}
-        
-            {#if can_be_activated}
-                {#if type == "datetime-local"}
-                    <input  type="datetime-local" 
-                            class="datepicker-input"
-                            tabindex="-1"
-                            on:change={on_changed}
-                            bind:value={rValue}
-                            bind:this={input_element}>
-                {:else}
-                    <input  type="date" 
-                            class="datepicker-input"
-                            tabindex="-1"
-                            on:change={on_changed}
-                            bind:value={rValue}
-                            bind:this={input_element}
-                            on:blur={blur}>
-                {/if}
+                    {#if can_be_activated}
+                        <div class="no-print ml-auto w-3 h-3 {chevron_mt} text-stone-700 dark:text-stone-300">
+                            <FaChevronDown/>
+                        </div>
+                    {/if}
 
-                
-            {/if}
+                    {#if can_be_activated}
+                        {#if type == "datetime-local"}
+                            <input  type="datetime-local" 
+                                    class="datepicker-input"
+                                    tabindex="-1"
+                                    on:change={on_changed}
+                                    bind:value={rValue}
+                                    bind:this={input_element}>
+                        {:else}
+                            <input  type="date" 
+                                    class="datepicker-input"
+                                    tabindex="-1"
+                                    on:change={on_changed}
+                                    bind:value={rValue}
+                                    bind:this={input_element}
+                                    on:blur={blur}>
+                        {/if}
+                    {/if}
+
+                </span>
+            </p>
+
         </div>
 
         

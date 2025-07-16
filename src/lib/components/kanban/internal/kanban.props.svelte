@@ -124,7 +124,7 @@
                     self={item}
                     a={prop.a}
                     compact={true}
-                    s="xs"
+                    s="sm"
                     inContext="props"
                     bind:this={propElements[idx]}/>
             {:else if prop.type == rList_property_type.Combo}
@@ -138,28 +138,28 @@
                         hasNone={prop.hasNone}
                         icon={false}
                         definition={prop.combo_definition}
-                        s="xs"
+                        s="sm"
                         changed={(k,n) => { /*fake assignment for component rer-ender*/ item[prop.a] = item[prop.a]; }} 
                         bind:this={propElements[idx]}/>
             {:else if prop.type == rList_property_type.Static}
                 <p
                     class="     h-6
-                                sm:text-xs sm:min-h-[1rem]
-                                text-base min-h-[1.5rem]
-                                text-stone-400
+                                text-sm sm:min-h-[1rem]
+                                text-base-sm min-h-[1.5rem]
+                                text-stone-600 dark:text-stone-400
                                 text-right"
                                 bind:this={propElements[idx]}>
                     {item[prop.a]}
                 </p>
             {:else if prop.type == rList_property_type.Tags}
                 <Tags
-                    class="mt-2"
+                    class="mt-1"
                     compact
                     inContext="props"
                     self={item}
                     a={prop.a}
                     getGlobalTags={prop.getAllTags}
-                    s="xs"
+                    s="sm"
                     onSelect={prop.onSelect}
                     onUpdateAllTags={prop.onUpdateAllTags}
                     canChangeColor={prop.canChangeColor}

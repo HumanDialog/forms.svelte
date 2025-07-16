@@ -4,7 +4,8 @@
                 FaPen,
                 FaInfoCircle,
                 FaUserSlash,
-                FaChevronDown} from 'svelte-icons/fa'
+                FaChevronDown,
+                FaInfo} from 'svelte-icons/fa'
     
     import Page from './page.svelte'
     import List from './components/list/list.svelte'
@@ -23,6 +24,7 @@
 	import { ComboSource } from '$lib';
     import {showMenu} from '$lib/components/menu'
     import {onErrorShowAlert} from './stores'
+    import {randomString} from './utils'
 	
 
     // ==============================================================================
@@ -31,6 +33,7 @@
     export let nameAttrib = "Name";
     export let emailAttrib = "login";
     export let refAttrib = "$ref";
+    export let hrefAttrib = ''
     export let showFiles = false;
     //export let show_admin = true;
     export let showAccessRoles = false;
@@ -54,7 +57,7 @@
     const authAccessKinds = [
         { name: 'No auth access', key: 0 },
         { name: 'Read auth access', key: 1 },
-        { name: 'Can invite others', key: 3 },
+        //{ name: 'Can invite others', key: 3 },
         { name: 'Full auth access', key: 7 },
     ]
 
@@ -68,10 +71,17 @@
     {
         if(showAccessRoles)
         {
-            let roles = await reef.get('/sys/list_access_roles')
+            let roles = await reef.get('/sys/list_access_roles?details')
             access_roles = [];
             if(roles)
-                roles.forEach( gname => access_roles.push({name: gname}));
+                roles.forEach( roleInfo => 
+                    access_roles.push(
+                        {
+                            name: roleInfo.name,
+                            flags: roleInfo.flags,
+                            id: roleInfo.id,
+                            summary: roleInfo.summary ? roleInfo.summary : roleInfo.name
+                        }));
         }
 
 
@@ -93,7 +103,10 @@
                         avatar_url : "",
                         invitation_not_accepted: false,
                         removed: false,
-                        membership_tag: ""
+                        membership_tag: "",
+                        ... hrefAttrib ? { 
+                            [hrefAttrib]: u[hrefAttrib] 
+                         } : { }
                     }
                 )
             })
@@ -102,7 +115,7 @@
         //fake_users = [];
         //add_fake_users(fake_users);
 
-        await fetch_details();
+      //  await fetch_details();
  
     }
 
@@ -126,6 +139,13 @@
             }
         } )
 
+    }
+
+    async function fetch_user_details(reef_user)
+    {
+        let details = await reef.get(`/sys/user_details?email=${reef_user[emailAttrib]}`)
+        set_user_info(reef_user, details);
+        list?.reload(reef_users);
     }
 
     function set_user_info(user, info)
@@ -162,7 +182,8 @@
         email: '',
         auth_group: 0,
         files_group: 0,
-        acc_role: ''
+        acc_role: '',
+        silently: false
     }
 
     let name_input;
@@ -264,30 +285,43 @@
         return false;
     }
     
+    let inviteUserIdempotencyToken = ''
     function create_new_user()
     {
         if(showAccessRoles && access_roles.length > 0)
             new_user.acc_role = access_roles[0].name ?? ""
 
         create_new_user_enabled = true;
+        inviteUserIdempotencyToken = randomString(8);
 
     }
 
-    let page_operations=[
-        {
-            icon: FaUserPlus,
-            caption: '',
-            action: (focused) => { create_new_user(); }
-        },
-        {
-            separator: true
-        },
-        {
-            icon: FaUserSlash,
-            caption: '',
-            action: (f) => {askToDeleteApplicationAccount();}
-        }
-    ]
+    let page_operations={
+        opver: 2,
+        fab: 'M00',
+        operations: [
+            {
+                caption: 'View',
+                operations: [
+                    {
+                        icon: FaUserPlus,
+                        caption: 'Add user',
+                        action: (focused) => { create_new_user(); },
+                    //    fab: 'M10',
+                        tbr: 'A'
+                    },
+                    // przenieść na stronie /profile
+                  /*  {
+                        icon: FaUserSlash,
+                        caption: 'Delete application account',
+                        action: (f) => {askToDeleteApplicationAccount();},
+                        //fab: 'S00',
+                        tbr: 'C'
+                    }*/
+                ]
+            }
+        ]
+    }
 
     function get_edit_operations(user)
     {
@@ -297,18 +331,14 @@
                 action: (focused) =>  { list.edit(user, nameAttrib) }
             },
             {
-                caption: 'Users management',
+                caption: 'Users management (auth role)',
                 action: (focused) => { list.edit(user, 'Privileges') }
             }];
 
         if(showAccessRoles)
         {
             operations.push({
-                separator: true
-            });
-
-            operations.push({
-                caption: 'Access role',
+                caption: 'Access role (app role)',
                 action: (focused) => { list.edit(user, 'Access') }
             });
         }
@@ -316,7 +346,7 @@
         if(showFiles)
         {
             operations.push({
-                caption: 'External files',
+                caption: 'External files (files role)',
                 action: (focused) => { list.edit(user, 'Files') }
             });
         }
@@ -326,47 +356,63 @@
 
     let user_operations = (user) => { 
         
-        let operations = [];
+        let operations = [
+            {
+                caption: 'Fetch info',
+                icon: FaInfo,
+                action: (f) => fetch_user_details(user),
+                tbr: 'A'
+            }
+        ];
 
         if(user.removed)
-            return [];
-        
-        let edit_operations = get_edit_operations(user)
-        if(edit_operations.length == 1)
         {
-            operations.push({
-                                icon: FaPen,
-                                caption: '',
-                                action: edit_operations[0].action
-                            });
+            operations = [ ...operations,
+                {
+                    icon: FaUserPlus,
+                    caption: 'Revert removing',
+                    action: (f) => askToAddAgain(user),
+//                    fab: 'M10',
+                    tbr: 'A'
+                }
+            ];
         }
         else
         {
+            let edit_operations = get_edit_operations(user)
+            
             operations.push({
                                 icon: FaPen,
-                                caption: '',
-                                grid: edit_operations
+                                caption: 'Change',
+                                menu: edit_operations,
+                                //fab: 'M20',
+                                tbr: 'A'
+                            });
+            
+            operations.push({
+                                caption: 'Remove user',
+                                icon: FaUserMinus,
+                                action: (focused) => askToRemove(user),
+                             //   fab: 'M30',
+                                tbr: 'A'
                             });
         }
 
-        operations.push({
-                            caption: '',
-                            icon: FaUserMinus,
-                            action: (focused) => askToRemove(user)
-                        });
-
-        return operations;
-    }
-
-    let user_context_menu = (user) => {
-        if(user.removed)
-            return [];
-
-        let edit_operations = get_edit_operations(user);
+        
         return {
-            grid: edit_operations
+            opver: 2,
+            fab: 'M00',
+            operations: [
+                {
+                    caption: 'User',
+                 //   tbr: 'B',
+                    operations: operations
+                }
+            ]
         }
     }
+
+    
 
     let data_item = 
     { 
@@ -487,6 +533,8 @@
                                 client_id: $session.configuration.client_id,
                                 redirect_uri: `${window.location.origin}/#/auth/cb`,
                                 state: `${window.location.origin}/#/auth/signin`,
+                                idempotency_token: inviteUserIdempotencyToken,
+                                silently: new_user.silently ?? false,
                                 set:
                                 {
                                     [nameAttrib]: new_user.name,
@@ -538,6 +586,7 @@
         new_user.auth_group = 0;
         new_user.files_group = 0;
         new_user.acc_role = ''
+        new_user.silently = false;
 
         create_new_user_enabled = false;
     }
@@ -549,15 +598,18 @@
         new_user.auth_group = 0;
         new_user.files_group = 0;
         new_user.acc_role = ''
+        new_user.silently = false;
 
         create_new_user_enabled = false;
     }
 
     let removeModal;
     let userToRemove;
+    let removeUserIdempotencyToken = ''
     function askToRemove(user)
     {
         userToRemove = user;
+        removeUserIdempotencyToken = randomString(8);
         removeModal.show()
     }
 
@@ -569,7 +621,7 @@
         let email = userToRemove[emailAttrib];
         try{
 
-            const res = await reef.fetch('/json/anyv/sys/kick_out_user?email=' + email)
+            const res = await reef.fetch(`/json/anyv/sys/kick_out_user?email=${email}&idempotency_token=${removeUserIdempotencyToken}`)
             removeModal.hide();
 
             if(res.ok)
@@ -592,9 +644,11 @@
     }
 
     let deleteAccountModal;
+    let deleteAccountIdempotencyToken = ''
     function askToDeleteApplicationAccount()
     {
         deleteAccountModal.show()
+        deleteAccountIdempotencyToken = randomString(8)
     }
 
     async function deleteApplicationAccount()
@@ -605,7 +659,7 @@
 
         try{
 
-            const res = await reef.fetch(`json/anyv/sys/unregister_user?email=${my_email}`)
+            const res = await reef.fetch(`json/anyv/sys/unregister_user?email=${my_email}&idempotency_token=${deleteAccountIdempotencyToken}`)
             deleteAccountModal.hide();
 
             if(res.ok)
@@ -627,6 +681,26 @@
             onErrorShowAlert(err);
         }
     }
+
+    function askToAddAgain(user)
+    {
+        new_user.email = user[emailAttrib];
+        new_user.name = user[nameAttrib];      
+        new_user.silently = true;
+
+        //name_input?.setReadonly(true)
+        //email_input?.setReadonly(true)
+
+        create_new_user();
+    }
+
+   function getHRefFunc()
+   {
+        if(!hrefAttrib)
+            return undefined
+        else
+            return (user) => { return user[hrefAttrib]} 
+   }
     
 </script>
 
@@ -644,9 +718,8 @@
     <List       objects={reef_users} 
                 title='Members' 
                 toolbarOperations={user_operations} 
-                contextMenu={user_context_menu}
                 bind:this={list}>
-            <ListTitle a={nameAttrib} onChange={on_name_changed}/>
+            <ListTitle a={nameAttrib} onChange={on_name_changed} hrefFunc={getHRefFunc()}/>
             <ListSummary a={emailAttrib} readonly/>
 
             <ListStaticProperty name="Membership" a="membership_tag"/>
@@ -659,7 +732,7 @@
 
             {#if showAccessRoles}
                 <ListComboProperty name='Access' a='acc_role' onSelect={on_change_access_role}>
-                    <ComboSource objects={access_roles} name='name' key='name'/>
+                    <ComboSource objects={access_roles} name='summary' key='name'/>
                 </ListComboProperty>
             {/if}
 
@@ -690,18 +763,20 @@
                     self={new_user} 
                     a="email" 
                     validation={is_valid_email_address}
-                    bind:this={email_input}/>
+                    bind:this={email_input}
+                    readonly={new_user.silently}/>
 
             <Input  label='Name' 
                     placeholder='Optional' 
                     self={new_user} 
                     a="name"
-                    bind:this={name_input}/>
+                    bind:this={name_input}
+                    readonly={new_user.silently}/>
 
             <!--Checkbox class="mt-2 text-xs font-normal" self={new_user} a="maintainer">
                 <div class="flex flex-row items-center">
                     <span class="">Maintainer</span>
-                    <Icon id="b1" size={4} component={FaInfoCircle} class="text-stone-400 ml-5 pt-0 mt-1"/>
+                    <Icon id="b1" s="md" component={FaInfoCircle} class="text-stone-400 ml-5 pt-0 mt-1"/>
                     <Popover class="w-64 text-sm font-light text-stone-500 bg-white dark:bg-stone-800 dark:border-stone-600 dark:text-stone-400" triggeredBy="#b1" color="dropdown">
                         Means that the invited user will be able to add/remove others and manage permissions in this organization.
                     </Popover>
@@ -810,7 +885,7 @@
 
                             let options = [];
                             access_roles.forEach(k => options.push({
-                                caption: k.name,
+                                caption: k.summary,
                                 action: (f) => { new_user.acc_role=k.name}
                             }));
 
@@ -818,7 +893,12 @@
                             let pt = new DOMPoint(rect.left, rect.bottom)
                             showMenu(pt, options);   
                         }}>
-                            {new_user.acc_role ? new_user.acc_role : '<none>'}
+                            {#if new_user.acc_role}
+                                {access_roles.find(r => r.name==new_user.acc_role).summary}
+                            {:else}
+                                {"<none>"}
+                            {/if}
+                           
                             <span class="w-3 h-3 inline-block text-stone-700 dark:text-stone-300 ml-2 mt-2 sm:mt-1">
                                 <FaChevronDown/>
                             </span>

@@ -294,7 +294,7 @@
 
     const ORDER_STEP = 64;
     const MIN_ORDER = 0;
-    function reorderElements(items: object[], from :object | null = null)
+    function reorderElements(items: object[], from :object | null = null, pushImediatelly=true)
     {
         const oa = definition.orderAttrib
         let fromIdx;
@@ -321,10 +321,11 @@
             order += ORDER_STEP;
         }
 
-        pushChanges();
+        if(pushImediatelly)
+            pushChanges();
     }
 
-    export function replace(item, toColumnIdx, afterElement) 
+    export async function replace(item, toColumnIdx, afterElement) 
     {
         
         const fromColumnIdx = getColumnIdx(item)
@@ -340,23 +341,33 @@
         const fromColumn = columns[fromColumnIdx]
         const toColumn = columns[toColumnIdx];
 
+        const propsChanges = {
+            order: -1,
+            state: -1
+        }
+
         switch(afterElement)
         {
         case KanbanColumnTop:
             if((!toListTop) || (toListTop[oa] > item[oa]))
             {
-                item[sa] = toColumnState
-                informModification(item, sa)
+                //item[sa] = toColumnState
+                //informModification(item, sa)
+
+                propsChanges.state = toColumnState
             }
             else
             {
                 const prevItem = getPrev(allItems, toListTop)
                 if(!prevItem)
                 {
-                    item[sa] = toColumnState;
+                    //item[sa] = toColumnState;
+                    //informModification(item, sa);
+                    
                     item[oa] = toListTop[oa] - ORDER_STEP;
-                    informModification(item, sa);
                     informModification(item, oa);
+                    propsChanges.state = toColumnState;
+                    propsChanges.order = item[oa];
 
                     remove(allItems, item);
                     insertAt(allItems, 0, item);
@@ -368,43 +379,51 @@
                     let orderSpace = nextOrder - prevOrder;
                     if(orderSpace < 2)
                     {
-                        reorderElements(allItems, prevItem)
+                        reorderElements(allItems, prevItem, false)
                         prevOrder = prevItem[oa];
                         nextOrder = toListTop[oa];
                         orderSpace = nextOrder - prevOrder;
                     }
                 
-                    item[sa] = toColumnState;
+                    //item[sa] = toColumnState;
+                    //informModification(item, sa);
+
                     item[oa] = prevOrder + Math.floor(orderSpace / 2);
-                    informModification(item, sa);
                     informModification(item, oa);
+                    propsChanges.state = toColumnState
+                    propsChanges.order = item[oa];
 
                     
                     remove(allItems, item)
                     insertAfter(allItems, prevItem, item);
                 }
             }
-            pushChanges();
-            fromColumn.reload()
-            toColumn.reload()
-            return;
+            //pushChanges();
+            //fromColumn.reload()
+            //toColumn.reload()
+            break;
 
         case KanbanColumnBottom:
         default:
             if((!toListBottom) || (item[oa] > toListBottom[oa]))
             {
-                item[sa] = toColumnState;
-                informModification(item, sa)
+                //item[sa] = toColumnState;
+                //informModification(item, sa)
+                propsChanges.state = toColumnState
             }
             else
             {
                 const nextItem = getNext(allItems, toListBottom)
                 if(!nextItem)
                 {
-                    item[sa] = toColumnState;
+                    //item[sa] = toColumnState;
+                    //informModification(item, sa);
+
                     item[oa] = toListBottom[oa] + ORDER_STEP;
-                    informModification(item, sa);
                     informModification(item, oa);
+                    
+                    propsChanges.state = toColumnState
+                    propsChanges.order = item[oa];
 
                     remove(allItems, item);
                     insertAfter(allItems, toListBottom, item)
@@ -416,27 +435,60 @@
                     let orderSpace = nextOrder - prevOrder;
                     if(orderSpace < 2)
                     {
-                        reorderElements(allItems, toListBottom)
+                        reorderElements(allItems, toListBottom, false)
                         prevOrder = toListBottom[oa];
                         nextOrder = nextItem[oa];
                         orderSpace = nextOrder - prevOrder;
                     }
                     
-                    item[sa] = toColumnState;
+                    //item[sa] = toColumnState;
+                    //informModification(item, sa);
+
                     item[oa] = prevOrder + Math.floor(orderSpace / 2);
-                    informModification(item, sa);
                     informModification(item, oa);
+
+                    propsChanges.state = toColumnState
+                    propsChanges.order = item[oa]
 
                     remove(allItems, item)
                     insertAfter(allItems, toListBottom, item)
                 }
             }
-            pushChanges();
+            //pushChanges();
 
+            //fromColumn.reload()
+            //toColumn.reload()
+
+            break;
+        }
+
+        if(definition.onReplace)
+        {
+            // there was some changes in order, mayby even reorderElements
+            if(propsChanges.state >= 0)
+            {
+                pushChanges();   
+            }
+
+            const req = {
+                [sa]: propsChanges.state,
+                item: item,
+                toColumn: toColumnIdx
+            }
+
+            await definition.onReplace(req)
+        }
+        else
+        {
+            if(propsChanges.state >= 0)
+            {
+                item[sa] = propsChanges.state
+                informModification(item, sa)   
+            }
+
+            pushChanges();
             fromColumn.reload()
             toColumn.reload()
-
-            return;
         }
 	}
 
@@ -573,7 +625,7 @@
 
         // ======================
         if(definition.onAdd)
-            await definition.onAdd(newElement)
+            await definition.onAdd(newElement, columnIdx)
     }
 
     export function activateColumn(columnIdx: number)

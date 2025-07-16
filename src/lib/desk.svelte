@@ -17,11 +17,13 @@
             set_dark_mode_default,
             sidebar_left_pos,
             wholeAppReloader,
-            alerts } from './stores.js'
+            alerts, removeAlert, showFABAlways} from './stores.js'
     
     //import { AuthorizedView} from '@humandialog/auth.svelte'
-    import { handleSelect, isDeviceSmallerThan, removeAt } from './utils'
+    import { handleSelect, isDeviceSmallerThan, isOnNavigationPage, isOnScreenKeyboardVisible, removeAt, UI } from './utils'
     import { afterUpdate, onMount } from 'svelte';
+    import {location} from 'svelte-spa-router'
+    import {FaCopy, FaTimes} from 'svelte-icons/fa'
     
     export let layout;
 
@@ -75,16 +77,26 @@
 
     $: { visible_sidebar = $main_sidebar_visible_store
         
-        if(visible_sidebar == "*")
+        if(!is_small)
+        {
+            if(visible_sidebar == "*")
+            {
+                main_side_panel_visibility = "hidden"
+                lg_content_area_horizontal_dim = ""
+            }
+            else
+            {
+                main_side_panel_visibility = "fixed lg:block"
+                lg_content_area_horizontal_dim = `lg:left-[360px] lg:w-[calc(100vw-360px)]`
+            }    
+        }
+        else
         {
             main_side_panel_visibility = "hidden"
             lg_content_area_horizontal_dim = ""
         }
-        else
-        {
-            main_side_panel_visibility = "fixed lg:block"
-            lg_content_area_horizontal_dim = `lg:left-[360px] lg:w-[calc(100vw-360px)]`
-        }      
+          
+        //console.log('main_side_panel_visibility', main_side_panel_visibility)
     }
     
     let tools_visibility = "hidden"
@@ -92,11 +104,22 @@
     let bottom_bar_visibility = "hidden"
     let bottom_bar_visible = false
     let lg_main_sidebar_height = ""
-    let fab_visibility = "hidden"
-    let fab_bottom = "bottom-0"
+    //let fab_base_visibility = "hidden"
+    //let fab_visibility = fab_base_visibility;
+    //let fab_bottom = "bottom-0"
+    let vertical_toolbar_visibility = "hidden sm:block"
+    let content_left = "left-0 sm:left-[40px]";
+    let content_width = "w-screen  sm:w-[calc(100vw-40px)] ";
                                 
     let content_top = ""
-    let content_height = ""                                
+    let content_height = ""              
+    
+    const FAB_HIDDEN = 0
+    const FAB_VISIBLE_ON_MOBILE = 1
+    const FAB_VISIBLE_ALWAYS = 2
+    let fab_visibility_mode = FAB_HIDDEN
+    let is_fab_visible = false;
+    
     
     $: { tools_visible = $tools_visible_store
         bottom_bar_visible = $bottom_bar_visible_store
@@ -107,25 +130,43 @@
 
         if(tools_visible)
         {
-            tools_visibility = "hidden sm:block sm:fixed"
-            fab_visibility = "fixed sm:hidden"
-
-            content_top = 'top-[50px] sm:top-[40px]'
             
-            if(bottom_bar_visible)
-                content_height = `h-[calc(100vh-290px)] sm:h-[calc(100vh-280px)]`    
-            else    
-                content_height = `h-[calc(100vh-50px)] sm:h-[calc(100vh-40px)]` 
-               
+            const alwaysShowFAB = (!is_small) && $showFABAlways
+
+            if(alwaysShowFAB)
+            {
+                fab_visibility_mode = FAB_VISIBLE_ALWAYS
+                tools_visibility = "hidden"
+                content_top = 'top-[50px] sm:top-[0px]'
+                
+                if(bottom_bar_visible)
+                    content_height = `min-h-[calc(100vh-290px)] sm:h-[calc(100vh-240px)]`
+                else    
+                    content_height = `min-h-[calc(100vh-50px)] sm:h-[calc(100vh-0px)]` 
+            }
+            else
+            {
+                fab_visibility_mode = FAB_VISIBLE_ON_MOBILE
+                tools_visibility = "hidden sm:block sm:fixed"
+                content_top = 'top-[50px] sm:top-[40px]'
+                
+                if(bottom_bar_visible)
+                    content_height = `min-h-[calc(100vh-290px)] sm:h-[calc(100vh-280px)]`
+                else    
+                    content_height = `min-h-[calc(100vh-50px)] sm:h-[calc(100vh-40px)]` 
+            }
         }
         else
         {
             tools_visibility = "hidden"
+            //fab_base_visibility = "hidden"
+            fab_visibility_mode = FAB_HIDDEN
+
             content_top = `top-[50px] sm:top-0`
             if(bottom_bar_visible)
-                content_height = `h-[calc(100vh-290px)] sm:h-[calc(100vh-240px)]`           
+                content_height = `min-h-[calc(100vh-290px)] sm:h-[calc(100vh-240px)]`           
             else
-                content_height = `h-[calc(100vh-50px)] sm:h-screen`
+                content_height = `min-h-[calc(100vh-50px)] sm:h-screen`
         }
         
         
@@ -134,15 +175,48 @@
         {
             lg_main_sidebar_height = `lg:h-[calc(100vh-240px)]`    
             bottom_bar_visibility = "fixed"
-            fab_bottom = `bottom-[240px]`;
+         //   fab_bottom = `bottom-[240px]`;
         }
         else
         {    
             lg_main_sidebar_height = ""
             bottom_bar_visibility = "hidden"
-            fab_bottom = "bottom-0"
+         //   fab_bottom = "bottom-0"
         }
         
+        
+        //fab_visibility = fab_base_visibility;
+        determineFABVisibility();
+    }
+
+
+    $: navigationPageVisible = navigationPageSetup($location);
+    function navigationPageSetup(...args)
+    {
+        if(!is_small)
+        {
+            vertical_toolbar_visibility = "hidden sm:block"
+            content_left = "left-0 sm:left-[40px]";
+            content_width = "w-screen  sm:w-[calc(100vw-40px)]";
+            return false;
+        }
+        else
+        {
+            if(isOnNavigationPage())
+            {
+                vertical_toolbar_visibility = "block"
+                content_left = "left-[50px]";
+                content_width = "w-[calc(100vw-50px)] ";
+                return true;
+            }
+            else
+            {
+                vertical_toolbar_visibility = "hidden sm:block"
+                content_left = "left-0 sm:left-[40px]";
+                content_width = "w-screen  sm:w-[calc(100vw-40px)] ";
+                return false;
+            }
+        }
     }
 
     //$: screen.width = innerWidth;  
@@ -154,8 +228,22 @@
     }
 
     onMount( () => {
+        
+
         window.addEventListener('resize', on_resize)
+        
+        const vp = window.visualViewport;
+        vp?.addEventListener('resize', onViewportResize)
+        setViewportHeight(vp)
+
+        document.addEventListener('selectionchange', onSelectionChanged)
+        //document.addEventListener('focusout', onFocusOut)
+
         return () => {
+            
+          //  document.removeEventListener('focusout', onFocusOut)
+            document.removeEventListener('selectionchange', onSelectionChanged)
+            vp?.removeEventListener('resize', onViewportResize)
             window.removeEventListener('resize', on_resize)
             
             // remove dark class form body element when we leave Layout view
@@ -168,6 +256,96 @@
     {
         auto_hide_sidebar();
     }
+
+    let minViewportHeight = 0;
+    let maxViewportHeight = 0;
+    function setViewportHeight(vp)
+    {
+        if(!vp)
+            return;
+
+        const h = vp.height
+        if(!minViewportHeight) {
+            minViewportHeight = h }
+        else if(minViewportHeight > h) {
+            minViewportHeight = h }
+
+        if(!maxViewportHeight) {
+            maxViewportHeight = h; }
+        else if(maxViewportHeight < h) {
+            maxViewportHeight = h }
+    }
+
+    function onViewportResize(e)
+    {
+        const vp = window.visualViewport;
+        setViewportHeight(vp)
+
+        determineFABVisibilityAsync();
+    }
+
+    function onSelectionChanged(e)
+    {
+        //console.log('onSelectionChanged')
+        determineFABVisibilityAsync();
+    }
+
+    function onFocusOut(e)
+    {
+        determineFABVisibilityAsync();
+    }
+
+    let change_ticket = 0
+    let last_change_ticket = 0
+    function determineFABVisibilityAsync()
+    {
+        change_ticket++;
+        setTimeout( () => {
+            if(change_ticket != last_change_ticket)
+            {
+                last_change_ticket = change_ticket;
+                determineFABVisibility();
+            }
+        }, 200)
+        
+    }
+
+    function determineFABVisibility()
+    {
+        switch(fab_visibility_mode)
+        {
+        case FAB_HIDDEN:
+            is_fab_visible = false;
+            break;
+
+        case FAB_VISIBLE_ON_MOBILE:
+            if(isDeviceSmallerThan("sm"))
+            {
+                if(isOnScreenKeyboardVisible())
+                    is_fab_visible = false;
+                else
+                    is_fab_visible = true;
+            }
+            else
+                is_fab_visible = false;
+            break;
+
+        case FAB_VISIBLE_ALWAYS:
+            if(isOnScreenKeyboardVisible())
+                is_fab_visible = false;
+            else
+                is_fab_visible = true;
+            break;
+        }
+    }
+
+    let operationsComponent
+    let fabComponent;
+    afterUpdate( () =>
+    {
+        UI.operations = operationsComponent
+        UI.fab = fabComponent;          
+    })
 
 </script>
 
@@ -183,7 +361,8 @@
                 on:click={handleSelect} 
                 on:contextmenu={handleSelect}>
 
-            <div class="bg-white dark:bg-stone-900 dark:text-white  overflow-x-clip overflow-y-clip  h-screen">    
+            <div class="bg-white dark:bg-stone-900 dark:text-white  overflow-x-clip 
+                        sm:overflow-y-clip  min-h-screen sm:h-screen">    
                 <!--###########################################################-->
                 <!--##  HORIZONTAL TOOLBAR (FOR PHONES)  ######################-->
                 <!--###########################################################-->
@@ -198,9 +377,9 @@
                 <!--#######################################################-->
                 <!--##  VERTICAL TOOLBAR                 ##################-->
                 <!--#######################################################-->
-                <div  class="hidden sm:block fixed left-0 top-0 w-[50px] sm:w-[40px] h-screen z-20 inset-0   overflow-hidden">
-                    <div class="sticky top-0 flex h-full w-10 bg-stone-800 dark:bg-stone-950 flex-col items-center text-stone-100 shadow">
-                        <VerticalToolbar appConfig={layout}/>
+                <div  class="{vertical_toolbar_visibility} fixed left-0 top-[50px] sm:top-0 w-[50px] sm:w-[40px] h-screen z-20 inset-0   overflow-hidden">
+                    <div class="sticky top-0 flex h-full w-12 sm:w-10 bg-stone-800 dark:bg-stone-950 flex-col items-center text-stone-100 shadow">
+                        <VerticalToolbar appConfig={layout} mobile={is_small}/>
                     </div>    
                 </div>
 
@@ -232,7 +411,7 @@
                     behaviour is the content expand vertically, and only vertical scrollbar can be visible.
                     When content on the main page needs to be expanded horizontally (like kanban chart for example) then
                     that component should define overflow-x-* itself -->
-                <section on:click|capture={auto_hide_sidebar} class="">
+                <section on:click|capture={() => { if(!navigationPageVisible) auto_hide_sidebar()}  } class="">
 
                     <!--###########################################################-->
                     <!--##  HORIZONTAL TOOLS                 ######################-->
@@ -246,31 +425,34 @@
                                     {lg_content_area_horizontal_dim}
                                     z-10 overflow-hidden " >
 
-                        <Operations/>
+                        <Operations bind:this={operationsComponent} />
                     </div>
 
-                    <div class="{fab_visibility} right-3 {fab_bottom} mb-1 cursor-pointer z-10">
-                        <Fab/>
-                    </div>
+                   
 
                     <!--#######################################################-->
                     <!--##  CONTENT                          ##################-->
                     <!--#######################################################-->
                     <!-- fixed => relative, content-height => min content height -- -->
                     <div    id="__hd_svelte_main_content_container"
-                            class="relative left-0  w-screen  
-                                    sm:left-[40px]  sm:w-[calc(100vw-40px)]    
+                            class="relative 
+                                    {content_left}
+                                    {content_width}   
                                     {content_top}
-                                    {content_height}
                                     {lg_content_area_horizontal_dim}
-                                    z-0 overflow-x-hidden overflow-y-auto" 
+                                    z-0 overflow-x-hidden 
+                                    {content_height} sm:overflow-y-auto" 
                                     >
-                            <Configurable config={layout.mainContent} min_h_class="min-h-full">
+                            <Configurable config={layout.mainContent} min_h_class="min-h-screen">
                                 <div slot='alt'></div>
                             </Configurable>
                     </div>    
 
-
+                     {#if is_fab_visible}
+                    <!--div class="{fab_visibility} left-3 {fab_bottom} mb-1 cursor-pointer z-10"-->
+                        <Fab bind:this={fabComponent} />
+                    <!---/div-->
+                    {/if}
 
                     <!--###########################################################-->
                     <!--##  BOTTOM SIDEBAR          ###############################-->
@@ -287,20 +469,22 @@
                     <!--##########################################################-->
                     <!--##  ALERTS ###############################################-->
                     <!--##########################################################-->
-                    <section class="absolute left-2 sm:left-auto sm:right-2 bottom-2 flex flex-col gap-2">
+                    <section class="fixed left-2 sm:left-auto sm:right-2 bottom-2 flex flex-col gap-2">
                         {#if $alerts && $alerts.length > 0}
                             {#each $alerts as alert, idx}
-                                <Alert class="bg-red-900/40  shadow-lg shadow-stone-400 dark:shadow-black flex flex-row">
-                                    <button class="sm:hidden font-bold  ml-auto"
-                                            on:click={() => {$alerts = removeAt($alerts, idx)}}>
-                                        x
-                                    </button>
-                                    <p>
-                                        {alert}
+                                <Alert class="bg-red-900/40  shadow-lg shadow-stone-400 dark:shadow-black flex flex-row-reverse sm:flex-row">
+                                    {@const text_max_width = is_small ? '60vw' : '75vw'}
+                                    
+                                    <p class="flex-none truncate" style="max-width: {text_max_width}">
+                                        {alert.msg}
                                     </p>
-                                    <button class="hidden sm:block font-bold  ml-auto"
-                                            on:click={() => {$alerts = removeAt($alerts, idx)}}>
-                                        x
+                                    <button class="block sm:ml-auto w-3 mx-1"
+                                            on:click={() => {navigator.clipboard.writeText(alert.msg)}}>
+                                        <FaCopy/>
+                                    </button>
+                                    <button class="block w-3 mx-1"
+                                            on:click={() => {removeAlert(alert)}}>
+                                        <FaTimes/>
                                     </button>
                                 </Alert>    
                             {/each}
@@ -310,7 +494,7 @@
                     <!-- #########################################################-->
                     <!-- ## MODAL DIALOG #########################################-->
                     <!-- #########################################################-->
-                    <div id="__hd_svelte_modal_root" class="z-30">
+                    <div id="__hd_svelte_modal_root" class="z-30 sm:z-40">
                         <!-- after <Modal/> component is shown it's rettached to above div
                             see: modal.svelte afterUpdate -->
                     </div>

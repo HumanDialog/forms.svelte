@@ -1,7 +1,11 @@
 <script lang="ts">
 
     import {tick, afterUpdate} from 'svelte'
-    
+    import {isDeviceSmallerThan} from '../utils'
+    import {pushToolsActionsOperations, popToolsActionsOperations} from '../stores'
+    import {FaTimes} from 'svelte-icons/fa'
+    import Icon from './icon.svelte'
+
     let x :number;
     let y :number;
     let visible :boolean = false;
@@ -10,9 +14,11 @@
 
     let around_rect :DOMRect;
 
-    let root_element;
+    let rootElement;
+    let internalElement;
+    let closeButtonPos = ''
     
-    $: display = visible ? 'fixed' : 'hidden';
+    //$: display = visible ? 'fixed' : 'hidden';
 
     export async function show(around :DOMRect | DOMPoint, _toolbar, _props = {})
     {
@@ -31,19 +37,49 @@
         
         const was_visible = visible;
 
+        if((!was_visible) && (toolbar == _toolbar) && internalElement && internalElement.reload)
+        {
+            internalElement.reload(_props);
+        }
+
         visible = true;
         toolbar = _toolbar;
         props = _props;
 
+        cssPosition = calculatePosition(x, y, around_rect, true, true);
+
         props.onHide = () => {hide()};
+        props.onSizeChanged = () => onSizeChanged();
 
         hide_window_indicator = 0;
         window.addEventListener('click', on_before_window_click, true);
+
+        if(false && isDeviceSmallerThan("sm"))
+        {    
+            pushToolsActionsOperations( {
+                opver: 1,
+                operations: [
+                    {
+                        caption: 'Menu',
+                        operations: [
+                            {
+                                icon: FaTimes,
+                                action: (f) => { hide(); },
+                                fab: 'M00',
+                                tbr: 'A'
+                            }
+                        ]
+                    }
+                ]
+            })
+        }
                 
         await tick();
 
         if(!was_visible)
-            root_element.addEventListener('click', on_before_container_click, true);
+            rootElement.addEventListener('click', on_before_container_click, true);
+
+        cssPosition = calculatePosition(x, y, around_rect, true, false);
     }
 
     export function isVisible()
@@ -53,11 +89,27 @@
 
     export function hide()
     {
+        if(false && visible)
+            popToolsActionsOperations();
+
         visible = false;
+        cssPosition = calculatePosition(x, y, around_rect, false, false);
+        
         window.removeEventListener('click', on_before_window_click, true);
-        root_element.removeEventListener('click', on_before_container_click, true);
+        rootElement?.removeEventListener('click', on_before_container_click, true);
     }
 
+    export function isSameToolbar(_toolbar)
+    {
+        return _toolbar == toolbar;
+    }
+
+    async function onSizeChanged()
+    {
+        cssPosition = calculatePosition(x, y, around_rect, true, true);
+        await tick();
+        cssPosition = calculatePosition(x, y, around_rect, true, false);
+    }
     
     let hide_window_indicator :number = 0;
     function on_before_window_click()
@@ -77,39 +129,140 @@
         hide_window_indicator--;
     }
 
-    afterUpdate(() => 
+    /*afterUpdate(() => 
     {
-        if(!root_element)
+        if(!rootElement)
             return;
 
-        let rect :DOMRect = root_element.getBoundingClientRect()
-        if(rect.height == 0)
+        let myRect :DOMRect = rootElement.getBoundingClientRect()
+        if(myRect.height == 0)
             return;
 
         const m = 15;
-        let container_rect :DOMRect = new DOMRect(m, 0, window.innerWidth-2*m, window.innerHeight)
+        let screenRect :DOMRect = new DOMRect(m, 0, window.innerWidth-2*m, window.innerHeight)
                         
-        if(rect.right > container_rect.right)
-            x = container_rect.right - rect.width;
+        if(myRect.right > screenRect.right)
+            x = screenRect.right - myRect.width;
 
-        if(rect.bottom > container_rect.bottom)
-            y = container_rect.bottom - rect.height - around_rect.height;
+        if(myRect.bottom > screenRect.bottom)
+            y = screenRect.bottom - myRect.height - around_rect.height;
             
-        if(rect.left < container_rect.left)
-            x = container_rect.left;
+        if(myRect.left < screenRect.left)
+            x = screenRect.left;
 
-        if(rect.top < container_rect.top)
-            y = container_rect.top
+        if(myRect.top < screenRect.top)
+            y = screenRect.top
       
-    })
+    })*/
+
+    let cssPosition = ''
+    function calculatePosition(x: number, y: number, around: DOMRect, visible: boolean, fresh: boolean): string
+    {
+        let result = '';
+
+        if(!visible)
+        {
+            result = 'display: none';
+        }
+        else if(isDeviceSmallerThan("sm"))
+        {
+            let screenRect = new DOMRect;
+            screenRect.x = 0;
+            screenRect.y = 0;
+            screenRect.width = window.innerWidth;
+            screenRect.height = window.innerHeight;
+
+            const margin = 5
+
+            let myRect :DOMRect|null = null;
+            if(!fresh)
+            {
+                myRect = rootElement.getBoundingClientRect()
+                if(myRect && myRect.height == 0)
+                    myRect = null;
+            }
+            
+            if(myRect)
+            {
+                let maxHeight = screenRect.height / 2 - margin;
+
+                if(myRect.height < maxHeight)
+                    maxHeight = myRect.height
+                
+                const width = screenRect.width - 2*margin;
+                x = margin;
+                y = screenRect.bottom - maxHeight - margin;
+
+                result = `left: ${x}px; top: ${y}px; width: ${width}px; max-height: ${maxHeight}px; display: block`
+            }
+            else
+            {
+                const maxHeight = screenRect.height / 2 - margin;
+                const width = screenRect.width - 2*margin;
+                x = margin;
+                y = screenRect.bottom - maxHeight - margin;
+
+                result = `left: ${x}px; top: ${y}px; width: ${width}px; max-height: ${maxHeight}px; display: block`
+            }
+
+            closeButtonPos = `right: ${margin}px; top: calc(${y}px - 1.75rem)`
+        }
+        else
+        {
+            let myRect :DOMRect|null = null;
+
+            if(!fresh)
+            {
+                myRect = rootElement.getBoundingClientRect()
+                if(myRect && myRect.height == 0)
+                    myRect = null;
+            }
+
+            const m = 15;
+            let screenRect :DOMRect = new DOMRect(m, 0, window.innerWidth-2*m, window.innerHeight)
+                    
+            if(myRect)
+            {
+                if(myRect.right > screenRect.right)
+                    x = screenRect.right - myRect.width;
+
+                if(myRect.bottom > screenRect.bottom)
+                    y = screenRect.bottom - myRect.height - around_rect.height;
+                    
+                if(myRect.left < screenRect.left)
+                    x = screenRect.left;
+
+                if(myRect.top < screenRect.top)
+                    y = screenRect.top
+            }
+
+            result = `left:${x}px; top:${y}px; width: max-content; height:max-content; display: block`
+            closeButtonPos = ``
+            
+        }
+
+        return result;
+    }
 
 
 </script>
 
 <div    id="__hd_svelte_floating_container"
-        class="p-2 bg-stone-100 dark:bg-stone-800 rounded-lg shadow {display} z-30"
-        style="left:{x}px; top:{y}px; width: max-content; height:max-content"
-        bind:this={root_element}>
-    <svelte:component this={toolbar} {...props} />
+        class="p-2 bg-stone-100 dark:bg-stone-800 rounded-lg shadow-md shadow-stone-500 dark:shadow-black z-40 fixed "
+        style={cssPosition}
+        bind:this={rootElement}>
+        {#if closeButtonPos}
+    <button class="     fixed w-6 h-6 flex items-center justify-center
+                        text-stone-500 bg-stone-200/70 hover:bg-stone-200
+                        focus:outline-none font-medium rounded-full text-sm text-center
+                        dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700 
+                        focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800" 
+            style={closeButtonPos}
+            on:click={ hide }>
+            <Icon component={FaTimes} s="md"/>
+        </button>
+    {/if}
+
+    <svelte:component this={toolbar} {...props} bind:this={internalElement} />
 </div>
 

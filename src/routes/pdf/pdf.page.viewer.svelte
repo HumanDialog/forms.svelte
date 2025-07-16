@@ -20,11 +20,21 @@
     import {points} from './points'
 	import { remove, removeAt } from '$lib/utils';
 	import { page } from '$app/stores';
+    import {FaMapPin, FaMapMarker, FaMapMarkerAlt} from 'svelte-icons/fa'
+    
 	
     export let pageNo = 1;
     export let rotation = undefined
     export let scale = 1.0
     export let url;
+
+    export function changeScale(_scale)
+    {
+        scale = _scale
+
+        //1. Render by 
+    }
+
     let canvasPdf;
     let svgTasks;
     
@@ -91,6 +101,7 @@
         await pdfPage.render({
             canvasContext: ctx,
             viewport: viewport,
+            annotationMode: pdfjs.AnnotationMode.DISABLE,
             background: null
         }).promise
  

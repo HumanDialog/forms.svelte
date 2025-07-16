@@ -21,6 +21,7 @@
     export let pushChangesImmediately = true;
 
     export let required = false;
+    export let readonly = false;
 
     export  let s = 'sm'
     export  let c = ''
@@ -45,17 +46,33 @@
         return !invalid;
     } 
 
+    export function setReadonly(val)
+    {
+        readonly = val;
+        itype = itype;
+    }
+
+    export function refresh(itm=undefined)
+    {
+        if(itm)
+            self = itm;
+
+        item = self ?? $contextItemsStore[ctx];
+        setup()
+    }
+
+    let userClass = $$restProps.class ?? '';
     
     let   item = null
 
-    let     labelMargins = 'mt-1 mb-0.5' //
+    let     labelMargins = 'mb-0.5' //
     let input_pt = 'pt-0.5'
     let input_pb = 'pb-1'
     
     switch (s)
     {
         case 'md':
-            labelMargins = 'mt-1 mb-1';
+            labelMargins = 'mb-1';
             input_pt = 'pt-2.5'
             input_pb = 'pb-2.5';           
             break;
@@ -120,7 +137,7 @@
 
 {#if itype == 'text'}
     {@const border_style = invalid ? "border-red-300 dark:border-red-600" : "border-stone-300 dark:border-stone-500" }
-    <div class={cs}>
+    <div class="{cs} {userClass}">
         <label for="name" class="block {labelMargins} text-xs font-small text-stone-900 dark:text-white">{label}</label>
         
         <input  type=text name="name" id="name" 
@@ -128,6 +145,7 @@
                 on:change={()=> (value_changed())}
                 on:blur={() => { accept_change();} }
                 on:keydown={(e)=>{check_validity();}}
+                {readonly}
                 
                 class="     bg-stone-50 dark:bg-stone-700
                             border {border_style} rounded-lg 

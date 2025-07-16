@@ -40,8 +40,8 @@
 <li class=" mx-2 pt-2 pb-4 px-1 rounded-md border border-transparent
             bg-stone-100 dark:bg-stone-700">
 
-    <h3  class=" text-lg font-semibold min-h-[1.75rem]
-                sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
+    <h3  class=" text-base font-semibold min-h-[1.75rem]
+                 sm:min-h-[1.25rem]
                 whitespace-nowrap overflow-clip w-full sm:flex-none "
                 use:editable={{
                     action: (text) => onInsert(text, ''),
@@ -52,10 +52,9 @@
     </h3>
 
     {#if editSummary}
-        <p class="  sm:text-xs sm:min-h-[1rem]
-                text-base min-h-[1.5rem]
+        <p class="  text-sm min-h-[1.25rem]
                 text-stone-400
-                max-h-[75px] sm:max-h-[64px]
+                max-h-[75px] 
                 overflow-hidden"
                 use:editable={{
                     action: (text) => onSummaryChanged(text), 

@@ -19,18 +19,23 @@
             context_info_store,
             contextToolbarOperations,
             data_tick_store,
-            reloadWholeApp
+            reloadWholeApp,
+            showFABAlways,
+            leftHandedFAB
         } from "./stores.js";     
     import Icon from './components/icon.svelte';
     import {session, signInHRef, signOutHRef} from '@humandialog/auth.svelte'
-	import { push } from 'svelte-spa-router';
+	import { pop, push } from 'svelte-spa-router';
 	import { tick } from 'svelte';
+	import { isDeviceSmallerThan, popNavigationPage } from './utils';
     
 
-    export let appConfig;
+    export let appConfig = undefined;
     export let mobile=false;
     export let clearsContext = 'sel props'
     
+    export let definedTabs = undefined
+    export let mainToolbarConfig = undefined
     
     let tabs = new Array();
     let config = null;
@@ -45,10 +50,19 @@
     let can_add_new_group = false;
 
     $:  {
-        config = appConfig.mainToolbar;
-        has_selection_details = appConfig.selectionDetails;
-        if(has_selection_details)
-            selection_detils_caption = appConfig.selectionDetails.caption ?? 'Properties'
+        if(appConfig)
+        {
+            config = appConfig.mainToolbar;
+            has_selection_details = appConfig.selectionDetails;
+            if(has_selection_details)
+                selection_detils_caption = appConfig.selectionDetails.caption ?? 'Properties'
+        }
+        else
+        {
+            has_selection_details = false;
+            config = mainToolbarConfig;
+        }
+
         is_logged_in = $session.isActive;
         show_sign_in_out_icons = config.signin ? true : false;
         sign_in_href = $signInHRef;
@@ -56,23 +70,38 @@
 
         tabs = new Array();
 
-        Object.keys(appConfig.sidebar).forEach( (key) =>    
-            { 
-                const ctab = appConfig.sidebar[key];
-                const can_show = (ctab.authorized && is_logged_in) || (!ctab.authorized)
-                if(can_show)
-                    tabs.push({key: key, icon: ctab.icon}); 
-            });
-
-        // there is no current visible sidebar
-        if($main_sidebar_visible_store != '*')
+        if(definedTabs && Array.isArray(definedTabs) && definedTabs.length > 0)
         {
-            if(tabs.every( (e) => e.key != $main_sidebar_visible_store))
+            tabs = [...definedTabs]
+        }
+        else
+        {
+            Object.keys(appConfig.sidebar).forEach( (key) =>    
+                { 
+                    const ctab = appConfig.sidebar[key];
+                    const can_show = (ctab.authorized && is_logged_in) || (!ctab.authorized)
+                    if(can_show)
+                    {
+                        const tab = {
+                            key: key,
+                            icon: ctab.icon,
+                            onclick: (e) => on_navigator_tab_clicked(e, key)
+                        }
+
+                        tabs.push(tab); 
+                    }
+                });
+
+            // there is no current visible sidebar
+            if($main_sidebar_visible_store != '*')
             {
-                if(tabs.length)
-                    show_sidebar(tabs[0].key);
-                else
-                    hide_sidebar();
+                if(tabs.every( (e) => e.key != $main_sidebar_visible_store))
+                {
+                    if(tabs.length)
+                        show_sidebar(tabs[0].key);
+                    else
+                        hide_sidebar();
+                }
             }
         }
        
@@ -93,12 +122,19 @@
         
     }
 
-    function on_tab_clicked(key)
+    function on_navigator_tab_clicked(e, key)
     {
-        if(!mobile)
+        e.stopPropagation();
+       
+         if(!mobile)
             toggle_sidebar(key);
         else
-            show_sidebar(key);
+        {
+            if($main_sidebar_visible_store == key)
+                popNavigationPage();
+            else
+                show_sidebar(key);
+        }
     }
 
     function show_options(e)
@@ -182,6 +218,22 @@
                     icon: $tools_visible_store ? FaToggleOn : FaToggleOff,
                     action: (focused) => { $tools_visible_store = !$tools_visible_store; }
                 });
+        }
+
+        if(!isDeviceSmallerThan("sm"))
+        {
+            options.push({
+                caption: 'Floating actions',
+                icon: $showFABAlways ? FaToggleOn : FaToggleOff,
+                action: (f) => { $showFABAlways = !$showFABAlways; }
+            })
+
+            options.push({
+                caption: 'Left-handed floating actions',
+                icon: $leftHandedFAB ? FaToggleOn : FaToggleOff,
+                disabled: !$showFABAlways,
+                action: (f) => { $leftHandedFAB = !$leftHandedFAB; }
+            })
         }
 
         if(has_selection_details)
@@ -319,15 +371,15 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 
 <section class="no-print flex flex-col w-full h-full" on:click={clearSelection}>
-    <div class="px-0 w-10">
+    <div class="px-0 w-12 sm:w-10">
         {#each tabs as tab}
             {@const isSelected = $main_sidebar_visible_store == tab.key}
             <button
                 class="h-16 px-0 flex justify-center items-center w-full text-stone-300 hover:text-stone-100"
                 class:bg-orange-500={isSelected}
-                on:click|stopPropagation={()=> (on_tab_clicked(tab.key))}>
+                on:click={tab.onclick}>
                 
-                <Icon size={6} component={tab.icon}/>
+                <Icon s="xl" component={tab.icon}/>
             </button>
         {/each}
     </div>
@@ -339,7 +391,7 @@
             {#if show_groups_switch_menu}
                 <button class="h-12 px-0 flex justify-center items-center w-full text-stone-300 hover:text-stone-100"
                         on:click|stopPropagation={show_groups}>
-                    <Icon size={4} component={FaUsers} />
+                    <Icon s="md" component={FaUsers} />
                 </button>
             {/if}
 
@@ -347,7 +399,7 @@
                 class="h-12  px-0 flex justify-center items-center w-full text-stone-300 hover:text-stone-100"
                 on:click|stopPropagation={show_options}>
 
-                <Icon size={4} component={FaCog} />
+                <Icon s="md" component={FaCog} />
             </button>
 
         </div>

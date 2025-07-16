@@ -1,6 +1,7 @@
 import { getContext, tick } from "svelte";
 import {get} from 'svelte/store'
-import { contextItemsStore, contextToolbarOperations, data_tick_store } from "./stores";
+import { contextItemsStore, contextToolbarOperations, pageToolbarOperations, data_tick_store } from "./stores";
+import {location, push, pop} from 'svelte-spa-router' 
 
 export let icons = {symbols :null}
 
@@ -55,8 +56,13 @@ export function activateItem(context_level, itm, operations=null)
 
     //chnages.just_changed_context = true;
 
-    if(operations && Array.isArray(operations))
-        contextToolbarOperations.set( [...operations] )
+    if(operations)
+    { 
+        if(Array.isArray(operations))
+            contextToolbarOperations.set( [...operations] )
+        else
+            contextToolbarOperations.set( {...operations} )
+    }
 }
 
 export function clearActiveItem(context_level)
@@ -74,6 +80,59 @@ export function clearActiveItem(context_level)
     //chnages.just_changed_context = true;
 
     contextToolbarOperations.set( [] )
+}
+
+export function refreshToolbarOperations()
+{
+    
+    let refreshed = false
+
+    const contextOperations = get(contextToolbarOperations)
+    if(contextOperations)
+    {
+        
+        if(Array.isArray(contextOperations))
+        {
+            if(contextOperations.length > 0)
+            {
+                contextToolbarOperations.set([...contextOperations])
+                refreshed = true
+            }
+        }
+        else
+        {
+            if(contextOperations.operations && contextOperations.operations.length > 0)
+            {
+                contextToolbarOperations.set({...contextOperations})
+                refreshed = true
+            }
+        }
+    }
+    
+    if(!refreshed)
+    {
+        const pageOperations = get(pageToolbarOperations);
+        if(pageOperations)
+        {
+            if(Array.isArray(pageOperations))
+            {
+                if(pageOperations.length > 0)
+                {
+                    pageToolbarOperations.set([...pageOperations])
+                    refreshed = true
+                }
+            }
+            else
+            {
+                if(pageOperations.operations && pageOperations.operations.length > 0)
+                {
+                    pageToolbarOperations.set({...pageOperations})
+                    refreshed = true
+                }
+            }
+        }
+
+    }
 }
 
 export function isSelected(itm)
@@ -113,6 +172,7 @@ export function editable(node, params)
     let onRemove = undefined;
     let onFinish = undefined;
     let onSoftEnter = undefined;
+    let onSingleChange = undefined
     if(params instanceof Object)
     {
         action = params.action ?? params;
@@ -120,6 +180,7 @@ export function editable(node, params)
         onRemove = params.remove ?? undefined
         onFinish = params.onFinish ?? undefined
         onSoftEnter = params.onSoftEnter ?? undefined;
+        onSingleChange = params.onSingleChange ?? undefined
        
         if(params.readonly)
             return;
@@ -162,7 +223,7 @@ export function editable(node, params)
         case 'Enter':
             e.stopPropagation();
             e.preventDefault();
-
+            
             if(e.shiftKey && onSoftEnter)
                 await finish_editing({ softEnter: true});
             else
@@ -211,11 +272,14 @@ export function editable(node, params)
             if(active)
             {
                 if(has_changed)
+                {
+                    has_changed = false;
                     await action(node.textContent)
+                }
+                    
             }
             else
                 await action(node.textContent)
-            
         }
 
         const finish_event  = new CustomEvent("finish", {
@@ -274,7 +338,12 @@ export function editable(node, params)
         currentEditable = node;
         node.addEventListener("save", save_listener)
         
-        observer = new MutationObserver(() => { has_changed = true; });
+        observer = new MutationObserver(() => { 
+            has_changed = true; 
+            if(onSingleChange)
+                onSingleChange(node.textContent)
+        });
+
         observer.observe(   node,  {
                                 childList: true,
                                 attributes: true,
@@ -301,6 +370,7 @@ export function editable(node, params)
         
         return {
             destroy() {
+
                 node.removeEventListener("edit", edit_listener)
                 node.classList.remove("editable")
                 node.contentEditable = "false"
@@ -521,4 +591,120 @@ export function swapElements(array, e1, e2)
     array[idx2] = e1;
 
     return array;
+}
+
+
+export async function resizeImage(file, maxWidth=1024, maxHeight=1024, contentType='', quality=0.95)
+{
+    if(!contentType)
+        contentType = file.type
+
+    if(!contentType)
+        contentType = 'image/png'
+
+    const calculateSize = (img, maxWidth, maxHeight) => {
+        let w = img.width,
+            h = img.height;
+        if (w > h) {
+          if (w > maxWidth) {
+            h = Math.round((h * maxWidth) / w);
+            w = maxWidth;
+          }
+        } else {
+          if (h > maxHeight) {
+            w = Math.round((w * maxHeight) / h);
+            h = maxHeight;
+          }
+        }
+        return [w, h];
+      };
+
+    return new Promise((resolve) => {
+
+        const img = new Image();
+        img.onerror = function () {
+            URL.revokeObjectURL(this.src)
+        }
+
+        img.onload = function () {
+            URL.revokeObjectURL(this.src)
+            const [newWidth, newHeight] = calculateSize(img, maxWidth, maxHeight);
+
+            console.log('resizeImage', img.width, '=>', newWidth, img.height, '=>', newHeight, contentType, quality)
+            
+            const canvas = document.createElement("canvas");
+            canvas.width = newWidth;
+            canvas.height = newHeight;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, newWidth, newHeight);
+    
+            canvas.toBlob((blob) => {
+                resolve(blob);
+              },
+    
+              contentType,
+              quality)
+       
+        }
+
+        img.src = URL.createObjectURL(file);
+
+    }) 
+}
+
+export function isOnScreenKeyboardVisible()
+{
+    if(!isDeviceSmallerThan('sm'))       // are we on mobile?
+        return false;
+
+    const sel = window.getSelection();
+    // if we have active selections then it's very possible we have onscreen keyboard visible, se we need to shrink window.innerHeight 
+    if(sel && sel.rangeCount>0 && sel.focusNode /*&& sel.focusNode.nodeType==sel.focusNode.TEXT_NODE*/) // TipTap fix: when cursor blinks at begining of line it's not TEXT_NODE. ProseMirror handles it as special case
+    {
+        const el = sel.focusNode.parentElement;
+        if(el && (el.isContentEditable || el.contentEditable == 'true' || el.tagName == 'INPUT'))
+            return true;
+    }
+
+    return false;
+}
+
+export const UI = {
+    operations: null,
+    fab: null,
+    navigator: null
+}
+
+export const NAVIGATION_PAGE_PATH = '/'
+export function isOnNavigationPage()
+{
+    const loc = get(location)
+    if(loc == NAVIGATION_PAGE_PATH)
+        return true;
+    else
+        return false;
+}
+
+export function pushNavigationPage()
+{
+    push(NAVIGATION_PAGE_PATH)
+}
+
+export function popNavigationPage()
+{
+    if(isOnNavigationPage())
+        pop();
+}
+
+export function dec2hex (dec) 
+{
+    return dec.toString(16).padStart(2, "0")
+}
+  
+
+export function randomString(len) 
+{
+    var arr = new Uint8Array((len || 16) / 2)
+    window.crypto.getRandomValues(arr)
+    return Array.from(arr, dec2hex).join('')
 }

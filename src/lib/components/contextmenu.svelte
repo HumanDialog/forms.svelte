@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { afterUpdate, tick} from 'svelte';
     import Icon from './icon.svelte'
-    import {contextItemsStore} from '../stores'
-    import {isDeviceSmallerThan} from '../utils'
-    import {hideWholeContextMenu} from './menu'
+    import {contextItemsStore, pushToolsActionsOperations, popToolsActionsOperations} from '../stores'
+    import {isDeviceSmallerThan, isOnScreenKeyboardVisible} from '../utils'
+    import {hideWholeContextMenu, showMenu, showFloatingToolbar, showGridMenu} from './menu'
+    import {FaTimes} from 'svelte-icons/fa'
 
     export let widthPx     :number = 400;
 
@@ -21,64 +22,136 @@
     let menu_items :HTMLElement[] = [];
     let submenus = [];
     let around_rect :DOMRect;
+    let css_position = ''
+    let closeButtonPos = ''
 
     $: display = visible ? 'block' : 'none';
-
-    afterUpdate(() => 
+//
+    /* afterUpdate(() =>
     {
+        console.log('menu afterUpdate', around_rect)
+
         let rect :DOMRect = menu_root.getBoundingClientRect()
         if(rect.height == 0)
             return;
 
-        const m = 15;
-        let container_rect :DOMRect = new DOMRect(m, 0, window.innerWidth-2*m, window.innerHeight)
-        
-        if(isDeviceSmallerThan('sm'))       // are we on mobile?
+        if(isDeviceSmallerThan("sm"))
         {
-            const sel = window.getSelection();
-            console.log('sel', sel)
-            // if we have active selections then it's very possible we have onscreen keyboard visible, se we need to shrink window.innerHeight 
-            if(sel && sel.rangeCount>0 && sel.focusNode && sel.focusNode.nodeType==sel.focusNode.TEXT_NODE)
-            {
-                const el :HTMLElement|null = sel.focusNode.parentElement;
-                if(el && (el.isContentEditable || el.contentEditable == 'true' || el.tagName == 'INPUT'))
-                {
-                    console.log('keyboard visible, move menu 300px up', el)
-                    container_rect.height -= 300; // it will be enough?
-                }
-                
-            }
-        }
 
-        
-        
-        //console.log('beforeUpdate', rect, ' in ', container_rect)
-                
-        let xShifted = false;
-        if(rect.right > container_rect.right)
+        }
+        else
         {
-            x = container_rect.right - rect.width + m;
-            xShifted = true;
+            //css_position = calculatePosition(x, y, around_rect, visible);
         }
-
-        let yShifted = false;
-        if(rect.bottom > container_rect.bottom)
-        {
-            y = container_rect.bottom - rect.height-m;
-            if(xShifted)    // possible covers around rect
-                x -= around_rect.width;
-            else
-                y -= around_rect.height-m;
-            yShifted = true;
-        }
-
-        if(rect.left < container_rect.left)
-            x = container_rect.left;
-
-        if(rect.top < container_rect.top)
-            y = container_rect.top
     })
-    
+        */
+
+    function calculatePosition(x: number, y: number, around: DOMRect, visible: boolean, fresh: boolean): string
+    {
+        let result = '';
+
+        if(!visible)
+        {
+            result = 'display: none';
+        }
+        else if(isDeviceSmallerThan("sm"))
+        {
+            let screenRect = new DOMRect;
+            screenRect.x = 0;
+            screenRect.y = 0;
+            screenRect.width = window.innerWidth;
+            screenRect.height = window.innerHeight;
+
+            const margin = 5
+
+            let myRect :DOMRect|null = null;
+            if(!fresh)
+            {
+                myRect = menu_root.getBoundingClientRect()
+                if(myRect.height == 0)
+                {
+                    myRect = null;
+                }
+            }
+
+            if(myRect)
+            {
+                let maxHeight = screenRect.height / 2 - margin;
+
+                if(myRect.height < maxHeight)
+                    maxHeight = myRect.height
+
+                const width = screenRect.width - 2*margin;
+                x = margin;
+                y = screenRect.bottom - maxHeight - margin;
+
+                result = `left: ${x}px; top: ${y}px; width: ${width}px; max-height: ${maxHeight}px; display: block`
+            }
+            else
+            {
+                const maxHeight = screenRect.height / 2 - margin;
+                const width = screenRect.width - 2*margin;
+                x = margin;
+                y = screenRect.bottom - maxHeight - margin;
+
+                result = `left: ${x}px; top: ${y}px; width: ${width}px; max-height: ${maxHeight}px; display: block`
+            }
+
+            closeButtonPos = `right: ${margin}px; top: calc(${y}px - 1.75rem)`
+
+        }
+        else
+        {
+            let myRect :DOMRect|null = null;
+            if(!fresh)
+            {
+                myRect = menu_root.getBoundingClientRect()
+                if(myRect.height == 0)
+                {
+                    myRect = null;
+                }
+            }
+
+            if(myRect)
+            {
+                const m = 15;
+                let screenRect :DOMRect = new DOMRect(m, 0, window.innerWidth-2*m, window.innerHeight)
+
+                let xShifted = false;
+                if(myRect.right > screenRect.right)
+                {
+                    x = screenRect.right - myRect.width + m;
+                    xShifted = true;
+                }
+
+                let yShifted = false;
+                if(myRect.bottom > screenRect.bottom)
+                {
+                    y = screenRect.bottom - myRect.height;
+                    if(around)
+                    {
+                        if(xShifted)    // possible covers around rect
+                            x -= around.width;
+                        else
+                            y -= around.height;
+                    }
+                    yShifted = true;
+                }
+
+                if(myRect.left < screenRect.left)
+                    x = screenRect.left;
+
+                if(myRect.top < screenRect.top)
+                    y = screenRect.top
+            }
+
+            result = `left:${x}px; top:${y}px; display: block; min-width: 15rem`
+            closeButtonPos = ''
+        }
+
+        return result;
+    }
+
     export async function show(around :DOMRect|DOMPoint, _operations)
     {
         if(around instanceof DOMRect)
@@ -95,7 +168,9 @@
         }
 
         visible = true;
-        
+        css_position = calculatePosition(x, y, around_rect, true, true);
+
+
         operations = [..._operations];
         focused_index = operations.findIndex(o => !o.disabled)
 
@@ -107,18 +182,43 @@
             hide_window_indicator = 0;
             window.addEventListener('click', on_before_window_click, true)
         }
-        
 
-        await tick();
+
+        if(false && isDeviceSmallerThan("sm"))
+        {
+            pushToolsActionsOperations ({
+                opver: 1,
+                operations: [
+                    {
+                        caption: 'Menu',
+                        operations: [
+                            {
+                                icon: FaTimes,
+                                action: (f) => { hide(); },
+                                fab: 'M00',
+                                tbr: 'A'
+                            }
+                        ]
+                    }
+                ]
+            })
+        }
+
+        await tick();       // render menu and fix position after rendering
+
+        css_position = calculatePosition(x, y, around_rect, true, false);
 
         if(is_root_menu)
             menu_root.addEventListener('click', on_before_container_click, true)
 
-        
+
         if(menu_items.length && !isDeviceSmallerThan("sm"))
             focus_menu_item(focused_index);
-        
+
+
     }
+
+
 
     export function isVisible()
     {
@@ -127,10 +227,14 @@
 
     export function hide()
     {
+        if(false && visible)
+            popToolsActionsOperations()
+
         visible = false;
+        css_position = calculatePosition(x, y, around_rect, false, false);
 
         window.removeEventListener('click', on_before_window_click, true);
-        menu_root.removeEventListener('click', on_before_container_click, true);
+        menu_root?.removeEventListener('click', on_before_container_click, true);
     }
 
     export function getRenderedRect() :DOMRect | undefined
@@ -183,7 +287,7 @@
             break;
 
         case 'Enter':
-            execute_action(operation, index);
+            execute_action(undefined, operation, index);
             e.preventDefault();
             e.stopPropagation();
             break;
@@ -193,30 +297,14 @@
 
     function navigate_up()
     {
-        let index = focused_index;
-        while(index > 0 && menu_items.length > 0)
-        {
-            let prev_item = menu_items[--index];
-            if(prev_item)
-            {
-                focus_menu_item(index);
-                break;
-            } 
-        }
+        let index = get_this_or_prev_valid_index(focused_index-1);
+        focus_menu_item(index);
     }
 
     function navigate_down()
     {
-        let index = focused_index;
-        while(index+1 < menu_items.length)
-        {
-            let next_item = menu_items[++index];
-            if(next_item)
-            {
-                focus_menu_item(index);
-                break;
-            }
-        }
+        let index = get_this_or_next_valid_index(focused_index+1);
+        focus_menu_item(index); 
     }
 
     function on_change_focus(e)
@@ -236,7 +324,7 @@
             focus_menu_item(index);
     }
 
-    function execute_action(operation, index)
+    function execute_action(e, operation, index)
     {
         if(operation.menu)
         {
@@ -249,15 +337,100 @@
         if(!operation)
             return;
 
+        ////
+
+        /*
         if(!operation.action)
             return;
 
         let context_item = null
         if($contextItemsStore.focused)
             context_item = $contextItemsStore[$contextItemsStore.focused]
-        
-        
+
+
         operation.action(context_item);
+        */
+        ////
+
+        let owner = e.target;
+        while(owner && owner.tagName != 'BUTTON')
+            owner = owner.parentElement
+
+        if(operation.preAction)
+            operation.preAction(owner)
+
+        const mobile = isDeviceSmallerThan("sm")
+
+        if(operation.action)
+        {
+            //let focused_item = null
+            //if($contextItemsStore.focused)
+            //    focused_item = $contextItemsStore[$contextItemsStore.focused]
+
+            operation.action(owner, around_rect)
+        }
+        else
+        {
+            let rect;
+            if(around_rect)
+                rect = around_rect
+            else
+                rect = owner.getBoundingClientRect()
+
+            if(operation.toolbar)
+                showFloatingToolbar(rect, operation.toolbar, operation.props ?? {} )
+            else if(operation.grid)
+            {
+                if(mobile)
+                    showMenu(rect, operation.grid)
+                else
+                    showGridMenu(rect, operation.grid)
+            }
+        }
+
+
+    }
+
+    function get_this_or_next_valid_index(index: number): number
+    {
+        if(!operations)
+            return 0;
+
+        if(operations.length == 0)
+            return 0;
+
+        if(index >= operations.length)
+            return operations.length-1;
+
+        if(index < 0)
+            return 0;
+
+        const op = operations[index]
+        if(op.separator || op.disabled)
+            return get_this_or_next_valid_index(index+1)
+        else
+            return index;
+    }
+
+    function get_this_or_prev_valid_index(index: number): number
+    {
+        if(!operations)
+            return 0;
+
+        if(operations.length == 0)
+            return 0;
+
+        if(index >= operations.length)
+            return operations.length-1;
+
+        if(index < 0)
+            return 0;
+
+        const op = operations[index]
+        if(op.separator || op.disabled)
+            return get_this_or_prev_valid_index(index-1)
+        else
+            return index;
     }
 
     function focus_menu_item(index :number)
@@ -266,11 +439,11 @@
         if(operation.disabled)
             return;
 
-        focused_index = index;
+        focused_index = get_this_or_next_valid_index(index)
         let element :HTMLElement = menu_items[focused_index];
         element.focus();
 
-        if(submenus && submenus.length) 
+        if(submenus && submenus.length)
         {
             if(submenus[focused_index])
             {
@@ -315,26 +488,61 @@
         owner_menu_item.focus();
         hide();
     }
-    
+
     function mousedown(e)
     {
         // preventDefault on mousedown avoids focusing the button
-        // so it keeps focus (and text selection) 
+        // so it keeps focus (and text selection)
         e.preventDefault()
+    }
+
+    function calculateBackground(is_highlighted, active)
+    {
+        if(is_highlighted)
+        {
+            if(active)
+                return 'bg-stone-400/40 dark:bg-stone-400/40';
+            else
+                return 'bg-stone-400/30 dark:bg-stone-400/30';
+        }
+        else
+        {
+            if(active)
+                return 'bg-stone-400/20 dark:bg-stone-400/20';
+            else
+                return '';
+        }
     }
 
 </script>
 
-<div id="__hd_svelte_contextmenu" 
-    class=" bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-900 shadow-md 
-            z-30 fixed min-w-[{min_width_px}px] w-max" 
-    style={`left:${x}px; top:${y}px; display:${display}`}
+
+<div id="__hd_svelte_contextmenu"
+    class=" bg-white dark:bg-stone-800
+            text-stone-800 dark:text-stone-400 rounded-lg border
+            border-stone-200 dark:border-stone-700 shadow-md
+            z-40 fixed min-w-60 max-h-screen overflow-y-auto"
+    style={css_position}
     bind:this={menu_root}>
+
+    {#if closeButtonPos}
+        <button class="     fixed w-6 h-6 flex items-center justify-center
+                            text-stone-500 bg-stone-200/70 hover:bg-stone-200
+                            focus:outline-none font-medium rounded-full text-sm text-center
+                            dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700 
+                            focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800" 
+                style={closeButtonPos}
+                on:click={ hide }>
+            <Icon component={FaTimes} s="md"/>
+        </button>
+    {/if}
 
     {#each operations as operation, index}
         {@const is_separator = operation.separator}
         {#if is_separator}
-            <hr class="my-1 mx-0 border-1 dark:border-stone-900">
+            {#if index>0 && index < operations.length-1}
+                <hr class="my-1 mx-4 border-1 border-stone-300 dark:border-stone-700">
+            {/if}
         {:else}
             {@const mobile = isDeviceSmallerThan("sm")}
             {@const icon_placeholder_without_desc = mobile ? 12 : 10}
@@ -345,32 +553,37 @@
             {@const isBottom = index == operations.length-1}
             {@const isFocused = index == focused_index}
             {@const clipFocusedBorder = isFocused ? (isTop ? 'rounded-t-lg' : (isBottom ? 'rounded-b-lg' : '')) : ''}
-            {@const active = ((!mobile) && isFocused) ? `bg-stone-200 dark:bg-stone-600 ${clipFocusedBorder}` : ''}
+            {@const active = calculateBackground(isFocused, false)}
             {@const has_submenu = operation.menu !== undefined && operation.menu.length > 0}
-            
-            <button class="font-medium m-0 py-2 pr-4 text-lg sm:text-sm w-full text-left flex flex-row cursor-context-menu {active} focus:outline-none"
+
+            <button class="block  w-full pr-4 text-left flex flex-row cursor-context-menu {active} focus:outline-none"
                     id={menu_item_id}
                     bind:this={menu_items[index]}
-                    on:click|stopPropagation={(e) => { execute_action(operation, index) } } 
+                    on:click|stopPropagation={(e) => { execute_action(e, operation, index) } }
                     on:mouseenter = {(e) => {on_mouse_move(index)}}
                     on:keydown|stopPropagation={(e) => on_keydown(e, operation, index)}
                     on:mousedown={mousedown}
                     disabled={operation.disabled}
                     class:opacity-60={operation.disabled}>
-                    
-                <div class="flex items-center justify-center mt-1 sm:mt-0.5" style:width={`${icon_placeholder_size*0.25}rem`}>
+
+                <div class="flex items-center justify-center space-x-10 px-4 py-2 ml-12 sm:ml-0" >
                     {#if operation.icon}
                         {@const cc = mobile ? 7 : 6}
                         {@const icon_size = icon_placeholder_size - cc}
-                        <Icon size={icon_size} component={operation.icon}/>
+                        <Icon s="md" component={operation.icon}/>
+                    {:else}
+                        {@const cc = mobile ? 7 : 6}
+                        {@const icon_size = icon_placeholder_size - cc}
+                        <div class="w-4 h-4"></div>
                     {/if}
                 </div>
-                <div class="">
+                <div class="flex items-center ">
                     <p> {operation.caption}</p>
                     {#if operation.description}
                         {@const shortcut_width_px = operation.shortcut ? 80 : 0}
-                        <p  class="text-sm font-normal text-stone-900 dark:text-stone-500 truncate inline-block"
-                            style:max-width={`calc(${width_px-shortcut_width_px} - 3rem)`} >{operation.description}</p>
+                        <p  class="truncate inline-block">
+                            {operation.description}
+                        </p>
                     {/if}
                 </div>
                 {#if has_submenu}

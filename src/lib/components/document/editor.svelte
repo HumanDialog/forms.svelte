@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { onMount, onDestroy,  getContext } from 'svelte';
-    import {session} from '@humandialog/auth.svelte'
+    import { onMount, onDestroy,  getContext, afterUpdate, tick } from 'svelte';
+    import {reef, session} from '@humandialog/auth.svelte'
 	import { Editor } from '@tiptap/core';
-	
+
     import StarterKit from '@tiptap/starter-kit';
     import Document from '@tiptap/extension-document'
     import Paragraph from '@tiptap/extension-paragraph'
@@ -12,21 +12,33 @@
     import HardBreak from '@tiptap/extension-hard-break'
     import HorizontalRule from '@tiptap/extension-horizontal-rule'
     import Image from '@tiptap/extension-image'
+    import Link from '@tiptap/extension-link'
+    import CodeBlock from '@tiptap/extension-code-block'
+    import BulletList from '@tiptap/extension-bullet-list'
+    import ListItem from '@tiptap/extension-list-item'
+
+    import Table from '@tiptap/extension-table'
+    import TableCell from '@tiptap/extension-table-cell'
+    import TableHeader from '@tiptap/extension-table-header'
+    import TableRow from '@tiptap/extension-table-row'
 
     import Bold from '@tiptap/extension-bold'
     import Code from '@tiptap/extension-code'
     import Italic from '@tiptap/extension-italic'
     import Strike from '@tiptap/extension-strike'
+    import Underline from '@tiptap/extension-underline'
     import Dropcursor from '@tiptap/extension-dropcursor'
     import Gapcursor from '@tiptap/extension-gapcursor'
     import History from '@tiptap/extension-history'
-    
-    import {data_tick_store, contextItemsStore, contextTypesStore} from '../../stores.js'
+
+    import {data_tick_store, contextItemsStore, contextTypesStore, onErrorShowAlert, pushToolsActionsOperations, popToolsActionsOperations} from '../../stores.js'
     import {informModification, pushChanges} from '../../updates.js'
-    import {isDeviceSmallerThan, parseWidthDirective} from '../../utils.js'
+    import {isDeviceSmallerThan, parseWidthDirective, refreshToolbarOperations, UI} from '../../utils.js'
     import Palette from './internal/palette.svelte'
 
-    import {FaFont, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle, FaInfo, FaImage} from 'svelte-icons/fa'
+    import {FaFont, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle, FaInfo, FaImage,
+            FaBold, FaItalic, FaUnderline, FaStrikethrough, FaArrowLeft, FaGripLines, FaListUl, FaTable, FaTimes } from 'svelte-icons/fa'
+
     import IcH1 from './internal/h1.icon.svelte'
     import IcH2 from './internal/h2.icon.svelte'
     import IcH3 from './internal/h3.icon.svelte'
@@ -34,15 +46,17 @@
 
     import { Extension } from '@tiptap/core'
     import {Suggestion} from './internal/suggestion'
-	
+
     export let value = '';
     export let placeholder = '';
-    
+
     export let self = null;
     export let a = '';
     export let context = '';
     export let typename = '';
     export let compact = false;
+    export let onSingleChange: Function|undefined = undefined
+    export let onApplyChanges: Function|undefined = undefined;
 
     export let onFocusCb = undefined;
     export let onBlurCb = undefined;
@@ -52,6 +66,13 @@
     export let c='';
     export let pushChangesImmediately = true;
 
+    export let chat :object|undefined = undefined;
+    export let readOnly = false;
+
+    export let extraFrontPaletteCommands = []
+    export let extraBackPaletteCommands = []
+    export let extraInsertPaletteCommands = []
+
     let onFinishEditing = undefined;
     export function run(onStop=undefined)
     {
@@ -60,18 +81,129 @@
         editor.commands.focus();
     }
 
+    let suggestionRange = undefined;
     export function getFormattingOperations(withCaptions = false)
     {
         let result = [];
-        commands.forEach( c => {
-            result.push({
-                caption: withCaptions ? c.caption : '',
-                icon: c.icon,
-                action: c.on_choice
-            })
+
+        /*if(isDeviceSmallerThan("sm"))
+        {
+            result = [
+                {
+                    caption: 'Back to edit',
+                    icon: FaArrowLeft,
+                    action: (fi) => {editor?.commands.focus();}
+                },
+                {
+                    separator: true
+                }
+            ]
+        }
+        */
+
+        paletteCommands.forEach( c => {
+            if(c.separator)
+            {
+                result.push({separator: true})
+            }
+            else
+            {
+                result.push({
+                    caption: withCaptions ? c.caption : '',
+                    icon: c.icon,
+                    action: (f) => c.on_choice(suggestionRange),
+                    activeFunc: c.is_active,
+                    tbr: 'B'
+                })
+            }
         })
-        
+
         return result;
+    }
+
+
+    export function getMarksOperations(tbr = 'A')
+    {
+        let operations = []
+        paletteMarksCommands.forEach( c => {
+            if(!c.separator)
+            {
+                operations.push({
+                    caption: c.caption,
+                    icon: c.icon ?? undefined,
+                    action: (f) => c.on_choice(suggestionRange),
+                    activeFunc: c.is_active,
+                })
+            }
+        })
+
+        return {
+            caption: 'Text',
+            operations: operations,
+            preAction: (f) => { if (editor.isFocused) lockNextBlurCallbacks++ },
+            tbr: tbr
+        }
+    }
+
+    export function getStylesOperations(tbr = 'A')
+    {
+        let operations = []
+        paletteStylesCommands.forEach( c => {
+            if(!c.separator)
+            {
+                operations.push({
+                    caption: c.caption,
+                    icon: c.icon ?? undefined,
+                    action: (f) => c.on_choice(suggestionRange),
+                    activeFunc: c.is_active,
+                })
+            }
+        })
+
+        return {
+            caption: 'Styles',
+            operations: operations,
+            preAction: (f) => { if (editor.isFocused) lockNextBlurCallbacks++ },
+            tbr: tbr
+        }
+    }
+
+    export function getInsertOperations(tbr = 'A')
+    {
+        let operations = []
+
+        if(extraInsertPaletteCommands && extraInsertPaletteCommands.length > 0)
+        {
+            extraInsertPaletteCommands.forEach(exc => {
+                operations = [...operations, exc]
+            })
+        }
+
+        paletteInsertCommands.forEach( c => {
+            if(!c.separator)
+            {
+                operations.push({
+                    caption: c.caption,
+                    icon: c.icon ?? undefined,
+                    action: (f) => c.on_choice(suggestionRange),
+                    activeFunc: c.is_active,
+                })
+            }
+        })
+
+        return {
+            caption: 'Insert',
+            operations: operations,
+            preAction: (f) => { if (editor.isFocused) lockNextBlurCallbacks++ },
+            tbr: tbr
+        }
+    }
+
+
+
+    export function scrollIntoView(param)
+    {
+        editorElement.scrollIntoView(param);
     }
 
     let   item = null;
@@ -86,11 +218,12 @@
     if(compact)
         appearance_class = "";
     else
-        appearance_class = `bg-stone-50 border border-stone-300 rounded-md 
-                            dark:bg-stone-700 dark:border-stone-600 
+        appearance_class = `bg-stone-50 border border-stone-300 rounded-md
+                            dark:bg-stone-700 dark:border-stone-600
                             px-2.5`;
 
     let  last_tick = -1;
+    let  lockNextBlurCallbacks = 0;
 
     $: updateAfterUIChanges($data_tick_store)
 
@@ -112,13 +245,13 @@
         if(a)
         {
             if(self)
-                item = self   
+                item = self
             else
                 item = $contextItemsStore[ctx];
-                
+
             if(!typename)
                 typename = $contextTypesStore[ctx];
-            
+
             if(item != null)
                 value = item[a]
         }
@@ -143,7 +276,7 @@
                 decorationTag: 'span',
                 decorationClass: 'suggestion',
                 startOfLine: false,
-                allowSpaces: false, 
+                allowSpaces: false,
                 //prefixSpace: false,
                 allowedPrefixes: null,
                 command: ({ editor, range, props }) => {
@@ -165,23 +298,36 @@
 
     const suggestion = {
         items: ({ query }) => {
-            
+
         },
 
         render: () => {
-            
+
             return {
             onStart: props => {
-                
+
                 if (!props.clientRect) {
                     return
                 }
 
-
-                const cursorRect = props.clientRect();
-                show_command_palette(cursorRect);
-                palette.set_current_editor_range(props.range)
-                palette.filter('');
+                if(isDeviceSmallerThan("sm"))
+                {
+                    lockNextBlurCallbacks++;
+                    suggestionRange = props.range;
+                    editor.commands.blur();
+                    //setTimeout(() => UI.fab?.activateMainOperation(), 100)
+                    palette.set_current_editor_range(props.range)
+                    const cursorRect = props.clientRect();
+                    palette.filter('');
+                    setTimeout(() => show_command_palette(cursorRect), 100)
+                }
+                else
+                {
+                    const cursorRect = props.clientRect();
+                    show_command_palette(cursorRect);
+                    palette.set_current_editor_range(props.range)
+                    palette.filter('');
+                }
             },
 
             onUpdate(props) {
@@ -191,7 +337,7 @@
                     palette.set_current_editor_range(props.range)
                     palette.filter(props.query);
                 }
-                
+
             },
 
             onKeyDown(props) {
@@ -235,7 +381,7 @@
 	let editor;
 
     const codeBlockClass = 'ml-6 text-sm font-mono break-normal text-pink-700 dark:text-pink-600'
-    const CodeBlock = Paragraph.extend({
+    const _CodeBlock = Paragraph.extend({
         name: 'CodeBlock',
         priority: 999,
         addAttributes() {
@@ -381,7 +527,7 @@
     const QuoteBlock = Paragraph.extend({
         name: 'QuoteBlock',
         priority: 998,
-        
+
         renderHTML({ HTMLAttributes }) {
             return ['blockquote', HTMLAttributes, 0]
         },
@@ -404,7 +550,7 @@
         }
     })
 
-    function prepareFullImagePath(url)
+    /*function prepareFullImagePath(url)
     {
         if (!url.startsWith('/json/'))
         {
@@ -433,17 +579,17 @@
                     fullPath = fullPath + '/' + url;
             }
         }
-        else    
+        else
             fullPath = url;
 
-        
+
 
         if($session.tenants.length > 0)
         {
             const currentGroupInfo = $session.tenants.find(t => t.id == $session.tid)
             if(currentGroupInfo && currentGroupInfo.headers && currentGroupInfo.headers.length > 0)
             {
-                
+
                 const paramsNo = currentGroupInfo.headers.length
                 for(let i=0; i<paramsNo; i++)
                 {
@@ -453,13 +599,15 @@
                         if(fullPath.includes('?'))     // has other params
                         {
                             fullPath += '&'
-                        }   
+                        }
                         else
                         {
                             fullPath += '?'
                         }
                     }
-                   
+                    else
+                        fullPath += '&';
+
                     fullPath += param.key.toLowerCase()
                     fullPath += '=' + param.value;
                 }
@@ -468,12 +616,12 @@
         else
         {
             const user = $session.localDevCurrentUser;
-            if (user) 
+            if (user)
             {
                 if(fullPath.includes('?'))     // has other params
                 {
                     fullPath += '&'
-                }   
+                }
                 else
                 {
                     fullPath += '?'
@@ -494,33 +642,147 @@
 
         return fullPath;
     }
+    */
+
+    let downloadedImages = []
 
     const CrossImage = Image.extend({
         addAttributes() {
             return {
-                crossorigin: {
-                    default: 'use-credentials'
+                //crossorigin: {
+                //    default: 'use-credentials'
+                //},
+
+                loading: {
+                    default: 'lazy'
                 },
 
                 dataPath: {
                     default: null,
-                    parseHTML: (element) => {  return element.getAttribute('data-path') },
+                    parseHTML: (element) =>
+                    {
+                        return element.getAttribute('data-path')
+                    },
+
                     renderHTML: (attributes) => {
                         const dataPath = attributes.dataPath;
                         if(dataPath)
                         {
+                            let src = '';
+                            let found = downloadedImages.find(e => e.dataPath == dataPath)
+                            if(found)
+                            {
+                                if(found.url)
+                                    src = found.url;
+                            }
+                            else
+                            {
+                                const newEntry = {
+                                    dataPath: dataPath,
+                                    url: ''
+                                }
+
+                                downloadedImages.push(newEntry)
+
+                                reef.fetch(`/json/anyv/${dataPath}`).then( (res) => {
+                                    if(res.ok)
+                                    {
+                                        res.blob().then( blob => {
+                                            newEntry.url = URL.createObjectURL(blob);
+                                            //console.log('image loaded: ', dataPath, newEntry.url)
+
+                                            editorElement?.querySelectorAll('img').forEach( img => {
+                                                if(img.getAttribute('data-path') == dataPath)
+                                                    img.src = newEntry.url
+                                            })
+                                        })
+                                    }
+                                    else
+                                    {
+                                        res.text().then( err => onErrorShowAlert(err))
+                                    }
+                                },
+
+                                (err) => {
+                                    onErrorShowAlert(err)
+                                })
+                            }
+
                             return {
                                 'data-path': dataPath,
-                                src: prepareFullImagePath(dataPath)
+                            //    src: prepareFullImagePath(dataPath)
+                           //      src: 'http://localhost/_hd_force_img_error'
+                                src: src
                             }
                         }
                         else
                         {
-                           return {
+                            return {
 
-                           }
+                            }
                         }
-                    } 
+                    }
+                },
+
+                temporary: {
+                    default: '',
+                    parseHTML: (element) =>
+                    {
+                        return element.getAttribute('temporary')
+                    },
+                    renderHTML: (attributes) => {
+                            const temporary = attributes.temporary;
+                            if(temporary)
+                            {
+                                return {
+                                    temporary: temporary,
+                                    src: temporary
+                                }
+                            }
+                            else
+                                return {
+                        }
+                    }
+                }
+            }
+        }
+    })
+
+    const chatShortcuts = Extension.create({
+        name: 'chatShortcuts',
+        addKeyboardShortcuts() {
+            return {
+                Enter: () => {
+
+                    if(chat && chat.onSubmit)
+                        chat.onSubmit(changedValue)
+
+                    return this.editor.commands.clearContent();
+                },
+
+                'Shift-Enter': () => {
+                    console.log('chatShortcut Shift-Enter')
+                    /**
+                     * currently we do not have an option to show a soft line break in the posts, so we overwrite
+                     * the behavior from tiptap with the default behavior on pressing enter
+                     */
+                    return this.editor.commands.first(({commands}) => [
+                        () => commands.newlineInCode(),
+                        () => commands.createParagraphNear(),
+                        () => commands.liftEmptyBlock(),
+                        () => commands.splitBlock(),
+                    ]);
+                }
+            }
+        }
+    })
+
+    const additionalShortcuts = Extension.create({
+        name: 'additionalShortcuts',
+        addKeyboardShortcuts() {
+            return {
+                'Mod-s': () => {
+                    console.log('todo: save content')
                 }
             }
         }
@@ -528,6 +790,7 @@
 
     onMount(() => {
 		editor = new Editor({
+            editable: !readOnly,
             editorProps: {
                 attributes: {
                     class: `${cs} ${appearance_class} prose prose-base sm:prose-base dark:prose-invert ${additional_class}  whitespace-pre-wrap focus:outline-none`,
@@ -539,7 +802,7 @@
                 Paragraph,
                 Text,
                 Heading.configure({
-                    levels: [1, 2],
+                    levels: [1, 2, 3, 4],
                 }),
                 /*Image.configure({
                     HTMLAttributes: {
@@ -549,22 +812,35 @@
                 CrossImage,
                 HardBreak,
                 HorizontalRule,
-                
+                BulletList,
+                ListItem,
+
+                Table.configure({
+                    resizable: true,
+                }),
+                TableRow,
+                TableHeader,
+                TableCell,
+
                 // custom
                 CodeBlock,
-                CommentBlock,
-                WarningBlock,
-                InfoBlock,
+                //CommentBlock,
+                //WarningBlock,
+                //InfoBlock,
                 QuoteBlock,
 
                 Bold,
                 Code,
                 Italic,
                 Strike,
+                Underline,
+                Link,
 
                 Dropcursor,
                 Gapcursor,
                 History,
+
+                ... chat ? [chatShortcuts] : [],
 
                 PalletePlugin.configure({
                     suggestion,
@@ -573,25 +849,47 @@
 			content: value,
             injectCSS: false,
 			onTransaction({ editor, transaction }) {
-				hasChangedValue = true;
-                changedValue = editor.getHTML()
-                handleImagesDeletions(transaction)
+                const wasContentChanged = transaction.steps.length > 0
+                if(wasContentChanged)
+                {
+                    hasChangedValue = true;
+                    changedValue = editor.getHTML()
+
+                    if(onSingleChange)
+                        onSingleChange(changedValue)
+                    else
+                        logChanges()
+
+                    handleImagesChanges(transaction)
+                }
+                refreshToolbarOperations()
 			},
             onFocus({ editor, event }) {
                 // The editor is focused.
+                on_focus();
                 if(onFocusCb)
                     onFocusCb();
             },
             onBlur({ editor, event }) {
                 // The editor isn’t focused anymore.
-                on_blur();
-                if(onBlurCb)
-                    onBlurCb();
+                if(lockNextBlurCallbacks > 0)
+                {
+                    lockNextBlurCallbacks--;
+                }
+                else
+                {
+                    on_blur();
+                    if(onBlurCb)
+                        onBlurCb();
+                }
             },
             onContentError({ editor, error, disableCollaboration }) {
                 // The editor content does not match the schema.
                 console.log('editor content error:', error)
             },
+            onUpdate({editor}) {
+                //setupImgErrorHandlers()
+            }
 		});
 	});
 
@@ -604,8 +902,65 @@
             palette.hide();
 	});
 
+    /* afterUpdate( () =>
+    {
+        setupImgErrorHandlers()
+    })
+
+    function setupImgErrorHandlers()
+    {
+        editorElement.querySelectorAll('img').forEach( img =>
+            {
+                const dataPath = img.getAttribute('data-path')
+                if(dataPath)
+                {
+                    img.onerror = onImgError
+                }
+            }
+        )
+    }
+
+    const onImgError = async (e) => {
+        const img = e.target;
+        if(img.src.endsWith('/_hd_force_img_error'))
+        {
+            const dataPath = img.getAttribute('data-path')
+            if(dataPath)
+            {
+                const res = await reef.fetch(`json/anyv/${dataPath}`)
+                if(res.ok)
+                {
+                    const blob = await res.blob()
+                    img.src = URL.createObjectURL(blob)
+                }
+            }
+            //    img.src = prepareFullImagePath(dataPath)
+        }
+    } */
+
+    const isAutoSaveEnabled = false;
+    let autoSaveTimerId = 0;
+    function on_focus()
+    {
+        if(isAutoSaveEnabled)
+        {
+            autoSaveTimerId = setInterval(() =>
+            {
+                if(hasChangedValue)
+                    saveData();
+            },
+            10000);
+        }
+    }
+
     function on_blur()
     {
+        if(autoSaveTimerId)
+        {
+            clearInterval(autoSaveTimerId)
+            autoSaveTimerId = 0;
+        }
+
         if(onFinishEditing)
         {
             onFinishEditing();
@@ -619,7 +974,7 @@
         }
     }
 
-    export function save()
+    export async function save()
     {
         if(saveData())
         {
@@ -630,23 +985,38 @@
 
     function saveData()
     {
-        if(item && a && hasChangedValue)
+        if(!hasChangedValue)
+            return false;
+
+        hasChangedValue = false;
+
+        //console.log('editor: saveData')
+
+        if(onApplyChanges)
         {
-            item[a] = changedValue;
-            //value = changed_value;
-            hasChangedValue = false;
-
-            if(typename)
-                informModification(item, a, typename);
-            else
-                informModification(item, a);
-            
-            if(pushChangesImmediately)
-                pushChanges();
-
+            onApplyChanges(changedValue)
             return true;
         }
+        else  if(item && a)
+        {
+            logChanges()
+            if(pushChangesImmediately)
+                pushChanges(refreshToolbarOperations);
+            return true;
+        }
+
         return false;
+    }
+
+    function logChanges()
+    {
+        item[a] = changedValue;
+        //value = changed_value;
+
+        if(typename)
+            informModification(item, a, typename);
+        else
+            informModification(item, a);
     }
 
     // =========================================== Palette ===========================================================================
@@ -657,7 +1027,7 @@
     {
         const selection = window.getSelection();
         const range = selection.getRangeAt(0);
-        
+
         const rect = range.getBoundingClientRect();
         return rect;
     }
@@ -680,23 +1050,81 @@
     function on_palette_shown()
     {
         is_command_palette_visible = true;
+
+        if(false && isDeviceSmallerThan("sm"))
+        {
+            pushToolsActionsOperations({
+                opver: 1,
+                operations: [
+                    {
+                        caption: 'Palette',
+                        operations: [
+                            {
+                                icon: FaTimes,
+                                action: (f) => { palette.hide(); editor?.commands.focus() },
+                                fab: 'M00',
+                                tbr: 'A'
+                            }
+                        ]
+                    }
+                ]
+            })
+        }
+
     }
 
     function on_palette_hidden()
     {
+        if(false && is_command_palette_visible)
+            popToolsActionsOperations()
+
+        editor?.commands.focus()
+
         is_command_palette_visible = false;
+
         //clear_previous_text_and_position();
     }
 
-    function show_command_palette(cursorRect)
+    function show_command_palette(cursor_rect)
     {
-        let rect = cursorRect; //get_selection_bbox();
         let client_rect = get_window_box();
+
+        if(isDeviceSmallerThan("sm"))
+            show_small_command_palette(client_rect)
+        else
+            show_big_command_palette(cursor_rect, client_rect)
+    }
+
+    function show_small_command_palette(client_rect)
+    {
+        //palette.max_height_px = client_rect.height - 64;
+        //palette.width_px = client_rect.width - 96;
+        //let x=64, y=32;
+        //let show_above = false;
+
+        const margin = 5
+
+        palette.max_height_px = client_rect.height / 2 - margin;
+        palette.width_px = client_rect.width - 2*margin;
+        let x=margin;
+        let y = client_rect.bottom - margin;
+        let show_above = true;
+
+        palette.show(x, y, show_above);
+    }
+
+    function show_big_command_palette(cursor_rect, client_rect)
+    {
+        //editor.commands.blur();
+        //return;
+        let rect = cursor_rect; //get_selection_bbox();
+
         let top_space = rect.y;
         let bottom_space = client_rect.height - (rect.y + rect.height);
-        
+        //console.log('cu:', rect, ' cl:', client_rect)
+
         palette.max_height_px = 500;
-        palette.width_px = 400;
+        palette.width_px = 200;
 
         let preferred_palette_height = palette.max_height_px;
         let preferred_palette_width = palette.width_px;
@@ -733,7 +1161,7 @@
             x = rect.x + 5;
             y = rect.y - (preferred_palette_height - bottom_space)
         }
-        else 
+        else
             show_fullscreen = true;
 
         const isSmallDevice = isDeviceSmallerThan("sm")
@@ -747,28 +1175,99 @@
             palette.show(x, y, show_above);
     }
 
-    function onAddedImageReady(dataPath)
+    export function addTemporaryImage(src)
     {
-        const imgFullPath = prepareFullImagePath(dataPath)
         editor.commands.insertContent({
-          type: 'image',
-          attrs: {
-             src: imgFullPath, 
-             dataPath: dataPath
-          },
+            type: 'image',
+            attrs: {
+                src: '',
+                temporary: src
+            }
         })
     }
 
-    function handleImagesDeletions(transaction)
+    export function replaceTemporaryImage(temporarySrc, dataPath)
     {
-        if(!onRemoveImage)
+        const image = editor.$node('image', {temporary: temporarySrc})
+        if(!image)
             return;
 
+        image.setAttribute({
+            dataPath: dataPath,
+            src: '',
+            temporary: ''
+        })
+    }
+
+    export function removeTemporaryImage(temporarySrc)
+    {
+        const image = editor.$node('image', {temporary: temporarySrc})
+        if(!image)
+            return;
+
+        editor.commands.deleteRange(image.range)
+    }
+
+    export function getInnerHtml()
+    {
+        return editor.getHTML();
+    }
+
+    export function setInnerHtml(content)
+    {
+        editor.commands.SetContent(content)
+    }
+
+    async function onAddedImageReady(dataPath)
+    {
+        //const imgFullPath = prepareFullImagePath(dataPath)
+        editor.commands.insertContent({
+                type: 'image',
+                attrs: {
+                    src: '',
+                    dataPath: dataPath
+                },
+            })
+        /*
+
+        const res = await reef.fetch(`json/anyv/${dataPath}`)
+        if(res.ok)
+        {
+            const blob = await res.blob()
+            const src = URL.createObjectURL(blob)
+
+            editor.commands.insertContent({
+                type: 'image',
+                attrs: {
+                    src: src,
+                    dataPath: dataPath
+                },
+            })
+        }
+        else
+        {
+            editor.commands.insertContent({
+                type: 'image',
+                attrs: {
+                    src: 'file://_hd_force_img_error',
+                    dataPath: dataPath
+                },
+            })
+        }
+        */
+
+    }
+
+    function handleImagesChanges(transaction)
+    {
         const getImageSrcs = (fragment) => {
             let srcs = new Set();
             fragment.forEach((node) => {
                 if (node.type.name === 'image') {
-                    srcs.add(node.attrs.dataPath);
+                    if(node.attrs.dataPath)
+                        srcs.add(node.attrs.dataPath);
+                    else if (node.attrs.temporary)
+                        srcs.add(node.attrs.temporary);
                 }
             });
                 return srcs;
@@ -784,47 +1283,436 @@
         // Determine which images were deleted
         let deletedImageSrcs = [...previousSrcs].filter((src) => !currentSrcs.has(src));
 
-        deletedImageSrcs.forEach( src => onRemoveImage(src))
+        if(onRemoveImage)
+            deletedImageSrcs.forEach( src => onRemoveImage(src))
+
+
     }
 
 
     // ================================================================================================================================
 
-    
-    let commands  = [
-               {   caption: 'Normal',       description: 'This is normal text style',      tags: 'text',    icon: FaRemoveFormat,               on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setParagraph().run(); else editor.commands.setParagraph() } } ,
-               
-               {   caption: 'Heading 1',      description: 'Description heading',            tags: 'h1',      icon: IcH1,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 1}).run(); else editor.commands.setHeading({ level: 1 }) } } ,
-               {   caption: 'Heading 2',      description: 'Description heading',            tags: 'h2',      icon: IcH2,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 2}).run(); else editor.commands.setHeading({ level: 2 }) } } ,
-              
-               {   caption: 'Code',         description: 'Source code monospace text',                      icon: FaCode,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsCode().run(); else editor.commands.setAsCode() } },
-               {   caption: 'Comment',      description: 'With this you can comment the above paragraph',   icon: FaComment,                    on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsComment().run(); else editor.commands.setAsComment() } } ,
-               {   caption: 'Quote',        description: 'To quote someone',                                icon: FaQuoteRight,                 on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsQuote().run(); else editor.commands.setAsQuote() } } ,
-               {   caption: 'Warning',      description: 'An important warning to above paragraph',         icon: FaExclamationTriangle,        on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsWarning().run(); else editor.commands.setAsWarning() } } ,
-               {   caption: 'Info',         description: 'An important info about above paragraph',         icon: FaInfo,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsInfo().run(); else editor.commands.setAsInfo() } }, 
+    export function setBold()
+    {
+        makeBold(suggestionRange)
+    }
 
-               {   caption: 'Image',        description: 'Add image to document',                           icon: FaImage,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).run(); if(onAddImage) onAddImage(onAddedImageReady);  } } 
+    export function setItalic()
+    {
+        makeItalic(suggestionRange)
+    }
+
+    export function setUnderline()
+    {
+        makeUnderline(suggestionRange)
+    }
+
+    export function setStrikethrough()
+    {
+        makeStrikethrough(suggestionRange)
+    }
+
+    export function setNormal()
+    {
+        if(suggestionRange)
+            editor.chain().focus().deleteRange(suggestionRange).setParagraph().run();
+        else
+            editor.chain().focus().setParagraph().run()
+    }
+
+    export function setHeading(level)
+    {
+        if(suggestionRange)
+            editor.chain().focus().deleteRange(suggestionRange).setHeading({level: level}).run();
+        else
+            editor.chain().focus().setHeading({ level: level }).run()
+    }
+
+
+    export function setCode()
+    {
+        if(suggestionRange)
+            editor.chain().focus().deleteRange(suggestionRange).setCodeBlock().run();
+        else
+            editor.chain().focus().setCodeBlock().run()
+    }
+
+    export function setComment()
+    {
+        if(suggestionRange)
+            editor.chain().focus().deleteRange(suggestionRange).setAsComment().run();
+        else
+            editor.chain().focus().setAsComment().run()
+    }
+
+    export function setQuote()
+    {
+        if(suggestionRange)
+            editor.chain().focus().deleteRange(suggestionRange).setAsQuote().run();
+        else
+            editor.chain().focus().setAsQuote().run()
+    }
+
+    export function setWarning()
+    {
+        if(suggestionRange)
+            editor.chain().focus().deleteRange(suggestionRange).setAsWarning().run();
+        else
+            editor.chain().focus().setAsWarning().run()
+    }
+
+    export function setInfo()
+    {
+        if(suggestionRange)
+            editor.chain().focus().deleteRange(suggestionRange).setAsInfo().run();
+        else
+            editor.chain().focus().setAsInfo().run()
+    }
+
+    export function setBulletList()
+    {
+        if(suggestionRange)
+            editor.chain().focus().deleteRange(suggestionRange).toggleBulletList().run();
+        else
+            editor.chain().focus().toggleBulletList().run()
+    }
+
+    export function setImage()
+    {
+        if(suggestionRange)
+            editor.chain().focus().deleteRange(suggestionRange).run();
+
+        if(onAddImage)
+            onAddImage(onAddedImageReady);
+    }
+
+    export function setTable()
+    {
+        if(suggestionRange)
+            editor.chain().focus().deleteRange(suggestionRange).insertTable().run();
+        else
+            editor.chain().focus().insertTable().run()
+    }
+
+    export function setHorizontalRule()
+    {
+        if(suggestionRange)
+            editor.chain().focus().deleteRange(suggestionRange).setHorizontalRule().run();
+        else
+            editor.chain().focus().setHorizontalRule().run();
+    }
+
+    export function isActiveBold()
+    {
+        return editor?.isActive('bold')
+    }
+
+    export function isActiveItalic()
+    {
+        return editor?.isActive('italic')
+    }
+
+    export function isActiveUnderlie()
+    {
+        return editor?.isActive('underline')
+    }
+
+    export function isActiveStrikethrough()
+    {
+        return editor?.isActive('strike')
+    }
+
+    export function isActiveNormal()
+    {
+        return editor?.isActive('paragraph')
+    }
+
+    export function isActiveHeading(level)
+    {
+        return editor?.isActive('heading', {level: level})
+    }
+
+    export function isActiveH1()
+    {
+        return editor?.isActive('heading', {level: 1})
+    }
+
+    export function isActiveH2()
+    {
+        return editor?.isActive('heading', {level: 2})
+    }
+
+    export function isActiveH3()
+    {
+        return editor?.isActive('heading', {level: 3})
+    }
+
+    export function isActiveH4()
+    {
+        return editor?.isActive('heading', {level: 4})
+    }
+
+    export function isActiveCode()
+    {
+        return editor?.isActive('CodeBlock')
+    }
+
+    export function isActiveComment()
+    {
+        return  editor?.isActive('CommentBlock')
+    }
+
+    export function isActiveQuote()
+    {
+        return editor?.isActive('QuoteBlock')
+    }
+
+    export function isActiveWarning()
+    {
+        return editor?.isActive('WarningBlock')
+    }
+
+    export function isActiveInfo()
+    {
+        return editor?.isActive('InfoBlock')
+    }
+
+    export function isActiveBulletList()
+    {
+        return editor?.isActive('bulletList')
+    }
+
+    export function isActiveImage()
+    {
+        return false
+    }
+
+    export function isActiveTable()
+    {
+        editor?.isActive('table')
+    }
+
+    export function isActiveHorizontalRule()
+    {
+        return false
+    }
+
+    export function preventBlur()
+    {
+        if(editor.isFocused)
+            lockNextBlurCallbacks++;
+    }
+
+    export function hasChanged()
+    {
+        return hasChangedValue
+    }
+
+
+    const paletteMarksCommands = [
+        {    caption: 'Bold',        description: 'Marks text as bolded',            tags: 'strong', icon: FaBold,                       on_choice: makeBold,            is_active: () => editor?.isActive('bold')  },
+        {    caption: 'Italic',      description: 'Marks text as italic',            tags: 'strong', icon: FaItalic,                     on_choice: makeItalic,          is_active: () => editor?.isActive('italic')  },
+        {    caption: 'Underlie',    description: 'Marks text as underlined',                        icon: FaUnderline,                  on_choice: makeUnderline,       is_active: () => editor?.isActive('underline')    },
+        {    caption: 'Strikethrough',description: 'Marks text as strikethrough',                    icon: FaStrikethrough,              on_choice: makeStrikethrough,   is_active: () => editor?.isActive('strike')},
+    ]
+
+    const paletteStylesCommands = [
+        {   caption: 'Normal',       description: 'This is normal text style',      tags: 'paragraph,text',    icon: FaRemoveFormat,               on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setParagraph().run(); else editor.chain().focus().setParagraph().run() },  is_active: () => editor?.isActive('paragraph')  } ,
+        {   caption: 'Heading 1',      description: 'Description heading',           tags: 'h1',      icon: IcH1,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 1}).run(); else editor.chain().focus().setHeading({ level: 1 }).run() },   is_active: () => editor?.isActive('heading', {level: 1})  } ,
+        {   caption: 'Heading 2',      description: 'Secondary heading',             tags: 'h2',      icon: IcH2,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 2}).run(); else editor.chain().focus().setHeading({ level: 2 }).run() },   is_active: () => editor?.isActive('heading', {level: 2}) } ,
+        {   caption: 'Heading 3',      description: 'Secondary heading',             tags: 'h3',      icon: IcH3,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 3}).run(); else editor.chain().focus().setHeading({ level: 3 }).run() },   is_active: () => editor?.isActive('heading', {level: 3}) } ,
+        {   caption: 'Heading 4',      description: 'Secondary heading',             tags: 'h4',      icon: IcH4,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 4}).run(); else editor.chain().focus().setHeading({ level: 4 }).run() },   is_active: () => editor?.isActive('heading', {level: 4}) } ,
+
+        {   caption: 'Code',         description: 'Source code monospace text',                      icon: FaCode,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setCodeBlock().run(); else editor.chain().focus().setCodeBlock().run() }, is_active: () => editor?.isActive('CodeBlock') },
+    //    {   caption: 'Comment',      description: 'With this you can comment the above paragraph',   icon: FaComment,                    on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsComment().run(); else editor.chain().focus().setAsComment().run() }, is_active: () => editor?.isActive('CommentBlock')  } ,
+        {   caption: 'Quote',        description: 'To quote someone',                                icon: FaQuoteRight,                 on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsQuote().run(); else editor.chain().focus().setAsQuote().run() }, is_active: () => editor?.isActive('QuoteBlock')  } ,
+    //    {   caption: 'Warning',      description: 'An important warning to above paragraph',         icon: FaExclamationTriangle,        on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsWarning().run(); else editor.chain().focus().setAsWarning().run() }, is_active: () => editor?.isActive('WarningBlock')  } ,
+    //    {   caption: 'Info',         description: 'An important info about above paragraph',         icon: FaInfo,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsInfo().run(); else editor.chain().focus().setAsInfo().run() }, is_active: () => editor?.isActive('InfoBlock')  },
+        {   caption: 'Bullet list',  description: 'Unordered list of items',                         icon: FaListUl,                     on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).toggleBulletList().run(); else editor.chain().focus().toggleBulletList().run() }, is_active: () => editor?.isActive('bulletList')  },
+    ]
+
+    const paletteInsertCommands = [
+        {   caption: 'Image',        description: 'Add image to document',           tags:'img,picture',      icon: FaImage,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).run(); if(onAddImage) onAddImage(onAddedImageReady);  } } ,
+        {   caption: 'Table',        description: 'Table',                                                    icon: FaTable,                      on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).insertTable().run(); else editor.chain().focus().insertTable().run() }, is_active: () => editor?.isActive('table')  },
+        {   caption: 'Horizontal rule', description: 'Add horizonal role',           tags: 'hr',              icon: FaGripLines,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHorizontalRule().run(); else editor.chain().focus().setHorizontalRule().run();  } }
+    ]
+
+    const paletteCommands  = [
+
+                {    caption: 'Text',         separator: true },
+                ...paletteMarksCommands,
+
+                {    caption: 'Styles',       separator: true },
+                ...paletteStylesCommands,
+
+                {   caption: 'Insert',        separator: true },
+                ...paletteInsertCommands
             ];
-    
-    
+
+    function makeBold(range)
+    {
+        if(range)
+        {
+            editor.chain().focus().deleteRange(range).toggleBold().run()
+        }
+        else
+        {
+            editor.chain().focus().toggleBold().run()
+        }
+    }
+
+    function makeItalic(range)
+    {
+        if(range)
+        {
+            editor.chain().focus().deleteRange(range).toggleItalic().run()
+        }
+        else
+        {
+            editor.chain().focus().toggleItalic().run()
+        }
+    }
+
+    function makeUnderline(range)
+    {
+        if(range)
+        {
+            editor.chain().focus().deleteRange(range).toggleUnderline().run()
+        }
+        else
+        {
+            editor.chain().focus().toggleUnderline().run()
+        }
+    }
+
+    function makeStrikethrough(range)
+    {
+        if(range)
+        {
+            editor.chain().focus().deleteRange(range).toggleStrike().run()
+        }
+        else
+        {
+            editor.chain().focus().toggleStrike().run()
+        }
+    }
+
+    function getPaletteCommands()
+    {
+        let commands = [];
+        if(extraFrontPaletteCommands && extraFrontPaletteCommands.length > 0)
+        {
+            extraFrontPaletteCommands.forEach(exc => {
+                commands.push({
+                    caption: exc.caption,
+                    description: exc.description,
+                    tags: exc.tags,
+                    icon: exc.icon,
+                    on_choice: (range) =>
+                        {
+                            if(range)
+                                editor.chain().focus().deleteRange(range).run();
+
+                            if(exc.action)
+                                exc.action();
+                        },
+                    is_active: () => {
+                        if(exc.is_active)
+                            return exc.is_active()
+                        else
+                            return false;
+                    }
+                })
+            })
+
+            commands.push({ separator: true})
+        }
+
+
+        commands = [...commands, { caption: 'Text',     separator: true }]
+        commands = [...commands, ...paletteMarksCommands]
+        commands = [...commands, { caption: 'Styles',   separator: true }]
+        commands = [...commands, ...paletteStylesCommands]
+
+        commands = [...commands, {   caption: 'Insert',  separator: true }]
+        if(extraInsertPaletteCommands && extraInsertPaletteCommands.length > 0)
+        {
+            extraInsertPaletteCommands.forEach(exc => {
+                commands.push({
+                    caption: exc.caption,
+                    description: exc.description,
+                    tags: exc.tags,
+                    icon: exc.icon,
+                    on_choice: (range) =>
+                        {
+                            if(range)
+                                editor.chain().focus().deleteRange(range).run();
+
+                            if(exc.action)
+                                exc.action();
+                        },
+                    is_active: () => {
+                        if(exc.is_active)
+                            return exc.is_active()
+                        else
+                            return false;
+                    }
+                })
+            })
+        }
+
+        commands = [...commands, ...paletteInsertCommands]
+
+        if(extraBackPaletteCommands && extraBackPaletteCommands.length > 0)
+        {
+            commands.push({ separator: true})
+
+            extraBackPaletteCommands.forEach(exc => {
+                commands.push({
+                    caption: exc.caption,
+                    description: exc.description,
+                    tags: exc.tags,
+                    icon: exc.icon,
+                    on_choice: (range) =>
+                        {
+                            if(range)
+                                editor.chain().focus().deleteRange(range).run();
+
+                            if(exc.action)
+                                exc.action();
+                        },
+                    is_active: () => {
+                        if(exc.is_active)
+                            return exc.is_active()
+                        else
+                            return false;
+                    }
+                })
+            })
+        }
+
+        return commands;
+    }
+
+
 </script>
 
 
 
 <div bind:this={editorElement} />
 
-<Palette    commands={commands} 
-            bind:this={palette} 
+<Palette    commands={getPaletteCommands()}
+            bind:this={palette}
             on:palette_shown={on_palette_shown}
             on:palette_hidden={on_palette_hidden}
             on:palette_mouse_click={on_palette_mouse_click}/>
 
-<!--div    contenteditable="true" 
+<!--div    contenteditable="true"
         bind:this={editorElement}
         on:keyup={on_keyup}
         on:keydown={on_keydown}
         on:mouseup={on_mouseup}
-        class="{cs}     {appearance_class} 
+        class="{cs}     {appearance_class}
                         prose prose-base sm:prose-base dark:prose-invert {additional_class} overflow-y-auto whitespace-pre-wrap"
         on:blur={on_blur}
         on:focus={on_focus}

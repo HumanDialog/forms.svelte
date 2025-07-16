@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {Spinner} from 'flowbite-svelte'
+    //import {Spinner} from 'flowbite-svelte'
     import { onMount } from 'svelte';
 
     export let color = 'blue';

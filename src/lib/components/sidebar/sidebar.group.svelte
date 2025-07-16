@@ -36,11 +36,11 @@
 {/if}
 
 {#if !collapsable}
-    <ul class="space-y-2 {list_border}">
+    <ul class= "{list_border}">
         <slot/>
     </ul>
 {:else if !collapsed}
-    <ul class="space-y-2 {list_border}">
+    <ul class="{list_border}">
         <slot/>
     </ul>
 {/if}

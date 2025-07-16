@@ -11,6 +11,9 @@ export function showMenu(around :DOMRect|DOMPoint, operations)
     if(!menu_element)
     {
         let app_div = document.getElementById("__hd_svelte_layout_root")
+        if(!app_div)
+            app_div = document.getElementById("app")
+        
         menu_comopnent = new Menu({
             target: app_div,
             props: {
@@ -47,6 +50,9 @@ export function showFloatingToolbar(around :DOMRect|DOMPoint, toolbar, props = {
     if(!floating_container)
     {
         let app_div = document.getElementById("__hd_svelte_layout_root")
+        if(!app_div)
+            app_div = document.getElementById("app")
+        
         toolbar_component = new Floating_container({
             target: app_div,
             props: {
@@ -58,19 +64,28 @@ export function showFloatingToolbar(around :DOMRect|DOMPoint, toolbar, props = {
     }
     else if(toolbar_component)
     {
-        //if(toolbar_component.isVisible())
-        //{
-        //    toolbar_component.hide();
-        //}
-        //else
-        //{
+        if(toolbar_component.isVisible() && toolbar_component.isSameToolbar(toolbar))
+        {
+            toolbar_component.hide();
+        }
+        else
+        {
             toolbar_component.show(around, toolbar, props);
-        //}
+        }
     }
     else
         console.error('what now?')
 
     return toolbar_component;
+}
+
+export function hideFloatingToolbar()
+{
+    if(toolbar_component)
+    {
+        if(toolbar_component.isVisible())
+            toolbar_component.hide();
+    }
 }
 
 export function showGridMenu(around :DOMRect|DOMPoint, operations)

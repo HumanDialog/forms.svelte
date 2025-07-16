@@ -2,8 +2,8 @@
     import {FaUsers, FaCog, FaSignInAlt, FaSignOutAlt, FaBars, FaToggleOn, FaToggleOff} from 'svelte-icons/fa/'
     //import GoPrimitiveDot from 'svelte-icons/go/GoPrimitiveDot.svelte'
     import {showMenu} from '$lib/components/menu'
-    import {push} from 'svelte-spa-router'
-    import {contextItemsStore, context_info_store, contextToolbarOperations, data_tick_store} from './stores.js'
+    import {push, pop, location} from 'svelte-spa-router'
+    import {contextItemsStore, context_info_store, contextToolbarOperations, data_tick_store, leftHandedFAB} from './stores.js'
     //import Menu from '$lib/components/contextmenu.svelte'
 
     import {
@@ -24,11 +24,14 @@
     import {session, signInHRef, signOutHRef} from '@humandialog/auth.svelte'
 
     import VerticalToolbar from '$lib/vertical.toolbar.svelte'
-	import { isDeviceSmallerThan } from './utils.js';
+	import { isDeviceSmallerThan, isOnNavigationPage, pushNavigationPage, popNavigationPage } from './utils.js';
     
 
-    export let appConfig;
+    export let appConfig = undefined;
     export let clearsContext = 'sel props'
+
+    export let definedTabs = undefined
+    export let mainToolbarConfig = undefined
     
     let config = null;
     let has_selection_details = false;
@@ -45,23 +48,39 @@
 
     $:
     {
-        config = appConfig.mainToolbar;
-        has_selection_details = appConfig.selectionDetails;
-        if(has_selection_details)
-            selection_details_caption = appConfig.selectionDetails.caption ?? 'Properties';
+        if(appConfig)
+        {
+            config = appConfig.mainToolbar;
+            has_selection_details = appConfig.selectionDetails;
+            if(has_selection_details)
+                selection_details_caption = appConfig.selectionDetails.caption ?? 'Properties';
+        }
+        else
+        {
+            config = mainToolbarConfig
+            has_selection_details = false
+        }
+
         is_logged_in = $session.isActive;
         show_sign_in_out_icons = config.signin ? true : false;
         sign_in_href = $signInHRef;
         sign_out_href = $signOutHRef;
         //user_is_in_multiple_groups = $session.tenants.length > 1
 
-        tabs = Object.keys(appConfig.sidebar);
-        if(tabs.length > 1)
-            icon = FaBars;
-        else    
+        if(definedTabs && Array.isArray(definedTabs) && definedTabs.length > 0)
         {
-            let first_tab = appConfig.sidebar[tabs[0]];
-            icon = first_tab.icon;
+            
+        }
+        else
+        {
+            tabs = Object.keys(appConfig.sidebar);
+            if(tabs.length > 1)
+                icon = FaBars;
+            else    
+            {
+                let first_tab = appConfig.sidebar[tabs[0]];
+                icon = first_tab.icon;
+            }
         }
     }
 
@@ -82,7 +101,36 @@
     function toggle_navigator(e)
     {
         if(isDeviceSmallerThan('sm'))
-            push('/')
+        {
+            if(isOnNavigationPage())
+            {
+                popNavigationPage();
+            }
+            else
+            {
+                if(tabs.length == 1)
+                {
+                    $sidebar_left_pos = 0;
+                    show_sidebar(tabs[0]);
+                }
+                else
+                {
+                    let sidebar = $main_sidebar_visible_store;
+                    if(sidebar == "*")
+                    {
+                        if((!previously_visible_sidebar) || previously_visible_sidebar === '*')
+                            sidebar = Object.keys(appConfig.sidebar)[0];
+                        else
+                            sidebar = previously_visible_sidebar;
+                    }
+
+                    $sidebar_left_pos = 40;
+                    show_sidebar(sidebar)
+                }
+
+                pushNavigationPage();
+            }
+        }
         else
         {
 
@@ -190,6 +238,12 @@
                 });
         }
 
+         options.push({
+                caption: 'Left-handed floating actions',
+                icon: $leftHandedFAB ? FaToggleOn : FaToggleOff,
+                action: (f) => { $leftHandedFAB = !$leftHandedFAB; }
+            })
+
         if(has_selection_details)
         {
             options.push( {
@@ -254,9 +308,17 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class="no-print flex flex-row w-full" on:click={clearSelection}>
     <div class="flex-none left-0 flex h-12 sm:h-10">
-        <button class="w-12 sm:w-10 h-full flex justify-center items-center text-stone-300 hover:text-stone-100" on:click|stopPropagation={toggle_navigator}>
-            <Icon class="w-8 sm:w-6 h-8 sm:h-6" component={icon}/>
-        </button>
+        {#if definedTabs && definedTabs.length > 0}
+            {#each definedTabs as tab}
+                <button class="w-12 sm:w-10 h-full flex justify-center items-center text-stone-300 hover:text-stone-100" on:click={tab.onclick}>
+                    <Icon s="xl" component={tab.icon}/>
+                </button>    
+            {/each}
+        {:else}
+            <button class="w-12 sm:w-10 h-full flex justify-center items-center text-stone-300 hover:text-stone-100" on:click|stopPropagation={toggle_navigator}>
+                <Icon s="xl" component={icon}/>
+            </button>
+        {/if}
     </div>
 
     <div class="grow">
@@ -268,7 +330,7 @@
         {#if user_is_in_multiple_groups}
             <button class="h-full w-12 sm:w-10 px-0 flex justify-center items-center   text-stone-300 hover:text-stone-100"
                     on:click|stopPropagation={show_groups}>
-                <Icon class="w-5 sm:w-4 h-5 sm:h-4" component={FaUsers} />
+                <Icon s="xl" component={FaUsers} />
             </button>
         {/if}
 
@@ -276,13 +338,13 @@
             class="h-full w-12 sm:w-10 px-0 flex justify-center items-center   text-stone-300 hover:text-stone-100"
             on:click|stopPropagation={show_options}>
 
-            <Icon class="w-5 sm:w-4 h-5 sm:h-4" component={FaCog} />
+            <Icon s="xl" component={FaCog} />
         </button>
     </div>
 
 </div>
 
-{#if tabs.length > 1 &&  $main_sidebar_visible_store != "*"}
+{#if false && tabs.length > 1 &&  $main_sidebar_visible_store != "*"}
     <div  class="no-print flex-none block fixed left-0 top-[40px] w-[40px] h-screen z-20 inset-0   overflow-hidden">
         <div class="sticky top-0 flex h-full w-10 bg-stone-900 flex-col items-center text-stone-100 shadow">
             <VerticalToolbar {appConfig} mobile={true}/>

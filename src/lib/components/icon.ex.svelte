@@ -10,53 +10,9 @@
     export let symbol :string = '';                         // predefined html particle from icons app map
     export let color:string = '';
 
-    export let s = 'md'
+    export let size :number|undefined = undefined;                            
     export let bg :string = '';                             // In case of initials mode it can be automatically generated from 'label' hash
-    export let circle :boolean = false;            
-    
-    let size = 4
-    switch(s)
-    {
-    case '5xl':
-        size = 12
-        break;
-
-    case '4xl':
-        size = 9
-        break;
-
-    case '3xl':
-        size = 7.5
-        break;
-
-    case '2xl':
-        size = 6
-        break;
-
-    case 'xl':
-        size = 5
-        break;
-
-    case 'lg':
-        size = 4.5
-        break;
-
-    case 'md':
-        size = 4
-        break;
-
-    case 'base':
-        size = 4
-        break;
-    
-    case 'sm':
-        size = 3.5
-        break;
-
-    case 'xs':
-        size = 3
-        break;
-    }
+    export let circle :boolean = false;                     
     
     let additional_class = $$restProps.class ?? '';
     let id = $$restProps.id ?? '';
@@ -132,20 +88,21 @@
     let style;
     $: {
 
-        if(!additional_class)
+        if(size == undefined)
         {
-            let icon_size :string = `${size*0.25}rem`;
-            style = `width: ${icon_size}; height: ${icon_size}`;
-        }
-        else
-        {
-            if(additional_class.includes('w-') || additional_class.includes('h-'))
-                style = ''
-            else
+            if(!additional_class)
             {
+                size = 5
                 let icon_size :string = `${size*0.25}rem`;
                 style = `width: ${icon_size}; height: ${icon_size}`;
             }
+            else    
+                style = '';
+        }
+        else
+        {
+            let icon_size :string = `${size*0.25}rem`;
+            style = `width: ${icon_size}; height: ${icon_size}`;
         }
     }
 

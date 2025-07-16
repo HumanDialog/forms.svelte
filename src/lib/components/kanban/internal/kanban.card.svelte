@@ -1,6 +1,6 @@
 <script lang="ts">
 	import {getContext, tick} from 'svelte'
-    import{ push } from 'svelte-spa-router'
+    import{ push, link } from 'svelte-spa-router'
     import {    contextItemsStore, 
                 isActive, 
                 isSelected, 
@@ -61,17 +61,21 @@
 
     function getOperations()
     {
-        let operations = []
-        
         const getCustomOperations = definition.getCardOperations;
         if(getCustomOperations)
         {
             const cutomOperations = getCustomOperations(item)
-            cutomOperations.forEach( o => operations.push(o))
+            if(Array.isArray(cutomOperations))
+            {
+                return [...cutomOperations]
+            }
+            else
+            {
+                return {...cutomOperations}
+            }
         }
 
 
-        return operations;
     }
 
     //let moveButton;
@@ -289,8 +293,7 @@
         {@const canOpen = isLinkLike || hasOpen}
         {@const openableClass = canOpen ? "sm:hover:cursor-pointer underline" : ""}
         {@const showIcon = showAttachementIcon()}
-            <h3 class=" text-lg font-semibold min-h-[1.75rem]
-                        sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
+            <h3 class=" h3 text-base font-semibold pb-1
                         whitespace-nowrap overflow-clip truncate w-full sm:flex-none
                         relative {openableClass}"
                 use:editable={{
@@ -301,10 +304,18 @@
                     onSoftEnter: async (text) => { onTitleChanged(text); await editProperty('Summary') }
                     }}
                 use:conditionalClick={{
-                    condition: canOpen, 
+                    condition: hasOpen, 
                     callback: performOpen}}
                 bind:this={titleElement}>
+
+                {#if isLinkLike}
+                    <a href={getHRef()} use:link>
+                        {item[definition.titleAttrib]}    
+                    </a>
+                {:else}
                     {item[definition.titleAttrib]}
+                {/if}
+
 
                 {#if showIcon}
                     <span id="attachement" class="absolute top-1 right-0 w-5 h-5 sm:w-3 sm:h-3">
@@ -318,8 +329,8 @@
           
                         
     {:else}
-        <h3  class=" text-lg font-semibold min-h-[1.75rem]
-                    sm:text-sm sm:font-semibold sm:min-h-[1.25rem]
+        <h3  class=" text-base font-semibold pb-1
+                    sm:text-base sm:font-semibold 
                     whitespace-nowrap overflow-clip truncate w-full sm:flex-none
                     relative">
             {item[definition.titleAttrib]}
@@ -339,10 +350,10 @@
     {#if item[definition.summaryAttrib] || summaryPlaceholder}
         {#key item[definition.summaryAttrib]}
             {#if isCardActive}
-                <p class="  sm:text-xs sm:min-h-[1rem]
-                            text-base min-h-[1.5rem]
-                            text-stone-400
-                            max-h-[75px] sm:max-h-[64px]
+                <p class="  text-sm sm:text-sm 
+                            
+                            text-stone-600 dark:text-stone-400
+                            
                             overflow-hidden"
                             use:editable={{
                                 action: (text) => onSummaryChanged(text), 
@@ -353,10 +364,10 @@
                     {item[definition.summaryAttrib]}
                 </p>
             {:else}
-                <p class="  sm:text-xs sm:min-h-[1rem]
-                                text-base min-h-[1.5rem]
-                                text-stone-400
-                                max-h-[75px] sm:max-h-[64px]
+                <p class=" text-sm  sm:text-sm 
+                               
+                                text-stone-600 dark:text-stone-400
+                                
                                 overflow-hidden">
                     {item[definition.summaryAttrib]}
                 </p>

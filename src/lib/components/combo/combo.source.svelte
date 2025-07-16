@@ -23,6 +23,9 @@
     definition.element_avatar = avatar;
     definition.element_icon = icon;
 
-    
+    export function updateObjects(objects :object[])
+    {
+        definition.collection = objects;
+    }    
 
 </script>

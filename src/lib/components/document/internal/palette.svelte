@@ -5,8 +5,9 @@
     import Pallete_row from './palette.row.svelte'
     import { createEventDispatcher } from 'svelte';
     import Icon from '../../icon.svelte'
-    import { isDeviceSmallerThan} from '../../../utils.js'
-
+    import { isDeviceSmallerThan, UI} from '../../../utils.js'
+    import {FaTimes} from 'svelte-icons/fa'
+    
     export let commands         :Document_command[];
 
     export let width_px        :number = 400;
@@ -58,11 +59,12 @@
         */
 
         //toolboxY += window.scrollY
-        //css_style = `position: fixed; left:${toolboxX}px; top:${toolboxY}px;`;
+        //css_style = `left:${toolboxX}px; top:${toolboxY}px;`;
         
         toolboxY += window.scrollY /*+ mainContentDiv?.scrollTop*/;
-        css_style = `position: absolute; left:${toolboxX}px; top:${toolboxY}px;`;
-
+        //css_style = `position: absolute; left:${toolboxX}px; top:${toolboxY}px;`;
+        css_style = `left:${toolboxX}px; top:${toolboxY}px;`;
+        console.log("toolbox: ", css_style)
         dispatch('palette_shown');
     }
 
@@ -74,6 +76,9 @@
           if(/*isToolbox && */visible && paletteElement)
           {
               let layoutRoot = document.getElementById("__hd_svelte_layout_root")
+              if(!layoutRoot)
+                    layoutRoot = document.getElementById("app")
+
               if(!!layoutRoot && paletteElement.parentElement != layoutRoot)
               {
                 await tick();
@@ -83,16 +88,28 @@
       }
     )
 
+    let closeButtonPos = ''
     export function show(x :number, y :number, up :boolean = false)
     {
         isToolbox = false;
-        css_style = `width: ${width_px}px; max-height:${max_height_px}px; position: fixed; left:${x}px; top:${y}px;`;
+        css_style = `width: ${width_px}px; max-height:${max_height_px}px; left:${x}px; top:${y}px;`;
         
         if(up)
             css_style += ' transform: translate(0, -100%);'
-
+        //console.log("show:", css_style)
         visible = true;
         dispatch('palette_shown');
+
+        closeButtonPos = ''
+
+        setTimeout(() => {
+            const rect = paletteElement.getBoundingClientRect()
+            closeButtonPos = `right: ${15}px; top: calc(${rect.y}px - 1.75rem)`
+        //    console.log('closeButtonPos', closeButtonPos)
+        },0)
+
+
+        console.trace()
     }
 
     export function show_fullscreen(_width_px :number, _height_px :number)
@@ -100,10 +117,11 @@
         isToolbox = false;
         width_px = _width_px;
         max_height_px = _height_px;
-        css_style =`position: fixed; left: 0px; top: 0px; width: ${_width_px}px; height: ${_height_px}px; z-index: 1055;`;
+        css_style =`left: 0px; top: 0px; width: ${_width_px}px; height: ${_height_px}px; z-index: 1055;`;
 
         visible = true;
         dispatch('palette_shown');
+        
     }
 
     export function hide()
@@ -130,31 +148,74 @@
         if(!filtered_commands)
             return filtered_commands;
 
+        let was_any_items_before = filtered_commands.length > 0;
+
         if(!key)
         {
             filtered_commands = [...commands];
-            return filtered_commands;
+        }
+        else
+        {
+            filtered_commands = [];
+            commands.forEach( (cmd) =>
+            {
+                if(cmd.separator)
+                    filtered_commands.push(cmd);
+                else if(cmd.caption.toLowerCase().includes(key.toLowerCase()))
+                    filtered_commands.push(cmd);
+                else if(cmd.tags && cmd.tags.toLowerCase().includes(key.toLowerCase()))
+                    filtered_commands.push(cmd);
+            });
         }
 
-        let was_any_items_before = filtered_commands.length > 0;
-        filtered_commands = [];
-        commands.forEach( (cmd) =>
-        {
-            if(cmd.caption.toLowerCase().includes(key.toLowerCase()))
-                filtered_commands.push(cmd);
-            else if(cmd.tags && cmd.tags.toLowerCase().includes(key.toLowerCase()))
-            filtered_commands.push(cmd);
-        });
+        // sprawdzamy zdefiniowany warunek widoczności
+        filtered_commands = filtered_commands.filter(c => {
+            if(c.is_visible)
+                return c.is_visible()
+            else
+                return true;
+        })
 
+        // usuwamy separatory na początku i na koncu listy i zgrupowane obok siebie
+        let lastSeparatorIdx = -1;
+        let commandsNo = filtered_commands.length;
+        for(let i=0; i<commandsNo; i++)
+        {
+            if(filtered_commands[i].separator == true)
+            {
+                if(i == 0)
+                {
+                    filtered_commands.splice(i, 1);
+                    commandsNo--;
+                    i--;
+                }
+                else if(lastSeparatorIdx < 0)
+                    lastSeparatorIdx = i;
+                else if(lastSeparatorIdx == i-1)
+                {
+                    filtered_commands.splice(i, 1);
+                    commandsNo--;
+                    i--;
+                }   
+                else
+                    lastSeparatorIdx = i;     
+            }
+        }
+
+        if(filtered_commands[commandsNo-1].separator == true)
+            filtered_commands.splice(commandsNo-1, 1)
+
+        
         // jeśli poprzednio podświetlony element znalazł się w podownie nowym zestawie to zostaje dalej jako podświetlony
         // w przeciwym wypadku podświetlamy pierwszy element na liście.
         if(!current_command || filtered_commands.every( v => v != current_command))
         {
             if(filtered_commands.length)
-                current_command = filtered_commands[0];
+                current_command = get_operation_or_next_valid(0);
             else
                 current_command = null;
         }
+
 
         // jeśli poprzednio nie było juz nic do wyświetlenia i tym razem też tak wyszło, wówczas zamykamy zupełnie paletę. 
         // Najwidoczniej użytkownik nie jest zainteresowany wybieraniem czegokolwiek z palety.
@@ -164,9 +225,41 @@
         return filtered_commands;
     }
 
+    
+
     export function get_filtered_commands() :Document_command[]
     {
         return filtered_commands;
+    }
+
+    function get_operation_or_next_valid(idx: number) :Document_command|null
+    {
+        let op :Document_command|null = filtered_commands[idx];
+        while(op.separator && idx < filtered_commands.length-1)
+        {   
+            idx++;
+            op = filtered_commands[idx];
+        }
+
+        if(op.separator)
+            return null;
+        else
+            return op;
+    }
+
+    function get_operation_or_prev_valid(idx: number) :Document_command|null
+    {
+        let op :Document_command|null = filtered_commands[idx];
+        while(op.separator && idx > 0)
+        {
+            idx--;
+            op = filtered_commands[idx];
+        }
+
+        if(op.separator)
+            return null;
+        else
+            return op;
     }
 
     export function navigate_up()
@@ -174,14 +267,22 @@
         if(!current_command)
         {
             if(filtered_commands.length > 0)
-            update_current_command(filtered_commands[filtered_commands.length-1]);
+            {
+                let op :Document_command|null = get_operation_or_prev_valid(filtered_commands.length-1);
+                if(op)
+                    update_current_command(op);
+            }
 
             return;
         }
 
         let idx = filtered_commands.findIndex((c) => c == current_command);
         if(idx > 0)
-            update_current_command(filtered_commands[idx-1]);
+        {
+            let op :Document_command|null = get_operation_or_prev_valid(idx-1)
+            if(op)
+                update_current_command(op);
+        }
 
     }
 
@@ -190,14 +291,22 @@
         if(!current_command)
         {
             if(filtered_commands.length > 0)
-                update_current_command(filtered_commands[0]);
+            {
+                let op :Document_command|null = get_operation_or_next_valid(0);
+                if(op)
+                    update_current_command(op);
+            }
                 
             return;
         }
 
         let idx = filtered_commands.findIndex((c) => c == current_command);
         if(idx < filtered_commands.length-1)
-            update_current_command(filtered_commands[idx+1]);
+        {
+            let op :Document_command|null = get_operation_or_next_valid(idx+1);
+            if(op)
+                update_current_command(op);
+        }
 
     }
 
@@ -225,10 +334,14 @@
         let prev_current = current_command;
         
         if(prev_current)
-            rows.find((r) => r.cmd == prev_current).is_highlighted = false;
+            rows.find((r) => !!r && r.cmd == prev_current).is_highlighted = false;
 
         if(cmd)
-            rows.find((r) => r.cmd == cmd).is_highlighted = true;
+        {
+            const row = rows.find((r) => !!r && r.cmd == cmd);
+            row.is_highlighted = true;
+            row?.scrollToView();
+        }
 
         current_command = cmd;
     }
@@ -269,7 +382,8 @@
             toolboxX = beforeTrackingPos.x + trackDelta.x;
             //toolboxY = beforeTrackingPos.y + trackDelta.y;
 
-            css_style = `position: absolute; left:${toolboxX}px; top:${toolboxY}px;`;
+            //css_style = `position: absolute; left:${toolboxX}px; top:${toolboxY}px;`;
+            css_style = `left:${toolboxX}px; top:${toolboxY}px;`;
             e.stopPropagation()
         }
     }
@@ -282,13 +396,22 @@
     }
 
 
+    function isRowActive(cmd)
+    {
+        if(cmd.is_active)
+            return cmd.is_active()
+        else
+            return false;
+    }
+
+   
     
 </script>
 
 {#if isToolbox}
-    <menu   class=" not-prose bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md 
-                    z-30
-                    flex flex-row flex-nowrap"
+    <menu   class="  bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md 
+                    z-40
+                    flex flex-row flex-nowrap fixed"
             style={css_style}
             hidden={!visible}
             on:touchstart={mousedown}
@@ -297,47 +420,83 @@
             bind:this={paletteElement}>
         {#if filtered_commands && filtered_commands.length}
             {#each filtered_commands as cmd, idx (cmd.caption)}
-                {@const id = "cpi_" + idx}
-                {@const mobile = isDeviceSmallerThan("sm")}
-                {@const icon_placeholder_size = mobile ? 12 : 10}
-                <button class="font-medium m-0 py-2 pr-4 text-lg sm:text-sm w-full text-left flex flex-row cursor-context-menu focus:outline-none"
-                        {id}
-                        bind:this={rows[idx]}
-                        on:click={ () => { execute_mouse_click(cmd.on_choice); }}
-                        on:mousedown={buttonMousedown}>
-                
-                    <div class="flex items-center justify-center mt-1 sm:mt-0.5" style:width={`${icon_placeholder_size*0.25}rem`}>
-                        {#if cmd.icon}
-                            {@const cc = mobile ? 7 : 6}
-                            {@const default_icon_size = icon_placeholder_size - cc}
-                            {@const icon_size = cmd.icon_size ? cmd.icon_size : default_icon_size}
-                            <Icon size={icon_size} component={cmd.icon}/>
-                        {/if}
-                    </div>
-                </button>
+                {#if !cmd.separator}
+                    {@const id = "cpi_" + idx}
+                    {@const mobile = isDeviceSmallerThan("sm")}
+                    {@const icon_placeholder_size = mobile ? 12 : 10}
+                    {@const active=isRowActive(cmd)}
+                    <button class="font-medium m-0 py-2 mr-4 text-lg sm:text-sm w-full text-left flex flex-row cursor-context-menu focus:outline-none"
+                            class:dark:bg-stone-700={active}
+                            class:bg-stone-300={active}
+                            {id}
+                            bind:this={rows[idx]}
+                            on:click={ () => { execute_mouse_click(cmd.on_choice); }}
+                            on:mousedown={buttonMousedown}>
+                    
+                        <div class="flex items-center justify-center mt-1 sm:mt-0.5" style:width={`${icon_placeholder_size*0.25}rem`}>
+                            {#if cmd.icon}
+                                {@const cc = mobile ? 7 : 6}
+                                {@const default_icon_size = icon_placeholder_size - cc}
+                                {@const icon_size = cmd.icon_size ? cmd.icon_size : default_icon_size}
+                                <Icon s="md" component={cmd.icon}/>
+                            {/if}
+                        </div>
+                    </button>
+                {/if}
             {/each}
         {/if}
     </menu>
 {:else}
-    <div    class="not-prose bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md z-30" 
-            hidden={!visible}
-            style={css_style}
-            bind:this={paletteElement}>
-        {#if filtered_commands && filtered_commands.length}
-            {#each filtered_commands as cmd, idx (cmd.caption)}
-                {@const id = "cpi_" + idx}
-                <Pallete_row    {id}
-                                cmd={cmd}
-                                is_highlighted={cmd == current_command}
-                                on:click={ () => { execute_mouse_click(cmd.on_choice); }}
-                                on:mousemove={ () => { on_mouse_over(cmd); }}
-                                on:mousedown={buttonMousedown}
-                                bind:this={rows[idx]}
-                                />
-            {/each}
-        {:else}
-            <p class="text-sm text-stone-500">No results</p>
-        {/if}
+    <!--div hidden={!visible}-->
 
-    </div>
+        {#if visible &&  closeButtonPos}
+            {#key closeButtonPos}
+                <button class="     fixed w-6 h-6 flex items-center justify-center
+                                    text-stone-500 bg-stone-200/70 hover:bg-stone-200
+                                    focus:outline-none font-medium rounded-full text-sm text-center
+                                    dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700 
+                                    focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800" 
+                        style={closeButtonPos}
+                        on:mousedown={buttonMousedown}
+                        on:click={ () => hide() }>
+                    <Icon component={FaTimes} s="md"/>
+                </button>
+            {/key}
+        {/if}
+    
+        <div    hidden={!visible}
+                class="bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md overflow-y-auto z-40 fixed"
+                id="__hd_FormattingPalette"
+                bind:this={paletteElement}
+                style={css_style} >
+
+            {#if filtered_commands && filtered_commands.length}
+                {#each filtered_commands as cmd, idx (cmd.caption)}
+                    {#if cmd.separator}
+                        {#if idx>0 && idx<filtered_commands.length-1}   <!-- not first or last place -->
+                            <hr class="mx-4 my-1 border-stone-300 dark:border-stone-700"/>
+                        {/if}
+                    {:else}
+                        {@const id = "cpi_" + idx}
+                        {@const active=isRowActive(cmd)}
+                        <Pallete_row    {id}
+                                        cmd={cmd}
+                                        is_highlighted={cmd == current_command}
+                                        on:click={ () => { execute_mouse_click(cmd.on_choice); }}
+                                        on:mousemove={ () => { on_mouse_over(cmd); }}
+                                        on:mousedown={buttonMousedown}
+                                        bind:this={rows[idx]}
+                                        {active}
+                                        />
+                    {/if}
+                {/each}
+            {:else}
+                <p class="text-sm text-stone-500">No results</p>
+            {/if}
+
+        </div>
+    <!---/div-->
+    
+    
 {/if}
+

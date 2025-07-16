@@ -1,12 +1,13 @@
 <script lang="ts">
-    import {data_tick_store, contextItemsStore, contextTypesStore} from '../../stores.js' 
+    import {data_tick_store, contextItemsStore, contextTypesStore, pushToolsActionsOperations, popToolsActionsOperations} from '../../stores.js' 
     import {informModification, pushChanges} from '../../updates.js'
-    import {parseWidthDirective,shouldBeComapact} from '../../utils.js'
+    import {isDeviceSmallerThan, parseWidthDirective,shouldBeComapact} from '../../utils.js'
     import {afterUpdate, getContext, onMount, setContext} from 'svelte';
     import {rCombo_definition, rCombo_item, cached_sources} from './combo'
-    import FaChevronDown from 'svelte-icons/fa/FaChevronDown.svelte'
+    import {FaChevronDown, FaTimes} from 'svelte-icons/fa'
     import Icon from '../icon.svelte'
     import { reef } from '@humandialog/auth.svelte/dist/index.js';
+	import { showMenu } from '../menu.js';
 
     export let label = ''
     export let self = null;
@@ -34,6 +35,7 @@
     
     export let pushChangesImmediately: boolean = true;
     export let hasNone :boolean = isAssociation;
+    export let readOnly: boolean = false
     
     let userClass = $$restProps.class ?? '';
 
@@ -70,8 +72,8 @@
             label_mb = 'mb-2';
             input_pt = 'pt-2.5'
             input_pb = 'pb-2.5';     
-            font_size = 'text-lg sm:text-sm'      
-            line_h = 'h-7 sm:h-5'
+            font_size = 'text-base'      
+            line_h = 'h-5 sm:h-5'
             chevron_mt = 'mt-2 sm:mt-1'
             break;
 
@@ -79,10 +81,27 @@
             label_mb = 'mb-0.5';
             input_pt = 'pt-0.5'
             input_pb = 'pb-0.5';
-            font_size = 'text-base sm:text-xs'           
-            line_h = 'h-6 sm:h-4'
+            font_size = 'text-xs'           
+            line_h = 'h-6 '
             chevron_mt = ''
             break;
+        case 'sm':
+            label_mb = 'mb-0.5';
+            input_pt = 'pt-0.5'
+            input_pb = 'pb-0.5';
+            font_size = 'text-sm'           
+            line_h = 'h-6 '
+            chevron_mt = ''
+            break;           
+            
+        default:
+            label_mb =  '';
+            input_pt =  ''
+            input_pb =  '';
+            font_size = ''           
+            line_h =    ''
+            chevron_mt = ''
+                
     }
 
     let background_class = is_compact && !icon ? "" : ""; //bg-stone-900/10 dark:bg-stone-100/10 rounded-lg" : ""
@@ -98,7 +117,7 @@
    
     let cs =  c ? parseWidthDirective(c) : 'col-span-1';
     let ctx = context ? context : getContext('ctx');
-    let can_be_activated :boolean  =true;
+    let can_be_activated :boolean  = !readOnly;
     
     let  last_tick = -1    
 
@@ -136,10 +155,13 @@
 
         tick_request_internal = tick_request_internal + 1;
         
-        if(is_compact)
+        if(readOnly)
+            can_be_activated = false
+        else if(is_compact)
         {
             can_be_activated = false;
 
+            
             let contexts = inContext.split(' ');
             contexts.forEach(ctx => 
             {
@@ -175,16 +197,24 @@
     });
 
 
+    let closeButtonPos = ''
+    let dropdownElement;
     function dropdown_action(node :HTMLElement)
     {
         if(is_dropdown_open)
-            dropdown_height = node.getBoundingClientRect().height;
+        {
+            const rect = node.getBoundingClientRect()
+            dropdown_height = rect.height;
+        }
 
         return {
             update()
             {
                 if(is_dropdown_open)
-                    dropdown_height = node.getBoundingClientRect().height;
+                {
+                    const rect = node.getBoundingClientRect()
+                    dropdown_height = rect.height;
+                }
             },
 
             destroy()
@@ -201,7 +231,7 @@
         if(!can_be_activated)
             return;
         
-        if(!combo)
+        if(!textbox)
             return;
  
         if(is_dropdown_open)
@@ -225,8 +255,16 @@
         client_rect.y = 0;
         client_rect.width = window.innerWidth;
         client_rect.height = window.innerHeight;
+        /*
+
+        let rect;
         
-        let rect = combo.getBoundingClientRect();
+        if(is_compact)
+           rect = textbox.getBoundingClientRect();
+        else
+            rect = combo.getBoundingClientRect();
+
+        
 
         let top_space = rect.y;
         let bottom_space = client_rect.height - (rect.y + rect.height);
@@ -262,23 +300,51 @@
         else    // like bottom 
             y = rect.y + rect.height;
 
-        if(show_fullscreen)
+        closeButtonPos = ''
+
+        if(isDeviceSmallerThan("sm"))
         {
-            dropdown_position =`position: fixed; left: 0px; top: 0px; width: ${client_rect.width}px; height: ${client_rect.height}px;`;
+            let screenRect = new DOMRect;
+            screenRect.x = 0;
+            screenRect.y = 0;
+            screenRect.width = window.innerWidth;
+            screenRect.height = window.innerHeight;
+
+            const margin = 5
+
+           
+            const maxHeight = screenRect.height / 2 - margin;
+            const width = screenRect.width - 2*margin;
+            x = margin;
+            y = screenRect.bottom - margin;
+
+            dropdown_position = `left: ${x}px; top: ${y}px; transform: translate(0, -100%); width: ${width}px; max-height: ${maxHeight}px; display: block`
+
+            setTimeout( () => {
+                if(dropdownElement)
+                {
+                    const rect = dropdownElement.getBoundingClientRect()
+                    closeButtonPos = `right: ${margin}px; top: calc(${rect.y}px - 1.75rem)`
+                }
+            }, 0)
+        }
+        else if(show_fullscreen)
+        {
+            dropdown_position =`left: 0px; top: 0px; width: ${client_rect.width}px; height: ${client_rect.height}px;`;
         }
         else
         {
             dropdown_position = `min-width: ${palette_width_px}px; max-height:${palette_max_height_px}px; position: fixed; left:${x}px; top:${y}px;`;
             if(show_above)
                 dropdown_position += ' transform: translate(0, -100%);'
+
+            if(!is_compact)
+                dropdown_position += `width: ${preferred_palette_width}px`
         }
 
-        
-        console.log('dropdown_position', dropdown_position, rect, client_rect)
-        console.log('preferred_palette_height', preferred_palette_height)
-        console.log('bottom_space', bottom_space)
-        console.log('top_space', top_space)
-        
+        */
+
+       openDropdownAsMenu()
 
         is_dropdown_open = true;
         
@@ -300,17 +366,75 @@
                                         subtree: true } );
         }
 
+        if(false && isDeviceSmallerThan("sm"))
+        {    
+            pushToolsActionsOperations({
+                opver: 1,
+                operations: [
+                    {
+                        caption: 'Menu',
+                        operations: [
+                            {
+                                icon: FaTimes,
+                                action: (f) => { hide(); },
+                                fab: 'M00',
+                                tbr: 'A'
+                            }
+                        ]
+                    }
+                ]
+            })
+        }
         
         //filtered_source = definition.source.map( e => e);
         //highlighted_option = filtered_source.length > 0 ? filtered_source[0] : null;
     }
 
+    function openDropdownAsMenu()
+    {
+        let rect;
+        if(is_compact)
+           rect = textbox.getBoundingClientRect();
+        else
+            rect = combo.getBoundingClientRect();
+
+        let operations = []
+
+        if(hasNone)
+            operations.push({
+                caption: '<none>',
+                action: (f) => on_choose(null)
+        })
+
+        // tmp: force again
+        if(definition && definition.collection)
+            source_fetched(definition.collection);
+
+        const _filtered_source = filtered_source ? filtered_source : definition.source
+        _filtered_source.forEach( i => {
+            operations.push({
+                caption: i.Name ?? i.Key,
+                icon: i.Icon ?? undefined,
+                action: (f) => on_choose(i)
+            })
+        })
+
+        console.log('operations', operations)
+
+        showMenu(rect, operations)
+    }
+
     export function hide()
     {
+        if(!is_dropdown_open)
+            return;
+
         if(mutation_observer)
             mutation_observer.disconnect();
 
         is_dropdown_open = false;
+        //popToolsActionsOperations();
+        dropdown_position = 'display: none;'
 
         combo_text = get_combo_text();
         
@@ -327,7 +451,7 @@
     function selected_item(itm, a) :rCombo_item
     {
         let choosed_value = itm[a];
-
+        
         if(typeof choosed_value === 'object' )
         {
             if(choosed_value)
@@ -589,7 +713,8 @@
             return;
 
         filtered_source = get_filtered_source();
-        highlighted_option = filtered_source.length > 0 ? filtered_source[0] : null;
+        //highlighted_option = filtered_source.length > 0 ? filtered_source[0] : null;
+        openDropdownAsMenu()
     }
     
     let new_item_option: rCombo_item
@@ -767,6 +892,8 @@
         filtered_source = definition.source.map( e => e);
         highlighted_option = filtered_source.length > 0 ? filtered_source[0] : null;
 
+        //console.log('source_fetched, definition.source', definition.source)
+
     }
 
     function setup_view(...args)
@@ -814,28 +941,29 @@
     {/if}
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div    bind:this={combo}    
-            on:click={(e) => { show(e, undefined) }}
-            class:cursor-pointer={can_be_activated && is_compact}
             class="max-w-full {appearance_class} flex flex-row content-between items-center"
          >
             
-        <div class="max-w-full flex-1 flex flex-row items-center">
-            {#if !is_dropdown_open}
+        <p  class="max-w-full flex-1 flex flex-row items-center"
+            on:click={(e) => { show(e, undefined) }}
+            class:cursor-pointer={can_be_activated && is_compact}>
+            
+            {#if true || !is_dropdown_open}
                 {#if icon && sel_item}
                     {#if sel_item.Color}
-                        <Icon size={5} circle={true} color={sel_item.Color}/>
+                        <Icon s="xl" circle={true} color={sel_item.Color}/>
                     {:else if sel_item.Icon}
-                        <Icon size={4} component={sel_item.Icon}/>
+                        <Icon s="md" component={sel_item.Icon}/>
                     {:else if sel_item.Icon == null}
                         <div class="w-4 h-4"></div>
                     {:else}
-                        <Icon size={5} circle={true} symbol={sel_item.Avatar} label={sel_item.Name}/>
+                        <Icon s="xl" circle={true} symbol={sel_item.Avatar} label={sel_item.Name}/>
                     {/if}
                 {/if}
             {/if}
 
             
-            <p  bind:this={textbox}
+            <span  bind:this={textbox}
                 class="dark:text-stone-300 {line_h} truncate pl-0 pr-2.5 {background_class} min-w-[2.5rem]"
                 class:ml-2={icon}
                 class:text-stone-400={ (!is_dropdown_open) && (!sel_item)}
@@ -844,81 +972,104 @@
                 contenteditable={is_dropdown_open && filtered}
                 on:keydown={on_keydown}
                 tabindex="0">
-                {combo_text}</p>
-        </div>
+                {combo_text}</span>
+
+            {#if can_be_activated }
+                <div class="w-3 h-3 no-print flex-none text-stone-700 dark:text-stone-300 {chevron_mt}"
+                    class:ms-auto={!is_compact}>
+                    <FaChevronDown/>
+                </div>
+            {/if}
+        </p>
         
-        {#if can_be_activated }
-            <div class="w-3 h-3 no-print flex-none text-stone-700 dark:text-stone-300 {chevron_mt}">
-                <FaChevronDown/>
-            </div>
-        {/if}
+        
     </div>
 
-    <div    hidden={!is_dropdown_open} 
-            class="{cs} bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md overflow-y-auto cursor-pointer z-30"
-            style={dropdown_position}
-            use:dropdown_action>
-        <ul class="py-1">
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!--div    hidden={!is_dropdown_open}>
+        {#if closeButtonPos}
+            {#key closeButtonPos}
+                <button class="     fixed w-6 h-6 flex items-center justify-center
+                                    text-stone-500 bg-stone-200/70 hover:bg-stone-200
+                                    focus:outline-none font-medium rounded-full text-sm text-center
+                                    dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700 
+                                    focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800" 
+                        style={closeButtonPos}
+                        on:click={ hide }>
+                    <Icon component={FaTimes} s="md"/>
+                </button>
+            {/key}
+        {/if}
 
-            {#if definition.source && definition.source.length}
-                {#if hasNone}
-                    <!-- svelte-ignore a11y-click-events-have-key-events -->
-                    <li class="rounded p-2 flex flex-row items-center {font_size}" 
-                        class:bg-stone-100={highlighted_option == null}
-                        class:dark:bg-stone-700={highlighted_option == null}
-                        class:dark:hover:bg-stone-700={highlighted_option == null}
-                        on:mousemove={() => on_mouse_move(null)}
-                        on:click|preventDefault|stopPropagation={async () => await on_choose(null)}
-                        tabindex="-1">
+        <div    class="not-prose {cs} bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md overflow-y-auto cursor-pointer z-40
+                    fixed"
+                style={dropdown_position}
+                bind:this={dropdownElement}
+                use:dropdown_action>
+            
+                
 
-                        <div class="ml-2">
-                            &lt;none&gt;
-                        </div>
-                    </li>
-                {/if}
+            <ul class="py-1">
 
-                {@const _filtered_source = filtered_source ? filtered_source : definition.source}
-                {#if _filtered_source.length > 0}
-                    {#each _filtered_source as item (item.Key)}
-                        <!-- svelte-ignore a11y-click-events-have-key-events -->
-                        <li class="rounded p-2 flex flex-row items-center {font_size}" 
-                            class:bg-stone-100={highlighted_option == item}
-                            class:dark:bg-stone-700={highlighted_option == item}
-                            class:dark:hover:bg-stone-700={highlighted_option == item}
-                            on:mousemove={() => on_mouse_move(item)}
-                            on:click|preventDefault|stopPropagation={async () => await on_choose(item)}
+                {#if definition.source && definition.source.length}
+                    {#if hasNone}
+                        
+                        <li class="rounded flex flex-row items-center {font_size}
+                                    space-x-10 px-4 py-2 ml-12 sm:ml-0" 
+                            class:bg-stone-100={highlighted_option == null}
+                            class:dark:bg-stone-700={highlighted_option == null}
+                            class:dark:hover:bg-stone-700={highlighted_option == null}
+                            on:mousemove={() => on_mouse_move(null)}
+                            on:click|preventDefault|stopPropagation={async () => await on_choose(null)}
                             tabindex="-1">
 
-                            {#if icon}
-                                {#if item.Color}
-                                    <Icon size={5} circle={true} color={item.Color}/>
-                                {:else if item.Avatar} 
-                                    <Icon size={5} circle={true} symbol={item.Avatar}/>
-                                {:else if item.Icon}
-                                    <Icon size={4} component={item.Icon}/>
-                                {:else if item.Icon == null}
-                                    <div class="w-4 h-4"></div>
-                                {:else if item.Name}
-                                    <Icon size={5} circle={true} label={item.Name}/>
-                                {:else}
-                                    <Icon size={5} circle={true}/>
-                                {/if}
-                            {/if}
-                            <div class="ml-2">
-                            {#if item.Name}
-                                {item.Name}
-                            {:else if item.Key}
-                                {item.Key}
-                            {/if}
-                            </div>
+                            <h4 class="ml-2 text-stone-400 dark:text-stone-500">
+                                &lt;none&gt;
+                            </h4>
                         </li>
-                    {/each}
-                {:else}
-                    <li class="rounded p-2">No options</li>
+                    {/if}
+
+                    {@const _filtered_source = filtered_source ? filtered_source : definition.source}
+                    {#if _filtered_source.length > 0}
+                        {#each _filtered_source as item (item.Key)}
+                            {@const active=(highlighted_option == item) ? 'bg-stone-400/30 dark:bg-stone-400/30' : ''}
+                            <li class="rounded flex flex-row items-center {font_size}
+                                    space-x-10 px-4 py-2 pl-12 sm:pl-2 {active}" 
+                                on:mousemove={() => on_mouse_move(item)}
+                                on:click|preventDefault|stopPropagation={async () => await on_choose(item)}
+                                tabindex="-1">
+
+                                {#if icon}
+                                    {#if item.Color}
+                                        <Icon s="md" circle={true} color={item.Color}/>
+                                    {:else if item.Avatar} 
+                                        <Icon s="md" circle={true} symbol={item.Avatar}/>
+                                    {:else if item.Icon}
+                                        <Icon s="md" component={item.Icon}/>
+                                    {:else if item.Icon == null}
+                                        <div class="w-4 h-4"></div>
+                                    {:else if item.Name}
+                                        <Icon s="md" circle={true} label={item.Name}/>
+                                    {:else}
+                                        <Icon s="md" circle={true}/>
+                                    {/if}
+                                {/if}
+                                <h4 class="ml-2">
+                                {#if item.Name}
+                                    {item.Name}
+                                {:else if item.Key}
+                                    {item.Key}
+                                {/if}
+                                </h4>
+                            </li>
+                        {/each}
+                    {:else}
+                        <li class="rounded p-2">No options</li>
+                    {/if}
                 {/if}
-            {/if}
-        </ul>
-    </div>
+            </ul>
+        </div>
+    </div-->
 </div>
 {/if}
 

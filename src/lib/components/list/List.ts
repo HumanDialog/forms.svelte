@@ -10,6 +10,7 @@ export enum rList_property_type
     Tags
 }
 
+
 export class rList_property
 {
     constructor(type :rList_property_type)
@@ -22,6 +23,11 @@ export class rList_property
     public a            :string = '';
     public onSelect    :Function | undefined = undefined;
     public position     :number|string|undefined = undefined
+    public readOnly     :boolean = false
+    public detailed     :boolean = false
+    public prefix       :string = ''
+    public postfix      :string = ''
+    public getter       :Function | undefined = undefined
 }
 
 export class rList_property_combo extends rList_property
@@ -51,6 +57,7 @@ export class rList_property_tags extends rList_property
 
 export class rList_definition
 {
+    public name                 :string = ''
     public title                :string = '';
     public title_editable       :boolean = false;
     public on_title_changed     :Function | undefined = undefined;
@@ -69,4 +76,5 @@ export class rList_definition
     public onOpen               :Function | undefined = undefined;
 
     public properties           :rList_property[] = [];
+    public tags                 :rList_property_tags|null = null
 }
