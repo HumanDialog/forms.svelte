@@ -271,7 +271,7 @@
                         </button>
                     {/each}
                 {:else}
-                    {@const enabledLightColors ='text-stone-600 hover:text-stone-800 hover:bg-stone-200 active:bg-stone-200 border-stone-200'}
+                    {@const enabledLightColors ='text-stone-600 hover:text-stone-800 hover:bg-stone-200 active:bg-stone-100 border-stone-200'}
                     {@const disabledLightColors ='text-stone-400 border-stone-200'}
 
                     {@const enabledDarkColors ='dark:text-stone-300 dark:hover:text-white dark:hover:bg-stone-800 dark:active:bg-stone-600 dark:border-stone-600'}
@@ -287,7 +287,7 @@
                             focus:outline-none
                             inline-flex items-center
                             {colors}"
-                            class:bg-stone-700={isActive}
+                            class:bg-stone-200={isActive}
                             class:dark:bg-stone-800={isActive}
                             disabled={isDisabled}
                             on:mousedown={(e) => mousedown(e, operation)}
@@ -329,7 +329,7 @@
                         {colors}
                         focus:outline-none
                         inline-flex items-center"
-                        class:bg-stone-700={isActive}
+                        class:bg-stone-200={isActive}
                         class:dark:bg-stone-800={isActive}
                         disabled={isDisabled}
                         on:mousedown={(e) => mousedown(e, operation)}

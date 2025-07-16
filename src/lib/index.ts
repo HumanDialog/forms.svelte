@@ -79,6 +79,13 @@ export {default as KanbanCallbacks} from './components/kanban/kanban.callbacks.s
 export {KanbanColumnTop, KanbanColumnBottom} from './components/kanban/Kanban'
 
 export {default as Paginator} from './components/paginator.svelte'
+export {default as Breadcrumb} from './components/breadcrumb.svelte'
+export {
+    breadcrumbAdd,
+    breadcrumbParse,
+    breadcrumbStringify,
+    breadcrumbClipName
+}   from './components/breadcrumb_utils'
 
 export {
     selectItem,

@@ -8,7 +8,7 @@
 </svelte:head> 
 
 <section class="bg-local bg-cover" >
-<Header/>
+<Header  transparent light main/>
 </section>
 
 <div class="antialiased  bg-white  w-full ">

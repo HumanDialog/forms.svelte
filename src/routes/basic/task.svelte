@@ -1050,7 +1050,8 @@
 
             {#if task.Description || descriptionPlaceholder}
                 <hr/>
-                <Editor   a='Description'
+                <Editor     class="mb-40"
+                            a='Description'
                             compact={true}
                             bind:this={description}
                             onFocusCb={() => activateFormattingTools()}

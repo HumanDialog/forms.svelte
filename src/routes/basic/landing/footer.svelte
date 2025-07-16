@@ -34,7 +34,7 @@
                             <a href="https://twitter.com/ObjectReef" class="hover:underline ">X (Twitter)</a>
                         </li>
                         <li class="mb-2 sm:mb-4">
-                            <a href="https://github.com/HumanDialog/octopus.basic.svelte" class="hover:underline ">GitHub</a>
+                            <a href="https://github.com/HumanDialog/octopus.basic.reef" class="hover:underline ">GitHub</a>
                         </li>
                     </ul>
                 </div>

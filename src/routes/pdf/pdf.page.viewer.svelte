@@ -27,6 +27,14 @@
     export let rotation = undefined
     export let scale = 1.0
     export let url;
+
+    export function changeScale(_scale)
+    {
+        scale = _scale
+
+        //1. Render by 
+    }
+
     let canvasPdf;
     let svgTasks;
     

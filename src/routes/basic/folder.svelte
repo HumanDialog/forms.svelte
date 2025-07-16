@@ -14,7 +14,9 @@
                 Modal,
                 onErrorShowAlert,
 				activateItem, UI,
-				showFloatingToolbar} from '$lib'
+				showFloatingToolbar,
+                Breadcrumb,
+				breadcrumbAdd} from '$lib'
     import {FaRegFile, FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaSync,
         FaList, FaEllipsisH, FaChevronRight, FaChevronLeft, FaRegShareSquare, FaLink, FaUnlink, FaRegStar, FaStar, FaCopy, FaCut} from 'svelte-icons/fa'
 
@@ -40,6 +42,10 @@
     let tasksComponent;
     let folderTitle = ''
 
+    let prevBreadcrumbPath = ''
+    let breadcrumbPath = ''
+    let breadcrumb;
+
     let users = [];
 
     const STATE_FINISHED = 7000;
@@ -53,9 +59,6 @@
         if(foundIdx < 0)
             return;
 
-
-
-
         if(!segments.length)
             contextItemId = 1
         else
@@ -65,12 +68,20 @@
         contextItem = null
         contextPath = `/Folder/${contextItemId}`
 
+
+        const params = new URLSearchParams($querystring);
+        if(params.has("path"))
+            prevBreadcrumbPath = params.get("path") ?? ''
+        else
+            prevBreadcrumbPath = ''
+
         const cacheKey = `folder_${contextItemId}`
         const cachedValue = cache.get(cacheKey)
         if(cachedValue)
         {
             contextItem = cachedValue;
             folderTitle = contextItem.Title;
+            breadcrumbPath = breadcrumbAdd(prevBreadcrumbPath, folderTitle, $location)
 
             subfoldersComponent?.reload(contextItem, subfoldersComponent.KEEP_SELECTION)
             notesComponent?.reload(contextItem, notesComponent.KEEP_SELECTION)
@@ -88,7 +99,10 @@
 
         contextItem  = readItem
         if(contextItem)
+        {
             folderTitle = contextItem.Title;
+            breadcrumbPath = breadcrumbAdd(prevBreadcrumbPath, folderTitle, $location)
+        }
 
         cache.set(cacheKey, contextItem)
 
@@ -943,14 +957,27 @@
 
             <section class="w-full place-self-center max-w-3xl">
 
+            <p class="hidden sm:block mt-3 ml-3 pb-5 text-lg text-left">
+                {folderTitle}
+            </p>
+            
+
+            {#if breadcrumbPath}
+                <Breadcrumb class="hidden sm:block mb-5" path={breadcrumbPath} bind:this={breadcrumb}  />
+            {/if}
+
+
+            <!--p class="hidden sm:block mt-3 ml-3 pb-5 text-lg text-left">
+                {folderTitle}
+            </p-->
+
             <List   self={contextItem}
                     a='Folders'
-                    title={folderTitle}
                     toolbarOperations={(el) => elementOperations(el, 'Folder')}
                     orderAttrib='Order'
                     bind:this={subfoldersComponent}>
                 <ListTitle      a='Title'
-                                hrefFunc={(folder) => `${folder.href}`}
+                                hrefFunc={(folder) => `${folder.href}?path=${breadcrumbPath}`}
                                 onChange={changeElementProperty}/>
 
                 <ListSummary    a='Summary'

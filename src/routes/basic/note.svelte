@@ -789,7 +789,8 @@
 
             <!--{#if note.Content || descriptionPlaceholder}-->
                 <hr/>
-                <Editor   a='Content'
+                <Editor     class="mb-40"
+                            a='Content'
                             compact={true}
                             bind:this={description}
                             onFocusCb={() => activateFormattingTools()}
