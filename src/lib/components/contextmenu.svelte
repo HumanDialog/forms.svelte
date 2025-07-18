@@ -556,7 +556,7 @@
             {@const active = calculateBackground(isFocused, false)}
             {@const has_submenu = operation.menu !== undefined && operation.menu.length > 0}
 
-            <button class="block  w-full pr-4 text-left flex flex-row cursor-context-menu {active} focus:outline-none"
+            <button class="block  w-full pr-4 text-left flex flex-row cursor-context-menu {active} focus:outline-none items-center"
                     id={menu_item_id}
                     bind:this={menu_items[index]}
                     on:click|stopPropagation={(e) => { execute_action(e, operation, index) } }
@@ -566,7 +566,7 @@
                     disabled={operation.disabled}
                     class:opacity-60={operation.disabled}>
 
-                <div class="flex items-center justify-center space-x-10 px-4 py-2 ml-12 sm:ml-0" >
+                <div class="flex  justify-center space-x-10 px-4 py-2 ml-12 sm:ml-0" >
                     {#if operation.icon}
                         {@const cc = mobile ? 7 : 6}
                         {@const icon_size = icon_placeholder_size - cc}
@@ -577,11 +577,10 @@
                         <div class="w-4 h-4"></div>
                     {/if}
                 </div>
-                <div class="flex items-center ">
-                    <p> {operation.caption}</p>
+                <div class="">
+                        <p class=""> {operation.caption}</p>
                     {#if operation.description}
-                        {@const shortcut_width_px = operation.shortcut ? 80 : 0}
-                        <p  class="truncate inline-block">
+                         <p  class="truncate inline-block text-xs">
                             {operation.description}
                         </p>
                     {/if}
