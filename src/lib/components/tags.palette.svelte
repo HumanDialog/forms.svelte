@@ -185,7 +185,7 @@
 </script>
 
 {#if view==TAGS_PALETTE}
-<menu class="{userClass} flex flex-column {gap} flex-wrap mr-1 sm:mr-0 sm:w-72">
+<menu class="{userClass} flex flex-column {gap} flex-wrap mr-1 sm:mr-0 sm:w-72 text-stone-600 dark:text-stone-300">
     <p class="flex flex-row {gap} flex-wrap ">
         {#key filteredTags}
             {#if filteredTags.length > 0}
@@ -206,7 +206,7 @@
 
     <input  type="text" name="text" id="text"
             autocomplete="off" 
-            class="block bg-stone-100 dark:bg-stone-800 flex-1"
+            class="block bg-stone-100 dark:bg-stone-800 flex-1 text-stone-700 dark:text-stone-200"
             bind:value={inputText}
             on:input={onTextInput}
             on:blur={onTextBlur}

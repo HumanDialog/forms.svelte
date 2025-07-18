@@ -43,17 +43,21 @@
         </section>
 
         <section class="bg-local bg-cover py-8 px-4 mx-auto max-w-screen-xl lg:px-6 relative">
-            <img src="/landing/octopus-screen-md.png" alt="octopus-screen-lg" 
-                    class="hidden sm:block rounded-xl shadow-lg "/>
+            <img src="/landing/new-kanban-md.png" alt="octopus-screen-lg" 
+                    class="hidden sm:block rounded-xl shadow-lg 
+                            w-full max-w-[1280px] "/>
 
-            <img src="/landing/octopus-screen-sm.png" alt="octopus-screen-sm"
-                    class="rounded-xl shadow-lg hidden sm:block sm:absolute sm:right-[0px] sm:top-[200px]" />
+            <img src="/landing/new-mytasks-sm-sm.jpg" alt="octopus-screen-sm"
+                    class="rounded-xl shadow-lg hidden sm:block sm:absolute sm:right-[0px] sm:top-[150px]
+                            w-full max-w-[320px] " />
 
-            <img src="/landing/octopus-kanban-sm.png" alt="octopus-screen-sm"
-                    class="rounded-xl shadow-lg block sm:hidden absolute right-[0px] top-[100px]" />
+            <img src="/landing/new-kanban-sm-sm.png" alt="octopus-screen-sm"
+                    class="rounded-xl shadow-lg block sm:hidden absolute right-[20px] top-[100px]
+                    w-full max-w-[250px] " />
 
-            <img src="/landing/octopus-screen-sm.png" alt="octopus-screen-lg" 
-                    class="block sm:hidden rounded-xl shadow-lg "/>
+            <img src="/landing/new-mytasks-sm.jpg" alt="octopus-screen-lg" 
+                    class="block sm:hidden rounded-xl shadow-lg
+                    w-full max-w-[250px] "/>
         </section>
 
         <section class="mt-20 mb-10" >
