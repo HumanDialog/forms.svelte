@@ -14,7 +14,7 @@
 				mainContentPageReloader,
                 Modal,
                 onErrorShowAlert} from '$lib'
-    import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCircle, FaPen, FaArchive, FaEllipsisH} from 'svelte-icons/fa'
+    import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaArchive, FaEllipsisH} from 'svelte-icons/fa'
 
     export let params = {}
 
@@ -294,9 +294,16 @@
             <ListDateProperty name="DueDate"/>
 
             <span slot="left" let:element>
-                <Icon component={element.State == STATE_FINISHED ? FaRegCheckCircle : FaRegCircle}
-                    on:click={(e) => finishTask(e, element)}
-                    class="h-5 w-5  text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
+                {#if element.State == STATE_FINISHED}
+                    <Icon component={FaRegCalendarCheck}
+                    class="h-5 w-5  text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
+
+                {:else}
+                    <Icon component={FaRegCalendar}
+                        on:click={(e) => finishTask(e, element)}
+                        class="h-5 w-5  text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
+
+                {/if}
             </span>
 
 
