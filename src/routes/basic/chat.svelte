@@ -287,6 +287,29 @@
         }
     }
 
+    let editableElement;
+    async function onPaste(e)
+    {
+        e.preventDefault();
+        
+        const sel = window.getSelection()
+        //const selNo = sel?.focusOffset
+        //const selNode = sel?.focusNode
+
+        //console.log('sel', selNo, selNode)
+        
+        const txt = e.clipboardData.getData('text/plain')
+        
+        //const left = newMessageContent.substring(0, selNo)
+        //const right = newMessageContent.substring(selNo+1)
+        //newMessageContent = left + txt + right
+        newMessageContent = txt
+        
+        await tick()
+
+        sel?.setPosition(editableElement.childNodes[0], txt.length)
+    }
+
     function onSubmitClick(e)
     {
         if(newMessageContent)
@@ -523,9 +546,11 @@
                             overflow-x-clip text-wrap break-words"
                             bind:innerHTML={newMessageContent}
                             contenteditable="true"
+                            bind:this={editableElement}
 
                             placeholder="Type new message"
-                            on:keydown={onKeyDown}>
+                            on:keydown={onKeyDown}
+                            on:paste={onPaste}>
                     </p> <!--maxlength={196-additionalBytesSize(newMessageContent)} -->
 
 
