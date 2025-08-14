@@ -54,6 +54,7 @@
     routes.set('/doc/*',                wrap({ asyncComponent: () => import('./tilos/static.doc.svelte')}))
     routes.set('/blog',                 wrap({ asyncComponent: () => import('./landing/blog/blog.svelte')}))
     routes.set('/blog/*',               wrap({ asyncComponent: () => import('./landing/blog/article.svelte')}))
+    routes.set('/swagger',              wrap({ asyncComponent: () => import('./swagger/index.svelte')}))
     routes.set(r, AppView)
     routes.set('*', NotFound)
 
