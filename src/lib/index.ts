@@ -146,6 +146,8 @@ export { default as IcH4 } from './components/document/internal/h4.icon.svelte'
 
 
 
-
+export {    registerKicksObserver,
+            unregisterKicksObserver,
+            forceKicksChecking }    from './kicks.js'
 
 

@@ -7,9 +7,12 @@
             reloadVisibleTags,
 			getNiceStringDate,
             showFloatingToolbar,
-            UI
+            UI,
+            registerKicksObserver,
+            unregisterKicksObserver,
+            forceKicksChecking
             } from '$lib'
-	import { afterUpdate, tick } from 'svelte';
+	import { afterUpdate, tick, onMount } from 'svelte';
     import {location, link, querystring} from 'svelte-spa-router'
 
     import {FaPaste, FaArrowCircleRight, FaTimes, FaRegFile, FaRegCalendar, FaPaperPlane, FaRegStar, FaStar} from 'svelte-icons/fa/'
@@ -18,11 +21,15 @@
     let channelRef = ''
     let channel = null;
     let allTags = '';
+    let channelRefreshLabel = ''
 
     let pendingUploading = false;
     let isReadOnly = false;
     let unreadMessagesNo = 0
     let selectedMessageId = 0
+
+    const heuristicIntevals = [5,10,20,40]
+    let heuristicIntervalIdx = -1
 
 
     $: onParamsChanged($location, $querystring)
@@ -36,6 +43,8 @@
 
         const channelId = parseInt(segments[segments.length-1])
         channelRef = `./MessageChannel/${channelId}`
+
+        channelRefreshLabel = `MsgC_${channelId}`
 
         let scrollToPost = 0
         selectedMessageId = 0
@@ -76,6 +85,34 @@
 
        if(unreadMessagesNo > 0)
             setTimeout(async () => await markRead(), 2000)
+    }
+
+    onMount(() => {
+        const observerId = registerKicksObserver(channelRefreshLabel, 60, onRemoteChanged)
+        return () => {
+            unregisterKicksObserver(observerId)
+        }
+    })
+
+    async function onRemoteChanged(labels)
+    {
+        let restoreSelection = isDuringEditing()
+        if(restoreSelection)
+            storeEditableSelection()
+
+        await reloadData();
+        await tick();   // rerender
+        scrollDown();
+
+        // doesn't work. don't know why
+        if(restoreSelection)
+        {
+            restoreEditableSelection()
+        }
+
+        await markRead()
+
+        startHeuristicRefreshing()
     }
 
     async function scrollWhereNeeded(scrollToPost)
@@ -269,6 +306,8 @@
             await reloadData();
             await tick();   // rerender
             scrollDown();
+
+            startHeuristicRefreshing();
         }
     }
 
@@ -415,6 +454,68 @@
     }
 
 
+    function isDuringEditing()
+    {
+        if(document.activeElement == editableElement)
+            return true;
+        else
+            return false;
+    }
+
+    let fNode;
+    let aNode;
+    let fOffset;
+    let aOffset;
+    function storeEditableSelection()
+    {
+        const sel = window.getSelection()
+        fNode = sel?.focusNode
+        fOffset = sel?.focusOffset
+        aNode = sel?.anchorNode
+        aOffset = sel?.anchorOffset
+    }
+
+    function restoreEditableSelection()
+    {
+        if(!fNode)
+            return;
+
+        editableElement.focus()
+        const sel = window.getSelection()
+        let range = document.createRange();
+        range.setStart(aNode, aOffset)
+        range.setEnd(fNode, fOffset)
+        sel?.removeAllRanges()
+        sel?.addRange(range)
+
+        fNode = null
+        aNode = null
+    }
+
+    let heuristicTimerId = 0
+    function startHeuristicRefreshing()
+    {
+        heuristicIntervalIdx = 0;
+
+        if(heuristicTimerId > 0)
+            clearTimeout(heuristicTimerId)
+
+        heuristicTimerId = setTimeout(onHeuristicRefresh, heuristicIntevals[heuristicIntervalIdx]*1000)
+    }
+
+    function onHeuristicRefresh()
+    {
+        forceKicksChecking()
+
+        heuristicIntervalIdx++;
+        if(heuristicIntervalIdx >= heuristicIntevals.length)
+        {
+            heuristicIntervalIdx = -1
+            heuristicTimerId = 0
+        }
+        else
+            heuristicTimerId = setTimeout(onHeuristicRefresh, heuristicIntevals[heuristicIntervalIdx]*1000)
+    }
 
 </script>
 

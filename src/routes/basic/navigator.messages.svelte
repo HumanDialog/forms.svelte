@@ -11,7 +11,9 @@
                 onErrorShowAlert,
                 randomString, UI,
                 Icon,
-            showMenu} from '$lib'
+            showMenu,
+            registerKicksObserver,
+			unregisterKicksObserver} from '$lib'
     import {FaHashtag, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaRegComment, FaUsers, FaPlus} from 'svelte-icons/fa'
     import {location, push} from 'svelte-spa-router'
     import {reef, session} from '@humandialog/auth.svelte'
@@ -33,24 +35,33 @@
 
     const navRefresher = {
         refresh: () => {
-                initNavigator();
+                refreshNavigator();
             }
     }
 
+    let kickObserverId = 0
     onMount( () =>
     {
         initNavigator();
         UI.navigator = navRefresher
         
         return () => {
+            if(kickObserverId > 0)
+                unregisterKicksObserver(kickObserverId)
             if(UI.navigator == navRefresher)
                 UI.navigator = null
         }      
     })
 
+
     
     async function initNavigator()
     {
+        if(kickObserverId > 0)
+            unregisterKicksObserver(kickObserverId)
+        
+        readyPartsNo = 0
+
         const generalKey = `navigatorGeneralChannels`
         const generalValue = cache.get(generalKey)
         if(generalValue)
@@ -63,6 +74,7 @@
         {
             navGeneralLists?.reload(generalChannels)
             cache.set(generalKey, generalChannels);
+            registerKicksObserverWhenReady()
         })
 
 
@@ -78,13 +90,48 @@
         {
             navDirectLists?.reload(directChannels)
             cache.set(directKey, directChannels);
+            registerKicksObserverWhenReady()
         })
 
     }
 
+    let readyPartsNo = 0
+    function registerKicksObserverWhenReady()
+    {
+        readyPartsNo++;
+        if(readyPartsNo < 2)
+            return
+        
+        let labels = []
+        generalChannels.filter(ch => !!ch.IsSubscribed).forEach( ch => labels.push(`MsgC_${ch.Id}`)) 
+        directChannels.forEach(ch => labels.push(`MsgC_${ch.MessageChannelId}`))
+        
+        if(labels.length > 0)
+            kickObserverId = registerKicksObserver(labels, 60, labels => refreshNavigator())
+    }
+
+    function refreshNavigator()
+    {
+        const generalKey = `navigatorGeneralChannels`
+        fetchGeneralChannels().then(() => 
+        {
+            navGeneralLists?.reload(generalChannels)
+            cache.set(generalKey, generalChannels);
+        })
+
+
+        const directKey = `navigatorDirectChannels`
+        
+        fetchDirectChannels().then(() => 
+        {
+            navDirectLists?.reload(directChannels)
+            cache.set(directKey, directChannels);
+        })
+    }
+
     function fetchGeneralChannels()
     {
-        return reef.get("/group/MessageChannels?sort=Order&fields=$ref,Id,Title,Order,href,$type,GetUnreadMessagesNo", onErrorShowAlert).then((res) =>
+        return reef.get("/group/MessageChannels?sort=Order&fields=$ref,Id,Title,Order,href,$type,GetUnreadMessagesNo,IsSubscribed", onErrorShowAlert).then((res) =>
         {
             if(res != null)
                 generalChannels = res.MessageChannel;
@@ -95,7 +142,7 @@
 
     function fetchDirectChannels()
     {
-        return reef.get("/user/MessageChannels?sort=Order&fields=$ref,Id,Title,Order,href,$type,UnreadMessagesNo", onErrorShowAlert).then((res) =>
+        return reef.get("/user/MessageChannels?sort=Order&fields=$ref,Id,Title,Order,href,$type,UnreadMessagesNo,MessageChannelId", onErrorShowAlert).then((res) =>
         {
             if(res != null)
                 directChannels = res.MessageChannelUser;
