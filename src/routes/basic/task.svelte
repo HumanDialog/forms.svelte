@@ -23,7 +23,9 @@
 			pushChanges,
             hasModifications,
             refreshToolbarOperations,
-            informModificationEx
+            informModificationEx,
+            breadcrumbAdd,
+            Breadcrumb
             } from '$lib'
 	import { onMount, tick } from 'svelte';
     import {location, querystring, push, link} from 'svelte-spa-router'
@@ -45,6 +47,9 @@
 
     let attachedFiles = []
 
+    let prevBreadcrumbPath = ''
+    let breadcrumbPath = ''
+
     let isReadOnly = false;
     const s = session;
 
@@ -60,6 +65,12 @@
 
         const taskId = segments[segments.length-1]
         taskRef = `./Task/${taskId}`
+
+        const params = new URLSearchParams($querystring);
+        if(params.has("path"))
+            prevBreadcrumbPath = params.get("path") ?? ''
+        else
+            prevBreadcrumbPath = ''
 
         reef.get('/group/AllTags', onErrorShowAlert).then((res) => {
             allTags = res
@@ -163,6 +174,8 @@
                 })
             })
         }
+
+        breadcrumbPath = breadcrumbAdd(prevBreadcrumbPath, task.Title, $location)
 
     }
 
@@ -912,6 +925,9 @@
             title={task.Title}>
     <section class="w-full flex justify-center">
         <article class="w-full prose prose-base prose-zinc dark:prose-invert mx-2">
+            {#if breadcrumbPath}
+                <Breadcrumb class="not-prose hidden sm:block" path={breadcrumbPath} collapseLonger/>
+            {/if}
             <section class="w-full flex flex-row justify-between">
                     <p class="">
                         {task.Index}

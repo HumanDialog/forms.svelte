@@ -44,8 +44,7 @@
 
     let prevBreadcrumbPath = ''
     let breadcrumbPath = ''
-    let breadcrumb;
-
+    
     let users = [];
 
     const STATE_FINISHED = 7000;
@@ -957,19 +956,19 @@
 
             <section class="w-full place-self-center max-w-3xl">
 
-            <p class="hidden sm:block mt-3 ml-3 pb-5 text-lg text-left">
-                {folderTitle}
-            </p>
-            
-
-            {#if breadcrumbPath}
-                <Breadcrumb class="hidden sm:block mb-5" path={breadcrumbPath} bind:this={breadcrumb}  />
-            {/if}
-
-
             <!--p class="hidden sm:block mt-3 ml-3 pb-5 text-lg text-left">
                 {folderTitle}
             </p-->
+            
+
+            {#if breadcrumbPath}
+                <Breadcrumb class="hidden sm:block mb-5" path={breadcrumbPath} />
+            {/if}
+
+
+            <p class="hidden sm:block mt-3 ml-3 pb-5 text-lg text-left">
+                {folderTitle}
+            </p>
 
             <List   self={contextItem}
                     a='Folders'
@@ -997,7 +996,7 @@
                     orderAttrib='Order'
                     bind:this={notesComponent}>
                 <ListTitle      a='Title'
-                                hrefFunc={(note) => `${note.href}`}
+                                hrefFunc={(note) => `${note.href}?path=${breadcrumbPath}`}
                                 onChange={changeElementProperty}/>
                 <ListSummary    a='Summary'
                                 onChange={changeElementProperty}/>
@@ -1015,7 +1014,7 @@
                     orderAttrib='Order'
                     bind:this={tasksComponent}>
                 <ListTitle      a='Title'
-                                hrefFunc={(task) => `${task.href}`}
+                                hrefFunc={(task) => `${task.href}?path=${breadcrumbPath}`}
                                 onChange={changeElementProperty}/>
 
                 <ListSummary    a='Summary'

@@ -160,7 +160,8 @@
         if(linkPath.startsWith('#'))
             linkPath = linkPath.substring(1)
 
-        if(currentPath.startsWith(linkPath))
+        //if(currentPath.startsWith(linkPath))
+        if(currentPath == linkPath)
             return true;
         else
             return false;

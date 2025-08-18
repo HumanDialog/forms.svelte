@@ -24,7 +24,9 @@
 			pushChanges,
             hasModifications,
             refreshToolbarOperations,
-            informModificationEx
+            informModificationEx,
+            breadcrumbAdd,
+            Breadcrumb
             } from '$lib'
 	import { onMount, tick } from 'svelte';
     import {location, querystring, push, link} from 'svelte-spa-router'
@@ -49,6 +51,9 @@
     let modificationDate = null
     let attachedFiles = []
 
+    let prevBreadcrumbPath = ''
+    let breadcrumbPath = ''
+
     $: onParamsChanged($location)
 
     async function onParamsChanged(...args)
@@ -66,6 +71,12 @@
             allTags = res
             reloadVisibleTags()
         })
+
+        const params = new URLSearchParams($querystring);
+        if(params.has("path"))
+            prevBreadcrumbPath = params.get("path") ?? ''
+        else
+            prevBreadcrumbPath = ''
 
        await reloadData();
     }
@@ -141,6 +152,8 @@
                 })
             })
         }
+
+        breadcrumbPath = breadcrumbAdd(prevBreadcrumbPath, note.Title, $location)
 
     }
 
@@ -681,7 +694,11 @@
             title={note.Title}>
     <section class="w-full flex justify-center">
         <article class="w-full prose prose-base prose-zinc dark:prose-invert mx-2 prose-img:rounded-xl ">
+            {#if breadcrumbPath}
+                <Breadcrumb class="not-prose hidden sm:block" path={breadcrumbPath} collapseLonger/>
+            {/if}
             <section class="w-full flex flex-row justify-between">
+                
                     <p class="">
                         {note.Index}
                     </p>
