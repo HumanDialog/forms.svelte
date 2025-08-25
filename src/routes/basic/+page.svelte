@@ -9,7 +9,7 @@
     import NotFound from './landing/not.found.svelte'
     import AppView from './AppView.svelte';
 	import {appUsers} from './users.js'
-    import {dark_mode_store} from '$lib'
+    import {dark_mode_store, setLanguages} from '$lib'
 
 	const mode = __APP_MODE__
     const objectreef_io = __OBJECTREEF_IO__
@@ -57,6 +57,25 @@
     routes.set('/swagger',              wrap({ asyncComponent: () => import('./swagger/index.svelte')}))
     routes.set(r, AppView)
     routes.set('*', NotFound)
+
+    setLanguages([
+        {
+            key: "en",
+            name: 'English',
+            flag: '/landing/lang/GB_64.png',
+            default: true
+        },
+        {
+            key: 'es',
+            name: "Español",
+            flag: '/landing/lang/ES_64.png'
+        },
+        {
+            key: 'pl',
+            name: 'Polski',
+            flag: '/landing/lang/PL_64.png'
+        }
+    ])
 
     const authTemporaryPageClass = 'bg-white dark:bg-stone-900 dark:text-white sm:overflow-y-clip absolute top-0 left-0 w-screen h-screen'
     const authButtonClass = `py-2.5 px-4 my-1

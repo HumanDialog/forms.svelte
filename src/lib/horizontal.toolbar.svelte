@@ -1,5 +1,5 @@
 <script>
-    import {FaUsers, FaCog, FaSignInAlt, FaSignOutAlt, FaBars, FaToggleOn, FaToggleOff} from 'svelte-icons/fa/'
+    import {FaUsers, FaCog, FaSignInAlt, FaSignOutAlt, FaBars, FaToggleOn, FaToggleOff, FaLanguage} from 'svelte-icons/fa/'
     //import GoPrimitiveDot from 'svelte-icons/go/GoPrimitiveDot.svelte'
     import {showMenu} from '$lib/components/menu'
     import {push, pop, location} from 'svelte-spa-router'
@@ -25,7 +25,7 @@
 
     import VerticalToolbar from '$lib/vertical.toolbar.svelte'
 	import { isDeviceSmallerThan, isOnNavigationPage, pushNavigationPage, popNavigationPage } from './utils.js';
-    
+    import {setCurrentLanguage, getLanguages, i18n, getCurrentLanguage} from './i18n.js'
 
     export let appConfig = undefined;
     export let clearsContext = 'sel props'
@@ -35,7 +35,7 @@
     
     let config = null;
     let has_selection_details = false;
-    let selection_details_caption = 'Properties'
+    let selection_details_caption = i18n({en: 'Properties', es: 'Propiedades', pl: 'Właściwości'});
     
     let show_sign_in_out_icons = false;
     let is_logged_in = false;
@@ -53,7 +53,13 @@
             config = appConfig.mainToolbar;
             has_selection_details = appConfig.selectionDetails;
             if(has_selection_details)
-                selection_details_caption = appConfig.selectionDetails.caption ?? 'Properties';
+            {
+                if(appConfig.selectionDetails.captionFunc)
+                    selection_details_caption = appConfig.selectionDetails.captionFunc()
+                else if(appConfig.selectionDetails.caption)
+                    selection_details_caption = appConfig.selectionDetails.caption
+
+            }
         }
         else
         {
@@ -177,8 +183,14 @@
 
                 if(add)
                 {
+                    let caption = ''
+                    if(o.captionFunc)
+                        caption = o.captionFunc()
+                    else if(o.caption)
+                        caption = o.caption
+
                     options.push({
-                                caption: o.caption,
+                                caption: caption,
                                 icon: o.icon,
                                 action: o.action
                             })
@@ -191,7 +203,7 @@
                 if(!is_logged_in)
                 {
                     options.push({
-                        caption: 'Sign in',
+                        caption: i18n( { en: 'Sign in', es: 'Iniciar sesión', pl: 'Zaloguj'}),
                         icon: FaSignInAlt,
                         action: (focused) => { push(sign_in_href) }
                     });
@@ -199,7 +211,7 @@
                 else
                 {
                     options.push({
-                        caption: 'Sign out',
+                        caption: i18n({en: 'Sign out', es: 'Cerrar sesión', pl: 'Wyloguj' }) ,
                         icon: FaSignOutAlt,
                         action: (focused) => { push(sign_out_href) }
                     });
@@ -211,10 +223,11 @@
 
         if(!config || config.darkMode)
         {
+            const capt = i18n({en: 'Dark mode', es: 'Modo oscuro', pl: 'Tryb ciemny'})
             if($dark_mode_store == '')
             {
                 options.push( {
-                        caption: 'Dark mode',
+                        caption: capt,
                         icon: FaToggleOff,
                         action: (focused) => { $dark_mode_store = 'dark'; }
                     });
@@ -222,24 +235,41 @@
             else
             {
                 options.push( {
-                        caption: 'Dark mode',
+                        caption: capt,
                         icon: FaToggleOn,
                         action: (focused) => { $dark_mode_store = ''; }
                     });
             }
         }
 
+        const langs = getLanguages()
+        if(langs && langs.length > 1)
+        {
+            const langMenu = langs.map( l => ({
+                caption: l.name,
+                img: l.flag,
+                action: (b) => {setCurrentLanguage(l); reloadWholeApp()},
+                disabled: getCurrentLanguage() == l
+            }))
+
+            options.push( {
+                caption: i18n({en: 'Language', es:'Idioma', pl:'Język'}),
+                menu: langMenu,
+                icon: FaLanguage
+            })
+        }
+
         if(config && config.operations)
         {
             options.push( {
-                    caption: 'Toolbar',
+                    caption: i18n({en:'Toolbar', es:'Barra de herramientas', pl:'Pasek narzędzi'}),
                     icon: $tools_visible_store ? FaToggleOn : FaToggleOff,
                     action: (focused) => { $tools_visible_store = !$tools_visible_store; }
                 });
         }
 
          options.push({
-                caption: 'Left-handed floating actions',
+                caption: i18n({en: 'Left-handed mode', es: 'Modo para zurdos', pl: 'Tryb dla leworęcznych'}),
                 icon: $leftHandedFAB ? FaToggleOn : FaToggleOff,
                 action: (f) => { $leftHandedFAB = !$leftHandedFAB; }
             })

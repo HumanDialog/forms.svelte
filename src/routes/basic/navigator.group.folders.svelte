@@ -8,7 +8,7 @@
                 Modal,
                 reloadWholeApp,
                 Input,
-                onErrorShowAlert, UI} from '$lib'
+                onErrorShowAlert, UI, i18n} from '$lib'
     import {FaRegFolder, FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaArchive, FaUsers, FaPlus, FaRegStar, FaStar, FaPaste} from 'svelte-icons/fa'
     import {location, push} from 'svelte-spa-router'
     import {reef, session} from '@humandialog/auth.svelte'
@@ -230,17 +230,17 @@
     {
         return [
             {
-                caption: 'Unpin',
+                caption: '_; Unpin; Desanclar; Odepnij',
                 icon: FaRegStar,
                 action: (f) => unpinFolder(dataItem)
             },
             {
-                caption: 'Move up',
+                caption: '_; Move up; Desplazar hacia arriba; Przesuń w górę',
                 icon: FaCaretUp,
                 action: (f) => navPinnedFolders.moveUp(dataItem)
             },
             {
-                caption: 'Move down',
+                caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                 icon: FaCaretDown,
                 action: (f) => navPinnedFolders.moveDown(dataItem)
 
@@ -249,18 +249,18 @@
                 separator: true
             },
             {
-                caption: 'Rename',
+                caption: '_; Rename; Cambiar nombre; Zmień nazwę',
                 action: (f) => startEditing(domNode)
             },
             {
-                caption: 'Edit summary',
+                caption: '_; Edit summary; Cambiar la descripción; Zmień opis',
                 action: (f) => navItem.editSummary()
             },
             {
                 separator: true
             },
             {
-                caption: 'Delete',
+                caption: '_; Delete; Eliminar; Usuń',
                 action: (f) => askToDelete(dataItem, 'PinnedFolder')
             }
         ]
@@ -270,12 +270,12 @@
     {
         return [
             {
-                caption: 'Move up',
+                caption: '_; Move up; Desplazar hacia arriba; Przesuń w górę',
                 icon: FaCaretUp,
                 action: (f) => navGroupFolders.moveUp(dataItem)
             },
             {
-                caption: 'Move down',
+                caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                 icon: FaCaretDown,
                 action: (f) => navGroupFolders.moveDown(dataItem)
 
@@ -284,18 +284,18 @@
                 separator: true
             },
             {
-                caption: 'Rename',
+                caption: '_; Rename; Cambiar nombre; Zmień nazwę',
                 action: (f) => startEditing(domNode)
             },
             {
-                caption: 'Edit summary',
+                caption: '_; Edit summary; Cambiar la descripción; Zmień opis',
                 action: (f) => navItem.editSummary()
             },
             {
                 separator: true
             },
             {
-                caption: 'Delete',
+                caption: '_; Delete; Eliminar; Usuń',
                 action: (f) => askToDelete(dataItem, 'GroupFolder')
             }
         ]
@@ -310,7 +310,7 @@
     {
         return [
             {
-                caption: 'Clear Clipboard',
+                caption: '_; Clear Clipboard; Borrar portapapeles; Wyczyść schowek',
                 icon: FaTrash,
                 action: (f) => clearFolder(dataItem)
             }];;
@@ -415,9 +415,9 @@
                                 icon={FaRegFolder}
                                 active={isRoutingTo("/myfolders", currentPath)}
                                 operations={(node) => getMyFoldersOperations(node, user)}
-                                summary="Personal folders"
-                                selectable={user}>
-                    My Folders
+                                summary={i18n(["Personal folders", "Carpetas personales", "Foldery osobiste"])}
+                                selectable={user}> <!--  _; Personal folders; Carpetas personales Foldery osobiste -->
+                    _; My Folders; Mis carpetas; Moje Foldery
                 </SidebarItem>
             </SidebarGroup>
         {/if}
@@ -427,7 +427,7 @@
             <SidebarList    objects={groupFolders}
                             orderAttrib='Order'
                             inserter={addFolder}
-                            inserterPlaceholder='New folder'
+                            inserterPlaceholder={i18n(['New folder', 'Nueva carpeta', 'Nowy folder'])}
                             bind:this={navGroupFolders}>
                 <svelte:fragment let:item let:idx>
                     {@const href = item.href}
@@ -447,7 +447,7 @@
             </SidebarList>
         </SidebarGroup>
 
-        <SidebarGroup border>
+        <!--SidebarGroup border>
             {@const href = `/folder/${basket.Id}`}
             <SidebarItem   {href}
                             icon={FaPaste}
@@ -455,14 +455,14 @@
                             operations={(node) => getBasketOperations(node, basket)}
                             summary="List of selected items for quick operations"
                             selectable={basket}>
-                My Clipboard
+                _; My Clipboard; Mi portapapeles; Mój Schowek
             </SidebarItem>
-        </SidebarGroup>
+        </SidebarGroup-->
 
 
-        {:else}
-            <Spinner delay={3000}/>
-        {/if}
+    {:else}
+        <Spinner delay={3000}/>
+    {/if}
 
 {:else} <!-- !sidebar -->
 
@@ -498,9 +498,9 @@
                 <SidebarItem    href="/myfolders"
                                 icon={FaRegFolder}
                                 operations={(node) => getMyFoldersOperations(node, user)}
-                                summary="Personal folders"
+                                summary={i18n(["Personal folders", "Carpetas personales", "Foldery osobiste"])}
                                 item={user}>
-                    My Folders
+                    _; My Folders; Mis carpetas; Moje Foldery
                 </SidebarItem>
             </SidebarGroup>
         {/if}
@@ -545,8 +545,8 @@
 {/if}
 {/key}
 
-<Modal  title="Delete"
-        content="Are you sure you want to delete selected folder?"
+<Modal  title={i18n(['Delete', 'Eliminar', 'Usuń'])}
+        content={i18n(["Are you sure you want to delete selected folder?", "¿Está seguro de que desea eliminar la carpeta seleccionada?", "Czy na pewno chcesz usunąć wybrany folder?"])}
         icon={FaTrash}
         onOkCallback={deleteFolder}
         bind:this={deleteModal}

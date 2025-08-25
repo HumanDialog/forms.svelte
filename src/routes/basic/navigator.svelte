@@ -9,7 +9,7 @@
                 reloadWholeApp,
                 Input, 
                 onErrorShowAlert,
-                randomString, UI} from '$lib'
+                randomString, UI, i18n} from '$lib'
     import {FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaArchive, FaUsers, FaPlus} from 'svelte-icons/fa'
     import {location, push} from 'svelte-spa-router'
     import {reef, session} from '@humandialog/auth.svelte'
@@ -163,7 +163,7 @@
         let menuOperations = [];
         if(dataItem == user)
             menuOperations.push({
-                caption: 'Finish all',
+                caption: '_; Finish all; Completa todos; Ukończ wszystkie',
                 icon: FaRegCheckCircle,
                 action: (f) => finishAllMyTasks()
             });
@@ -215,28 +215,28 @@
         let menuOperations = [];
         menuOperations = [
             {
-                caption: 'Rename',
+                caption: '_; Rename; Cambiar nombre; Zmień nazwę',
                 action: (f) => startEditing(domNode)
             },
             {
-                caption: 'Edit summary',
+                caption: '_; Edit summary; Cambiar la descripción; Zmień opis',
                 action: (f) => navItem.editSummary()
             },
             {
-                caption: 'Finish all',
+                caption: '_; Finish all; Completa todos; Ukończ wszystkie',
                 action: (f) => finishAllOnList(dataItem)
             },
             {
-                caption: 'Move on top',
+                caption: '_; Move on top; Mover a la parte superior; Przesuń na szczyt',
                 action: (f) => navLists.moveTop(dataItem)
             },
             {
-                caption: 'Move up',
+                caption: '_; Move up; Desplazar hacia arriba; Przesuń w górę',
                 icon: FaCaretUp,
                 action: (f) => navLists.moveUp(dataItem)
             },
             {
-                caption: 'Move down',
+                caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                 icon: FaCaretDown,
                 action: (f) => navLists.moveDown(dataItem)
 
@@ -245,11 +245,11 @@
                 separator: true
             },
             {
-                caption: 'Archive',
+                caption: '_; Archive; Archivar; Zarchiwizuj',
                 action: (f) => askToArchive(dataItem)
             },
             {
-                caption: 'Delete',
+                caption: '_; Delete; Eliminar; Usuń',
                 action: (f) => askToDelete(dataItem)
             }
         ]
@@ -327,7 +327,7 @@
                 separator: true
             })
             options.push({
-                caption: 'Add group',
+                caption: '_; Add group; Añadir grupo; Dodaj grupę',
                 icon: FaPlus,
                 action: (f) => launchNewGroupWizzard()
             })
@@ -421,9 +421,9 @@
                                 icon={FaList}
                                 active={isRoutingTo("/mytasks", currentPath)}
                                 operations={(node) => getUserListOperations(node, user)}
-                                summary="All active tasks assigned to me."
+                                summary={i18n(["All active tasks assigned to me.", "Tareas activas asignadas a mí.", "Aktywne zadania przypisane do mnie."])}
                                 selectable={user}>
-                    My Tasks
+                    _; My Tasks; Mis tareas; Moje zadania
                 </SidebarItem>
             </SidebarGroup>
         {/if}
@@ -433,7 +433,7 @@
             <SidebarList    objects={taskLists} 
                             orderAttrib='Order'
                             inserter={addList} 
-                            inserterPlaceholder='New list'
+                            inserterPlaceholder={i18n(['New list', 'Nueva lista', 'Nowa lista'])}
                             bind:this={navLists}>
                 <svelte:fragment let:item let:idx>
                     {@const href = item.href}
@@ -453,7 +453,8 @@
             </SidebarList> 
         </SidebarGroup>
 
-        <SidebarGroup border title='Archived' collapsable onExpand={onExpandArchived}>
+        <SidebarGroup border collapsable onExpand={onExpandArchived} 
+                        title={i18n(['Archived', 'Archivado', 'Zarchiwizowane'])} >
             <SidebarList    objects={archivedLists}
                             bind:this={navArchivedLists}>
                 <svelte:fragment let:item>
@@ -494,9 +495,9 @@
                 <SidebarItem    href="/mytasks"
                                 icon={FaList}
                                 operations={(node) => getUserListOperations(node, user)}
-                                summary="All active tasks assigned to me."
+                                summary={i18n(["All active tasks assigned to me.", "Tareas activas asignadas a mí.", "Aktywne zadania przypisane do mnie."])}
                                 item={user}>
-                    My Tasks
+                    _; My Tasks; Mis tareas; Moje zadania
                 </SidebarItem>
             </SidebarGroup>
         {/if}
@@ -522,7 +523,8 @@
             </SidebarList> 
         </SidebarGroup>
 
-        <SidebarGroup border title='Archived' collapsable onExpand={onExpandArchived}>
+        <SidebarGroup border collapsable onExpand={onExpandArchived} 
+                        title={i18n(['Archived', 'Archivado', 'Zarchiwizowane'])} >
             <SidebarList    objects={archivedLists}
                             bind:this={navArchivedLists}>
                 <svelte:fragment let:item>
@@ -544,28 +546,28 @@
 {/if}
 {/key}
 
-<Modal  title="Delete"
-        content="Are you sure you want to delete selected list?"
+<Modal  title={i18n(['Delete', 'Eliminar', 'Usuń'])}
+        content={i18n(["Are you sure you want to delete selected list?", '¿Está seguro de que desea eliminar la lista seleccionada?', 'Czy na pewno chcesz usunąć wybraną listę?'])}
         icon={FaTrash}
         onOkCallback={deleteList}
         bind:this={deleteModal}
         />
 
-<Modal  title="Archive"
-        content="Are you sure you want to archive selected list?"
+<Modal  title={i18n(['Archive', 'Archivar', 'Zarchiwizuj'])}
+        content={i18n(["Are you sure you want to archive selected list?", '¿Está seguro de que desea archivar la lista seleccionada?', 'Czy na pewno chcesz zarchiwizować wybraną listę?'])}
         icon={FaArchive}
         onOkCallback={archiveList}
         bind:this={archiveModal}
         />
 
 <Modal  bind:open={newGroupModalVisible}
-        title='Create group'
-        okCaption='Create'
+        title={i18n(['Create group', 'Crear grupo', 'Utwórz grupę'])}
+        okCaption={i18n(['Create', 'Crear', 'Utwórz'])}
         onOkCallback={onNewGroupOK}
         onCancelCallback={onNewGroupCancel}
         icon={FaUsers}
 >
-    <Input  label='Group name' 
+    <Input  label={i18n(['Group name', 'Nombre del grupo', 'Nazwa grupy'])} 
             placeholder='' 
             self={newGroupParams} 
             a="name"

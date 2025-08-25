@@ -13,7 +13,7 @@
                 Icon,
             showMenu,
             registerKicksObserver,
-			unregisterKicksObserver} from '$lib'
+			unregisterKicksObserver, i18n} from '$lib'
     import {FaHashtag, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaRegComment, FaUsers, FaPlus} from 'svelte-icons/fa'
     import {location, push} from 'svelte-spa-router'
     import {reef, session} from '@humandialog/auth.svelte'
@@ -267,20 +267,20 @@
                 separator: true
             },
         */    {
-                caption: 'Rename',
+                caption: '_; Rename; Cambiar nombre; Zmień nazwę',
                 action: (f) => startEditing(domNode)
             },
             {
-                caption: 'Edit summary',
+                caption: '_; Edit summary; Cambiar la descripción; Zmień opis',
                 action: (f) => navItem.editSummary()
             },
             {
-                caption: 'Move up',
+                caption: '_; Move up; Desplazar hacia arriba; Przesuń w górę',
                 icon: FaCaretUp,
                 action: (f) => navGeneralLists.moveUp(dataItem)
             },
             {
-                caption: 'Move down',
+                caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                 icon: FaCaretDown,
                 action: (f) => navGeneralLists.moveDown(dataItem)
 
@@ -289,7 +289,7 @@
                 separator: true
             },
             {
-                caption: 'Delete',
+                caption: '_; Delete; Eliminar; Usuń',
                 action: (f) => askToDelete(dataItem)
             }
         ]
@@ -308,16 +308,16 @@
                 separator: true
             },
           */  {
-                caption: 'Edit summary',
+                caption: '_; Edit summary; Cambiar la descripción; Zmień opis',
                 action: (f) => navItem.editSummary()
             },
             {
-                caption: 'Move up',
+                caption: '_; Move up; Desplazar hacia arriba; Przesuń w górę',
                 icon: FaCaretUp,
                 action: (f) => navDirectLists.moveUp(dataItem)
             },
             {
-                caption: 'Move down',
+                caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                 icon: FaCaretDown,
                 action: (f) => navDirectLists.moveDown(dataItem)
 
@@ -326,7 +326,7 @@
                 separator: true
             },
             {
-                caption: 'Delete',
+                caption: '_; Delete; Eliminar; Usuń',
                 action: (f) => askToDelete(dataItem)
             }
         ]
@@ -393,7 +393,7 @@
                 <SidebarList    objects={generalChannels} 
                                 orderAttrib='Order'
                                 inserter={addChannel} 
-                                inserterPlaceholder='New channel'
+                                inserterPlaceholder={i18n({en: 'New channel', es: 'Nuevo canal', pl: 'Nowy kanał'})}
                                 bind:this={navGeneralLists}>
                     <svelte:fragment let:item let:idx>
                         {@const href = item.href}
@@ -465,7 +465,7 @@
                     on:click={onNewDMChannel}
                     >
                     <Icon component={FaPlus} class="inline-block w-4 h-4 mt-0.5 ml-2.5 pr-0.5 mr-4"/>
-                    <p>New direct channel</p>
+                    <p>_; New direct channel; Nuevo canal directo; Nowy kanał bezpośredni</p>
                 </button>
 
             </SidebarGroup>
@@ -527,7 +527,7 @@
                     on:click={onNewDMChannel}
                     >
                     <Icon component={FaPlus} class="inline-block w-4 h-4 mt-0.5 ml-2.5 pr-0.5 mr-4"/>
-                    <p>New direct channel</p>
+                    <p>_; New direct channel; Nuevo canal directo; Nowy kanał bezpośredni</p>
                 </button>
                 
             </SidebarGroup>
@@ -538,8 +538,8 @@
 {/if}
 {/key}
 
-<Modal  title="Delete"
-        content="Are you sure you want to delete selected channel?"
+<Modal  title={i18n(['Delete', 'Eliminar', 'Usuń'])}
+        content={i18n(["Are you sure you want to delete selected channel?", "¿Está seguro de que desea eliminar el canal seleccionado?", "Czy na pewno chcesz usunąć wybrany kanał?"])}
         icon={FaTrash}
         onOkCallback={deleteChannel}
         bind:this={deleteModal}

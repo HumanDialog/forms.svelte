@@ -1,7 +1,7 @@
 <script>
-    import {FaUsers, FaCog, FaToggleOn, FaToggleOff, FaSignInAlt, FaSignOutAlt, FaPlus} from 'svelte-icons/fa/'
+    import {FaUsers, FaCog, FaToggleOn, FaToggleOff, FaSignInAlt, FaSignOutAlt, FaPlus, FaLanguage} from 'svelte-icons/fa/'
     //import GoPrimitiveDot from 'svelte-icons/go/GoPrimitiveDot.svelte'
-    import {showMenu} from '$lib/components/menu'
+    import {showMenu, SHOW_MENU_RIGHT} from '$lib/components/menu'
     import {reef} from '@humandialog/auth.svelte'
     import Modal from './modal.svelte'
     import Input from './components/inputbox.ltop.svelte'
@@ -28,6 +28,7 @@
 	import { pop, push } from 'svelte-spa-router';
 	import { tick } from 'svelte';
 	import { isDeviceSmallerThan, popNavigationPage } from './utils';
+    import {setCurrentLanguage, getLanguages, i18n, getCurrentLanguage} from './i18n.js'
     
 
     export let appConfig = undefined;
@@ -40,7 +41,7 @@
     let tabs = new Array();
     let config = null;
     let has_selection_details = false;
-    let selection_detils_caption = 'Properties';
+    let selection_detils_caption =  i18n({en: 'Properties', es: 'Propiedades', pl: 'Właściwości'});
     
     let show_sign_in_out_icons = false;
     let is_logged_in = false;
@@ -54,8 +55,15 @@
         {
             config = appConfig.mainToolbar;
             has_selection_details = appConfig.selectionDetails;
+            
             if(has_selection_details)
-                selection_detils_caption = appConfig.selectionDetails.caption ?? 'Properties'
+            {
+                if(appConfig.selectionDetails.captionFunc)
+                    selection_detils_caption = appConfig.selectionDetails.captionFunc()
+                else if(appConfig.selectionDetails.caption)
+                    selection_detils_caption = appConfig.selectionDetails.caption
+
+            }
         }
         else
         {
@@ -159,8 +167,14 @@
 
                 if(add)
                 {
+                    let caption = ''
+                    if(o.captionFunc)
+                        caption = o.captionFunc()
+                    else if(o.caption)
+                        caption = o.caption
+
                     options.push({
-                                    caption: o.caption,
+                                    caption: caption,
                                     icon: o.icon,
                                     action: o.action
                                 })
@@ -173,7 +187,7 @@
                 if(!is_logged_in)
                 {
                     options.push({
-                        caption: 'Sign in',
+                        caption: i18n( { en: 'Sign in', es: 'Iniciar sesión', pl: 'Zaloguj'}),
                         icon: FaSignInAlt,
                         action: (focused) => { push(sign_in_href) }
                     });
@@ -181,7 +195,7 @@
                 else
                 {
                     options.push({
-                        caption: 'Sign out',
+                        caption: i18n({en: 'Sign out', es: 'Cerrar sesión', pl: 'Wyloguj' }) ,
                         icon: FaSignOutAlt,
                         action: (focused) => { push(sign_out_href) }
                     });
@@ -193,10 +207,11 @@
 
         if(!config || config.darkMode)
         {
+            const capt = i18n({en: 'Dark mode', es: 'Modo oscuro', pl: 'Tryb ciemny'})
             if($dark_mode_store == '')
             {
                 options.push( {
-                        caption: 'Dark mode',
+                        caption: capt,
                         icon: FaToggleOff,
                         action: (focused) => { $dark_mode_store = 'dark'; }
                     });
@@ -204,17 +219,34 @@
             else
             {
                 options.push( {
-                        caption: 'Dark mode',
+                        caption: capt,
                         icon: FaToggleOn,
                         action: (focused) => { $dark_mode_store = ''; }
                     });
             }
         }
 
+        const langs = getLanguages()
+        if(langs && langs.length > 1)
+        {
+            const langMenu = langs.map( l => ({
+                caption: l.name,
+                img: l.flag,
+                action: (b) => {setCurrentLanguage(l); reloadWholeApp()},
+                disabled: getCurrentLanguage() == l
+            }))
+
+            options.push( {
+                caption: i18n({en: 'Language', es:'Idioma', pl:'Język'}),
+                menu: langMenu,
+                icon: FaLanguage
+            })
+        }
+
         if(config && config.operations)
         {
             options.push( {
-                    caption: 'Toolbar',
+                    caption: i18n({en:'Toolbar', es:'Barra de herramientas', pl:'Pasek narzędzi'}),
                     icon: $tools_visible_store ? FaToggleOn : FaToggleOff,
                     action: (focused) => { $tools_visible_store = !$tools_visible_store; }
                 });
@@ -223,13 +255,13 @@
         if(!isDeviceSmallerThan("sm"))
         {
             options.push({
-                caption: 'Floating actions',
+                caption: i18n({en: 'Floating buttons', es: 'Botones flotantes', pl: 'Pływające przyciski'}),
                 icon: $showFABAlways ? FaToggleOn : FaToggleOff,
                 action: (f) => { $showFABAlways = !$showFABAlways; }
             })
 
             options.push({
-                caption: 'Left-handed floating actions',
+                caption: i18n({en: 'Left-handed mode', es: 'Modo para zurdos', pl: 'Tryb dla leworęcznych'}),
                 icon: $leftHandedFAB ? FaToggleOn : FaToggleOff,
                 disabled: !$showFABAlways,
                 action: (f) => { $leftHandedFAB = !$leftHandedFAB; }
@@ -245,8 +277,8 @@
                     });
         }
         
-        let pt = new DOMPoint(rect.right, rect.top)
-        showMenu(pt, options);    
+        //let anchor = new DOMPoint(rect.right, rect.top)
+        showMenu(rect, options, SHOW_MENU_RIGHT);    
     }
 
     function show_groups(e)
@@ -281,15 +313,15 @@
                 separator: true
             })
             options.push({
-                caption: 'Add group',
+                caption: i18n({en:'Add group', es: 'Añadir grupo', pl: 'Dodaj grupę' }),
                 icon: FaPlus,
                 action: (f) => launchNewGroupWizzard()
             })
         }
 
         
-        let pt = new DOMPoint(rect.right, rect.top)
-        showMenu(pt, options);    
+        //const anchor = new DOMPoint(rect.right, rect.top)
+        showMenu(rect, options, SHOW_MENU_RIGHT);    
     }
 
     function clearSelection()
@@ -409,13 +441,13 @@
     <!--Menu bind:this={menu}/-->
 
 <Modal  bind:open={newGroupModalVisible}
-        title='Create group'
-        okCaption='Create'
+        title={ i18n({en:'Create group', es:'Crear grupo', pl:'Utwórz grupę'})}
+        okCaption={ i18n({en:'Create', es:'Crear', pl:'Utwórz'})}
         onOkCallback={onNewGroupOK}
         onCancelCallback={onNewGroupCancel}
         icon={FaUsers}
 >
-    <Input  label='Group name' 
+    <Input  label={i18n({en:'Group name', es:'Nombre del grupo', pl:'Nazwa grupy'})} 
             placeholder='' 
             self={newGroupParams} 
             a="name"

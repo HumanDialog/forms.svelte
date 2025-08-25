@@ -1,6 +1,6 @@
 <script>
     import {reef, session, Authorized, NotAuthorized} from '@humandialog/auth.svelte'
-	import {Layout, onErrorShowAlert, Spinner} from '$lib';
+	import {Layout, onErrorShowAlert, Spinner, i18n, Console} from '$lib';
     import Sidebar from './sidebar.svelte'
 
     import SidebarFolders from './sidebar.folders.svelte'
@@ -8,7 +8,6 @@
     import SidebarTilos from './sidebar.tilos.svelte'
 
     import {push} from 'svelte-spa-router'
-
 
     import AppIcon from './appicon.svelte'
     import TilosIcon from './icons/tilos.icon.svelte'
@@ -37,8 +36,6 @@
     import Unauthorized from './tilos/unauthorized.access.svelte';
     //import StaticDoc from './tilos/static.doc.svelte'
 
-
-    import {Console} from '$lib'
     import { tick, onMount } from 'svelte';
 
     const objectreef_io = __OBJECTREEF_IO__
@@ -204,19 +201,22 @@
                     signin: true,
                     customOperations:[
                         {
-                            caption: 'Profile',
+                         //   caption: '_; Profile; Perfil; Profil',
+                            captionFunc: () => '_; Profile; Perfil; Profil',
                             icon: FaUser,
                             action: (f) => { push('/profile')},
                             condition: () => $session.isActive
                         },
                         {
-                            caption: 'Members',
+                        //    caption: '_; Members; Miembros; Członkowie',
+                            captionFunc: () => '_; Members; Miembros; Członkowie',
                             icon: FaUsersCog,
                             action: (f) => { push(`/members`) },
                             condition: () => $session.authAccessGroup() != 0
                         },
                         {
-                            caption: 'Clipboard',
+                        //    caption: '_; Clipboard; Portapapeles; Schowek',
+                            captionFunc: () => '_; Clipboard; Portapapeles; Schowek',
                             icon: FaPaste,
                             action: (f) => showBasket(),
                             condition: () => $session.isActive
@@ -224,7 +224,8 @@
                     ]
                 },
                 selectionDetails:{
-                    caption: 'Console',
+                    //caption: '_; Console; Consola; Konsola',
+                    captionFunc: () => '_; Console; Consola; Konsola',
                     component: Console
                 },
                 dark:
@@ -265,7 +266,8 @@
                 mainToolbar : {
                     customOperations:[
                         {
-                            caption: 'Leave guest session',
+                        //    caption: '_; Leave guest session; Salir de la sesión de invitado; Opuść sesję gościa',
+                            captionFunc: () => '_; Leave guest session; Salir de la sesión de invitado; Opuść sesję gościa',
                             icon: FaSignOutAlt,
                             action: (f) => {
                                 $session.isUnauthorizedGuest = false
@@ -275,7 +277,8 @@
                     ]
                 },
                 selectionDetails:{
-                    caption: 'Console',
+                //    caption: '_; Console; Consola; Konsola',
+                    captionFunc: () => '_; Console; Consola; Konsola',
                     component: Console
                 },
                 dark:
