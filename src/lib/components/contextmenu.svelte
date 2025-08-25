@@ -3,7 +3,8 @@
     import Icon from './icon.svelte'
     import {contextItemsStore, pushToolsActionsOperations, popToolsActionsOperations} from '../stores'
     import {isDeviceSmallerThan, isOnScreenKeyboardVisible} from '../utils'
-    import {hideWholeContextMenu, showMenu, showFloatingToolbar, showGridMenu} from './menu'
+    import {hideWholeContextMenu, showMenu, showFloatingToolbar, showGridMenu,
+        SHOW_MENU_BELOW, SHOW_MENU_ABOVE, SHOW_MENU_RIGHT, SHOW_MENU_LEFT } from './menu'
     import {FaTimes} from 'svelte-icons/fa'
 
     export let widthPx     :number = 400;
@@ -22,6 +23,7 @@
     let menu_items :HTMLElement[] = [];
     let submenus = [];
     let around_rect :DOMRect;
+    let around_preference: number = 0
     let css_position = ''
     let closeButtonPos = ''
 
@@ -41,12 +43,12 @@
         }
         else
         {
-            //css_position = calculatePosition(x, y, around_rect, visible);
+            //css_position = calculatePosition(x, y,  visible);
         }
     })
         */
 
-    function calculatePosition(x: number, y: number, around: DOMRect, visible: boolean, fresh: boolean): string
+    function calculatePosition(x: number, y: number, visible: boolean, fresh: boolean): string
     {
         let result = '';
 
@@ -117,32 +119,103 @@
                 const m = 15;
                 let screenRect :DOMRect = new DOMRect(m, 0, window.innerWidth-2*m, window.innerHeight)
 
-                let xShifted = false;
-                if(myRect.right > screenRect.right)
+                if(around_rect)
                 {
-                    x = screenRect.right - myRect.width + m;
-                    xShifted = true;
-                }
+                    const menuWidth = myRect.width
+                    const menuHeight = myRect.height
 
-                let yShifted = false;
-                if(myRect.bottom > screenRect.bottom)
-                {
-                    y = screenRect.bottom - myRect.height;
-                    if(around)
+                    let topArea;
+                    let bottomArea;
+                    let leftArea;
+                    let rightArea;
+
+                    switch(around_preference)
                     {
-                        if(xShifted)    // possible covers around rect
-                            x -= around.width;
-                        else
-                            y -= around.height;
+                    case SHOW_MENU_BELOW:
+                        topArea = around_rect.top - screenRect.top
+                        bottomArea = screenRect.bottom - around_rect.bottom
+                        leftArea = around_rect.right - screenRect.left
+                        rightArea = screenRect.right - around_rect.left
+                        
+                        if(menuHeight <= bottomArea)
+                            y = around_rect.bottom
+                        else if(menuHeight <= topArea)
+                            y = around_rect.top - menuHeight
+                        
+                        if(menuWidth <= rightArea)
+                            x = around_rect.left
+                        else if(menuWidth <= leftArea)
+                            x = around_rect.right - menuWidth
+                        break;
+
+                    case SHOW_MENU_ABOVE:
+                        topArea = around_rect.top - screenRect.top
+                        bottomArea = screenRect.bottom - around_rect.bottom
+                        leftArea = around_rect.right - screenRect.left
+                        rightArea = screenRect.right - around_rect.left
+                        
+                        if(menuHeight <= topArea)
+                            y = around_rect.top - menuHeight
+                        else if(menuHeight <= bottomArea)
+                            y = around_rect.bottom
+                        
+                        if(menuWidth <= rightArea)
+                            x = around_rect.left
+                        else if(menuWidth <= leftArea)
+                            x = around_rect.right - menuWidth
+                        break;
+
+                    case SHOW_MENU_RIGHT:
+                        topArea = around_rect.bottom - screenRect.top
+                        bottomArea = screenRect.bottom - around_rect.top
+                        leftArea = around_rect.left - screenRect.left
+                        rightArea = screenRect.right - around_rect.right
+
+                        if(menuWidth <= rightArea)
+                            x = around_rect.right
+                        else if(menuWidth <= leftArea)
+                            x = around_rect.left - menuWidth
+
+                        if(menuHeight <= bottomArea)
+                            y = around_rect.top
+                        else if(menuHeight <= topArea)
+                            y = around_rect.bottom - menuHeight
+
+                        break;
+
+                    case SHOW_MENU_LEFT:
+                        topArea = around_rect.bottom - screenRect.top
+                        bottomArea = screenRect.bottom - around_rect.top
+                        leftArea = around_rect.left - screenRect.left
+                        rightArea = screenRect.right - around_rect.right
+
+                        if(menuWidth <= leftArea)
+                            x = around_rect.left - menuWidth
+                        else if(menuWidth <= rightArea)
+                            x = around_rect.right
+                        
+                        if(menuHeight <= bottomArea)
+                            y = around_rect.top
+                        else if(menuHeight <= topArea)
+                            y = around_rect.bottom - menuHeight
+                        break;
                     }
-                    yShifted = true;
+                }
+                else
+                {
+                    if(myRect.right > screenRect.right)
+                        x = screenRect.right - myRect.width + m;
+                    
+                    if(myRect.bottom > screenRect.bottom)
+                        y = screenRect.bottom - myRect.height;
+                    
+                    if(myRect.left < screenRect.left)
+                        x = screenRect.left;
+
+                    if(myRect.top < screenRect.top)
+                        y = screenRect.top
                 }
 
-                if(myRect.left < screenRect.left)
-                    x = screenRect.left;
-
-                if(myRect.top < screenRect.top)
-                    y = screenRect.top
             }
 
             result = `left:${x}px; top:${y}px; display: block; min-width: 15rem`
@@ -152,12 +225,44 @@
         return result;
     }
 
-    export async function show(around :DOMRect|DOMPoint, _operations)
+    function intersects(lpRect1: DOMRect , lpRect2: DOMRect): boolean
+    {
+        const left  = Math.max(lpRect1.left,  lpRect2.left);
+        const right = Math.min(lpRect1.right, lpRect2.right);
+        const top   = Math.max(lpRect1.top, lpRect2.top);
+        const bottom= Math.min(lpRect1.bottom, lpRect2.bottom);
+
+        return ((left <= right) && (top <= bottom));
+    }
+
+    export async function show(around :DOMRect|DOMPoint, _operations, preference :number = 0)
     {
         if(around instanceof DOMRect)
         {
-            x = around.left;
-            y = around.bottom;
+            switch(preference)
+            {
+            case SHOW_MENU_BELOW:
+                x = around.left;
+                y = around.bottom;
+                break;
+
+            case SHOW_MENU_ABOVE:
+                x = around.left;
+                y = around.top;
+                break;
+
+            case SHOW_MENU_RIGHT:
+                x = around.right;
+                y = around.top;
+                break;
+
+            case SHOW_MENU_LEFT:
+                x = around.left;
+                y = around.top;
+                break;
+            }
+
+            around_preference = preference
             around_rect = around;
         }
         else if(around instanceof DOMPoint)
@@ -168,7 +273,7 @@
         }
 
         visible = true;
-        css_position = calculatePosition(x, y, around_rect, true, true);
+        css_position = calculatePosition(x, y, true, true);
 
 
         operations = [..._operations];
@@ -206,7 +311,7 @@
 
         await tick();       // render menu and fix position after rendering
 
-        css_position = calculatePosition(x, y, around_rect, true, false);
+        css_position = calculatePosition(x, y, true, false);
 
         if(is_root_menu)
             menu_root.addEventListener('click', on_before_container_click, true)
@@ -231,7 +336,7 @@
             popToolsActionsOperations()
 
         visible = false;
-        css_position = calculatePosition(x, y, around_rect, false, false);
+        css_position = calculatePosition(x, y, false, false);
 
         window.removeEventListener('click', on_before_window_click, true);
         menu_root?.removeEventListener('click', on_before_container_click, true);
@@ -326,7 +431,9 @@
 
     function execute_action(e, operation, index)
     {
-        if(operation.menu)
+        const mobile = isDeviceSmallerThan("sm")
+
+        if(operation.menu && !mobile)
         {
             focus_menu_item(index);
             return;
@@ -359,7 +466,7 @@
         if(operation.preAction)
             operation.preAction(owner)
 
-        const mobile = isDeviceSmallerThan("sm")
+        
 
         if(operation.action)
         {
@@ -385,6 +492,10 @@
                     showMenu(rect, operation.grid)
                 else
                     showGridMenu(rect, operation.grid)
+            }
+            else if(operation.menu)
+            {
+                showMenu(rect, operation.menu)
             }
         }
 
@@ -571,6 +682,12 @@
                         {@const cc = mobile ? 7 : 6}
                         {@const icon_size = icon_placeholder_size - cc}
                         <Icon s="md" component={operation.icon}/>
+                    {:else if operation.img}
+                        {@const cc = mobile ? 7 : 6}
+                        {@const icon_size = icon_placeholder_size - cc}
+                        <div class="w-4 h-4">
+                            <img src={operation.img} alt=""/>
+                        </div>
                     {:else}
                         {@const cc = mobile ? 7 : 6}
                         {@const icon_size = icon_placeholder_size - cc}

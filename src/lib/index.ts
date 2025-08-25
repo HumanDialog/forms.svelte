@@ -41,7 +41,7 @@ export { default as Editor} from './components/document/editor.svelte'
 
 export { default as Spinner} from './components/delayed.spinner.svelte'
 //export { default as Menu } from './components/contextmenu.svelte'
-export { showMenu, showGridMenu, showFloatingToolbar } from './components/menu'
+export { showMenu, showGridMenu, showFloatingToolbar, SHOW_MENU_BELOW, SHOW_MENU_ABOVE, SHOW_MENU_RIGHT, SHOW_MENU_LEFT} from './components/menu'
 
 export { default as Fab } from './components/Fab.svelte'
 export { default as Sidebar } from './components/sidebar/sidebar.svelte'
@@ -118,6 +118,7 @@ export {
             mainContentPageReloader,
             reloadMainContentPage,
             reloadWholeApp,
+            wholeAppReloader,
             alerts,
             addAlert,
             onErrorShowAlert,
@@ -150,4 +151,10 @@ export {    registerKicksObserver,
             unregisterKicksObserver,
             forceKicksChecking }    from './kicks.js'
 
+export {
+    i18n,
+    setLanguages, getLanguages,
+    setCurrentLanguage, getCurrentLanguage, getCurrentLanguageIdx, getCurrentLanguageKey
+}   from './i18n.js'
 
+export {i18nPreprocess} from './i18n-preprocess.js'
