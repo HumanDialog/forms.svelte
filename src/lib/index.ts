@@ -105,6 +105,18 @@ export {
     isOnScreenKeyboardVisible,
     randomString,
     UI,
+
+    NAV_MODE_SIDEBAR,
+    NAV_MODE_FULL_PAGE,
+    navGetMode,
+    navIsVisible,
+    navGetKey,
+    navShow,
+    navHide,
+    navToggle,
+    navPrevVisibleKey,
+    navAutoHide,
+    
 }   from './utils'
 
 export {
@@ -123,6 +135,7 @@ export {
             addAlert,
             onErrorShowAlert,
             main_sidebar_visible_store,
+            navKey,
             tagsReloader,
             reloadVisibleTags,
             dark_mode_store,

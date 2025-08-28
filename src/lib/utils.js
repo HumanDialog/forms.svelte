@@ -1,6 +1,6 @@
 import { getContext, tick } from "svelte";
-import {get} from 'svelte/store'
-import { contextItemsStore, contextToolbarOperations, pageToolbarOperations, data_tick_store } from "./stores";
+import {derived, get} from 'svelte/store'
+import { contextItemsStore, contextToolbarOperations, pageToolbarOperations, data_tick_store, main_sidebar_visible_store, show_sidebar, hide_sidebar, previously_visible_sidebar, auto_hide_sidebar} from "./stores";
 import {location, push, pop} from 'svelte-spa-router' 
 
 export let icons = {symbols :null}
@@ -675,27 +675,6 @@ export const UI = {
     navigator: null
 }
 
-export const NAVIGATION_PAGE_PATH = '/'
-export function isOnNavigationPage()
-{
-    const loc = get(location)
-    if(loc == NAVIGATION_PAGE_PATH)
-        return true;
-    else
-        return false;
-}
-
-export function pushNavigationPage()
-{
-    push(NAVIGATION_PAGE_PATH)
-}
-
-export function popNavigationPage()
-{
-    if(isOnNavigationPage())
-        pop();
-}
-
 export function dec2hex (dec) 
 {
     return dec.toString(16).padStart(2, "0")
@@ -708,3 +687,184 @@ export function randomString(len)
     window.crypto.getRandomValues(arr)
     return Array.from(arr, dec2hex).join('')
 }
+
+
+export const NAVIGATION_PAGE_PATH = '/nav'
+let savedAppPage = ''
+let lastNavPage = ''
+
+export function isOnNavigationPage(navKind)
+{
+    const loc = get(location)
+    
+    if(!navKind)
+    {
+        if(loc.startsWith(NAVIGATION_PAGE_PATH))
+            return true;
+        else
+            return false;
+    }
+    else
+    {
+        if(loc.startsWith(`${NAVIGATION_PAGE_PATH}/${navKind}`))
+            return true;
+        else
+            return false;
+    }
+    
+}
+
+
+export function pushNavigationPage(navKind)
+{
+    if(!isOnNavigationPage())
+        savedAppPage = get(location)
+
+    if(!navKind)
+    {
+        navKind = navPrevVisibleKey()
+        if(!navKind)
+            lastNavPage = `${NAVIGATION_PAGE_PATH}/`
+        else
+            lastNavPage = `${NAVIGATION_PAGE_PATH}/${navKind}`
+    }
+    else
+        lastNavPage = `${NAVIGATION_PAGE_PATH}/${navKind}`
+
+    push(lastNavPage)
+}
+
+export function popNavigationPage()
+{
+    if(isOnNavigationPage())
+    {
+        if(savedAppPage)
+            push(savedAppPage)
+        else
+            pop()
+
+        savedAppPage = ''
+    }
+}
+
+export const NAV_MODE_SIDEBAR = 0
+export const NAV_MODE_FULL_PAGE = 1
+
+let navMode = isDeviceSmallerThan("sm") ? NAV_MODE_FULL_PAGE : NAV_MODE_SIDEBAR
+
+export function navGetMode()
+{
+    return navMode;
+}
+
+export function navIsVisible()
+{
+    switch(navMode)
+    {
+    case NAV_MODE_SIDEBAR:
+        return get(main_sidebar_visible_store) != '*'
+
+    case NAV_MODE_FULL_PAGE:
+        return isOnNavigationPage();
+    }
+}
+
+export function navGetKey()
+{
+    switch(navMode)
+    {
+    case NAV_MODE_SIDEBAR:
+        return get(main_sidebar_visible_store)
+
+    case NAV_MODE_FULL_PAGE:
+        {
+            const segments = get(location).split('/')
+            if(segments.length > 1)
+                return segments[2]
+            else
+                return ""
+        }
+        return ""
+    }
+}
+
+export function navShow(key)
+{
+    switch(navMode)
+    {
+    case NAV_MODE_SIDEBAR:
+        show_sidebar(key)
+        break;
+
+    case NAV_MODE_FULL_PAGE:
+        pushNavigationPage(key)
+        break;
+    }
+}
+
+export function navHide()
+{
+    switch(navMode)
+    {
+    case NAV_MODE_SIDEBAR:
+        hide_sidebar()
+        break;
+
+    case NAV_MODE_FULL_PAGE:
+        popNavigationPage()
+        break;
+    }
+}
+
+
+export function navToggle(key)
+{
+    if(navIsVisible())
+    {
+        if(navGetKey() == key)
+            navHide()
+        else
+            navShow(key)
+    }
+    else
+        navShow(key)
+
+}
+
+export function navPrevVisibleKey()
+{
+    switch(navMode)
+    {
+    case NAV_MODE_SIDEBAR:
+        if(!previously_visible_sidebar)
+            return ''
+        else if(previously_visible_sidebar == '*')
+            return ''
+        else
+            return previously_visible_sidebar
+
+    case NAV_MODE_FULL_PAGE:
+        {
+            const segs = lastNavPage.split('/')
+            if(segs.length > 1)
+                return segs[2]
+            else
+                return ''
+        }
+    }
+}
+
+export function navAutoHide()
+{
+    switch(navMode)
+    {
+    case NAV_MODE_SIDEBAR:
+        auto_hide_sidebar()
+        break;
+
+    case NAV_MODE_FULL_PAGE:
+        break;
+    }
+}
+
+

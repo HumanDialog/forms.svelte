@@ -44,7 +44,7 @@
                         apiVersion: "v001"}
                    });
 
-    const r = /^\/listboard|tdownload|tcontact|tasklist|task|note|folder|mytasks|myfolders|members|chat|thread|newthread|forum|thome|profile|doc|request-license-file\/(.*)\/?$/i
+    const r = /^\/listboard|tdownload|tcontact|tasklist|task|note|folder|mytasks|myfolders|members|chat|thread|newthread|forum|thome|profile|doc|request-license-file|nav\/(.*)\/?$/i
 
     const routes = new Map()
     routes.set('/',                     Main)

@@ -1,7 +1,7 @@
 <script lang="ts">
     import {getContext, tick} from 'svelte'
     import Icon from '../icon.svelte'
-    import {contextItemsStore, auto_hide_sidebar, contextToolbarOperations} from '../../stores'
+    import {contextItemsStore, contextToolbarOperations} from '../../stores'
     import {FaBars, FaEllipsisV} from 'svelte-icons/fa'
     import {link, push} from 'svelte-spa-router'
     //import FaBars from 'svelte-icons/fa/FaBars.svelte'
@@ -16,12 +16,7 @@
         startEditing,
 		getActive,
 
-		isOnNavigationPage,
-
-		UI
-
-
-
+		navAutoHide
 
     } from "../../utils";
 
@@ -179,7 +174,7 @@
         }
         else
         {
-            auto_hide_sidebar();
+            navAutoHide()
             redirect_to(href)
         }
     }

@@ -39,11 +39,11 @@
                 <AppIcon class="block w-6 h-6 sm:w-10 sm:h-10"/>
                 <span class="ml-2 sm:ml-4 sm:mt-1">
                     <span class="font-semibold text-base sm:text-2xl {brand_color}">Octopus</span>
-                    <span class=" text-xs sm:text-xl font-normal {hero_color}"> | 
+                    <span class=" text-xs sm:text-xl font-normal {hero_color}"> | <span>
                         _;
                         A minimalist workspace for tasks and notes;
                         Un espacio de trabajo minimalista para tareas y notas;
-                        Minimalistyczna aplikacja do zadań i notatek 
+                        Minimalistyczna aplikacja do zadań i notatek </span>
                     </span>
                 </span>
             </div>

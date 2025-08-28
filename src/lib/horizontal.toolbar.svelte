@@ -8,13 +8,8 @@
 
     import {
         dark_mode_store,
-        toggle_sidebar,
-        show_sidebar,
-        hide_sidebar,
         tools_visible_store,
         bottom_bar_visible_store,
-        previously_visible_sidebar,
-        main_sidebar_visible_store,
         sidebar_left_pos,
 		page_title,
 		nav_titles,
@@ -24,7 +19,7 @@
     import {session, signInHRef, signOutHRef} from '@humandialog/auth.svelte'
 
     import VerticalToolbar from '$lib/vertical.toolbar.svelte'
-	import { isDeviceSmallerThan, isOnNavigationPage, pushNavigationPage, popNavigationPage } from './utils.js';
+	import { isDeviceSmallerThan, navIsVisible, navGetKey, navToggle, navShow, navHide, navPrevVisibleKey } from './utils.js';
     import {setCurrentLanguage, getLanguages, i18n, getCurrentLanguage} from './i18n.js'
 
     export let appConfig = undefined;
@@ -92,11 +87,12 @@
 
     let title = ''
     $:{
-        if($main_sidebar_visible_store == '*')
+        if(!navIsVisible())
             title = $page_title;
         else
         {
-            let nav_title = $nav_titles[$main_sidebar_visible_store];
+            const navKey = navGetKey()
+            let nav_title = $nav_titles[navKey];
             if(nav_title != undefined)
                 title = nav_title
             else
@@ -106,59 +102,25 @@
 
     function toggle_navigator(e)
     {
-        if(isDeviceSmallerThan('sm'))
+        if(tabs.length == 1)
         {
-            if(isOnNavigationPage())
-            {
-                popNavigationPage();
-            }
-            else
-            {
-                if(tabs.length == 1)
-                {
-                    $sidebar_left_pos = 0;
-                    show_sidebar(tabs[0]);
-                }
-                else
-                {
-                    let sidebar = $main_sidebar_visible_store;
-                    if(sidebar == "*")
-                    {
-                        if((!previously_visible_sidebar) || previously_visible_sidebar === '*')
-                            sidebar = Object.keys(appConfig.sidebar)[0];
-                        else
-                            sidebar = previously_visible_sidebar;
-                    }
-
-                    $sidebar_left_pos = 40;
-                    show_sidebar(sidebar)
-                }
-
-                pushNavigationPage();
-            }
+            $sidebar_left_pos = 0;
+            navToggle(tabs[0])
         }
         else
         {
+            $sidebar_left_pos = 40;
 
-            if(tabs.length == 1)
+            if(!navIsVisible())
             {
-                $sidebar_left_pos = 0;
-                toggle_sidebar(tabs[0]);
+                let navKey = navPrevVisibleKey()
+                if(!navKey)
+                    navKey = Object.keys(appConfig.sidebar)[0]
+                
+                navShow(navKey);
             }
             else
-            {
-                let sidebar = $main_sidebar_visible_store;
-                if(sidebar == "*")
-                {
-                    if((!previously_visible_sidebar) || previously_visible_sidebar === '*')
-                        sidebar = Object.keys(appConfig.sidebar)[0];
-                    else
-                        sidebar = previously_visible_sidebar;
-                }
-
-                $sidebar_left_pos = 40;
-                toggle_sidebar(sidebar)
-            }
+                navHide()
         }
     }
 
@@ -374,7 +336,7 @@
 
 </div>
 
-{#if false && tabs.length > 1 &&  $main_sidebar_visible_store != "*"}
+{#if false && tabs.length > 1 &&  navIsVisible()}
     <div  class="no-print flex-none block fixed left-0 top-[40px] w-[40px] h-screen z-20 inset-0   overflow-hidden">
         <div class="sticky top-0 flex h-full w-10 bg-stone-900 flex-col items-center text-stone-100 shadow">
             <VerticalToolbar {appConfig} mobile={true}/>

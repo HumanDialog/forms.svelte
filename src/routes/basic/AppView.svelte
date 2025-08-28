@@ -170,6 +170,8 @@
                 mainContent : {
                     routes : {
                         '/' :           { component: AppMain},
+                        '/nav' :        { component: AppMain},
+                        '/nav/*' :      { component: AppMain},
                         '/tasklist':    { component: Tasklist},
                         '/tasklist/*':  { component: Tasklist},
                         '/task' :       { component: Task },

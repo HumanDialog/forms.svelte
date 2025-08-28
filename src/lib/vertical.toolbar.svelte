@@ -8,26 +8,23 @@
     //import Menu from '$lib/components/contextmenu.svelte'
 
     import {dark_mode_store, 
-            toggle_sidebar, 
-            show_sidebar,
-            hide_sidebar,
             tools_visible_store,
             bottom_bar_visible_store, 
             right_sidebar_visible_store,
-            main_sidebar_visible_store,
             contextItemsStore,
             context_info_store,
             contextToolbarOperations,
             data_tick_store,
             reloadWholeApp,
             showFABAlways,
-            leftHandedFAB
+            leftHandedFAB,
+            navKey
         } from "./stores.js";     
     import Icon from './components/icon.svelte';
     import {session, signInHRef, signOutHRef} from '@humandialog/auth.svelte'
 	import { pop, push } from 'svelte-spa-router';
 	import { tick } from 'svelte';
-	import { isDeviceSmallerThan, popNavigationPage } from './utils';
+	import { isDeviceSmallerThan, navGetKey, navHide, navIsVisible, navShow, navToggle } from './utils';
     import {setCurrentLanguage, getLanguages, i18n, getCurrentLanguage} from './i18n.js'
     
 
@@ -101,17 +98,20 @@
                 });
 
             // there is no current visible sidebar
-            if($main_sidebar_visible_store != '*')
+            if(navIsVisible())
             {
-                if(tabs.every( (e) => e.key != $main_sidebar_visible_store))
+                const selectedNav = navGetKey()
+                if(tabs.every( (e) => e.key != selectedNav))
                 {
                     if(tabs.length)
-                        show_sidebar(tabs[0].key);
+                        navShow(tabs[0].key);
                     else
-                        hide_sidebar();
+                        navHide();
                 }
             }
         }
+
+        
        
         /*show_groups_switch_menu = $session.tenants.length > 1
 
@@ -132,17 +132,8 @@
 
     function on_navigator_tab_clicked(e, key)
     {
-        e.stopPropagation();
-       
-         if(!mobile)
-            toggle_sidebar(key);
-        else
-        {
-            if($main_sidebar_visible_store == key)
-                popNavigationPage();
-            else
-                show_sidebar(key);
-        }
+        e.stopPropagation();    
+        navToggle(key);
     }
 
     function show_options(e)
@@ -405,7 +396,7 @@
 <section class="no-print flex flex-col w-full h-full" on:click={clearSelection}>
     <div class="px-0 w-12 sm:w-10">
         {#each tabs as tab}
-            {@const isSelected = $main_sidebar_visible_store == tab.key}
+            {@const isSelected = $navKey == tab.key}
             <button
                 class="h-16 px-0 flex justify-center items-center w-full text-stone-300 hover:text-stone-100"
                 class:bg-orange-500={isSelected}
