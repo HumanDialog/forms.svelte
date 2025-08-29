@@ -13,7 +13,8 @@
                 ListComboProperty,
 				mainContentPageReloader,
                 Modal,
-                onErrorShowAlert} from '$lib'
+                onErrorShowAlert,
+            i18n} from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaArchive, FaEllipsisH} from 'svelte-icons/fa'
 
     export let params = {}
@@ -162,11 +163,11 @@
             tbr: 'C',
             operations: [
                 {
-                    caption: 'View',
+                    caption: '_; View; Ver; Widok',
                     operations: [
                         {
                             icon: FaPlus,
-                            caption: 'Add',
+                            caption: '_; Add; Añadir; Dodaj',
                             hideToolbarCaption: true,
                             action: (focused) => { listComponent.addRowAfter(null) },
                             //fab: 'M10',
@@ -184,40 +185,40 @@
             tbr: 'C',
             operations: [
                 {
-                    caption: 'Task',
+                    caption: '_; Task; Tarea; Zadanie',
                     //tbr: 'B',
                     operations: [
                         {
-                            caption: 'Edit...',
+                            caption: '_; Edit...; Editar...; Edytuj...',
                             hideToolbarCaption: true,
                             icon: FaPen,
                             fab: 'M20',
                             tbr: 'A',
                             grid: [
                                     {
-                                        caption: 'Name',
+                                        caption: '_; Name; Nombre; Nazwa',
                                         action: (focused) =>  { listComponent.edit(task, 'Title') }
                                     },
                                     {
-                                        caption: 'Summary',
+                                        caption: '_; Summary; Resumen; Podsumowanie',
                                         action: (focused) =>  { listComponent.edit(task, 'Summary') }
                                     },
                                     {
                                         separator: true
                                     },
                                     {
-                                        caption: 'List',
+                                        caption: '_; List; Lista; Lista',
                                         action: (focused) => { listComponent.edit(task, 'TaskList') }
                                     },
                                     {
-                                        caption: 'Due Date',
+                                        caption: '_; Due Date; Fecha; Termin',
                                         action: (focused) => { listComponent.edit(task, 'DueDate') }
                                     }
                             ]
 
                         },
                         {
-                            caption: 'Move up',
+                            caption: 'Move _; Move up; Deslizar hacia arriba; Przesuń w górę',
                             hideToolbarCaption: true,
                             icon: FaCaretUp,
                             action: (f) => listComponent.moveUp(task),
@@ -225,7 +226,7 @@
                             tbr: 'A'
                         },
                         {
-                            caption: 'Move down',
+                            caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                             hideToolbarCaption: true,
                             icon: FaCaretDown,
                             action: (f) => listComponent.moveDown(task),
@@ -235,12 +236,12 @@
 
                         /* {
                             icon: FaArchive,
-                            caption: 'Archive',
+                            caption: '_; Archive; Archivar; Zarchiwizuj',
                             action: (f) => askToArchive(task)
                         },*/
                         {
                             icon: FaTrash,
-                            caption: 'Delete',
+                            caption: '_; Delete; Eliminar; Usuń',
                             action: (f) => askToDelete(task),
                             fab: 'S10',
                         }
@@ -248,10 +249,10 @@
                     ]
                 },
                 {
-                    caption: 'View',
+                    caption: '_; View; Ver; Widok',
                     operations: [
                         {
-                            caption: 'Add',
+                            caption: '_; Add; Añadir; Dodaj',
                             hideToolbarCaption: true,
                             icon: FaPlus,
                             action: (focused) => { listComponent.addRowAfter(task) },
@@ -264,19 +265,19 @@
         }
     }
 
-
+    const title = '_; My tasks; Mis tareas; Moje zadania'
 
 </script>
 
 <svelte:head>
-    <title>My Tasks | {__APP_TITLE__}</title>
+    <title>{title} | {__APP_TITLE__}</title>
 </svelte:head>
 
 {#if user}
     <Page   self={user}
             toolbarOperations={pageOperations}
             clearsContext='props sel'
-            title='My tasks'>
+            title={title}>
             <section class="w-full place-self-center max-w-3xl">
         <List   self={user}
                 a='MyTasks'
@@ -315,15 +316,15 @@
 {/if}
 
 
-<Modal  title="Delete"
-        content="Are you sure you want to delete selected task?"
+<Modal  title={i18n(['Delete', 'Eliminar', 'Usuń'])}
+        content={i18n(["Are you sure you want to delete selected task?", "¿Está seguro de que desea eliminar la tarea seleccionada?", "Czy na pewno chcesz usunąć wybrane zadanie?"])}
         icon={FaTrash}
         onOkCallback={deleteTask}
         bind:this={deleteModal}
         />
 
-<Modal  title="Archive"
-        content="Are you sure you want to archive selected task?"
+<Modal  title={i18n(['Archive', 'Archivar', 'Zarchiwizuj'])}
+        content={i18n(["Are you sure you want to archive selected task?", "¿Está seguro de que desea archivar la tarea seleccionada?", "Czy na pewno chcesz zarchiwizować wybrane zadanie?"])}
         icon={FaArchive}
         onOkCallback={archiveTask}
         bind:this={archiveModal}

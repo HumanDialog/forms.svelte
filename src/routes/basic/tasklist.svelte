@@ -13,7 +13,7 @@
 				mainContentPageReloader,
                 Modal,
                 onErrorShowAlert, showMenu,
-				UI} from '$lib'
+				UI, i18n} from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaList,
         FaEllipsisH, FaChevronRight, FaChevronLeft, FaRandom, FaRegClipboard
     } from 'svelte-icons/fa'
@@ -110,7 +110,7 @@
             if(!isArchivedTasks)
                 listTitle = currentList.Name
             else
-                listTitle = `Archive of ${currentList.Name}`
+                listTitle = `${arichive_of()} ${currentList.Name}`
         }
 
 
@@ -118,6 +118,8 @@
 
         listComponent?.reload(currentList, listComponent.KEEP_SELECTION);
     }
+
+    const arichive_of = () => '_; Archive of; Archivo de; Archiwum'
 
     function showCachedDataFirst(cachedValue)
     {
@@ -128,7 +130,7 @@
         if(!isArchivedTasks)
             listTitle = currentList.Name
         else
-            listTitle = `Archive of ${currentList.Name}`
+            listTitle = `${arichive_of()} ${currentList.Name}`
 
         listComponent?.reload(currentList, listComponent.KEEP_SELECTION);
     }
@@ -186,7 +188,7 @@
             if(!isArchivedTasks)
                 listTitle = currentList.Name
             else
-                listTitle = `Archive of ${currentList.Name}`
+                listTitle = `${arichive_of()} ${currentList.Name}`
         }
     }
 
@@ -272,11 +274,11 @@
             tbr: 'C',
             operations: [
                 {
-                    caption: 'View',
+                    caption: '_; View; Ver; Widok',
                     //tbr: 'B',
                     operations: [
                         {
-                            caption: 'New task',
+                            caption: '_; New task; Nueva tarea; Nowe zadanie',
                             icon: FaPlus,
                             action: (f) => { listComponent.addRowAfter(null) },
                             fab: 'M01',
@@ -284,7 +286,7 @@
                             hideToolbarCaption: true
                         },
                         {
-                            caption: 'Add tasks from Clipboard',
+                            caption: '_; Add tasks from Clipboard; Añadir tareas desde el portapapeles; Dodaj zadania ze schowka',
                             //icon: FaRegClipboard, //FaLink, //aRegShareSquare, //
                             toolbar: BasketPreview,
                             props: {
@@ -296,7 +298,7 @@
                         },
                         {
                             //icon: FaRandom,
-                            caption: 'Change Task List kind',
+                            caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
                             action: changeListKind,
                         //    fab: 'S02',
                         //    tbr: 'C'
@@ -326,40 +328,40 @@
             tbr: 'C',
             operations: [
                 {
-                    caption: 'Task',
+                    caption: '_; Task; Tarea; Zadanie',
                     //tbr: 'B',
                     operations: [
                         {
-                            caption: 'Edit...',
+                            caption: '_; Edit...; Editar...; Edytuj...',
                             hideToolbarCaption: true,
                             icon: FaPen,
                             fab: 'M20',
                             tbr: 'A',
                             grid: [
                                 {
-                                    caption: 'Name',
+                                    caption: '_; Name; Nombre; Nazwa',
                                     action: (focused) =>  { listComponent.edit(task, 'Title') }
                                 },
                                 {
-                                    caption: 'Summary',
+                                    caption: '_; Summary; Resumen; Podsumowanie',
                                     action: (focused) =>  { listComponent.edit(task, 'Summary') }
                                 },
                                 {
                                     separator: true
                                 },
                                 {
-                                    caption: 'Responsible',
+                                    caption: '_; Responsible; Responsable; Odpowiedzialny',
                                     action: (focused) => { listComponent.edit(task, 'Actor') }
                                 },
                                 {
-                                    caption: 'Due Date',
+                                    caption: '_; Due Date; Fecha; Termin',
                                     action: (focused) => { listComponent.edit(task, 'DueDate') }
                                 }
 
                             ]
                         },
                         {
-                            caption: 'Move up',
+                            caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                             icon: FaCaretUp,
                             action: (f) => listComponent.moveUp(task),
                             fab: 'M03',
@@ -367,7 +369,7 @@
                             hideToolbarCaption: true
                         },
                         {
-                            caption: 'Move down',
+                            caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                             icon: FaCaretDown,
                             action: (f) => listComponent.moveDown(task),
                             fab: 'M02',
@@ -376,22 +378,22 @@
                         },
                         {
                             //icon: FaArchive,
-                            caption: 'Archive task',
+                            caption: '_; Archive; Archivar; Zarchiwizuj',
                             action: (f) => askToArchive(task)
                         },
                         {
                             //icon: FaTrash,
-                            caption: 'Delete task',
+                            caption: '_; Delete; Eliminar; Usuń',
                             action: (f) => askToDelete(task)
                         }
                     ]
                 },
                 {
-                    caption: 'View',
+                    caption: '_; View; Ver; Widok',
                     //tbr: 'B',
                     operations: [
                         {
-                            caption: 'New task',
+                            caption: '_; New task; Nueva tarea; Nowe zadanie',
                             icon: FaPlus,
                             action: (f) => { listComponent.addRowAfter(task) },
                             fab: 'M01',
@@ -399,7 +401,7 @@
                             hideToolbarCaption: true
                         },
                         {
-                            caption: 'Add tasks from Clipboard',
+                            caption: '_; Add tasks from Clipboard; Añadir tareas desde el portapapele; Dodaj zadania ze schowka',
                         //    icon: FaRegClipboard, //FaLink, //aRegShareSquare, //
                             toolbar: BasketPreview,
                             props: {
@@ -411,7 +413,7 @@
                         },
                         {
                             //icon: FaRandom,
-                            caption: 'Change Task List kind',
+                            caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
                             action: changeListKind,
                         //    fab: 'S02',
                         //    tbr: 'C'
@@ -556,7 +558,7 @@
                     <a  href={`/tasklist/${listId}?archivedTasks`}
                         class="hover:underline"
                         use:link>
-                            Show archived tasks
+                            _; Show archived tasks; Mostrar tareas archivadas; Pokaż zarchiwizowane zadania
                             <div class="inline-block mt-1.5 w-3 h-3"><FaChevronRight/></div>
                     </a>
                 </div>
@@ -565,7 +567,7 @@
             <div class="ml-3 mt-20  mb-10">
                 <button on:click={(e) => pop() }>
                     <div class="inline-block mt-1.5 w-3 h-3"><FaChevronLeft/></div>
-                    Back
+                    _; Back; Volver; Wróć
                 </button>
 
             </div>
@@ -577,24 +579,24 @@
 {/if}
 
 
-<Modal  title="Delete"
-        content="Are you sure you want to delete selected task?"
+<Modal  title={i18n(['Delete', 'Eliminar', 'Usuń'])}
+        content={i18n(["Are you sure you want to delete selected task?", "¿Está seguro de que desea eliminar la tarea seleccionada?", "Czy na pewno chcesz usunąć wybrane zadanie?"])}
         icon={FaTrash}
         onOkCallback={deleteTask}
         bind:this={deleteModal}
         />
 
-<Modal  title="Archive"
-        content="Are you sure you want to archive selected task?"
+<Modal  title={i18n(['Archive', 'Archivar', 'Zarchiwizuj'])}
+        content={i18n(["Are you sure you want to archive selected task?", "¿Está seguro de que desea archivar la tarea seleccionada?", "Czy na pewno chcesz zarchiwizować wybrane zadanie?"])}
         icon={FaArchive}
         onOkCallback={archiveTask}
         bind:this={archiveModal}
         />
 
-<Modal  title="Change list kind"
-        content="Are you sure you want to change current list kind?"
+<Modal  title={i18n(['Change list kind', 'Cambiar tipo de lista', 'Zmień rodzaj listy'])}
+        content={i18n(["Are you sure you want to change current list kind?", "¿Estás seguro de que deseas cambiar el tipo de lista actual?", "Czy na pewno chcesz zmienić aktualny rodzaj listy?"])}
         icon={FaRandom}
         onOkCallback={handleChangeListKind}
-        okCaption="Change"
+        okCaption={i18n(['Change', 'Cambiar', 'Zmień'])}
         bind:this={changeKindModal}
         />

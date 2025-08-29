@@ -14,7 +14,7 @@
                 Modal,
                 onErrorShowAlert,
 				activateItem, UI,
-				showFloatingToolbar,
+				i18n,
                 Breadcrumb,
 				breadcrumbAdd} from '$lib'
     import {FaRegFile, FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaSync,
@@ -421,7 +421,7 @@
         if(contextItem.IsPinned)
         {
             pinOperation = {
-                caption: 'Unpin folder',
+                caption: '_; Unpin folder; Desenganchar la carpeta; Odepnij folder',
                 //icon: FaStar, //aRegShareSquare, //
                 action: async (f) => {
                     await toggleFolderPinned(contextItem);
@@ -438,7 +438,7 @@
         else
         {
             pinOperation = {
-                caption: 'Pin folder',
+                caption: '_; Pin folder; Fijar carpeta; Przypnij folder',
                 icon: FaRegStar, //aRegShareSquare, //
                 action: async (f) => {
                     await toggleFolderPinned(contextItem);
@@ -463,18 +463,18 @@
             tbr: 'C',
             operations: [
                 {
-                    caption: 'View',
+                    caption: '_; View; Ver; Widok',
                     menu: 'FT',
                     operations: [
                         {
-                            caption: 'Clear Clipboard',
+                            caption: '_; Clear Clipboard; Borrar portapapeles; Wyczyść schowek',
                             icon: FaBasketTrash, //FaTrash,
                             action: async (f) => await dettachAllMyContent(),
                         //      fab: 'M30',
                             tbr: 'A'
                         },
                         {
-                            caption: 'Refresh',
+                            caption: '_; Refresh; Actualizar; Odśwież',
                             //icon: FaSync,
                             action: async (f) => await refreshView(),
                         //    fab: 'S10',
@@ -490,25 +490,25 @@
     function newElementOperations()
     {
         return {
-            caption: "File",
+            caption: '_; File; Archivo; Plik',
             // tbr: 'B',
             operations: [
                 {
-                    caption: 'New folder',
+                    caption: '_; New folder; Nueva carpeta; Nowy folder',
                     icon: FaRegFolder,
                     action: (f) => { subfoldersComponent.addRowAfter(null) },
                     tbr: 'A',
                     fab: 'M03'
                 },
                 {
-                    caption: 'New note',
+                    caption: '_; New note; Nueva nota; Nowa notatka',
                     icon: FaRegFile,
                     action: (f) => { notesComponent.addRowAfter(null) },
                     tbr: 'A',
                     fab: 'M02'
                 },
                 {
-                    caption: 'New task',
+                    caption: '_; New task; Nueva tarea; Nowe zadanie',
                     icon: FaRegCalendar,
                     action: (f) => { tasksComponent.addRowAfter(null) },
                     tbr: 'A',
@@ -518,7 +518,7 @@
                     separator: true
                 },
                 {
-                    caption: 'Add elements from Clipboard',
+                    caption: '_; Add elements from Clipboard; Añadir elementos del portapapeles; Dodaj elementy ze schowka',
 
                     toolbar: BasketPreview,
                     props: {
@@ -541,12 +541,12 @@
             operations: [
                 newElementOperations(),
                 {
-                    caption: "View",
+                    caption: '_; View; Ver; Widok',
                     //tbr: 'B',
                     operations: [
                         pinOp(),
                         {
-                            caption: 'Refresh',
+                            caption: '_; Refresh; Actualizar; Odśwież',
                             //icon: FaSync,
                             action: async (f) => await refreshView(),
                             //fab: 'S10',
@@ -645,7 +645,7 @@
                         caption: kind,
                         operations: [
                             {
-                                caption: 'Move up',
+                                caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                                 icon: FaCaretUp,
                                 action: (f) => list.moveUp(element),
                                 fab:'M05',
@@ -653,7 +653,7 @@
                                 hideToolbarCaption: true
                             },
                             {
-                                caption: 'Move down',
+                                caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                                 icon: FaCaretDown,
                                 action: (f) => list.moveDown(element),
                                 fab:'M04',
@@ -662,7 +662,7 @@
                             },
                             {
                                 icon: FaTrash,
-                                caption: 'Remove from Clipboard',
+                                caption: '_; Remove from Clipboard; Eliminar del portapapeles; Usuń ze schowka',
                                 action: (f) => dettachElement(element, kind),
                             //    fab:'M30',
                                 tbr:'A'
@@ -683,33 +683,33 @@
                 operations: [
                     newElementOperations(),
                     {
-                        caption: 'Element',
+                        caption: '_; Element; Elemento; Element',
 
                         //icon: FaPlus,
                         //hideToolbarCaption: true,
                         operations: [
                             {
-                                caption: 'Edit',
+                                caption: '_; Edit; Editar; Edytuj',
                                 icon: FaPen,
                                 tbr: 'A',
                                 fab:'M20',
                                 //action: (focused) =>  { listComponent(kind).edit(element, 'Title') },
                                 grid:[
                                     {
-                                        caption: 'Edit Title',
+                                        caption: '_; Edit Title; Editar título; Edytuj tytuł',
                                         action: (focused) =>  { listComponent(kind).edit(element, 'Title') },
                                         tbr: 'A',
 
                                     },
                                     {
-                                        caption: 'Edit summary',
+                                        caption: '_; Edit summary; Editar resumen; Edytuj podsumowanie',
                                         action: (focused) =>  { listComponent(kind).edit(element, 'Summary') }
                                     }
                                 ]
 
                             },
                             {
-                                caption: 'Move up',
+                                caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                                 icon: FaCaretUp,
                                 action: (f) => list.moveUp(element),
                                 fab:'M05',
@@ -717,7 +717,7 @@
                                 hideToolbarCaption: true
                             },
                             {
-                                caption: 'Move down',
+                                caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                                 icon: FaCaretDown,
                                 action: (f) => list.moveDown(element),
                                 fab:'M04',
@@ -725,7 +725,7 @@
                                 hideToolbarCaption: true
                             },
                             {
-                                caption: 'Add to Clipboard',
+                                caption: '_; Add to Clipboard; Añadir al portapapeles; Dodaj do schowka',
                                 icon: FaCopy, //FaCopy,   // MdLibraryAdd
                                 action: (f) => copyElementToBasket(element, kind),
                                 hideToolbarCaption: true,
@@ -734,7 +734,7 @@
 
                             },
                             {
-                                caption: 'Move to Clipboard',
+                                caption: '_; Move to Clipboard; Mover al portapapeles; Przenieś do schowka',
                                 icon: FaCut, //FaCut,
                                 action: (f) => cutElementToBasket(element, kind),
                                 hideToolbarCaption: true,
@@ -745,12 +745,12 @@
                                 separator: true
                             },
                             {
-                                caption: 'Dettach',
+                                caption: '_; Detach; Desconectar; Odłącz',
                           //      icon: FaUnlink,
                                 action: (f) => dettachElement(element, kind)
                             },
                             {
-                                caption: 'Delete permanently',
+                                caption: '_; Delete; Eliminar; Usuń',
                              //   icon: FaTrash,
                                 action: (f) => askToDelete(element, kind)
                             }
@@ -760,167 +760,7 @@
             }
     }
 
-    function folderElementOperations_original(element, kind)
-    {
-        let list = listComponent(kind);
-        return {
-                opver: 2,
-                fab: 'M00',
-                tbr: 'A',
-                operations: [
-                    {
-                        caption: 'Element',
-                        tbr: 'C',
-                        icon: FaPlus,
-                        hideToolbarCaption: true,
-                        operations: [
-                            {
-                                caption: `Add ${kind}`,
-                                icon: FaPlus,
-                                action: (f) => { list.addRowAfter(element) },
-                                fab:'M20',
-                                tbr:'A',
-                            },
-                            {
-                                caption: 'Edit title',
-                                icon: FaPen,
-                                action: (focused) =>  { listComponent(kind).edit(element, 'Title') },
-                                tbr:'A' ,
-                                fab:'M30',
-                                hideToolbarCaption: true
-                            },
-                            {
-                                caption: 'Edit summary',
-                                action: (focused) =>  { listComponent(kind).edit(element, 'Summary') }
-                            },
-                            {
-                                caption: 'Move up',
-                                icon: FaCaretUp,
-                                action: (f) => list.moveUp(element),
-                                fab:'M05',
-                                tbr:'A',
-                                hideToolbarCaption: true
-                            },
-                            {
-                                caption: 'Move down',
-                                icon: FaCaretDown,
-                                action: (f) => list.moveDown(element),
-                                fab:'M04',
-                                tbr:'A' ,
-                                hideToolbarCaption: true
-                            },
-                            {
-                                caption: 'Add to Clipboard',
-                                icon: FaBasketPlus, //FaCopy,   // MdLibraryAdd
-                                action: (f) => copyElementToBasket(element, kind),
-                                fab: 'S10',
-                                tbr: 'A'
-
-                            },
-                            {
-                                caption: 'Move to Clipboard',
-                                //icon: FaBasketCut, //FaCut,
-                                action: (f) => cutElementToBasket(element, kind),
-                            //    fab: 'M05',
-                            //    tbr: 'A'
-                            },
-                            {
-                                separator: true
-                            },
-                            {
-                                caption: 'Dettach',
-                          //      icon: FaUnlink,
-                                action: (f) => dettachElement(element, kind)
-                            },
-                            {
-                                caption: 'Delete permanently',
-                                icon: FaTrash,
-                                action: (f) => askToDelete(element, kind)
-                            }
-                        ]
-                    }
-                ]
-            }
-    }
-
-    function folderElementOperations_bug(element, kind)
-    {
-        let list = listComponent(kind);
-        return {
-                opver: 2,
-                fab: 'M00',
-                tbr: 'A',
-                operations: [
-
-
-                            {
-                                caption: `Add ${kind}`,
-                                icon: FaPlus,
-                                action: (f) => { list.addRowAfter(element) },
-                            //    fab:'M10',
-                                tbr:'A',
-                            },
-                            {
-                                caption: 'Edit title',
-                                icon: FaPen,
-                                action: (focused) =>  { listComponent(kind).edit(element, 'Title') },
-                                tbr:'A' ,
-                                hideToolbarCaption: true
-                            },
-                            {
-                                caption: 'Edit summary',
-                                action: (focused) =>  { listComponent(kind).edit(element, 'Summary') }
-                            },
-                            {
-                                caption: 'Move up',
-                                icon: FaCaretUp,
-                                action: (f) => list.moveUp(element),
-                                fab:'M05',
-                                tbr:'A',
-                                hideToolbarCaption: true
-                            },
-                            {
-                                caption: 'Move down',
-                                icon: FaCaretDown,
-                                action: (f) => list.moveDown(element),
-                                fab:'M04',
-                                tbr:'A' ,
-                                hideToolbarCaption: true
-                            },
-                            {
-                                caption: 'Add to Clipboard',
-                                icon: FaBasketPlus, //FaCopy,   // MdLibraryAdd
-                                action: (f) => copyElementToBasket(element, kind),
-                                fab: 'S10',
-                                tbr: 'A'
-
-                            },
-                            {
-                                caption: 'Move to Clipboard',
-                                //icon: FaBasketCut, //FaCut,
-                                action: (f) => cutElementToBasket(element, kind),
-                            //    fab: 'M05',
-                            //    tbr: 'A'
-                            },
-                            {
-                                separator: true
-                            },
-                            {
-                                caption: 'Dettach',
-                          //      icon: FaUnlink,
-                                action: (f) => dettachElement(element, kind)
-                            },
-                            {
-                                caption: 'Delete permanently',
-                                icon: FaTrash,
-                                action: (f) => askToDelete(element, kind)
-                            }
-
-
-                ]
-            }
-    }
-
+    
 
     let elementOperations = (element, kind) => {
 
@@ -1045,8 +885,8 @@
 
 
 
-<Modal  title="Delete"
-        content="Are you sure you want to delete selected element?"
+<Modal  title={i18n(['Delete', 'Eliminar', 'Usuń'])}
+        content={i18n(["Are you sure you want to delete selected folder?", "¿Está seguro de que desea eliminar el elemento seleccionado?", "Czy na pewno chcesz usunąć wybrany element?"])}
         icon={FaTrash}
         onOkCallback={deleteElement}
         bind:this={deleteModal}

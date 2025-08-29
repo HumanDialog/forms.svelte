@@ -46,6 +46,7 @@
 
     import { Extension } from '@tiptap/core'
     import {Suggestion} from './internal/suggestion'
+	import { i18n } from '$lib/i18n.js';
 
     export let value = '';
     export let placeholder = '';
@@ -125,7 +126,7 @@
     export function getMarksOperations(tbr = 'A')
     {
         let operations = []
-        paletteMarksCommands.forEach( c => {
+        paletteMarksCommands().forEach( c => {
             if(!c.separator)
             {
                 operations.push({
@@ -138,7 +139,7 @@
         })
 
         return {
-            caption: 'Text',
+            caption: i18n({en: 'Text', es: 'Texto', pl: 'Tekst'}),
             operations: operations,
             preAction: (f) => { if (editor.isFocused) lockNextBlurCallbacks++ },
             tbr: tbr
@@ -148,7 +149,7 @@
     export function getStylesOperations(tbr = 'A')
     {
         let operations = []
-        paletteStylesCommands.forEach( c => {
+        paletteStylesCommands().forEach( c => {
             if(!c.separator)
             {
                 operations.push({
@@ -161,7 +162,7 @@
         })
 
         return {
-            caption: 'Styles',
+            caption: i18n({en: 'Styles', es: 'Estilos', pl: 'Style'}),
             operations: operations,
             preAction: (f) => { if (editor.isFocused) lockNextBlurCallbacks++ },
             tbr: tbr
@@ -179,7 +180,7 @@
             })
         }
 
-        paletteInsertCommands.forEach( c => {
+        paletteInsertCommands().forEach( c => {
             if(!c.separator)
             {
                 operations.push({
@@ -192,7 +193,7 @@
         })
 
         return {
-            caption: 'Insert',
+            caption: i18n({en: 'Insert', es: 'Insertar', pl: 'Wstaw'}),
             operations: operations,
             preAction: (f) => { if (editor.isFocused) lockNextBlurCallbacks++ },
             tbr: tbr
@@ -1509,44 +1510,47 @@
     }
 
 
-    const paletteMarksCommands = [
-        {    caption: 'Bold',        description: 'Marks text as bolded',            tags: 'strong', icon: FaBold,                       on_choice: makeBold,            is_active: () => editor?.isActive('bold')  },
-        {    caption: 'Italic',      description: 'Marks text as italic',            tags: 'strong', icon: FaItalic,                     on_choice: makeItalic,          is_active: () => editor?.isActive('italic')  },
-        {    caption: 'Underlie',    description: 'Marks text as underlined',                        icon: FaUnderline,                  on_choice: makeUnderline,       is_active: () => editor?.isActive('underline')    },
-        {    caption: 'Strikethrough',description: 'Marks text as strikethrough',                    icon: FaStrikethrough,              on_choice: makeStrikethrough,   is_active: () => editor?.isActive('strike')},
+    const paletteMarksCommands = () => [
+        {    caption: i18n({en: 'Bold', es: 'Negrita', pl: 'Pogrubiony'}),              description: 'Marks text as bolded',            tags: 'strong', icon: FaBold,                       on_choice: makeBold,            is_active: () => editor?.isActive('bold')  },
+        {    caption: i18n({en: 'Italic', es: 'Cursiva', pl: 'Kursywa'}),               description: 'Marks text as italic',            tags: 'strong', icon: FaItalic,                     on_choice: makeItalic,          is_active: () => editor?.isActive('italic')  },
+        {    caption: i18n({en: 'Underline', es: 'Subrayar', pl: 'Podkreślenie'}),      description: 'Marks text as underlined',                        icon: FaUnderline,                  on_choice: makeUnderline,       is_active: () => editor?.isActive('underline')    },
+        {    caption: i18n({en: 'Strikethrough', es: 'Tachado', pl: 'Przekreślenie'}),  description: 'Marks text as strikethrough',                    icon: FaStrikethrough,              on_choice: makeStrikethrough,   is_active: () => editor?.isActive('strike')},
     ]
 
-    const paletteStylesCommands = [
-        {   caption: 'Normal',       description: 'This is normal text style',      tags: 'paragraph,text',    icon: FaRemoveFormat,               on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setParagraph().run(); else editor.chain().focus().setParagraph().run() },  is_active: () => editor?.isActive('paragraph')  } ,
-        {   caption: 'Heading 1',      description: 'Description heading',           tags: 'h1',      icon: IcH1,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 1}).run(); else editor.chain().focus().setHeading({ level: 1 }).run() },   is_active: () => editor?.isActive('heading', {level: 1})  } ,
-        {   caption: 'Heading 2',      description: 'Secondary heading',             tags: 'h2',      icon: IcH2,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 2}).run(); else editor.chain().focus().setHeading({ level: 2 }).run() },   is_active: () => editor?.isActive('heading', {level: 2}) } ,
-        {   caption: 'Heading 3',      description: 'Secondary heading',             tags: 'h3',      icon: IcH3,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 3}).run(); else editor.chain().focus().setHeading({ level: 3 }).run() },   is_active: () => editor?.isActive('heading', {level: 3}) } ,
-        {   caption: 'Heading 4',      description: 'Secondary heading',             tags: 'h4',      icon: IcH4,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 4}).run(); else editor.chain().focus().setHeading({ level: 4 }).run() },   is_active: () => editor?.isActive('heading', {level: 4}) } ,
+    const paletteStylesCommands = () => [
+        {   caption: i18n({en: 'Normal', es: 'Normal', pl: 'Normalny'}),             description: 'This is normal text style',      tags: 'paragraph,text',    icon: FaRemoveFormat,               on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setParagraph().run(); else editor.chain().focus().setParagraph().run() },  is_active: () => editor?.isActive('paragraph')  } ,
+        {   caption: i18n({en: 'Heading 1', es: 'Título 1', pl: 'Nagłówek 1'}),      description: 'Description heading',           tags: 'h1',      icon: IcH1,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 1}).run(); else editor.chain().focus().setHeading({ level: 1 }).run() },   is_active: () => editor?.isActive('heading', {level: 1})  } ,
+        {   caption: i18n({en: 'Heading 2', es: 'Título 2', pl: 'Nagłówek 2'}),      description: 'Secondary heading',             tags: 'h2',      icon: IcH2,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 2}).run(); else editor.chain().focus().setHeading({ level: 2 }).run() },   is_active: () => editor?.isActive('heading', {level: 2}) } ,
+        {   caption: i18n({en: 'Heading 3', es: 'Título 3', pl: 'Nagłówek 3'}),      description: 'Secondary heading',             tags: 'h3',      icon: IcH3,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 3}).run(); else editor.chain().focus().setHeading({ level: 3 }).run() },   is_active: () => editor?.isActive('heading', {level: 3}) } ,
+        {   caption: i18n({en: 'Heading 4', es: 'Título 4', pl: 'Nagłówek 4'}),      description: 'Secondary heading',             tags: 'h4',      icon: IcH4,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 4}).run(); else editor.chain().focus().setHeading({ level: 4 }).run() },   is_active: () => editor?.isActive('heading', {level: 4}) } ,
 
-        {   caption: 'Code',         description: 'Source code monospace text',                      icon: FaCode,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setCodeBlock().run(); else editor.chain().focus().setCodeBlock().run() }, is_active: () => editor?.isActive('CodeBlock') },
+        {   caption: i18n({en: 'Code', es: 'Código', pl: 'Kod'}),         description: 'Source code monospace text',                      icon: FaCode,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setCodeBlock().run(); else editor.chain().focus().setCodeBlock().run() }, is_active: () => editor?.isActive('CodeBlock') },
     //    {   caption: 'Comment',      description: 'With this you can comment the above paragraph',   icon: FaComment,                    on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsComment().run(); else editor.chain().focus().setAsComment().run() }, is_active: () => editor?.isActive('CommentBlock')  } ,
-        {   caption: 'Quote',        description: 'To quote someone',                                icon: FaQuoteRight,                 on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsQuote().run(); else editor.chain().focus().setAsQuote().run() }, is_active: () => editor?.isActive('QuoteBlock')  } ,
+        {   caption: i18n({en: 'Quote', es: 'Cita', pl: 'Cytat'}),        description: 'To quote someone',                                icon: FaQuoteRight,                 on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsQuote().run(); else editor.chain().focus().setAsQuote().run() }, is_active: () => editor?.isActive('QuoteBlock')  } ,
     //    {   caption: 'Warning',      description: 'An important warning to above paragraph',         icon: FaExclamationTriangle,        on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsWarning().run(); else editor.chain().focus().setAsWarning().run() }, is_active: () => editor?.isActive('WarningBlock')  } ,
     //    {   caption: 'Info',         description: 'An important info about above paragraph',         icon: FaInfo,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setAsInfo().run(); else editor.chain().focus().setAsInfo().run() }, is_active: () => editor?.isActive('InfoBlock')  },
-        {   caption: 'Bullet list',  description: 'Unordered list of items',                         icon: FaListUl,                     on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).toggleBulletList().run(); else editor.chain().focus().toggleBulletList().run() }, is_active: () => editor?.isActive('bulletList')  },
+        {   caption: i18n({en: 'BulletList', es: 'Lista con viñetas', pl: 'Lista punktowana'}),  description: 'Unordered list of items',                         icon: FaListUl,                     on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).toggleBulletList().run(); else editor.chain().focus().toggleBulletList().run() }, is_active: () => editor?.isActive('bulletList')  },
     ]
 
-    const paletteInsertCommands = [
-        {   caption: 'Image',        description: 'Add image to document',           tags:'img,picture',      icon: FaImage,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).run(); if(onAddImage) onAddImage(onAddedImageReady);  } } ,
-        {   caption: 'Table',        description: 'Table',                                                    icon: FaTable,                      on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).insertTable().run(); else editor.chain().focus().insertTable().run() }, is_active: () => editor?.isActive('table')  },
-        {   caption: 'Horizontal rule', description: 'Add horizonal role',           tags: 'hr',              icon: FaGripLines,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHorizontalRule().run(); else editor.chain().focus().setHorizontalRule().run();  } }
+    const paletteInsertCommands = () => [
+        {   caption: i18n({en: 'Image', es: 'Imagen', pl: 'Obraz'}),        description: 'Add image to document',           tags:'img,picture',      icon: FaImage,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).run(); if(onAddImage) onAddImage(onAddedImageReady);  } } ,
+        {   caption: i18n({en: 'Table', es: 'Tabla', pl: 'Tabela'}),        description: 'Table',                                                    icon: FaTable,                      on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).insertTable().run(); else editor.chain().focus().insertTable().run() }, is_active: () => editor?.isActive('table')  },
+        {   caption: i18n({en: 'Horizontal rule', es: 'Regla horizontal', pl: 'Pozioma linia'}), description: 'Add horizonal role',           tags: 'hr',              icon: FaGripLines,                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHorizontalRule().run(); else editor.chain().focus().setHorizontalRule().run();  } }
     ]
 
     const paletteCommands  = [
 
-                {    caption: 'Text',         separator: true },
-                ...paletteMarksCommands,
+                {    caption: i18n({en: 'Text', es: 'Texto', pl: 'Tekst'}),         
+                    separator: true },
+                ...paletteMarksCommands(),
 
-                {    caption: 'Styles',       separator: true },
-                ...paletteStylesCommands,
+                {    caption: i18n({en: 'Styles', es: 'Estilos', pl: 'Style'}),       
+                    separator: true },
+                ...paletteStylesCommands(),
 
-                {   caption: 'Insert',        separator: true },
-                ...paletteInsertCommands
+                {   caption: i18n({en: 'Insert', es: 'Insertar', pl: 'Wstaw'}),        
+                    separator: true },
+                ...paletteInsertCommands()
             ];
 
     function makeBold(range)
@@ -1629,12 +1633,12 @@
         }
 
 
-        commands = [...commands, { caption: 'Text',     separator: true }]
-        commands = [...commands, ...paletteMarksCommands]
-        commands = [...commands, { caption: 'Styles',   separator: true }]
-        commands = [...commands, ...paletteStylesCommands]
+        commands = [...commands, { caption: i18n({en: 'Text', es: 'Texto', pl: 'Tekst'}),     separator: true }]
+        commands = [...commands, ...paletteMarksCommands()]
+        commands = [...commands, { caption: i18n({en: 'Styles', es: 'Estilos', pl: 'Style'}),   separator: true }]
+        commands = [...commands, ...paletteStylesCommands()]
 
-        commands = [...commands, {   caption: 'Insert',  separator: true }]
+        commands = [...commands, {   caption: i18n({en: 'Insert', es: 'Insertar', pl: 'Wstaw'}),  separator: true }]
         if(extraInsertPaletteCommands && extraInsertPaletteCommands.length > 0)
         {
             extraInsertPaletteCommands.forEach(exc => {
@@ -1661,7 +1665,7 @@
             })
         }
 
-        commands = [...commands, ...paletteInsertCommands]
+        commands = [...commands, ...paletteInsertCommands()]
 
         if(extraBackPaletteCommands && extraBackPaletteCommands.length > 0)
         {

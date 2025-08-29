@@ -19,7 +19,7 @@
 				ListStaticProperty,
                 getNiceStringDateTime,
                 getNiceStringDate,
-                Paginator
+                Paginator, i18n
             } from '$lib'
     import {FaSync, FaComments, FaComment} from 'svelte-icons/fa'
     import {location, pop, push, querystring} from 'svelte-spa-router'
@@ -211,7 +211,7 @@
             fab: 'M00',
             operations: [
                 {
-                    caption: "View",
+                    caption: "_; View; Ver; Widok",
                     operations: [
                         ... (!folder.IsRoot) ? [
                             {
@@ -221,7 +221,7 @@
                                 tbr: 'A'
                             } ]: [],
                         {
-                            caption: 'Refresh',
+                            caption: '_; Refresh; Actualizar; Odśwież',
                             icon: FaSync,
                             action: async (f) => await refreshView(),
                             tbr: 'C',

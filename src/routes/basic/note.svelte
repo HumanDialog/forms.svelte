@@ -26,7 +26,7 @@
             refreshToolbarOperations,
             informModificationEx,
             breadcrumbAdd,
-            Breadcrumb
+            Breadcrumb, i18n
             } from '$lib'
 	import { onMount, tick } from 'svelte';
     import {location, querystring, push, link} from 'svelte-spa-router'
@@ -219,7 +219,7 @@
 
     let addOperations = [
         {
-            caption: 'Summary',
+            caption: '_; Summary; Resumen; Podsumowanie',
             action: async (f) =>
                 {
                     if(summary)
@@ -235,7 +235,7 @@
 
 
         {
-            caption: 'Tag',
+            caption: '_; Tag; Etiqueta; Etykieta',
             icon: FaTag,
             action: async (f) => runTagInserter()
         },
@@ -244,12 +244,12 @@
             separator: true
         },
         {
-            caption: 'Attachement',
+            caption: '_; Attachement; Anexo; Załącznik',
             icon: FaFileDownload,
             action: async (f) => runFileAttacher()
         },
         {
-            caption: 'Content',
+            caption: '_; Content; Contenido; Treść',
             icon: FaAlignLeft,
             action: async (f) =>
                 {
@@ -273,11 +273,11 @@
             tbr: 'C',
             operations: [
                 {
-                    caption: 'Note',
+                    caption: '_; Note; Nota; Notatka',
                     //tbr: 'B',
                     operations: [
                         {
-                            caption: 'Save',
+                            caption: '_; Save; Guardar; Zapisz',
                             hideToolbarCaption: true,
                             icon: FaSave,
                             action: (f) => saveCurrentEditable(),
@@ -286,7 +286,7 @@
                             disabledFunc: () => !hasModifications()
                         },
                         {
-                            caption: 'Edit...',
+                            caption: '_; Edit...; Editar...; Edytuj...',
                             hideToolbarCaption: true,
                             icon: FaPen,
                             grid: addOperations,
@@ -294,7 +294,7 @@
                             tbr: 'A'
                         },
                         {
-                            caption: 'Add to Clipboard',
+                            caption: '_; Add to Clipboard; Añadir al portapapeles; Dodaj do schowka',
                             icon: FaCopy,   // MdLibraryAdd
                             action: (f) => copyTaskToBasket(),
                             fab: 'M03',
@@ -323,12 +323,12 @@
             preAction: description.preventBlur,
             operations: [
                 {
-                    caption: 'Styles',
+                    caption: '_; Styles; Estilos; Style',
                     //tbr: 'B',
                     preAction: description.preventBlur,
                     operations: [
                         {
-                            caption: 'Normal',
+                            caption: '_; Normal; Normal; Normalny',
                             icon: FaRemoveFormat,
                             tbr: 'A',
                             hideToolbarCaption: true,
@@ -336,7 +336,7 @@
                             activeFunc: description.isActiveNormal,
                         },
                         {
-                            caption: 'Heading 1',
+                            caption: '_; Heading 1; Título 1; Nagłówek 1',
                             icon: IcH1,
                             tbr: 'A',
                             hideToolbarCaption: true,
@@ -344,42 +344,42 @@
                             activeFunc: description.isActiveH1
                         },
                         {
-                            caption: 'Heading 2',
+                            caption: '_; Heading 2; Título 2; Nagłówek 2',
                             icon: IcH2,
                             tbr: 'A',hideToolbarCaption: true,
                             action: (f) => description.setHeading(2),
                             activeFunc: description.isActiveH2
                         },
                         {
-                            caption: 'Heading 3',
+                            caption: '_; Heading 3; Título 3; Nagłówek 3',
                             icon: IcH3,
                             tbr: 'A',hideToolbarCaption: true,
                             action: (f) => description.setHeading(3),
                             activeFunc: description.isActiveH3
                         },
                         {
-                            caption: 'Heading 4',
+                            caption: '_; Heading 4; Título 4; Nagłówek 4',
                             icon: IcH4,
                             tbr: 'A',hideToolbarCaption: true,
                             action: (f) => description.setHeading(4),
                             activeFunc: description.isActiveH4
                         },
                         {
-                            caption: 'Code',
+                            caption: '_; Code; Código; Kod',
                             icon: FaCode,
                             tbr: 'A',hideToolbarCaption: true,
                             action: (f) => description.setCode(),
                             activeFunc: description.isActiveCode
                         },
                         {
-                            caption: 'Quote',
+                            caption: '_; Quote; Cita; Cytat',
                             icon: FaQuoteRight,
                             tbr: 'A',hideToolbarCaption: true,
                             action: (f) => description.setQuote(),
                             activeFunc: description.isActiveQuote
                         },
                         {
-                            caption: 'BulletList',
+                            caption: '_; BulletList; Lista con viñetas; Lista punktowana',
                             icon: FaListUl,
                             tbr: 'A',hideToolbarCaption: true,
                             action: (f) => description.setBulletList(),
@@ -389,12 +389,12 @@
                     ]
                 },
                 {
-                    caption: 'Text',
+                    caption: '_; Text; Texto; Tekst',
                     //tbr: 'B',
                     preAction: description.preventBlur,
                     operations: [
                         {
-                            caption: 'Bold',
+                            caption: '_; Bold; Negrita; Pogrubiony',
                             icon: FaBold,
                             action: (f) => description.setBold(),
                             activeFunc: description.isActiveBold,
@@ -402,7 +402,7 @@
                             hideToolbarCaption: true
                         },
                         {
-                            caption: 'Italic',
+                            caption: '_; Italic; Cursiva; Kursywa',
                             icon: FaItalic,
                             action: (f) => description.setItalic(),
                             activeFunc: description.isActiveItalic,
@@ -410,7 +410,7 @@
                             hideToolbarCaption: true
                         },
                         {
-                            caption: 'Underline',
+                            caption: '_; Underline; Subrayar; Podkreślenie',
                             icon: FaUnderline,
                             action: (f) => description.setUnderline(),
                             activeFunc: description.isActiveUnderline,
@@ -418,7 +418,7 @@
                             hideToolbarCaption: true
                         },
                         {
-                            caption: 'Strikethrough',
+                            caption: '_; Strikethrough; Tachado; Przekreślenie',
                             icon: FaStrikethrough,
                             action: (f) => description.setStrikethrough(),
                             activeFunc: description.isActiveStrikethrough,
@@ -426,44 +426,44 @@
                     ]
                 },
                 {
-                    caption: 'Insert',
+                    caption: '_; Insert; Insertar; Wstaw',
                     //tbr: 'B',
                     preAction: description.preventBlur,
                     operations: [
                         {
-                            caption: 'Image',
+                            caption: '_; Image; Imagen; Obraz',
                             icon: FaImage,
                             action: (f) => description.setImage(),
                             activeFunc: description.isActiveImage,
                             tbr: 'A', hideToolbarCaption: true
                         },
                         {
-                            caption: 'Table',
+                            caption: '_; Table; Tabla; Tabela',
                             icon: FaTable,
                             action: (f) => description.setTable(),
                             activeFunc: description.isActiveTable
                         },
                         {
-                            caption: 'Attachement',
+                            caption: '_; Attachement; Anexo; Załącznik',
                             icon: FaPaperclip,
                             action: (f) => runFileAttacher(),
                             tbr: 'A',
                             hideToolbarCaption: true
                         },
                         {
-                            caption: 'Tag',
+                            caption: '_; Tag; Etiqueta; Etykieta',
                             icon: FaTag,
                             action: (f) => runTagInserter()
                         }
                     ]
                 },
                 {
-                    caption: 'Note',
+                    caption: '_; Note; Nota; Notatka',
                     //tbr: 'B',
                     preAction: description.preventBlur,
                     operations: [
                         {
-                            caption: 'Save',
+                            caption: '_; Save; Guardar; Zapisz',
                             hideToolbarCaption: true,
                             icon: FaSave,
                             action: (f) => description?.save(),
@@ -472,7 +472,7 @@
                             disabledFunc: () => !hasModifications()
                         },
                         {
-                            caption: 'Edit...',
+                            caption: '_; Edit...; Editar...; Edytuj...',
                             hideToolbarCaption: true,
                             icon: FaPen,
                             grid: addOperations,
@@ -480,7 +480,7 @@
                         //    tbr: 'A'
                         },
                         {
-                            caption: 'Add to Clipboard',
+                            caption: '_; Add to Clipboard; Añadir al portapapeles; Dodaj do schowka',
                             icon: FaCopy,   // MdLibraryAdd
                             action: (f) => copyTaskToBasket(),
                         //    fab: 'M04',
@@ -497,12 +497,12 @@
 
     const extraPaletteCommandsExt = [
         {
-            caption: 'Save',
+            caption: '_; Save; Guardar; Zapisz',
             icon: FaSave,
             action: () => description?.save(),
         },
         {
-            caption: 'Add to Clipboard',
+            caption: '_; Add to Clipboard; Añadir al portapapeles; Dodaj do schowka',
             icon: FaCopy,   // MdLibraryAdd
             action: () => copyTaskToBasket(),
         }
@@ -511,12 +511,12 @@
 
     const extraInsertPalletteCommandsExt = [
         {
-            caption: 'Attachement',
+            caption: 'Attach_; Attachement; Anexo; Załącznikement',
             icon: FaPaperclip,
             action: runFileAttacher
         },
         {
-            caption: 'Tag',
+            caption: '_; Tag; Etiqueta; Etykieta',
             icon: FaTag,
             action: () => setTimeout(() => runTagInserter(), 500)
         }
@@ -831,5 +831,5 @@
 
 <Modal title='Uploading...' bind:open={pendingUploading} mode={3} icon={FaCloudUploadAlt}>
     <Spinner delay={0}/>
-    <span class="ml-3">Your file is uploading to the server</span>
+    <span class="ml-3">_; Your file is uploading to the server; Tu archivo se está cargando en el servidor; Twój plik jest przesyłany na serwer</span>
 </Modal>

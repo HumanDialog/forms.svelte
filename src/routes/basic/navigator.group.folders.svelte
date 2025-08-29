@@ -193,7 +193,7 @@
                 action: (f) => startEditing(domNode)
             },
             {
-                caption: 'Edit summary',
+                caption: '_; Edit summary; Editar resumen; Edytuj podsumowanie',
                 action: (f) => navItem.editSummary()
             },
             {
@@ -201,12 +201,12 @@
                 action: (f) => navGroupFolders.moveTop(dataItem)
             },
             {
-                caption: 'Move up',
+                caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                 icon: FaCaretUp,
                 action: (f) => navGroupFolders.moveUp(dataItem)
             },
             {
-                caption: 'Move down',
+                caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                 icon: FaCaretDown,
                 action: (f) => navGroupFolders.moveDown(dataItem)
 
@@ -215,11 +215,11 @@
                 separator: true
             },
             {
-                caption: 'Archive',
+                caption: '_; Archive; Archivar; Zarchiwizuj',
                 action: (f) => askToArchive(dataItem)
             },
             {
-                caption: 'Delete',
+                caption: '_; Delete; Eliminar; Usuń',
                 action: (f) => askToDelete(dataItem)
             }
         ]
@@ -249,11 +249,11 @@
                 separator: true
             },
             {
-                caption: '_; Rename; Cambiar nombre; Zmień nazwę',
+                caption: '_; Rename; Editar nombre; Edytuj nazwę',
                 action: (f) => startEditing(domNode)
             },
             {
-                caption: '_; Edit summary; Cambiar la descripción; Zmień opis',
+                caption: '_; Edit summary; Editar resumen; Edytuj podsumowanie',
                 action: (f) => navItem.editSummary()
             },
             {
@@ -284,11 +284,11 @@
                 separator: true
             },
             {
-                caption: '_; Rename; Cambiar nombre; Zmień nazwę',
+                caption: '_; Rename; Editar nombre; Edytuj nazwę',
                 action: (f) => startEditing(domNode)
             },
             {
-                caption: '_; Edit summary; Cambiar la descripción; Zmień opis',
+                caption: '_; Edit summary; Editar resumen; Edytuj podsumowanie',
                 action: (f) => navItem.editSummary()
             },
             {

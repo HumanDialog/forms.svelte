@@ -21,7 +21,7 @@
 	import Checkbox from '$lib/components/checkbox.svelte';
    
 	import { reef, session, signInHRef } from '@humandialog/auth.svelte';
-	import { ComboSource } from '$lib';
+	import { ComboSource, i18n } from '$lib';
     import {showMenu} from '$lib/components/menu'
     import {onErrorShowAlert} from './stores'
     import {randomString} from './utils'
@@ -54,17 +54,23 @@
 
     let fake_users;
 
-    const authAccessKinds = [
-        { name: 'No auth access', key: 0 },
-        { name: 'Read auth access', key: 1 },
+    const authAccessKinds = () => [
+        {   name: i18n({en: 'Cannot change permissions', es: 'No puede cambiar los permisos', pl: 'Nie może zmieniać uprawnień'}),
+            key: 0 },
+        {   name: i18n({en: 'Can only read permissions', es: 'Solo puede leer permisos', pl: 'Może tylko czytać uprawnienia'}), 
+            key: 1 },
         //{ name: 'Can invite others', key: 3 },
-        { name: 'Full auth access', key: 7 },
+        {   name: i18n({en: 'Full access to permissions', es: 'Acceso completo a los permisos', pl: 'Pełny dostęp do uprawnień'}),
+            key: 7 },
     ]
 
-    const filesAccessKinds = [
-        { name: 'Can read files', key: 0 },
-        { name: 'Can write files', key: 1 },
-        { name: 'Full files access', key: 3 },
+    const filesAccessKinds = () => [
+        {   name: i18n({en: 'Can read files', es: 'Puede leer archivos', pl: 'Może odczytywać pliki'}),
+            key: 0 },
+        {   name: i18n({en: 'Can write files', es: 'Puede escribir archivos', pl: 'Może zapisywać pliki'}),
+            key: 1 },
+        {   name: i18n({en: 'Full files access', es: 'Acceso completo a los archivos', pl: 'Pełny dostęp do plików'}), 
+            key: 3 },
     ]
 
     async function init()
@@ -160,9 +166,9 @@
         //console.log(info)
 
         if(user.removed)
-            user.membership_tag = "Removed";
+            user.membership_tag = i18n({en: 'Removed', es: 'Eliminado', pl: 'Usunięto'});
         else if(user.invitation_not_accepted)
-            user.membership_tag = "Invited";
+            user.membership_tag = i18n({en: 'Invited', es: 'Invitado', pl: 'Zaproszono'});
         else
             user.membership_tag = "";
 
@@ -301,11 +307,11 @@
         fab: 'M00',
         operations: [
             {
-                caption: 'View',
+                caption: i18n({en: 'View', es: 'Ver', pl: 'Widok'}),
                 operations: [
                     {
                         icon: FaUserPlus,
-                        caption: 'Add user',
+                        caption: i18n({en: 'Add user', es: 'Añadir usuario', pl: 'Dodaj użytkownika'}),
                         action: (focused) => { create_new_user(); },
                     //    fab: 'M10',
                         tbr: 'A'
@@ -331,14 +337,14 @@
                 action: (focused) =>  { list.edit(user, nameAttrib) }
             },
             {
-                caption: 'Users management (auth role)',
+                caption: i18n({en: 'Users management', es: 'Gestión de usuarios', pl: 'Zarządzanie użytkownikami'}),
                 action: (focused) => { list.edit(user, 'Privileges') }
             }];
 
         if(showAccessRoles)
         {
             operations.push({
-                caption: 'Access role (app role)',
+                caption: i18n({en: 'Role in the application', es: 'Papel en la aplicación', pl: 'Rola w aplikacji'}),
                 action: (focused) => { list.edit(user, 'Access') }
             });
         }
@@ -346,7 +352,7 @@
         if(showFiles)
         {
             operations.push({
-                caption: 'External files (files role)',
+                caption: i18n({en: 'External files', es: 'Archivos externos', pl: 'Pliki zewnętrzne'}),
                 action: (focused) => { list.edit(user, 'Files') }
             });
         }
@@ -358,7 +364,7 @@
         
         let operations = [
             {
-                caption: 'Fetch info',
+                caption: i18n({en: 'Fetch info', es: 'Obtener información', pl: 'Pobierz informacje'}),
                 icon: FaInfo,
                 action: (f) => fetch_user_details(user),
                 tbr: 'A'
@@ -370,7 +376,7 @@
             operations = [ ...operations,
                 {
                     icon: FaUserPlus,
-                    caption: 'Revert removing',
+                    caption: i18n({en: 'Revert removing', es: 'Revertir eliminación', pl: 'Cofnij usunięcie'}),
                     action: (f) => askToAddAgain(user),
 //                    fab: 'M10',
                     tbr: 'A'
@@ -383,14 +389,14 @@
             
             operations.push({
                                 icon: FaPen,
-                                caption: 'Change',
+                                caption: i18n({en: 'Change', es: 'Cambiar', pl: 'Zmień'}),
                                 menu: edit_operations,
                                 //fab: 'M20',
                                 tbr: 'A'
                             });
             
             operations.push({
-                                caption: 'Remove user',
+                                caption: i18n({en: 'Remove user', es: 'Eliminar usuario', pl: 'Usuń użytkownika'}),
                                 icon: FaUserMinus,
                                 action: (focused) => askToRemove(user),
                              //   fab: 'M30',
@@ -404,7 +410,7 @@
             fab: 'M00',
             operations: [
                 {
-                    caption: 'User',
+                    caption: i18n({en: 'User', es: 'Usuario', pl: 'Użytkownik'}),
                  //   tbr: 'B',
                     operations: operations
                 }
@@ -725,7 +731,7 @@
             <ListStaticProperty name="Membership" a="membership_tag"/>
             
             <ListComboProperty name='Privileges' a='auth_group' onSelect={on_change_privileges}>
-                {#each authAccessKinds as kind}
+                {#each authAccessKinds() as kind}
                     <ComboItem name={kind.name} key={kind.key}  />    
                 {/each}
             </ListComboProperty>
@@ -738,7 +744,7 @@
 
             {#if showFiles}
             <ListComboProperty name='Files' a='files_group' onSelect={on_change_files_access}>
-                {#each filesAccessKinds as kind}
+                {#each filesAccessKinds() as kind}
                     <ComboItem name={kind.name} key={kind.key}  />    
                 {/each}
             </ListComboProperty>
@@ -752,8 +758,8 @@
 </Page>
 
 <Modal  bind:open={create_new_user_enabled}
-        title='Invite someone'
-        okCaption='Invite'
+        title={i18n({en: 'Invite someone', es: 'Invitar a alguien', pl: 'Zaproś kogoś'})}
+        okCaption={i18n({en: 'Invite', es: 'Invitar', pl: 'Zaproś'})}
         onOkCallback={on_new_user_requested}
         onCancelCallback={on_new_user_canceled}
         icon={FaUserPlus}>
@@ -766,7 +772,7 @@
                     bind:this={email_input}
                     readonly={new_user.silently}/>
 
-            <Input  label='Name' 
+            <Input  label={i18n({en: 'Name', es: 'Nombre', pl: 'Imię'})} 
                     placeholder='Optional' 
                     self={new_user} 
                     a="name"
@@ -795,7 +801,7 @@
                 <div class="flex flex-col">
                     <label for="new_user_auth_group"
                             class="text-xs">
-                        Auth access
+                        {i18n({en: 'Permissions management', es: 'Gestión de permisos', pl: 'Zarządzanie uprawnieniami'})}
                     </label>
                     <button id="new_user_auth_group"
                             class=" w-full mt-0.5
@@ -811,7 +817,7 @@
                             return;
 
                         let options = [];
-                        authAccessKinds.forEach(k => options.push({
+                        authAccessKinds().forEach(k => options.push({
                             caption: k.name,
                             action: (f) => { new_user.auth_group=k.key}
                         }));
@@ -820,7 +826,7 @@
                         let pt = new DOMPoint(rect.left, rect.bottom)
                         showMenu(pt, options);   
                     }}>
-                        {authAccessKinds.find(k => k.key == new_user.auth_group)?.name}
+                        {authAccessKinds().find(k => k.key == new_user.auth_group)?.name}
                         <span class="w-3 h-3 inline-block text-stone-700 dark:text-stone-300 ml-2 mt-2 sm:mt-1">
                             <FaChevronDown/>
                         </span>
@@ -831,7 +837,7 @@
                     <div class="flex flex-col">
                         <label for="new_user_auth_group"
                                 class="text-xs">
-                            Files access
+                            {i18n({en: 'File access', es: 'Acceso a los archivos', pl: 'Dostęp do plików'})}
                         </label>
                         <button 
                                 class=" mt-0.5 w-full
@@ -847,7 +853,7 @@
                                 return;
 
                             let options = [];
-                            filesAccessKinds.forEach(k => options.push({
+                            filesAccessKinds().forEach(k => options.push({
                                 caption: k.name,
                                 action: (f) => { new_user.files_group=k.key}
                             }));
@@ -856,7 +862,7 @@
                             let pt = new DOMPoint(rect.left, rect.bottom)
                             showMenu(pt, options);   
                         }}>
-                            {filesAccessKinds.find(k => k.key == new_user.files_group)?.name}
+                            {filesAccessKinds().find(k => k.key == new_user.files_group)?.name}
                             <span class="w-3 h-3 inline-block text-stone-700 dark:text-stone-300 ml-2 mt-2 sm:mt-1">
                                 <FaChevronDown/>
                             </span>
@@ -868,7 +874,7 @@
                     <div class="flex flex-col">
                         <label for="new_user_auth_group"
                                 class="text-xs">
-                            App role
+                            {i18n({en: 'Role in the application', es: 'Papel en la aplicación', pl: 'Rola w aplikacji'})}
                         </label>
                         <button 
                                 class=" mt-0.5 w-full
@@ -896,7 +902,7 @@
                             {#if new_user.acc_role}
                                 {access_roles.find(r => r.name==new_user.acc_role).summary}
                             {:else}
-                                {"<none>"}
+                                {i18n({en: '"<none>', es: '<ningún>', pl: '<żadna>'})}
                             {/if}
                            
                             <span class="w-3 h-3 inline-block text-stone-700 dark:text-stone-300 ml-2 mt-2 sm:mt-1">
@@ -908,18 +914,18 @@
             </section>
 </Modal>
 
-<Modal  title="User removal"
-        content="Are you sure you want to remove {userToRemove ? userToRemove[nameAttrib] : 'user'} from the group?"
+<Modal  title={i18n({en: 'User removal', es: 'Eliminar usuario', pl: 'Usuwanie użytkownika'})} 
+        content={i18n({en: `Are you sure you want to remove ${userToRemove ? userToRemove[nameAttrib] : 'user'}?`, es: `¿Estás seguro de que deseas eliminar al ${userToRemove ? userToRemove[nameAttrib] : 'usuario'}?`, pl: `Czy na pewno chcesz usunąć ${userToRemove ? userToRemove[nameAttrib] : 'użytkownika'}?`})}
         icon={FaUserMinus}
-        okCaption='Remove'
+        okCaption={i18n({en: 'Remove', es: 'Eliminar', pl: 'Usuń'})}
         onOkCallback={removeUser}
         bind:this={removeModal}
         />
 
-<Modal  title="Delete app account"
-        content="Are you sure you want to delete your application account?"
+<Modal  title={i18n({en: 'Delete app account', es: 'Eliminar cuenta de la aplicación', pl: 'Usuń konto aplikacji'})}
+        content={i18n({en: 'Are you sure you want to delete your application account?', es: '¿Estás seguro de que deseas eliminar tu cuenta de la aplicación?', pl: 'Czy na pewno chcesz usunąć swoje konto aplikacji?'})}
         icon={FaUserSlash}
-        okCaption='Delete'
+        okCaption={i18n({en: 'Delete', es: 'Eliminar', pl: 'Usuń'})}
         onOkCallback={deleteApplicationAccount}
         bind:this={deleteAccountModal}
         />

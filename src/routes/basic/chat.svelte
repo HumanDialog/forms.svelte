@@ -10,7 +10,8 @@
             UI,
             registerKicksObserver,
             unregisterKicksObserver,
-            forceKicksChecking
+            forceKicksChecking,
+            i18n
             } from '$lib'
 	import { afterUpdate, tick, onMount } from 'svelte';
     import {location, link, querystring} from 'svelte-spa-router'
@@ -219,7 +220,7 @@
         if(channel.IsSubscribed > 0)
         {
             toggleSubscribe = {
-                caption: 'Unsubscribe',
+                caption: '_; Unfollow; Dejar de seguir; Przestań obserwować',
                 icon: FaStar,
                 action: (f) => unsubscribeChannel(),
                 tbr: 'C'
@@ -228,7 +229,7 @@
         else
         {
             toggleSubscribe = {
-                caption: 'Subscribe',
+                caption: '_; Follow; Seguir; Śledź',
                 icon: FaRegStar,
                 action: (f) => subscribeChannel(),
                 tbr: 'C'
@@ -240,7 +241,7 @@
             fab: 'T01',
             operations: [
                 {
-                    caption: 'Channel',
+                    caption: '_; Channel; Canal; Kanał',
                     operations: [
                         ... channel.Status == 1 ? [toggleSubscribe] : []
                     ]
@@ -573,7 +574,7 @@
                                         before:border before:dark:border-red-800 before:border-red-200
                                         after:border after:dark:border-red-800 after:border-red-200
                                         text-red-400 dark:text-red-600">
-                                        Unread messages
+                                        _; Unread messages; Mensajes no leídos; Nieprzeczytane wiadomości
                             </p>
                         {/if}
                         <!--    border-bottom: 1px solid #000; -->
@@ -631,7 +632,7 @@
                     <!---/section-->
                 {/each}
             {:else}
-                <p class="">No messages here</p>
+                <p class="">_; No messages here; No hay mensajes aquí; Brak wiadomości</p>
             {/if}
             <!--p class="h-20"></p-->
 
@@ -687,7 +688,7 @@
                             flex items-center rounded"
                             on:click={showBasket}>
                         <div class="w-5 h-5 mr-1"><FaPaste/></div>
-                        <span class="ml-2">Paste...</span>
+                        <span class="ml-2">_; Paste...; Pegar...; Wklej...</span>
                     </button>
 
                     <p class="flex-none ml-auto py-2.5 mr-1 text-xs m-0">
@@ -703,7 +704,7 @@
                             flex items-center rounded"
                             on:click={onSubmitClick}>
                         <div class="w-5 h-5 mr-1"><FaPaperPlane/></div>
-                        <span class="ml-2">Send</span>
+                        <span class="ml-2">_; Send; Enviar; Wyślij</span>
 
                     </button>
 

@@ -215,11 +215,11 @@
         let menuOperations = [];
         menuOperations = [
             {
-                caption: '_; Rename; Cambiar nombre; Zmień nazwę',
+                caption: '_; Rename; Editar nombre; Edytuj nazwę',
                 action: (f) => startEditing(domNode)
             },
             {
-                caption: '_; Edit summary; Cambiar la descripción; Zmień opis',
+                caption: '_; Edit summary; Editar resumen; Edytuj podsumowanie',
                 action: (f) => navItem.editSummary()
             },
             {

@@ -4,6 +4,7 @@
     import {contextItemsStore, contextToolbarOperations} from '../../stores'
     import {FaBars, FaEllipsisV} from 'svelte-icons/fa'
     import {link, push} from 'svelte-spa-router'
+    import {i18n} from '../../i18n'
     //import FaBars from 'svelte-icons/fa/FaBars.svelte'
 
     import {
@@ -260,7 +261,7 @@
                 opver: 1,
                 operations: [
                     {
-                        caption: 'View',
+                        caption: i18n({en: 'View', es: 'Ver', pl: 'Widok'}),
                         operations: [
                             {
                                 icon: FaEllipsisV,

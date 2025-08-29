@@ -3,7 +3,8 @@
                 Spinner, 
                 Page,
                 navKey, 
-                navGetMode, NAV_MODE_SIDEBAR
+                navGetMode, NAV_MODE_SIDEBAR,
+                i18n
     } from '$lib'
     import {push, location } from "svelte-spa-router";
     import Navigator from "./navigator.svelte";
@@ -14,7 +15,7 @@
     import {session, Authorized, NotAuthorized} from '@humandialog/auth.svelte'
     import Landing from './landing/landing.svelte'
     import {onMount} from 'svelte'
-	import { navGetKey } from '$lib/utils';
+	
 
     export let defaultPath = ''
 
@@ -60,7 +61,7 @@
         opver: 1,
         operations: [
             {
-                caption: 'View',
+                caption: '_; View; Ver; Widok',
                 operations: [
                     {
                         icon: FaPlus,

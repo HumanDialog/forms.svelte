@@ -62,7 +62,7 @@ export function hide_popup()
         popup_visible_store.set('+')
         visible_popup_index = '+'
     }
-    console.log("hide_popup:" + visible_popup_index)
+   // console.log("hide_popup:" + visible_popup_index)
 }
 
 export function show_popup(index)

@@ -12,7 +12,7 @@
                 ListComboProperty,
 				mainContentPageReloader,
                 Modal,
-                onErrorShowAlert} from '$lib'
+                onErrorShowAlert, i18n} from '$lib'
     import {FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCalendar, FaPen, FaArchive, FaEllipsisH, FaCopy, FaCut} from 'svelte-icons/fa'
 
     export let params = {}
@@ -110,11 +110,11 @@
         fab: 'M00',
         operations: [
             {
-                caption: 'View',
+                caption: '_; View; Ver; Widok',
                 operations: [
                     {
                         icon: FaPlus,
-                        caption: 'New Personal Folder',
+                        caption: '_; New personal folder; Nueva carpeta personal; Nowy folder osobisty',
                         //hideToolbarCaption: true,
                         action: (focused) => { listComponent.addRowAfter(null) },
                         fab: 'M01',
@@ -140,12 +140,12 @@
             tbr: 'C',
             operations: [
                 {
-                    caption: 'Folder',
+                    caption: '_; Folder; Carpeta; Folder',
                     //tbr: 'B',
                     operations: [
 
                         {
-                            caption: 'Move up',
+                            caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                             hideToolbarCaption: true,
                             icon: FaCaretUp,
                             action: (f) => listComponent.moveUp(folder),
@@ -153,7 +153,7 @@
                             tbr:'A'
                         },
                         {
-                            caption: 'Move down',
+                            caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                             hideToolbarCaption: true,
                             icon: FaCaretDown,
                             action: (f) => listComponent.moveDown(folder),
@@ -161,14 +161,14 @@
                             tbr:'A'
                         },
                         {
-                            caption: 'Edit name',
+                            caption: '_; Edit name; Editar nombre; Edytuj nazwę',
                             icon: FaPen,
                             fab: 'M20',
                             tbr: 'A',hideToolbarCaption: true,
                             action: (f) =>  { listComponent.edit(folder, 'Title') }
                         },
                         {
-                            caption: 'Edit summary',
+                            caption: '_; Edit summary; Editar resumen; Edytuj podsumowanie',
                             action: (f) =>  { listComponent.edit(folder, 'Summary') }
                         },
                     /*    {
@@ -180,13 +180,13 @@
                         },
                         {
                             icon: FaCut,
-                            caption: 'Move to Clipboard',
+                            caption: '_; Move to Clipboard; Mover al portapapeles; Przenieś do schowka',
                             action: (f) => cutFolderToBasket(folder),
                         //    fab: 'M05',
                             tbr: 'A'
                         },
                     */    {
-                            caption: 'Delete',
+                            caption: '_; Delete; Eliminar; Usuń',
                             //icon: FaTrash,
                             action: (f) => askToDelete(folder),
                             //fab:'M30',
@@ -194,7 +194,7 @@
                         },
                         {
                             icon: FaPlus,
-                            caption: 'New Personal Folder',
+                            caption: '_; New personal folder; Nueva carpeta personal; Nowy folder osobisty',
                             hideToolbarCaption: true,
                             action: (focused) => { listComponent.addRowAfter(folder) },
                             //fab: 'M10',
@@ -222,10 +222,12 @@
     }
     */
 
+    const title = '_; My Folders; Mis carpetas; Moje foldery'
+
 </script>
 
 <svelte:head>
-    <title>My Folders | {__APP_TITLE__}</title>
+    <title>{title} | {__APP_TITLE__}</title>
 </svelte:head>
 
 {#if user}
@@ -233,7 +235,7 @@
     <Page   self={user}
             toolbarOperations={pageOperations}
             clearsContext='props sel'
-            title='My Folders'>
+            title={title}>
             <section class="w-full place-self-center max-w-3xl">
         <List   self={user}
                 a='Folders'
@@ -257,8 +259,8 @@
 {/if}
 
 
-<Modal  title="Delete"
-        content="Are you sure you want to delete selected folder?"
+<Modal  title={i18n(['Delete', 'Eliminar', 'Usuń'])}
+        content={i18n(["Are you sure you want to delete selected folder?", "¿Está seguro de que desea eliminar el elemento seleccionado?", "Czy na pewno chcesz usunąć wybrany element?"])}
         icon={FaTrash}
         onOkCallback={deleteFolder}
         bind:this={deleteModal}

@@ -15,7 +15,7 @@
 			getNiceStringDateTime,
             startEditing,
             IcH1, IcH2, IcH3, IcH4,
-            addAlert
+            addAlert, i18n
         } from '$lib'
 	import { tick } from 'svelte';
     import {location, push, pop, replace, link} from 'svelte-spa-router'
@@ -164,18 +164,18 @@
                     ]
                 },
                 {
-                    caption: 'Insert',
+                    caption: '_; Insert; Insertar; Wstaw',
                     tbr: 'B',
                     operations: [
                          {
-                            caption: 'Attachement',
+                            caption: '_; Attachement; Anexo; Załącznik',
                             icon: FaPaperclip,
                             action: (f) => runFileAttacher(),
                             tbr: 'A',
                             hideToolbarCaption: true
                         },
                         {
-                            caption: 'Tag',
+                            caption: '_; Tag; Etiqueta; Etykieta',
                             icon: FaTag,
                             action: (f) => runTagInserter()
                         }
@@ -210,12 +210,12 @@
                     ]
                 },
                 {
-                    caption: 'Insert',
+                    caption: '_; Insert; Insertar; Wstaw',
                     tbr: 'B',
                     preAction: contentElement.preventBlur,
                     operations: [
                         {
-                            caption: 'Image',
+                            caption: '_; Image; Imagen; Obraz',
                             icon: FaImage,
                             action: (f) => contentElement.setImage(),
                             activeFunc: contentElement.isActiveImage,
@@ -223,32 +223,32 @@
                             hideToolbarCaption: true
                         },
                         {
-                            caption: 'Table',
+                            caption: '_; Table; Tabla; Tabela',
                             icon: FaTable,
                             action: (f) => contentElement.setTable(),
                             activeFunc: contentElement.isActiveTable
                         },
                         {
-                            caption: 'Attachement',
+                            caption: '_; Attachement; Anexo; Załącznik',
                             icon: FaPaperclip,
                             action: (f) => runFileAttacher(),
                             tbr: 'A',
                             hideToolbarCaption: true
                         },
                         {
-                            caption: 'Tag',
+                            caption: '_; Tag; Etiqueta; Etykieta',
                             icon: FaTag,
                             action: (f) => runTagInserter()
                         }
                     ]
                 },
                 {
-                    caption: 'Text',
+                    caption: '_; Text; Texto; Tekst',
                     tbr: 'B',
                     preAction: contentElement.preventBlur,
                     operations: [
                         {
-                            caption: 'Bold',
+                            caption: '_; Bold; Negrita; Pogrubiony',
                             icon: FaBold,
                             action: (f) => contentElement.setBold(),
                             activeFunc: contentElement.isActiveBold,
@@ -256,7 +256,7 @@
                             hideToolbarCaption: true
                         },
                         {
-                            caption: 'Italic',
+                            caption: '_; Italic; Cursiva; Kursywa',
                             icon: FaItalic,
                             action: (f) => contentElement.setItalic(),
                             activeFunc: contentElement.isActiveItalic,
@@ -264,7 +264,7 @@
                             hideToolbarCaption: true
                         },
                         {
-                            caption: 'Underline',
+                            caption: '_; Underline; Subrayar; Podkreślenie',
                             icon: FaUnderline,
                             action: (f) => contentElement.setUnderline(),
                             activeFunc: contentElement.isActiveUnderline,
@@ -272,7 +272,7 @@
                             hideToolbarCaption: true
                         },
                         {
-                            caption: 'Strikethrough',
+                            caption: '_; Strikethrough; Tachado; Przekreślenie',
                             icon: FaStrikethrough,
                             action: (f) => contentElement.setStrikethrough(),
                             activeFunc: contentElement.isActiveStrikethrough,
@@ -280,42 +280,42 @@
                     ]
                 },
                 {
-                    caption: 'Styles',
+                    caption: '_; Styles; Estilos; Style',
                     tbr: 'B',
                     preAction: contentElement.preventBlur,
                     operations: [
                         {
-                            caption: 'Normal',
+                            caption: '_; Normal; Normal; Normalny',
                             icon: FaRemoveFormat,
                             action: (f) => contentElement.setNormal(),
                             activeFunc: contentElement.isActiveNormal,
                         },
                         {
-                            caption: 'Heading 1',
+                            caption: '_; Heading 1; Título 1; Nagłówek 1',
                             icon: IcH1,
                             action: (f) => contentElement.setHeading(1),
                             activeFunc: contentElement.isActiveH1
                         },
                         {
-                            caption: 'Heading 2',
+                            caption: '_; Heading 2; Título 2; Nagłówek 2',
                             icon: IcH2,
                             action: (f) => contentElement.setHeading(2),
                             activeFunc: contentElement.isActiveH2
                         },
                         {
-                            caption: 'Heading 3',
+                            caption: '_; Heading 3; Título 3; Nagłówek 3',
                             icon: IcH3,
                             action: (f) => contentElement.setHeading(3),
                             activeFunc: contentElement.isActiveH3
                         },
                         {
-                            caption: 'Heading 4',
+                            caption: '_; Heading 4; Título 4; Nagłówek 4',
                             icon: IcH4,
                             action: (f) => contentElement.setHeading(4),
                             activeFunc: contentElement.isActiveH4
                         },
                         {
-                            caption: 'Code',
+                            caption: '_; Code; Código; Kod',
                             icon: FaCode,
                             action: (f) => contentElement.setCode(),
                             activeFunc: contentElement.isActiveCode,
@@ -327,7 +327,7 @@
                             activeFunc: contentElement.isActiveComment,
                         },
                         {
-                            caption: 'Quote',
+                            caption: '_; Quote; Cita; Cytat',
                             icon: FaQuoteRight,
                             action: (f) => contentElement.setQuote(),
                             activeFunc: contentElement.isActiveQuote,
@@ -345,7 +345,7 @@
                             activeFunc: contentElement.isActiveInfo,
                         },
                         {
-                            caption: 'BulletList',
+                            caption: '_; BulletList; Lista con viñetas; Lista punktowana',
                             icon: FaListUl,
                             action: (f) => contentElement.setBulletList(),
                             activeFunc: contentElement.isActiveBulletList,
@@ -377,12 +377,12 @@
 
     const extraInsertPalletteCommands = [
         {
-            caption: 'Attachement',
+            caption: '_; Attachement; Anexo; Załącznik',
             icon: FaPaperclip,
             action: runFileAttacher
         },
         {
-            caption: 'Tag',
+            caption: '_; Tag; Etiqueta; Etykieta',
             icon: FaTag,
             action: () => setTimeout(() => runTagInserter(), 500)
         }
