@@ -165,7 +165,7 @@ export {    registerKicksObserver,
             forceKicksChecking }    from './kicks.js'
 
 export {
-    i18n,
+    i18n, extractTranslated, ext,
     setLanguages, getLanguages,
     setCurrentLanguage, getCurrentLanguage, getCurrentLanguageIdx, getCurrentLanguageKey
 }   from './i18n.js'

@@ -53,6 +53,8 @@
     let isReadOnly = false;
     const s = session;
 
+    const STATE_FINISHED = 7000
+
     $: onParamsChanged($location)
 
     async function onParamsChanged(...args)
@@ -144,7 +146,7 @@
             try{
                 availableStates = JSON.parse(task.TaskList.TaskStates);
                 availableStates.forEach( e => {
-                    if(e.state == 1000)
+                    if(e.state == STATE_FINISHED)
                         e.icon = FaCheck;
                     else
                         e.icon = null;

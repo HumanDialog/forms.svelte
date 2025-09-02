@@ -9,7 +9,7 @@
     import NotFound from './landing/not.found.svelte'
     import AppView from './AppView.svelte';
 	import {appUsers} from './users.js'
-    import {dark_mode_store} from '$lib'
+    import {dark_mode_store,  setLanguages} from '$lib'
 
     import { GoogleAnalytics } from '@beyonk/svelte-google-analytics'
     import {cookies_allow_analytics} from './landing/cookie.preferences'
@@ -63,7 +63,7 @@
             google_analytics.init();
     }
 
-    const r = /^\/listboard|tdownload|tcontact|tasklist|task|note|folder|mytasks|myfolders|members|chat|thread|newthread|forum|thome|profile|doc|request-license-file\/(.*)\/?$/i
+    const r = /^\/listboard|tdownload|tcontact|tasklist|task|note|folder|mytasks|myfolders|members|chat|thread|newthread|forum|thome|profile|doc|request-license-file|nav\/(.*)\/?$/i
 
     const routes = new Map()
     routes.set('/',                     Main)
@@ -75,6 +75,25 @@
     routes.set('/blog/*',               wrap({ asyncComponent: () => import('./landing/blog/article.svelte')}))
     routes.set(r, AppView)
     routes.set('*', NotFound)
+
+    setLanguages([
+        {
+            key: "en",
+            name: 'English',
+            flag: '/landing/lang/GB_64.png',
+            default: true
+        },
+        {
+            key: 'es',
+            name: "Español",
+            flag: '/landing/lang/ES_64.png'
+        },
+        {
+            key: 'pl',
+            name: 'Polski',
+            flag: '/landing/lang/PL_64.png'
+        }
+    ])
 
     const authTemporaryPageClass = 'bg-white dark:bg-stone-900 dark:text-white sm:overflow-y-clip absolute top-0 left-0 w-screen h-screen'
     const authButtonClass = `py-2.5 px-4 my-1

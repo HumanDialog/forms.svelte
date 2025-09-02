@@ -13,7 +13,8 @@
 				mainContentPageReloader,
                 Modal,
                 onErrorShowAlert, showMenu,
-				UI, i18n} from '$lib'
+				UI, i18n,
+				ext} from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaList,
         FaEllipsisH, FaChevronRight, FaChevronLeft, FaRandom, FaRegClipboard
     } from 'svelte-icons/fa'
@@ -434,7 +435,7 @@
         list.TaskStates.forEach(s => {
             if(result)
                 result += ', '
-            result += s.name
+            result += ext(s.name)
         })
 
         return result
@@ -456,8 +457,8 @@
             //prevKind = template.Kind
 
             menuOperations.push({
-                caption: template.Name,
-                description: template.Summary ?? getDefaultTypeSummary(template),
+                caption: ext(template.Name),
+                description: template.Summary ? ext(template.Summary) : getDefaultTypeSummary(template),
                 action: (f) => askToChangeListKind(template)
             })
         })

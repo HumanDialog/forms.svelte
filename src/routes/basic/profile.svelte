@@ -164,7 +164,7 @@
                                 {/if}
                             </span>
                         {:else}
-                            _; Enter information about yourself; Introduce información sobre ti mismo; Wpisz informację o sobie
+                            <span>_; Enter information about yourself; Introduce información sobre ti mismo; Wpisz informację o sobie</span>
                         {/if}
                     </p>
                 {:else}

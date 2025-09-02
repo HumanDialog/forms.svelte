@@ -160,3 +160,29 @@ export function i18n(list)
 	}
 }
 
+export function extractTranslated(str)
+{
+	if(str.startsWith('_;'))
+	{
+		const body = str.replace(/^_;\s*/, '');   			// cut prefix "_;  "
+		return i18n(body);
+	}
+	else if(str.startsWith('__;'))
+	{
+		const body = str.replace(/^__;\s*/, '');   			// cut prefix "__;  "
+  		const PAIRS = /([A-Za-z]{2})\s*:\s*([^;]*)/g;
+		const dict = {};
+  		
+		for (const [, code, text] of body.matchAll(PAIRS)) 
+			dict[code.toLowerCase()] = text.trim();
+		
+		return i18n(dict)
+	}
+	else
+		return str
+}
+
+export function ext(str)
+{
+	return extractTranslated(str)
+}

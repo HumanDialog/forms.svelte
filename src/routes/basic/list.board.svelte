@@ -25,7 +25,7 @@
 		ComboItem,
         UI,
         reloadVisibleTags,
-        i18n,
+        i18n, ext,
 		isDeviceSmallerThan
 
 	} from '$lib';
@@ -308,7 +308,7 @@
         list.TaskStates.forEach(s => {
             if(result)
                 result += ', '
-            result += s.name
+            result += ext(s.name)
         })
 
         return result
@@ -330,8 +330,8 @@
             //prevKind = template.Kind
 
             menuOperations.push({
-                caption: template.Name,
-                description: template.Summary ?? getDefaultTypeSummary(template),
+                caption: ext(template.Name),
+                description: template.Summary ? ext(template.Summary) : getDefaultTypeSummary(template),
                 action: (f) => askToChangeListKind(template)
             })
         })
@@ -1025,7 +1025,7 @@
 
 
                 {#each taskStates as taskState, columnIdx (taskState.name+taskState.state)}
-                    <KanbanColumn   title={taskState.name}
+                    <KanbanColumn   title={ext(taskState.name)}
                                     state={taskState.state}
                                     operations={getColumnOperations(columnIdx, taskState)}
                                     onTitleChanged={(title) => onColumnNameChanged(columnIdx, title)}
@@ -1114,7 +1114,7 @@
                 changed={onNewColumnStateSelected}>
 
             {#each newColumnStates as column}
-                <ComboItem key={column.state} name={column.name}/>
+                <ComboItem key={column.state} name={ext(column.name)}/>
             {/each}
         </Combo>
 
