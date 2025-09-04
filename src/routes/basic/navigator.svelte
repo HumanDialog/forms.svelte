@@ -9,7 +9,7 @@
                 reloadWholeApp,
                 Input, 
                 onErrorShowAlert,
-                randomString, UI, i18n} from '$lib'
+                randomString, UI, i18n, ext} from '$lib'
     import {FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaArchive, FaUsers, FaPlus} from 'svelte-icons/fa'
     import {location, push} from 'svelte-spa-router'
     import {reef, session} from '@humandialog/auth.svelte'
@@ -445,9 +445,9 @@
                                     selectable={item}
                                     summary={{
                                         editable: (text) => {changeSummary(item, text, navItems[idx])},
-                                        content: item.Summary}}
+                                        content: ext(item.Summary)}}
                                     editable={(text) => {changeName(item, text)}}>
-                        {item.Name}
+                        {ext(item.Name)}
                     </SidebarItem>
                 </svelte:fragment>
             </SidebarList> 
@@ -461,9 +461,9 @@
                     {@const href = `/tasklist/${item.Id}?archivedList`}
                     <SidebarItem   {href}
                                     icon={FaList}
-                                    summary={item.Summary}
+                                    summary={ext(item.Summary)}
                                     active={isRoutingTo(href, currentPath)}>
-                        {item.Name}
+                        {ext(item.Name)}
                     </SidebarItem>
                 </svelte:fragment>
             </SidebarList>
@@ -515,9 +515,9 @@
                                     {item}
                                     summary={{
                                         editable: (text) => {changeSummary(item, text, navItems[idx])},
-                                        content: item.Summary}}
+                                        content: ext(item.Summary)}}
                                     editable={(text) => {changeName(item, text)}}>
-                        {item.Name}
+                        {ext(item.Name)}
                     </SidebarItem>
                 </svelte:fragment>
             </SidebarList> 
@@ -531,9 +531,9 @@
                     {@const href = `/tasklist/${item.Id}?archivedList`}
                     <SidebarItem   {href}
                                     icon={FaList}
-                                    summary={item.Summary}
+                                    summary={ext(item.Summary)}
                                     {item}>
-                        {item.Name}
+                        {ext(item.Name)}
                     </SidebarItem>
                 </svelte:fragment>
             </SidebarList>

@@ -8,8 +8,8 @@
                 Modal,
                 reloadWholeApp,
                 Input,
-                onErrorShowAlert, UI, i18n} from '$lib'
-    import {FaRegFolder, FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaArchive, FaUsers, FaPlus, FaRegStar, FaStar, FaPaste} from 'svelte-icons/fa'
+                onErrorShowAlert, UI, i18n, ext} from '$lib'
+    import {FaRegFolder, FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaArchive, FaUsers, FaPlus, FaRegStar, FaStar, FaPaste, FaRegClipboard, FaRegComments} from 'svelte-icons/fa'
     import {location, push} from 'svelte-spa-router'
     import {reef, session} from '@humandialog/auth.svelte'
 	import { onMount, tick } from 'svelte';
@@ -71,7 +71,7 @@
                             {
                                 Id: 11,
                                 Association: 'BasketFolder',
-                                Expressions:['Id','$ref', 'Title', 'href', 'Summary'],
+                                Expressions:['Id','$ref', 'Title', 'href', 'Summary', 'icon'],
                             },
                             {
                                 Id: 12,
@@ -82,7 +82,7 @@
                                         Id: 121,
                                         Association: 'Folders/Folder',
                                         Sort: 'Order',
-                                        Expressions:['Id','$ref', 'Title', 'href', 'Summary', 'Order'],
+                                        Expressions:['Id','$ref', 'Title', 'href', 'Summary', 'Order', 'icon'],
                                     }
                                 ]
                             }
@@ -120,7 +120,7 @@
 
     async function fetchGroupFolders()
     {
-        let res = await reef.get("/group/Folders?sort=Order&fields=Id,Title,Summary,Order,href,$type,$ref", onErrorShowAlert);
+        let res = await reef.get("/group/Folders?sort=Order&fields=Id,Title,Summary,Order,href,$type,$ref,icon", onErrorShowAlert);
         if(res != null)
             groupFolders = res.Folder;
         else
@@ -379,6 +379,26 @@
         return (res != null);
     }
 
+    function getFolderIcon(folder)
+    {
+        if(folder.icon)
+        {
+            switch(folder.icon)
+            {
+            case 'Folder':
+                return FaRegFolder;
+            case 'Clipboard':
+                return FaRegClipboard;
+            case 'Discussion':
+                return FaRegComments;
+            default:
+                return FaRegFolder
+            }
+        }
+        else
+            return FaRegFolder
+    }
+
 </script>
 
 {#key currentPath}
@@ -401,9 +421,9 @@
                                             selectable={item}
                                             summary={{
                                                 editable: (text) => {changeSummary(item, text)},
-                                                content: item.Summary}}
+                                                content: ext(item.Summary)}}
                                             editable={(text) => {changeName(item, text)}}>
-                                {item.Title}
+                                {ext(item.Title)}
                             </SidebarItem>
                         </svelte:fragment>
                     </SidebarList>
@@ -432,16 +452,16 @@
                 <svelte:fragment let:item let:idx>
                     {@const href = item.href}
                     <SidebarItem   {href}
-                                    icon={FaRegFolder}
+                                    icon={getFolderIcon(item)}
                                     bind:this={navGroupItems[idx]}
                                     active={isRoutingTo(href, currentPath)}
                                     operations={(node) => getGroupFolderOperations(node, item, navGroupItems[idx])}
                                     selectable={item}
                                     summary={{
                                         editable: (text) => {changeSummary(item, text)},
-                                        content: item.Summary}}
+                                        content: ext(item.Summary)}}
                                     editable={(text) => {changeName(item, text)}}>
-                        {item.Title}
+                        {ext(item.Title)}
                     </SidebarItem>
                 </svelte:fragment>
             </SidebarList>
@@ -483,9 +503,9 @@
                                             {item}
                                             summary={{
                                                 editable: (text) => {changeSummary(item, text)},
-                                                content: item.Summary}}
+                                                content: ext(item.Summary)}}
                                             editable={(text) => {changeName(item, text)}}>
-                                {item.Title}
+                                {ext(item.Title)}
                             </SidebarItem>
                         </svelte:fragment>
                     </SidebarList>
@@ -518,9 +538,9 @@
                                     {item}
                                     summary={{
                                         editable: (text) => {changeSummary(item, text)},
-                                        content: item.Summary}}
+                                        content: ext(item.Summary)}}
                                     editable={(text) => {changeName(item, text)}}>
-                        {item.Title}
+                        {ext(item.Title)}
                     </SidebarItem>
                 </svelte:fragment>
             </SidebarList>

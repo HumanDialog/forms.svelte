@@ -162,6 +162,9 @@ export function i18n(list)
 
 export function extractTranslated(str)
 {
+	if(!str)
+		return ""
+	
 	if(str.startsWith('_;'))
 	{
 		const body = str.replace(/^_;\s*/, '');   			// cut prefix "_;  "

@@ -147,17 +147,17 @@
             fab: 'M00',
             operations: [
                 {
-                    caption: 'Thread',
+                    caption: '_; Thread; Hilo; Wątek',
                     tbr: 'B',
                     operations: [
                         {
-                            caption: 'Publish',
+                            caption: '_; Publish; Publicar; Opublikuj',
                             icon: FaPaperPlane,
                             action: (f) => {postQuestion()},
                             tbr: 'A'
                         }, 
                         {
-                            caption: 'Cancel posting',
+                            caption: '_; Cancel; Cancelar; Anuluj',
                             icon: FaTimes,
                             action: (f) => {askLeaveQuestion()},
                         }
@@ -192,18 +192,18 @@
             fab: 'M00',
             operations: [
                 {
-                    caption: 'Thread',
+                    caption: '_; Thread; Hilo; Wątek',
                     tbr: 'B',
                     preAction: contentElement.preventBlur,
                     operations: [
                         {
-                            caption: 'Publish',
+                            caption: '_; Publish; Publicar; Opublikuj',
                             icon: FaPaperPlane,
                             action: (f) => {postQuestion()},
                             tbr: 'A'
                         }, 
                         {
-                            caption: 'Cancel posting',
+                            caption: '_; Cancel; Cancelar; Anuluj',
                             icon: FaTimes,
                             action: (f) => {askLeaveQuestion()},
                         }
@@ -320,19 +320,19 @@
                             action: (f) => contentElement.setCode(),
                             activeFunc: contentElement.isActiveCode,
                         },
-                        {
+                    /*    {
                             caption: 'Comment',
                             icon: FaComment,
                             action: (f) => contentElement.setComment(),
                             activeFunc: contentElement.isActiveComment,
-                        },
+                        }, */
                         {
                             caption: '_; Quote; Cita; Cytat',
                             icon: FaQuoteRight,
                             action: (f) => contentElement.setQuote(),
                             activeFunc: contentElement.isActiveQuote,
                         },
-                        {
+                   /*     {
                             caption: 'Warning',
                             icon: FaExclamationTriangle,
                             action: (f) => contentElement.setWarning(),
@@ -343,7 +343,7 @@
                             icon: FaInfo,
                             action: (f) => contentElement.setInfo(),
                             activeFunc: contentElement.isActiveInfo,
-                        },
+                        },*/
                         {
                             caption: '_; BulletList; Lista con viñetas; Lista punktowana',
                             icon: FaListUl,
@@ -364,12 +364,12 @@
        
     const extraPaletteCommands = [
         {
-            caption: 'Publish',
+            caption: '_; Publish; Publicar; Opublikuj',
             icon: FaPaperPlane,
             action: () => postQuestion()
         },
         {
-            caption: 'Cancel posting',
+            caption: '_; Cancel; Cancelar; Anuluj',
             icon: FaTimes,
             action: () => askLeaveQuestion()
         }
@@ -501,22 +501,23 @@
 
     async function postQuestion()
     {
+        const msg = '_; Enter title and description first; Introduzca primero el título y la descripción; Najpierw wprowadź tytuł i opis';
         if(!note.Title)
         {
-            addAlert('Enter title and description first')
+            addAlert(msg)
             return;
         }
 
         if(!contentElement)
         {
-            addAlert('Enter title and description first')
+            addAlert(msg)
             return
         }
 
         const originalPostContent = contentElement.getInnerHtml()
         if(!originalPostContent)
         {
-            addAlert('Enter title and description first')
+            addAlert(msg)
             return
         }
 
@@ -536,7 +537,7 @@
 
             if(res)
             {
-                newPostHRef = res
+                newPostHRef = await reef.get(`${res.$ref}/href`, onErrorShowAlert);
             }
             else
             {
@@ -655,7 +656,7 @@
 
             if(res2)
             {
-                newPostHRef = res2;
+                newPostHRef = await reef.get(`${res2.$ref}/href`, onErrorShowAlert);
             }
             else
             {
@@ -690,11 +691,12 @@
         pop()   // na razie tak
     }
 
+    const title = '_; New thread; Nuevo hilo; Nowy wątek'
 
 </script>
 
 <svelte:head>
-    <title>New thread | {__APP_TITLE__}</title>
+    <title> {title} | {__APP_TITLE__}</title>
 </svelte:head>
 
 {#if note != null}
@@ -738,7 +740,7 @@
                     </span>
                 {:else}
                     <span class="placeholder">
-                        Title
+                        _; Title; Título; Tytuł
                     </span>
                 {/if}
             </h1>
@@ -832,7 +834,8 @@
             {:else}
                 <p class="placeholder"
                     on:click={startDescriptionEditing}>
-                    Description. Press '/' to show commands palette
+                    {i18n(["Description. Press '/' to show commands palette", "Descripción. Presiona “/” para mostrar la paleta de comandos.", "Opis. Naciśnij „/”, aby wyświetlić paletę poleceń."])}
+                    
                 </p>
             {/if}
 
@@ -849,7 +852,7 @@
                         border border-stone-300 focus:outline-none dark:border-stone-600
                         flex items-center rounded"
                         on:click={(e) => {askLeaveQuestion()}}>
-                    <span class="ml-1">Cancel</span>
+                    <span class="ml-1">_; Cancel; Cancelar; Anuluj</span>
                     
                 </button>
                 <button type="button" 
@@ -861,7 +864,7 @@
                         on:click={(e) => {postQuestion()}}
                         {disabled}>
                     <div class="w-5 h-5 mr-1"><FaPaperPlane/></div>
-                    <span class="ml-2">Publish</span>
+                    <span class="ml-2">_; Publish; Publicar; Opublikuj</span>
                     
                 </button>
             </section>
@@ -875,13 +878,19 @@
 </Page>
 {/if}
 
-<Modal title='Preparing...' bind:open={pendingResizing} mode={3} icon={FaCloudUploadAlt}>
+<Modal  title={i18n({en: 'Preparing...', es: 'Preparación...', pl: 'Przygotowanie...'})}  
+        bind:open={pendingResizing} mode={3} icon={FaCloudUploadAlt}>
     <Spinner delay={0}/> 
-    <span class="ml-3">Your image is preparing</span>
+    <span class="ml-3">
+         _;
+        Your image is preparing;
+        Tu imagen se está preparando;
+        Twoje zdjęcie jest w trakcie przygotowywania
+    </span>
 </Modal>
 
-<Modal  title="Leave"
-        content="Are you sure you want to leave the creation of a new post?"
+<Modal  title={i18n({en: 'Leave', es: 'Salir', pl: 'Opuść'})}
+        content={i18n({en: 'Are you sure you want to leave the creation of a new post?', es: '¿Estás seguro de que deseas abandonar la creación de una nueva publicación?', pl: 'Czy na pewno chcesz zrezygnować z tworzenia nowego posta?'})}
         icon={FaTimes}
         onOkCallback={leaveQuestion}
         bind:this={leaveModal}

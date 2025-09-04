@@ -229,19 +229,19 @@
                             action: (f) => contentElement.setCode(),
                             activeFunc: contentElement.isActiveCode,
                         },
-                        {
+                /*        {
                             caption: 'Comment',
                             icon: FaComment,
                             action: (f) => contentElement.setComment(),
                             activeFunc: contentElement.isActiveComment,
-                        },
+                        },*/
                         {
                             caption: '_; Quote; Cita; Cytat',
                             icon: FaQuoteRight,
                             action: (f) => contentElement.setQuote(),
                             activeFunc: contentElement.isActiveQuote,
                         },
-                        {
+                /*        {
                             caption: 'Warning',
                             icon: FaExclamationTriangle,
                             action: (f) => contentElement.setWarning(),
@@ -252,7 +252,7 @@
                             icon: FaInfo,
                             action: (f) => contentElement.setInfo(),
                             activeFunc: contentElement.isActiveInfo,
-                        },
+                        },*/
                         {
                             caption: '_; BulletList; Lista con viñetas; Lista punktowana',
                             icon: FaListUl,
@@ -461,9 +461,15 @@
             <input hidden type="file" id="imageFile" accept="image/*" bind:this={imgInput} on:change={onImageSelected}/>
             <input hidden type="file" id="attachementFile" accept="*/*" bind:this={attInput} on:change={onAttachementSelected}/>
 
-            <Modal title='Uploading...' bind:open={pendingUploading} mode={3} icon={FaCloudUploadAlt}>
+            <Modal  title={i18n({en: 'Uploading...', es: 'Cargando...', pl: 'Przesyłanie...'})} 
+                     bind:open={pendingUploading} mode={3} icon={FaCloudUploadAlt}>
                 <Spinner delay={0}/> 
-                <span class="ml-3">Your file is uploading to the server</span>
+                <span class="ml-3">
+                    _;
+                    Your file is uploading to the server;
+                    Tu archivo se está cargando en el servidor;
+                    Twój plik jest przesyłany na serwer
+                </span>
             </Modal>
         {/if}
 {/if}

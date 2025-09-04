@@ -109,9 +109,9 @@
         if(currentList)
         {
             if(!isArchivedTasks)
-                listTitle = currentList.Name
+                listTitle = ext(currentList.Name)
             else
-                listTitle = `${arichive_of()} ${currentList.Name}`
+                listTitle = `${arichive_of()} ${ext(currentList.Name)}`
         }
 
 
@@ -129,9 +129,9 @@
 
         currentList = cachedValue
         if(!isArchivedTasks)
-            listTitle = currentList.Name
+            listTitle = ext(currentList.Name)
         else
-            listTitle = `${arichive_of()} ${currentList.Name}`
+            listTitle = `${arichive_of()} ${ext(currentList.Name)}`
 
         listComponent?.reload(currentList, listComponent.KEEP_SELECTION);
     }
@@ -187,9 +187,9 @@
         if(currentList)
         {
             if(!isArchivedTasks)
-                listTitle = currentList.Name
+                listTitle = ext(currentList.Name)
             else
-                listTitle = `${arichive_of()} ${currentList.Name}`
+                listTitle = `${arichive_of()} ${ext(currentList.Name)}`
         }
     }
 
@@ -507,8 +507,8 @@
 </script>
 
 <svelte:head>
-    {#if currentList && currentList.Name}
-        <title>{currentList.Name} | {__APP_TITLE__}</title>
+    {#if currentList && listTitle}
+        <title>{listTitle} | {__APP_TITLE__}</title>
     {:else}
         <title>{__APP_TITLE__}</title>
     {/if}

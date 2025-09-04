@@ -13,7 +13,7 @@
                 Icon,
             showMenu,
             registerKicksObserver,
-			unregisterKicksObserver, i18n} from '$lib'
+			unregisterKicksObserver, i18n, ext} from '$lib'
     import {FaHashtag, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaRegComment, FaUsers, FaPlus} from 'svelte-icons/fa'
     import {location, push} from 'svelte-spa-router'
     import {reef, session} from '@humandialog/auth.svelte'
@@ -405,7 +405,7 @@
                                         selectable={item}
                                         summary={{
                                             editable: (text) => {changeSummary(item, text)},
-                                            content: item.Summary}}
+                                            content: ext(item.Summary)}}
                                         editable={(text) => {changeName(item, text)}}>
                             <span class="relative">
                                  {#if item.GetUnreadMessagesNo}
@@ -416,7 +416,7 @@
                                         {item.GetUnreadMessagesNo}
                                     </div>
                                 {/if}
-                                {item.Title}
+                                {ext(item.Title)}
                             </span>
                         </SidebarItem>
                     </svelte:fragment>
@@ -440,11 +440,11 @@
                                         selectable={item}
                                         summary={{
                                             editable: (text) => {changeSummary(item, text)},
-                                            content: item.Summary}}
+                                            content: ext(item.Summary)}}
                                         editable={(text) => {changeName(item, text)}}
                                         >
                             <span class="relative">
-                                {item.Title}
+                                {ext(item.Title)}
                                 {#if item.UnreadMessagesNo}
                                     <div class="absolute 
                                             inline-flex items-center justify-center 
@@ -492,9 +492,9 @@
                                         {item}
                                         summary={{
                                             editable: (text) => {changeSummary(item, text)},
-                                            content: item.Summary}}
+                                            content: ext(item.Summary)}}
                                         editable={(text) => {changeName(item, text)}}>
-                            {item.Title}
+                            {ext(item.Title)}
                         </SidebarItem>
                     </svelte:fragment>
                 </SidebarList> 
@@ -513,9 +513,9 @@
                                         {item}
                                         summary={{
                                             editable: (text) => {changeSummary(item, text)},
-                                            content: item.Summary}}
+                                            content: ext(item.Summary)}}
                                         editable={(text) => {changeName(item, text)}}>
-                            {item.Title}
+                            {ext(item.Title)}
                         </SidebarItem>
                     </svelte:fragment>
                 </SidebarList> 

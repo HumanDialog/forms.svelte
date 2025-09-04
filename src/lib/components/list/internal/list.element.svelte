@@ -21,6 +21,7 @@
 	import { push, link } from 'svelte-spa-router';
     import {FaExternalLinkAlt} from 'svelte-icons/fa/'
 	import Tags from '../../tags.svelte'
+    import {ext} from '../../../i18n'
     
     export let item     :object;
 
@@ -376,7 +377,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 {#if item}
-{@const element_title = item[title]}
+{@const element_title = ext(item[title])}
 
 <section    class="my-1 flex flex-row w-full  text-stone-900 dark:text-stone-300 cursor-default rounded-md border border-transparent {selected_class} {focused_class} scroll-mt-[50px] sm:scroll-mt-[40px]"
             role="menu"
@@ -454,8 +455,9 @@
         </section>
 
         {#if summary && (item[summary] || placeholder=='Summary')}
+            {@const summaryText = ext(item[summary])}
             {@const element_id = `__hd_list_ctrl_${getItemKey(item)}_Summary`}
-            {#key item[summary] }           
+            {#key summaryText }           
                 {#if is_row_active}
                     <p  id={element_id} 
                         class=" text-sm                              
@@ -466,14 +468,14 @@
                                 onFinish: (d) => {placeholder='';},
                                 active: true
                             }}>
-                        {item[summary]}
+                        {summaryText}
                     </p>
                 {:else}
                     <p  id={element_id} 
                         class=" text-sm 
                                     text-stone-600 dark:text-stone-400"
                         on:click={(e) => on_active_row_clicked(e, 'bottom')}>
-                        {item[summary]}
+                        {summaryText}
                     </p>
                 {/if}
             {/key}

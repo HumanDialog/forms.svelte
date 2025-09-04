@@ -11,7 +11,7 @@
             registerKicksObserver,
             unregisterKicksObserver,
             forceKicksChecking,
-            i18n
+            i18n, ext
             } from '$lib'
 	import { afterUpdate, tick, onMount } from 'svelte';
     import {location, link, querystring} from 'svelte-spa-router'
@@ -197,7 +197,7 @@
         channel = res.MessageChannel
 
         if(channel.GetTitle)
-            channel.Title = channel.GetTitle
+            channel.Title = ext(channel.GetTitle)
 
         unreadMessagesNo = channel.GetUnreadMessagesNo
 

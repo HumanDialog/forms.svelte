@@ -12,7 +12,9 @@
                 ListComboProperty,
 				mainContentPageReloader,
                 Modal,
-                onErrorShowAlert, i18n} from '$lib'
+                onErrorShowAlert, i18n,
+                breadcrumbAdd, Breadcrumb} from '$lib'
+    import {querystring, location} from 'svelte-spa-router'
     import {FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCalendar, FaPen, FaArchive, FaEllipsisH, FaCopy, FaCut} from 'svelte-icons/fa'
 
     export let params = {}
@@ -20,8 +22,12 @@
     let user = null;
     let listComponent;
 
+    let prevBreadcrumbPath = ''
+    let breadcrumbPath = ''
+    const title = '_; My Folders; Mis carpetas; Moje foldery'
 
-    $: onParamsChanged($session, $mainContentPageReloader);
+
+    $: onParamsChanged($session, $mainContentPageReloader, $querystring);
 
     async function onParamsChanged(...args)
     {
@@ -30,6 +36,14 @@
             user = null;
             return;
         }
+
+        const params = new URLSearchParams($querystring);
+        if(params.has("path"))
+            prevBreadcrumbPath = params.get("path") ?? ''
+        else
+            prevBreadcrumbPath = ''
+
+        breadcrumbPath = breadcrumbAdd(prevBreadcrumbPath, title, $location)
 
         await fetchData()
     }
@@ -222,7 +236,7 @@
     }
     */
 
-    const title = '_; My Folders; Mis carpetas; Moje foldery'
+    
 
 </script>
 
@@ -237,12 +251,22 @@
             clearsContext='props sel'
             title={title}>
             <section class="w-full place-self-center max-w-3xl">
+
+        {#if breadcrumbPath}
+                <Breadcrumb class="hidden sm:block mb-5" path={breadcrumbPath} />
+            {/if}
+
+
+            <p class="hidden sm:block mt-3 ml-3 pb-5 text-lg text-left">
+                {title}
+            </p>
+
         <List   self={user}
                 a='Folders'
                 toolbarOperations={folderOperations}
                 orderAttrib='Order'
                 bind:this={listComponent}>
-            <ListTitle a='Title' hrefFunc={(folder) => `${folder.href}`}/>
+            <ListTitle a='Title' hrefFunc={(folder) => `${folder.href}?path=${breadcrumbPath}`}/>
             <ListSummary a='Summary'/>
             <ListInserter action={addFolder} icon/>
 

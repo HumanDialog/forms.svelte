@@ -22,7 +22,9 @@
             IcH2,
             IcH3,
             IcH4,
-            reloadVisibleTags, i18n
+            reloadVisibleTags, i18n,
+            breadcrumbAdd,
+            Breadcrumb
             } from '$lib'
 	import { afterUpdate, tick } from 'svelte';
     import {location, querystring, push, link} from 'svelte-spa-router'
@@ -55,6 +57,9 @@
     let mobile = isDeviceSmallerThan("sm")
     let scrollToPost = 0
 
+    let prevBreadcrumbPath = ''
+    let breadcrumbPath = ''
+
     $: onParamsChanged($location)
 
     async function onParamsChanged(...args)
@@ -82,6 +87,11 @@
             scrollToPost = parseInt(params.get("res"))
         else
             scrollToPost = 0
+
+        if(params.has("path"))
+            prevBreadcrumbPath = params.get("path") ?? ''
+        else
+            prevBreadcrumbPath = ''
 
         noteRef = `./Note/${taskId}`
 
@@ -189,6 +199,8 @@
             })
         }
 
+        breadcrumbPath = breadcrumbAdd(prevBreadcrumbPath, note.Title, $location)
+
         isReadOnly = true; //(note.$acc & 0x2) == 0
 
         postResponses = [];
@@ -291,11 +303,11 @@
             tbr: 'C',
             operations: [
                 {
-                    caption: 'Thread',
+                    caption: '_; Thread; Hilo; Wątek',
                     //tbr: 'B',
                     operations: [
                         {
-                            caption: 'Reply',
+                            caption: '_; Reply; Responder; Odpowiedz',
                             icon: FaCommentPlus,
                             action: (f) => runAnswerEditor(),
                             tbr: 'A',
@@ -317,7 +329,7 @@
                             }
                         ] : [],
                         {
-                            caption: 'Follow',
+                            caption: '_; Follow; Seguir; Śledź',
                             icon: FaRegStar,        // FaStar
                             action: (f) => {} ,
                         },
@@ -346,7 +358,7 @@
             fab: 'M00',
             operations: [
                 {
-                    caption: 'Thread',
+                    caption: '_; Thread; Hilo; Wątek',
                     preAction: questionElement.preventBlur,
                     operations: [
                         {
@@ -478,19 +490,19 @@
                             action: (f) => questionElement.setCode(),
                             activeFunc: questionElement.isActiveCode,
                         },
-                        {
+                   /*     {
                             caption: 'Comment',
                             icon: FaComment,
                             action: (f) => questionElement.setComment(),
                             activeFunc: questionElement.isActiveComment,
-                        },
+                        }, */
                         {
                             caption: '_; Quote; Cita; Cytat',
                             icon: FaQuoteRight,
                             action: (f) => questionElement.setQuote(),
                             activeFunc: questionElement.isActiveQuote,
                         },
-                        {
+                    /*    {
                             caption: 'Warning',
                             icon: FaExclamationTriangle,
                             action: (f) => questionElement.setWarning(),
@@ -501,7 +513,7 @@
                             icon: FaInfo,
                             action: (f) => questionElement.setInfo(),
                             activeFunc: questionElement.isActiveInfo,
-                        },
+                        }, */
                         {
                             caption: '_; BulletList; Lista con viñetas; Lista punktowana',
                             icon: FaListUl,
@@ -961,18 +973,18 @@
                 fab: 'M00',
                 operations: [
                     {
-                        caption: 'Reply',
+                        caption: '_; Reply; Responder; Odpowiedz',
                         preAction: answerElement.preventBlur,
                         tbr: 'B',
                         operations:[
                             {
-                                caption: 'Publish',
+                                caption: '_; Publish; Publicar; Opublikuj',
                                 icon: FaPaperPlane,
                                 action: (f) => { postAnswer() },
                                 tbr: 'A'
                             },
                             {
-                                caption: 'Cancel answering',
+                                caption: '_; Cancel; Cancelar; Anuluj',
                                 icon: FaTimes,
                                 action: (f) => { askLeaveAnswer() },
                             }
@@ -1084,19 +1096,19 @@
                             action: (f) => answerElement.setCode(),
                             activeFunc: answerElement.isActiveCode,
                         },
-                        {
+                    /*    {
                             caption: 'Comment',
                             icon: FaComment,
                             action: (f) => answerElement.setComment(),
                             activeFunc: answerElement.isActiveComment,
-                        },
+                        }, */
                         {
                             caption: '_; Quote; Cita; Cytat',
                             icon: FaQuoteRight,
                             action: (f) => answerElement.setQuote(),
                             activeFunc: answerElement.isActiveQuote,
                         },
-                        {
+                   /*     {
                             caption: 'Warning',
                             icon: FaExclamationTriangle,
                             action: (f) => answerElement.setWarning(),
@@ -1107,7 +1119,7 @@
                             icon: FaInfo,
                             action: (f) => answerElement.setInfo(),
                             activeFunc: answerElement.isActiveInfo,
-                        },
+                        }, */
                         {
                             caption: '_; BulletList; Lista con viñetas; Lista punktowana',
                             icon: FaListUl,
@@ -1127,12 +1139,12 @@
 
     const extraPaletteCommands = [
         {
-            caption: 'Publish',
+            caption: '_; Publish; Publicar; Opublikuj',
             icon: FaPaperPlane,
             action: () => postAnswer()
         },
         {
-            caption: 'Cancel answering',
+            caption: '_; Cancel; Cancelar; Anuluj',
             icon: FaTimes,
             action: () => askLeaveAnswer()
         }
@@ -1172,6 +1184,9 @@
             title={note.Title}>
     <section class="w-full flex justify-center">
         <article class="w-full prose prose-base prose-zinc dark:prose-invert mx-2  mb-64">
+            {#if breadcrumbPath}
+                <Breadcrumb class="not-prose hidden sm:block" path={breadcrumbPath} collapseLonger/>
+            {/if}
             <section class="w-full flex flex-row justify-between">
                     <p class="">
                         {note.Index}
@@ -1359,7 +1374,7 @@
                                     border border-stone-300 focus:outline-none dark:border-stone-600
                                     flex items-center rounded"
                                     on:click={(e) => {askLeaveAnswer()}}>
-                                <span class="ml-1">Cancel</span>
+                                <span class="ml-1">_; Cancel; Cancelar; Anuluj</span>
 
                             </button>
                             <button type="button"
@@ -1371,7 +1386,7 @@
                                     flex items-center rounded"
                                     on:click={(e) => {postAnswer()}}>
                                 <div class="w-5 h-5 mr-1"><FaPaperPlane/></div>
-                                <span class="ml-2">Publish</span>
+                                <span class="ml-2">_; Publish; Publicar; Opublikuj</span>
 
                             </button>
                         </section>
@@ -1392,7 +1407,7 @@
                                 on:click={(e) => {runAnswerEditor()}}
                                 >
                             <div class="w-5 h-5 mr-1"><FaCommentPlus/></div>
-                            <span class="ml-2">Reply</span>
+                            <span class="ml-2">_; Reply; Responder; Odpowiedz</span>
 
                         </button>
                     </section>
@@ -1408,23 +1423,41 @@
 </Page>
 {/if}
 
-<Modal title='Preparing...' bind:open={pendingResizing} mode={3} icon={FaCloudUploadAlt}>
+<Modal  title={i18n({en: 'Preparing...', es: 'Preparación...', pl: 'Przygotowanie...'})}  
+        bind:open={pendingResizing} mode={3} icon={FaCloudUploadAlt}>
     <Spinner delay={0}/>
-    <span class="ml-3">Your image is preparing</span>
+    <span class="ml-3">
+        _;
+        Your image is preparing;
+        Tu imagen se está preparando;
+        Twoje zdjęcie jest w trakcie przygotowywania
+    </span>
 </Modal>
 
-<Modal title='Uploading...' bind:open={pendingUploading} mode={3} icon={FaCloudUploadAlt}>
+<Modal  title={i18n({en: 'Uploading...', es: 'Cargando...', pl: 'Przesyłanie...'})} 
+        bind:open={pendingUploading} mode={3} icon={FaCloudUploadAlt}>
     <Spinner delay={0}/>
-    <span class="ml-3">Your file is uploading to the server</span>
+    <span class="ml-3">
+        _;
+        Your file is uploading to the server;
+        Tu archivo se está cargando en el servidor;
+        Twój plik jest przesyłany na serwer
+    </span>
 </Modal>
 
-<Modal title='Posting...' bind:open={pendingPosting} mode={3} icon={FaCloudUploadAlt}>
+<Modal  title={i18n({en: 'Posting...', es: 'Publicando...', pl: 'Wysyłanie...'})} 
+        bind:open={pendingPosting} mode={3} icon={FaCloudUploadAlt}>
     <Spinner delay={0}/>
-    <span class="ml-3">Your post is saved on the server</span>
+    <span class="ml-3">
+        _;
+        Your post is saved on the server;
+        Tu publicación se ha guardado en el servidor;
+        Twój post został zapisany na serwerze
+    </span>
 </Modal>
 
-<Modal  title="Leave"
-        content="Are you sure you want to leave the creation of a new post?"
+<Modal  title={i18n({en: 'Leave', es: 'Salir', pl: 'Opuść'})}
+        content={i18n({en: 'Are you sure you want to leave the creation of a new post?', es: '¿Estás seguro de que deseas abandonar la creación de una nueva publicación?', pl: 'Czy na pewno chcesz zrezygnować z tworzenia nowego posta?'})}
         icon={FaTimes}
         onOkCallback={leaveAnswer}
         bind:this={leaveModal}

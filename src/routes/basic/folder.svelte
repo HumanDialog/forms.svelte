@@ -14,7 +14,7 @@
                 Modal,
                 onErrorShowAlert,
 				activateItem, UI,
-				i18n,
+				i18n, ext,
                 Breadcrumb,
 				breadcrumbAdd} from '$lib'
     import {FaRegFile, FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaSync,
@@ -79,7 +79,7 @@
         if(cachedValue)
         {
             contextItem = cachedValue;
-            folderTitle = contextItem.Title;
+            folderTitle = ext(contextItem.Title);
             breadcrumbPath = breadcrumbAdd(prevBreadcrumbPath, folderTitle, $location)
 
             subfoldersComponent?.reload(contextItem, subfoldersComponent.KEEP_SELECTION)
@@ -99,7 +99,7 @@
         contextItem  = readItem
         if(contextItem)
         {
-            folderTitle = contextItem.Title;
+            folderTitle = ext(contextItem.Title);
             breadcrumbPath = breadcrumbAdd(prevBreadcrumbPath, folderTitle, $location)
         }
 
@@ -166,7 +166,7 @@
     {
         contextItem = await readContextItem(contextItemId);
         if(contextItem)
-            folderTitle = contextItem.Title;
+            folderTitle = ext(contextItem.Title);
     }
 
     /*onMount( () => {

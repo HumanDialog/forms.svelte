@@ -999,7 +999,7 @@
 
 <svelte:head>
     {#if currentList && currentList.Name}
-        <title>{currentList.Name} | {__APP_TITLE__}</title>
+        <title>{ext(currentList.Name)} | {__APP_TITLE__}</title>
     {:else}
         <title>{__APP_TITLE__}</title>
     {/if}
@@ -1011,11 +1011,11 @@
 		self={currentList}
 		toolbarOperations={getPageOperations()}
 		clearsContext="props sel"
-		title={currentList.Name}
+		title={ext(currentList.Name)}
 	>
 
 		<Kanban class="grow-0"
-                title={currentList.Name}
+                title={ext(currentList.Name)}
                 bind:this={kanban}>
 
             <KanbanSource self={currentList}
