@@ -537,7 +537,7 @@
 
             if(res)
             {
-                newPostHRef = await reef.get(`${res.$ref}/href`, onErrorShowAlert);
+                newPostHRef = await reef.get(`${res.Note.$ref}/href`, onErrorShowAlert);
             }
             else
             {
@@ -656,7 +656,7 @@
 
             if(res2)
             {
-                newPostHRef = await reef.get(`${res2.$ref}/href`, onErrorShowAlert);
+                newPostHRef = await reef.get(`${res2.Note.$ref}/href`, onErrorShowAlert);
             }
             else
             {
