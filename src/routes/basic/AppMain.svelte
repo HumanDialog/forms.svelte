@@ -97,7 +97,7 @@
         switch(name)
         {
         case 'Folders':
-            return addOperation;
+            return [];
 
         case 'Messages':
             return [];
@@ -106,7 +106,7 @@
             return [];
 
         default:
-            return addOperation;
+            return [];
         }
     }
 

@@ -122,7 +122,7 @@
                                     {
                                         Id: 1,
                                         Association: '',
-                                        Expressions:['Id', '$ref','Title','Summary', 'IsPinned', 'IsBasket'],
+                                        Expressions:['Id', '$ref','Title','Summary', 'IsPinned', 'IsBasket', 'IsRootPinned'],
                                         SubTree:
                                         [
                                             {
@@ -357,7 +357,12 @@
 
     async function addFolder(newFolderAttribs)
     {
-        let res = await reef.post(`${contextPath}/CreateSubFolderEx`,{ properties: newFolderAttribs }, onErrorShowAlert)
+        let res = await reef.post(`${contextPath}/CreateSubFolder`,{ 
+            title: newFolderAttribs.Title,
+            summary:  newFolderAttribs.Summary,
+            order: newFolderAttribs.Order,
+            kind: 0
+        }, onErrorShowAlert)
         if(!res)
             return null;
 
@@ -432,14 +437,14 @@
                     },
                 //fab: 'S00',
                 //tbr: 'C',
-                hideToolbarCaption: true
+                //hideToolbarCaption: true
             }
         }
         else
         {
             pinOperation = {
                 caption: '_; Pin folder; Fijar carpeta; Przypnij folder',
-                icon: FaRegStar, //aRegShareSquare, //
+                //icon: FaRegStar, //aRegShareSquare, //
                 action: async (f) => {
                     await toggleFolderPinned(contextItem);
                     // refreshing operations
@@ -449,7 +454,7 @@
                 },
                 //fab: 'S00',
                 //tbr: 'C',
-                hideToolbarCaption: true
+                //hideToolbarCaption: true
             }
         }
         return pinOperation;
@@ -468,7 +473,7 @@
                     operations: [
                         {
                             caption: '_; Clear Clipboard; Borrar portapapeles; Wyczyść schowek',
-                            icon: FaBasketTrash, //FaTrash,
+                        //    icon: FaBasketTrash, //FaTrash,
                             action: async (f) => await dettachAllMyContent(),
                         //      fab: 'M30',
                             tbr: 'A'
@@ -487,71 +492,96 @@
         }
     }
 
-    function newElementOperations()
+    function newElementOperations(afterElement)
     {
-        return {
+        const isClipboard = contextItem.IsBasket
+        const isRootPinned = contextItem.IsRootPinned
+
+        const canAddFolders = !(isRootPinned || isClipboard)
+        const canAddNotes = !(isRootPinned || isClipboard)
+        const canAddTasks = !(isRootPinned || isClipboard)
+
+        const newFolder = {
+            caption: '_; New folder; Nueva carpeta; Nowy folder',
+            icon: FaRegFolder,
+            action: (f) => { subfoldersComponent.addRowAfter(afterElement) },
+            tbr: 'A',
+            fab: 'M03'
+        }
+
+        const newNote = {
+            caption: '_; New note; Nueva nota; Nowa notatka',
+            icon: FaRegFile,
+            action: (f) => { notesComponent.addRowAfter(afterElement) },
+            tbr: 'A',
+            fab: 'M02'
+        }
+
+        const newTask = {
+            caption: '_; New task; Nueva tarea; Nowe zadanie',
+            icon: FaRegCalendar,
+            action: (f) => { tasksComponent.addRowAfter(afterElement) },
+            tbr: 'A',
+            fab: 'M01'
+        }
+
+        let result = {
             caption: '_; File; Archivo; Plik',
             // tbr: 'B',
-            operations: [
-                {
-                    caption: '_; New folder; Nueva carpeta; Nowy folder',
-                    icon: FaRegFolder,
-                    action: (f) => { subfoldersComponent.addRowAfter(null) },
-                    tbr: 'A',
-                    fab: 'M03'
-                },
-                {
-                    caption: '_; New note; Nueva nota; Nowa notatka',
-                    icon: FaRegFile,
-                    action: (f) => { notesComponent.addRowAfter(null) },
-                    tbr: 'A',
-                    fab: 'M02'
-                },
-                {
-                    caption: '_; New task; Nueva tarea; Nowe zadanie',
-                    icon: FaRegCalendar,
-                    action: (f) => { tasksComponent.addRowAfter(null) },
-                    tbr: 'A',
-                    fab: 'M01'
-                },
-                {
-                    separator: true
-                },
-                {
-                    caption: '_; Add elements from Clipboard; Añadir elementos del portapapeles; Dodaj elementy ze schowka',
-
-                    toolbar: BasketPreview,
-                    props: {
-                        destinationContainer: contextPath,
-                        onRefreshView: refreshViewAfterAttachingFromBasket
-                    },
-                    //fab: 'M01',
-                    //tbr: 'A'
-                },
-            ]
+            operations: [ ]
         }
+
+        if(canAddFolders)
+            result.operations.push(newFolder)
+
+        if(canAddNotes)
+            result.operations.push(newNote)
+
+        if(canAddTasks)
+            result.operations.push(newTask)
+
+        if(result.operations.length > 0)
+            result.operations.push({separator: true})
+
+        
+        result.operations.push({
+            caption: '_; Add elements from Clipboard; Añadir elementos del portapapeles; Dodaj elementy ze schowka',
+            toolbar: BasketPreview,
+            props: {
+                destinationContainer: contextPath,
+                onRefreshView: refreshViewAfterAttachingFromBasket
+            },
+            //fab: 'M01',
+            //tbr: 'A'
+        })
+        return result
     }
 
     function  folderPageOperations()
     {
+        const isClipboard = contextItem.IsBasket
+        const isRootPinned = contextItem.IsRootPinned
+        const canPin = !(isRootPinned || isClipboard)
+        
         return {
             opver: 2,
             fab: 'M00',
             tbr: 'C',
             operations: [
-                newElementOperations(),
+                newElementOperations(null),
                 {
                     caption: '_; View; Ver; Widok',
                     //tbr: 'B',
                     operations: [
-                        pinOp(),
+                        
+                        ... !canPin ? [] : [pinOp()],
                         {
                             caption: '_; Refresh; Actualizar; Odśwież',
                             //icon: FaSync,
                             action: async (f) => await refreshView(),
                             //fab: 'S10',
                             //tbr: 'C',
-                            hideToolbarCaption: true
+                            //hideToolbarCaption: true
                         }
                     ]
                 }
@@ -661,7 +691,7 @@
                                 hideToolbarCaption: true
                             },
                             {
-                                icon: FaTrash,
+                            //    icon: FaTrash,
                                 caption: '_; Remove from Clipboard; Eliminar del portapapeles; Usuń ze schowka',
                                 action: (f) => dettachElement(element, kind),
                             //    fab:'M30',
@@ -681,7 +711,7 @@
                 fab: 'M00',
                 tbr: 'C',
                 operations: [
-                    newElementOperations(),
+                    newElementOperations(element),
                     {
                         caption: '_; Element; Elemento; Element',
 
@@ -693,7 +723,6 @@
                                 icon: FaPen,
                                 tbr: 'A',
                                 fab:'M20',
-                                //action: (focused) =>  { listComponent(kind).edit(element, 'Title') },
                                 grid:[
                                     {
                                         caption: '_; Edit Title; Editar título; Edytuj tytuł',

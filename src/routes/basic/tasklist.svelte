@@ -16,7 +16,7 @@
 				UI, i18n,
 				ext} from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaList,
-        FaEllipsisH, FaChevronRight, FaChevronLeft, FaRandom, FaRegClipboard
+        FaEllipsisH, FaChevronRight, FaChevronLeft, FaRandom, FaCheck, FaCopy
     } from 'svelte-icons/fa'
     import {location, pop, push, querystring, link} from 'svelte-spa-router'
     import {cache} from './cache.js'
@@ -280,11 +280,10 @@
                     operations: [
                         {
                             caption: '_; New task; Nueva tarea; Nowe zadanie',
-                            icon: FaPlus,
+                            icon: FaRegCalendar,
                             action: (f) => { listComponent.addRowAfter(null) },
                             fab: 'M01',
-                            tbr: 'A',
-                            hideToolbarCaption: true
+                            tbr: 'A'
                         },
                         {
                             caption: '_; Add tasks from Clipboard; Añadir tareas desde el portapapeles; Dodaj zadania ze schowka',
@@ -293,9 +292,10 @@
                             props: {
                                 destinationContainer: listPath,
                                 onRefreshView: (f) => reloadTasks(listComponent.KEEP_SELECTION)
-                            },
-                      //      fab: 'M01',
-                      //      tbr: 'A'
+                            }
+                        },
+                        {
+                            separator: true
                         },
                         {
                             //icon: FaRandom,
@@ -323,24 +323,57 @@
 
 
     let taskOperations = (task) => {
+        if(isArchivedList)
+            return []
+
+        if(isArchivedTasks)
+            return []
+
         return {
             opver: 2,
             fab: 'M00',
             tbr: 'C',
             operations: [
                 {
+                    caption: '_; View; Ver; Widok',
+                    //tbr: 'B',
+                    operations: [
+                        {
+                            caption: '_; New task; Nueva tarea; Nowe zadanie',
+                            icon: FaRegCalendar,
+                            action: (f) => { listComponent.addRowAfter(task) },
+                            fab: 'M01',
+                            tbr: 'A'
+                        },
+                        {
+                            caption: '_; Add tasks from Clipboard; Añadir tareas desde el portapapele; Dodaj zadania ze schowka',
+                            toolbar: BasketPreview,
+                            props: {
+                                destinationContainer: listPath,
+                                onRefreshView: (f) => reloadTasks(listComponent.KEEP_SELECTION)
+                            },
+                        },
+                        {
+                            separator: true
+                        },
+                        {
+                            caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
+                            action: changeListKind,
+                        }
+                    ]
+                },
+                {
                     caption: '_; Task; Tarea; Zadanie',
                     //tbr: 'B',
                     operations: [
                         {
                             caption: '_; Edit...; Editar...; Edytuj...',
-                            hideToolbarCaption: true,
                             icon: FaPen,
                             fab: 'M20',
                             tbr: 'A',
                             grid: [
                                 {
-                                    caption: '_; Name; Nombre; Nazwa',
+                                    caption: '_; Title; Título; Tytuł',
                                     action: (focused) =>  { listComponent.edit(task, 'Title') }
                                 },
                                 {
@@ -362,10 +395,19 @@
                             ]
                         },
                         {
+                            caption: '_; Finish; Finalizar; Zakończ',
+                            icon: FaCheck,
+                            action: (f) => finishTask(undefined, task),
+                            disabled: task.State == STATE_FINISHED,
+                            fab: 'M03',
+                            tbr: 'A'
+
+                        },
+                        {
                             caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                             icon: FaCaretUp,
                             action: (f) => listComponent.moveUp(task),
-                            fab: 'M03',
+                            fab: 'M05',
                             tbr: 'A',
                             hideToolbarCaption: true
                         },
@@ -373,9 +415,17 @@
                             caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                             icon: FaCaretDown,
                             action: (f) => listComponent.moveDown(task),
-                            fab: 'M02',
+                            fab: 'M04',
                             tbr: 'A',
                             hideToolbarCaption: true
+                        },
+                        {
+                            caption: '_; Add to Clipboard; Añadir al portapapeles; Dodaj do schowka',
+                            icon: FaCopy, 
+                            action: (f) => copyTaskToBasket(task),
+                            fab: 'M30',
+                            tbr: 'A', hideToolbarCaption: true
+
                         },
                         {
                             //icon: FaArchive,
@@ -388,40 +438,7 @@
                             action: (f) => askToDelete(task)
                         }
                     ]
-                },
-                {
-                    caption: '_; View; Ver; Widok',
-                    //tbr: 'B',
-                    operations: [
-                        {
-                            caption: '_; New task; Nueva tarea; Nowe zadanie',
-                            icon: FaPlus,
-                            action: (f) => { listComponent.addRowAfter(task) },
-                            fab: 'M01',
-                            tbr: 'A',
-                            hideToolbarCaption: true
-                        },
-                        {
-                            caption: '_; Add tasks from Clipboard; Añadir tareas desde el portapapele; Dodaj zadania ze schowka',
-                        //    icon: FaRegClipboard, //FaLink, //aRegShareSquare, //
-                            toolbar: BasketPreview,
-                            props: {
-                                destinationContainer: listPath,
-                                onRefreshView: (f) => reloadTasks(listComponent.KEEP_SELECTION)
-                            },
-                      //      fab: 'M01',
-                      //      tbr: 'A'
-                        },
-                        {
-                            //icon: FaRandom,
-                            caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
-                            action: changeListKind,
-                        //    fab: 'S02',
-                        //    tbr: 'C'
-                        }
-                    ]
                 }
-
             ]
         }
     }
@@ -504,6 +521,11 @@
             UI.navigator.refresh();
     }
 
+    async function copyTaskToBasket(task)
+    {
+        await reef.post(`${task.$ref}/CopyToBasket`, { } , onErrorShowAlert);
+    }
+
 </script>
 
 <svelte:head>
@@ -515,7 +537,7 @@
 </svelte:head>
 
 {#if currentList}
-    {#key listPath} <!-- to force new page operations -->
+    {#key listPath + isArchivedTasks} <!-- to force new page operations -->
     <Page   self={currentList}
             toolbarOperations={ getPageOperations() }
             clearsContext='props sel'

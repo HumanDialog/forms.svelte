@@ -100,7 +100,7 @@ function checkKicks(informObservers=true)
 {
     const s = get(session)
     const appId = s.appId ? s.appId : 'octopus'
-    const tid = s.tid ? s.tid : 'octopus/15'
+    const tid = s.tid ? s.tid : 'octopus/13'
     console.log(s.isActive, appId, tid)
     if(s.isActive && appId && tid)
     {

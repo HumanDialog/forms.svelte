@@ -34,6 +34,10 @@
     import TilosDownload from './tilos/download.svelte'
     import TilosContact from './tilos/contact.svelte'
     import Unauthorized from './tilos/unauthorized.access.svelte';
+    import AllTaskLists from './tasklists.all.svelte'
+    import GroupFolders from './folders.group.svelte'
+    import GeneralChannels from './channels.general.svelte'
+    import PrivateChannels from './channels.private.svelte'
     //import StaticDoc from './tilos/static.doc.svelte'
 
     import { tick, onMount } from 'svelte';
@@ -196,7 +200,11 @@
                         '/profile/*':   {component: Profile},
                         '/profile':     {component: Profile},
                         '/tdownload':   {component: TilosDownload},
-                        '/tcontact':    {component: TilosContact}
+                        '/tcontact':    {component: TilosContact},
+                        '/alllists':    {component: AllTaskLists},
+                        '/group-folders': {component: GroupFolders},
+                        '/general-channels': {component: GeneralChannels},
+                        '/private-channels':{component: PrivateChannels}
                     }
                 },
                 mainToolbar : {

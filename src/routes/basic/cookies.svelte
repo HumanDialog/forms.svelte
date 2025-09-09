@@ -101,9 +101,9 @@
             </span>
                 _;
                 for user session maintenance, analytics and remarketing. Read our ;
-                para el mantenimiento de la sesión del usuario, análisis y remarketing. Lea nuestra
-                w celu utrzymania sesji użytkownika, analizy danych i remarketingu. Zapoznaj się z naszą ;
-                    <a href={privacy} use:link class="whitespace-nowrap underline">
+                para el mantenimiento de la sesión del usuario, análisis y remarketing. Lea nuestra ;
+                w celu utrzymania sesji użytkownika, analizy danych i remarketingu. Zapoznaj się z naszą
+                    <a href={privacy} use:link class="whitespace-nowrap underline pl-1">
                         _; Privacy Policy; Política de privacidad; Polityką prywatności
                     </a>
                 _;
@@ -113,9 +113,9 @@
             </p>
         </div>
         <div class="ml-auto text-right shrink-0 mx-4">
-            <button class="font-semibold pt-1 pb-2 mb-0 mx-1 w-20 text-sm px-1 bg-zinc-100  hover:bg-zinc-300 dark:bg-zinc-700 hover:dark:bg-zinc-600 rounded-md text-slate-900 dark:text-slate-100" on:click={on_deny}>_; Deny; Negar; Odrzuć</button>
-            <button class="font-semibold pt-1 pb-2 mb-0 mx-1 w-20 text-sm px-1 bg-zinc-100 hover:bg-zinc-300 dark:bg-zinc-700 hover:dark:bg-zinc-600 rounded-md text-slate-900 dark:text-slate-100" on:click={on_customize}>_; Customize; Personalizar; Dostosuj</button>
-            <button class="font-semibold pt-1 pb-2 mb-0 mx-1 w-20 text-sm px-1 bg-blue-700 hover:bg-indigo-400 dark:bg-indigo-500 hover:dark:bg-indigo-400 rounded-md text-slate-100 mr-2" on:click={on_allow_all}>_; Allow all; Permitir todo; Pozwól na wszystko</button>
+            <button class="font-semibold pt-1 pb-2 mb-0 mx-1 min-w-[5rem] text-sm px-1 bg-zinc-100  hover:bg-zinc-300 dark:bg-zinc-700 hover:dark:bg-zinc-600 rounded-md text-slate-900 dark:text-slate-100" on:click={on_deny}>_; Deny; Negar; Odrzuć</button>
+            <button class="font-semibold pt-1 pb-2 mb-0 mx-1 min-w-[5rem] text-sm px-1 bg-zinc-100 hover:bg-zinc-300 dark:bg-zinc-700 hover:dark:bg-zinc-600 rounded-md text-slate-900 dark:text-slate-100" on:click={on_customize}>_; Customize; Personalizar; Dostosuj</button>
+            <button class="font-semibold pt-1 pb-2 mb-0 mx-1 min-w-[5rem] text-sm px-1 bg-blue-700 hover:bg-indigo-400 dark:bg-indigo-500 hover:dark:bg-indigo-400 rounded-md text-slate-100 mr-2" on:click={on_allow_all}>_; Allow all; Permitir todo; Pozwól na wszystko</button>
         </div>
     </div>
     {#if customize}
@@ -152,8 +152,8 @@
             Ta strona internetowa wykorzystuje pliki cookie </span>
             _;
             for user session maintenance, analytics and remarketing. Read our ;
-            para el mantenimiento de la sesión del usuario, análisis y remarketing. Lea nuestra
-            w celu utrzymania sesji użytkownika, analizy danych i remarketingu. Zapoznaj się z naszą ;
+            para el mantenimiento de la sesión del usuario, análisis y remarketing. Lea nuestra ;
+            w celu utrzymania sesji użytkownika, analizy danych i remarketingu. Zapoznaj się z naszą 
             <a href={privacy} use:link class="whitespace-nowrap underline">_; Privacy Policy; Política de privacidad; Polityką prywatności</a> 
             _;
             to learn more.;
@@ -162,9 +162,9 @@
         </p>
     </div>
     <div class="flex flex-row justify-around">
-        <button class="font-semibold pt-1 pb-2 mb-0 mx-1 w-20 text-sm px-1 bg-zinc-100  hover:bg-zinc-300 dark:bg-zinc-700 hover:dark:bg-zinc-600 rounded-md text-slate-900 dark:text-slate-100" on:click={on_deny}>_; Deny; Negar; Odrzuć</button>
-        <button class="font-semibold pt-1 pb-2 mb-0 mx-1 w-20 text-sm px-1 bg-zinc-100 hover:bg-zinc-300  dark:bg-zinc-700 hover:dark:bg-zinc-600 rounded-md text-slate-900 dark:text-slate-100" on:click={on_customize}>_; Customize; Personalizar; Dostosuj</button>
-        <button class="font-semibold pt-1 pb-2 mb-0 mx-1 w-20 text-sm px-1 bg-blue-700 hover:bg-indigo-400 dark:bg-indigo-500 hover:dark:bg-indigo-400 rounded-md text-slate-100 mr-2" on:click={on_allow_all}>_; Allow all; Permitir todo; Pozwól na wszystko</button>
+        <button class="font-semibold pt-1 pb-2 mb-0 mx-1 min-w-[5rem] text-sm px-1 bg-zinc-100  hover:bg-zinc-300 dark:bg-zinc-700 hover:dark:bg-zinc-600 rounded-md text-slate-900 dark:text-slate-100" on:click={on_deny}>_; Deny; Negar; Odrzuć</button>
+        <button class="font-semibold pt-1 pb-2 mb-0 mx-1 min-w-[5rem] text-sm px-1 bg-zinc-100 hover:bg-zinc-300  dark:bg-zinc-700 hover:dark:bg-zinc-600 rounded-md text-slate-900 dark:text-slate-100" on:click={on_customize}>_; Customize; Personalizar; Dostosuj</button>
+        <button class="font-semibold pt-1 pb-2 mb-0 mx-1 min-w-[5rem] text-sm px-1 bg-blue-700 hover:bg-indigo-400 dark:bg-indigo-500 hover:dark:bg-indigo-400 rounded-md text-slate-100 mr-2" on:click={on_allow_all}>_; Allow all; Permitir todo; Pozwól na wszystko</button>
     </div>
     {#if customize}
     <section>

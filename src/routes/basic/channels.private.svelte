@@ -3,28 +3,22 @@
     import {    Spinner,
                 Page,
                 Icon,
-                ComboSource,
                 List,
                 ListTitle,
                 ListSummary,
                 ListInserter,
-                ListDateProperty,
-                ListComboProperty,
 				mainContentPageReloader,
-                Modal,
-                onErrorShowAlert, i18n,
-                breadcrumbAdd, Breadcrumb} from '$lib'
+                Modal, showMenu,
+                onErrorShowAlert, i18n} from '$lib'
     import {querystring, location} from 'svelte-spa-router'
-    import {FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCalendar, FaPen, FaArchive, FaEllipsisH, FaCopy, FaCut} from 'svelte-icons/fa'
+    import {FaRegFolder, FaRegComment, FaCaretUp, FaCaretDown, FaTrash, FaRegComments, FaRegClipboard, FaPen, FaArchive, FaEllipsisH, FaCopy, FaCut} from 'svelte-icons/fa'
 
     export let params = {}
 
     let user = null;
     let listComponent;
 
-    let prevBreadcrumbPath = ''
-    let breadcrumbPath = ''
-    const title = '_; My Folders; Mis carpetas; Moje foldery'
+    const title = '_; Private channels; Canales privados; Kanały prywatne'
 
 
     $: onParamsChanged($session, $mainContentPageReloader, $querystring);
@@ -36,14 +30,6 @@
             user = null;
             return;
         }
-
-        const params = new URLSearchParams($querystring);
-        if(params.has("path"))
-            prevBreadcrumbPath = params.get("path") ?? ''
-        else
-            prevBreadcrumbPath = ''
-
-        breadcrumbPath = breadcrumbAdd(prevBreadcrumbPath, title, $location)
 
         await fetchData()
     }
@@ -60,13 +46,13 @@
                                         {
                                             Id: 1,
                                             Association: '',
-                                            Expressions:['Id','Name','login', '$ref'],
+                                            Expressions:['Id','Name', '$ref'],
                                             SubTree:
                                             [
                                                 {
                                                     Id: 2,
-                                                    Association: 'Folders',
-                                                    Expressions:['Id','Title', 'Summary', 'href', 'Order', '$ref'],
+                                                    Association: 'MessageChannels',
+                                                    Expressions:['Id','Title', 'Summary', 'href', 'Order', '$ref', 'UnreadMessagesNo', 'MessageChannelId'],
                                                     Sort: "Order",
                                                 }
                                             ]
@@ -80,7 +66,7 @@
             user = null
     }
 
-    async function reloadFolders(selectRecommendation)
+    async function reloadChannels(selectRecommendation)
     {
         await fetchData();
         listComponent.reload(user, selectRecommendation);
@@ -88,36 +74,28 @@
 
 
     let deleteModal;
-    let folderToDelete;
-    function askToDelete(folder)
+    let channelToDelete;
+    function askToDelete(channel)
     {
-        folderToDelete = folder;
+        channelToDelete = channel;
         deleteModal.show()
     }
 
 
-    async function deleteFolder()
+    async function deleteChannel()
     {
-        if(!folderToDelete)
+        if(!channelToDelete)
             return;
 
-        await reef.post(`${folderToDelete.$ref}/DeletePermanently`, { }, onErrorShowAlert);
+        await reef.delete(`/user/MessageChannels/${channelToDelete.Id}`, onErrorShowAlert)
         deleteModal.hide();
 
 
-        await reloadFolders(listComponent.SELECT_NEXT)
+        await reloadChannels(listComponent.SELECT_NEXT)
     }
 
 
-    async function addFolder(newFolderAttribs)
-    {
-        let res = await reef.post(`/user/Folders/new`, newFolderAttribs, onErrorShowAlert)
-        if(!res)
-            return null;
-
-        let newFolder = res.Folder[0];
-        await reloadFolders(newFolder.Id)
-    }
+    
 
     let pageOperations = {
         opver: 2,
@@ -127,9 +105,9 @@
                 caption: '_; View; Ver; Widok',
                 operations: [
                     {
-                        caption: '_; New folder; Nueva carpeta; Nowy folder',
-                        icon: FaRegFolder,
-                        action: (focused) => { listComponent.addRowAfter(null) },
+                        caption: '_; New channel; Nuevo canal; Nowy kanał',
+                        icon: FaRegComment,
+                        action: onNewDMChannel,
                         tbr: 'A',
                         fab: 'M03'
                     }
@@ -138,15 +116,15 @@
         ]
     }
 
-    function getEditOperations(folder)
+    function getEditOperations(channel)
     {
         return [
 
         ];
     }
 
-    let folderOperations = (folder) => {
-        let editOperations = getEditOperations(folder)
+    let channelOperations = (channel) => {
+        let editOperations = getEditOperations(channel)
         return {
             opver: 2,
             fab: 'M00',
@@ -156,16 +134,16 @@
                     caption: '_; View; Ver; Widok',
                     operations: [ 
                         {
-                            caption: '_; New folder; Nueva carpeta; Nowy folder',
-                            icon: FaRegFolder,
-                            action: (focused) => { listComponent.addRowAfter(folder) },
+                            caption: '_; New channel; Nuevo canal; Nowy kanał',
+                            icon: FaRegComment,
+                            action: onNewDMChannel,
                             tbr: 'A',
                             fab: 'M03'
                         }
                     ]
                 },
                 {
-                    caption: '_; Folder; Carpeta; Folder',
+                    caption: '_; Channel; Canal; Kanał',
                     //tbr: 'B',
                     operations: [
                         {
@@ -174,13 +152,13 @@
                             tbr: 'A',
                             fab:'M20',
                             grid:[
-                                {
+                        /*        {
                                     caption: '_; Edit Title; Editar título; Edytuj tytuł',
-                                    action: (f) =>  { listComponent.edit(folder, 'Title') },
+                                    action: (f) =>  { listComponent.edit(channel, 'Title') },
                                 },
-                                {
+                        */        {
                                     caption: '_; Edit summary; Editar resumen; Edytuj podsumowanie',
-                                    action: (f) =>  { listComponent.edit(folder, 'Summary') }
+                                    action: (f) =>  { listComponent.edit(channel, 'Summary') }
                                 }
                             ]
 
@@ -189,7 +167,7 @@
                             caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                             hideToolbarCaption: true,
                             icon: FaCaretUp,
-                            action: (f) => listComponent.moveUp(folder),
+                            action: (f) => listComponent.moveUp(channel),
                             fab:'M05',
                             tbr:'A',
                         },
@@ -197,7 +175,7 @@
                             caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                             hideToolbarCaption: true,
                             icon: FaCaretDown,
-                            action: (f) => listComponent.moveDown(folder),
+                            action: (f) => listComponent.moveDown(channel),
                             fab:'M04',
                             tbr:'A' 
                         },
@@ -205,52 +183,55 @@
                        {
                             caption: '_; Delete; Eliminar; Usuń',
                             //icon: FaTrash,
-                            action: (f) => askToDelete(folder),
+                            action: (f) => askToDelete(channel),
                             //fab:'M30',
                             //tbr:'B'
                         }
+                        
                     ]
                 }
             ]
         }
     }
 
-    /*
-    async function copyFolderToBasket(folder)
+    async function addDirectChannel(toWhom)
     {
-        await reef.post(`${folder.$ref}/CopyToBasket`, { }, onErrorShowAlert)
-        // not needed
-        //await reloadFolders(listComponent.SELECT_NEXT)
+        const res = await reef.post(`user/AddDirectMesssageChannel`, {
+            toWhom: toWhom
+        }, onErrorShowAlert)
+
+        await reloadChannels(listComponent.KEEP_SELECTION)
     }
 
-    async function cutFolderToBasket(folder)
+    async function onNewDMChannel(element)
     {
-        const res = await reef.post(`${user.$ref}/MoveFolderToBasket`, {folder: folder.$ref}, onErrorShowAlert)
-        if(res)
-            await reloadFolders(listComponent.SELECT_NEXT)
-    }
-    */
+        const res = await reef.post('group/GetPossibleDirectChannelUsers', { 
+            excludeExisting: true
+        }, onErrorShowAlert)
+        if(!res)
+            return;
 
-    function getFolderIcon(folder)
-    {
-        if(folder.icon)
-        {
-            switch(folder.icon)
-            {
-            case 'Folder':
-                return FaRegFolder;
-            case 'Clipboard':
-                return FaRegClipboard;
-            case 'Discussion':
-                return FaRegComments;
-            default:
-                return FaRegFolder
-            }
-        }
-        else
-            return FaRegFolder
-    }
+        let options = []
+        res.forEach(e => {
+            options.push({
+                caption: e.Name,
+                action: async (f) => {await addDirectChannel(e.ref)}
+            })
+        })
 
+        if(!options.length)
+            return;
+
+        let owner = element;
+        while(owner && ((owner.tagName != 'BUTTON') && (owner.tagName != 'LI')))
+            owner = owner.parentElement
+
+        if(!owner)
+            return;
+
+        let rect = owner.getBoundingClientRect()
+        showMenu(rect, options);
+    }
 </script>
 
 <svelte:head>
@@ -265,26 +246,21 @@
             title={title}>
             <section class="w-full place-self-center max-w-3xl">
 
-        {#if breadcrumbPath}
-                <Breadcrumb class="hidden sm:block mb-5" path={breadcrumbPath} />
-            {/if}
-
-
             <p class="hidden sm:block mt-3 ml-3 pb-5 text-lg text-left">
                 {title}
             </p>
 
         <List   self={user}
-                a='Folders'
-                toolbarOperations={folderOperations}
+                a='MessageChannels'
+                toolbarOperations={channelOperations}
                 orderAttrib='Order'
                 bind:this={listComponent}>
-            <ListTitle a='Title' hrefFunc={(folder) => `${folder.href}?path=${breadcrumbPath}`}/>
+            <ListTitle a='Title' hrefFunc={(channel) => `${channel.href}`}/>
             <ListSummary a='Summary'/>
-            <ListInserter action={addFolder} icon/>
+            <!--ListInserter action={addChannel} icon/-->
 
             <span slot="left" let:element>
-                <Icon component={getFolderIcon(element)}
+                <Icon component={FaRegComment}
                     class="h-5 w-5  text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
             </span>
 
@@ -297,8 +273,8 @@
 
 
 <Modal  title={i18n(['Delete', 'Eliminar', 'Usuń'])}
-        content={i18n(["Are you sure you want to delete selected folder?", "¿Está seguro de que desea eliminar el elemento seleccionado?", "Czy na pewno chcesz usunąć wybrany element?"])}
+        content={i18n(["Are you sure you want to delete selected channel?", "¿Está seguro de que desea eliminar el elemento seleccionado?", "Czy na pewno chcesz usunąć wybrany element?"])}
         icon={FaTrash}
-        onOkCallback={deleteFolder}
+        onOkCallback={deleteChannel}
         bind:this={deleteModal}
         />

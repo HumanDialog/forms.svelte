@@ -131,7 +131,7 @@
 
     function fetchGeneralChannels()
     {
-        return reef.get("/group/MessageChannels?sort=Order&fields=$ref,Id,Title,Order,href,$type,GetUnreadMessagesNo,IsSubscribed", onErrorShowAlert).then((res) =>
+        return reef.get("/group/MessageChannels?sort=Order&fields=$ref,Id,Title,Summary,Order,href,$type,GetUnreadMessagesNo,IsSubscribed", onErrorShowAlert).then((res) =>
         {
             if(res != null)
                 generalChannels = res.MessageChannel;
@@ -142,7 +142,7 @@
 
     function fetchDirectChannels()
     {
-        return reef.get("/user/MessageChannels?sort=Order&fields=$ref,Id,Title,Order,href,$type,UnreadMessagesNo,MessageChannelId", onErrorShowAlert).then((res) =>
+        return reef.get("/user/MessageChannels?sort=Order&fields=$ref,Id,Title,Summary,Order,href,$type,UnreadMessagesNo,MessageChannelId", onErrorShowAlert).then((res) =>
         {
             if(res != null)
                 directChannels = res.MessageChannelUser;
@@ -388,12 +388,11 @@
     {@const hasContent = (generalChannels ) || (directChannels )}
     {#if hasContent}
         
-            <SidebarGroup >
+            <SidebarGroup title={i18n({en: 'Common', es: 'Comunes', pl: 'Wspólne'})}
+                        moreHref="/general-channels">
             
                 <SidebarList    objects={generalChannels} 
                                 orderAttrib='Order'
-                                inserter={addChannel} 
-                                inserterPlaceholder={i18n({en: 'New channel', es: 'Nuevo canal', pl: 'Nowy kanał'})}
                                 bind:this={navGeneralLists}>
                     <svelte:fragment let:item let:idx>
                         {@const href = item.href}
@@ -401,12 +400,7 @@
                                         icon={FaHashtag}
                                         bind:this={navGeneralItems[idx]}
                                         active={isRoutingTo(href, currentPath)}
-                                        operations={(node) => getChannelOperations(node, item, navGeneralItems[idx])}
-                                        selectable={item}
-                                        summary={{
-                                            editable: (text) => {changeSummary(item, text)},
-                                            content: ext(item.Summary)}}
-                                        editable={(text) => {changeName(item, text)}}>
+                                        summary={ext(item.Summary)}>
                             <span class="relative">
                                  {#if item.GetUnreadMessagesNo}
                                     <div class="absolute 
@@ -425,7 +419,8 @@
         
 
         
-            <SidebarGroup border>
+            <SidebarGroup title={i18n({en: 'Private', es: 'Privados', pl: 'Prywatne'})}
+                        moreHref="/private-channels">
             
                 <SidebarList    objects={directChannels} 
                                 orderAttrib='Order'
@@ -436,13 +431,7 @@
                                         icon={FaRegComment}
                                         bind:this={navDirectItems[idx]}
                                         active={isRoutingTo(href, currentPath)}
-                                        operations={(node) => getDirectChannelOperations(node, item, navDirectItems[idx])}
-                                        selectable={item}
-                                        summary={{
-                                            editable: (text) => {changeSummary(item, text)},
-                                            content: ext(item.Summary)}}
-                                        editable={(text) => {changeName(item, text)}}
-                                        >
+                                        summary={ ext(item.Summary)}>
                             <span class="relative">
                                 {ext(item.Title)}
                                 {#if item.UnreadMessagesNo}
@@ -458,7 +447,7 @@
                     </svelte:fragment>
                 </SidebarList> 
 
-                <button   class=" mb-2 ml-2 mr-3 w-full
+                <!--button   class=" mb-2 ml-2 mr-3 w-full
                     text-base font-normal 
                     text-stone-500 hover:text-stone-700 dark:text-stone-500 dark:hover:text-stone-400
                     flex items-center" 
@@ -466,7 +455,7 @@
                     >
                     <Icon component={FaPlus} class="inline-block w-4 h-4 mt-0.5 ml-2.5 pr-0.5 mr-4"/>
                     <p>_; New direct channel; Nuevo canal directo; Nowy kanał bezpośredni</p>
-                </button>
+                </button-->
 
             </SidebarGroup>
         
@@ -479,7 +468,8 @@
 
     {@const hasContent = (generalChannels) || (directChannels)}
     {#if hasContent}
-            <SidebarGroup >
+            <SidebarGroup title={i18n({en: 'Common', es: 'Comunes', pl: 'Wspólne'})}
+                        moreHref="/general-channels">
                 <SidebarList    objects={generalChannels} 
                                 orderAttrib='Order'
                                 bind:this={navGeneralLists}>
@@ -488,19 +478,16 @@
                         <SidebarItem   {href}
                                         icon={FaHashtag}
                                         bind:this={navGeneralItems[idx]}
-                                        operations={(node) => getChannelOperations(node, item, navGeneralItems[idx])}
                                         {item}
-                                        summary={{
-                                            editable: (text) => {changeSummary(item, text)},
-                                            content: ext(item.Summary)}}
-                                        editable={(text) => {changeName(item, text)}}>
+                                        summary={ext(item.Summary)}>
                             {ext(item.Title)}
                         </SidebarItem>
                     </svelte:fragment>
                 </SidebarList> 
             </SidebarGroup>
         
-            <SidebarGroup border>
+            <SidebarGroup title={i18n({en: 'Private', es: 'Privados', pl: 'Prywatne'})}
+                        moreHref="/private-channels">
                 <SidebarList    objects={directChannels} 
                                 orderAttrib='Order'
                                 bind:this={navDirectLists}>
@@ -509,18 +496,14 @@
                         <SidebarItem   {href}
                                         icon={FaRegComment}
                                         bind:this={navDirectItems[idx]}
-                                        operations={(node) => getDirectChannelOperations(node, item, navGeneralItems[idx])}
                                         {item}
-                                        summary={{
-                                            editable: (text) => {changeSummary(item, text)},
-                                            content: ext(item.Summary)}}
-                                        editable={(text) => {changeName(item, text)}}>
+                                        summary={ext(item.Summary)}>
                             {ext(item.Title)}
                         </SidebarItem>
                     </svelte:fragment>
                 </SidebarList> 
 
-                <button   class=" mb-2 ml-2 mr-3 w-full
+                <!--button   class=" mb-2 ml-2 mr-3 w-full
                     text-base font-normal 
                     text-stone-500 hover:text-stone-700 dark:text-stone-500 dark:hover:text-stone-400
                     flex items-center" 
@@ -528,7 +511,7 @@
                     >
                     <Icon component={FaPlus} class="inline-block w-4 h-4 mt-0.5 ml-2.5 pr-0.5 mr-4"/>
                     <p>_; New direct channel; Nuevo canal directo; Nowy kanał bezpośredni</p>
-                </button>
+                </button-->
                 
             </SidebarGroup>
         

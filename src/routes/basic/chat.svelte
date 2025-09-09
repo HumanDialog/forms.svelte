@@ -229,7 +229,7 @@
         else
         {
             toggleSubscribe = {
-                caption: '_; Follow; Seguir; Śledź',
+                caption: '_; Follow; Seguir; Obserwuj',
                 icon: FaRegStar,
                 action: (f) => subscribeChannel(),
                 tbr: 'C'

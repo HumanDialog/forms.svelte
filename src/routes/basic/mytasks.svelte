@@ -15,7 +15,7 @@
                 Modal,
                 onErrorShowAlert,
             i18n} from '$lib'
-    import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaArchive, FaEllipsisH} from 'svelte-icons/fa'
+    import {FaCheck, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaArchive, FaEllipsisH} from 'svelte-icons/fa'
 
     export let params = {}
 
@@ -139,7 +139,8 @@
 
     async function finishTask(event, task)
     {
-        event.stopPropagation();
+        if(event)
+            event.stopPropagation();
 
         let result = await reef.post(`${task.$ref}/Finish`, {}, onErrorShowAlert);
         if(result)
@@ -166,11 +167,10 @@
                     caption: '_; View; Ver; Widok',
                     operations: [
                         {
-                            icon: FaPlus,
-                            caption: '_; Add; Añadir; Dodaj',
-                            hideToolbarCaption: true,
+                            icon: FaRegCalendar,
+                            caption: '_; New task; Nueva tarea; Nowe zadanie',
                             action: (focused) => { listComponent.addRowAfter(null) },
-                            //fab: 'M10',
+                            fab: 'M01',
                             tbr: 'A'
                         }
                     ]
@@ -185,18 +185,29 @@
             tbr: 'C',
             operations: [
                 {
+                    caption: '_; View; Ver; Widok',
+                    operations: [
+                        {
+                            caption: '_; New task; Nueva tarea; Nowe zadanie',
+                            icon: FaRegCalendar,
+                            action: (focused) => { listComponent.addRowAfter(task) },
+                            fab: 'M01',
+                            tbr: 'A'
+                        }
+                    ]
+                },
+                {
                     caption: '_; Task; Tarea; Zadanie',
                     //tbr: 'B',
                     operations: [
                         {
                             caption: '_; Edit...; Editar...; Edytuj...',
-                            hideToolbarCaption: true,
                             icon: FaPen,
                             fab: 'M20',
                             tbr: 'A',
                             grid: [
                                     {
-                                        caption: '_; Name; Nombre; Nazwa',
+                                        caption: '_; Title; Título; Tytuł',
                                         action: (focused) =>  { listComponent.edit(task, 'Title') }
                                     },
                                     {
@@ -218,11 +229,20 @@
 
                         },
                         {
-                            caption: 'Move _; Move up; Deslizar hacia arriba; Przesuń w górę',
+                            caption: '_; Finish; Finalizar; Zakończ',
+                            icon: FaCheck,
+                            action: (f) => finishTask(undefined, task),
+                            disabled: task.State == STATE_FINISHED,
+                            fab: 'M03',
+                            tbr: 'A'
+
+                        },
+                        {
+                            caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                             hideToolbarCaption: true,
                             icon: FaCaretUp,
                             action: (f) => listComponent.moveUp(task),
-                            fab: 'M03',
+                            fab: 'M05',
                             tbr: 'A'
                         },
                         {
@@ -230,35 +250,19 @@
                             hideToolbarCaption: true,
                             icon: FaCaretDown,
                             action: (f) => listComponent.moveDown(task),
-                            fab: 'M02',
+                            fab: 'M04',
                             tbr: 'A'
                         },
 
-                        /* {
-                            icon: FaArchive,
+                         {
                             caption: '_; Archive; Archivar; Zarchiwizuj',
                             action: (f) => askToArchive(task)
-                        },*/
+                        },
                         {
-                            icon: FaTrash,
                             caption: '_; Delete; Eliminar; Usuń',
-                            action: (f) => askToDelete(task),
-                            fab: 'S10',
+                            action: (f) => askToDelete(task)
                         }
 
-                    ]
-                },
-                {
-                    caption: '_; View; Ver; Widok',
-                    operations: [
-                        {
-                            caption: '_; Add; Añadir; Dodaj',
-                            hideToolbarCaption: true,
-                            icon: FaPlus,
-                            action: (focused) => { listComponent.addRowAfter(task) },
-                            fab: 'M01',
-                            tbr: 'A'
-                        }
                     ]
                 }
             ]

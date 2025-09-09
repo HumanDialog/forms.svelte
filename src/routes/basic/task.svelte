@@ -25,7 +25,7 @@
             refreshToolbarOperations,
             informModificationEx,
             breadcrumbAdd,
-            Breadcrumb, i18n
+            Breadcrumb, i18n, ext
             } from '$lib'
 	import { onMount, tick } from 'svelte';
     import {location, querystring, push, link} from 'svelte-spa-router'
@@ -79,11 +79,11 @@
             reloadVisibleTags()
         })
 
-        let res = await reef.get('/group/Lists?fields=$ref,Name', onErrorShowAlert)
-        allLists = res.TaskList
+        //let res = await reef.get('/group/Lists?fields=$ref,Name', onErrorShowAlert)
+        //allLists = res.TaskList
 
         //res = await reef.get('/app/Users?fields=$ref,Name')
-        res = await reef.post('group/query',
+        let res = await reef.post('group/query',
                             {
                                 Id: 1,
                                 Name: 'Users',
@@ -323,7 +323,6 @@
                         },
                         {
                             caption: '_; Edit...; Editar...; Edytuj...',
-                            hideToolbarCaption: true,
                             icon: FaPen,
                             grid: addOperations,
                             fab: 'M20',
@@ -333,8 +332,8 @@
                             caption: '_; Add to Clipboard; Añadir al portapapeles; Dodaj do schowka',
                             icon: FaCopy,   // MdLibraryAdd
                             action: (f) => copyTaskToBasket(),
-                            fab: 'M04',
-                            tbr: 'A', hideToolbarCaption: true
+                            fab: 'M30',
+                            tbr: 'A',
 
                         }
                     ]
@@ -517,7 +516,6 @@
                         },
                         {
                             caption: '_; Edit...; Editar...; Edytuj...',
-                            hideToolbarCaption: true,
                             icon: FaPen,
                             grid: addOperations,
                             fab: 'M20',
@@ -528,8 +526,8 @@
                             caption: '_; Add to Clipboard; Añadir al portapapeles; Dodaj do schowka',
                             icon: FaCopy,   // MdLibraryAdd
                             action: (f) => copyTaskToBasket(),
-                            fab: 'M04',
-                            tbr: 'A',hideToolbarCaption: true
+                            fab: 'M30',
+                            tbr: 'A'
 
                         },
                     ]
@@ -697,7 +695,6 @@
                         },
                         {
                             caption: '_; Edit...; Editar...; Edytuj...',
-                            hideToolbarCaption: true,
                             icon: FaPen,
                             grid: addOperations,
                        //     fab: 'M10',
@@ -708,7 +705,7 @@
                             caption: '_; Add to Clipboard; Añadir al portapapeles; Dodaj do schowka',
                             icon: FaCopy,   // MdLibraryAdd
                             action: (f) => copyTaskToBasket(),
-                        //    fab: 'M04',
+                        //    fab: 'M30',
                         //    tbr: 'A'
 
                         },
@@ -720,21 +717,18 @@
 
     }
 
-    const extraPaletteCommands = [
+    const extraPaletteCommands = []
+    const extraPaletteCommandsExt = [
         {
             caption: '_; Save; Guardar; Zapisz',
             icon: FaSave,
             action: () => description?.save(),
             disabledFunc: () => !hasModifications()
-        },
-        {
-            caption: '_; Add to Clipboard; Añadir al portapapeles; Dodaj do schowka',
-            icon: FaCopy,   // MdLibraryAdd
-            action: () => copyTaskToBasket(),
         }
     ]
 
-    const extraInsertPalletteCommands = [
+    const extraInsertPalletteCommands = []
+    const extraInsertPalletteCommandsExt = [
         {
             caption: '_; Attachement; Anexo; Załącznik',
             icon: FaPaperclip,
@@ -744,6 +738,15 @@
             caption: '_; Tag; Etiqueta; Etykieta',
             icon: FaTag,
             action: () => setTimeout(() => runTagInserter(), 500)
+        }
+    ]
+
+    const extraBackPaletteCommands = []
+    const extraBackPaletteCommandsExt = [
+         {
+            caption: '_; Add to Clipboard; Añadir al portapapeles; Dodaj do schowka',
+            icon: FaCopy,   // MdLibraryAdd
+            action: () => copyTaskToBasket(),
         }
     ]
 
@@ -938,7 +941,7 @@
                         {#if task.TaskList || onListPlaceholder}
                             <p>
                                 <a href={task.TaskList.href} use:link >
-                                    {task.TaskList.Name}
+                                    {ext(task.TaskList.Name)}
                                 </a>
                             </p>
                             <!--Combo  compact
@@ -1077,7 +1080,8 @@
                             onAddImage={uploadImage}
                             onRemoveImage={removeImage}
                             extraFrontPaletteCommands={extraPaletteCommands}
-                            extraInsertPaletteCommands={extraInsertPalletteCommands}/>
+                            extraInsertPaletteCommands={extraInsertPalletteCommands}
+                            extraBackPaletteCommands={extraBackPaletteCommands}/>
 
             {/if}
 

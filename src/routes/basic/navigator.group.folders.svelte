@@ -76,11 +76,11 @@
                             {
                                 Id: 12,
                                 Association: 'PinnedFolders',
-                                Expressions:['Id','$ref', 'Title'],
+                                Expressions:['Id','$ref', 'Title', 'href'],
                                 SubTree:[
                                     {
                                         Id: 121,
-                                        Association: 'Folders/Folder',
+                                        Association: 'Folders',
                                         Sort: 'Order',
                                         Expressions:['Id','$ref', 'Title', 'href', 'Summary', 'Order', 'icon'],
                                     }
@@ -94,7 +94,7 @@
                 {
                     user = res.User
                     basket = user.BasketFolder
-                    pinnedFolders = user.PinnedFolders['Folders/Folder']
+                    pinnedFolders = user.PinnedFolders.Folders
 
                     navPinnedFolders?.reload(pinnedFolders)
                     cache.set('navFoldersUser', user)
@@ -406,7 +406,8 @@
     {#if groupFolders && groupFolders.length > 0}
         {#if $session.isActive}
             {#if pinnedFolders && pinnedFolders.length > 0}
-                <SidebarGroup >
+                <SidebarGroup title={i18n({en: 'Pinned', es: 'Sujetado', pl: 'Przypięte'})}
+                        moreHref={user.PinnedFolders.href}>
 
                     <SidebarList    objects={pinnedFolders}
                                     orderAttrib='Order'
@@ -417,12 +418,7 @@
                                             icon={FaRegStar}
                                             bind:this={navPinnedItems[idx]}
                                             active={isRoutingTo(href, currentPath)}
-                                            operations={(node) => getPinnedFolderOperations(node, item, navPinnedItems[idx])}
-                                            selectable={item}
-                                            summary={{
-                                                editable: (text) => {changeSummary(item, text)},
-                                                content: ext(item.Summary)}}
-                                            editable={(text) => {changeName(item, text)}}>
+                                            summary={ext(item.Summary)}>
                                 {ext(item.Title)}
                             </SidebarItem>
                         </svelte:fragment>
@@ -430,24 +426,21 @@
                 </SidebarGroup>
             {/if}
 
-            <SidebarGroup border>
+            <SidebarGroup title={i18n({en: 'Personal', es: 'Personales', pl: 'Osobiste'})}>
                 <SidebarItem   href="/myfolders"
                                 icon={FaRegFolder}
                                 active={isRoutingTo("/myfolders", currentPath)}
-                                operations={(node) => getMyFoldersOperations(node, user)}
-                                summary={i18n(["Personal folders", "Carpetas personales", "Foldery osobiste"])}
-                                selectable={user}> <!--  _; Personal folders; Carpetas personales Foldery osobiste -->
+                                summary={i18n(["Personal folders", "Carpetas personales", "Foldery osobiste"])}>
                     _; My Folders; Mis carpetas; Moje Foldery
                 </SidebarItem>
             </SidebarGroup>
         {/if}
 
-        <SidebarGroup border>
+        <SidebarGroup  title={i18n({en: 'Common', es: 'Comunes', pl: 'Wspólne'})}
+                        moreHref="/group-folders">
 
             <SidebarList    objects={groupFolders}
                             orderAttrib='Order'
-                            inserter={addFolder}
-                            inserterPlaceholder={i18n(['New folder', 'Nueva carpeta', 'Nowy folder'])}
                             bind:this={navGroupFolders}>
                 <svelte:fragment let:item let:idx>
                     {@const href = item.href}
@@ -455,12 +448,7 @@
                                     icon={getFolderIcon(item)}
                                     bind:this={navGroupItems[idx]}
                                     active={isRoutingTo(href, currentPath)}
-                                    operations={(node) => getGroupFolderOperations(node, item, navGroupItems[idx])}
-                                    selectable={item}
-                                    summary={{
-                                        editable: (text) => {changeSummary(item, text)},
-                                        content: ext(item.Summary)}}
-                                    editable={(text) => {changeName(item, text)}}>
+                                    summary={ext(item.Summary)}>
                         {ext(item.Title)}
                     </SidebarItem>
                 </svelte:fragment>
@@ -490,7 +478,8 @@
 
         {#if $session.isActive}
             {#if pinnedFolders && pinnedFolders.length > 0}
-                <SidebarGroup >
+                <SidebarGroup   title={i18n({en: 'Pinned', es: 'Sujetado', pl: 'Przypięte'})}
+                                moreHref={user.PinnedFolders.href}>
                     <SidebarList    objects={pinnedFolders}
                                     orderAttrib='Order'
                                     bind:this={navPinnedFolders}>
@@ -499,12 +488,8 @@
                             <SidebarItem   {href}
                                             icon={FaRegStar}
                                             bind:this={navPinnedItems[idx]}
-                                            operations={(node) => getPinnedFolderOperations(node, item, navPinnedItems[idx])}
                                             {item}
-                                            summary={{
-                                                editable: (text) => {changeSummary(item, text)},
-                                                content: ext(item.Summary)}}
-                                            editable={(text) => {changeName(item, text)}}>
+                                            summary={ext(item.Summary)}>
                                 {ext(item.Title)}
                             </SidebarItem>
                         </svelte:fragment>
@@ -514,10 +499,9 @@
 
 
 
-            <SidebarGroup border>
+            <SidebarGroup title={i18n({en: 'Personal', es: 'Personales', pl: 'Osobiste'})}>
                 <SidebarItem    href="/myfolders"
                                 icon={FaRegFolder}
-                                operations={(node) => getMyFoldersOperations(node, user)}
                                 summary={i18n(["Personal folders", "Carpetas personales", "Foldery osobiste"])}
                                 item={user}>
                     _; My Folders; Mis carpetas; Moje Foldery
@@ -525,7 +509,8 @@
             </SidebarGroup>
         {/if}
 
-        <SidebarGroup border>
+        <SidebarGroup title={i18n({en: 'Common', es: 'Comunes', pl: 'Wspólne'})}
+                        moreHref="/group-folders">
             <SidebarList    objects={groupFolders}
                             orderAttrib='Order'
                             bind:this={navGroupFolders}>
@@ -534,12 +519,8 @@
                     <SidebarItem   {href}
                                     icon={FaRegFolder}
                                     bind:this={navGroupItems[idx]}
-                                    operations={(node) => getGroupFolderOperations(node, item, navGroupItems[idx])}
                                     {item}
-                                    summary={{
-                                        editable: (text) => {changeSummary(item, text)},
-                                        content: ext(item.Summary)}}
-                                    editable={(text) => {changeName(item, text)}}>
+                                    summary={ext(item.Summary)}>
                         {ext(item.Title)}
                     </SidebarItem>
                 </svelte:fragment>

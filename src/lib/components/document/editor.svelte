@@ -1540,13 +1540,13 @@
 
     const paletteCommands  = [
 
-                {    caption: i18n({en: 'Text', es: 'Texto', pl: 'Tekst'}),         
-                    separator: true },
-                ...paletteMarksCommands(),
-
                 {    caption: i18n({en: 'Styles', es: 'Estilos', pl: 'Style'}),       
                     separator: true },
                 ...paletteStylesCommands(),
+
+                {    caption: i18n({en: 'Text', es: 'Texto', pl: 'Tekst'}),         
+                    separator: true },
+                ...paletteMarksCommands(),
 
                 {   caption: i18n({en: 'Insert', es: 'Insertar', pl: 'Wstaw'}),        
                     separator: true },
@@ -1632,11 +1632,12 @@
             commands.push({ separator: true})
         }
 
+        commands = [...commands, { caption: i18n({en: 'Styles', es: 'Estilos', pl: 'Style'}),   separator: true }]
+        commands = [...commands, ...paletteStylesCommands()]
 
         commands = [...commands, { caption: i18n({en: 'Text', es: 'Texto', pl: 'Tekst'}),     separator: true }]
         commands = [...commands, ...paletteMarksCommands()]
-        commands = [...commands, { caption: i18n({en: 'Styles', es: 'Estilos', pl: 'Style'}),   separator: true }]
-        commands = [...commands, ...paletteStylesCommands()]
+        
 
         commands = [...commands, {   caption: i18n({en: 'Insert', es: 'Insertar', pl: 'Wstaw'}),  separator: true }]
         if(extraInsertPaletteCommands && extraInsertPaletteCommands.length > 0)

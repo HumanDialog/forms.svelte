@@ -287,7 +287,6 @@
                         },
                         {
                             caption: '_; Edit...; Editar...; Edytuj...',
-                            hideToolbarCaption: true,
                             icon: FaPen,
                             grid: addOperations,
                             fab: 'M20',
@@ -297,7 +296,7 @@
                             caption: '_; Add to Clipboard; Añadir al portapapeles; Dodaj do schowka',
                             icon: FaCopy,   // MdLibraryAdd
                             action: (f) => copyTaskToBasket(),
-                            fab: 'M03',
+                            fab: 'M30',
                             tbr: 'A'
 
                         }
@@ -473,7 +472,6 @@
                         },
                         {
                             caption: '_; Edit...; Editar...; Edytuj...',
-                            hideToolbarCaption: true,
                             icon: FaPen,
                             grid: addOperations,
                         //    fab: 'M10',
@@ -483,7 +481,7 @@
                             caption: '_; Add to Clipboard; Añadir al portapapeles; Dodaj do schowka',
                             icon: FaCopy,   // MdLibraryAdd
                             action: (f) => copyTaskToBasket(),
-                        //    fab: 'M04',
+                        //   fab: 'M30',
                         //    tbr: 'A'
 
                         }
@@ -500,12 +498,8 @@
             caption: '_; Save; Guardar; Zapisz',
             icon: FaSave,
             action: () => description?.save(),
-        },
-        {
-            caption: '_; Add to Clipboard; Añadir al portapapeles; Dodaj do schowka',
-            icon: FaCopy,   // MdLibraryAdd
-            action: () => copyTaskToBasket(),
         }
+        
     ]
     const extraInsertPalletteCommands = []
 
@@ -519,6 +513,15 @@
             caption: '_; Tag; Etiqueta; Etykieta',
             icon: FaTag,
             action: () => setTimeout(() => runTagInserter(), 500)
+        }
+    ]
+
+    const extraBackPaletteCommands = []
+    const extraBackPaletteCommandsExt = [
+        {
+            caption: '_; Add to Clipboard; Añadir al portapapeles; Dodaj do schowka',
+            icon: FaCopy,   // MdLibraryAdd
+            action: () => copyTaskToBasket(),
         }
     ]
 
@@ -815,7 +818,8 @@
                             onAddImage={uploadImage}
                             onRemoveImage={removeImage}
                             extraFrontPaletteCommands={extraPaletteCommands}
-                            extraInsertPaletteCommands={extraInsertPalletteCommands}/>
+                            extraInsertPaletteCommands={extraInsertPalletteCommands}
+                            extraBackPaletteCommands={extraBackPaletteCommands}/>
             <!--{/if}-->
 
         </article>

@@ -256,9 +256,17 @@
 
     function activate_row(e, item)
     {
+        const openable = !!definition.title_href || !!definition.title_href_func
         if(toolbarOperations)
         {
             activateItem('props', item, toolbarOperations(item));
+            
+            if(e)
+                e.stopPropagation();
+        }
+        else if(openable)
+        {
+            activateItem('props', item, []);
             
             if(e)
                 e.stopPropagation();

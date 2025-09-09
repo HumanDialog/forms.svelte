@@ -9,9 +9,9 @@
                 reloadWholeApp,
                 Input, 
                 onErrorShowAlert,
-                randomString, UI, i18n, ext} from '$lib'
+                randomString, UI, i18n, ext, isDeviceSmallerThan} from '$lib'
     import {FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaArchive, FaUsers, FaPlus} from 'svelte-icons/fa'
-    import {location, push} from 'svelte-spa-router'
+    import {location, push, link} from 'svelte-spa-router'
     import {reef, session} from '@humandialog/auth.svelte'
 	import { afterUpdate, onMount, tick } from 'svelte';
     import {cache} from './cache.js'
@@ -72,7 +72,21 @@
 
     async function fetchData()
     {
-        let res = await reef.get("/group/Lists?sort=Order&fields=Id,Name,Summary,Order,href,$type", onErrorShowAlert);
+        let res = await reef.post('group/query', {
+            Id: 1,
+            Name: "collector",
+            ExpandLevel: 1,
+            Limit: isDeviceSmallerThan("sm") ? 7 : 12,
+            Tree: [
+                {
+                    Id: 2,
+                    Association: 'Lists',
+                    Sort: "Order",
+                    Expressions: ['Id', 'Name', 'Summary', 'Order', 'href', '$ref', '$type']
+                }
+            ]
+        }, onErrorShowAlert)
+
         if(res != null)
             taskLists = res.TaskList;
         else
@@ -420,7 +434,6 @@
                 <SidebarItem   href="/mytasks"
                                 icon={FaList}
                                 active={isRoutingTo("/mytasks", currentPath)}
-                                operations={(node) => getUserListOperations(node, user)}
                                 summary={i18n(["All active tasks assigned to me.", "Tareas activas asignadas a mí.", "Aktywne zadania przypisane do mnie."])}
                                 selectable={user}>
                     _; My Tasks; Mis tareas; Moje zadania
@@ -428,12 +441,11 @@
             </SidebarGroup>
         {/if}
 
-        <SidebarGroup border>
+        <SidebarGroup   title={i18n({en: 'Task lists', es: 'Listas de tareas', pl: 'Listy zadań'})}
+                        moreHref="/alllists">
            
             <SidebarList    objects={taskLists} 
                             orderAttrib='Order'
-                            inserter={addList} 
-                            inserterPlaceholder={i18n(['New list', 'Nueva lista', 'Nowa lista'])}
                             bind:this={navLists}>
                 <svelte:fragment let:item let:idx>
                     {@const href = item.href}
@@ -441,33 +453,11 @@
                                     icon={FaList}
                                     bind:this={navItems[idx]}
                                     active={isRoutingTo(href, currentPath)}
-                                    operations={(node) => getTaskListOperations(node, item, navItems[idx])}
-                                    selectable={item}
-                                    summary={{
-                                        editable: (text) => {changeSummary(item, text, navItems[idx])},
-                                        content: ext(item.Summary)}}
-                                    editable={(text) => {changeName(item, text)}}>
+                                    summary={ext(item.Summary)}>
                         {ext(item.Name)}
                     </SidebarItem>
                 </svelte:fragment>
             </SidebarList> 
-        </SidebarGroup>
-
-        <SidebarGroup border collapsable onExpand={onExpandArchived} 
-                        title={i18n(['Archived', 'Archivado', 'Zarchiwizowane'])} >
-            <SidebarList    objects={archivedLists}
-                            bind:this={navArchivedLists}>
-                <svelte:fragment let:item>
-                    {@const href = `/tasklist/${item.Id}?archivedList`}
-                    <SidebarItem   {href}
-                                    icon={FaList}
-                                    summary={ext(item.Summary)}
-                                    active={isRoutingTo(href, currentPath)}>
-                        {ext(item.Name)}
-                    </SidebarItem>
-                </svelte:fragment>
-            </SidebarList>
-            
         </SidebarGroup>
 
     {:else}
@@ -494,7 +484,6 @@
             <SidebarGroup border>
                 <SidebarItem    href="/mytasks"
                                 icon={FaList}
-                                operations={(node) => getUserListOperations(node, user)}
                                 summary={i18n(["All active tasks assigned to me.", "Tareas activas asignadas a mí.", "Aktywne zadania przypisane do mnie."])}
                                 item={user}>
                     _; My Tasks; Mis tareas; Moje zadania
@@ -502,7 +491,9 @@
             </SidebarGroup>
         {/if}
         
-        <SidebarGroup border>
+        <SidebarGroup title={i18n({en: 'Task lists', es: 'Listas de tareas', pl: 'Listy zadań'})}
+                        moreHref="/alllists">
+                        
             <SidebarList    objects={taskLists} 
                             orderAttrib='Order'
                             bind:this={navLists}>
@@ -511,33 +502,13 @@
                     <SidebarItem   {href}
                                     icon={FaList}
                                     bind:this={navItems[idx]}
-                                    operations={(node) => getTaskListOperations(node, item, navItems[idx])}
+                                    
                                     {item}
-                                    summary={{
-                                        editable: (text) => {changeSummary(item, text, navItems[idx])},
-                                        content: ext(item.Summary)}}
-                                    editable={(text) => {changeName(item, text)}}>
+                                    summary={ext(item.Summary)}>
                         {ext(item.Name)}
                     </SidebarItem>
                 </svelte:fragment>
             </SidebarList> 
-        </SidebarGroup>
-
-        <SidebarGroup border collapsable onExpand={onExpandArchived} 
-                        title={i18n(['Archived', 'Archivado', 'Zarchiwizowane'])} >
-            <SidebarList    objects={archivedLists}
-                            bind:this={navArchivedLists}>
-                <svelte:fragment let:item>
-                    {@const href = `/tasklist/${item.Id}?archivedList`}
-                    <SidebarItem   {href}
-                                    icon={FaList}
-                                    summary={ext(item.Summary)}
-                                    {item}>
-                        {ext(item.Name)}
-                    </SidebarItem>
-                </svelte:fragment>
-            </SidebarList>
-            
         </SidebarGroup>
 
     {:else}
@@ -546,7 +517,7 @@
 {/if}
 {/key}
 
-<Modal  title={i18n(['Delete', 'Eliminar', 'Usuń'])}
+<!--Modal  title={i18n(['Delete', 'Eliminar', 'Usuń'])}
         content={i18n(["Are you sure you want to delete selected list?", '¿Está seguro de que desea eliminar la lista seleccionada?', 'Czy na pewno chcesz usunąć wybraną listę?'])}
         icon={FaTrash}
         onOkCallback={deleteList}
@@ -572,4 +543,4 @@
             self={newGroupParams} 
             a="name"
             required/>
-</Modal>
+</Modal-->

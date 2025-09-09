@@ -15,16 +15,16 @@
                 onErrorShowAlert, i18n,
                 breadcrumbAdd, Breadcrumb} from '$lib'
     import {querystring, location} from 'svelte-spa-router'
-    import {FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCalendar, FaPen, FaArchive, FaEllipsisH, FaCopy, FaCut} from 'svelte-icons/fa'
+    import {FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegComments, FaRegClipboard, FaPen, FaArchive, FaEllipsisH, FaCopy, FaCut} from 'svelte-icons/fa'
 
     export let params = {}
 
-    let user = null;
+    let group = null;
     let listComponent;
 
     let prevBreadcrumbPath = ''
     let breadcrumbPath = ''
-    const title = '_; My Folders; Mis carpetas; Moje foldery'
+    const title = '_; Common folders; Carpetas comunes; Wspólne foldery'
 
 
     $: onParamsChanged($session, $mainContentPageReloader, $querystring);
@@ -33,7 +33,7 @@
     {
         if(!$session.isActive)
         {
-            user = null;
+            group = null;
             return;
         }
 
@@ -50,7 +50,7 @@
 
     async function fetchData()
     {
-        let res = await reef.post(`/user/query`,
+        let res = await reef.post(`/group/query`,
                                 {
                                     Id: 1,
                                     Name: "collector",
@@ -60,13 +60,13 @@
                                         {
                                             Id: 1,
                                             Association: '',
-                                            Expressions:['Id','Name','login', '$ref'],
+                                            Expressions:['Id','Name', '$ref'],
                                             SubTree:
                                             [
                                                 {
                                                     Id: 2,
                                                     Association: 'Folders',
-                                                    Expressions:['Id','Title', 'Summary', 'href', 'Order', '$ref'],
+                                                    Expressions:['Id','Title', 'Summary', 'href', 'Order', '$ref', 'icon'],
                                                     Sort: "Order",
                                                 }
                                             ]
@@ -75,15 +75,15 @@
                                 },
                                 onErrorShowAlert);
         if(res)
-            user = res.User;
+            group = res.Group;
         else
-            user = null
+            group = null
     }
 
     async function reloadFolders(selectRecommendation)
     {
         await fetchData();
-        listComponent.reload(user, selectRecommendation);
+        listComponent.reload(group, selectRecommendation);
     }
 
 
@@ -111,7 +111,7 @@
 
     async function addFolder(newFolderAttribs)
     {
-        let res = await reef.post(`/user/Folders/new`, newFolderAttribs, onErrorShowAlert)
+        let res = await reef.post("/group/Folders/new", newFolderAttribs, onErrorShowAlert);
         if(!res)
             return null;
 
@@ -209,6 +209,7 @@
                             //fab:'M30',
                             //tbr:'B'
                         }
+                        
                     ]
                 }
             ]
@@ -231,6 +232,7 @@
     }
     */
 
+    
     function getFolderIcon(folder)
     {
         if(folder.icon)
@@ -257,9 +259,9 @@
     <title>{title} | {__APP_TITLE__}</title>
 </svelte:head>
 
-{#if user}
+{#if group}
 
-    <Page   self={user}
+    <Page   self={group}
             toolbarOperations={pageOperations}
             clearsContext='props sel'
             title={title}>
@@ -274,7 +276,7 @@
                 {title}
             </p>
 
-        <List   self={user}
+        <List   self={group}
                 a='Folders'
                 toolbarOperations={folderOperations}
                 orderAttrib='Order'
