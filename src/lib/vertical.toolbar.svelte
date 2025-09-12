@@ -90,7 +90,10 @@
                         const tab = {
                             key: key,
                             icon: ctab.icon,
-                            onclick: (e) => on_navigator_tab_clicked(e, key)
+                            onclick: (e) => on_navigator_tab_clicked(e, key),
+                            mountObserver: ctab.mountObserver,
+                            badgeObtainerAsync: ctab.badgeObtainerAsync,
+                            badgeObtainer: ctab.badgeObtainer
                         }
 
                         tabs.push(tab); 
@@ -388,6 +391,26 @@
         newGroupParams.name = '';
         newGroupModalVisible = false;
     }
+
+    function mountNavigator(node, tab)
+    {
+        if(!tab.mountObserver)
+            return;
+
+        const onDestroy = tab.mountObserver(rerenderTabs)
+
+        return {
+            destroy() {
+                if(onDestroy)
+                    onDestroy()
+            }
+        }
+    }
+
+    function rerenderTabs()
+    {
+        tabs = [...tabs]
+    }
     
 </script>
 
@@ -398,11 +421,41 @@
         {#each tabs as tab}
             {@const isSelected = $navKey == tab.key}
             <button
-                class="h-16 px-0 flex justify-center items-center w-full text-stone-300 hover:text-stone-100"
+                class="h-16 px-0 flex justify-center items-center w-full text-stone-300 hover:text-stone-100 relative"
                 class:bg-orange-500={isSelected}
-                on:click={tab.onclick}>
+                on:click={tab.onclick}
+                use:mountNavigator={tab}>
                 
                 <Icon s="xl" component={tab.icon}/>
+
+                {#if !isSelected}
+                    {#if tab.badgeObtainer}
+                        {@const badge=tab.badgeObtainer()}
+                        {#if badge > 0}
+                            {#if badge > 9}
+                                9+
+                            {:else}
+                                {badge}
+                            {/if}
+                        {/if}
+                    {:else if tab.badgeObtainerAsync}
+                        {#await tab.badgeObtainerAsync() then badge}
+                            {#if badge > 0}
+                                <div class="absolute 
+                                            inline-flex items-center justify-center 
+                                            w-5 h-5 
+                                            text-[10px] font-bold text-white bg-red-500 border-2 border-white rounded-full bottom-2 end-0 dark:border-gray-900">
+                                    {#if badge > 9}
+                                        9+
+                                    {:else}
+                                        {badge}
+                                    {/if}
+                                </div>
+                            {/if}
+                        {/await}
+                    {/if}
+                {/if}
+
             </button>
         {/each}
     </div>

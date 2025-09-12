@@ -406,8 +406,12 @@
                                     <div class="absolute 
                                             inline-flex items-center justify-center 
                                             w-5 h-5 
-                                            text-xs font-bold text-white bg-red-500 border-2 border-white rounded-full -top-1 -end-5 dark:border-gray-900">
-                                        {item.GetUnreadMessagesNo}
+                                            text-[10px] font-bold text-white bg-red-500 border-2 border-white rounded-full -top-1 -end-5 dark:border-gray-900">
+                                        {#if item.UnreadMessagesNo <= 9}
+                                            {item.UnreadMessagesNo}
+                                        {:else}
+                                            9+
+                                        {/if}
                                     </div>
                                 {/if}
                                 {ext(item.Title)}
@@ -438,8 +442,12 @@
                                     <div class="absolute 
                                             inline-flex items-center justify-center 
                                             w-5 h-5 
-                                            text-xs font-bold text-white bg-red-500 border-2 border-white rounded-full -top-1 -end-5 dark:border-gray-900">
-                                        {item.UnreadMessagesNo}
+                                            text-[10px] font-bold text-white bg-red-500 border-2 border-white rounded-full -top-1 -end-5 dark:border-gray-900">
+                                        {#if item.UnreadMessagesNo <= 9}
+                                            {item.UnreadMessagesNo}
+                                        {:else}
+                                            9+
+                                        {/if}
                                     </div>
                                 {/if}
                             </span>
@@ -480,7 +488,21 @@
                                         bind:this={navGeneralItems[idx]}
                                         {item}
                                         summary={ext(item.Summary)}>
-                            {ext(item.Title)}
+                           <span class="relative">
+                                 {#if item.GetUnreadMessagesNo}
+                                    <div class="absolute 
+                                            inline-flex items-center justify-center 
+                                            w-5 h-5 
+                                            text-[10px] font-bold text-white bg-red-500 border-2 border-white rounded-full -top-1 -end-5 dark:border-gray-900">
+                                        {#if item.UnreadMessagesNo <= 9}
+                                            {item.UnreadMessagesNo}
+                                        {:else}
+                                            9+
+                                        {/if}
+                                    </div>
+                                {/if}
+                                {ext(item.Title)}
+                            </span>
                         </SidebarItem>
                     </svelte:fragment>
                 </SidebarList> 
@@ -498,7 +520,21 @@
                                         bind:this={navDirectItems[idx]}
                                         {item}
                                         summary={ext(item.Summary)}>
-                            {ext(item.Title)}
+                            <span class="relative">
+                                {ext(item.Title)}
+                                {#if item.UnreadMessagesNo}
+                                    <div class="absolute 
+                                            inline-flex items-center justify-center 
+                                            w-5 h-5 
+                                            text-[10px] font-bold text-white bg-red-500 border-2 border-white rounded-full -top-1 -end-5 dark:border-gray-900">
+                                        {#if item.UnreadMessagesNo <= 9}
+                                            {item.UnreadMessagesNo}
+                                        {:else}
+                                            9+
+                                        {/if}
+                                    </div>
+                                {/if}
+                            </span>
                         </SidebarItem>
                     </svelte:fragment>
                 </SidebarList> 

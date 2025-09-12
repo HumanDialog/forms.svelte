@@ -1,6 +1,6 @@
 <script>
     import {reef, session, Authorized, NotAuthorized} from '@humandialog/auth.svelte'
-	import {Layout, onErrorShowAlert, Spinner, i18n, Console} from '$lib';
+	import {Layout, onErrorShowAlert, Spinner, i18n, Console, registerKicksObserver, unregisterKicksObserver} from '$lib';
     import Sidebar from './sidebar.svelte'
 
     import SidebarFolders from './sidebar.folders.svelte'
@@ -111,7 +111,9 @@
                 return {
                     'Messages': {
                             icon: FaComments,
-                            component: SidebarMessages
+                            component: SidebarMessages,
+                            mountObserver: mountMessagesObserver,
+                            badgeObtainerAsync: async () => await getUnreadMessages()
                         }
                 }
 
@@ -142,6 +144,51 @@
             default:
                 return { }
             }
+        }
+    }
+
+    let kicksObserver = 0
+    let rerenderTabs;
+    function mountMessagesObserver(rerenderTabsCb)
+    {
+        rerenderTabs = rerenderTabsCb;
+        let lazyFetcher = setTimeout(() => { 
+            lazyFetcher=0; 
+            fetchSubscribedChannels()}, 1000)
+
+        return () => {
+        
+            if(lazyFetcher)
+            {
+                clearTimeout(lazyFetcher)
+                lazyFetcher = 0
+            }
+            
+            if(kicksObserver)
+            {
+                unregisterKicksObserver(kicksObserver)
+                kicksObserver = 0
+            }
+        }
+    }
+
+    async function fetchSubscribedChannels()
+    {
+        const labels = await reef.get('user/GetSubscribedChannelsKickLabels', onErrorShowAlert)
+        if(labels && Array.isArray(labels) && labels.length > 0)
+            kicksObserver = registerKicksObserver(labels, 60, refreshMessagesTab)
+    }
+
+    async function getUnreadMessages()
+    {
+        return await reef.get('user/GetUnreadMessagesNo', onErrorShowAlert)
+    }
+
+    async function refreshMessagesTab(labels)
+    {       
+        if(rerenderTabs)
+        {
+            setTimeout(() => rerenderTabs(), 4000)
         }
     }
 

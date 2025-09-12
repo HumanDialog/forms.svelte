@@ -97,6 +97,7 @@
 
     async function onRemoteChanged(labels)
     {
+        //console.log('onRemoteChanged')
         let restoreSelection = isDuringEditing()
         if(restoreSelection)
             storeEditableSelection()
@@ -307,6 +308,7 @@
             await reloadData();
             await tick();   // rerender
             scrollDown();
+            editableElement?.focus()
 
             startHeuristicRefreshing();
         }
