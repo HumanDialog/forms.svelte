@@ -5,7 +5,12 @@ import Grid from './Grid.menu.svelte'
 let menu_comopnent :Menu|null = null;
 let toolbar_component :Floating_container|null = null;
 
-export function showMenu(around :DOMRect|DOMPoint, operations)
+export const SHOW_MENU_BELOW = 0
+export const SHOW_MENU_ABOVE = 1
+export const SHOW_MENU_RIGHT = 2
+export const SHOW_MENU_LEFT = 3
+
+export function showMenu(around :DOMRect|DOMPoint, operations, preference :number = SHOW_MENU_BELOW)
 {
     let menu_element =  document.getElementById("__hd_svelte_contextmenu");
     if(!menu_element)
@@ -21,14 +26,14 @@ export function showMenu(around :DOMRect|DOMPoint, operations)
             }
         });
         
-        menu_comopnent.show(around, operations);
+        menu_comopnent.show(around, operations, preference);
     }
     else if(menu_comopnent)
     {
         if(menu_comopnent.isVisible())
             menu_comopnent.hide();
         else
-            menu_comopnent.show(around, operations);
+            menu_comopnent.show(around, operations, preference);
     }
     else
         console.error('what now?')

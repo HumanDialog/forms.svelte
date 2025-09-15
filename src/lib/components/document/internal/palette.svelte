@@ -64,7 +64,7 @@
         toolboxY += window.scrollY /*+ mainContentDiv?.scrollTop*/;
         //css_style = `position: absolute; left:${toolboxX}px; top:${toolboxY}px;`;
         css_style = `left:${toolboxX}px; top:${toolboxY}px;`;
-        console.log("toolbox: ", css_style)
+        //console.log("toolbox: ", css_style)
         dispatch('palette_shown');
     }
 
@@ -109,7 +109,7 @@
         },0)
 
 
-        console.trace()
+        //console.trace()
     }
 
     export function show_fullscreen(_width_px :number, _height_px :number)
@@ -471,7 +471,7 @@
                 style={css_style} >
 
             {#if filtered_commands && filtered_commands.length}
-                {#each filtered_commands as cmd, idx (cmd.caption)}
+                {#each filtered_commands as cmd, idx }
                     {#if cmd.separator}
                         {#if idx>0 && idx<filtered_commands.length-1}   <!-- not first or last place -->
                             <hr class="mx-4 my-1 border-stone-300 dark:border-stone-700"/>

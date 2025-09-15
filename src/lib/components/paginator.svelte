@@ -1,5 +1,7 @@
 <script>
     
+    import {i18n} from '../i18n.js'
+
     export let pageNo
     export let allPagesNo
     export let onPage
@@ -67,7 +69,9 @@
             <li>
                 <button on:click={onPrevPage} 
                     class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-stone-500 bg-white border border-e-0 border-stone-300 rounded-s-lg hover:bg-stone-100 hover:text-stone-700 dark:bg-stone-800 dark:border-stone-700 dark:text-stone-400 dark:hover:bg-stone-700 dark:hover:text-white">
-                    <span class="sr-only">Previous</span>
+                    <span class="sr-only">
+                        { i18n({en: 'Previous', es: 'Anterior', pl: 'Wcześniejsze'}) }
+                    </span>
                         <svg class="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4"/>
                         </svg>
@@ -94,7 +98,11 @@
             <!--a href="#" aria-current="page" class="">3</a-->
             <li>
                 <button on:click={onNextPage} class="flex items-center justify-center px-3 h-8 leading-tight text-stone-500 bg-white border border-stone-300 rounded-e-lg hover:bg-stone-100 hover:text-stone-700 dark:bg-stone-800 dark:border-stone-700 dark:text-stone-400 dark:hover:bg-stone-700 dark:hover:text-white">
-                    <span class="sr-only">Next</span>
+                    <span class="sr-only">
+
+                        { i18n({en: 'Next', es: 'Siguiente', pl: 'Następne'}) }
+
+                    </span>
                         <svg class="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
                         </svg>

@@ -370,7 +370,7 @@
             </button-->
         </h2>
     </header>
-    <ul class="w-full border-stone-700 pb-20" bind:this={column_element}>
+    <ul class="w-full border-stone-400 dark:border-stone-700 pb-20" bind:this={column_element}>
         {#if showInserterAfterId === KanbanColumnTop}
             <Inserter   onInsert={async (title, summary) => {await onInsert(currentColumnIdx, title, summary, KanbanColumnTop)}}
                         bind:this={inserter} />

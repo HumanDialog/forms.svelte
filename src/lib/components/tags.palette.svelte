@@ -4,6 +4,7 @@
     import TagColorsPalette from './tag.colors.svelte'
 	import { tick } from 'svelte';
 	import { isDeviceSmallerThan } from '$lib/utils';
+    import {i18n} from '../i18n'
 
     export let usedTags = []
     export let allTags  = []
@@ -185,7 +186,7 @@
 </script>
 
 {#if view==TAGS_PALETTE}
-<menu class="{userClass} flex flex-column {gap} flex-wrap mr-1 sm:mr-0 sm:w-72">
+<menu class="{userClass} flex flex-column {gap} flex-wrap mr-1 sm:mr-0 sm:w-72 text-stone-600 dark:text-stone-300">
     <p class="flex flex-row {gap} flex-wrap ">
         {#key filteredTags}
             {#if filteredTags.length > 0}
@@ -194,9 +195,13 @@
                         onCustomClick={(e) => onTagSelected(tag)}/>
                 {/each}
             {:else if allowNewTags}
-                <p>Create tag:</p>
+                <p>
+                    { i18n({en: 'Create tag:', es: 'Crear etiqueta:', pl: 'Utwrórz etykietę:'}) }
+                </p>
             {:else}
-                <p>No tags</p>
+                <p>
+                    { i18n({en: 'No tags', es: 'Sin etiquetas', pl: 'Żadnych etykiet'}) }
+                </p>
             {/if}
 
         {/key}
@@ -206,12 +211,12 @@
 
     <input  type="text" name="text" id="text"
             autocomplete="off" 
-            class="block bg-stone-100 dark:bg-stone-800 flex-1"
+            class="block bg-stone-100 dark:bg-stone-800 flex-1 text-stone-700 dark:text-stone-200"
             bind:value={inputText}
             on:input={onTextInput}
             on:blur={onTextBlur}
             on:keydown={onKeyDown}
-            placeholder="Type to filter or create tag">
+            placeholder={i18n({en: 'Type to filter or create tag', es: 'Escriba para filtrar o crear una etiqueta', pl: 'Wpisz, aby filtrować lub utworzyć tag'})}>
         {#if allowNewTags}
             <button class="block w-5 h-5 mt-0.5 ml-auto mr-2
                     text-stone-600 hover:text-stone-800 hover:bg-stone-200 active:bg-stone-200 border-stone-200

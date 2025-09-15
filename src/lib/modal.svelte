@@ -4,6 +4,7 @@
     import {pushToolsActionsOperations, popToolsActionsOperations} from './stores.js'
     import {isDeviceSmallerThan} from './utils'
     import {FaTimes} from 'svelte-icons/fa'
+    import {i18n} from './i18n.js'
     
     export let title :string = '';
     export let open :boolean = false;
@@ -17,7 +18,7 @@
     export let mode = OKCancel; 
 
     export let okCaption :string = 'OK';
-    export let cancelCaption :string = 'Cancel'
+    export let cancelCaption :string = i18n({en:'Cancel', es:'Cancelar', pl:'Anuluj'})
 
     export let onOkCallback :Function | undefined = undefined;
     export let onCancelCallback :Function | undefined = undefined;

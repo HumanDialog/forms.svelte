@@ -1,6 +1,8 @@
 
-import {writable, get} from 'svelte/store';
+import {writable, get, derived} from 'svelte/store';
 import {SCREEN_SIZES, randomString} from './utils.js'
+import {navGetKey} from './utils.js'
+import { location } from 'svelte-spa-router';
 
 export const data_tick_store = writable(1);
 export const contextItemsStore = writable({focused:'', data: null, sel: null})
@@ -222,5 +224,4 @@ export function show_sidebar(index)
     main_sidebar_visible_store.set(index)
 }
 
-
-
+export const navKey = derived([main_sidebar_visible_store, location], ([$main_sidebar_visible_store, $location]) => navGetKey() )

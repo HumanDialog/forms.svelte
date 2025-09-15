@@ -8,6 +8,7 @@
     import Icon from '../icon.svelte'
     import { reef } from '@humandialog/auth.svelte/dist/index.js';
 	import { showMenu } from '../menu.js';
+	import { ext, i18n } from '$lib/i18n.js';
 
     export let label = ''
     export let self = null;
@@ -402,7 +403,7 @@
 
         if(hasNone)
             operations.push({
-                caption: '<none>',
+                caption: `<${i18n({en: 'blank', es: 'blanco', pl: 'pusty'})}>`,
                 action: (f) => on_choose(null)
         })
 
@@ -413,13 +414,11 @@
         const _filtered_source = filtered_source ? filtered_source : definition.source
         _filtered_source.forEach( i => {
             operations.push({
-                caption: i.Name ?? i.Key,
+                caption: i.Name ? ext(i.Name) : i.Key,
                 icon: i.Icon ?? undefined,
                 action: (f) => on_choose(i)
             })
         })
-
-        console.log('operations', operations)
 
         showMenu(rect, operations)
     }
@@ -502,7 +501,7 @@
             let found = selected_item(item, a);
 
             if(found)
-                return found.Name ?? found.Key;
+                return found.Name ? ext(found.Name) : found.Key;
             else
                 return placeholder;
         }

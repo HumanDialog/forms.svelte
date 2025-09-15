@@ -1,5 +1,5 @@
 <script>
-    import {FaUsers, FaCog, FaSignInAlt, FaSignOutAlt, FaBars, FaToggleOn, FaToggleOff} from 'svelte-icons/fa/'
+    import {FaUsers, FaCog, FaSignInAlt, FaSignOutAlt, FaBars, FaToggleOn, FaToggleOff, FaLanguage} from 'svelte-icons/fa/'
     //import GoPrimitiveDot from 'svelte-icons/go/GoPrimitiveDot.svelte'
     import {showMenu} from '$lib/components/menu'
     import {push, pop, location} from 'svelte-spa-router'
@@ -8,13 +8,8 @@
 
     import {
         dark_mode_store,
-        toggle_sidebar,
-        show_sidebar,
-        hide_sidebar,
         tools_visible_store,
         bottom_bar_visible_store,
-        previously_visible_sidebar,
-        main_sidebar_visible_store,
         sidebar_left_pos,
 		page_title,
 		nav_titles,
@@ -24,8 +19,8 @@
     import {session, signInHRef, signOutHRef} from '@humandialog/auth.svelte'
 
     import VerticalToolbar from '$lib/vertical.toolbar.svelte'
-	import { isDeviceSmallerThan, isOnNavigationPage, pushNavigationPage, popNavigationPage } from './utils.js';
-    
+	import { isDeviceSmallerThan, navIsVisible, navGetKey, navToggle, navShow, navHide, navPrevVisibleKey } from './utils.js';
+    import {setCurrentLanguage, getLanguages, i18n, getCurrentLanguage} from './i18n.js'
 
     export let appConfig = undefined;
     export let clearsContext = 'sel props'
@@ -35,7 +30,7 @@
     
     let config = null;
     let has_selection_details = false;
-    let selection_details_caption = 'Properties'
+    let selection_details_caption = i18n({en: 'Properties', es: 'Propiedades', pl: 'Właściwości'});
     
     let show_sign_in_out_icons = false;
     let is_logged_in = false;
@@ -53,7 +48,13 @@
             config = appConfig.mainToolbar;
             has_selection_details = appConfig.selectionDetails;
             if(has_selection_details)
-                selection_details_caption = appConfig.selectionDetails.caption ?? 'Properties';
+            {
+                if(appConfig.selectionDetails.captionFunc)
+                    selection_details_caption = appConfig.selectionDetails.captionFunc()
+                else if(appConfig.selectionDetails.caption)
+                    selection_details_caption = appConfig.selectionDetails.caption
+
+            }
         }
         else
         {
@@ -86,11 +87,12 @@
 
     let title = ''
     $:{
-        if($main_sidebar_visible_store == '*')
+        if(!navIsVisible())
             title = $page_title;
         else
         {
-            let nav_title = $nav_titles[$main_sidebar_visible_store];
+            const navKey = navGetKey()
+            let nav_title = $nav_titles[navKey];
             if(nav_title != undefined)
                 title = nav_title
             else
@@ -100,59 +102,25 @@
 
     function toggle_navigator(e)
     {
-        if(isDeviceSmallerThan('sm'))
+        if(tabs.length == 1)
         {
-            if(isOnNavigationPage())
-            {
-                popNavigationPage();
-            }
-            else
-            {
-                if(tabs.length == 1)
-                {
-                    $sidebar_left_pos = 0;
-                    show_sidebar(tabs[0]);
-                }
-                else
-                {
-                    let sidebar = $main_sidebar_visible_store;
-                    if(sidebar == "*")
-                    {
-                        if((!previously_visible_sidebar) || previously_visible_sidebar === '*')
-                            sidebar = Object.keys(appConfig.sidebar)[0];
-                        else
-                            sidebar = previously_visible_sidebar;
-                    }
-
-                    $sidebar_left_pos = 40;
-                    show_sidebar(sidebar)
-                }
-
-                pushNavigationPage();
-            }
+            $sidebar_left_pos = 0;
+            navToggle(tabs[0])
         }
         else
         {
+            $sidebar_left_pos = 40;
 
-            if(tabs.length == 1)
+            if(!navIsVisible())
             {
-                $sidebar_left_pos = 0;
-                toggle_sidebar(tabs[0]);
+                let navKey = navPrevVisibleKey()
+                if(!navKey)
+                    navKey = Object.keys(appConfig.sidebar)[0]
+                
+                navShow(navKey);
             }
             else
-            {
-                let sidebar = $main_sidebar_visible_store;
-                if(sidebar == "*")
-                {
-                    if((!previously_visible_sidebar) || previously_visible_sidebar === '*')
-                        sidebar = Object.keys(appConfig.sidebar)[0];
-                    else
-                        sidebar = previously_visible_sidebar;
-                }
-
-                $sidebar_left_pos = 40;
-                toggle_sidebar(sidebar)
-            }
+                navHide()
         }
     }
 
@@ -177,8 +145,14 @@
 
                 if(add)
                 {
+                    let caption = ''
+                    if(o.captionFunc)
+                        caption = o.captionFunc()
+                    else if(o.caption)
+                        caption = o.caption
+
                     options.push({
-                                caption: o.caption,
+                                caption: caption,
                                 icon: o.icon,
                                 action: o.action
                             })
@@ -191,7 +165,7 @@
                 if(!is_logged_in)
                 {
                     options.push({
-                        caption: 'Sign in',
+                        caption: i18n( { en: 'Sign in', es: 'Iniciar sesión', pl: 'Zaloguj'}),
                         icon: FaSignInAlt,
                         action: (focused) => { push(sign_in_href) }
                     });
@@ -199,7 +173,7 @@
                 else
                 {
                     options.push({
-                        caption: 'Sign out',
+                        caption: i18n({en: 'Sign out', es: 'Cerrar sesión', pl: 'Wyloguj' }) ,
                         icon: FaSignOutAlt,
                         action: (focused) => { push(sign_out_href) }
                     });
@@ -211,10 +185,11 @@
 
         if(!config || config.darkMode)
         {
+            const capt = i18n({en: 'Dark mode', es: 'Modo oscuro', pl: 'Tryb ciemny'})
             if($dark_mode_store == '')
             {
                 options.push( {
-                        caption: 'Dark mode',
+                        caption: capt,
                         icon: FaToggleOff,
                         action: (focused) => { $dark_mode_store = 'dark'; }
                     });
@@ -222,24 +197,41 @@
             else
             {
                 options.push( {
-                        caption: 'Dark mode',
+                        caption: capt,
                         icon: FaToggleOn,
                         action: (focused) => { $dark_mode_store = ''; }
                     });
             }
         }
 
+        const langs = getLanguages()
+        if(langs && langs.length > 1)
+        {
+            const langMenu = langs.map( l => ({
+                caption: l.name,
+                img: l.flag,
+                action: (b) => {setCurrentLanguage(l); reloadWholeApp()},
+                disabled: getCurrentLanguage() == l
+            }))
+
+            options.push( {
+                caption: i18n({en: 'Language', es:'Idioma', pl:'Język'}),
+                menu: langMenu,
+                icon: FaLanguage
+            })
+        }
+
         if(config && config.operations)
         {
             options.push( {
-                    caption: 'Toolbar',
+                    caption: i18n({en:'Toolbar', es:'Barra de herramientas', pl:'Pasek narzędzi'}),
                     icon: $tools_visible_store ? FaToggleOn : FaToggleOff,
                     action: (focused) => { $tools_visible_store = !$tools_visible_store; }
                 });
         }
 
          options.push({
-                caption: 'Left-handed floating actions',
+                caption: i18n({en: 'Left-handed mode', es: 'Modo para zurdos', pl: 'Tryb dla leworęcznych'}),
                 icon: $leftHandedFAB ? FaToggleOn : FaToggleOff,
                 action: (f) => { $leftHandedFAB = !$leftHandedFAB; }
             })
@@ -344,7 +336,7 @@
 
 </div>
 
-{#if false && tabs.length > 1 &&  $main_sidebar_visible_store != "*"}
+{#if false && tabs.length > 1 &&  navIsVisible()}
     <div  class="no-print flex-none block fixed left-0 top-[40px] w-[40px] h-screen z-20 inset-0   overflow-hidden">
         <div class="sticky top-0 flex h-full w-10 bg-stone-900 flex-col items-center text-stone-100 shadow">
             <VerticalToolbar {appConfig} mobile={true}/>

@@ -9,7 +9,6 @@
     import {main_sidebar_visible_store, 
             tools_visible_store, 
             bottom_bar_visible_store, 
-            auto_hide_sidebar,
             hasSelectedItem,
             dark_mode_store,
             data_tick_store,
@@ -20,7 +19,7 @@
             alerts, removeAlert, showFABAlways} from './stores.js'
     
     //import { AuthorizedView} from '@humandialog/auth.svelte'
-    import { handleSelect, isDeviceSmallerThan, isOnNavigationPage, isOnScreenKeyboardVisible, removeAt, UI } from './utils'
+    import { handleSelect, isDeviceSmallerThan, isOnScreenKeyboardVisible, navGetMode, removeAt, UI, NAV_MODE_SIDEBAR, navAutoHide, navIsVisible } from './utils'
     import { afterUpdate, onMount } from 'svelte';
     import {location} from 'svelte-spa-router'
     import {FaCopy, FaTimes} from 'svelte-icons/fa'
@@ -76,8 +75,8 @@
     //let autoRedirectToSignIn = layout.autoRedirectToSignIn ?? true
 
     $: { visible_sidebar = $main_sidebar_visible_store
-        
-        if(!is_small)
+        const navMode = navGetMode()
+        if(navMode == NAV_MODE_SIDEBAR)
         {
             if(visible_sidebar == "*")
             {
@@ -190,10 +189,11 @@
     }
 
 
-    $: navigationPageVisible = navigationPageSetup($location);
+    $: navigationPageSetup($location);
     function navigationPageSetup(...args)
     {
-        if(!is_small)
+        const navMode = navGetMode()
+        if(navMode == NAV_MODE_SIDEBAR)
         {
             vertical_toolbar_visibility = "hidden sm:block"
             content_left = "left-0 sm:left-[40px]";
@@ -202,7 +202,7 @@
         }
         else
         {
-            if(isOnNavigationPage())
+            if(navIsVisible())
             {
                 vertical_toolbar_visibility = "block"
                 content_left = "left-[50px]";
@@ -254,7 +254,7 @@
 
     function on_resize()
     {
-        auto_hide_sidebar();
+        navAutoHide()
     }
 
     let minViewportHeight = 0;
@@ -278,6 +278,7 @@
 
     function onViewportResize(e)
     {
+        console.log('onViewportResize')
         const vp = window.visualViewport;
         setViewportHeight(vp)
 
@@ -411,7 +412,7 @@
                     behaviour is the content expand vertically, and only vertical scrollbar can be visible.
                     When content on the main page needs to be expanded horizontally (like kanban chart for example) then
                     that component should define overflow-x-* itself -->
-                <section on:click|capture={() => { if(!navigationPageVisible) auto_hide_sidebar()}  } class="">
+                <section on:click|capture={() => navAutoHide()  } class="">
 
                     <!--###########################################################-->
                     <!--##  HORIZONTAL TOOLS                 ######################-->

@@ -1,4 +1,6 @@
 
+import {getCurrentLanguageKey} from '../i18n.js'
+
 export function getFormattedStringDate(d, type = "datetime")
 {
     if(!d)
@@ -86,11 +88,11 @@ export function getNiceStringDate(d)
         
         let days_diff = day - current_day;
         if(days_diff == 0)
-            return 'Today';
+            return today();
         else if(days_diff == 1)
-            return 'Tomorrow';
+            return tomorrow();
         else if(days_diff == -1)
-            return 'Yesterday';
+            return yesterday();
         else if(days_diff > 0 && days_diff <= 7)
         {
             if(day_of_week > current_day_of_week)
@@ -122,67 +124,68 @@ export function getNiceStringDate(d)
     }
 }
 
+function today()
+{
+    const lang = getCurrentLanguageKey()
+    if(Object.keys(abbrCloseLang).includes(lang))
+        return abbrCloseLang[lang][1]
+    else
+        return abbrCloseLang.en[1]
+}
+
+function tomorrow()
+{
+    const lang = getCurrentLanguageKey()
+    if(Object.keys(abbrCloseLang).includes(lang))
+        return abbrCloseLang[lang][2]
+    else
+        return abbrCloseLang.en[2]
+}
+
+function yesterday()
+{
+    const lang = getCurrentLanguageKey()
+    if(Object.keys(abbrCloseLang).includes(lang))
+        return abbrCloseLang[lang][0]
+    else
+        return abbrCloseLang.en[0]
+}
+
+
 export function dayName(d)
 {
-    switch(d)
-    {
-    case 0:
-        return 'Sun';
-    
-    case 1:
-        return 'Mon';
-
-    case 2:
-        return 'Tue';
-
-    case 3:
-        return 'Wed';
-
-    case 4:
-        return 'Thu';
-
-    case 5:
-        return 'Fri';
-
-    case 6:
-        return 'Sat';
-    
-    case 7:
-        return 'Sun';
-    }
-
-    return '';
+    const lang = getCurrentLanguageKey()
+    if(Object.keys(abbrDaysLang).includes(lang))
+        return abbrDaysLang[lang][d]
+    else
+        return abbrDaysLang.en[d]
 }
 
 export function monthName(m)
 {
-    switch(m)
-    {
-        case 0:
-            return "Jan";
-        case 1:
-            return "Feb";
-        case 2:
-            return "Mar";
-        case 3:
-            return "Apr";
-        case 4:
-            return "May";
-        case 5:
-            return "Jun";
-        case 6:
-            return "Jul";
-        case 7:
-            return "Aug";
-        case 8:
-            return "Sep";
-        case 9:
-            return "Oct";
-        case 10:
-            return "Nov";
-        case 11:
-            return "Dec";
-    }
+    const lang = getCurrentLanguageKey()
+    if(Object.keys(abbrMonthsLang).includes(lang))
+        return abbrMonthsLang[lang][m]
+    else
+        return abbrMonthsLang.en[m]
+}
 
-    return '';
+// translations
+
+const abbrCloseLang = {
+    en: ['yesterday', 'today', 'tomorrow'],
+    es: ['ayer', 'hoy', 'mañana'],
+    pl: ['wczoraj', 'dziś', 'jutro']
+}
+
+const abbrDaysLang = {
+    en: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    es: ['dom', 'lun', 'mar', 'miérc', 'juev', 'vier', 'sáb', 'dom'],
+    pl: ['nie', 'pon', 'wto', 'śro', 'czw', 'pią', 'sob', 'nie'] 
+}
+
+const abbrMonthsLang = {
+    en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    es: ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'set', 'oct', 'nov', 'dic'],
+    pl: ['sty', 'lut', 'mar', 'kwi', 'maj', 'cze', 'lip', 'sie', 'wrz', 'paź', 'lis', 'gru']
 }
