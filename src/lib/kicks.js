@@ -104,15 +104,12 @@ function checkKicks(informObservers=true)
     console.log(s.isActive, appId, tid)
     if(s.isActive && appId && tid)
     {
-        reef.fetch(`/dev/kicks?app_id=${appId}&tenant_id=${encodeURIComponent(tid)}&last_check=${lastCheckAt}`).then(res => {
+        const cloudAddr = reef.get_general_cloud_address()
+        reef.fetch(`${cloudAddr}/dev/kicks?app_id=${appId}&tenant_id=${encodeURIComponent(tid)}&last_check=${lastCheckAt}`).then(res => {
             if(res.ok)
             {
                 res.json().then( result =>
                 {
-                    // todo 
-                    //console.log('kicks:', result)  
-
-
                     let changedLabels = []
                     result.allKicks.forEach(current => {
                         
