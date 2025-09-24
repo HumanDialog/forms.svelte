@@ -26,7 +26,7 @@
             refreshToolbarOperations,
             informModificationEx,
             breadcrumbAdd,
-            Breadcrumb, i18n
+            Breadcrumb, i18n, UI
             } from '$lib'
 	import { onMount, tick } from 'svelte';
     import {location, querystring, push, link} from 'svelte-spa-router'
@@ -107,6 +107,7 @@
                                                     'AttachedFiles',
                                                     'Kind',
                                                     'State',
+                                                    'IsPinned',
                                                     '$ref',
                                                     '$type',
                                                     '$acc'],
@@ -293,16 +294,66 @@
                             tbr: 'A'
                         },
                         {
-                            caption: '_; Add to Clipboard; Añadir al portapapeles; Dodaj do schowka',
+                            caption: '_; Copy; Copiar; Kopiuj',
                             icon: FaCopy,   // MdLibraryAdd
                             action: (f) => copyTaskToBasket(),
                             fab: 'M30',
                             tbr: 'A'
-
-                        }
+                        },
+                        {
+                            separator: true
+                        },
+                        pinOp()
                     ]
                 }
             ]
+        }
+    }
+
+    function pinOp()
+    {
+        let pinOperation;
+        if(note.IsPinned)
+        {
+            pinOperation = {
+                caption: '_; Unpin note; Desenganchar la nota; Odepnij notatkę',
+                //icon: FaStar, //aRegShareSquare, //
+                action: async (f) => {
+                    await toggleNotePinned(note);
+                    // refreshing operations
+                    activateItem('data', note, getPageOperations());
+                    if(UI.navigator)
+                        UI.navigator.refresh()
+                    }
+            }
+        }
+        else
+        {
+            pinOperation = {
+                caption: '_; Pin note; Fijar nota; Przypnij notatkę',
+                //icon: FaRegStar, //aRegShareSquare, //
+                action: async (f) => {
+                    await toggleNotePinned(note);
+                    // refreshing operations
+                    activateItem('data', note, getPageOperations());
+                    if(UI.navigator)
+                        UI.navigator.refresh()
+                }
+            }
+        }
+        return pinOperation;
+    }
+
+    async function toggleNotePinned(note)
+    {
+        let res = await reef.post(`${note.$ref}/TogglePinned`, {}, onErrorShowAlert)
+        if(res)
+        {
+            note.IsPinned = true
+        }
+        else
+        {
+            note.IsPinned = false
         }
     }
 
@@ -478,7 +529,7 @@
                         //    tbr: 'A'
                         },
                         {
-                            caption: '_; Add to Clipboard; Añadir al portapapeles; Dodaj do schowka',
+                            caption: '_; Copy; Copiar; Kopiuj',
                             icon: FaCopy,   // MdLibraryAdd
                             action: (f) => copyTaskToBasket(),
                         //   fab: 'M30',
@@ -519,7 +570,7 @@
     const extraBackPaletteCommands = []
     const extraBackPaletteCommandsExt = [
         {
-            caption: '_; Add to Clipboard; Añadir al portapapeles; Dodaj do schowka',
+            caption: '_; Copy; Copiar; Kopiuj',
             icon: FaCopy,   // MdLibraryAdd
             action: () => copyTaskToBasket(),
         }

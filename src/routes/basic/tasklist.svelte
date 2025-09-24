@@ -16,7 +16,7 @@
 				UI, i18n,
 				ext} from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaList,
-        FaEllipsisH, FaChevronRight, FaChevronLeft, FaRandom, FaCheck, FaCopy
+        FaEllipsisH, FaChevronRight, FaChevronLeft, FaRandom, FaCheck, FaCopy, FaUndo
     } from 'svelte-icons/fa'
     import {location, pop, push, querystring, link} from 'svelte-spa-router'
     import {cache} from './cache.js'
@@ -251,6 +251,16 @@
             await reloadTasks(listComponent.KEEP_OR_SELECT_NEXT)
     }
 
+    async function undoFinishTask(event, task)
+    {
+        if(event)
+            event.stopPropagation();
+
+        let result = await reef.post(`${task.$ref}/UndoFinish`, {}, onErrorShowAlert);
+        if(result)
+            await reloadTasks(listComponent.KEEP_OR_SELECT_NEXT)
+    }
+
     async function addTask(newTaskAttribs)
     {
         let res = await reef.post(`${listPath}/CreateTaskEx`,{ properties: newTaskAttribs }, onErrorShowAlert)
@@ -286,7 +296,7 @@
                             tbr: 'A'
                         },
                         {
-                            caption: '_; Add tasks from Clipboard; Añadir tareas desde el portapapeles; Dodaj zadania ze schowka',
+                            caption: '_; Paste; Pegar; Wklej',
                             //icon: FaRegClipboard, //FaLink, //aRegShareSquare, //
                             toolbar: BasketPreview,
                             props: {
@@ -346,7 +356,7 @@
                             tbr: 'A'
                         },
                         {
-                            caption: '_; Add tasks from Clipboard; Añadir tareas desde el portapapele; Dodaj zadania ze schowka',
+                            caption: '_; Paste; Pegar; Wklej',
                             toolbar: BasketPreview,
                             props: {
                                 destinationContainer: listPath,
@@ -394,14 +404,31 @@
 
                             ]
                         },
-                        {
+                       /* ... (task.State == STATE_FINISHED) ? [
+                            {
+                                caption: '_; Undo finish; Retroceder final; Cofnij zakończenie',
+                                icon: FaUndo,
+                                action: (f) => undoFinishTask(undefined, task),
+                                fab: 'M03',
+                                tbr: 'A'
+                            }
+                        ] : [
+                            {
+                                caption: '_; Finish; Finalizar; Zakończ',
+                                icon: FaCheck,
+                                action: (f) => finishTask(undefined, task),
+                                disabled: task.State == STATE_FINISHED
+                                fab: 'M03',
+                                tbr: 'A'
+                            }
+                        ], */
+                         {
                             caption: '_; Finish; Finalizar; Zakończ',
                             icon: FaCheck,
                             action: (f) => finishTask(undefined, task),
                             disabled: task.State == STATE_FINISHED,
                             fab: 'M03',
                             tbr: 'A'
-
                         },
                         {
                             caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
@@ -420,7 +447,7 @@
                             hideToolbarCaption: true
                         },
                         {
-                            caption: '_; Add to Clipboard; Añadir al portapapeles; Dodaj do schowka',
+                            caption: '_; Copy; Copiar; Kopiuj',
                             icon: FaCopy, 
                             action: (f) => copyTaskToBasket(task),
                             fab: 'M30',

@@ -258,7 +258,7 @@
                             fab: 'M01'
                         },
                         {
-                            caption: '_; Add tasks from Clipboard; Añadir tareas desde el portapapeles; Dodaj zadania ze schowka',
+                            caption: '_; Paste; Pegar; Wklej',
                             toolbar: BasketPreview,
                             props: {
                                 destinationContainer: listPath,
@@ -488,7 +488,7 @@
                             tbr: 'A'
                         },
                         {
-                            caption: '_; Add tasks from Clipboard; Añadir tareas desde el portapapele; Dodaj zadania ze schowka',
+                            caption: '_; Paste; Pegar; Wklej',
                             toolbar: BasketPreview,
                             props: {
                                 destinationContainer: listPath,
@@ -578,7 +578,7 @@
                             hideToolbarCaption: true
                         } ],
                         {
-                            caption: '_; Add to Clipboard; Añadir al portapapeles; Dodaj do schowka',
+                            caption: '_; Copy; Copiar; Kopiuj',
                             icon: FaCopy, 
                             action: (f) => copyTaskToBasket(task),
                             fab: 'M30',
@@ -676,7 +676,7 @@
                             tbr: 'A'
                         },
                         {
-                            caption: '_; Add tasks from Clipboard; Añadir tareas desde el portapapeles; Dodaj zadania ze schowka',
+                            caption: '_; Paste; Pegar; Wklej',
                             //icon: FaRegClipboard, //FaLink, //aRegShareSquare, //
                             toolbar: BasketPreview,
                             props: {

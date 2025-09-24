@@ -18,7 +18,7 @@
                 Breadcrumb,
 				breadcrumbAdd} from '$lib'
     import {FaRegFile, FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaSync,
-        FaList, FaEllipsisH, FaChevronRight, FaChevronLeft, FaRegShareSquare, FaLink, FaUnlink, FaRegStar, FaStar, FaCopy, FaCut} from 'svelte-icons/fa'
+        FaList, FaEllipsisH, FaChevronRight, FaChevronLeft, FaRegShareSquare, FaLink, FaUnlink, FaRegStar, FaStar, FaCopy, FaCut, FaRegComments, FaRegClipboard} from 'svelte-icons/fa'
 
         import {FaEdit} from 'svelte-icons/fa'
         import FaHighlighter from 'svelte-icons/fa/FaHighlighter.svelte'
@@ -37,9 +37,7 @@
     let contextItem = null;
     let contextPath;
     let contextItemId;
-    let subfoldersComponent;
-    let notesComponent;
-    let tasksComponent;
+    let listComponent;
     let folderTitle = ''
 
     let prevBreadcrumbPath = ''
@@ -82,9 +80,7 @@
             folderTitle = ext(contextItem.Title);
             breadcrumbPath = breadcrumbAdd(prevBreadcrumbPath, folderTitle, $location)
 
-            subfoldersComponent?.reload(contextItem, subfoldersComponent.KEEP_SELECTION)
-            notesComponent?.reload(contextItem, notesComponent.KEEP_SELECTION)
-            tasksComponent?.reload(contextItem, tasksComponent.KEEP_SELECTION)
+            listComponent?.reload(contextItem, listComponent.KEEP_SELECTION)
         }
 
         const readItem = await readContextItem(contextItemId)
@@ -101,13 +97,12 @@
         {
             folderTitle = ext(contextItem.Title);
             breadcrumbPath = breadcrumbAdd(prevBreadcrumbPath, folderTitle, $location)
+            setupAllElements(contextItem)
         }
 
         cache.set(cacheKey, contextItem)
 
-        subfoldersComponent?.reload(contextItem, subfoldersComponent.KEEP_SELECTION)
-        notesComponent?.reload(contextItem, notesComponent.KEEP_SELECTION)
-        tasksComponent?.reload(contextItem, tasksComponent.KEEP_SELECTION)
+        listComponent?.reload(contextItem, listComponent.KEEP_SELECTION)
     }
 
     async function readContextItem(contextItemId)
@@ -129,24 +124,24 @@
                                                 Id: 2,
                                                 Association: 'Folders',
                                                 //Filter: 'State <> STATE_FINISHED',
-                                                Sort: 'Order',
-                                                Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'IsPinned']
+                                                //Sort: 'Order',
+                                                Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'IsPinned', 'icon', '$type']
 
                                             },
                                             {
                                                 Id: 3,
                                                 Association: 'Notes',
                                                 //Filter: 'State <> STATE_FINISHED',
-                                                Sort: 'Order',
-                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href']
+                                                //Sort: 'Order',
+                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href', '$type']
 
                                             },
                                             {
                                                 Id: 4,
                                                 Association: 'Tasks',
                                                 //Filter: 'State <> STATE_FINISHED',
-                                                Sort: 'Order',
-                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'href']
+                                                //Sort: 'Order',
+                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'href', '$type']
 
                                             }
                                         ]
@@ -162,11 +157,29 @@
             return null;
     }
 
+    function setupAllElements(contextItem)
+    {
+        contextItem.allElements = []
+        if(contextItem.Folders)
+            contextItem.allElements = [...contextItem.allElements, ...contextItem.Folders]
+
+        if(contextItem.Notes)
+            contextItem.allElements = [...contextItem.allElements, ...contextItem.Notes]
+
+        if(contextItem.Tasks)
+            contextItem.allElements = [...contextItem.allElements, ...contextItem.Tasks]
+
+        contextItem.allElements.sort((a,b) => a.Order - b.Order)
+    }
+
     async function fetchData()
     {
         contextItem = await readContextItem(contextItemId);
         if(contextItem)
+        {
             folderTitle = ext(contextItem.Title);
+            setupAllElements(contextItem)
+        }
     }
 
     /*onMount( () => {
@@ -229,24 +242,27 @@
         switch(deleteObjectKind)
         {
         case 'Task':
+        case 'FolderTask':
             await reef.post(`${contextItem.$ref}/DeletePermanentlyTask`, { taskLink: objectToDelete.$ref } , onErrorShowAlert);
             deleteModal.hide();
             await fetchData();
-            tasksComponent.reload(contextItem, tasksComponent.SELECT_NEXT);
+            listComponent.reload(contextItem, listComponent.SELECT_NEXT);
             break;
 
         case 'Note':
+        case 'FolderNote':
             await reef.post(`${contextItem.$ref}/DeletePermanentlyNote`, { noteLink: objectToDelete.$ref } , onErrorShowAlert);
             deleteModal.hide();
             await fetchData();
-            notesComponent.reload(contextItem, notesComponent.SELECT_NEXT);
+            listComponent.reload(contextItem, listComponent.SELECT_NEXT);
             break;
 
         case 'Folder':
+        case 'FolderFolder':
             await reef.post(`${contextItem.$ref}/DeletePermanentlyFolder`, { folderLink: objectToDelete.$ref } , onErrorShowAlert);
             deleteModal.hide();
             await fetchData();
-            subfoldersComponent.reload(contextItem, subfoldersComponent.SELECT_NEXT);
+            listComponent.reload(contextItem, listComponent.SELECT_NEXT);
             break;
         }
 
@@ -256,21 +272,21 @@
     {
         await reef.post(`${contextItem.$ref}/DettachSubFolder`, { folderLink: folder.$ref } , onErrorShowAlert);
         await fetchData();
-        subfoldersComponent.reload(contextItem, subfoldersComponent.SELECT_NEXT);
+        listComponent.reload(contextItem, listComponent.SELECT_NEXT);
     }
 
     async function dettachNote(note)
     {
         await reef.post(`${contextItem.$ref}/DettachNote`, { noteLink: note.$ref } , onErrorShowAlert);
         await fetchData();
-        notesComponent.reload(contextItem, notesComponent.SELECT_NEXT);
+        listComponent.reload(contextItem, listComponent.SELECT_NEXT);
     }
 
     async function dettachTask(task)
     {
         await reef.post(`${contextItem.$ref}/DettachTask`, { taskLink: task.$ref } , onErrorShowAlert);
         await fetchData();
-        tasksComponent.reload(contextItem, tasksComponent.SELECT_NEXT);
+        listComponent.reload(contextItem, listComponent.SELECT_NEXT);
     }
 
     async function copyTaskToBasket(task)
@@ -285,7 +301,7 @@
     {
         await reef.post(`${contextItem.$ref}/CutTaskToBasket`, { taskLink: task.$ref } , onErrorShowAlert);
         await fetchData();
-        tasksComponent.reload(contextItem, tasksComponent.SELECT_NEXT);
+        listComponent.reload(contextItem, listComponent.SELECT_NEXT);
     }
 
     async function copyNoteToBasket(note)
@@ -300,7 +316,7 @@
     {
         await reef.post(`${contextItem.$ref}/CutNoteToBasket`, { noteLink: note.$ref } , onErrorShowAlert);
         await fetchData();
-        notesComponent.reload(contextItem, notesComponent.SELECT_NEXT);
+        listComponent.reload(contextItem, listComponent.SELECT_NEXT);
     }
 
     async function copySubFolderToBasket(folder)
@@ -315,7 +331,7 @@
     {
         await reef.post(`${contextItem.$ref}/CutSubFolderToBasket`, { folderLink: folder.$ref } , onErrorShowAlert);
         await fetchData();
-        subfoldersComponent.reload(contextItem, subfoldersComponent.SELECT_NEXT);
+        listComponent.reload(contextItem, listComponent.SELECT_NEXT);
     }
 
     async function finishTask(event, task)
@@ -327,7 +343,26 @@
         if(result)
         {
             await fetchData();
-            tasksComponent.reload(contextItem, tasksComponent.KEEP_OR_SELECT_NEXT);
+            listComponent.reload(contextItem, listComponent.KEEP_OR_SELECT_NEXT);
+        }
+    }
+
+    let newElementKind = ''
+    async function addElement(newElementAttribs) 
+    {
+        switch(newElementKind)
+        {
+        case 'Folder':
+        case 'FolderFolder':
+            return await addFolder(newElementAttribs)
+
+        case 'Note':
+        case 'FolderNote':
+            return await addNote(newElementAttribs)
+
+        case 'Task':
+        case 'FolderTask':
+            return await addTask(newElementAttribs)
         }
     }
 
@@ -340,7 +375,7 @@
         let newTask = res.FolderTask;
 
         await fetchData();
-        tasksComponent.reload(contextItem, newTask.Id);
+        listComponent.reload(contextItem, newTask.Id);
     }
 
     async function addNote(newNoteAttribs)
@@ -352,7 +387,7 @@
         let newNote = res.FolderNote;
 
         await fetchData();
-        notesComponent.reload(contextItem, newNote.Id);
+        listComponent.reload(contextItem, newNote.Id);
     }
 
     async function addFolder(newFolderAttribs)
@@ -369,7 +404,7 @@
         let newFolder = res.FolderFolder;
 
         await fetchData();
-        subfoldersComponent.reload(contextItem, newFolder.Id);
+        listComponent.reload(contextItem, newFolder.Id);
     }
 
     async function toggleFolderPinned(folder)
@@ -407,17 +442,13 @@
         await reef.post(`${contextItem.$ref}/DettachAllContent`, {} , onErrorShowAlert)
 
         await fetchData();
-        subfoldersComponent.reload(contextItem, subfoldersComponent.CLEAR_SELECTION)
-        notesComponent.reload(contextItem, notesComponent.CLEAR_SELECTION)
-        tasksComponent.reload(contextItem, tasksComponent.CLEAR_SELECTION)
+        listComponent.reload(contextItem, listComponent.CLEAR_SELECTION)
     }
 
     async function refreshView()
     {
         await fetchData();
-        subfoldersComponent.reload(contextItem, subfoldersComponent.KEEP_SELECTION)
-        notesComponent.reload(contextItem, notesComponent.KEEP_SELECTION)
-        tasksComponent.reload(contextItem, tasksComponent.KEEP_SELECTION)
+        listComponent.reload(contextItem, listComponent.KEEP_SELECTION)
     }
 
     function pinOp()
@@ -504,7 +535,7 @@
         const newFolder = {
             caption: '_; New folder; Nueva carpeta; Nowy folder',
             icon: FaRegFolder,
-            action: (f) => { subfoldersComponent.addRowAfter(afterElement) },
+            action: (f) => { newElementKind='Folder';  listComponent.addRowAfter(afterElement) },
             tbr: 'A',
             fab: 'M03'
         }
@@ -512,7 +543,7 @@
         const newNote = {
             caption: '_; New note; Nueva nota; Nowa notatka',
             icon: FaRegFile,
-            action: (f) => { notesComponent.addRowAfter(afterElement) },
+            action: (f) => { newElementKind='Note';  listComponent.addRowAfter(afterElement) },
             tbr: 'A',
             fab: 'M02'
         }
@@ -520,7 +551,7 @@
         const newTask = {
             caption: '_; New task; Nueva tarea; Nowe zadanie',
             icon: FaRegCalendar,
-            action: (f) => { tasksComponent.addRowAfter(afterElement) },
+            action: (f) => { newElementKind='Task';  listComponent.addRowAfter(afterElement) },
             tbr: 'A',
             fab: 'M01'
         }
@@ -545,7 +576,7 @@
 
         
         result.operations.push({
-            caption: '_; Add elements from Clipboard; Añadir elementos del portapapeles; Dodaj elementy ze schowka',
+            caption: '_; Paste; Pegar; Wklej',
             toolbar: BasketPreview,
             props: {
                 destinationContainer: contextPath,
@@ -605,35 +636,23 @@
     async function refreshViewAfterAttachingFromBasket(f)
     {
         await fetchData();
-        subfoldersComponent.reload(contextItem, subfoldersComponent.CLEAR_SELECTION)
-        notesComponent.reload(contextItem, notesComponent.CLEAR_SELECTION)
-        tasksComponent.reload(contextItem, tasksComponent.CLEAR_SELECTION)
+        listComponent.reload(contextItem, listComponent.CLEAR_SELECTION)
     }
 
 
-    function listComponent(kind)
-    {
-        switch(kind)
-        {
-        case 'Task':
-            return tasksComponent;
-        case 'Note':
-            return notesComponent;
-        case 'Folder':
-            return subfoldersComponent;
-        }
-    }
-
-
+    
     async function dettachElement(element, kind)
     {
         switch(kind)
         {
         case 'Folder':
+        case 'FolderFolder':
             return dettachSubFolder(element)
         case 'Note':
+        case 'FolderNote':
             return dettachNote(element)
         case 'Task':
+        case 'FolderTask':
             return dettachTask(element)
         }
     }
@@ -643,10 +662,13 @@
         switch(kind)
         {
         case 'Folder':
+        case 'FolderFolder':
             return copySubFolderToBasket(element)
         case 'Note':
+        case 'FolderNote':
             return copyNoteToBasket(element)
         case 'Task':
+        case 'FolderTask':
             return copyTaskToBasket(element)
         }
     }
@@ -656,17 +678,20 @@
         switch(kind)
         {
         case 'Folder':
+        case 'FolderFolder':
             return cutSubFolderToBasket(element)
         case 'Note':
+        case 'FolderNote':
             return cutNoteToBasket(element)
         case 'Task':
+        case 'FolderTask':
             return cutTaskToBasket(element)
         }
     }
 
     function basketElementOperations(element, kind)
     {
-        let list = listComponent(kind);
+        let list = listComponent;
         return {
                 opver: 2,
                 fab: 'M00',
@@ -705,7 +730,7 @@
 
     function folderElementOperations(element, kind)
     {
-        let list = listComponent(kind);
+        let list = listComponent;
         return {
                 opver: 2,
                 fab: 'M00',
@@ -726,13 +751,13 @@
                                 grid:[
                                     {
                                         caption: '_; Edit Title; Editar título; Edytuj tytuł',
-                                        action: (focused) =>  { listComponent(kind).edit(element, 'Title') },
+                                        action: (focused) =>  { listComponent.edit(element, 'Title') },
                                         tbr: 'A',
 
                                     },
                                     {
                                         caption: '_; Edit summary; Editar resumen; Edytuj podsumowanie',
-                                        action: (focused) =>  { listComponent(kind).edit(element, 'Summary') }
+                                        action: (focused) =>  { listComponent.edit(element, 'Summary') }
                                     }
                                 ]
 
@@ -754,7 +779,7 @@
                                 hideToolbarCaption: true
                             },
                             {
-                                caption: '_; Add to Clipboard; Añadir al portapapeles; Dodaj do schowka',
+                                caption: '_; Copy; Copiar; Kopiuj',
                                 icon: FaCopy, //FaCopy,   // MdLibraryAdd
                                 action: (f) => copyElementToBasket(element, kind),
                                 hideToolbarCaption: true,
@@ -763,7 +788,7 @@
 
                             },
                             {
-                                caption: '_; Move to Clipboard; Mover al portapapeles; Przenieś do schowka',
+                                caption: '_; Cut; Cortar; Wytnij',
                                 icon: FaCut, //FaCut,
                                 action: (f) => cutElementToBasket(element, kind),
                                 hideToolbarCaption: true,
@@ -804,6 +829,44 @@
         }
     }
 
+    function getFolderIcon(folder)
+    {
+        if(folder.icon)
+        {
+            switch(folder.icon)
+            {
+            case 'Folder':
+                return FaRegFolder;
+            case 'Clipboard':
+                return FaRegClipboard;
+            case 'Discussion':
+                return FaRegComments;
+            default:
+                return FaRegFolder
+            }
+        }
+        else
+            return FaRegFolder
+    }
+
+    function getElementIcon(element)
+    {
+        switch(element.$type)
+        {
+        case 'Folder':
+        case 'FolderFolder':
+            return getFolderIcon(element)
+
+        case 'Note':
+        case 'FolderNote':
+            return FaRegFile;
+
+        case 'Task':
+        case 'FolderTask':
+            return FaRegCalendar;
+        }
+    }
+
 
 </script>
 
@@ -840,26 +903,26 @@
             </p>
 
             <List   self={contextItem}
-                    a='Folders'
-                    toolbarOperations={(el) => elementOperations(el, 'Folder')}
+                    a='allElements'
+                    toolbarOperations={(el) => elementOperations(el, el.$type)}
                     orderAttrib='Order'
-                    bind:this={subfoldersComponent}>
+                    bind:this={listComponent}>
                 <ListTitle      a='Title'
-                                hrefFunc={(folder) => `${folder.href}?path=${breadcrumbPath}`}
+                                hrefFunc={(el) => `${el.href}?path=${breadcrumbPath}`}
                                 onChange={changeElementProperty}/>
 
                 <ListSummary    a='Summary'
                                 onChange={changeElementProperty}/>
 
-                <ListInserter   action={addFolder} icon/>
+                <ListInserter   action={addElement} icon/>
 
                 <span slot="left" let:element>
-                    <Icon component={FaRegFolder}
+                    <Icon component={getElementIcon(element)}
                         class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
                 </span>
             </List>
 
-            <List   self={contextItem}
+            <!--List   self={contextItem}
                     a='Notes'
                     toolbarOperations={ (el) => elementOperations(el, 'Note')}
                     orderAttrib='Order'
@@ -902,7 +965,7 @@
 
                     {/if}
                 </span>
-            </List>
+            </List-->
 
     </section>
 
@@ -915,7 +978,7 @@
 
 
 <Modal  title={i18n(['Delete', 'Eliminar', 'Usuń'])}
-        content={i18n(["Are you sure you want to delete selected folder?", "¿Está seguro de que desea eliminar el elemento seleccionado?", "Czy na pewno chcesz usunąć wybrany element?"])}
+        content={i18n(["Are you sure you want to delete selected element?", "¿Está seguro de que desea eliminar el elemento seleccionado?", "Czy na pewno chcesz usunąć wybrany element?"])}
         icon={FaTrash}
         onOkCallback={deleteElement}
         bind:this={deleteModal}

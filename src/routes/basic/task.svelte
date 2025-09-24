@@ -329,7 +329,7 @@
                             tbr: 'A'
                         },
                         {
-                            caption: '_; Add to Clipboard; Añadir al portapapeles; Dodaj do schowka',
+                            caption: '_; Copy; Copiar; Kopiuj',
                             icon: FaCopy,   // MdLibraryAdd
                             action: (f) => copyTaskToBasket(),
                             fab: 'M30',
@@ -523,7 +523,7 @@
                         },
 
                         {
-                            caption: '_; Add to Clipboard; Añadir al portapapeles; Dodaj do schowka',
+                            caption: '_; Copy; Copiar; Kopiuj',
                             icon: FaCopy,   // MdLibraryAdd
                             action: (f) => copyTaskToBasket(),
                             fab: 'M30',
@@ -702,7 +702,7 @@
                         },
 
                         {
-                            caption: '_; Add to Clipboard; Añadir al portapapeles; Dodaj do schowka',
+                            caption: '_; Copy; Copiar; Kopiuj',
                             icon: FaCopy,   // MdLibraryAdd
                             action: (f) => copyTaskToBasket(),
                         //    fab: 'M30',
@@ -744,7 +744,7 @@
     const extraBackPaletteCommands = []
     const extraBackPaletteCommandsExt = [
          {
-            caption: '_; Add to Clipboard; Añadir al portapapeles; Dodaj do schowka',
+            caption: '_; Copy; Copiar; Kopiuj',
             icon: FaCopy,   // MdLibraryAdd
             action: () => copyTaskToBasket(),
         }

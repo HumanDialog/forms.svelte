@@ -15,7 +15,7 @@
                 Modal,
                 onErrorShowAlert,
             i18n} from '$lib'
-    import {FaCheck, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaArchive, FaEllipsisH} from 'svelte-icons/fa'
+    import {FaCheck, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaArchive, FaUndo} from 'svelte-icons/fa'
 
     export let params = {}
 
@@ -137,23 +137,84 @@
         await reloadTasks(listComponent.SELECT_NEXT)
     }
 
+    let finishRequested = []
+    let finishTimer = 0
+
+    function isFinishRequested(task)
+    {
+        const idx = finishRequested.findIndex((t) =>  t == task.$ref)
+        return idx >= 0 
+    }
+
+    function requestFinish(task)
+    {
+        if(!isFinishRequested(task))
+        {
+            finishRequested.push(task.$ref)
+        }
+
+        setupFinishingTimer()
+    }
+
+    function undoRequestFinish(task)
+    {
+        const idx = finishRequested.findIndex((t) => t == task.$ref)
+        if(idx >= 0)
+        {
+            finishRequested.splice(idx, 1)
+        }
+        
+        setupFinishingTimer()
+    }
+
+    async function executeFinishingRequestedTasks()
+    {
+        let promises = []
+        finishRequested.forEach( $ref => 
+            promises.push( reef.post(`${$ref}/Finish`, {}, onErrorShowAlert))
+        )
+
+        finishRequested = []
+
+        await Promise.all(promises)
+        await reloadTasks(listComponent.KEEP_OR_SELECT_NEXT)
+        
+    }
+
+    function setupFinishingTimer()
+    {
+        if(finishTimer > 0)
+            clearTimeout(finishTimer)
+
+        finishTimer = setTimeout(executeFinishingRequestedTasks, 5000)
+    }
+
     async function finishTask(event, task)
     {
         if(event)
             event.stopPropagation();
 
-        let result = await reef.post(`${task.$ref}/Finish`, {}, onErrorShowAlert);
-        if(result)
-            await reloadTasks(listComponent.KEEP_OR_SELECT_NEXT)
+        requestFinish(task)
+        listComponent.rereder()
+    }
+
+    async function undoFinishTask(event, task)
+    {
+        if(event)
+            event.stopPropagation();
+
+        undoRequestFinish(task)
+        listComponent.rereder()
     }
 
     async function addTask(newTaskAttribs)
     {
-        let res = await reef.post(`/user/MyTasks/new`, newTaskAttribs, onErrorShowAlert)
+        let res = await reef.post('/user/CreateMyTask', newTaskAttribs, onErrorShowAlert)
+        //let res = await reef.post(`/user/MyTasks/new`, newTaskAttribs, onErrorShowAlert)
         if(!res)
             return null;
 
-        let newTask = res.Task[0];
+        let newTask = res.Task;
         await reloadTasks(newTask.Id)
     }
 
@@ -228,15 +289,23 @@
                             ]
 
                         },
-                        {
-                            caption: '_; Finish; Finalizar; Zakończ',
-                            icon: FaCheck,
-                            action: (f) => finishTask(undefined, task),
-                            disabled: task.State == STATE_FINISHED,
-                            fab: 'M03',
-                            tbr: 'A'
-
-                        },
+                        ... ((task.State == STATE_FINISHED) || isFinishRequested(task)) ? [
+                            {
+                                caption: '_; Undo finish; Retroceder final; Cofnij zakończenie',
+                                icon: FaUndo,
+                                action: (f) => undoFinishTask(undefined, task),
+                                fab: 'M03',
+                                tbr: 'A'
+                            }
+                        ] : [
+                            {
+                                caption: '_; Finish; Finalizar; Zakończ',
+                                icon: FaCheck,
+                                action: (f) => finishTask(undefined, task),
+                                fab: 'M03',
+                                tbr: 'A'
+                            }
+                        ],
                         {
                             caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                             hideToolbarCaption: true,
@@ -299,8 +368,9 @@
             <ListDateProperty name="DueDate"/>
 
             <span slot="left" let:element>
-                {#if element.State == STATE_FINISHED}
+                {#if element.State == STATE_FINISHED || isFinishRequested(element)}
                     <Icon component={FaRegCalendarCheck}
+                    on:click={(e) => undoFinishTask(e, element)}
                     class="h-5 w-5  text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
 
                 {:else}

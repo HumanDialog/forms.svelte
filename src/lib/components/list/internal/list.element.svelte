@@ -16,11 +16,12 @@
     import Summary from './list.element.summary.svelte'
     import Properties from './list.element.props.svelte'
     import { isDeviceSmallerThan } from '../../../utils'
+    import Icon from '../../icon.svelte'
                 
     import {rList_definition, rList_property_type} from '../List'
 	import { push, link } from 'svelte-spa-router';
-    import {FaExternalLinkAlt} from 'svelte-icons/fa/'
-	import Tags from '../../tags.svelte'
+    import {FaExternalLinkAlt, FaRegSquare, FaRegCheckSquare} from 'svelte-icons/fa/'
+    import Tags from '../../tags.svelte'
     import {ext} from '../../../i18n'
     
     export let item     :object;
@@ -33,6 +34,7 @@
     export let contextMenu = undefined;
     
     export let key: string = '';
+    export let multiselect:  boolean = false
 
     let definition :rList_definition = getContext("rList-definition");
     //console.log(definition.properties, item)
@@ -98,7 +100,7 @@
 
     function calculate_active(...args)
     {
-        const activeItem = getActive('props')
+        const activeItem = getActive('props')       // hasActive
         if(!activeItem)
             return false;
         
@@ -381,6 +383,11 @@
                 inline: "nearest"
             });
     }
+
+    function onToggleMultiSelect(e)
+    {
+
+    }
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -392,6 +399,11 @@
             tabindex="-1"
             bind:this={rootElement}> <!--  on:contextmenu={on_contextmenu} -->
 
+    {#if multiselect}
+         <Icon  component={FaRegCheckSquare} class="flex-none h-5 w-5 sm:h-4 sm:w-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 mr-3 "
+                on:click={onToggleMultiSelect}/>
+    {/if}
+    
     <slot name="left" element={item}/>
     
     <i class="hidden sm:w-1/2 sm:w-2/3 sm:w-1/3"></i>   <!-- just to force tailwind classes including -->

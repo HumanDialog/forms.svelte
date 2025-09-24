@@ -98,7 +98,7 @@
         if(!item)
             return active;
 
-        const activeItem = getActive('props')
+        const activeItem = getActive('props')   // hasActive
         if(item.$ref)
         {
             if(activeItem)

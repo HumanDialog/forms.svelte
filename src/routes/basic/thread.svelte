@@ -335,7 +335,7 @@
                         },
                         {
                             icon: FaCopy,   // MdLibraryAdd
-                            caption: '_; Add to Clipboard; Añadir al portapapeles; Dodaj do schowka',
+                            caption: '_; Copy; Copiar; Kopiuj',
                             action: (f) => copyTaskToBasket(),
 
                         }

@@ -9,7 +9,7 @@
                 reloadWholeApp,
                 Input,
                 onErrorShowAlert, UI, i18n, ext} from '$lib'
-    import {FaRegFolder, FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaArchive, FaUsers, FaPlus, FaRegStar, FaStar, FaPaste, FaRegClipboard, FaRegComments} from 'svelte-icons/fa'
+    import {FaRegFolder, FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaArchive, FaUsers, FaPlus, FaRegStar, FaStar, FaPaste, FaRegClipboard, FaRegComments, FaRegFile, FaRegCalendar} from 'svelte-icons/fa'
     import {location, push} from 'svelte-spa-router'
     import {reef, session} from '@humandialog/auth.svelte'
 	import { onMount, tick } from 'svelte';
@@ -20,9 +20,9 @@
     let groupFolders = [];
     let user = {};
     let basket = {}
-    let pinnedFolders = []
+    let pinnedElements = []
     let navGroupFolders;
-    let navPinnedFolders;
+    let navPinnedElements;
     let navGroupItems = [];
     let navPinnedItems = [];
 
@@ -54,9 +54,20 @@
             {
                 user = cachedUser;
                 basket = user.BasketFolder
-                pinnedFolders = user.PinnedFolders['Folders/Folder']
+                
+                pinnedElements = []
+                if(user.PinnedFolders.Folders)
+                    pinnedElements = [...pinnedElements, ...user.PinnedFolders.Folders]
 
-                navPinnedFolders?.reload(pinnedFolders)
+                if(user.PinnedFolders.Notes)
+                    pinnedElements = [...pinnedElements, ...user.PinnedFolders.Notes]
+
+                if(user.PinnedFolders.Tasks)
+                    pinnedElements = [...pinnedElements, ...user.PinnedFolders.Tasks]
+                
+                pinnedElements.sort( (a, b) => a.Order - b.Order)
+
+                navPinnedElements?.reload(pinnedElements)
             }
 
             reef.post('user/query', {
@@ -81,8 +92,17 @@
                                     {
                                         Id: 121,
                                         Association: 'Folders',
-                                        Sort: 'Order',
-                                        Expressions:['Id','$ref', 'Title', 'href', 'Summary', 'Order', 'icon'],
+                                        Expressions:['Id','$ref', 'Title', 'href', 'Summary', 'Order', 'icon', '$type'],
+                                    },
+                                    {
+                                        Id: 122,
+                                        Association: 'Notes',
+                                        Expressions:['Id','$ref', 'Title', 'href', 'Summary', 'Order', '$type'],
+                                    },
+                                    {
+                                        Id: 123,
+                                        Association: 'Tasks',
+                                        Expressions:['Id','$ref', 'Title', 'href', 'Summary', 'Order', '$type'],
                                     }
                                 ]
                             }
@@ -94,9 +114,20 @@
                 {
                     user = res.User
                     basket = user.BasketFolder
-                    pinnedFolders = user.PinnedFolders.Folders
 
-                    navPinnedFolders?.reload(pinnedFolders)
+                    pinnedElements = []
+                    if(user.PinnedFolders.Folders)
+                        pinnedElements = [...pinnedElements, ...user.PinnedFolders.Folders]
+
+                    if(user.PinnedFolders.Notes)
+                        pinnedElements = [...pinnedElements, ...user.PinnedFolders.Notes]
+
+                    if(user.PinnedFolders.Tasks)
+                        pinnedElements = [...pinnedElements, ...user.PinnedFolders.Tasks]
+                    
+                    pinnedElements.sort( (a, b) => a.Order - b.Order)
+
+                    navPinnedElements?.reload(pinnedElements)
                     cache.set('navFoldersUser', user)
                 }
             })
@@ -237,12 +268,12 @@
             {
                 caption: '_; Move up; Desplazar hacia arriba; Przesuń w górę',
                 icon: FaCaretUp,
-                action: (f) => navPinnedFolders.moveUp(dataItem)
+                action: (f) => navPinnedElements.moveUp(dataItem)
             },
             {
                 caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                 icon: FaCaretDown,
-                action: (f) => navPinnedFolders.moveDown(dataItem)
+                action: (f) => navPinnedElements.moveDown(dataItem)
 
             },
             {
@@ -399,23 +430,41 @@
             return FaRegFolder
     }
 
+    function getElementIcon(element)
+    {
+        switch(element.$type)
+        {
+        case 'Folder':
+        case 'FolderFolder':
+            return getFolderIcon(element)
+
+        case 'Note':
+        case 'FolderNote':
+            return FaRegFile;
+
+        case 'Task':
+        case 'FolderTask':
+            return FaRegCalendar;
+        }
+    }
+
 </script>
 
 {#key currentPath}
 {#if sidebar}
     {#if groupFolders && groupFolders.length > 0}
         {#if $session.isActive}
-            {#if pinnedFolders && pinnedFolders.length > 0}
+            {#if pinnedElements && pinnedElements.length > 0}
                 <SidebarGroup title={i18n({en: 'Pinned', es: 'Sujetado', pl: 'Przypięte'})}
                         moreHref={user.PinnedFolders.href}>
 
-                    <SidebarList    objects={pinnedFolders}
+                    <SidebarList    objects={pinnedElements}
                                     orderAttrib='Order'
-                                    bind:this={navPinnedFolders}>
+                                    bind:this={navPinnedElements}>
                         <svelte:fragment let:item let:idx>
                             {@const href = item.href}
                             <SidebarItem   {href}
-                                            icon={FaRegStar}
+                                            icon={getElementIcon(item)}
                                             bind:this={navPinnedItems[idx]}
                                             active={isRoutingTo(href, currentPath)}
                                             summary={ext(item.Summary)}>
@@ -477,16 +526,16 @@
     {#if groupFolders && groupFolders.length > 0}
 
         {#if $session.isActive}
-            {#if pinnedFolders && pinnedFolders.length > 0}
+            {#if pinnedElements && pinnedElements.length > 0}
                 <SidebarGroup   title={i18n({en: 'Pinned', es: 'Sujetado', pl: 'Przypięte'})}
                                 moreHref={user.PinnedFolders.href}>
-                    <SidebarList    objects={pinnedFolders}
+                    <SidebarList    objects={pinnedElements}
                                     orderAttrib='Order'
-                                    bind:this={navPinnedFolders}>
+                                    bind:this={navPinnedElements}>
                         <svelte:fragment let:item let:idx>
                             {@const href = item.href}
                             <SidebarItem   {href}
-                                            icon={FaRegStar}
+                                            icon={getElementIcon(item)}
                                             bind:this={navPinnedItems[idx]}
                                             {item}
                                             summary={ext(item.Summary)}>
