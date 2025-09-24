@@ -17,11 +17,12 @@
 
     let basketItem;
     let basketEntriesNo = 0
-
+    
     const STATE_FINISHED = 7000;
 
     let reloadTicket = -1
     let lastReloadTicket = 0
+    
 
     $: initData()
 
@@ -47,22 +48,19 @@
                                             {
                                                 Id: 2,
                                                 Association: 'Folders',
-                                                Sort: 'Order',
-                                                Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'IsPinned']
+                                                Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'IsPinned', '$type', 'icon']
 
                                             },
                                             {
                                                 Id: 3,
                                                 Association: 'Notes',
-                                                Sort: 'Order',
-                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href']
+                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href', '$type']
 
                                             },
                                             {
                                                 Id: 4,
                                                 Association: 'Tasks',
-                                                Sort: 'Order',
-                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'href']
+                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'href', '$type']
 
                                             }
                                         ]
@@ -75,34 +73,44 @@
             basketItem = res.Folder;
             basketEntriesNo = 0;
 
+            basketItem.allElements = []
+
             if(basketItem.Folders && basketItem.Folders.length > 0)
+            {
                 basketEntriesNo += basketItem.Folders.length;
+                basketItem.allElements = [...basketItem.allElements, ...basketItem.Folders]
+            }
 
             if(basketItem.Notes && basketItem.Notes.length > 0)
+            {
                 basketEntriesNo += basketItem.Notes.length;
+                basketItem.allElements = [...basketItem.allElements, ...basketItem.Notes]
+            }
 
             if(basketItem.Tasks && basketItem.Tasks.length > 0)
+            {
                 basketEntriesNo += basketItem.Tasks.length;
+                basketItem.allElements = [...basketItem.allElements, ...basketItem.Tasks]
+            }
+
+            basketItem.allElements.sort((a,b) => a.Order - b.Order)
 
         }
         else
         {
             basketItem = null
             basketEntriesNo = 0
+            basketItem.allElements = []
         }
     }
 
-    let foldersElement;
-    let notesElement;
-    let tasksElement;
+    let listElement;
     export async function reload()
     {
         reloadTicket++;
         await initData()
 
-        foldersElement.reload(basketItem);
-        notesElement.reload(basketItem);
-        tasksElement.reload(basketItem);
+        listElement.reload(basketItem);
     }
 
     let rootElement;
@@ -173,6 +181,44 @@
         }
     }
 
+    function getFolderIcon(folder)
+    {
+        if(folder.icon)
+        {
+            switch(folder.icon)
+            {
+            case 'Folder':
+                return FaRegFolder;
+            case 'Clipboard':
+                return FaRegClipboard;
+            case 'Discussion':
+                return FaRegComments;
+            default:
+                return FaRegFolder
+            }
+        }
+        else
+            return FaRegFolder
+    }
+
+    function getElementIcon(element)
+    {
+        switch(element.$type)
+        {
+        case 'Folder':
+        case 'FolderFolder':
+            return getFolderIcon(element)
+
+        case 'Note':
+        case 'FolderNote':
+            return FaRegFile;
+
+        case 'Task':
+        case 'FolderTask':
+            return FaRegCalendar;
+        }
+    }
+
 </script>
 
 <menu class="" bind:this={rootElement}>
@@ -187,50 +233,20 @@
             {/if}
 
             <List   self={basketItem}
-                    a='Folders'
+                    a='allElements'
                     orderAttrib='Order'
-                    bind:this={foldersElement}>
+                    bind:this={listElement}
+                    >
                 <ListTitle a='Title'/>
                 <ListSummary a='Summary'/>
 
                 <span slot="left" let:element>
-                    <Icon component={FaRegFolder}
+                    <Icon component={getElementIcon(element)}
                         class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
                 </span>
             </List>
 
-            <List   self={basketItem}
-                    a='Notes'
-                    orderAttrib='Order'
-                    bind:this={notesElement}>
-                <ListTitle a='Title'/>
-                <ListSummary a='Summary'/>
-
-                <span slot="left" let:element>
-                    <Icon component={FaRegFile}
-                        class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
-                </span>
-            </List>
-
-            <List   self={basketItem}
-                    a='Tasks'
-                    orderAttrib='Order'
-                    bind:this={tasksElement}>
-                <ListTitle a='Title'/>
-                <ListSummary a='Summary'/>
-
-                <span slot="left" let:element>
-                    {#if element.State == STATE_FINISHED}
-                        <Icon component={FaRegCalendarCheck}
-                        class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
-
-                    {:else}
-                        <Icon component={FaRegCalendar}
-                            class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
-
-                    {/if}
-                </span>
-            </List>
+            
 
         </div>
 
@@ -279,7 +295,7 @@
                                 disabled={!basketEntriesNo}
                                 on:click={() => attachToAndClear()}>
 
-                    _; Attach and clear; Adjuntar y borrar; Dołącz i wyczyść
+                    _; Attach and clear; Adjuntar y borrar; Załącz i wyczyść
                 </button>
             </div>
 
