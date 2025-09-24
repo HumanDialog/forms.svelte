@@ -28,6 +28,7 @@
     let isReadOnly = false;
     let unreadMessagesNo = 0
     let selectedMessageId = 0
+    const charsLimit = 196
 
     const heuristicIntevals = [5,10,20,40]
     let heuristicIntervalIdx = -1
@@ -333,23 +334,53 @@
     async function onPaste(e)
     {
         e.preventDefault();
+        const pasteText = e.clipboardData.getData('text/plain');
         
-        const sel = window.getSelection()
+        const selection = window.getSelection();
+        const range = selection?.getRangeAt(0);
+        /*const sel = window.getSelection()*/
         //const selNo = sel?.focusOffset
         //const selNode = sel?.focusNode
-
+        const before = editableElement.innerText.slice(0, range?.startOffset ?? 0);
+        const after = editableElement.innerText.slice(range?.endOffset ?? 0);
         //console.log('sel', selNo, selNode)
-        
-        const txt = e.clipboardData.getData('text/plain')
-        
+        let combined = before + pasteText + after;
+
+        const combinedSize = byteLengthUTF8(combined)
+        if(combinedSize > charsLimit)
+            return;
+
+       
         //const left = newMessageContent.substring(0, selNo)
         //const right = newMessageContent.substring(selNo+1)
         //newMessageContent = left + txt + right
-        newMessageContent = txt
-        
-        await tick()
+        newMessageContent = combined;
+        editableElement.innerText = combined;
 
-        sel?.setPosition(editableElement.childNodes[0], txt.length)
+        await tick();
+
+        const node = editableElement.firstChild;
+        if (node) {
+            const pos = before.length + pasteText.length;
+            const clampedPos = Math.min(pos, node.textContent.length);
+            const newRange = document.createRange();
+            newRange.setStart(node, clampedPos);
+            newRange.setEnd(node, clampedPos);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+        }
+    }
+
+    function onBeforeInput(e) {
+        const currentText = editableElement.innerText;
+        const incomingText = e.data ?? '';
+        const currentTextSize = byteLengthUTF8(currentText)
+        const incomingTextSize = byteLengthUTF8(incomingText)
+        
+        if(currentTextSize + incomingTextSize > charsLimit)
+            e.preventDefault()
+        
+        
     }
 
     function onSubmitClick(e)
@@ -373,6 +404,7 @@
             if (code >= 0xDC00 && code <= 0xDFFF) i--; //trail surrogate
         }
         return s;
+        /*return new TextEncoder().encode(str).length;*/
     }
 
     function additionalBytesSize(str)
@@ -654,8 +686,9 @@
 
                             placeholder="Type new message"
                             on:keydown={onKeyDown}
-                            on:paste={onPaste}>
-                    </p> <!--maxlength={196-additionalBytesSize(newMessageContent)} -->
+                            on:paste={onPaste}
+                            on:beforeinput={onBeforeInput}>
+                    </p> <!--maxlength={charsLimit-additionalBytesSize(newMessageContent)} -->
 
 
 
@@ -694,7 +727,7 @@
                     </button>
 
                     <p class="flex-none ml-auto py-2.5 mr-1 text-xs m-0">
-                        {byteLengthUTF8(newMessageContent)}/196
+                        {byteLengthUTF8(newMessageContent)}/{charsLimit}
                     </p>
 
                     <button type="button"
