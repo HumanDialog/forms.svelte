@@ -2,6 +2,8 @@
     import {setContext, getContext, afterUpdate, tick, onMount} from 'svelte'
     import {data_tick_store, contextItemsStore, contextTypesStore } from '../../stores'
     import {activateItem, getActive, clearActiveItem, parseWidthDirective, getPrev, getNext, swapElements, getLast, insertAfter} from '../../utils' 
+    import Icon from '../icon.svelte'
+    import {FaRegSquare, FaRegCheckSquare} from 'svelte-icons/fa/'
     
     import {rList_definition} from './List'
     import List_element from './internal/list.element.svelte'
@@ -25,6 +27,7 @@
     export let contextMenu = undefined;
 
     export let key: string = '';
+    export let multiselect: boolean = false
 
     // reload selection parameter
     export const CLEAR_SELECTION = 0;
@@ -441,12 +444,17 @@
 
 
     {#if items && items.length > 0 }
+        {#if multiselect}
+            <Icon component={FaRegCheckSquare} class="h-5 w-5 sm:h-4 sm:w-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 mr-3 "/>
+        {/if}
+        
         {#each items as element, i (getItemKey(element))}
             
             <List_element   item={element} 
                             {toolbarOperations}
                             {contextMenu}
                             {key}
+                            {multiselect}
                             bind:this={rows[i]}
                             >
             
