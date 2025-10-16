@@ -18,6 +18,8 @@
     export let onAttach = undefined
     export let onAttachAndClear = undefined
 
+    // gitlab mirror test
+
     let basketItem;
     let basketEntriesNo = 0
     
