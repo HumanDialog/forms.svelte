@@ -5,7 +5,7 @@ import {navGetKey} from './utils.js'
 import { location } from 'svelte-spa-router';
 
 export const data_tick_store = writable(1);
-export const contextItemsStore = writable({focused:'', data: null, sel: null})
+export const contextItemsStore = writable({focused:'', data: null, sel: null, props: null})
 export const context_info_store = writable({data: '', sel: ''})
 export const contextTypesStore = writable({focused:'', data: null, sel: null})
 export const contextToolbarOperations = writable([]);

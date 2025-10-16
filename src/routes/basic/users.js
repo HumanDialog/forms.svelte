@@ -2,13 +2,13 @@
 const octopusTestUsers = [
     {
         username: "alice@example.com",
-        role: 'supervisor',
-        groupId: 13
+        role: 'GroupOwner',
+        groupId: 15
     },
     {
         username: "bob@example.com",
-        role: 'supervisor',
-        groupId: 13
+        role: 'GroupMember',
+        groupId: 15
     }
 ]
 
