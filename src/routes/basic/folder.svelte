@@ -16,9 +16,12 @@
 				activateItem, UI,
 				i18n, ext,
                 Breadcrumb,
-				breadcrumbAdd} from '$lib'
+				breadcrumbAdd,
+                refreshToolbarOperations} from '$lib'
     import {FaRegFile, FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaSync,
-        FaList, FaEllipsisH, FaChevronRight, FaChevronLeft, FaRegShareSquare, FaLink, FaUnlink, FaRegStar, FaStar, FaCopy, FaCut, FaRegComments, FaRegClipboard} from 'svelte-icons/fa'
+        FaList, FaEllipsisH, FaChevronRight, FaChevronLeft, FaRegShareSquare, FaLink, FaUnlink, FaRegStar, FaStar, FaCopy, FaCut, FaRegComments, FaRegClipboard,
+        FaRegCheckSquare,
+        } from 'svelte-icons/fa'
 
         import {FaEdit} from 'svelte-icons/fa'
         import FaHighlighter from 'svelte-icons/fa/FaHighlighter.svelte'
@@ -125,7 +128,7 @@
                                                 Association: 'Folders',
                                                 //Filter: 'State <> STATE_FINISHED',
                                                 //Sort: 'Order',
-                                                Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'IsPinned', 'icon', '$type']
+                                                Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'IsInBasket' , 'icon', '$type']
 
                                             },
                                             {
@@ -133,7 +136,7 @@
                                                 Association: 'Notes',
                                                 //Filter: 'State <> STATE_FINISHED',
                                                 //Sort: 'Order',
-                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href', '$type']
+                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href', 'IsInBasket', '$type']
 
                                             },
                                             {
@@ -141,7 +144,7 @@
                                                 Association: 'Tasks',
                                                 //Filter: 'State <> STATE_FINISHED',
                                                 //Sort: 'Order',
-                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'href', '$type']
+                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'href', 'IsInBasket', '$type']
 
                                             }
                                         ]
@@ -264,6 +267,24 @@
             await fetchData();
             listComponent.reload(contextItem, listComponent.SELECT_NEXT);
             break;
+
+        case 'multi':
+            {
+                let refs = []
+                objectToDelete.forEach(i => 
+                    refs.push({
+                        Type: i.$type,
+                        Id: i.Id,
+                        Title: i.Title,
+                        ref: i.$ref
+                        })   
+                )
+                await reef.post(`${contextItem.$ref}/DeletePermanentlyMulti`, { items: refs } , onErrorShowAlert);
+                deleteModal.hide();
+                await fetchData();
+                listComponent.reload(contextItem, listComponent.SELECT_NEXT);
+            }
+            break;
         }
 
     }
@@ -292,6 +313,8 @@
     async function copyTaskToBasket(task)
     {
         await reef.post(`${contextItem.$ref}/CopyTaskToBasket`, { taskLink: task.$ref } , onErrorShowAlert);
+        task.IsInBasket = true
+        refreshToolbarOperations()
         // not needed
         //await fetchData();
         //tasksComponent.reload(contextItem, tasksComponent.SELECT_NEXT);
@@ -307,6 +330,8 @@
     async function copyNoteToBasket(note)
     {
         await reef.post(`${contextItem.$ref}/CopyNoteToBasket`, { noteLink: note.$ref } , onErrorShowAlert);
+        note.IsInBasket = true
+        refreshToolbarOperations()
         // not needed
         //await fetchData();
         //tasksComponent.reload(contextItem, tasksComponent.SELECT_NEXT);
@@ -322,6 +347,8 @@
     async function copySubFolderToBasket(folder)
     {
         await reef.post(`${contextItem.$ref}/CopySubFolderToBasket`, { folderLink: folder.$ref } , onErrorShowAlert);
+        folder.IsInBasket = true
+        refreshToolbarOperations()
         // not needed
         //await fetchData();
         //tasksComponent.reload(contextItem, tasksComponent.SELECT_NEXT);
@@ -333,6 +360,7 @@
         await fetchData();
         listComponent.reload(contextItem, listComponent.SELECT_NEXT);
     }
+    
 
     async function finishTask(event, task)
     {
@@ -500,22 +528,25 @@
             operations: [
                 {
                     caption: '_; View; Ver; Widok',
-                    menu: 'FT',
                     operations: [
                         {
                             caption: '_; Clear Clipboard; Borrar portapapeles; Wyczyść schowek',
                         //    icon: FaBasketTrash, //FaTrash,
                             action: async (f) => await dettachAllMyContent(),
                         //      fab: 'M30',
-                            tbr: 'A'
+                        //    tbr: 'A'
+                        },
+                        {
+                            separator: true
+                        },
+                        {
+                            caption: '_; Select; Seleccionar; Wybierz',
+                         //   icon: FaRegCheckSquare,
+                            action: (f) => listComponent.toggleMultiselection()
                         },
                         {
                             caption: '_; Refresh; Actualizar; Odśwież',
-                            //icon: FaSync,
                             action: async (f) => await refreshView(),
-                        //    fab: 'S10',
-                            //tbr: 'C',
-                            hideToolbarCaption: true
                         }
                     ]
                 }
@@ -604,15 +635,15 @@
                     caption: '_; View; Ver; Widok',
                     //tbr: 'B',
                     operations: [
-                        
                         ... !canPin ? [] : [pinOp()],
+                         {
+                            caption: '_; Select; Seleccionar; Wybierz',
+                         //   icon: FaRegCheckSquare,
+                            action: (f) => listComponent.toggleMultiselection()
+                        },
                         {
                             caption: '_; Refresh; Actualizar; Odśwież',
-                            //icon: FaSync,
                             action: async (f) => await refreshView(),
-                            //fab: 'S10',
-                            //tbr: 'C',
-                            //hideToolbarCaption: true
                         }
                     ]
                 }
@@ -657,6 +688,25 @@
         }
     }
 
+    async function dettachElementMulti(items)
+    {
+        let refs = []
+        items.forEach(i => 
+            refs.push({
+                Type: i.$type,
+                Id: i.Id,
+                Title: i.Title,
+                ref: i.$ref
+                })   
+        )
+
+        await reef.post(`${contextItem.$ref}/DettachElementMulti`, { items: refs } , onErrorShowAlert);
+        await fetchData();
+        listComponent.reload(contextItem, listComponent.SELECT_NEXT);
+    }
+
+   
+
     async function copyElementToBasket(element, kind)
     {
         switch(kind)
@@ -689,15 +739,56 @@
         }
     }
 
+    async function copyElementToBasketMulti(items)
+    {
+        let refs = []
+        items.forEach(i => {
+            refs.push({
+                Type: i.$type,
+                Id: i.Id,
+                Title: i.Title,
+                ref: i.$ref
+                })   
+
+            i.IsInBasket = true
+        })
+        
+        await reef.post(`${contextItem.$ref}/CopyToBasketMulti`, { items: refs } , onErrorShowAlert);
+        
+        refreshToolbarOperations()
+        // not needed
+        //await fetchData();
+        //tasksComponent.reload(contextItem, tasksComponent.SELECT_NEXT);
+    }
+
+    async function cutElementToBasketMulti(items)
+    {
+        //const refs = items.map( (e) => e.$ref)
+        let refs = []
+        items.forEach(i => 
+            refs.push({
+                Type: i.$type,
+                Id: i.Id,
+                Title: i.Title,
+                ref: i.$ref
+                })   
+        )
+        
+        await reef.post(`${contextItem.$ref}/CutToBasketMulti`, { items: refs } , onErrorShowAlert);
+        await fetchData();
+        listComponent.reload(contextItem, listComponent.SELECT_NEXT);
+    }
+
     function basketElementOperations(element, kind)
     {
         let list = listComponent;
         return {
                 opver: 2,
                 fab: 'M00',
+                tbr: 'C',
                 operations: [
                     {
-                        caption: kind,
+                        caption: '_; Element; Elemento; Element',
                         operations: [
                             {
                                 caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
@@ -716,12 +807,26 @@
                                 hideToolbarCaption: true
                             },
                             {
-                            //    icon: FaTrash,
+                                separator: true
+                            },
+                            {
                                 caption: '_; Remove from Clipboard; Eliminar del portapapeles; Usuń ze schowka',
                                 action: (f) => dettachElement(element, kind),
-                            //    fab:'M30',
-                                tbr:'A'
                             }
+                        ]
+                    },
+                    {
+                        caption: '_; View; Ver; Widok',
+                        operations: [
+                         {
+                            caption: '_; Select; Seleccionar; Wybierz',
+                         //   icon: FaRegCheckSquare,
+                            action: (f) => listComponent.toggleMultiselection()
+                        },
+                        {
+                            caption: '_; Refresh; Actualizar; Odśwież',
+                            action: async (f) => await refreshView(),
+                        }
                         ]
                     }
                 ]
@@ -730,6 +835,10 @@
 
     function folderElementOperations(element, kind)
     {
+        const isClipboard = contextItem.IsBasket
+        const isRootPinned = contextItem.IsRootPinned
+        const canPin = !(isRootPinned || isClipboard)
+
         let list = listComponent;
         return {
                 opver: 2,
@@ -739,9 +848,6 @@
                     newElementOperations(element),
                     {
                         caption: '_; Element; Elemento; Element',
-
-                        //icon: FaPlus,
-                        //hideToolbarCaption: true,
                         operations: [
                             {
                                 caption: '_; Edit; Editar; Edytuj',
@@ -780,11 +886,12 @@
                             },
                             {
                                 caption: '_; Copy; Copiar; Kopiuj',
-                                icon: FaCopy, //FaCopy,   // MdLibraryAdd
+                                icon: FaCopy, 
                                 action: (f) => copyElementToBasket(element, kind),
                                 hideToolbarCaption: true,
                                 fab: 'M30',
-                                tbr: 'A'
+                                tbr: 'A',
+                                disabledFunc: () => element.IsInBasket
 
                             },
                             {
@@ -809,6 +916,21 @@
                                 action: (f) => askToDelete(element, kind)
                             }
                         ]
+                    },
+                    {
+                        caption: '_; View; Ver; Widok',
+                        operations: [
+                            ... !canPin ? [] : [pinOp()],
+                         {
+                            caption: '_; Select; Seleccionar; Wybierz',
+                         //   icon: FaRegCheckSquare,
+                            action: (f) => listComponent.toggleMultiselection()
+                        },
+                        {
+                            caption: '_; Refresh; Actualizar; Odśwież',
+                            action: async (f) => await refreshView(),
+                        }
+                        ]
                     }
                 ]
             }
@@ -826,6 +948,124 @@
         else
         {
             return folderElementOperations(element, kind)
+        }
+    }
+
+    function multiselecOperations(items)
+    {
+        if(items.length == 0)
+            return []
+        else if(items.length == 1)      // not sure
+            return elementOperations(items[0], items[0].$type)
+        else if(contextItem.IsBasket)
+            return multiselectBasketOperations(items)
+        else
+        {
+            const isClipboard = contextItem.IsBasket
+            const isRootPinned = contextItem.IsRootPinned
+            const canPin = !(isRootPinned || isClipboard)
+            
+        return {
+                opver: 2,
+                fab: 'M00',
+                tbr: 'C',
+                operations: [
+                    //newElementOperations(element),
+                    {
+                        caption: '_; Element; Elemento; Element',
+
+                        operations: [
+                            {
+                                caption: '_; Copy; Copiar; Kopiuj',
+                                icon: FaCopy,
+                                action: (f) => copyElementToBasketMulti(items),
+                                hideToolbarCaption: true,
+                                fab: 'M30',
+                                tbr: 'A',
+                                disabledFunc: () => items.every((el) => el.IsInBasket)
+                            },
+                            {
+                                caption: '_; Cut; Cortar; Wytnij',
+                                icon: FaCut, //FaCut,
+                                action: (f) => cutElementToBasketMulti(items),
+                                hideToolbarCaption: true,
+                                fab: 'M40',
+                                tbr: 'A'
+                            },
+                            {
+                                separator: true
+                            },
+                            {
+                                caption: '_; Detach; Desconectar; Odłącz',
+                          //      icon: FaUnlink,
+                                action: (f) => dettachElementMulti(items)
+                            },
+                            {
+                                caption: '_; Delete; Eliminar; Usuń',
+                             //   icon: FaTrash,
+                                action: (f) => askToDelete(items, 'multi')
+                            }
+                        ]
+                    },
+                    {
+                        caption: '_; View; Ver; Widok',
+                        //tbr: 'B',
+                        operations: [
+                            ... !canPin ? [] : [pinOp()],
+                            {
+                                caption: '_; Select; Seleccionar; Wybierz',
+                            //   icon: FaRegCheckSquare,
+                                action: (f) => listComponent.toggleMultiselection()
+                            },
+                            {
+                                caption: '_; Refresh; Actualizar; Odśwież',
+                                //icon: FaSync,
+                                action: async (f) => await refreshView(),
+                                //fab: 'S10',
+                                //tbr: 'C',
+                                //hideToolbarCaption: true
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+
+    function multiselectBasketOperations(items)
+    {
+        return {
+                opver: 2,
+                fab: 'M00',
+                tbr: 'C',
+                operations: [
+                    {
+                        caption: '_; Element; Elemento; Element',
+                        operations: [
+                            {
+                            //    icon: FaTrash,
+                                caption: '_; Remove from Clipboard; Eliminar del portapapeles; Usuń ze schowka',
+                                action: (f) => dettachElementMulti(items),
+                            //    fab:'M30',
+                            //    tbr:'A'
+                            }
+                        ]
+                    },
+                    {
+                        caption: '_; View; Ver; Widok',
+                        operations: [
+                            {
+                                caption: '_; Select; Seleccionar; Wybierz',
+                            //   icon: FaRegCheckSquare,
+                                action: (f) => listComponent.toggleMultiselection()
+                            },
+                            {
+                                caption: '_; Refresh; Actualizar; Odśwież',
+                                action: async (f) => await refreshView(),
+                            }
+                        ]
+                    }
+                ]
         }
     }
 
@@ -905,6 +1145,7 @@
             <List   self={contextItem}
                     a='allElements'
                     toolbarOperations={(el) => elementOperations(el, el.$type)}
+                    {multiselecOperations}
                     orderAttrib='Order'
                     bind:this={listComponent}>
                 <ListTitle      a='Title'
@@ -921,52 +1162,6 @@
                         class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
                 </span>
             </List>
-
-            <!--List   self={contextItem}
-                    a='Notes'
-                    toolbarOperations={ (el) => elementOperations(el, 'Note')}
-                    orderAttrib='Order'
-                    bind:this={notesComponent}>
-                <ListTitle      a='Title'
-                                hrefFunc={(note) => `${note.href}?path=${breadcrumbPath}`}
-                                onChange={changeElementProperty}/>
-                <ListSummary    a='Summary'
-                                onChange={changeElementProperty}/>
-                <ListInserter action={addNote} icon/>
-
-                <span slot="left" let:element>
-                    <Icon component={FaRegFile}
-                        class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5 ml-2  mr-1"/>
-                </span>
-            </List>
-
-            <List   self={contextItem}
-                    a='Tasks'
-                    toolbarOperations={(el) => elementOperations(el, 'Task')}
-                    orderAttrib='Order'
-                    bind:this={tasksComponent}>
-                <ListTitle      a='Title'
-                                hrefFunc={(task) => `${task.href}?path=${breadcrumbPath}`}
-                                onChange={changeElementProperty}/>
-
-                <ListSummary    a='Summary'
-                                onChange={changeElementProperty}/>
-                <ListInserter action={addTask} icon/>
-
-                <span slot="left" let:element>
-                    {#if element.State == STATE_FINISHED}
-                        <Icon component={FaRegCalendarCheck}
-                        class="h-5 w-5  text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
-
-                    {:else}
-                        <Icon component={FaRegCalendar}
-                            on:click={(e) => finishTask(e, element)}
-                            class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1 "/>
-
-                    {/if}
-                </span>
-            </List-->
-
     </section>
 
     </Page>
@@ -978,8 +1173,23 @@
 
 
 <Modal  title={i18n(['Delete', 'Eliminar', 'Usuń'])}
-        content={i18n(["Are you sure you want to delete selected element?", "¿Está seguro de que desea eliminar el elemento seleccionado?", "Czy na pewno chcesz usunąć wybrany element?"])}
         icon={FaTrash}
         onOkCallback={deleteElement}
-        bind:this={deleteModal}
-        />
+        bind:this={deleteModal}>
+    <p class="text-sm text-stone-500 dark:text-stone-300">
+        {#if deleteObjectKind == 'multi' && objectToDelete.length > 1}
+            {@const itemsNo = objectToDelete.length}
+            {i18n({
+                en: `Are you sure you want to delete ${itemsNo} elements?`,
+                es: `¿Seguro que quieres eliminar ${itemsNo} elementos?`,
+                pl: `Czy na pewno chcesz usunąć ${itemsNo} ${itemsNo < 5 ? 'elementy' : 'elementów'}?`})}
+        {:else}
+            <span>
+                _; 
+                Are you sure you want to delete selected element?;
+                ¿Está seguro de que desea eliminar el elemento seleccionado?;
+                Czy na pewno chcesz usunąć wybrany element?
+            </span>
+        {/if}
+    </p>
+</Modal>

@@ -2,7 +2,10 @@
 	import { reef } from "@humandialog/auth.svelte";
     import {
         onErrorShowAlert, Icon,
-        List, ListTitle, ListSummary, Spinner, i18n
+        List, ListTitle, ListSummary, Spinner, i18n,
+        contextItemsStore,
+        getActiveItems,
+        clearActiveItem
     }   from '$lib'
     import {FaRegFolder, FaRegFile, FaRegCalendarCheck, FaRegCalendar} from 'svelte-icons/fa'
 	import { afterUpdate, onMount } from "svelte";
@@ -22,9 +25,10 @@
 
     let reloadTicket = -1
     let lastReloadTicket = 0
-    
 
     $: initData()
+    $: selectedElements = getSelectedItems($contextItemsStore)
+    $: selectedElementsNo = selectedElements.length
 
     async function initData(...args)
     {
@@ -104,6 +108,12 @@
         }
     }
 
+    function getSelectedItems(...args)
+    {
+        const selectedElements = getActiveItems('handy')
+        return selectedElements;
+    }
+
     let listElement;
     export async function reload()
     {
@@ -150,7 +160,13 @@
         }
         else
         {
-            const res = await reef.post(`${destinationContainer}/AttachBasketContent`, { }, onErrorShowAlert)
+            const items = selectedElements.map( el => { return {
+                Type: el.$type,
+                Id: el.Id,
+                Title: el.Title
+            }})
+
+            const res = await reef.post(`${destinationContainer}/AttachBasketContentMulti`, { items: items }, onErrorShowAlert)
             if(res)
             {
                 if(onRefreshView)
@@ -172,7 +188,13 @@
         }
         else
         {
-            const res = await reef.post(`${destinationContainer}/AttachAndClearBasketContent`, { }, onErrorShowAlert)
+            const items = selectedElements.map( el => { return {
+                Type: el.$type,
+                Id: el.Id,
+                Title: el.Title
+            }})
+
+            const res = await reef.post(`${destinationContainer}/AttachAndClearBasketContentMulti`, { items: items }, onErrorShowAlert)
             if(res)
             {
                 if(onRefreshView)
@@ -219,9 +241,21 @@
         }
     }
 
+    function clearSelection(e)
+    {
+        clearActiveItem('handy')
+    }
+
+    onMount( () => {
+        // clear selection when shown
+        clearActiveItem('handy')
+    })
+
 </script>
 
-<menu class="" bind:this={rootElement}>
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+ <!--svelte-ignore a11y-no-noninteractive-element-interactions -->
+<menu class="" bind:this={rootElement} on:click={clearSelection}>
     {#if basketItem}
         <div class="w-full h-64 sm:h-80 sm:max-w-sm overflow-y-auto overflow-x-clip
                 text-stone-600 dark:text-stone-400">
@@ -235,10 +269,12 @@
             <List   self={basketItem}
                     a='allElements'
                     orderAttrib='Order'
+                    multiselect
+                    selectionKey='handy'
                     bind:this={listElement}
                     >
-                <ListTitle a='Title'/>
-                <ListSummary a='Summary'/>
+                <ListTitle a='Title' readonly/>
+                <ListSummary a='Summary' readonly/>
 
                 <span slot="left" let:element>
                     <Icon component={getElementIcon(element)}
@@ -265,7 +301,7 @@
                                 disabled={!basketItem}
                                 on:click={() => editBasket()}>
 
-                    _; Edit; Editar; Edytuj
+                    _; Go to Clipboard; Ir al Portapapeles; Przejdź do Schowka
                 </button>
 
                 <button class=" py-2.5 px-5
@@ -277,10 +313,10 @@
                                 border-stone-200 dark:border-stone-600 focus:outline-none
                                 disabled:border-stone-200/60 disabled:dark:border-stone-600/60
                                 inline-flex items-center justify-center"
-                                disabled={!basketEntriesNo}
+                                disabled={!selectedElementsNo}
                                 on:click={() => attachTo()}>
 
-                    _; Attach; Adjuntar; Załącz
+                    _; Paste; Pegar; Wklej
                 </button>
 
                 <button class=" py-2.5 px-5
@@ -292,10 +328,10 @@
                                 border-stone-200 dark:border-stone-600 focus:outline-none
                                 disabled:border-stone-200/60 disabled:dark:border-stone-600/60
                                 inline-flex items-center justify-center"
-                                disabled={!basketEntriesNo}
+                                disabled={!selectedElementsNo}
                                 on:click={() => attachToAndClear()}>
 
-                    _; Attach and clear; Adjuntar y borrar; Załącz i wyczyść
+                    _; Paste and forget; Pegar y olvidar; Wklej i zapomnij
                 </button>
             </div>
 

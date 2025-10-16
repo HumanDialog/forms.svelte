@@ -1,7 +1,7 @@
 <script lang="ts">
     import {setContext, getContext, afterUpdate, tick, onMount} from 'svelte'
     import {data_tick_store, contextItemsStore, contextTypesStore } from '../../stores'
-    import {activateItem, getActive, clearActiveItem, parseWidthDirective, getPrev, getNext, swapElements, getLast, insertAfter} from '../../utils' 
+    import {activateItem, getActive, clearActiveItem, parseWidthDirective, getPrev, getNext, swapElements, getLast, insertAfter, getActiveCount, addActiveItem} from '../../utils' 
     import Icon from '../icon.svelte'
     import {FaRegSquare, FaRegCheckSquare} from 'svelte-icons/fa/'
     
@@ -25,8 +25,10 @@
 
     export let toolbarOperations = undefined;
     export let contextMenu = undefined;
+    export let multiselecOperations = (items) => []
 
     export let key: string = '';
+    export let selectionKey = 'props'
     export let multiselect: boolean = false
 
     // reload selection parameter
@@ -62,7 +64,7 @@
     let inserter;
     
     if(toolbarOperations)
-        clearActiveItem('props')
+        clearActiveItem(selectionKey)
 
     let  last_tick = -1   
     $: setup($data_tick_store, $contextItemsStore);
@@ -120,7 +122,7 @@
 
     export function reload(data: object|object[], selectElement=KEEP_SELECTION)
     {
-        let currentSelectedItem = getActive('props');
+        let currentSelectedItem = getActive(selectionKey);
         let currentSelectedItemKey = currentSelectedItem ? getItemKey(currentSelectedItem) : null
         let selectElementId: string|number|null = null;
         let altSelectElementId: string|number|null = null;
@@ -204,7 +206,7 @@
         }
 
         //if(!activate_after_dom_update)
-        //    activateItem('props', null, [])
+        //    activateItem(selectionKey, null, [])
     }
 
     export async function moveUp(element: object)
@@ -257,9 +259,9 @@
         
         show_insertion_row_after_element = after ?? END_OF_LIST;
 
-        last_activated_element = getActive('props');
+        last_activated_element = getActive(selectionKey);
         let fake_item = {};
-        activateItem('props', fake_item)
+        activateItem(selectionKey, fake_item)
 
         await tick();
 
@@ -279,7 +281,7 @@
             {
                 if(detail.incremental)
                 {
-                    let current_active = getActive('props');
+                    let current_active = getActive(selectionKey);
                     await addRowAfter(current_active);
                 }
             }
@@ -288,7 +290,7 @@
 
     function scrollToSelectedElement()
     {
-        const activeItem = getActive('props');
+        const activeItem = getActive(selectionKey);
         if(!activeItem)
             return;
 
@@ -306,14 +308,14 @@
         if(removing_idx < 0)
             return;
 
-        let active_element = getActive('props');
+        let active_element = getActive(selectionKey);
         
         if(active_element == element)
         {
             if(removing_idx + 1 < items.length)
                 rows[removing_idx+1].activate();
             else
-                activateItem('props', null, []);
+                activateItem(selectionKey, null, []);
         }
 
         items = items.filter( t => t != element)
@@ -326,6 +328,22 @@
             return;
         
         rows[editing_idx].editProperty(property_name);
+    }
+
+    export function toggleMultiselection()
+    {
+        multiselect = !multiselect
+        
+        let lastSelectedItem = getActive(selectionKey) 
+        if(lastSelectedItem)
+        {
+            let ops = []
+            if(toolbarOperations)
+                ops = toolbarOperations(lastSelectedItem)
+            activateItem(selectionKey, lastSelectedItem, ops)
+        }
+        else
+            clearActiveItem(selectionKey)
     }
 
     function reorderElements(items: object[], from :object | null = null)
@@ -430,6 +448,31 @@
         //rereder();
     }
 
+    const SELECT_ALL = 0
+    const UNSELECT_ALL = 1
+    function calcMultiSelectionMode(...args)
+    {
+        const multiselectionCount = getActiveCount(selectionKey)
+        if(multiselectionCount > 0)
+            return UNSELECT_ALL
+        else
+            return SELECT_ALL
+    }
+
+    $: multiselectionMode = calcMultiSelectionMode($contextItemsStore)
+
+    function toggleSelectAll(e)
+    {
+        if(multiselectionMode == UNSELECT_ALL)
+            clearActiveItem(selectionKey)
+        else
+        {
+            const operations = multiselecOperations(items);
+            items?.forEach(itm => addActiveItem(selectionKey, itm, operations))        
+        }
+        e.stopPropagation()
+    }
+
 </script>
 
 <slot/> <!-- Launch definition settings -->
@@ -445,7 +488,9 @@
 
     {#if items && items.length > 0 }
         {#if multiselect}
-            <Icon component={FaRegCheckSquare} class="h-5 w-5 sm:h-4 sm:w-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 mr-3 "/>
+            {@const icon = (multiselectionMode == SELECT_ALL) ? FaRegSquare : FaRegCheckSquare}
+            <Icon component={icon} class="h-5 w-5 sm:h-4 sm:w-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 mr-3"
+                    on:click={toggleSelectAll}/>
         {/if}
         
         {#each items as element, i (getItemKey(element))}
@@ -455,6 +500,8 @@
                             {contextMenu}
                             {key}
                             {multiselect}
+                            {multiselecOperations}
+                            {selectionKey}
                             bind:this={rows[i]}
                             >
             

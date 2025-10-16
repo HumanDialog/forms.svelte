@@ -5,10 +5,11 @@
             isSelected, 
             selectable, 
             activateItem, 
-            isActive, 
-            getActive,
+            isActive,
             editable, 
-            startEditing, 
+            startEditing,
+            addActiveItem,
+            removeActiveItem, 
     } from '../../../utils'
 
     import {showGridMenu, showMenu} from '../../menu'
@@ -32,8 +33,10 @@
     export let typename :string | undefined = undefined;
     export let toolbarOperations = undefined;
     export let contextMenu = undefined;
+    export let multiselecOperations = (items) => []
     
     export let key: string = '';
+    export let selectionKey = 'props'
     export let multiselect:  boolean = false
 
     let definition :rList_definition = getContext("rList-definition");
@@ -100,20 +103,10 @@
 
     function calculate_active(...args)
     {
-        const activeItem = getActive('props')       // hasActive
-        if(!activeItem)
-            return false;
-        
-        const activeKey = getItemKey(activeItem);
-        const itemKey = getItemKey(item)
-        if(activeKey == itemKey)
-        {
-           // console.log('active: ', itemKey)
-            return true;
-        }
-        else
-            return false;
-        //return isActive('props', item)
+        const key = getItemKeyName(item)
+        const active = isActive(selectionKey, item, key)
+       return active
+
     }
 
     function selected(...args)
@@ -131,6 +124,22 @@
             return item.Id;
         else 
             return 0;
+    }
+
+    function getItemKeyName(item: object): string
+    {
+        if(key)
+            return key;
+        else
+        {
+            const keys = Object.keys(item)        
+            if(keys.findIndex(e => e == '$ref') >= 0)
+                return '$ref'
+            else if(keys.findIndex(e => e == 'Id') >= 0)
+                return 'Id'
+            else
+                return ''
+        }
     }
     
     async function change_name(text)
@@ -261,14 +270,14 @@
         const openable = !!definition.title_href || !!definition.title_href_func
         if(toolbarOperations)
         {
-            activateItem('props', item, toolbarOperations(item));
+            activateItem(selectionKey, item, toolbarOperations(item));
             
             if(e)
                 e.stopPropagation();
         }
-        else if(openable)
+        else// if(openable)
         {
-            activateItem('props', item, []);
+            activateItem(selectionKey, item, []);
             
             if(e)
                 e.stopPropagation();
@@ -386,7 +395,13 @@
 
     function onToggleMultiSelect(e)
     {
+        if(!is_row_active)
+            addActiveItem(selectionKey, item, multiselecOperations)
+        else
+            removeActiveItem(selectionKey, item, multiselecOperations)
 
+        if(e)
+            e.stopPropagation();
     }
 </script>
 
@@ -400,7 +415,9 @@
             bind:this={rootElement}> <!--  on:contextmenu={on_contextmenu} -->
 
     {#if multiselect}
-         <Icon  component={FaRegCheckSquare} class="flex-none h-5 w-5 sm:h-4 sm:w-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 mr-3 "
+        {@const icon=is_row_active ? FaRegCheckSquare : FaRegSquare}
+         <Icon  component={icon} 
+                class="flex-none h-5 w-5 sm:h-4 sm:w-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 mr-3 "
                 on:click={onToggleMultiSelect}/>
     {/if}
     

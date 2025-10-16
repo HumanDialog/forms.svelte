@@ -93,6 +93,7 @@
             popToolsActionsOperations();
 
         visible = false;
+        toolbar = null;
         cssPosition = calculatePosition(x, y, around_rect, false, false);
         
         window.removeEventListener('click', on_before_window_click, true);
@@ -106,6 +107,9 @@
 
     async function onSizeChanged()
     {
+        if(!visible)
+            return;
+
         cssPosition = calculatePosition(x, y, around_rect, true, true);
         await tick();
         cssPosition = calculatePosition(x, y, around_rect, true, false);
@@ -263,6 +267,8 @@
         </button>
     {/if}
 
-    <svelte:component this={toolbar} {...props} bind:this={internalElement} />
+    {#if toolbar}
+        <svelte:component this={toolbar} {...props} bind:this={internalElement} />
+    {/if}
 </div>
 

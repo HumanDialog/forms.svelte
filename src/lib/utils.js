@@ -17,9 +17,6 @@ export function isDeviceSmallerThan(br)
     return window.innerWidth < SCREEN_SIZES[br]
 }
 
-//export const chnages = {
-//    just_changed_context: false
-//}
 
 export function selectItem(itm)
 {
@@ -56,7 +53,7 @@ export function activateItem(context_level, itm, operations=null)
 
     //chnages.just_changed_context = true;
 
-    if(operations)
+    if(operations && context_level == 'props')
     { 
         if(Array.isArray(operations))
             contextToolbarOperations.set( [...operations] )
@@ -70,6 +67,7 @@ export function clearActiveItem(context_level)
     let data_context = get(contextItemsStore);
     data_context[context_level] = null;
     data_context.focused = context_level;
+    data_context.sel = null
     contextItemsStore.set( {...data_context} )
 
     
@@ -79,8 +77,186 @@ export function clearActiveItem(context_level)
 
     //chnages.just_changed_context = true;
 
-    contextToolbarOperations.set( [] )
+    if(context_level == 'props')
+        contextToolbarOperations.set( [] )
 }
+
+export function addActiveItem(context_level, itm, operations = null)
+{
+    let data_context = get(contextItemsStore);
+    data_context['sel'] = itm; //null;
+    
+    let multi = data_context[context_level]
+    
+    if(multi && Array.isArray(multi))
+        multi = [...multi, itm]
+    else if(multi instanceof Object)
+        multi = [multi, itm]
+    else
+        multi = [itm]
+
+    data_context[context_level] = multi;
+    data_context.focused = context_level;
+    contextItemsStore.set( {...data_context} )
+
+    
+    let ticket = get(data_tick_store)
+    ticket++;
+    data_tick_store.set(ticket)
+
+    //chnages.just_changed_context = true;
+
+    if(operations && context_level == 'props')
+    { 
+        if(typeof operations === 'function')
+        {
+            const calculatedOps = operations(multi)
+            contextToolbarOperations.set(calculatedOps)
+        }
+        else if(Array.isArray(operations))
+            contextToolbarOperations.set( [...operations] )
+        else
+            contextToolbarOperations.set( {...operations} )
+    }
+
+}
+
+export function removeActiveItem(context_level, itm, operations = null)
+{
+    let data_context = get(contextItemsStore);
+    let multi = data_context[context_level]
+
+    if(multi && Array.isArray(multi))
+    {
+        const idx = multi.findIndex(el => el == itm)
+        if(idx >= 0)
+            multi.splice(idx, 1)
+    }
+    else
+        multi = []
+
+    if(multi.length == 1)
+        multi = multi[0]
+
+    data_context[context_level] = multi;
+
+    contextItemsStore.set( {...data_context} )
+
+    let ticket = get(data_tick_store)
+    ticket++;
+    data_tick_store.set(ticket)
+
+
+    if(context_level == 'props')
+    {
+        if(multi.length == 0)
+            contextToolbarOperations.set( [] )
+        else
+        {
+            if(operations)
+            { 
+                if(typeof operations === 'function')
+                {
+                    const calculatedOps = operations(multi)
+                    contextToolbarOperations.set(calculatedOps)
+                }
+                else if(Array.isArray(operations))
+                    contextToolbarOperations.set( [...operations] )
+                else
+                    contextToolbarOperations.set( {...operations} )
+            }
+        }
+    }
+
+}
+
+
+export function isSelected(itm)
+{
+    let data_context = get(contextItemsStore);
+    if(!!data_context && !!data_context['sel'] && data_context['sel'] == itm)
+        return true;
+    else
+        return false;
+}
+
+
+export function isActive(context_level, itm, key = undefined)
+{
+    let data_context = get(contextItemsStore);
+
+    if(!data_context)
+        return false
+
+    const slot = data_context[context_level];
+    if(!slot)
+        return false
+
+    if(Array.isArray(slot))
+    {
+        const idx = slot.findIndex(el => {
+            if(key)
+                return el[key] == itm[key]
+            else
+                return el == itm
+        })
+        return idx >= 0
+    }
+    else if(key)
+        return slot[key] == itm[key]
+    else
+        return slot == itm
+}
+
+export function getActive(context_level)
+{
+    let data_context = get(contextItemsStore);
+    if(data_context != undefined)
+    {
+        const prop = data_context[context_level]
+        if(prop && Array.isArray(prop) && prop.length > 0)
+            return prop[prop.length-1]
+        else
+            return prop; 
+    }
+    else
+        return null;
+}
+
+export function getActiveItems(context_level)
+{
+    let data_context = get(contextItemsStore);
+    if(data_context != undefined)
+    {
+        const prop = data_context[context_level]
+        if(prop && Array.isArray(prop))
+            return prop
+        else if(prop)
+            return [prop]
+        else
+            return [] 
+    }
+    else
+        return [];
+}
+
+export function getActiveCount(context_level)
+{
+    let data_context = get(contextItemsStore);
+
+    if(!data_context)
+        return 0
+
+    const slot = data_context[context_level];
+    if(!slot)
+        return 0
+
+    if(Array.isArray(slot))
+        return slot.length
+    else
+        return 1
+}
+
 
 export function refreshToolbarOperations()
 {
@@ -133,34 +309,6 @@ export function refreshToolbarOperations()
         }
 
     }
-}
-
-export function isSelected(itm)
-{
-    let data_context = get(contextItemsStore);
-    if(!!data_context && !!data_context['sel'] && data_context['sel'] == itm)
-        return true;
-    else
-        return false;
-}
-
-
-export function isActive(context_level, itm)
-{
-    let data_context = get(contextItemsStore);
-    if(data_context != undefined && data_context[context_level] != undefined && data_context[context_level] == itm)
-        return true;
-    else
-        return false;
-}
-
-export function getActive(context_level)
-{
-    let data_context = get(contextItemsStore);
-    if(data_context != undefined)
-        return data_context[context_level]
-    else
-        return null;
 }
 
 export let currentEditable = null;
