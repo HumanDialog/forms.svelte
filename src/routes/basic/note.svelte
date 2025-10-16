@@ -29,6 +29,7 @@
             Breadcrumb, i18n, UI
             } from '$lib'
 	import { onMount, tick } from 'svelte';
+
     import {location, querystring, push, link} from 'svelte-spa-router'
 
     import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen, FaList, FaCopy, FaFileDownload,
@@ -577,13 +578,17 @@
     ]
 
     const descriptionActive = { }
+    let isEditorFocused = false;
+
     function activateFormattingTools()
     {
+        isEditorFocused = true;
         activateItem('props', descriptionActive, getPageOperationsWithFormattingTools())
     }
 
     function deactivateFormattingToolsIfNeeded()
     {
+        isEditorFocused = false;
         if(isActive('props', descriptionActive))
             clearActiveItem('props')
     }
@@ -858,8 +863,10 @@
             </p>
             {/if}
 
+
             <!--{#if note.Content || descriptionPlaceholder}-->
-                <hr/>
+            <hr/>
+            <div class="relative">
                 <Editor     class="mb-40"
                             a='Content'
                             compact={true}
@@ -871,8 +878,15 @@
                             extraFrontPaletteCommands={extraPaletteCommands}
                             extraInsertPaletteCommands={extraInsertPalletteCommands}
                             extraBackPaletteCommands={extraBackPaletteCommands}/>
+                {#if (!note.Content) && !isEditorFocused}
+                    <div
+                        class="absolute top-0 left-0 text-gray-400 italic pointer-events-none select-none"
+                    >
+                    Pisz tutaj
+                    </div>
+                {/if}
+            </div>
             <!--{/if}-->
-
         </article>
 
 
