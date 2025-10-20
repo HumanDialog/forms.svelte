@@ -14,6 +14,7 @@
 				mainContentPageReloader,
                 Modal,
                 onErrorShowAlert,
+                Breadcrumb,
             i18n} from '$lib'
     import {FaCheck, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaArchive, FaUndo} from 'svelte-icons/fa'
 
@@ -24,6 +25,8 @@
 
     let lists = [];
     const STATE_FINISHED = 7000;
+    let canconicalPath = []
+    const title = '_; My tasks; Mis tareas; Moje zadania'
 
     $: onParamsChanged($session, $mainContentPageReloader);
 
@@ -57,7 +60,7 @@
                                         {
                                             Id: 1,
                                             Association: '',
-                                            Expressions:['Id','Name'],
+                                            Expressions:['Id','Name', 'href'],
                                             SubTree:
                                             [
                                                 {
@@ -87,6 +90,16 @@
             user = res.User;
         else
             user = null
+
+        canconicalPath = [
+            {
+                Name: user.Name,
+                href: user.href
+            },
+            {
+                Name: title
+            }
+        ]
     }
 
     async function reloadTasks(selectRecommendation)
@@ -338,7 +351,7 @@
         }
     }
 
-    const title = '_; My tasks; Mis tareas; Moje zadania'
+   
 
 </script>
 
@@ -351,7 +364,18 @@
             toolbarOperations={pageOperations}
             clearsContext='props sel'
             title={title}>
+
             <section class="w-full place-self-center max-w-3xl">
+
+            {#if canconicalPath}
+                <Breadcrumb class="mt-1 mb-5" path={canconicalPath} collapseLonger/>
+            {/if}
+
+
+            <p class="hidden sm:block mt-3 ml-3 pb-5 text-lg text-left">
+                {title}
+            </p>
+
         <List   self={user}
                 a='MyTasks'
                 toolbarOperations={taskOperations}

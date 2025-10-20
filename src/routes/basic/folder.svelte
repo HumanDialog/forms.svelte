@@ -16,7 +16,6 @@
 				activateItem, UI,
 				i18n, ext,
                 Breadcrumb,
-				breadcrumbAdd,
                 refreshToolbarOperations} from '$lib'
     import {FaRegFile, FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaSync,
         FaList, FaEllipsisH, FaChevronRight, FaChevronLeft, FaRegShareSquare, FaLink, FaUnlink, FaRegStar, FaStar, FaCopy, FaCut, FaRegComments, FaRegClipboard,
@@ -43,9 +42,6 @@
     let listComponent;
     let folderTitle = ''
 
-    let prevBreadcrumbPath = ''
-    let breadcrumbPath = ''
-    
     let users = [];
 
     const STATE_FINISHED = 7000;
@@ -69,20 +65,13 @@
         contextPath = `/Folder/${contextItemId}`
 
 
-        const params = new URLSearchParams($querystring);
-        if(params.has("path"))
-            prevBreadcrumbPath = params.get("path") ?? ''
-        else
-            prevBreadcrumbPath = ''
-
         const cacheKey = `folder_${contextItemId}`
         const cachedValue = cache.get(cacheKey)
         if(cachedValue)
         {
             contextItem = cachedValue;
             folderTitle = ext(contextItem.Title);
-            breadcrumbPath = breadcrumbAdd(prevBreadcrumbPath, folderTitle, $location)
-
+            
             listComponent?.reload(contextItem, listComponent.KEEP_SELECTION)
         }
 
@@ -99,7 +88,6 @@
         if(contextItem)
         {
             folderTitle = ext(contextItem.Title);
-            breadcrumbPath = breadcrumbAdd(prevBreadcrumbPath, folderTitle, $location)
             setupAllElements(contextItem)
         }
 
@@ -120,7 +108,7 @@
                                     {
                                         Id: 1,
                                         Association: '',
-                                        Expressions:['Id', '$ref','Title','Summary', 'IsPinned', 'IsBasket', 'IsRootPinned'],
+                                        Expressions:['Id', '$ref','Title','Summary', 'IsPinned', 'IsBasket', 'IsRootPinned', 'GetCanonicalPath'],
                                         SubTree:
                                         [
                                             {
@@ -128,7 +116,7 @@
                                                 Association: 'Folders',
                                                 //Filter: 'State <> STATE_FINISHED',
                                                 //Sort: 'Order',
-                                                Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'IsInBasket' , 'icon', '$type']
+                                                Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'IsInBasket' , 'IsCanonical',  'icon', '$type']
 
                                             },
                                             {
@@ -136,7 +124,7 @@
                                                 Association: 'Notes',
                                                 //Filter: 'State <> STATE_FINISHED',
                                                 //Sort: 'Order',
-                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href', 'IsInBasket', '$type']
+                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href', 'IsInBasket', 'IsCanonical','$type']
 
                                             },
                                             {
@@ -144,7 +132,7 @@
                                                 Association: 'Tasks',
                                                 //Filter: 'State <> STATE_FINISHED',
                                                 //Sort: 'Order',
-                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'href', 'IsInBasket', '$type']
+                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'href', 'IsInBasket', 'IsCanonical', '$type']
 
                                             }
                                         ]
@@ -308,6 +296,13 @@
         await reef.post(`${contextItem.$ref}/DettachTask`, { taskLink: task.$ref } , onErrorShowAlert);
         await fetchData();
         listComponent.reload(contextItem, listComponent.SELECT_NEXT);
+    }
+
+    async function setLocationAsCanonical(element)
+    {
+        await reef.get(`${element.$ref}/SetLocationAsCanonical`, onErrorShowAlert)
+        await fetchData();
+        listComponent.reload(contextItem, listComponent.KEEP_SELECTION);
     }
 
     async function copyTaskToBasket(task)
@@ -838,8 +833,35 @@
         const isClipboard = contextItem.IsBasket
         const isRootPinned = contextItem.IsRootPinned
         const canPin = !(isRootPinned || isClipboard)
+        const isCanonical = element.IsCanonical
 
         let list = listComponent;
+
+        let linkOperations = []
+        if(isCanonical)
+        {
+            linkOperations = [
+                {
+                    caption: '_; Delete; Eliminar; Usuń',
+                    action: (f) => askToDelete(element, kind)
+                }
+            ]
+        }
+        else
+        {
+             linkOperations = [
+                {
+                    caption: '_; Detach; Desconectar; Odłącz',
+                    action: (f) => dettachElement(element, kind)
+                },
+                {
+                    caption: '_; Set as primary location; Establecer como ubicación principal; Ustaw jako główną lokalizację',
+                    action: (f) => setLocationAsCanonical(element)
+                }
+             ]
+        }
+
+        
         return {
                 opver: 2,
                 fab: 'M00',
@@ -905,16 +927,7 @@
                             {
                                 separator: true
                             },
-                            {
-                                caption: '_; Detach; Desconectar; Odłącz',
-                          //      icon: FaUnlink,
-                                action: (f) => dettachElement(element, kind)
-                            },
-                            {
-                                caption: '_; Delete; Eliminar; Usuń',
-                             //   icon: FaTrash,
-                                action: (f) => askToDelete(element, kind)
-                            }
+                            ...linkOperations
                         ]
                     },
                     {
@@ -1133,8 +1146,8 @@
             </p-->
             
 
-            {#if breadcrumbPath}
-                <Breadcrumb class="hidden sm:block mb-5" path={breadcrumbPath} />
+            {#if contextItem.GetCanonicalPath}
+                <Breadcrumb class="mt-1 mb-5" path={contextItem.GetCanonicalPath} collapseLonger/>
             {/if}
 
 
@@ -1149,7 +1162,7 @@
                     orderAttrib='Order'
                     bind:this={listComponent}>
                 <ListTitle      a='Title'
-                                hrefFunc={(el) => `${el.href}?path=${breadcrumbPath}`}
+                                hrefFunc={(el) => `${el.href}`}
                                 onChange={changeElementProperty}/>
 
                 <ListSummary    a='Summary'

@@ -26,8 +26,8 @@
         UI,
         reloadVisibleTags,
         i18n, ext,
-		isDeviceSmallerThan
-
+		isDeviceSmallerThan,
+        Breadcrumb
 	} from '$lib';
     import {FaPlus, FaList, FaPen, FaCaretLeft, FaCaretRight, FaTrash, FaArrowsAlt, FaArchive, FaCheck, FaEllipsisH, FaChevronRight,
         FaAngleDown, FaAngleUp, FaColumns, FaRandom, FaChevronLeft, FaCopy, FaRegCalendar, FaCaretUp, FaCaretDown
@@ -122,10 +122,6 @@
                 taskStates = [];
         }
 
-
-        cache.set(cacheKey, currentList)
-        //console.log('loaded new data')
-
         if(currentList.$ref != prevDef)
         {
             definitionChangedTicket++;
@@ -138,7 +134,6 @@
 
     function showCachedDataFirst(cachedValue, prevDef)
     {
-        //console.log(cachedValue)
         if(!cachedValue)
             return;
 
@@ -169,7 +164,7 @@
                                     {
                                         Id: 1,
                                         Association: '',
-                                        Expressions:['$ref','Id','Name', 'Kind', 'GetTaskStates','href', '$type'],
+                                        Expressions:['$ref','Id','Name', 'Kind', 'GetTaskStates','href', 'GetCanonicalPath', '$type'],
                                         SubTree:
                                         [
                                             {
@@ -196,7 +191,13 @@
                             },
                             onErrorShowAlert);
         if(res)
-            return res.TaskList;
+        {
+            const taskList = res.TaskList
+            const cacheKey = `listboard/${taskList.Id}`
+            cache.set(cacheKey, taskList)
+            
+            return taskList;
+        }
         else
             return null
     }
@@ -777,9 +778,10 @@
                         shift: -1
                     }, onErrorShowAlert);
 
+        await fetchData()
+
         if(res && Array.isArray(res))
         {
-            taskStates = [...res]
             await kanban.rerender();
             kanban.activateColumn(columnIdx-1)
         }
@@ -795,9 +797,10 @@
                         shift: 1
                     }, onErrorShowAlert);
 
+        await fetchData()
+
         if(res && Array.isArray(res))
         {
-            taskStates = [...res]
             await kanban.rerender();
             kanban.activateColumn(columnIdx+1)
         }
@@ -979,9 +982,20 @@
 		title={ext(currentList.Name)}
 	>
 
+        <section class="w-full place-self-center max-w-3xl">
+
+            {#if currentList.GetCanonicalPath}
+                <Breadcrumb class="mt-1 mb-5" path={currentList.GetCanonicalPath} collapseLonger/>
+            {/if}
+
+
+            <p class="hidden sm:block mt-3 ml-3 pb-5 text-lg text-left">
+                {ext(currentList.Name)}
+            </p>
+        </section>
+
 		<Kanban class="grow-0"
-                title={ext(currentList.Name)}
-                bind:this={kanban}>
+                bind:this={kanban}> <!-- title={ext(currentList.Name)} -->
 
             <KanbanSource self={currentList}
                           a='Tasks'

@@ -25,7 +25,6 @@
             hasModifications,
             refreshToolbarOperations,
             informModificationEx,
-            breadcrumbAdd,
             Breadcrumb, i18n, UI
             } from '$lib'
 	import { onMount, tick } from 'svelte';
@@ -52,9 +51,7 @@
     let modificationDate = null
     let attachedFiles = []
 
-    let prevBreadcrumbPath = ''
-    let breadcrumbPath = ''
-
+    
     $: onParamsChanged($location)
 
     async function onParamsChanged(...args)
@@ -72,12 +69,6 @@
             allTags = res
             reloadVisibleTags()
         })
-
-        const params = new URLSearchParams($querystring);
-        if(params.has("path"))
-            prevBreadcrumbPath = params.get("path") ?? ''
-        else
-            prevBreadcrumbPath = ''
 
        await reloadData();
     }
@@ -109,6 +100,7 @@
                                                     'Kind',
                                                     'State',
                                                     'IsPinned',
+                                                    'GetCanonicalPath',
                                                     '$ref',
                                                     '$type',
                                                     '$acc'],
@@ -154,8 +146,6 @@
                 })
             })
         }
-
-        breadcrumbPath = breadcrumbAdd(prevBreadcrumbPath, note.Title, $location)
 
     }
 
@@ -733,6 +723,16 @@
         }
     }
 
+    function isContentEmpty()
+    {
+        if(!note.Content)
+            return true
+        else if(note.Content == '<p></p>')
+            return true
+        else
+            return false
+    }
+
 </script>
 
 <svelte:head>
@@ -753,8 +753,8 @@
             title={note.Title}>
     <section class="w-full flex justify-center">
         <article class="w-full prose prose-base prose-zinc dark:prose-invert mx-2 prose-img:rounded-xl ">
-            {#if breadcrumbPath}
-                <Breadcrumb class="not-prose hidden sm:block" path={breadcrumbPath} collapseLonger/>
+            {#if note.GetCanonicalPath}
+                <Breadcrumb class="not-prose mt-1" path={note.GetCanonicalPath} collapseLonger/>
             {/if}
             <section class="w-full flex flex-row justify-between">
                 
@@ -878,11 +878,14 @@
                             extraFrontPaletteCommands={extraPaletteCommands}
                             extraInsertPaletteCommands={extraInsertPalletteCommands}
                             extraBackPaletteCommands={extraBackPaletteCommands}/>
-                {#if (!note.Content) && !isEditorFocused}
+                {#if isContentEmpty() && !isEditorFocused}
                     <div
                         class="absolute top-0 left-0 text-gray-400 italic pointer-events-none select-none"
                     >
-                    Pisz tutaj
+                    _;
+                    Write the content of your note here. Press the / key to expand the formatting palette.;
+                    Escribe aquí el contenido de la nota. Pulsa la tecla / para desplegar la paleta de formato.;
+                    Pisz treść notatki tutaj. Naciśnij klawisz / by rozwinąć paletę formatującą.
                     </div>
                 {/if}
             </div>

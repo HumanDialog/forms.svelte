@@ -12,7 +12,7 @@
                 ListComboProperty,
 				mainContentPageReloader,
                 Modal,
-                onErrorShowAlert,
+                onErrorShowAlert, Breadcrumb,
             i18n} from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaList, FaPen, FaArchive, FaChevronLeft, FaChevronRight} from 'svelte-icons/fa'
     import {querystring, pop, link} from 'svelte-spa-router'
@@ -22,6 +22,8 @@
     let group = null;
     let listComponent;
     let showArchived = false;
+    let canonicalPath = []
+    const title = '_; All task lists; Todas las listas de tareas; Wszystkie listy zadań'
 
     $: onParamsChanged($session, $mainContentPageReloader, $querystring);
 
@@ -105,6 +107,15 @@
             else
                 group = null
         }
+
+        canonicalPath = [
+            {
+                Name: group.Name
+            },
+            {
+                Name: title
+            }
+        ]
 
     }
 
@@ -266,8 +277,6 @@
         }
     }
 
-    const title = '_; All task lists; Todas las listas de tareas; Wszystkie listy zadań'
-
 </script>
 
 <svelte:head>
@@ -282,6 +291,11 @@
                 clearsContext='props sel'
                 title={title}>
                 <section class="w-full place-self-center max-w-3xl">
+
+                    {#if canonicalPath}
+                        <Breadcrumb class="mt-1 mb-5" path={canonicalPath} collapseLonger/>
+                    {/if}
+
             <List   self={group}
                     a='Lists'
                     toolbarOperations={listOperations}

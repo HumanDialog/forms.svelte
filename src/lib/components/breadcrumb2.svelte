@@ -1,44 +1,32 @@
 <script>
     import {location, link, querystring} from 'svelte-spa-router'
-    import {randomString, isDeviceSmallerThan} from '../utils'
+	import { breadcrumbParse, breadcrumbStringify } from './breadcrumb_utils';
 	
-    export let path;
+    export let path = '';
     export let collapseLonger = false
 
     let segments = []
     let userClass = $$props.class ?? ''
-    
+
     $: init($location, $querystring)
 
     function init(...args)
     {
-        if(path && Array.isArray(path) && path.length > 0)
-        {
-            path.forEach(el => 
-                segments.push({
-                    name: el.Name,
-                    href: el.href ?? '',
-                    uniqueKey: randomString(5)
-                })
-            )
-        }
+        if(path)
+            segments = breadcrumbParse(path);
         else
             segments = []
-
     }
 
-    
-    function shouldBeCollapsed(idx)
+    function getSegmentHRef(href, idx)
     {
-        const isSmall = isDeviceSmallerThan("sm")
-        const entriesNo = segments.length
-        const maxEntriesNo = isSmall ? 2 : 5        //todo: depending on elements real widths
-        const isCollaspable = collapseLonger && entriesNo > maxEntriesNo
+        let prevSegments = []
+        if(idx > 0)
+            prevSegments = segments.slice(0, idx)
+        
+        const prevPath = breadcrumbStringify(prevSegments)
+        return `${href}?path=${prevPath}` 
 
-        if(!isCollaspable)
-            return false
-
-        return idx < entriesNo-maxEntriesNo
     }
 
 </script>
@@ -47,17 +35,18 @@
   <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse flex-wrap">
     
         {#if (segments && segments.length > 1)}
-            {#each segments as segment, idx (segment.uniqueKey)}
+            {#each segments as segment, idx (segment.href)}
                 {@const isFirst = idx == 0}
                 {@const isLast = idx == segments.length-1}
-                {@const isCollapsed = shouldBeCollapsed(idx)}
-                {@const isFirstCollapsed = isCollapsed && idx == 0}
+                {@const collapsable = collapseLonger && segments.length > 5}
+                {@const isCollapsed = collapsable && idx > 0 && idx < segments.length-3}
+                {@const isFirstCollapsed = isCollapsed && idx == 1}
                 
                 {#if isCollapsed}
                     {#if isFirstCollapsed}
-                        <!--svg class="rtl:rotate-180 w-3 h-3 text-stone-400 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                        <svg class="rtl:rotate-180 w-3 h-3 text-stone-400 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-                        </svg-->
+                        </svg>
                         <span class="ms-1 text-sm md:ms-2 font-semibold text-stone-900 dark:text-stone-100 whitespace-nowrap">
                             ...
                         </span>
@@ -75,15 +64,9 @@
                                     {segment.name}
                                 </span>
                             {:else}
-                                {#if segment.href}
-                                    <a href={segment.href} use:link class="ms-1 text-sm font-medium md:ms-2 text-stone-700 hover:text-stone-900  dark:text-stone-400 dark:hover:text-white whitespace-nowrap">
-                                        {segment.name}
-                                    </a>
-                                {:else}
-                                    <span class="ms-1 text-sm font-medium md:ms-2 text-stone-700  dark:text-stone-400 whitespace-nowrap">
-                                        {segment.name}
-                                    </span>
-                                {/if}
+                                <a href={getSegmentHRef(segment.href, idx)} use:link class="ms-1 text-sm font-medium md:ms-2 text-stone-700 hover:text-stone-900  dark:text-stone-400 dark:hover:text-white whitespace-nowrap">
+                                    {segment.name}
+                                </a>
                             {/if}
                         </div>
                     </li>

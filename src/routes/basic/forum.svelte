@@ -20,8 +20,7 @@
                 getNiceStringDateTime,
                 getNiceStringDate,
                 Paginator, i18n, ext,
-                Breadcrumb,
-				breadcrumbAdd
+                Breadcrumb
             } from '$lib'
     import {FaSync, FaComments, FaComment} from 'svelte-icons/fa'
     import {location, pop, push, querystring} from 'svelte-spa-router'
@@ -43,9 +42,6 @@
     let allPagesNo = 1
     let pageElementsNo = 25
 
-    let prevBreadcrumbPath = ''
-    let breadcrumbPath = ''
-    
     $: onParamsChanged($location, $querystring, $mainContentPageReloader);
     
     async function onParamsChanged(...args)
@@ -71,19 +67,12 @@
         else
             pageNo = 0
 
-        if(params.has("path"))
-            prevBreadcrumbPath = params.get("path") ?? ''
-        else
-            prevBreadcrumbPath = ''
-     
         const cacheKey = `forum_${contextItemId}`
         const cachedValue = cache.get(cacheKey)
         if(cachedValue)
         {
             contextItem = cachedValue;
             folderTitle = ext(contextItem.Title);
-
-            breadcrumbPath = breadcrumbAdd(prevBreadcrumbPath, folderTitle, $location)
 
             subfoldersComponent?.reload(contextItem, subfoldersComponent.KEEP_SELECTION)
             notesComponent?.reload(contextItem, notesComponent.KEEP_SELECTION)
@@ -108,8 +97,6 @@
         {
             folderTitle = ext(contextItem.Title);
             isRootFolder = !!contextItem.IsRoot
-
-            breadcrumbPath = breadcrumbAdd(prevBreadcrumbPath, folderTitle, $location)
 
             const allElementsNo = contextItem.NotesCount + contextItem.FoldersCount
             allPagesNo = Math.floor(allElementsNo / pageElementsNo)
@@ -146,7 +133,7 @@
                                     {
                                         Id: 1,
                                         Association: '',
-                                        Expressions:['Id', '$ref','Title','Summary', 'IsPinned', 'IsRoot', 'href', 'icon', 'FoldersCount', 'NotesCount'],
+                                        Expressions:['Id', '$ref','Title','Summary', 'IsPinned', 'IsRoot', 'href', 'icon', 'FoldersCount', 'NotesCount', 'GetCanonicalPath'],
                                         SubTreeOffset: pageOffset,
                                         SubTreeLimit: pageElementsNo,
                                         SubTree:
@@ -309,8 +296,8 @@
 
                 <section class="w-full place-self-center max-w-3xl relative">
                     
-                    {#if breadcrumbPath}
-                        <Breadcrumb class="hidden sm:block mb-5" path={breadcrumbPath} />
+                    {#if contextItem.GetCanonicalPath}
+                        <Breadcrumb class="mt-1 mb-5" path={contextItem.GetCanonicalPath} />
                     {/if}
 
 
@@ -333,7 +320,7 @@
                         orderAttrib='Order'
                         bind:this={subfoldersComponent}>
                     <ListTitle      a='Title' 
-                                    hrefFunc={(folder) => `${folder.href}?path=${breadcrumbPath}`}
+                                    hrefFunc={(folder) => `${folder.href}`}
                                     />
                     
                     <ListSummary    a='Summary'
@@ -355,7 +342,7 @@
                         orderAttrib='Order'
                         bind:this={notesComponent}>
                     <ListTitle      a='Title' 
-                                    hrefFunc={(note) => `${note.href}?path=${breadcrumbPath}`}
+                                    hrefFunc={(note) => `${note.href}`}
                                     />
                     <ListSummary    a='Summary' 
                                     />

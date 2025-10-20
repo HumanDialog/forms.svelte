@@ -13,7 +13,7 @@
 				mainContentPageReloader,
                 Modal,
                 onErrorShowAlert, showMenu,
-				UI, i18n,
+				UI, i18n, Breadcrumb,
 				ext} from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaList,
         FaEllipsisH, FaChevronRight, FaChevronLeft, FaRandom, FaCheck, FaCopy, FaUndo
@@ -148,7 +148,7 @@
                                     {
                                         Id: 1,
                                         Association: '',
-                                        Expressions:['Id','Name'],
+                                        Expressions:['Id','Name', 'href', 'GetCanonicalPath'],
                                         SubTree:
                                         [
                                             {
@@ -569,7 +569,13 @@
             toolbarOperations={ getPageOperations() }
             clearsContext='props sel'
             title={listTitle}>
+            
             <section class="w-full place-self-center max-w-3xl">
+
+                {#if currentList.GetCanonicalPath}
+                    <Breadcrumb class="mt-1 mb-5" path={currentList.GetCanonicalPath} collapseLonger/>
+                {/if}
+            
         <List   self={currentList}
                 a={assocName}
                 title={listTitle}

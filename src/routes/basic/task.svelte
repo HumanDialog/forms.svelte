@@ -24,7 +24,6 @@
             hasModifications,
             refreshToolbarOperations,
             informModificationEx,
-            breadcrumbAdd,
             Breadcrumb, i18n, ext
             } from '$lib'
 	import { onMount, tick } from 'svelte';
@@ -47,9 +46,6 @@
 
     let attachedFiles = []
 
-    let prevBreadcrumbPath = ''
-    let breadcrumbPath = ''
-
     let isReadOnly = false;
     const s = session;
 
@@ -67,12 +63,6 @@
 
         const taskId = segments[segments.length-1]
         taskRef = `./Task/${taskId}`
-
-        const params = new URLSearchParams($querystring);
-        if(params.has("path"))
-            prevBreadcrumbPath = params.get("path") ?? ''
-        else
-            prevBreadcrumbPath = ''
 
         reef.get('/group/AllTags', onErrorShowAlert).then((res) => {
             allTags = res
@@ -117,7 +107,7 @@
                                 {
                                     Id: 1,
                                     Association: '',
-                                    Expressions:['Id', 'Index', 'Title','Summary', 'Description', 'DueDate', 'Tags', 'State', 'AttachedFiles', '$ref', '$type', '$acc'],
+                                    Expressions:['Id', 'Index', 'Title','Summary', 'Description', 'DueDate', 'Tags', 'State', 'AttachedFiles', 'GetCanonicalPath', '$ref', '$type', '$acc'],
                                     SubTree:[
                                         {
                                             Id: 10,
@@ -176,8 +166,6 @@
                 })
             })
         }
-
-        breadcrumbPath = breadcrumbAdd(prevBreadcrumbPath, task.Title, $location)
 
     }
 
@@ -930,15 +918,15 @@
             title={task.Title}>
     <section class="w-full flex justify-center">
         <article class="w-full prose prose-base prose-zinc dark:prose-invert mx-2">
-            {#if breadcrumbPath}
-                <Breadcrumb class="not-prose hidden sm:block" path={breadcrumbPath} collapseLonger/>
+            {#if task.GetCanonicalPath}
+                <Breadcrumb class="not-prose mt-1" path={task.GetCanonicalPath} collapseLonger/>
             {/if}
             <section class="w-full flex flex-row justify-between">
                     <p class="">
                         {task.Index}
                     </p>
                     <div>
-                        {#if task.TaskList || onListPlaceholder}
+                        {#if false && (task.TaskList || onListPlaceholder)}
                             <p>
                                 <a href={task.TaskList.href} use:link >
                                     {ext(task.TaskList.Name)}

@@ -23,7 +23,6 @@
             IcH3,
             IcH4,
             reloadVisibleTags, i18n,
-            breadcrumbAdd,
             Breadcrumb
             } from '$lib'
 	import { afterUpdate, tick } from 'svelte';
@@ -57,9 +56,6 @@
     let mobile = isDeviceSmallerThan("sm")
     let scrollToPost = 0
 
-    let prevBreadcrumbPath = ''
-    let breadcrumbPath = ''
-
     $: onParamsChanged($location)
 
     async function onParamsChanged(...args)
@@ -87,11 +83,6 @@
             scrollToPost = parseInt(params.get("res"))
         else
             scrollToPost = 0
-
-        if(params.has("path"))
-            prevBreadcrumbPath = params.get("path") ?? ''
-        else
-            prevBreadcrumbPath = ''
 
         noteRef = `./Note/${taskId}`
 
@@ -142,6 +133,7 @@
                                                     'Tags',
                                                     'Kind',
                                                     'State',
+                                                    'GetCanonicalPath',
                                                     '$ref',
                                                     '$type',
                                                     '$acc'],
@@ -198,8 +190,6 @@
                 })
             })
         }
-
-        breadcrumbPath = breadcrumbAdd(prevBreadcrumbPath, note.Title, $location)
 
         isReadOnly = true; //(note.$acc & 0x2) == 0
 
@@ -1184,8 +1174,8 @@
             title={note.Title}>
     <section class="w-full flex justify-center">
         <article class="w-full prose prose-base prose-zinc dark:prose-invert mx-2  mb-64">
-            {#if breadcrumbPath}
-                <Breadcrumb class="not-prose hidden sm:block" path={breadcrumbPath} collapseLonger/>
+            {#if note.GetCanonicalPath}
+                <Breadcrumb class="not-prose mt-1" path={note.GetCanonicalPath} collapseLonger/>
             {/if}
             <section class="w-full flex flex-row justify-between">
                     <p class="">
