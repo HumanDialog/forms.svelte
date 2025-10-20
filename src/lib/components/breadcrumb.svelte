@@ -1,6 +1,7 @@
 <script>
     import {location, link, querystring} from 'svelte-spa-router'
     import {randomString, isDeviceSmallerThan} from '../utils'
+    import { ext } from '$lib/i18n.js';
 	
     export let path;
     export let collapseLonger = false
@@ -72,16 +73,16 @@
                             {/if}
                             {#if isLast}
                                 <span class="ms-1 text-sm md:ms-2 font-semibold text-stone-900 dark:text-stone-100 whitespace-nowrap">
-                                    {segment.name}
+                                    {ext(segment.name)}
                                 </span>
                             {:else}
                                 {#if segment.href}
                                     <a href={segment.href} use:link class="ms-1 text-sm font-medium md:ms-2 text-stone-700 hover:text-stone-900  dark:text-stone-400 dark:hover:text-white whitespace-nowrap">
-                                        {segment.name}
+                                        {ext(segment.name)}
                                     </a>
                                 {:else}
                                     <span class="ms-1 text-sm font-medium md:ms-2 text-stone-700  dark:text-stone-400 whitespace-nowrap">
-                                        {segment.name}
+                                        {ext(segment.name)}
                                     </span>
                                 {/if}
                             {/if}

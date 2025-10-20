@@ -982,20 +982,18 @@
 		title={ext(currentList.Name)}
 	>
 
-        <section class="w-full place-self-center max-w-3xl">
+        <!--section class="w-full place-self-center max-w-3xl"-->
 
             {#if currentList.GetCanonicalPath}
                 <Breadcrumb class="mt-1 mb-5" path={currentList.GetCanonicalPath} collapseLonger/>
             {/if}
 
 
-            <p class="hidden sm:block mt-3 ml-3 pb-5 text-lg text-left">
-                {ext(currentList.Name)}
-            </p>
-        </section>
+        <!--/section-->
 
 		<Kanban class="grow-0"
-                bind:this={kanban}> <!-- title={ext(currentList.Name)} -->
+                title={ext(currentList.Name)}
+                bind:this={kanban}> 
 
             <KanbanSource self={currentList}
                           a='Tasks'
