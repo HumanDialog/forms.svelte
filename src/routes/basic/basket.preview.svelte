@@ -170,7 +170,10 @@
         if(!destinationContainer)
         {
             if(onAttach)
-                onAttach(basketItem)
+            {
+                const items = [...selectedElements]
+                onAttach(basketItem, items)
+            }
         }
         else
         {
@@ -198,7 +201,10 @@
         if(!destinationContainer)
         {
             if(onAttachAndClear)
-                onAttachAndClear(basketItem)
+            {
+                const items = [...selectedElements]
+                onAttachAndClear(basketItem, items)
+            }
         }
         else
         {

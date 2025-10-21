@@ -194,12 +194,6 @@
                     preAction: contentElement.preventBlur,
                     operations: [
                         {
-                            caption: '_; Normal; Normal; Normalny',
-                            icon: FaRemoveFormat,
-                            action: (f) => contentElement.setNormal(),
-                            activeFunc: contentElement.isActiveNormal,
-                        },
-                        {
                             caption: '_; Heading 1; Título 1; Nagłówek 1',
                             icon: IcH1,
                             action: (f) => contentElement.setHeading(1),
@@ -222,6 +216,12 @@
                             icon: IcH4,
                             action: (f) => contentElement.setHeading(4),
                             activeFunc: contentElement.isActiveH4
+                        },
+                        {
+                            caption: '_; Normal; Normal; Normalny',
+                            icon: FaRemoveFormat,
+                            action: (f) => contentElement.setNormal(),
+                            activeFunc: contentElement.isActiveNormal,
                         },
                         {
                             caption: '_; Code; Código; Kod',

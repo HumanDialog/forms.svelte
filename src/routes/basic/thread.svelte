@@ -445,12 +445,6 @@
                     preAction: questionElement.preventBlur,
                     operations: [
                         {
-                            caption: '_; Normal; Normal; Normalny',
-                            icon: FaRemoveFormat,
-                            action: (f) => questionElement.setNormal(),
-                            activeFunc: questionElement.isActiveNormal,
-                        },
-                        {
                             caption: '_; Heading 1; Título 1; Nagłówek 1',
                             icon: IcH1,
                             action: (f) => questionElement.setHeading(1),
@@ -473,6 +467,12 @@
                             icon: IcH4,
                             action: (f) => questionElement.setHeading(4),
                             activeFunc: questionElement.isActiveH4
+                        },
+                        {
+                            caption: '_; Normal; Normal; Normalny',
+                            icon: FaRemoveFormat,
+                            action: (f) => questionElement.setNormal(),
+                            activeFunc: questionElement.isActiveNormal,
                         },
                         {
                             caption: '_; Code; Código; Kod',
@@ -1051,12 +1051,6 @@
                     preAction: answerElement.preventBlur,
                     operations: [
                         {
-                            caption: '_; Normal; Normal; Normalny',
-                            icon: FaRemoveFormat,
-                            action: (f) => answerElement.setNormal(),
-                            activeFunc: answerElement.isActiveNormal,
-                        },
-                        {
                             caption: '_; Heading 1; Título 1; Nagłówek 1',
                             icon: IcH1,
                             action: (f) => answerElement.setHeading(1),
@@ -1079,6 +1073,12 @@
                             icon: IcH4,
                             action: (f) => answerElement.setHeading(4),
                             activeFunc: answerElement.isActiveH4
+                        },
+                        {
+                            caption: '_; Normal; Normal; Normalny',
+                            icon: FaRemoveFormat,
+                            action: (f) => answerElement.setNormal(),
+                            activeFunc: answerElement.isActiveNormal,
                         },
                         {
                             caption: '_; Code; Código; Kod',

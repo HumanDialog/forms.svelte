@@ -1,5 +1,5 @@
 <script>
-    import {reef, session} from '@humandialog/auth.svelte'
+    import {reef, session, signInHRef} from '@humandialog/auth.svelte'
 	import  { Editor,
             Page,
             Combo,
@@ -25,7 +25,13 @@
             hasModifications,
             refreshToolbarOperations,
             informModificationEx,
-            Breadcrumb, i18n, UI
+            Breadcrumb, i18n, UI,
+
+			showFloatingToolbar,
+
+			randomString
+
+
             } from '$lib'
 	import { onMount, tick } from 'svelte';
 
@@ -33,11 +39,12 @@
 
     import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen, FaList, FaCopy, FaFileDownload,
         FaImage, FaTable, FaPaperclip, FaBold, FaItalic, FaUnderline, FaStrikethrough, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle,
-        FaInfo, FaListUl
+        FaInfo, FaListUl, FaLink
     } from 'svelte-icons/fa/'
 
 
     import AttachedFile from './attached.file.svelte'
+    import BasketPreview from './basket.preview.svelte'
 
     let noteRef = ''
     let note = null;
@@ -369,14 +376,6 @@
                     preAction: description.preventBlur,
                     operations: [
                         {
-                            caption: '_; Normal; Normal; Normalny',
-                            icon: FaRemoveFormat,
-                            tbr: 'A',
-                            hideToolbarCaption: true,
-                            action: (f) => description.setNormal(),
-                            activeFunc: description.isActiveNormal,
-                        },
-                        {
                             caption: '_; Heading 1; Título 1; Nagłówek 1',
                             icon: IcH1,
                             tbr: 'A',
@@ -404,6 +403,14 @@
                             tbr: 'A',hideToolbarCaption: true,
                             action: (f) => description.setHeading(4),
                             activeFunc: description.isActiveH4
+                        },
+                        {
+                            caption: '_; Normal; Normal; Normalny',
+                            icon: FaRemoveFormat,
+                            tbr: 'A',
+                            hideToolbarCaption: true,
+                            action: (f) => description.setNormal(),
+                            activeFunc: description.isActiveNormal,
                         },
                         {
                             caption: '_; Code; Código; Kod',
@@ -543,7 +550,99 @@
         }
         
     ]
-    const extraInsertPalletteCommands = []
+    const extraInsertPalletteCommands = [
+        {
+            caption: '_; Insert; Insertar; Wstaw',
+            icon: FaLink,
+            action: () => insertEditorLink()
+        }
+    ]
+
+    function insertEditorLink()
+    {
+        const makeLinkToElement = (clipboard, elements) => {
+            if(elements && Array.isArray(elements) && elements.length > 0)
+            {
+                elements.forEach((el) => 
+                {
+                    let href;
+                    if(el.href.endsWith('/blob'))
+                    {
+                        href = el.href + "?name=" + encodeURIComponent(el.Title)
+                    }
+                    else if(el.href.startsWith('/'))
+                    {
+                        href = /*window.location.origin +*/ window.location.pathname + '/#' + el.href
+                    }
+                    else
+                        href = el.href
+
+                    description.addLink(el.Title, href)
+                })   
+            }
+        }
+
+        const selection = window.getSelection();
+        const range = selection.getRangeAt(0);
+        const aroundRect = range.getBoundingClientRect();
+
+        showFloatingToolbar(aroundRect, BasketPreview, 
+            {
+                onAttach: (clipboard, elements) => makeLinkToElement(clipboard, elements),
+                onAttachAndClear: (clipboard, elements) => makeLinkToElement(clipboard, elements)
+            }
+        )
+    }
+
+    async function editorLinkClicked(href, target)
+    {
+        if(href.includes('/blob'))
+        {
+            let ref;
+            let name;
+            const queryIdx = href.indexOf('?')
+            if(queryIdx > 0)
+            {
+                ref = href.substring(0, queryIdx)
+                const query = href.substring(queryIdx)
+                const params = new URLSearchParams(query);
+                if(params.has("name"))
+                    name = params.get("name")
+                else
+                    name = 'file_' + randomString(8)
+            }
+            else
+            {
+                ref = href;
+                name = 'file_' + randomString(8)
+            }
+
+            const res = await reef.fetch(`json/anyv/${href}`, onErrorShowAlert);
+            if(res.ok)
+            {
+                const blob = await res.blob()
+                const blobUrl = URL.createObjectURL(blob);
+        
+                const link = document.createElement("a"); // Or maybe get it from the current document
+                link.href = blobUrl;
+                link.download = name;
+
+                //document.body.appendChild(link); // Or append it whereever you want
+                link.click() //can add an id to be specific if multiple anchor tag, and use #id
+                
+                
+                URL.revokeObjectURL(blobUrl)
+            }
+            else
+            {
+                const err = await res.text()
+                console.error(err)
+                onErrorShowAlert(err)
+            }
+        }
+        else
+            window.open(href, target);
+    }
 
     const extraInsertPalletteCommandsExt = [
         {
@@ -733,6 +832,8 @@
             return false
     }
 
+    
+
 </script>
 
 <svelte:head>
@@ -864,7 +965,8 @@
             {/if}
 
 
-            <!--{#if note.Content || descriptionPlaceholder}-->
+            <!--{#if note.Content || descriptionPlaceholder}   
+                             -->
             <hr/>
             <div class="relative">
                 <Editor     class="mb-40"
@@ -875,6 +977,7 @@
                             onBlurCb={() => deactivateFormattingToolsIfNeeded()}
                             onAddImage={uploadImage}
                             onRemoveImage={removeImage}
+                            onLinkClick={editorLinkClicked}
                             extraFrontPaletteCommands={extraPaletteCommands}
                             extraInsertPaletteCommands={extraInsertPalletteCommands}
                             extraBackPaletteCommands={extraBackPaletteCommands}/>

@@ -102,11 +102,14 @@
 
         closeButtonPos = ''
 
-        setTimeout(() => {
-            const rect = paletteElement.getBoundingClientRect()
-            closeButtonPos = `right: ${15}px; top: calc(${rect.y}px - 1.75rem)`
-        //    console.log('closeButtonPos', closeButtonPos)
-        },0)
+        if(isDeviceSmallerThan("sm"))
+        {
+            setTimeout(() => {
+                const rect = paletteElement.getBoundingClientRect()
+                closeButtonPos = `right: ${15}px; top: calc(${rect.y}px - 1.75rem)`
+            //    console.log('closeButtonPos', closeButtonPos)
+            },0)
+        }
 
 
         //console.trace()
