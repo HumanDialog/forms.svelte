@@ -7,7 +7,7 @@
         getActiveItems,
         clearActiveItem
     }   from '$lib'
-    import {FaRegFolder, FaRegFile, FaRegCalendarCheck, FaRegCalendar} from 'svelte-icons/fa'
+    import {FaRegFolder, FaRegFile, FaRegCalendarCheck, FaRegCalendar, FaFileDownload} from 'svelte-icons/fa'
 	import { afterUpdate, onMount } from "svelte";
 	import { push } from "svelte-spa-router";
 
@@ -68,6 +68,12 @@
                                                 Association: 'Tasks',
                                                 Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'href', '$type']
 
+                                            },
+                                            {
+                                                Id: 5,
+                                                Association: 'Files',
+                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href', '$type']
+
                                             }
                                         ]
                                     }
@@ -97,6 +103,12 @@
             {
                 basketEntriesNo += basketItem.Tasks.length;
                 basketItem.allElements = [...basketItem.allElements, ...basketItem.Tasks]
+            }
+
+            if(basketItem.Files && basketItem.Files.length > 0)
+            {
+                basketEntriesNo += basketItem.Files.length;
+                basketItem.allElements = [...basketItem.allElements, ...basketItem.Files]
             }
 
             basketItem.allElements.sort((a,b) => a.Order - b.Order)
@@ -240,6 +252,10 @@
         case 'Task':
         case 'FolderTask':
             return FaRegCalendar;
+
+        case 'UploadedFile':
+        case 'FolderFile':
+            return FaFileDownload;
         }
     }
 

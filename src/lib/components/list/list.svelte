@@ -375,14 +375,12 @@
         pushChanges();
     }
 
-    async function insert(title :string, summary: string, after :object | null)
+    export function assignOrder(after: object | null): number
     {
-        let newElement = {
-            [definition.title]: title,
-            [definition.summary]: summary
-        }
+        if(!orderAttrib)
+            return 0;
 
-        if(after && orderAttrib)
+        if(after)
         {
             const leftElement = after;
             const leftOrder = leftElement[orderAttrib];
@@ -391,28 +389,39 @@
             {
                 let rightOrder = rightElement[orderAttrib];
                 if(rightOrder - leftOrder >= 2)
-                    newElement[orderAttrib] = leftOrder + Math.floor((rightOrder - leftOrder)/2);
+                    return leftOrder + Math.floor((rightOrder - leftOrder)/2);
                 else
                 {
                     reorderElements(items, leftElement)
                     rightOrder = rightElement[orderAttrib];
-                    newElement[orderAttrib] = leftOrder + Math.floor((rightOrder - leftOrder)/2);
+                    return leftOrder + Math.floor((rightOrder - leftOrder)/2);
                 }
             }
             else
-                newElement[orderAttrib] = leftOrder + ORDER_STEP;
+                return leftOrder + ORDER_STEP;
         }
-        else if(orderAttrib)
+        else
         {
             const lastElement = getLast(items)
             if(lastElement)
             {
                 const lastOrder = lastElement[orderAttrib];
-                newElement[orderAttrib] = lastOrder + ORDER_STEP;
+                return lastOrder + ORDER_STEP;
             }
             else 
-                newElement[orderAttrib] = MIN_ORDER;
+                return MIN_ORDER;
         }
+    }
+
+    async function insert(title :string, summary: string, after :object | null)
+    {
+        let newElement = {
+            [definition.title]: title,
+            [definition.summary]: summary
+        }
+
+        if(orderAttrib)
+            newElement[orderAttrib] = assignOrder(after)
 
         await definition.onInsert(newElement);
         return;

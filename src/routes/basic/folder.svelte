@@ -19,7 +19,7 @@
                 refreshToolbarOperations} from '$lib'
     import {FaRegFile, FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaSync,
         FaList, FaEllipsisH, FaChevronRight, FaChevronLeft, FaRegShareSquare, FaLink, FaUnlink, FaRegStar, FaStar, FaCopy, FaCut, FaRegComments, FaRegClipboard,
-        FaRegCheckSquare,
+        FaRegCheckSquare, FaFileUpload, FaUpload, FaFileDownload, FaCloudUploadAlt
         } from 'svelte-icons/fa'
 
         import {FaEdit} from 'svelte-icons/fa'
@@ -41,6 +41,7 @@
     let contextItemId;
     let listComponent;
     let folderTitle = ''
+    let pendingUploading = false;
 
     let users = [];
 
@@ -91,8 +92,6 @@
             setupAllElements(contextItem)
         }
 
-        cache.set(cacheKey, contextItem)
-
         listComponent?.reload(contextItem, listComponent.KEEP_SELECTION)
     }
 
@@ -134,6 +133,12 @@
                                                 //Sort: 'Order',
                                                 Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'href', 'IsInBasket', 'IsCanonical', '$type']
 
+                                            },
+                                            {
+                                                Id: 5,
+                                                Association: 'Files',
+                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href', 'IsInBasket', 'IsCanonical', '$type']
+
                                             }
                                         ]
                                     }
@@ -142,7 +147,10 @@
                             onErrorShowAlert);
         if(res)
         {
-            return res.Folder;
+            const folderItem = res.Folder
+            const cacheKey = `folder_${folderItem.Id}`
+            cache.set(cacheKey, folderItem)
+            return folderItem;
         }
         else
             return null;
@@ -159,6 +167,9 @@
 
         if(contextItem.Tasks)
             contextItem.allElements = [...contextItem.allElements, ...contextItem.Tasks]
+
+        if(contextItem.Files)
+            contextItem.allElements = [...contextItem.allElements, ...contextItem.Files]
 
         contextItem.allElements.sort((a,b) => a.Order - b.Order)
     }
@@ -256,6 +267,14 @@
             listComponent.reload(contextItem, listComponent.SELECT_NEXT);
             break;
 
+        case 'UploadedFile':
+        case 'FolderFile':
+            await reef.post(`${contextItem.$ref}/DeletePermanentlyFile`, { fileLink: objectToDelete.$ref } , onErrorShowAlert);
+            deleteModal.hide();
+            await fetchData();
+            listComponent.reload(contextItem, listComponent.SELECT_NEXT);
+            break;
+
         case 'multi':
             {
                 let refs = []
@@ -298,6 +317,13 @@
         listComponent.reload(contextItem, listComponent.SELECT_NEXT);
     }
 
+    async function dettachFile(file)
+    {
+        await reef.post(`${contextItem.$ref}/DettachFile`, { fileLink: file.$ref } , onErrorShowAlert);
+        await fetchData();
+        listComponent.reload(contextItem, listComponent.SELECT_NEXT);
+    }
+
     async function setLocationAsCanonical(element)
     {
         await reef.get(`${element.$ref}/SetLocationAsCanonical`, onErrorShowAlert)
@@ -335,6 +361,23 @@
     async function cutNoteToBasket(note)
     {
         await reef.post(`${contextItem.$ref}/CutNoteToBasket`, { noteLink: note.$ref } , onErrorShowAlert);
+        await fetchData();
+        listComponent.reload(contextItem, listComponent.SELECT_NEXT);
+    }
+
+    async function copyFileToBasket(file)
+    {
+        await reef.post(`${contextItem.$ref}/CopyFileToBasket`, { fileLink: file.$ref } , onErrorShowAlert);
+        file.IsInBasket = true
+        refreshToolbarOperations()
+        // not needed
+        //await fetchData();
+        //tasksComponent.reload(contextItem, tasksComponent.SELECT_NEXT);
+    }
+
+    async function cutFileToBasket(file)
+    {
+        await reef.post(`${contextItem.$ref}/CutFileToBasket`, { fileLink: file.$ref } , onErrorShowAlert);
         await fetchData();
         listComponent.reload(contextItem, listComponent.SELECT_NEXT);
     }
@@ -386,6 +429,10 @@
         case 'Task':
         case 'FolderTask':
             return await addTask(newElementAttribs)
+
+        case 'UploadedFile':
+        case 'FolderFile':
+            return await addFile(newElementAttribs)
         }
     }
 
@@ -411,6 +458,18 @@
 
         await fetchData();
         listComponent.reload(contextItem, newNote.Id);
+    }
+
+    async function addFile(newFileAttribs)
+    {
+        let res = await reef.post(`${contextPath}/CreateFileEx`,{ properties: newFileAttribs }, onErrorShowAlert)
+        if(!res)
+            return null;
+
+        let newFile = res.FolderFile;
+
+        await fetchData();
+        listComponent.reload(contextItem, newFile.Id);
     }
 
     async function addFolder(newFolderAttribs)
@@ -557,6 +616,7 @@
         const canAddFolders = !(isRootPinned || isClipboard)
         const canAddNotes = !(isRootPinned || isClipboard)
         const canAddTasks = !(isRootPinned || isClipboard)
+        const canAddFiles = !(isRootPinned || isClipboard)
 
         const newFolder = {
             caption: '_; New folder; Nueva carpeta; Nowy folder',
@@ -582,6 +642,14 @@
             fab: 'M01'
         }
 
+        const newFile = {
+            caption: '_; Upload file; Subir archivo; Prześlij plik',
+            icon: FaFileUpload,
+            action: (f) => { newElementKind='UploadedFile';  runFileAttacher(afterElement) },
+            tbr: 'A',
+            fab: 'M01'
+        }
+
         let result = {
             caption: '_; File; Archivo; Plik',
             // tbr: 'B',
@@ -596,6 +664,9 @@
 
         if(canAddTasks)
             result.operations.push(newTask)
+
+        if(canAddFiles)
+            result.operations.push(newFile)
 
         if(result.operations.length > 0)
             result.operations.push({separator: true})
@@ -680,6 +751,9 @@
         case 'Task':
         case 'FolderTask':
             return dettachTask(element)
+        case 'UploadedFile':
+        case 'FolderFile':
+            return dettachFile(element)
         }
     }
 
@@ -715,6 +789,9 @@
         case 'Task':
         case 'FolderTask':
             return copyTaskToBasket(element)
+        case 'UploadedFile':
+        case 'FolderFile':
+            return copyFileToBasket(element)
         }
     }
 
@@ -731,6 +808,9 @@
         case 'Task':
         case 'FolderTask':
             return cutTaskToBasket(element)
+        case 'UploadedFile':
+        case 'FolderFile':
+            return cutFileToBasket(element)
         }
     }
 
@@ -1117,9 +1197,110 @@
         case 'Task':
         case 'FolderTask':
             return FaRegCalendar;
+
+        case 'UploadedFile':
+        case 'FolderFile':
+            return FaFileDownload;
         }
     }
 
+    let attInput;
+    let insertFileAfterElement = null;
+    function runFileAttacher(after)
+    {
+        insertFileAfterElement = after
+        attInput?.click();
+    }
+
+    async function onAttachementSelected()
+    {
+        const [file] = attInput.files;
+        if(file)
+        {
+            pendingUploading = true
+
+            const fileOrder = listComponent.assignOrder(insertFileAfterElement)
+
+            let fileLink = await reef.post(`${contextPath}/CreateFile`,
+                                    { 
+                                        title: file.name,
+                                        mimeType: file.type,
+                                        size: file.size,
+                                        order: fileOrder
+                                    }, onErrorShowAlert)
+            if(!fileLink)
+                return null;
+
+            fileLink = fileLink.FolderFile
+
+            const res = await reef.post(`UploadedFile/${fileLink.FileId}/Key/blob?name=${file.name}&size=${file.size}`, {}, onErrorShowAlert)
+            if(res && res.key && res.uploadUrl)
+            {
+                const newKey = res.key;
+                const uploadUrl = res.uploadUrl
+
+                try
+                {
+                    //const res = await new Promise(r => setTimeout(r, 10000));
+                    const res = await fetch(uploadUrl, {
+                                                method: 'PUT',
+                                                headers: new Headers({
+                                                    'Content-Type': file.type
+                                                }),
+                                                body: file})
+                    if(res.ok)
+                    {
+                        
+                    }
+                    else
+                    {
+                        const err = await res.text()
+                        console.error(err)
+                        onErrorShowAlert(err)
+                    }
+
+                }
+                catch(err)
+                {
+                    console.error(err)
+                    onErrorShowAlert(err)
+                }
+            }
+
+            pendingUploading = false;
+
+            await fetchData();
+            listComponent.reload(contextItem, fileLink.Id);
+        }
+    }
+
+    async function downloadFile(element)
+    {
+        //await new Promise(r => setTimeout(r, 5000));
+
+        const res = await reef.fetch(`json/anyv/${element.href}`, onErrorShowAlert);
+        if(res.ok)
+        {
+            const blob = await res.blob()
+            const blobUrl = URL.createObjectURL(blob);
+    
+            const link = document.createElement("a"); // Or maybe get it from the current document
+            link.href = blobUrl;
+            link.download = element.Title;
+
+            //document.body.appendChild(link); // Or append it whereever you want
+            link.click() //can add an id to be specific if multiple anchor tag, and use #id
+            
+            
+            URL.revokeObjectURL(blobUrl)
+        }
+        else
+        {
+            const err = await res.text()
+            console.error(err)
+            onErrorShowAlert(err)
+        }
+    }
 
 </script>
 
@@ -1163,6 +1344,8 @@
                     bind:this={listComponent}>
                 <ListTitle      a='Title'
                                 hrefFunc={(el) => `${el.href}`}
+                                downloadableFunc={(el) => el.$type == 'FolderFile'}
+                                onOpen={downloadFile}
                                 onChange={changeElementProperty}/>
 
                 <ListSummary    a='Summary'
@@ -1175,8 +1358,10 @@
                         class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
                 </span>
             </List>
-    </section>
+        </section>
 
+        <input hidden type="file" id="attachementFile" accept="*/*" bind:this={attInput} on:change={onAttachementSelected}/>
+    
     </Page>
     {/key}
 {:else}
@@ -1205,4 +1390,9 @@
             </span>
         {/if}
     </p>
+</Modal>
+
+<Modal title='Uploading...' bind:open={pendingUploading} mode={3} icon={FaCloudUploadAlt}>
+    <Spinner delay={500}/>
+    <span class="ml-3">_; Your file is uploading to the server; Tu archivo se está cargando en el servidor; Twój plik jest przesyłany na serwer</span>
 </Modal>

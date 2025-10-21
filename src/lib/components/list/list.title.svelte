@@ -9,6 +9,8 @@
     export let readonly :boolean = false;
     export let href     :string | undefined = undefined
     export let hrefFunc :Function | undefined = undefined
+    export let downloadable : boolean = false
+    export let downloadableFunc :Function | undefined = undefined
 
     
     let definition :rList_definition = getContext("rList-definition");
@@ -20,5 +22,7 @@
     definition.title_href = href;
     definition.title_href_func = hrefFunc;
     definition.onOpen = onOpen;
+    definition.downloadable = downloadable
+    definition.downloadableFunc = downloadableFunc
 
 </script>

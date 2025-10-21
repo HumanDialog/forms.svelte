@@ -74,6 +74,8 @@ export class rList_definition
     public onInsert             :Function | undefined = undefined;
     public inserter_icon        :boolean = false;
     public onOpen               :Function | undefined = undefined;
+    public downloadable         :boolean = false
+    public downloadableFunc     :Function | undefined = undefined
 
     public properties           :rList_property[] = [];
     public tags                 :rList_property_tags|null = null

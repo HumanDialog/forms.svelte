@@ -18,6 +18,7 @@
     import Properties from './list.element.props.svelte'
     import { isDeviceSmallerThan } from '../../../utils'
     import Icon from '../../icon.svelte'
+    import Spinner from '../../delayed.spinner.svelte'
                 
     import {rList_definition, rList_property_type} from '../List'
 	import { push, link } from 'svelte-spa-router';
@@ -51,7 +52,8 @@
 
     $: selected_class = is_row_selected ? "!border-blue-300 dark:!border-blue-300/50" : "";
     $: focused_class = is_row_active ? "bg-stone-200 dark:bg-stone-700" : "";
-    $: is_link_like = is_row_active && (!!definition.title_href || !!definition.title_href_func)
+    $: download = is_row_active && (definition.downloadable || (definition.downloadableFunc ? definition.downloadableFunc(item) : false))
+    $: is_link_like = is_row_active && (!!definition.title_href || !!definition.title_href_func || download)
 
     if(!typename)
     {
@@ -403,6 +405,21 @@
         if(e)
             e.stopPropagation();
     }
+
+    let isDownloading = false
+    async function onDownloadFile(e)
+    {
+        isDownloading = true
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        if(definition.onOpen)
+            await definition.onOpen(item)
+
+        isDownloading = false
+    }
+
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -421,7 +438,11 @@
                 on:click={onToggleMultiSelect}/>
     {/if}
     
-    <slot name="left" element={item}/>
+    {#if isDownloading}
+        <Spinner class="mt-0.5  ml-2  mr-1" size={5} delay={0}/>
+    {:else}
+        <slot name="left" element={item}/>
+    {/if}
     
     <i class="hidden sm:w-1/2 sm:w-2/3 sm:w-1/3"></i>   <!-- just to force tailwind classes including -->
     
@@ -446,10 +467,19 @@
                                         onSoftEnter: (text) => {change_name(text); editProperty('Summary')}
                                     }}
                             >  <!--on:click|stopPropagation={followDefinedHRef}-->
-                            <a  class="sm:hover:cursor-pointer underline" 
-                                href={getHRef()} use:link>
-                                {element_title}
-                            </a>
+                            {#if download}
+                                <a  class="sm:hover:cursor-pointer underline" 
+                                    download
+                                    href={getHRef()}
+                                    on:click={onDownloadFile}>
+                                    {element_title}
+                                </a>
+                            {:else}
+                                <a  class="sm:hover:cursor-pointer underline" 
+                                    href={getHRef()} use:link>
+                                    {element_title}
+                                </a>
+                            {/if}
                         </p>
                     {:else}
                         <p  class=" text-base font-semibold 
