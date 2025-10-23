@@ -573,7 +573,7 @@
                     }
                     else if(el.href.startsWith('/'))
                     {
-                        href = /*window.location.origin +*/ window.location.pathname + '/#' + el.href
+                        href = /*window.location.origin +*/ window.location.pathname + '#' + el.href
                     }
                     else
                         href = el.href
