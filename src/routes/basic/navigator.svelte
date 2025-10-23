@@ -529,7 +529,7 @@
         icon={FaArchive}
         onOkCallback={archiveList}
         bind:this={archiveModal}
-        />
+        /-->
 
 <Modal  bind:open={newGroupModalVisible}
         title={i18n(['Create group', 'Crear grupo', 'Utwórz grupę'])}
@@ -543,4 +543,4 @@
             self={newGroupParams} 
             a="name"
             required/>
-</Modal-->
+</Modal>
