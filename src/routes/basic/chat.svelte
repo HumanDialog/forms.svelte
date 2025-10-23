@@ -459,28 +459,14 @@
         "Id": 56
     }
 ]*/
-    async function onAttachBasket(basketItem)
+    async function onAttachBasket(basketItem, references)
     {
-        if(!basketItem)
-            return;
-
-       const res = await reef.post(`${basketItem.$ref}/GetBasketContents`, {}, onErrorShowAlert)
-       if(res)
-       {
-            newMessageAttachements = [...res]
-       }
+       newMessageAttachements = [...references]
     }
 
-    async function onAttachAndClearBasket(basketItem)
+    async function onAttachAndClearBasket(basketItem, references)
     {
-        if(!basketItem)
-            return;
-
-       const res = await reef.post(`${basketItem.$ref}/GetBasketContentsAndClear`, {}, onErrorShowAlert)
-       if(res)
-       {
-            newMessageAttachements = [...res]
-       }
+        newMessageAttachements = [...references]
     }
 
     function clearAttachements(e)
@@ -702,7 +688,7 @@
                                 {#if att.Title}
                                     {att.Title}
                                 {:else}
-                                    {att.Type}/{att.Id}
+                                    {att.typeName}/{att.id}
                                 {/if}
                             </p>
                         {/each}

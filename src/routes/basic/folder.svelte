@@ -996,7 +996,7 @@
                                 disabledFunc: () => element.IsInBasket
 
                             },
-                            {
+                        /*    {
                                 caption: '_; Cut; Cortar; Wytnij',
                                 icon: FaCut, //FaCut,
                                 action: (f) => cutElementToBasket(element, kind),
@@ -1004,7 +1004,7 @@
                                 fab: 'M40',
                                 tbr: 'A'
                             },
-                            {
+                        */    {
                                 separator: true
                             },
                             ...linkOperations
@@ -1077,7 +1077,7 @@
                                 tbr: 'A',
                                 disabledFunc: () => items.every((el) => el.IsInBasket)
                             },
-                            {
+                        /*    {
                                 caption: '_; Cut; Cortar; Wytnij',
                                 icon: FaCut, //FaCut,
                                 action: (f) => cutElementToBasketMulti(items),
@@ -1085,7 +1085,7 @@
                                 fab: 'M40',
                                 tbr: 'A'
                             },
-                            {
+                        */    {
                                 separator: true
                             },
                             {

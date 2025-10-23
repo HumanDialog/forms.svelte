@@ -7,7 +7,7 @@
         getActiveItems,
         clearActiveItem
     }   from '$lib'
-    import {FaRegFolder, FaRegFile, FaRegCalendarCheck, FaRegCalendar, FaFileDownload} from 'svelte-icons/fa'
+    import {FaRegFolder, FaRegFile, FaRegCalendarCheck, FaRegCalendar, FaFileDownload, FaList, FaRegComments, FaRegClipboard, FaClipboardList} from 'svelte-icons/fa'
 	import { afterUpdate, onMount } from "svelte";
 	import { push } from "svelte-spa-router";
 
@@ -20,10 +20,13 @@
 
     // gitlab mirror test
 
-    let basketItem;
-    let basketEntriesNo = 0
+    let clipboardItem;
+    let basketEntriesNo = -1
     
-    const STATE_FINISHED = 7000;
+    const EIF_ITEM              =  0x00000000
+    const EIF_CUT               =  0x00000001
+    const EIF_BEGIN_GROUP       =  0x00000100
+    const EIF_END_GROUP         =  0x00000200
 
     let reloadTicket = -1
     let lastReloadTicket = 0
@@ -39,7 +42,7 @@
 
         lastReloadTicket = reloadTicket
 
-        let res = await reef.post(`/user/BasketFolder/query`,
+        let res = await reef.post(`/user/Clipboards/first/query`,
                             {
                                 Id: 1,
                                 Name: '',
@@ -48,32 +51,14 @@
                                     {
                                         Id: 1,
                                         Association: '',
-                                        Expressions:['Id', '$ref','Title','Summary', 'href'],
+                                        Expressions:['Id', '$ref','Title'],
                                         SubTree:
                                         [
                                             {
                                                 Id: 2,
-                                                Association: 'Folders',
-                                                Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'IsPinned', '$type', 'icon']
-
-                                            },
-                                            {
-                                                Id: 3,
-                                                Association: 'Notes',
-                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href', '$type']
-
-                                            },
-                                            {
-                                                Id: 4,
-                                                Association: 'Tasks',
-                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'href', '$type']
-
-                                            },
-                                            {
-                                                Id: 5,
-                                                Association: 'Files',
-                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href', '$type']
-
+                                                Association: 'Elements',
+                                                Sort: "Order",
+                                                Expressions:['Id', 'Title', 'Summary', 'Order', 'href', 'icon', 'ElementId', 'ElementType', 'ElementNav', 'ElementInfo']
                                             }
                                         ]
                                     }
@@ -82,43 +67,39 @@
                             onErrorShowAlert);
         if(res)
         {
-            basketItem = res.Folder;
-            basketEntriesNo = 0;
+            clipboardItem = res.Clipboard;
+            if(clipboardItem && Object.keys(clipboardItem).length > 0)
+            {   
 
-            basketItem.allElements = []
+                clipboardItem.composedElements = []
 
-            if(basketItem.Folders && basketItem.Folders.length > 0)
-            {
-                basketEntriesNo += basketItem.Folders.length;
-                basketItem.allElements = [...basketItem.allElements, ...basketItem.Folders]
+                for(let i=0; i<clipboardItem.Elements.length; i++)
+                {
+                    const el = clipboardItem.Elements[i]
+                    if(el.ElementInfo & EIF_BEGIN_GROUP)
+                    {
+                        clipboardItem.composedElements.push(el)
+                        while((clipboardItem.Elements[i].ElementInfo & EIF_END_GROUP) == 0)
+                            i++
+                        i++
+                    }   
+                    else
+                        clipboardItem.composedElements.push(el)
+
+                }
+
+                basketEntriesNo = clipboardItem.composedElements.length
             }
-
-            if(basketItem.Notes && basketItem.Notes.length > 0)
+            else
             {
-                basketEntriesNo += basketItem.Notes.length;
-                basketItem.allElements = [...basketItem.allElements, ...basketItem.Notes]
+                clipboardItem = null
+                basketEntriesNo = 0    
             }
-
-            if(basketItem.Tasks && basketItem.Tasks.length > 0)
-            {
-                basketEntriesNo += basketItem.Tasks.length;
-                basketItem.allElements = [...basketItem.allElements, ...basketItem.Tasks]
-            }
-
-            if(basketItem.Files && basketItem.Files.length > 0)
-            {
-                basketEntriesNo += basketItem.Files.length;
-                basketItem.allElements = [...basketItem.allElements, ...basketItem.Files]
-            }
-
-            basketItem.allElements.sort((a,b) => a.Order - b.Order)
-
         }
         else
         {
-            basketItem = null
+            clipboardItem = null
             basketEntriesNo = 0
-            basketItem.allElements = []
         }
     }
 
@@ -134,7 +115,7 @@
         reloadTicket++;
         await initData()
 
-        listElement.reload(basketItem);
+        listElement.reload(clipboardItem);
     }
 
     let rootElement;
@@ -153,37 +134,74 @@
         }
     })
 
-    async function editBasket()
+    /*async function editBasket()
     {
         if(onHide)
             onHide();
 
-        if(basketItem && basketItem.href)
-            push(basketItem.href)
+        if(clipboardItem && clipboardItem.href)
+            push(clipboardItem.href)
     }
-
+    */
+    
     async function attachTo()
     {
         if(onHide)
             onHide();
 
+        let references = []
+        selectedElements.sort((a,b) => a.Order-b.Order).forEach(el => {
+            if(el.ElementInfo & EIF_BEGIN_GROUP)
+            {
+                const groupIdx = clipboardItem.Elements.findIndex((f) => f.Id==el.Id)
+                console.log('groupIdx', groupIdx, clipboardItem.Elements)
+                if(groupIdx >= 0)
+                {
+                    for(let groupElementIdx = groupIdx+1; groupElementIdx<clipboardItem.Elements.length; groupElementIdx++)
+                    {
+                        const groupElement = clipboardItem.Elements[groupElementIdx]
+                        if(groupElement.ElementInfo & EIF_END_GROUP)
+                            break;
+                        else
+                        {
+                            references.push({
+                                id:         groupElement.ElementId,
+                                typeName:   groupElement.ElementType,
+                                navPath:    groupElement.ElementNav,
+                                Title:      groupElement.Title,
+                                Summary:    groupElement.Summary,
+                                icon:       groupElement.icon,
+                                href:       groupElement.href, 
+                                flags:      groupElement.ElementInfo
+                            })                    
+                        }
+                    }   
+
+                }
+            }
+            else
+                references.push({
+                    id:         el.ElementId,
+                    typeName:   el.ElementType,
+                    navPath:    el.ElementNav,
+                    Title:      el.Title,
+                    Summary:    el.Summary,
+                    icon:       el.icon,
+                    href:       el.href, 
+                    flags:      el.ElementInfo
+                })
+        })
+
         if(!destinationContainer)
         {
             if(onAttach)
             {
-                const items = [...selectedElements]
-                onAttach(basketItem, items)
+                onAttach(clipboardItem, references)
             }
         }
         else
         {
-            const items = selectedElements.map( el => { return {
-                Type: el.$type,
-                Id: el.Id,
-                Title: el.Title
-            }})
-
-            const res = await reef.post(`${destinationContainer}/AttachBasketContentMulti`, { items: items }, onErrorShowAlert)
+            const res = await reef.post(`${destinationContainer}/AttachClipboard`, { references: references }, onErrorShowAlert)
             if(res)
             {
                 if(onRefreshView)
@@ -193,7 +211,7 @@
 
     }
 
-    async function attachToAndClear()
+    /*async function attachToAndClear()
     {
         if(onHide)
             onHide();
@@ -203,7 +221,7 @@
             if(onAttachAndClear)
             {
                 const items = [...selectedElements]
-                onAttachAndClear(basketItem, items)
+                onAttachAndClear(clipboardItem, items)
             }
         }
         else
@@ -222,6 +240,7 @@
             }
         }
     }
+    */
 
     function getFolderIcon(folder)
     {
@@ -245,23 +264,25 @@
 
     function getElementIcon(element)
     {
-        switch(element.$type)
+        switch(element.icon)
         {
         case 'Folder':
-        case 'FolderFolder':
             return getFolderIcon(element)
 
         case 'Note':
-        case 'FolderNote':
             return FaRegFile;
 
         case 'Task':
-        case 'FolderTask':
             return FaRegCalendar;
 
         case 'UploadedFile':
-        case 'FolderFile':
             return FaFileDownload;
+
+        case 'TaskList':
+            return FaList;
+
+        case 'Multi':
+                return FaClipboardList
         }
     }
 
@@ -280,40 +301,38 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
  <!--svelte-ignore a11y-no-noninteractive-element-interactions -->
 <menu class="" bind:this={rootElement} on:click={clearSelection}>
-    {#if basketItem}
-        <div class="w-full h-64 sm:h-80 sm:max-w-sm overflow-y-auto overflow-x-clip
+    {#if basketEntriesNo >= 0}
+        <div class="w-64 sm:w-80 h-64 sm:h-80 sm:max-w-sm overflow-y-auto overflow-x-clip
                 text-stone-600 dark:text-stone-400">
 
             {#if basketEntriesNo==0}
-                <div class="h-full flex items-center justify-center">
-                    <p>_; Clipboard is empty; El portapapeles está vacío; Schowek jest pusty</p>
+                <div class="w-full h-full flex items-center justify-center">
+                    <p class="">_; Clipboard is empty; El portapapeles está vacío; Schowek jest pusty</p>
                 </div>
+            {:else}
+                <List   self={clipboardItem}
+                        a='composedElements'
+                        orderAttrib='Order'
+                        multiselect
+                        selectionKey='handy'
+                        bind:this={listElement}
+                        >
+                    <ListTitle a='Title' readonly/>
+                    <ListSummary a='Summary' readonly/>
+
+                    <span slot="left" let:element>
+                        <Icon component={getElementIcon(element)}
+                            class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
+                    </span>
+                </List>
             {/if}
-
-            <List   self={basketItem}
-                    a='allElements'
-                    orderAttrib='Order'
-                    multiselect
-                    selectionKey='handy'
-                    bind:this={listElement}
-                    >
-                <ListTitle a='Title' readonly/>
-                <ListSummary a='Summary' readonly/>
-
-                <span slot="left" let:element>
-                    <Icon component={getElementIcon(element)}
-                        class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
-                </span>
-            </List>
-
-            
 
         </div>
 
         <!-- Footer -->
 
-            <div class="mt-2 flex flex-row justify-stretch gap-2">
-                <button class=" py-2.5 px-5
+            <div class="mt-2 flex flex-row justify-end gap-2">
+                <!--button class=" py-2.5 px-5
                                 text-base sm:text-xs font-medium
                                 bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400
                                 hover:bg-stone-200 hover:dark:bg-stone-600
@@ -322,11 +341,11 @@
                                 border-stone-200 dark:border-stone-600 focus:outline-none
                                 disabled:border-stone-200/60 disabled:dark:border-stone-600/60
                                 inline-flex items-center justify-center"
-                                disabled={!basketItem}
+                                disabled={!clipboardItem}
                                 on:click={() => editBasket()}>
 
                     _; Go to Clipboard; Ir al Portapapeles; Przejdź do Schowka
-                </button>
+                </button-->
 
                 <button class=" py-2.5 px-5
                                 text-base sm:text-xs font-medium
@@ -343,7 +362,7 @@
                     _; Paste; Pegar; Wklej
                 </button>
 
-                <button class=" py-2.5 px-5
+                <!--button class=" py-2.5 px-5
                                 text-base sm:text-xs font-medium
                                 bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400
                                 hover:bg-stone-200 hover:dark:bg-stone-600
@@ -356,7 +375,7 @@
                                 on:click={() => attachToAndClear()}>
 
                     _; Paste and forget; Pegar y olvidar; Wklej i zapomnij
-                </button>
+                </button-->
             </div>
 
     {:else}
