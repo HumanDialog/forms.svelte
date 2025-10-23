@@ -18,6 +18,7 @@
 
     import {FaPaste, FaArrowCircleRight, FaTimes, FaRegFile, FaRegCalendar, FaPaperPlane, FaRegStar, FaStar} from 'svelte-icons/fa/'
     import BasketPreview from './basket.preview.svelte'
+    import {fetchComposedClipboard4Message} from './basket.utils'
 
     let channelRef = ''
     let channel = null;
@@ -420,7 +421,7 @@
         return no;
     }
 
-    function showBasket(e)
+    async function showBasket(e)
     {
         let owner = e.target;
         while(owner && ((owner.tagName != 'BUTTON') && (owner.tagName != 'LI')))
@@ -437,10 +438,12 @@
         rect.width += 2*margin;
         rect.height += 2*margin;
 
+        const clipboardElements = await fetchComposedClipboard4Message()
+        
         showFloatingToolbar(rect, BasketPreview, {
                         onAttach: onAttachBasket,
-                        onAttachAndClear: onAttachAndClearBasket
-
+                        onAttachAndClear: onAttachAndClearBasket,
+                        clipboardElements: clipboardElements
                     });
     }
 

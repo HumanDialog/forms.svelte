@@ -13,7 +13,7 @@
 				mainContentPageReloader,
                 Modal,
                 onErrorShowAlert, showMenu,
-				UI, i18n, Breadcrumb,
+				UI, i18n, Breadcrumb, showFloatingToolbar,
 				ext} from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaList,
         FaEllipsisH, FaChevronRight, FaChevronLeft, FaRandom, FaCheck, FaCopy, FaUndo
@@ -21,6 +21,7 @@
     import {location, pop, push, querystring, link} from 'svelte-spa-router'
     import {cache} from './cache.js'
     import BasketPreview from './basket.preview.svelte'
+	import { fetchComposedClipboard4TaskList } from './basket.utils.js';
 
     export let params = {}
 
@@ -298,11 +299,7 @@
                         {
                             caption: '_; Paste; Pegar; Wklej',
                             //icon: FaRegClipboard, //FaLink, //aRegShareSquare, //
-                            toolbar: BasketPreview,
-                            props: {
-                                destinationContainer: listPath,
-                                onRefreshView: (f) => reloadTasks(listComponent.KEEP_SELECTION)
-                            }
+                            action: runPasteBasket,
                         },
                         {
                             separator: true
@@ -321,6 +318,16 @@
 
 
 
+    }
+
+    async function runPasteBasket(btt, aroundRect) 
+    {
+        const clipboardElements = await fetchComposedClipboard4TaskList()
+        showFloatingToolbar(aroundRect, BasketPreview, {
+            destinationContainer: listPath,
+            onRefreshView: (f) => reloadTasks(listComponent.KEEP_SELECTION),
+            clipboardElements: clipboardElements
+        })
     }
 
     async function switchToKanban()
@@ -357,11 +364,7 @@
                         },
                         {
                             caption: '_; Paste; Pegar; Wklej',
-                            toolbar: BasketPreview,
-                            props: {
-                                destinationContainer: listPath,
-                                onRefreshView: (f) => reloadTasks(listComponent.KEEP_SELECTION)
-                            },
+                            action: runPasteBasket
                         },
                         {
                             separator: true

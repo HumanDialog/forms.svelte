@@ -27,7 +27,8 @@
         reloadVisibleTags,
         i18n, ext,
 		isDeviceSmallerThan,
-        Breadcrumb
+        Breadcrumb,
+        showFloatingToolbar
 	} from '$lib';
     import {FaPlus, FaList, FaPen, FaCaretLeft, FaCaretRight, FaTrash, FaArrowsAlt, FaArchive, FaCheck, FaEllipsisH, FaChevronRight,
         FaAngleDown, FaAngleUp, FaColumns, FaRandom, FaChevronLeft, FaCopy, FaRegCalendar, FaCaretUp, FaCaretDown
@@ -35,6 +36,7 @@
     import MoveOperations from './list.board.move.svelte'
 	import { tick, onMount } from 'svelte';
     import BasketPreview from './basket.preview.svelte'
+    import {fetchComposedClipboard4TaskList} from './basket.utils'
     import {cache} from './cache.js'
 
     export let params = {}
@@ -260,11 +262,7 @@
                         },
                         {
                             caption: '_; Paste; Pegar; Wklej',
-                            toolbar: BasketPreview,
-                            props: {
-                                destinationContainer: listPath,
-                                onRefreshView: (f) => reload(kanban.KEEP_SELECTION)
-                            }
+                            action: runPasteBasket
                         },
                         {
                             separator: true
@@ -490,11 +488,7 @@
                         },
                         {
                             caption: '_; Paste; Pegar; Wklej',
-                            toolbar: BasketPreview,
-                            props: {
-                                destinationContainer: listPath,
-                                onRefreshView: (f) => reload(kanban.KEEP_SELECTION)
-                            }
+                            action: runPasteBasket
                         },
                         {
                             separator: true
@@ -679,11 +673,7 @@
                         {
                             caption: '_; Paste; Pegar; Wklej',
                             //icon: FaRegClipboard, //FaLink, //aRegShareSquare, //
-                            toolbar: BasketPreview,
-                            props: {
-                                destinationContainer: listPath,
-                                onRefreshView: (f) => reload(kanban.KEEP_SELECTION)
-                            },
+                            action: runPasteBasket
                             //fab: 'M01',
                            // tbr: 'A'
                         },
@@ -707,6 +697,16 @@
                 }
             ]
         }
+    }
+
+    async function runPasteBasket(btt, aroundRect) 
+    {
+        const clipboardElements = await fetchComposedClipboard4TaskList()
+        showFloatingToolbar(aroundRect, BasketPreview, {
+            destinationContainer: listPath,
+            onRefreshView: (f) => reload(kanban.KEEP_SELECTION),
+            clipboardElements: clipboardElements
+        })
     }
 
     function getColumnDeleteOptions(columnIdx, taskState)

@@ -10,6 +10,7 @@
     import {FaRegFolder, FaRegFile, FaRegCalendarCheck, FaRegCalendar, FaFileDownload, FaList, FaRegComments, FaRegClipboard, FaClipboardList} from 'svelte-icons/fa'
 	import { afterUpdate, onMount } from "svelte";
 	import { push } from "svelte-spa-router";
+	import { recentClipboardElements } from "./basket.utils";
 
     export let destinationContainer = ''
     export let onHide = undefined
@@ -17,6 +18,8 @@
     export let onRefreshView = undefined
     export let onAttach = undefined
     export let onAttachAndClear = undefined
+
+    export let clipboardElements = []
 
     // gitlab mirror test
 
@@ -27,6 +30,7 @@
     const EIF_CUT               =  0x00000001
     const EIF_BEGIN_GROUP       =  0x00000100
     const EIF_END_GROUP         =  0x00000200
+    const EIF_NOT_ALLOWED       =  0x10000000
 
     let reloadTicket = -1
     let lastReloadTicket = 0
@@ -42,65 +46,11 @@
 
         lastReloadTicket = reloadTicket
 
-        let res = await reef.post(`/user/Clipboards/first/query`,
-                            {
-                                Id: 1,
-                                Name: '',
-                                Tree:
-                                [
-                                    {
-                                        Id: 1,
-                                        Association: '',
-                                        Expressions:['Id', '$ref','Title'],
-                                        SubTree:
-                                        [
-                                            {
-                                                Id: 2,
-                                                Association: 'Elements',
-                                                Sort: "Order",
-                                                Expressions:['Id', 'Title', 'Summary', 'Order', 'href', 'icon', 'ElementId', 'ElementType', 'ElementNav', 'ElementInfo']
-                                            }
-                                        ]
-                                    }
-                                ]
-                            },
-                            onErrorShowAlert);
-        if(res)
-        {
-            clipboardItem = res.Clipboard;
-            if(clipboardItem && Object.keys(clipboardItem).length > 0)
-            {   
-
-                clipboardItem.composedElements = []
-
-                for(let i=0; i<clipboardItem.Elements.length; i++)
-                {
-                    const el = clipboardItem.Elements[i]
-                    if(el.ElementInfo & EIF_BEGIN_GROUP)
-                    {
-                        clipboardItem.composedElements.push(el)
-                        while((clipboardItem.Elements[i].ElementInfo & EIF_END_GROUP) == 0)
-                            i++
-                        i++
-                    }   
-                    else
-                        clipboardItem.composedElements.push(el)
-
-                }
-
-                basketEntriesNo = clipboardItem.composedElements.length
-            }
-            else
-            {
-                clipboardItem = null
-                basketEntriesNo = 0    
-            }
+        clipboardItem = {
+            Elements: [...clipboardElements]
         }
-        else
-        {
-            clipboardItem = null
-            basketEntriesNo = 0
-        }
+
+        basketEntriesNo = clipboardItem.Elements.length
     }
 
     function getSelectedItems(...args)
@@ -149,34 +99,27 @@
         if(onHide)
             onHide();
 
+            console.log('selectedElements',selectedElements)
+
         let references = []
-        selectedElements.sort((a,b) => a.Order-b.Order).forEach(el => {
+        const selectedReferences = selectedElements.sort((a,b) => a.Order-b.Order).filter((e) => (e.ElementInfo & EIF_NOT_ALLOWED) == 0 )
+        selectedReferences.forEach(el => {
             if(el.ElementInfo & EIF_BEGIN_GROUP)
             {
-                const groupIdx = clipboardItem.Elements.findIndex((f) => f.Id==el.Id)
-                console.log('groupIdx', groupIdx, clipboardItem.Elements)
-                if(groupIdx >= 0)
+                if(el.groupItems && Array.isArray(el.groupItems) && el.groupItems.length > 0)
                 {
-                    for(let groupElementIdx = groupIdx+1; groupElementIdx<clipboardItem.Elements.length; groupElementIdx++)
-                    {
-                        const groupElement = clipboardItem.Elements[groupElementIdx]
-                        if(groupElement.ElementInfo & EIF_END_GROUP)
-                            break;
-                        else
-                        {
-                            references.push({
-                                id:         groupElement.ElementId,
-                                typeName:   groupElement.ElementType,
-                                navPath:    groupElement.ElementNav,
-                                Title:      groupElement.Title,
-                                Summary:    groupElement.Summary,
-                                icon:       groupElement.icon,
-                                href:       groupElement.href, 
-                                flags:      groupElement.ElementInfo
-                            })                    
-                        }
-                    }   
-
+                    el.groupItems.forEach((gi) => {
+                        references.push({
+                                id:         gi.ElementId,
+                                typeName:   gi.ElementType,
+                                navPath:    gi.ElementNav,
+                                Title:      gi.Title,
+                                Summary:    gi.Summary,
+                                icon:       gi.icon,
+                                href:       gi.href, 
+                                flags:      gi.ElementInfo
+                            })   
+                    })
                 }
             }
             else
@@ -208,6 +151,8 @@
                     onRefreshView(res);
             }
         }
+
+        recentClipboardElements(selectedReferences)
 
     }
 
@@ -311,7 +256,7 @@
                 </div>
             {:else}
                 <List   self={clipboardItem}
-                        a='composedElements'
+                        a='Elements'
                         orderAttrib='Order'
                         multiselect
                         selectionKey='handy'
