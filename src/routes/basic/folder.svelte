@@ -16,7 +16,8 @@
 				activateItem, UI,
 				i18n, ext,
                 Breadcrumb,
-                refreshToolbarOperations} from '$lib'
+                refreshToolbarOperations,
+				showFloatingToolbar} from '$lib'
     import {FaRegFile, FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaSync,
         FaList, FaEllipsisH, FaChevronRight, FaChevronLeft, FaRegShareSquare, FaLink, FaUnlink, FaRegStar, FaStar, FaCopy, FaCut, FaRegComments, FaRegClipboard,
         FaRegCheckSquare, FaFileUpload, FaUpload, FaFileDownload, FaCloudUploadAlt
@@ -31,6 +32,7 @@
     import {onMount} from 'svelte'
     import {location, pop, push, querystring} from 'svelte-spa-router'
     import BasketPreview from './basket.preview.svelte'
+    import {fetchComposedClipboard4Folder} from './basket.utils'
     import FaBasketTrash from './icons/basket.trash.svelte'
     import {cache} from './cache.js'
 
@@ -334,7 +336,7 @@
     async function copyTaskToBasket(task)
     {
         await reef.post(`${contextItem.$ref}/CopyTaskToBasket`, { taskLink: task.$ref } , onErrorShowAlert);
-        task.IsInBasket = true
+        //task.IsInBasket = true
         refreshToolbarOperations()
         // not needed
         //await fetchData();
@@ -351,7 +353,7 @@
     async function copyNoteToBasket(note)
     {
         await reef.post(`${contextItem.$ref}/CopyNoteToBasket`, { noteLink: note.$ref } , onErrorShowAlert);
-        note.IsInBasket = true
+        //note.IsInBasket = true
         refreshToolbarOperations()
         // not needed
         //await fetchData();
@@ -368,7 +370,7 @@
     async function copyFileToBasket(file)
     {
         await reef.post(`${contextItem.$ref}/CopyFileToBasket`, { fileLink: file.$ref } , onErrorShowAlert);
-        file.IsInBasket = true
+        //file.IsInBasket = true
         refreshToolbarOperations()
         // not needed
         //await fetchData();
@@ -385,7 +387,7 @@
     async function copySubFolderToBasket(folder)
     {
         await reef.post(`${contextItem.$ref}/CopySubFolderToBasket`, { folderLink: folder.$ref } , onErrorShowAlert);
-        folder.IsInBasket = true
+        //folder.IsInBasket = true
         refreshToolbarOperations()
         // not needed
         //await fetchData();
@@ -674,16 +676,22 @@
         
         result.operations.push({
             caption: '_; Paste; Pegar; Wklej',
-            toolbar: BasketPreview,
-            props: {
-                destinationContainer: contextPath,
-                onRefreshView: refreshViewAfterAttachingFromBasket
-            },
+            action: runPasteBasket
             //fab: 'M01',
             //tbr: 'A'
         })
         return result
     }
+
+    async function runPasteBasket(btt, aroundRect)
+    {
+        const clipboardElements = await fetchComposedClipboard4Folder()
+        showFloatingToolbar(aroundRect, BasketPreview, {
+            destinationContainer: contextPath,
+            onRefreshView: refreshViewAfterAttachingFromBasket,
+            clipboardElements: clipboardElements
+        })
+    } 
 
     function  folderPageOperations()
     {
@@ -817,18 +825,9 @@
     async function copyElementToBasketMulti(items)
     {
         let refs = []
-        items.forEach(i => {
-            refs.push({
-                Type: i.$type,
-                Id: i.Id,
-                Title: i.Title,
-                ref: i.$ref
-                })   
-
-            i.IsInBasket = true
-        })
+        items.forEach((i) => refs.push(i.$ref))
         
-        await reef.post(`${contextItem.$ref}/CopyToBasketMulti`, { items: refs } , onErrorShowAlert);
+        await reef.post(`${contextItem.$ref}/CopyToBasketMulti`, { refs: refs } , onErrorShowAlert);
         
         refreshToolbarOperations()
         // not needed
@@ -993,10 +992,10 @@
                                 hideToolbarCaption: true,
                                 fab: 'M30',
                                 tbr: 'A',
-                                disabledFunc: () => element.IsInBasket
+                          //      disabledFunc: () => element.IsInBasket
 
                             },
-                            {
+                        /*    {
                                 caption: '_; Cut; Cortar; Wytnij',
                                 icon: FaCut, //FaCut,
                                 action: (f) => cutElementToBasket(element, kind),
@@ -1004,7 +1003,7 @@
                                 fab: 'M40',
                                 tbr: 'A'
                             },
-                            {
+                        */    {
                                 separator: true
                             },
                             ...linkOperations
@@ -1075,9 +1074,9 @@
                                 hideToolbarCaption: true,
                                 fab: 'M30',
                                 tbr: 'A',
-                                disabledFunc: () => items.every((el) => el.IsInBasket)
+                           //     disabledFunc: () => items.every((el) => el.IsInBasket)
                             },
-                            {
+                        /*    {
                                 caption: '_; Cut; Cortar; Wytnij',
                                 icon: FaCut, //FaCut,
                                 action: (f) => cutElementToBasketMulti(items),
@@ -1085,7 +1084,7 @@
                                 fab: 'M40',
                                 tbr: 'A'
                             },
-                            {
+                        */    {
                                 separator: true
                             },
                             {

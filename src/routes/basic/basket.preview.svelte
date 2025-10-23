@@ -7,9 +7,10 @@
         getActiveItems,
         clearActiveItem
     }   from '$lib'
-    import {FaRegFolder, FaRegFile, FaRegCalendarCheck, FaRegCalendar, FaFileDownload} from 'svelte-icons/fa'
+    import {FaRegFolder, FaRegFile, FaRegCalendarCheck, FaRegCalendar, FaFileDownload, FaList, FaRegComments, FaRegClipboard, FaClipboardList} from 'svelte-icons/fa'
 	import { afterUpdate, onMount } from "svelte";
 	import { push } from "svelte-spa-router";
+	import { recentClipboardElements } from "./basket.utils";
 
     export let destinationContainer = ''
     export let onHide = undefined
@@ -18,12 +19,18 @@
     export let onAttach = undefined
     export let onAttachAndClear = undefined
 
+    export let clipboardElements = []
+
     // gitlab mirror test
 
-    let basketItem;
-    let basketEntriesNo = 0
+    let clipboardItem;
+    let basketEntriesNo = -1
     
-    const STATE_FINISHED = 7000;
+    const EIF_ITEM              =  0x00000000
+    const EIF_CUT               =  0x00000001
+    const EIF_BEGIN_GROUP       =  0x00000100
+    const EIF_END_GROUP         =  0x00000200
+    const EIF_NOT_ALLOWED       =  0x10000000
 
     let reloadTicket = -1
     let lastReloadTicket = 0
@@ -39,87 +46,11 @@
 
         lastReloadTicket = reloadTicket
 
-        let res = await reef.post(`/user/BasketFolder/query`,
-                            {
-                                Id: 1,
-                                Name: '',
-                                Tree:
-                                [
-                                    {
-                                        Id: 1,
-                                        Association: '',
-                                        Expressions:['Id', '$ref','Title','Summary', 'href'],
-                                        SubTree:
-                                        [
-                                            {
-                                                Id: 2,
-                                                Association: 'Folders',
-                                                Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'IsPinned', '$type', 'icon']
-
-                                            },
-                                            {
-                                                Id: 3,
-                                                Association: 'Notes',
-                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href', '$type']
-
-                                            },
-                                            {
-                                                Id: 4,
-                                                Association: 'Tasks',
-                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'href', '$type']
-
-                                            },
-                                            {
-                                                Id: 5,
-                                                Association: 'Files',
-                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href', '$type']
-
-                                            }
-                                        ]
-                                    }
-                                ]
-                            },
-                            onErrorShowAlert);
-        if(res)
-        {
-            basketItem = res.Folder;
-            basketEntriesNo = 0;
-
-            basketItem.allElements = []
-
-            if(basketItem.Folders && basketItem.Folders.length > 0)
-            {
-                basketEntriesNo += basketItem.Folders.length;
-                basketItem.allElements = [...basketItem.allElements, ...basketItem.Folders]
-            }
-
-            if(basketItem.Notes && basketItem.Notes.length > 0)
-            {
-                basketEntriesNo += basketItem.Notes.length;
-                basketItem.allElements = [...basketItem.allElements, ...basketItem.Notes]
-            }
-
-            if(basketItem.Tasks && basketItem.Tasks.length > 0)
-            {
-                basketEntriesNo += basketItem.Tasks.length;
-                basketItem.allElements = [...basketItem.allElements, ...basketItem.Tasks]
-            }
-
-            if(basketItem.Files && basketItem.Files.length > 0)
-            {
-                basketEntriesNo += basketItem.Files.length;
-                basketItem.allElements = [...basketItem.allElements, ...basketItem.Files]
-            }
-
-            basketItem.allElements.sort((a,b) => a.Order - b.Order)
-
+        clipboardItem = {
+            Elements: [...clipboardElements]
         }
-        else
-        {
-            basketItem = null
-            basketEntriesNo = 0
-            basketItem.allElements = []
-        }
+
+        basketEntriesNo = clipboardItem.Elements.length
     }
 
     function getSelectedItems(...args)
@@ -134,7 +65,7 @@
         reloadTicket++;
         await initData()
 
-        listElement.reload(basketItem);
+        listElement.reload(clipboardItem);
     }
 
     let rootElement;
@@ -153,37 +84,67 @@
         }
     })
 
-    async function editBasket()
+    /*async function editBasket()
     {
         if(onHide)
             onHide();
 
-        if(basketItem && basketItem.href)
-            push(basketItem.href)
+        if(clipboardItem && clipboardItem.href)
+            push(clipboardItem.href)
     }
-
+    */
+    
     async function attachTo()
     {
         if(onHide)
             onHide();
 
+            console.log('selectedElements',selectedElements)
+
+        let references = []
+        const selectedReferences = selectedElements.sort((a,b) => a.Order-b.Order).filter((e) => (e.ElementInfo & EIF_NOT_ALLOWED) == 0 )
+        selectedReferences.forEach(el => {
+            if(el.ElementInfo & EIF_BEGIN_GROUP)
+            {
+                if(el.groupItems && Array.isArray(el.groupItems) && el.groupItems.length > 0)
+                {
+                    el.groupItems.forEach((gi) => {
+                        references.push({
+                                id:         gi.ElementId,
+                                typeName:   gi.ElementType,
+                                navPath:    gi.ElementNav,
+                                Title:      gi.Title,
+                                Summary:    gi.Summary,
+                                icon:       gi.icon,
+                                href:       gi.href, 
+                                flags:      gi.ElementInfo
+                            })   
+                    })
+                }
+            }
+            else
+                references.push({
+                    id:         el.ElementId,
+                    typeName:   el.ElementType,
+                    navPath:    el.ElementNav,
+                    Title:      el.Title,
+                    Summary:    el.Summary,
+                    icon:       el.icon,
+                    href:       el.href, 
+                    flags:      el.ElementInfo
+                })
+        })
+
         if(!destinationContainer)
         {
             if(onAttach)
             {
-                const items = [...selectedElements]
-                onAttach(basketItem, items)
+                onAttach(clipboardItem, references)
             }
         }
         else
         {
-            const items = selectedElements.map( el => { return {
-                Type: el.$type,
-                Id: el.Id,
-                Title: el.Title
-            }})
-
-            const res = await reef.post(`${destinationContainer}/AttachBasketContentMulti`, { items: items }, onErrorShowAlert)
+            const res = await reef.post(`${destinationContainer}/AttachClipboard`, { references: references }, onErrorShowAlert)
             if(res)
             {
                 if(onRefreshView)
@@ -191,9 +152,11 @@
             }
         }
 
+        recentClipboardElements(selectedReferences)
+
     }
 
-    async function attachToAndClear()
+    /*async function attachToAndClear()
     {
         if(onHide)
             onHide();
@@ -203,7 +166,7 @@
             if(onAttachAndClear)
             {
                 const items = [...selectedElements]
-                onAttachAndClear(basketItem, items)
+                onAttachAndClear(clipboardItem, items)
             }
         }
         else
@@ -222,6 +185,7 @@
             }
         }
     }
+    */
 
     function getFolderIcon(folder)
     {
@@ -245,23 +209,25 @@
 
     function getElementIcon(element)
     {
-        switch(element.$type)
+        switch(element.icon)
         {
         case 'Folder':
-        case 'FolderFolder':
             return getFolderIcon(element)
 
         case 'Note':
-        case 'FolderNote':
             return FaRegFile;
 
         case 'Task':
-        case 'FolderTask':
             return FaRegCalendar;
 
         case 'UploadedFile':
-        case 'FolderFile':
             return FaFileDownload;
+
+        case 'TaskList':
+            return FaList;
+
+        case 'Multi':
+                return FaClipboardList
         }
     }
 
@@ -280,40 +246,38 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
  <!--svelte-ignore a11y-no-noninteractive-element-interactions -->
 <menu class="" bind:this={rootElement} on:click={clearSelection}>
-    {#if basketItem}
-        <div class="w-full h-64 sm:h-80 sm:max-w-sm overflow-y-auto overflow-x-clip
+    {#if basketEntriesNo >= 0}
+        <div class="w-64 sm:w-80 h-64 sm:h-80 sm:max-w-sm overflow-y-auto overflow-x-clip
                 text-stone-600 dark:text-stone-400">
 
             {#if basketEntriesNo==0}
-                <div class="h-full flex items-center justify-center">
-                    <p>_; Clipboard is empty; El portapapeles está vacío; Schowek jest pusty</p>
+                <div class="w-full h-full flex items-center justify-center">
+                    <p class="">_; Clipboard is empty; El portapapeles está vacío; Schowek jest pusty</p>
                 </div>
+            {:else}
+                <List   self={clipboardItem}
+                        a='Elements'
+                        orderAttrib='Order'
+                        multiselect
+                        selectionKey='handy'
+                        bind:this={listElement}
+                        >
+                    <ListTitle a='Title' readonly/>
+                    <ListSummary a='Summary' readonly/>
+
+                    <span slot="left" let:element>
+                        <Icon component={getElementIcon(element)}
+                            class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
+                    </span>
+                </List>
             {/if}
-
-            <List   self={basketItem}
-                    a='allElements'
-                    orderAttrib='Order'
-                    multiselect
-                    selectionKey='handy'
-                    bind:this={listElement}
-                    >
-                <ListTitle a='Title' readonly/>
-                <ListSummary a='Summary' readonly/>
-
-                <span slot="left" let:element>
-                    <Icon component={getElementIcon(element)}
-                        class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
-                </span>
-            </List>
-
-            
 
         </div>
 
         <!-- Footer -->
 
-            <div class="mt-2 flex flex-row justify-stretch gap-2">
-                <button class=" py-2.5 px-5
+            <div class="mt-2 flex flex-row justify-end gap-2">
+                <!--button class=" py-2.5 px-5
                                 text-base sm:text-xs font-medium
                                 bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400
                                 hover:bg-stone-200 hover:dark:bg-stone-600
@@ -322,11 +286,11 @@
                                 border-stone-200 dark:border-stone-600 focus:outline-none
                                 disabled:border-stone-200/60 disabled:dark:border-stone-600/60
                                 inline-flex items-center justify-center"
-                                disabled={!basketItem}
+                                disabled={!clipboardItem}
                                 on:click={() => editBasket()}>
 
                     _; Go to Clipboard; Ir al Portapapeles; Przejdź do Schowka
-                </button>
+                </button-->
 
                 <button class=" py-2.5 px-5
                                 text-base sm:text-xs font-medium
@@ -343,7 +307,7 @@
                     _; Paste; Pegar; Wklej
                 </button>
 
-                <button class=" py-2.5 px-5
+                <!--button class=" py-2.5 px-5
                                 text-base sm:text-xs font-medium
                                 bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400
                                 hover:bg-stone-200 hover:dark:bg-stone-600
@@ -356,7 +320,7 @@
                                 on:click={() => attachToAndClear()}>
 
                     _; Paste and forget; Pegar y olvidar; Wklej i zapomnij
-                </button>
+                </button-->
             </div>
 
     {:else}

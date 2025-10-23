@@ -18,6 +18,7 @@
 
     import {FaPaste, FaArrowCircleRight, FaTimes, FaRegFile, FaRegCalendar, FaPaperPlane, FaRegStar, FaStar} from 'svelte-icons/fa/'
     import BasketPreview from './basket.preview.svelte'
+    import {fetchComposedClipboard4Message} from './basket.utils'
 
     let channelRef = ''
     let channel = null;
@@ -420,7 +421,7 @@
         return no;
     }
 
-    function showBasket(e)
+    async function showBasket(e)
     {
         let owner = e.target;
         while(owner && ((owner.tagName != 'BUTTON') && (owner.tagName != 'LI')))
@@ -437,10 +438,12 @@
         rect.width += 2*margin;
         rect.height += 2*margin;
 
+        const clipboardElements = await fetchComposedClipboard4Message()
+        
         showFloatingToolbar(rect, BasketPreview, {
                         onAttach: onAttachBasket,
-                        onAttachAndClear: onAttachAndClearBasket
-
+                        onAttachAndClear: onAttachAndClearBasket,
+                        clipboardElements: clipboardElements
                     });
     }
 
@@ -459,28 +462,14 @@
         "Id": 56
     }
 ]*/
-    async function onAttachBasket(basketItem)
+    async function onAttachBasket(basketItem, references)
     {
-        if(!basketItem)
-            return;
-
-       const res = await reef.post(`${basketItem.$ref}/GetBasketContents`, {}, onErrorShowAlert)
-       if(res)
-       {
-            newMessageAttachements = [...res]
-       }
+       newMessageAttachements = [...references]
     }
 
-    async function onAttachAndClearBasket(basketItem)
+    async function onAttachAndClearBasket(basketItem, references)
     {
-        if(!basketItem)
-            return;
-
-       const res = await reef.post(`${basketItem.$ref}/GetBasketContentsAndClear`, {}, onErrorShowAlert)
-       if(res)
-       {
-            newMessageAttachements = [...res]
-       }
+        newMessageAttachements = [...references]
     }
 
     function clearAttachements(e)
@@ -702,7 +691,7 @@
                                 {#if att.Title}
                                     {att.Title}
                                 {:else}
-                                    {att.Type}/{att.Id}
+                                    {att.typeName}/{att.id}
                                 {/if}
                             </p>
                         {/each}

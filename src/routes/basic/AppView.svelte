@@ -271,13 +271,12 @@
                             action: (f) => { push(`/members`) },
                             condition: () => $session.authAccessGroup() != 0
                         },
-                        {
-                        //    caption: '_; Clipboard; Portapapeles; Schowek',
+                      /*  {
                             captionFunc: () => '_; Clipboard; Portapapeles; Schowek',
                             icon: FaPaste,
                             action: (f) => showBasket(),
                             condition: () => $session.isActive
-                        }
+                        }*/
                     ]
                 },
                 selectionDetails:{

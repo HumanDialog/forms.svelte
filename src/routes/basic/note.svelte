@@ -45,6 +45,7 @@
 
     import AttachedFile from './attached.file.svelte'
     import BasketPreview from './basket.preview.svelte'
+    import {fetchComposedClipboard4Editor} from './basket.utils'
 
     let noteRef = ''
     let note = null;
@@ -558,7 +559,7 @@
         }
     ]
 
-    function insertEditorLink()
+    async function insertEditorLink()
     {
         const makeLinkToElement = (clipboard, elements) => {
             if(elements && Array.isArray(elements) && elements.length > 0)
@@ -586,10 +587,13 @@
         const range = selection.getRangeAt(0);
         const aroundRect = range.getBoundingClientRect();
 
+        const clipboardElements = await fetchComposedClipboard4Editor()
+        
         showFloatingToolbar(aroundRect, BasketPreview, 
             {
                 onAttach: (clipboard, elements) => makeLinkToElement(clipboard, elements),
-                onAttachAndClear: (clipboard, elements) => makeLinkToElement(clipboard, elements)
+                onAttachAndClear: (clipboard, elements) => makeLinkToElement(clipboard, elements),
+                clipboardElements: clipboardElements
             }
         )
     }
