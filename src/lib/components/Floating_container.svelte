@@ -2,7 +2,7 @@
 
     import {tick, afterUpdate} from 'svelte'
     import {isDeviceSmallerThan} from '../utils'
-    import {pushToolsActionsOperations, popToolsActionsOperations} from '../stores'
+    import {pushToolsActionsOperations, popToolsActionsOperations, fabHiddenDueToPopup} from '../stores'
     import {FaTimes} from 'svelte-icons/fa'
     import Icon from './icon.svelte'
 
@@ -54,9 +54,10 @@
         hide_window_indicator = 0;
         window.addEventListener('click', on_before_window_click, true);
 
-        if(false && isDeviceSmallerThan("sm"))
+        if(isDeviceSmallerThan("sm"))
         {    
-            pushToolsActionsOperations( {
+            $fabHiddenDueToPopup = true
+            /*pushToolsActionsOperations( {
                 opver: 1,
                 operations: [
                     {
@@ -71,7 +72,7 @@
                         ]
                     }
                 ]
-            })
+            })*/
         }
                 
         await tick();
@@ -89,8 +90,11 @@
 
     export function hide()
     {
-        if(false && visible)
-            popToolsActionsOperations();
+        if(visible)
+        {
+            $fabHiddenDueToPopup = false
+            //popToolsActionsOperations();
+        }
 
         visible = false;
         toolbar = null;

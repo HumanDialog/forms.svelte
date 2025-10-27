@@ -106,6 +106,7 @@ export {
     isDeviceSmallerThan,
     resizeImage,
     refreshToolbarOperations,
+    reloadPageToolbarOperations,
     isOnScreenKeyboardVisible,
     randomString,
     UI,

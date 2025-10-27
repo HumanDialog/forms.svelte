@@ -17,12 +17,13 @@
 				i18n, ext,
                 Breadcrumb,
                 refreshToolbarOperations,
-				showFloatingToolbar} from '$lib'
+				showFloatingToolbar,
+                reloadPageToolbarOperations} from '$lib'
     import {FaRegFile, FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaSync,
-        FaList, FaEllipsisH, FaChevronRight, FaChevronLeft, FaRegShareSquare, FaLink, FaUnlink, FaRegStar, FaStar, FaCopy, FaCut, FaRegComments, FaRegClipboard,
+        FaList, FaEllipsisH, FaChevronRight, FaChevronLeft, FaRegShareSquare, FaLink, FaUnlink, FaRegStar, FaStar, FaCut, FaRegComments, FaRegClipboard,
         FaRegCheckSquare, FaFileUpload, FaUpload, FaFileDownload, FaCloudUploadAlt
         } from 'svelte-icons/fa'
-
+        
         import {FaEdit} from 'svelte-icons/fa'
         import FaHighlighter from 'svelte-icons/fa/FaHighlighter.svelte'
 
@@ -32,7 +33,7 @@
     import {onMount} from 'svelte'
     import {location, pop, push, querystring} from 'svelte-spa-router'
     import BasketPreview from './basket.preview.svelte'
-    import {fetchComposedClipboard4Folder} from './basket.utils'
+    import {fetchComposedClipboard4Folder, transformClipboardToJSONReferences} from './basket.utils'
     import FaBasketTrash from './icons/basket.trash.svelte'
     import {cache} from './cache.js'
 
@@ -596,9 +597,9 @@
                             separator: true
                         },
                         {
-                            caption: '_; Select; Seleccionar; Wybierz',
+                            caption: '_; Select; Seleccionar; Zaznacz',
                          //   icon: FaRegCheckSquare,
-                            action: (f) => listComponent.toggleMultiselection()
+                            action: (f) => { listComponent.toggleMultiselection(); reloadPageToolbarOperations(multiselectPageOperations()) }
                         },
                         {
                             caption: '_; Refresh; Actualizar; Odśwież',
@@ -675,12 +676,43 @@
 
         
         result.operations.push({
-            caption: '_; Paste; Pegar; Wklej',
-            action: runPasteBasket
+            
+            caption: '_; Insert; Insertar; Wstaw',
+            menu: [
+                {
+                    caption: '_; Paste; Pegar; Wklej',
+                    action: pasteRecentClipboardElement
+                },
+                {
+                    caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
+                    action: runPasteBasket
+                },
+                {
+                    caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
+                    disabled: true
+                },
+                {
+                    caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
+                    disabled: true
+                }
+            ]
+            
             //fab: 'M01',
             //tbr: 'A'
         })
         return result
+    }
+
+    async function pasteRecentClipboardElement(btt, aroundRect) 
+    {
+        const clipboardElements = await fetchComposedClipboard4Folder()
+        if(clipboardElements && clipboardElements.length > 0)
+        {
+            const references = transformClipboardToJSONReferences([clipboardElements[0]])
+            const res = await reef.post(`${contextPath}/AttachClipboard`, { references: references }, onErrorShowAlert)
+            if(res)
+                refreshViewAfterAttachingFromBasket(res);
+        }
     }
 
     async function runPasteBasket(btt, aroundRect)
@@ -707,13 +739,12 @@
                 newElementOperations(null),
                 {
                     caption: '_; View; Ver; Widok',
-                    //tbr: 'B',
                     operations: [
                         ... !canPin ? [] : [pinOp()],
-                         {
-                            caption: '_; Select; Seleccionar; Wybierz',
-                         //   icon: FaRegCheckSquare,
-                            action: (f) => listComponent.toggleMultiselection()
+                        {
+                            caption: '_; Select; Seleccionar; Zaznacz',
+                        //   icon: FaRegCheckSquare,
+                            action: (f) => { listComponent.toggleMultiselection(); reloadPageToolbarOperations(multiselectPageOperations()) }
                         },
                         {
                             caption: '_; Refresh; Actualizar; Odśwież',
@@ -726,6 +757,44 @@
         }
     }
 
+    function multiselectPageOperations()
+    {
+        const isClipboard = contextItem.IsBasket
+        const isRootPinned = contextItem.IsRootPinned
+        const canPin = !(isRootPinned || isClipboard)
+
+        return {
+            opver: 2,
+            fab: 'M00',
+            tbr: 'C',
+            operations: [
+                {
+                    caption: '_; View; Ver; Widok',
+                    operations: [
+                        {
+                            caption: '_; All; Todos; Wszystkie',
+                            icon: FaRegCheckSquare,
+                            action: () => listComponent.toggleSelectAll(),
+                            //fab: 'M30',
+                            tbr: 'A',
+                        },
+                       // ... !canPin ? [] : [pinOp()],
+                        {
+                            caption: '_; Select; Seleccionar; Zaznacz',
+                        //   icon: FaRegCheckSquare,
+                            action: (f) => { listComponent.toggleMultiselection(); reloadPageToolbarOperations(getPageOperations()) },
+                            active: true
+                        },
+                        {
+                            caption: '_; Refresh; Actualizar; Odśwież',
+                            action: async (f) => await refreshView(),
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+
     function getPageOperations()
     {
         if(!contextItem)
@@ -734,7 +803,9 @@
         if(contextItem.IsBasket)
             return basketPageOperations();
         else
+        {
             return folderPageOperations();
+        }
 
     }
 
@@ -893,9 +964,9 @@
                         caption: '_; View; Ver; Widok',
                         operations: [
                          {
-                            caption: '_; Select; Seleccionar; Wybierz',
+                            caption: '_; Select; Seleccionar; Zaznacz',
                          //   icon: FaRegCheckSquare,
-                            action: (f) => listComponent.toggleMultiselection()
+                            action: (f) => { listComponent.toggleMultiselection(); reloadPageToolbarOperations(multiselectPageOperations()) }
                         },
                         {
                             caption: '_; Refresh; Actualizar; Odśwież',
@@ -986,9 +1057,18 @@
                                 hideToolbarCaption: true
                             },
                             {
-                                caption: '_; Copy; Copiar; Kopiuj',
-                                icon: FaCopy, 
-                                action: (f) => copyElementToBasket(element, kind),
+                                caption: '_; Send to...; Enviar a...; Wyślij do ...',
+                                icon: FaRegShareSquare,
+                                menu: [
+                                    {
+                                        caption: '_; Copy; Copiar; Kopiuj',
+                                        action: (f) => copyElementToBasket(element, kind),
+                                    },
+                                    {
+                                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
+                                        disabled: true
+                                    }
+                                ], 
                                 hideToolbarCaption: true,
                                 fab: 'M30',
                                 tbr: 'A',
@@ -1014,9 +1094,9 @@
                         operations: [
                             ... !canPin ? [] : [pinOp()],
                          {
-                            caption: '_; Select; Seleccionar; Wybierz',
+                            caption: '_; Select; Seleccionar; Zaznacz',
                          //   icon: FaRegCheckSquare,
-                            action: (f) => listComponent.toggleMultiselection()
+                            action: (f) => { listComponent.toggleMultiselection(); reloadPageToolbarOperations(multiselectPageOperations()) }
                         },
                         {
                             caption: '_; Refresh; Actualizar; Odśwież',
@@ -1043,15 +1123,15 @@
         }
     }
 
-    function multiselecOperations(items)
+    function multiselectOperations(items)
     {
-        if(items.length == 0)
-            return []
-        else if(items.length == 1)      // not sure
-            return elementOperations(items[0], items[0].$type)
-        else if(contextItem.IsBasket)
-            return multiselectBasketOperations(items)
-        else
+        //if(items.length == 0)
+        //    return []
+        //else if(items.length == 1)      // not sure
+        //    return elementOperations(items[0], items[0].$type)
+        //else if(contextItem.IsBasket)
+        //    return multiselectBasketOperations(items)
+        //else
         {
             const isClipboard = contextItem.IsBasket
             const isRootPinned = contextItem.IsRootPinned
@@ -1065,16 +1145,30 @@
                     //newElementOperations(element),
                     {
                         caption: '_; Element; Elemento; Element',
-
                         operations: [
                             {
-                                caption: '_; Copy; Copiar; Kopiuj',
-                                icon: FaCopy,
-                                action: (f) => copyElementToBasketMulti(items),
+                                caption: '_; All; Todos; Wszystkie',
+                                icon: FaRegCheckSquare,
+                                action: () => listComponent.toggleSelectAll(),
+                                //fab: 'M30',
+                                tbr: 'A',
+                            },
+                            {
+                                caption: '_; Send to...; Enviar a...; Wyślij do ...',
+                                icon: FaRegShareSquare,
+                                menu: [
+                                    {
+                                        caption: '_; Copy; Copiar; Kopiuj',
+                                        action: (f) => copyElementToBasketMulti(items),
+                                    },
+                                    {
+                                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
+                                        disabled: true
+                                    }
+                                ],
                                 hideToolbarCaption: true,
                                 fab: 'M30',
                                 tbr: 'A',
-                           //     disabledFunc: () => items.every((el) => el.IsInBasket)
                             },
                         /*    {
                                 caption: '_; Cut; Cortar; Wytnij',
@@ -1090,12 +1184,12 @@
                             {
                                 caption: '_; Detach; Desconectar; Odłącz',
                           //      icon: FaUnlink,
-                                action: (f) => dettachElementMulti(items)
+                                action: (f) => dettachElementMulti(items),
                             },
                             {
                                 caption: '_; Delete; Eliminar; Usuń',
                              //   icon: FaTrash,
-                                action: (f) => askToDelete(items, 'multi')
+                                action: (f) => askToDelete(items, 'multi'),
                             }
                         ]
                     },
@@ -1103,11 +1197,12 @@
                         caption: '_; View; Ver; Widok',
                         //tbr: 'B',
                         operations: [
-                            ... !canPin ? [] : [pinOp()],
+                           // ... !canPin ? [] : [pinOp()],
                             {
-                                caption: '_; Select; Seleccionar; Wybierz',
+                                caption: '_; Select; Seleccionar; Zaznacz',
                             //   icon: FaRegCheckSquare,
-                                action: (f) => listComponent.toggleMultiselection()
+                                action: (f) => { listComponent.toggleMultiselection(); reloadPageToolbarOperations(getPageOperations()); },
+                                active: true
                             },
                             {
                                 caption: '_; Refresh; Actualizar; Odśwież',
@@ -1147,9 +1242,10 @@
                         caption: '_; View; Ver; Widok',
                         operations: [
                             {
-                                caption: '_; Select; Seleccionar; Wybierz',
+                                caption: '_; Select; Seleccionar; Zaznacz',
                             //   icon: FaRegCheckSquare,
-                                action: (f) => listComponent.toggleMultiselection()
+                                action: (f) => { listComponent.toggleMultiselection(); reloadPageToolbarOperations(getPageOperations()) },
+                                active: true
                             },
                             {
                                 caption: '_; Refresh; Actualizar; Odśwież',
@@ -1338,7 +1434,7 @@
             <List   self={contextItem}
                     a='allElements'
                     toolbarOperations={(el) => elementOperations(el, el.$type)}
-                    {multiselecOperations}
+                    {multiselectOperations}
                     orderAttrib='Order'
                     bind:this={listComponent}>
                 <ListTitle      a='Title'

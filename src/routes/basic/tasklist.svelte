@@ -16,12 +16,12 @@
 				UI, i18n, Breadcrumb, showFloatingToolbar,
 				ext} from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaList,
-        FaEllipsisH, FaChevronRight, FaChevronLeft, FaRandom, FaCheck, FaCopy, FaUndo
+        FaEllipsisH, FaChevronRight, FaChevronLeft, FaRandom, FaCheck, FaRegShareSquare, FaUndo
     } from 'svelte-icons/fa'
     import {location, pop, push, querystring, link} from 'svelte-spa-router'
     import {cache} from './cache.js'
     import BasketPreview from './basket.preview.svelte'
-	import { fetchComposedClipboard4TaskList } from './basket.utils.js';
+	import { fetchComposedClipboard4TaskList, transformClipboardToJSONReferences } from './basket.utils.js';
 
     export let params = {}
 
@@ -297,9 +297,25 @@
                             tbr: 'A'
                         },
                         {
-                            caption: '_; Paste; Pegar; Wklej',
-                            //icon: FaRegClipboard, //FaLink, //aRegShareSquare, //
-                            action: runPasteBasket,
+                            caption: '_; Insert; Insertar; Wstaw',
+                            menu: [
+                                {
+                                    caption: '_; Paste; Pegar; Wklej',
+                                    action: pasteRecentClipboardElement
+                                },
+                                {
+                                    caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
+                                    action: runPasteBasket
+                                },
+                                {
+                                    caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
+                                    disabled: true
+                                },
+                                {
+                                    caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
+                                    disabled: true
+                                }
+                            ]
                         },
                         {
                             separator: true
@@ -318,6 +334,18 @@
 
 
 
+    }
+
+    async function pasteRecentClipboardElement(btt, aroundRect) 
+    {
+        const clipboardElements = await fetchComposedClipboard4TaskList()
+        if(clipboardElements && clipboardElements.length > 0)
+        {
+            const references = transformClipboardToJSONReferences([clipboardElements[0]])
+            const res = await reef.post(`${listPath}/AttachClipboard`, { references: references }, onErrorShowAlert)
+            if(res)
+                reloadTasks(listComponent.KEEP_SELECTION)
+        }
     }
 
     async function runPasteBasket(btt, aroundRect) 
@@ -450,12 +478,21 @@
                             hideToolbarCaption: true
                         },
                         {
-                            caption: '_; Copy; Copiar; Kopiuj',
-                            icon: FaCopy, 
-                            action: (f) => copyTaskToBasket(task),
+                            caption: '_; Send to...; Enviar a...; Wyślij do ...',
+                            icon: FaRegShareSquare, 
+                            menu: [
+                                {
+                                    caption: '_; Copy; Copiar; Kopiuj',
+                                    action: (f) => copyTaskToBasket(task),
+                                },
+                                {
+                                    caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
+                                    disabled: true
+                                }
+                            ],
+                            hideToolbarCaption: true,
                             fab: 'M30',
-                            tbr: 'A', hideToolbarCaption: true
-
+                            tbr: 'A'
                         },
                         {
                             //icon: FaArchive,

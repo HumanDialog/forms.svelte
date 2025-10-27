@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { afterUpdate, onMount, tick } from 'svelte';
 	  import Icon from './components/icon.svelte'
-    import {pushToolsActionsOperations, popToolsActionsOperations} from './stores.js'
+    import {pushToolsActionsOperations, popToolsActionsOperations, fabHiddenDueToPopup} from './stores.js'
     import {isDeviceSmallerThan} from './utils'
     import {FaTimes} from 'svelte-icons/fa'
     import {i18n} from './i18n.js'
@@ -28,9 +28,11 @@
         open = true;
         close_callback = on_close_callback;
 
-        if(false && isDeviceSmallerThan("sm"))
-        {    
-          pushToolsActionsOperations( {
+        if(isDeviceSmallerThan("sm"))
+        {  
+            $fabHiddenDueToPopup = true  
+
+          /*pushToolsActionsOperations( {
                 opver: 1,
                 operations: [
                     {
@@ -45,7 +47,7 @@
                         ]
                     }
                 ]
-            })
+            })*/
         }
     }
 
@@ -56,6 +58,7 @@
 
       open = false;
       //popToolsActionsOperations()
+      $fabHiddenDueToPopup = false
     }
 
     let root;

@@ -63,7 +63,7 @@ export async function fetchComposedClipboard4Task()
 
 export async function fetchComposedClipboard4Note()
 {
-    return await fetchComposedClipboard(['Note'])
+    return await fetchComposedClipboard(['Note', 'UploadedFile'])
 }
 
 export async function fetchComposedClipboard4Message()
@@ -132,4 +132,42 @@ export function recentClipboardElements(selectedElements)
     selectedElements.forEach((el) => refs.push(el.$ref))
 
     reef.post('user/Clipboards/first/SetRecentElements', {refs: refs}, onErrorShowAlert)
+}
+
+export function transformClipboardToJSONReferences(selectedReferences)
+{
+    let references = []
+    selectedReferences.forEach(el => {
+        if(el.ElementInfo & EIF_BEGIN_GROUP)
+        {
+            if(el.groupItems && Array.isArray(el.groupItems) && el.groupItems.length > 0)
+            {
+                el.groupItems.forEach((gi) => {
+                    references.push({
+                            id:         gi.ElementId,
+                            typeName:   gi.ElementType,
+                            navPath:    gi.ElementNav,
+                            Title:      gi.Title,
+                            Summary:    gi.Summary,
+                            icon:       gi.icon,
+                            href:       gi.href, 
+                            flags:      gi.ElementInfo
+                        })   
+                })
+            }
+        }
+        else
+            references.push({
+                id:         el.ElementId,
+                typeName:   el.ElementType,
+                navPath:    el.ElementNav,
+                Title:      el.Title,
+                Summary:    el.Summary,
+                icon:       el.icon,
+                href:       el.href, 
+                flags:      el.ElementInfo
+            })
+    })
+
+    return references
 }

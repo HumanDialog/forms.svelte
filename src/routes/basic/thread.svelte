@@ -30,7 +30,7 @@
 
     import {FaTimes, FaAlignLeft,FaCheck, FaTag, FaUser, FaCalendarAlt, FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen,
         FaCommentMedical, FaRegStar, FaStar, FaPaperPlane, FaPaperclip, FaPlus, FaComment, FaQuoteRight, FaInfo, FaListUl,
-        FaImage, FaTable, FaBold, FaItalic, FaUnderline, FaStrikethrough, FaRemoveFormat, FaCode, FaExclamationTriangle, FaCopy
+        FaImage, FaTable, FaBold, FaItalic, FaUnderline, FaStrikethrough, FaRemoveFormat, FaCode, FaExclamationTriangle, FaRegShareSquare
     } from 'svelte-icons/fa/'
 
     import FaCommentPlus from './icons/post.plus.svelte'
@@ -324,10 +324,18 @@
                             action: (f) => {} ,
                         },
                         {
-                            icon: FaCopy,   // MdLibraryAdd
-                            caption: '_; Copy; Copiar; Kopiuj',
-                            action: (f) => copyTaskToBasket(),
-
+                            icon: FaRegShareSquare,   // MdLibraryAdd
+                            caption: '_; Send to...; Enviar a...; Wyślij do ...',
+                            menu: [
+                                    {
+                                        caption: '_; Copy; Copiar; Kopiuj',
+                                        action: (f) => copyTaskToBasket(),
+                                    },
+                                    {
+                                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
+                                        disabled: true
+                                    }
+                                ]
                         }
                     ]
                 }

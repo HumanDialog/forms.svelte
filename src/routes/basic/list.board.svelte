@@ -31,12 +31,12 @@
         showFloatingToolbar
 	} from '$lib';
     import {FaPlus, FaList, FaPen, FaCaretLeft, FaCaretRight, FaTrash, FaArrowsAlt, FaArchive, FaCheck, FaEllipsisH, FaChevronRight,
-        FaAngleDown, FaAngleUp, FaColumns, FaRandom, FaChevronLeft, FaCopy, FaRegCalendar, FaCaretUp, FaCaretDown
+        FaAngleDown, FaAngleUp, FaColumns, FaRandom, FaChevronLeft, FaRegShareSquare, FaRegCalendar, FaCaretUp, FaCaretDown
     } from 'svelte-icons/fa'
     import MoveOperations from './list.board.move.svelte'
 	import { tick, onMount } from 'svelte';
     import BasketPreview from './basket.preview.svelte'
-    import {fetchComposedClipboard4TaskList} from './basket.utils'
+    import {fetchComposedClipboard4TaskList, transformClipboardToJSONReferences} from './basket.utils'
     import {cache} from './cache.js'
 
     export let params = {}
@@ -261,8 +261,25 @@
                             fab: 'M01'
                         },
                         {
-                            caption: '_; Paste; Pegar; Wklej',
-                            action: runPasteBasket
+                            caption: '_; Insert; Insertar; Wstaw',
+                            menu: [
+                                {
+                                    caption: '_; Paste; Pegar; Wklej',
+                                    action: pasteRecentClipboardElement
+                                },
+                                {
+                                    caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
+                                    action: runPasteBasket
+                                },
+                                {
+                                    caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
+                                    disabled: true
+                                },
+                                {
+                                    caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
+                                    disabled: true
+                                }
+                            ]
                         },
                         {
                             separator: true
@@ -487,8 +504,25 @@
                             tbr: 'A'
                         },
                         {
-                            caption: '_; Paste; Pegar; Wklej',
-                            action: runPasteBasket
+                            caption: '_; Insert; Insertar; Wstaw',
+                            menu: [
+                                {
+                                    caption: '_; Paste; Pegar; Wklej',
+                                    action: pasteRecentClipboardElement
+                                },
+                                {
+                                    caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
+                                    action: runPasteBasket
+                                },
+                                {
+                                    caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
+                                    disabled: true
+                                },
+                                {
+                                    caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
+                                    disabled: true
+                                }
+                            ]
                         },
                         {
                             separator: true
@@ -573,12 +607,21 @@
                             hideToolbarCaption: true
                         } ],
                         {
-                            caption: '_; Copy; Copiar; Kopiuj',
-                            icon: FaCopy, 
-                            action: (f) => copyTaskToBasket(task),
+                            caption: '_; Send to...; Enviar a...; Wyślij do ...',
+                            icon: FaRegShareSquare, 
+                            menu: [
+                                    {
+                                        caption: '_; Copy; Copiar; Kopiuj',
+                                        action: (f) => copyTaskToBasket(task),
+                                    },
+                                    {
+                                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
+                                        disabled: true
+                                    }
+                                ], 
+                            hideToolbarCaption: true,
                             fab: 'M30',
-                            tbr: 'A', hideToolbarCaption: true
-
+                            tbr: 'A'
                         },
                         ... (task.State == STATE_FINISHED) ? [] : [
                                 {
@@ -671,11 +714,25 @@
                             tbr: 'A'
                         },
                         {
-                            caption: '_; Paste; Pegar; Wklej',
-                            //icon: FaRegClipboard, //FaLink, //aRegShareSquare, //
-                            action: runPasteBasket
-                            //fab: 'M01',
-                           // tbr: 'A'
+                            caption: '_; Insert; Insertar; Wstaw',
+                            menu: [
+                                {
+                                    caption: '_; Paste; Pegar; Wklej',
+                                    action: pasteRecentClipboardElement
+                                },
+                                {
+                                    caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
+                                    action: runPasteBasket
+                                },
+                                {
+                                    caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
+                                    disabled: true
+                                },
+                                {
+                                    caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
+                                    disabled: true
+                                }
+                            ]
                         },
                         {
                             separator: true
@@ -696,6 +753,18 @@
                     operations: getColumnContextMenu(columnIdx, taskState, !mobile)
                 }
             ]
+        }
+    }
+
+    async function pasteRecentClipboardElement(btt, aroundRect) 
+    {
+        const clipboardElements = await fetchComposedClipboard4TaskList()
+        if(clipboardElements && clipboardElements.length > 0)
+        {
+            const references = transformClipboardToJSONReferences([clipboardElements[0]])
+            const res = await reef.post(`${listPath}/AttachClipboard`, { references: references }, onErrorShowAlert)
+            if(res)
+                reload(kanban.KEEP_SELECTION)
         }
     }
 

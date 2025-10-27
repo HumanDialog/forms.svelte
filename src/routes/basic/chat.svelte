@@ -11,14 +11,16 @@
             registerKicksObserver,
             unregisterKicksObserver,
             forceKicksChecking,
-            i18n, ext
+            i18n, ext,
+			showMenu,
+            SHOW_MENU_ABOVE
             } from '$lib'
 	import { afterUpdate, tick, onMount } from 'svelte';
     import {location, link, querystring} from 'svelte-spa-router'
 
     import {FaPaste, FaArrowCircleRight, FaTimes, FaRegFile, FaRegCalendar, FaPaperPlane, FaRegStar, FaStar} from 'svelte-icons/fa/'
     import BasketPreview from './basket.preview.svelte'
-    import {fetchComposedClipboard4Message} from './basket.utils'
+    import {fetchComposedClipboard4Message, transformClipboardToJSONReferences} from './basket.utils'
 
     let channelRef = ''
     let channel = null;
@@ -421,7 +423,7 @@
         return no;
     }
 
-    async function showBasket(e)
+    function showInsertMenu(e)
     {
         let owner = e.target;
         while(owner && ((owner.tagName != 'BUTTON') && (owner.tagName != 'LI')))
@@ -438,11 +440,45 @@
         rect.width += 2*margin;
         rect.height += 2*margin;
 
+        const ops = [
+            {
+                caption: '_; Paste; Pegar; Wklej',
+                action: pasteRecentClipboardElement
+            },
+            {
+                caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
+                action: runPasteBasket
+            },
+            {
+                caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
+                disabled: true
+            },
+            {
+                caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
+                disabled: true
+            }
+        ]
+
+        showMenu(rect, ops, SHOW_MENU_ABOVE)
+    }
+
+    async function pasteRecentClipboardElement(btt, aroundRect) 
+    {
         const clipboardElements = await fetchComposedClipboard4Message()
+        if(clipboardElements && clipboardElements.length > 0)
+        {
+            const references = transformClipboardToJSONReferences([clipboardElements[0]])
+            onAttachBasket(references)
+        }
+    }
+
+    async function runPasteBasket(btt, aroundRect)
+    {
+       const clipboardElements = await fetchComposedClipboard4Message()
         
-        showFloatingToolbar(rect, BasketPreview, {
-                        onAttach: onAttachBasket,
-                        onAttachAndClear: onAttachAndClearBasket,
+        showFloatingToolbar(aroundRect, BasketPreview, {
+                        onAttach: (basketItem, refs) => onAttachBasket(refs),
+                    //    onAttachAndClear: (basketItem, refs) => onAttachAndClearBasket(refs),
                         clipboardElements: clipboardElements
                     });
     }
@@ -462,12 +498,12 @@
         "Id": 56
     }
 ]*/
-    async function onAttachBasket(basketItem, references)
+    async function onAttachBasket(references)
     {
        newMessageAttachements = [...references]
     }
 
-    async function onAttachAndClearBasket(basketItem, references)
+    async function onAttachAndClearBasket(references)
     {
         newMessageAttachements = [...references]
     }
@@ -710,9 +746,9 @@
                             hover:bg-stone-200 dark:hover:bg-stone-900 active:bg-stone-200 dark:active:bg-stone-600
                             focus:outline-none dark:border-stone-600
                             flex items-center rounded"
-                            on:click={showBasket}>
+                            on:click={showInsertMenu}>
                         <div class="w-5 h-5 mr-1"><FaPaste/></div>
-                        <span class="ml-2">_; Paste...; Pegar...; Wklej...</span>
+                        <span class="ml-2">_; Insert; Insertar; Wstaw</span>
                     </button>
 
                     <p class="flex-none ml-auto py-2.5 mr-1 text-xs m-0">

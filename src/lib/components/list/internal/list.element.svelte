@@ -34,7 +34,7 @@
     export let typename :string | undefined = undefined;
     export let toolbarOperations = undefined;
     export let contextMenu = undefined;
-    export let multiselecOperations = (items) => []
+    export let multiselectOperations = (items) => []
     
     export let key: string = '';
     export let selectionKey = 'props'
@@ -272,7 +272,10 @@
         const openable = !!definition.title_href || !!definition.title_href_func
         if(toolbarOperations)
         {
-            activateItem(selectionKey, item, toolbarOperations(item));
+            if(multiselect)
+                activateItem(selectionKey, item, multiselectOperations);
+            else
+                activateItem(selectionKey, item, toolbarOperations(item));
             
             if(e)
                 e.stopPropagation();
@@ -398,9 +401,9 @@
     function onToggleMultiSelect(e)
     {
         if(!is_row_active)
-            addActiveItem(selectionKey, item, multiselecOperations)
+            addActiveItem(selectionKey, item, multiselectOperations)
         else
-            removeActiveItem(selectionKey, item, multiselecOperations)
+            removeActiveItem(selectionKey, item, multiselectOperations)
 
         if(e)
             e.stopPropagation();

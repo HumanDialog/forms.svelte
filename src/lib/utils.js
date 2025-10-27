@@ -55,14 +55,19 @@ export function activateItem(context_level, itm, operations=null)
 
     if(operations && context_level == 'props')
     { 
-        if(Array.isArray(operations))
+        if(typeof operations === 'function')
+        {
+            const calculatedOps = operations([itm])
+            contextToolbarOperations.set(calculatedOps)
+        }
+        else if(Array.isArray(operations))
             contextToolbarOperations.set( [...operations] )
         else
             contextToolbarOperations.set( {...operations} )
     }
 }
 
-export function clearActiveItem(context_level)
+export function clearActiveItem(context_level, operations=undefined)
 {
     let data_context = get(contextItemsStore);
     data_context[context_level] = null;
@@ -78,7 +83,22 @@ export function clearActiveItem(context_level)
     //chnages.just_changed_context = true;
 
     if(context_level == 'props')
-        contextToolbarOperations.set( [] )
+    {
+        if(operations)
+        {
+            if(typeof operations === 'function')
+            {
+                const calculatedOps = operations([])
+                contextToolbarOperations.set(calculatedOps)
+            }
+            else if(Array.isArray(operations))
+                contextToolbarOperations.set( [...operations] )
+            else
+                contextToolbarOperations.set( {...operations} )
+        }
+        else
+            contextToolbarOperations.set( [] )
+    }
 }
 
 export function addActiveItem(context_level, itm, operations = null)
@@ -257,6 +277,10 @@ export function getActiveCount(context_level)
         return 1
 }
 
+export function reloadPageToolbarOperations(operations)
+{
+    pageToolbarOperations.set(operations)
+}
 
 export function refreshToolbarOperations()
 {

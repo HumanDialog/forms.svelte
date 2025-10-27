@@ -34,7 +34,7 @@
     import { Plugin, PluginKey } from "@tiptap/pm/state";
     import { getAttributes } from "@tiptap/core";
 
-    import {data_tick_store, contextItemsStore, contextTypesStore, onErrorShowAlert, pushToolsActionsOperations, popToolsActionsOperations} from '../../stores.js'
+    import {data_tick_store, contextItemsStore, contextTypesStore, onErrorShowAlert, pushToolsActionsOperations, popToolsActionsOperations, fabHiddenDueToPopup} from '../../stores.js'
     import {informModification, pushChanges} from '../../updates.js'
     import {isDeviceSmallerThan, parseWidthDirective, refreshToolbarOperations, UI} from '../../utils.js'
     import Palette from './internal/palette.svelte'
@@ -1115,9 +1115,10 @@
     {
         is_command_palette_visible = true;
 
-        if(false && isDeviceSmallerThan("sm"))
+        if(isDeviceSmallerThan("sm"))
         {
-            pushToolsActionsOperations({
+            $fabHiddenDueToPopup = true
+            /*pushToolsActionsOperations({
                 opver: 1,
                 operations: [
                     {
@@ -1132,15 +1133,18 @@
                         ]
                     }
                 ]
-            })
+            })*/
         }
 
     }
 
     function on_palette_hidden()
     {
-        if(false && is_command_palette_visible)
-            popToolsActionsOperations()
+        if(is_command_palette_visible)
+        {
+            $fabHiddenDueToPopup = false
+            //popToolsActionsOperations()
+        }
 
         editor?.commands.focus()
 

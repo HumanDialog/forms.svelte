@@ -11,7 +11,7 @@
                 Modal, showMenu,
                 onErrorShowAlert, i18n} from '$lib'
     import {querystring, location} from 'svelte-spa-router'
-    import {FaRegFolder, FaRegComment, FaCaretUp, FaCaretDown, FaTrash, FaRegComments, FaRegClipboard, FaPen, FaArchive, FaEllipsisH, FaCopy, FaCut} from 'svelte-icons/fa'
+    import {FaRegFolder, FaRegComment, FaCaretUp, FaCaretDown, FaTrash, FaRegComments, FaRegClipboard, FaPen, FaArchive, FaEllipsisH} from 'svelte-icons/fa'
 
     export let params = {}
 

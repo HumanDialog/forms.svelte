@@ -26,26 +26,25 @@
             refreshToolbarOperations,
             informModificationEx,
             Breadcrumb, i18n, UI,
-
 			showFloatingToolbar,
-
-			randomString
-
-
+			randomString,
+            showMenu,
+            SHOW_MENU_BELOW,
+            ext
             } from '$lib'
 	import { onMount, tick } from 'svelte';
 
     import {location, querystring, push, link} from 'svelte-spa-router'
 
-    import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen, FaList, FaCopy, FaFileDownload,
+    import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen, FaList, FaRegShareSquare, FaFileDownload,
         FaImage, FaTable, FaPaperclip, FaBold, FaItalic, FaUnderline, FaStrikethrough, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle,
-        FaInfo, FaListUl, FaLink
+        FaInfo, FaListUl, FaLink, FaRegFolder, FaRegCalendar, FaRegFile
     } from 'svelte-icons/fa/'
 
 
     import AttachedFile from './attached.file.svelte'
     import BasketPreview from './basket.preview.svelte'
-    import {fetchComposedClipboard4Editor} from './basket.utils'
+    import {fetchComposedClipboard4Editor, fetchComposedClipboard4Note, transformClipboardToJSONReferences} from './basket.utils'
 
     let noteRef = ''
     let note = null;
@@ -122,6 +121,33 @@
                                             Id: 12,
                                             Association: 'ModifiedBy',
                                             Expressions:['$ref', 'Name']
+                                        },
+
+                                        {
+                                            Id: 13,
+                                            Association: 'InFolders/Folder',
+                                            Expressions:['$ref', 'Title', 'href']
+                                        },
+                                        {
+                                            Id: 14,
+                                            Association: 'InTasks/Task',
+                                            Expressions:['$ref', 'Title', 'href']
+                                        },
+                                        {
+                                            Id: 15,
+                                            Association: 'InNotes/InNote',
+                                            Expressions:['$ref', 'Title', 'href']
+                                        },
+
+                                        {
+                                            Id: 16,
+                                            Association: 'Notes',
+                                            Expressions:['$ref', 'Title', 'href']
+                                        },
+                                        {
+                                            Id: 17,
+                                            Association: 'Files',
+                                            Expressions:['$ref', 'Title', 'href']
                                         }
                                     ]
                                 }
@@ -293,11 +319,41 @@
                             tbr: 'A'
                         },
                         {
-                            caption: '_; Copy; Copiar; Kopiuj',
-                            icon: FaCopy,   // MdLibraryAdd
-                            action: (f) => copyTaskToBasket(),
+                            caption: '_; Send to...; Enviar a...; Wyślij do ...',
+                            icon: FaRegShareSquare,   // MdLibraryAdd
+                            menu: [
+                                    {
+                                        caption: '_; Copy; Copiar; Kopiuj',
+                                        action: (f) => copyTaskToBasket(),
+                                    },
+                                    {
+                                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
+                                        disabled: true
+                                    }
+                                ], 
                             fab: 'M30',
                             tbr: 'A'
+                        },
+                        {
+                            caption: '_; Insert; Insertar; Wstaw',
+                            menu: [
+                                {
+                                    caption: '_; Paste; Pegar; Wklej',
+                                    action: pasteRecentClipboardElement4Note
+                                },
+                                {
+                                    caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
+                                    action: runPasteBasket4Note
+                                },
+                                {
+                                    caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
+                                    disabled: true
+                                },
+                                {
+                                    caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
+                                    disabled: true
+                                }
+                            ]
                         },
                         {
                             separator: true
@@ -341,6 +397,32 @@
             }
         }
         return pinOperation;
+    }
+
+    async function runPasteBasket4Note(btt, aroundRect)
+    {
+        const clipboardElements = await fetchComposedClipboard4Note()
+
+        showFloatingToolbar(aroundRect, BasketPreview, 
+            {
+                destinationContainer: noteRef,
+                onRefreshView: async (f) => await reloadData(),
+                clipboardElements: clipboardElements
+            }
+        )
+    }
+
+    async function pasteRecentClipboardElement4Note(btt, aroundRect) 
+    {
+        const clipboardElements = await fetchComposedClipboard4Note()
+        if(clipboardElements && clipboardElements.length > 0)
+        {
+            const references = transformClipboardToJSONReferences([clipboardElements[0]])
+            const res = await reef.post(`${noteRef}/AttachClipboard`, { references: references }, onErrorShowAlert)
+            if(res)
+                await reloadData();
+            
+        }
     }
 
     async function toggleNotePinned(note)
@@ -528,13 +610,43 @@
                         //    tbr: 'A'
                         },
                         {
-                            caption: '_; Copy; Copiar; Kopiuj',
-                            icon: FaCopy,   // MdLibraryAdd
-                            action: (f) => copyTaskToBasket(),
+                            caption: '_; Send to...; Enviar a...; Wyślij do ...',
+                            icon: FaRegShareSquare,
+                            menu: [
+                                    {
+                                        caption: '_; Copy; Copiar; Kopiuj',
+                                        action: (f) => copyTaskToBasket(),
+                                    },
+                                    {
+                                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
+                                        disabled: true
+                                    }
+                                ], 
                         //   fab: 'M30',
                         //    tbr: 'A'
 
-                        }
+                        },
+                        {
+                            caption: '_; Insert; Insertar; Wstaw',
+                            menu: [
+                                {
+                                    caption: '_; Paste; Pegar; Wklej',
+                                    action: pasteRecentClipboardElement4Note
+                                },
+                                {
+                                    caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
+                                    action: runPasteBasket4Note
+                                },
+                                {
+                                    caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
+                                    disabled: true
+                                },
+                                {
+                                    caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
+                                    disabled: true
+                                }
+                            ]
+                        },
                     ]
                 }
             ]
@@ -553,99 +665,146 @@
     ]
     const extraInsertPalletteCommands = [
         {
-            caption: '_; Insert; Insertar; Wstaw',
             icon: FaLink,
-            action: () => insertEditorLink()
+            caption: '_; Insert; Insertar; Wstaw',
+            action: () => {
+                const operations = [
+                    {
+                        caption: '_; Paste; Pegar; Wklej',
+                        action: pasteRecentClipboardElement4Editor
+                    },
+                    {
+                        caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
+                        action: runPasteBasket4Editor
+                    },
+                    {
+                        caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
+                        disabled: true
+                    },
+                    {
+                        caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
+                        disabled: true
+                    }
+                ]
+
+                const selection = window.getSelection();
+                const range = selection.getRangeAt(0);
+                const aroundRect = range.getBoundingClientRect();
+
+                showMenu(aroundRect, operations, SHOW_MENU_BELOW)
+            }
         }
     ]
 
-    async function insertEditorLink()
+    async function runPasteBasket4Editor(btt, aroundRect)
     {
-        const makeLinkToElement = (clipboard, elements) => {
-            if(elements && Array.isArray(elements) && elements.length > 0)
-            {
-                elements.forEach((el) => 
-                {
-                    let href;
-                    if(el.href.endsWith('/blob'))
-                    {
-                        href = el.href + "?name=" + encodeURIComponent(el.Title)
-                    }
-                    else if(el.href.startsWith('/'))
-                    {
-                        href = /*window.location.origin +*/ window.location.pathname + '#' + el.href
-                    }
-                    else
-                        href = el.href
-
-                    description.addLink(el.Title, href)
-                })   
-            }
-        }
-
-        const selection = window.getSelection();
-        const range = selection.getRangeAt(0);
-        const aroundRect = range.getBoundingClientRect();
-
         const clipboardElements = await fetchComposedClipboard4Editor()
-        
+
         showFloatingToolbar(aroundRect, BasketPreview, 
             {
-                onAttach: (clipboard, elements) => makeLinkToElement(clipboard, elements),
-                onAttachAndClear: (clipboard, elements) => makeLinkToElement(clipboard, elements),
+                onAttach: (clipboard, elements) => makeLinkToElement(elements),
+                //onAttachAndClear: (clipboard, elements) => makeLinkToElement(elements),
                 clipboardElements: clipboardElements
             }
         )
     }
 
+    async function pasteRecentClipboardElement4Editor(btt, aroundRect) 
+    {
+        const clipboardElements = await fetchComposedClipboard4Editor()
+        if(clipboardElements && clipboardElements.length > 0)
+        {
+            const references = transformClipboardToJSONReferences([clipboardElements[0]])
+            makeLinkToElement(references)
+        }
+    }
+
+    function makeLinkToElement(elements)
+    {
+        if(elements && Array.isArray(elements) && elements.length > 0)
+        {
+            elements.forEach((el) => 
+            {
+                let href;
+                if(el.href.endsWith('/blob'))
+                {
+                    href = el.href + "?name=" + encodeURIComponent(el.Title)
+                }
+                else if(el.href.startsWith('/'))
+                {
+                    href = /*window.location.origin +*/ window.location.pathname + '#' + el.href
+                }
+                else
+                    href = el.href
+
+                description.addLink(el.Title, href)
+            })   
+        }
+    }
+
+    async function downloadFileFromHRef(href, title) 
+    {
+        let ref;
+        let name;
+        const queryIdx = href.indexOf('?')
+        if(queryIdx > 0)
+        {
+            ref = href.substring(0, queryIdx)
+            const query = href.substring(queryIdx)
+            const params = new URLSearchParams(query);
+            if(params.has("name"))
+                name = params.get("name")
+            else if(title)
+                name = title
+            else
+                name = 'file_' + randomString(8)
+        }
+        else
+        {
+            ref = href;
+            if(title)
+                name = title
+            else
+                name = 'file_' + randomString(8)
+        }
+
+        const res = await reef.fetch(`json/anyv/${href}`, onErrorShowAlert);
+        if(res.ok)
+        {
+            const blob = await res.blob()
+            const blobUrl = URL.createObjectURL(blob);
+    
+            const link = document.createElement("a"); // Or maybe get it from the current document
+            link.href = blobUrl;
+            link.download = name;
+
+            //document.body.appendChild(link); // Or append it whereever you want
+            link.click() //can add an id to be specific if multiple anchor tag, and use #id
+            
+            
+            URL.revokeObjectURL(blobUrl)
+        }
+        else
+        {
+            const err = await res.text()
+            console.error(err)
+            onErrorShowAlert(err)
+        }
+    }
+
     async function editorLinkClicked(href, target)
     {
         if(href.includes('/blob'))
-        {
-            let ref;
-            let name;
-            const queryIdx = href.indexOf('?')
-            if(queryIdx > 0)
-            {
-                ref = href.substring(0, queryIdx)
-                const query = href.substring(queryIdx)
-                const params = new URLSearchParams(query);
-                if(params.has("name"))
-                    name = params.get("name")
-                else
-                    name = 'file_' + randomString(8)
-            }
-            else
-            {
-                ref = href;
-                name = 'file_' + randomString(8)
-            }
-
-            const res = await reef.fetch(`json/anyv/${href}`, onErrorShowAlert);
-            if(res.ok)
-            {
-                const blob = await res.blob()
-                const blobUrl = URL.createObjectURL(blob);
-        
-                const link = document.createElement("a"); // Or maybe get it from the current document
-                link.href = blobUrl;
-                link.download = name;
-
-                //document.body.appendChild(link); // Or append it whereever you want
-                link.click() //can add an id to be specific if multiple anchor tag, and use #id
-                
-                
-                URL.revokeObjectURL(blobUrl)
-            }
-            else
-            {
-                const err = await res.text()
-                console.error(err)
-                onErrorShowAlert(err)
-            }
-        }
+            await downloadFileFromHRef(href)
         else
             window.open(href, target);
+    }
+
+    async function downloadAttachedFile(e, href, title)
+    {
+        e.preventDefault()
+        e.stopPropagation()
+        await downloadFileFromHRef(href, title);
     }
 
     const extraInsertPalletteCommandsExt = [
@@ -664,9 +823,18 @@
     const extraBackPaletteCommands = []
     const extraBackPaletteCommandsExt = [
         {
-            caption: '_; Copy; Copiar; Kopiuj',
-            icon: FaCopy,   // MdLibraryAdd
-            action: () => copyTaskToBasket(),
+            caption: '_; Send to...; Enviar a...; Wyślij do ...',
+            icon: FaRegShareSquare,   // MdLibraryAdd
+            menu: [
+                    {
+                        caption: '_; Copy; Copiar; Kopiuj',
+                        action: () => copyTaskToBasket(),
+                    },
+                    {
+                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
+                        disabled: true
+                    }
+                ], 
         }
     ]
 
@@ -773,7 +941,61 @@
         attInput?.click();
     }
 
-    async function onAttachementSelected()
+    async function onAttachementSelected() 
+    {
+        const [file] = attInput.files;
+        if(file)
+        {
+            pendingUploading = true
+
+            
+            let fileLink = await reef.post(`${noteRef}/CreateFile`,
+                                    { 
+                                        title: file.name,
+                                        mimeType: file.type,
+                                        size: file.size,
+                                        order: 0
+                                    }, onErrorShowAlert)
+            if(!fileLink)
+                return null;
+
+            fileLink = fileLink.NoteFile
+            const res = await reef.post(`UploadedFile/${fileLink.FileId}/Key/blob?name=${file.name}&size=${file.size}`, {}, onErrorShowAlert)
+
+            if(res && res.key && res.uploadUrl)
+            {
+                const uploadUrl = res.uploadUrl
+                try
+                {
+                    //const res = await new Promise(r => setTimeout(r, 10000));
+                    const res = await fetch(uploadUrl, {
+                                                method: 'PUT',
+                                                headers: new Headers({
+                                                    'Content-Type': file.type
+                                                }),
+                                                body: file})
+                    if(!res.ok)
+                    {
+                        const err = await res.text()
+                        console.error(err)
+                        onErrorShowAlert(err)
+                    }
+
+                }
+                catch(err)
+                {
+                    console.error(err)
+                    onErrorShowAlert(err)
+                }
+            }
+
+            pendingUploading = false;
+
+            await reloadData();
+        }
+    }
+
+    /*async function onAttachementSelected()
     {
         const [file] = attInput.files;
         if(file)
@@ -798,12 +1020,7 @@
                     if(res.ok)
                     {
                         // todo: editor path imgPath
-                        /*const dataPath = `${taskRef}/Images/blob?key=${newKey}`
-
-                        //console.log('upload success for ', dataPath)
-                        if(imgEditorActionAfterSuccess)
-                            imgEditorActionAfterSuccess(dataPath)
-                        */
+                        
                     }
                     else
                     {
@@ -825,6 +1042,7 @@
             await reloadData();
         }
     }
+    */
 
     function isContentEmpty()
     {
@@ -961,11 +1179,11 @@
 
 
             {#if attachedFiles && attachedFiles.length > 0}
-            <p>
+            <!--p>
                 {#each attachedFiles as fileInfo (fileInfo.name)}
                     <AttachedFile self={note} a='AttachedFiles' {fileInfo}/>
                 {/each}
-            </p>
+            </p-->
             {/if}
 
 
@@ -996,7 +1214,83 @@
                     </div>
                 {/if}
             </div>
-            <!--{/if}-->
+            
+
+            <hr/>
+
+            {#if (note.Notes && note.Notes.length > 0) || (note.Files && note.Files.length > 0)}
+                <h4>_;Attachments; Anexos; Załączniki</h4>
+                <p>
+                    {#if note.Notes && note.Notes.length > 0}
+                        {#each note.Notes as note}
+                            <a  class="mr-2 underline whitespace-nowrap" href={'#'+note.href}>
+                                <span class="inline-block w-4 h-4 relative top-0.5">
+                                    <FaRegFile/>
+                                </span>
+                                <span class="">
+                                    {note.Title}
+                                </span>
+                            </a>        
+                        {/each}
+                    {/if}
+
+                    {#if note.Files && note.Files.length > 0}
+                        {#each note.Files as file}
+                            <a  class="mr-2 whitespace-nowrap" on:click={(e) => downloadAttachedFile(e, file.href, file.Title)} href={file.href}>
+                                <span class="inline-block w-4 h-4 relative top-0.5">
+                                    <FaFileDownload/>
+                                </span>
+                                <span>
+                                    {file.Title}
+                                </span>
+                            </a>        
+                        {/each}
+                    {/if}
+                </p>    
+            {/if}
+
+            <h4>_; Attached to; Adjunto a; Przyłączony do</h4>
+            <p>
+                {#if note['InFolders/Folder'] && note['InFolders/Folder'].length > 0}
+                    {#each note['InFolders/Folder'] as inFolder}
+                        <a  class="mr-2 whitespace-nowrap" href={'#'+inFolder.href}>
+                            <span class="inline-block w-4 h-4 relative top-0.5">
+                                <FaRegFolder/>
+                            </span>
+                            <span>
+                                {ext(inFolder.Title)}
+                            </span>
+                        </a>
+                    {/each}
+                {/if}
+
+                {#if note['InTasks/Task'] && note['InTasks/Task'].length > 0}
+                    {#each note['InTasks/Task'] as inTask}
+                        <a  class="mr-2 whitespace-nowrap" href={'#'+inTask.href}>
+                            <span class="inline-block w-4 h-4 relative top-0.5">
+                                <FaRegCalendar/>
+                            </span>
+                            <span>
+                                {inTask.Title}
+                            </span>
+                        </a>
+                    {/each}
+                {/if}
+
+                {#if note['InNotes/InNote'] && note['InNotes/InNote'].length > 0}
+                    {#each note['InNotes/InNote'] as inNote}
+                        <a  class="mr-2 whitespace-nowrap" href={'#'+inNote.href}>
+                            <span class="inline-block w-4 h-4 relative top-0.5">
+                                <FaRegFile/>
+                            </span>
+                            <span>
+                                {inNote.Title}
+                            </span>
+                        </a>
+                    {/each}
+                {/if}
+            </p>
+
         </article>
 
 

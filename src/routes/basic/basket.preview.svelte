@@ -10,7 +10,7 @@
     import {FaRegFolder, FaRegFile, FaRegCalendarCheck, FaRegCalendar, FaFileDownload, FaList, FaRegComments, FaRegClipboard, FaClipboardList} from 'svelte-icons/fa'
 	import { afterUpdate, onMount } from "svelte";
 	import { push } from "svelte-spa-router";
-	import { recentClipboardElements } from "./basket.utils";
+	import { recentClipboardElements, transformClipboardToJSONReferences } from "./basket.utils";
 
     export let destinationContainer = ''
     export let onHide = undefined
@@ -99,42 +99,9 @@
         if(onHide)
             onHide();
 
-            console.log('selectedElements',selectedElements)
-
-        let references = []
         const selectedReferences = selectedElements.sort((a,b) => a.Order-b.Order).filter((e) => (e.ElementInfo & EIF_NOT_ALLOWED) == 0 )
-        selectedReferences.forEach(el => {
-            if(el.ElementInfo & EIF_BEGIN_GROUP)
-            {
-                if(el.groupItems && Array.isArray(el.groupItems) && el.groupItems.length > 0)
-                {
-                    el.groupItems.forEach((gi) => {
-                        references.push({
-                                id:         gi.ElementId,
-                                typeName:   gi.ElementType,
-                                navPath:    gi.ElementNav,
-                                Title:      gi.Title,
-                                Summary:    gi.Summary,
-                                icon:       gi.icon,
-                                href:       gi.href, 
-                                flags:      gi.ElementInfo
-                            })   
-                    })
-                }
-            }
-            else
-                references.push({
-                    id:         el.ElementId,
-                    typeName:   el.ElementType,
-                    navPath:    el.ElementNav,
-                    Title:      el.Title,
-                    Summary:    el.Summary,
-                    icon:       el.icon,
-                    href:       el.href, 
-                    flags:      el.ElementInfo
-                })
-        })
-
+        const references = transformClipboardToJSONReferences(selectedReferences)
+        
         if(!destinationContainer)
         {
             if(onAttach)
@@ -221,6 +188,7 @@
             return FaRegCalendar;
 
         case 'UploadedFile':
+        case 'File':
             return FaFileDownload;
 
         case 'TaskList':
@@ -247,7 +215,7 @@
  <!--svelte-ignore a11y-no-noninteractive-element-interactions -->
 <menu class="" bind:this={rootElement} on:click={clearSelection}>
     {#if basketEntriesNo >= 0}
-        <div class="w-64 sm:w-80 h-64 sm:h-80 sm:max-w-sm overflow-y-auto overflow-x-clip
+        <div class="w-full sm:w-80 h-64 sm:h-80 sm:max-w-sm overflow-y-auto overflow-x-clip
                 text-stone-600 dark:text-stone-400">
 
             {#if basketEntriesNo==0}

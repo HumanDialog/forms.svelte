@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {contextToolbarOperations, pageToolbarOperations, leftHandedFAB, toolsActionsOperations, fabCollapsed, bottom_bar_visible_store, main_sidebar_visible_store} from '../stores.js'
+    import {contextToolbarOperations, pageToolbarOperations, leftHandedFAB, toolsActionsOperations, fabCollapsed, bottom_bar_visible_store, main_sidebar_visible_store, fabHiddenDueToPopup} from '../stores.js'
     import { showFloatingToolbar, showMenu, showGridMenu } from './menu.js';
     import {FaChevronUp, FaChevronDown, FaChevronLeft, FaChevronRight, FaCircle, FaEllipsisV, FaRegDotCircle, FaDotCircle} from 'svelte-icons/fa/'
     import {isDeviceSmallerThan} from '../utils.js'
@@ -15,7 +15,8 @@
                                         $fabCollapsed,
                                         $bottom_bar_visible_store,
                                         $main_sidebar_visible_store,
-                                        $leftHandedFAB);
+                                        $leftHandedFAB,
+                                        $fabHiddenDueToPopup);
 
     let operations :object[] = [];
     let mainOperation :object|null = null;
@@ -29,6 +30,12 @@
     //..
     async function setupCurrentContextOperations(...args)
     {
+        if($fabHiddenDueToPopup)
+        {
+            operations = []
+            return;        
+        }
+
         await tick(); // to force mainContent re-render first. We need its bounding rect
 
         let opVer = 0

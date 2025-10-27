@@ -168,6 +168,8 @@ showFABAlways.subscribe( (value) => { localStorage.showFABAlways = (value ? 'tru
 export const leftHandedFAB = writable( (localStorage.leftHandedFAB && localStorage.leftHandedFAB == 'true') || false )
 leftHandedFAB.subscribe( (value) => { localStorage.leftHandedFAB = (value ? 'true' : '') } );
 
+export const fabHiddenDueToPopup = writable(false)
+
 export function restore_defults()
 {
     

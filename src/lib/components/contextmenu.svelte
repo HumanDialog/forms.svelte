@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { afterUpdate, tick} from 'svelte';
     import Icon from './icon.svelte'
-    import {contextItemsStore, pushToolsActionsOperations, popToolsActionsOperations} from '../stores'
+    import {contextItemsStore, pushToolsActionsOperations, popToolsActionsOperations, fabHiddenDueToPopup} from '../stores'
     import {isDeviceSmallerThan, isOnScreenKeyboardVisible} from '../utils'
     import {hideWholeContextMenu, showMenu, showFloatingToolbar, showGridMenu,
         SHOW_MENU_BELOW, SHOW_MENU_ABOVE, SHOW_MENU_RIGHT, SHOW_MENU_LEFT } from './menu'
@@ -289,9 +289,10 @@
         }
 
 
-        if(false && isDeviceSmallerThan("sm"))
+        if(isDeviceSmallerThan("sm"))
         {
-            pushToolsActionsOperations ({
+            $fabHiddenDueToPopup = true
+            /*pushToolsActionsOperations ({
                 opver: 1,
                 operations: [
                     {
@@ -306,7 +307,7 @@
                         ]
                     }
                 ]
-            })
+            })*/
         }
 
         await tick();       // render menu and fix position after rendering
@@ -332,8 +333,11 @@
 
     export function hide()
     {
-        if(false && visible)
-            popToolsActionsOperations()
+        if(visible)
+        {
+            $fabHiddenDueToPopup = false
+            //popToolsActionsOperations()
+        }
 
         visible = false;
         css_position = calculatePosition(x, y, false, false);
@@ -459,7 +463,7 @@
         */
         ////
 
-        let owner = e.target;
+        let owner = e?.target;
         while(owner && owner.tagName != 'BUTTON')
             owner = owner.parentElement
 
@@ -559,25 +563,7 @@
             if(submenus[focused_index])
             {
                 let rect :DOMRect = element.getBoundingClientRect();
-                let container_rect = new DOMRect(0, 0, window.innerWidth, window.innerHeight);
-
-                let _x = rect.right;
-                let _y = rect.top;
-
-                let submenu_width = min_width_px;
-                let rendered_rect = submenus[focused_index].getRenderedRect();
-                if(rendered_rect && rendered_rect.width > 0)
-                    submenu_width = rendered_rect.width;
-
-
-                if(_x + submenu_width > container_rect.right)
-                {
-                    // choose left or right side depending on which space is larger
-                    if(rect.left - container_rect.left > container_rect.right - rect.right)
-                        _x = rect.left - submenu_width;
-                }
-
-                submenus[focused_index].show(new DOMPoint(_x, _y), operations[focused_index].menu)
+                submenus[focused_index].show(rect, operations[focused_index].menu, SHOW_MENU_RIGHT)
             }
 
             for(let i=0; i<submenus.length; i++)
@@ -625,6 +611,22 @@
         }
     }
 
+    function isOperationActivated(operation)
+    {
+        if(operation.activeFunc)
+            return operation.activeFunc();
+        else
+            return operation.active ?? false;
+    }
+
+    function isOperationDisabled(operation)
+    {
+        if(operation.disabledFunc)
+            return operation.disabledFunc();
+        else
+            return operation.disabled ?? false;
+    }
+
 </script>
 
 
@@ -664,7 +666,7 @@
             {@const isBottom = index == operations.length-1}
             {@const isFocused = index == focused_index}
             {@const clipFocusedBorder = isFocused ? (isTop ? 'rounded-t-lg' : (isBottom ? 'rounded-b-lg' : '')) : ''}
-            {@const active = calculateBackground(isFocused, false)}
+            {@const active = calculateBackground(isFocused || isOperationActivated(operation), false)}
             {@const has_submenu = operation.menu !== undefined && operation.menu.length > 0}
 
             <button class="block  w-full pr-4 text-left flex flex-row cursor-context-menu {active} focus:outline-none items-center"
@@ -674,8 +676,8 @@
                     on:mouseenter = {(e) => {on_mouse_move(index)}}
                     on:keydown|stopPropagation={(e) => on_keydown(e, operation, index)}
                     on:mousedown={mousedown}
-                    disabled={operation.disabled}
-                    class:opacity-60={operation.disabled}>
+                    disabled={isOperationDisabled(operation)}
+                    class:opacity-60={isOperationDisabled(operation)}>
 
                 <div class="flex  justify-center space-x-10 px-4 py-2 ml-12 sm:ml-0" >
                     {#if operation.icon}

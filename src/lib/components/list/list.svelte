@@ -25,7 +25,7 @@
 
     export let toolbarOperations = undefined;
     export let contextMenu = undefined;
-    export let multiselecOperations = (items) => []
+    export let multiselectOperations = (items) => []
 
     export let key: string = '';
     export let selectionKey = 'props'
@@ -333,17 +333,43 @@
     export function toggleMultiselection()
     {
         multiselect = !multiselect
-        
-        let lastSelectedItem = getActive(selectionKey) 
-        if(lastSelectedItem)
+
+        if(multiselect)
         {
-            let ops = []
-            if(toolbarOperations)
-                ops = toolbarOperations(lastSelectedItem)
-            activateItem(selectionKey, lastSelectedItem, ops)
+            let lastSelectedItem = getActive(selectionKey) 
+            if(lastSelectedItem)
+            {
+                let ops = []
+                if(multiselectOperations)
+                    ops = multiselectOperations
+
+                activateItem(selectionKey, lastSelectedItem, ops)
+            }
+            else
+            {
+                clearActiveItem(selectionKey)
+            }
         }
         else
-            clearActiveItem(selectionKey)
+        {
+            let lastSelectedItem = getActive(selectionKey) 
+            if(lastSelectedItem)
+            {
+                let ops = []
+                if(toolbarOperations)
+                    ops = toolbarOperations(lastSelectedItem)
+                activateItem(selectionKey, lastSelectedItem, ops)
+            }
+            else
+                clearActiveItem(selectionKey)
+        }
+        
+        
+    }
+
+    export function isMultiselectionEnabled()
+    {
+        return multiselect
     }
 
     function reorderElements(items: object[], from :object | null = null)
@@ -470,16 +496,18 @@
 
     $: multiselectionMode = calcMultiSelectionMode($contextItemsStore)
 
-    function toggleSelectAll(e)
+    export function toggleSelectAll(e)
     {
         if(multiselectionMode == UNSELECT_ALL)
             clearActiveItem(selectionKey)
         else
         {
-            const operations = multiselecOperations(items);
+            const operations = multiselectOperations(items);
             items?.forEach(itm => addActiveItem(selectionKey, itm, operations))        
         }
-        e.stopPropagation()
+        
+        if(e)
+            e.stopPropagation()
     }
 
 </script>
@@ -496,7 +524,7 @@
 
 
     {#if items && items.length > 0 }
-        {#if multiselect}
+        {#if false && multiselect}
             {@const icon = (multiselectionMode == SELECT_ALL) ? FaRegSquare : FaRegCheckSquare}
             <Icon component={icon} class="h-5 w-5 sm:h-4 sm:w-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 mr-3"
                     on:click={toggleSelectAll}/>
@@ -509,7 +537,7 @@
                             {contextMenu}
                             {key}
                             {multiselect}
-                            {multiselecOperations}
+                            {multiselectOperations}
                             {selectionKey}
                             bind:this={rows[i]}
                             >

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {data_tick_store, contextItemsStore, contextTypesStore, pushToolsActionsOperations, popToolsActionsOperations} from '../../stores.js' 
+    import {data_tick_store, contextItemsStore, contextTypesStore, pushToolsActionsOperations, popToolsActionsOperations, fabHiddenDueToPopup} from '../../stores.js' 
     import {informModification, pushChanges} from '../../updates.js'
     import {isDeviceSmallerThan, parseWidthDirective,shouldBeComapact} from '../../utils.js'
     import {afterUpdate, getContext, onMount, setContext} from 'svelte';
@@ -367,9 +367,10 @@
                                         subtree: true } );
         }
 
-        if(false && isDeviceSmallerThan("sm"))
+        if(isDeviceSmallerThan("sm"))
         {    
-            pushToolsActionsOperations({
+            $fabHiddenDueToPopup = true
+            /*pushToolsActionsOperations({
                 opver: 1,
                 operations: [
                     {
@@ -384,7 +385,7 @@
                         ]
                     }
                 ]
-            })
+            })*/
         }
         
         //filtered_source = definition.source.map( e => e);
@@ -433,6 +434,7 @@
 
         is_dropdown_open = false;
         //popToolsActionsOperations();
+        $fabHiddenDueToPopup = false
         dropdown_position = 'display: none;'
 
         combo_text = get_combo_text();
