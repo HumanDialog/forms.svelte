@@ -1183,7 +1183,7 @@
     <section class="w-full flex justify-center">
         <article class="w-full prose prose-base prose-zinc dark:prose-invert mx-2  mb-64">
             {#if note.GetCanonicalPath}
-                <Breadcrumb class="not-prose mt-1" path={note.GetCanonicalPath} collapseLonger/>
+                <Breadcrumb class="not-prose mt-1" path={note.GetCanonicalPath}/>
             {/if}
             <section class="w-full flex flex-row justify-between">
                     <p class="">

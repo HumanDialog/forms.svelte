@@ -17,6 +17,7 @@
                 Breadcrumb,
             i18n} from '$lib'
     import {FaCheck, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaArchive, FaUndo} from 'svelte-icons/fa'
+    import {setBrowserRecentElement} from './basket.utils'
 
     export let params = {}
 
@@ -91,7 +92,7 @@
         else
             user = null
 
-        canconicalPath = [
+        /*canconicalPath = [
             {
                 Name: user.Name,
                 href: user.href
@@ -99,7 +100,7 @@
             {
                 Name: title
             }
-        ]
+        ]*/
     }
 
     async function reloadTasks(selectRecommendation)
@@ -228,6 +229,8 @@
             return null;
 
         let newTask = res.Task;
+        setBrowserRecentElement(newTask.Id, 'Task')
+
         await reloadTasks(newTask.Id)
     }
 
@@ -368,7 +371,7 @@
             <section class="w-full place-self-center max-w-3xl">
 
             {#if canconicalPath}
-                <Breadcrumb class="mt-1 mb-5" path={canconicalPath} collapseLonger/>
+                <Breadcrumb class="mt-1 mb-5" path={canconicalPath}/>
             {/if}
 
 

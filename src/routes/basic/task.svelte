@@ -41,7 +41,7 @@
     } from 'svelte-icons/fa/'
     import AttachedFile from './attached.file.svelte'
     import BasketPreview from './basket.preview.svelte'
-    import {fetchComposedClipboard4Editor, fetchComposedClipboard4Task, transformClipboardToJSONReferences} from './basket.utils'
+    import {fetchComposedClipboard4Editor, fetchComposedClipboard4Task, transformClipboardToJSONReferences, pushBrowserRecentElements, setBrowserRecentElement, getBrowserRecentElements} from './basket.utils'
 	
     let taskRef = ''
     let task = null;
@@ -97,6 +97,9 @@
         allActors = res.User;
 
         await reloadData();
+
+        if(task)
+            pushBrowserRecentElements( task.Id, task.$type, task.$ref, task.Title, task.Summary, "Task", task.href)
     }
 
     async function reloadData()
@@ -114,7 +117,7 @@
                                 {
                                     Id: 1,
                                     Association: '',
-                                    Expressions:['Id', 'Index', 'Title','Summary', 'Description', 'DueDate', 'Tags', 'State', 'AttachedFiles', 'GetCanonicalPath', '$ref', '$type', '$acc'],
+                                    Expressions:['Id', 'Index', 'Title','Summary', 'Description', 'DueDate', 'Tags', 'State', 'AttachedFiles', 'GetCanonicalPath', '$ref', '$type', '$acc', 'href'],
                                     SubTree:[
                                         {
                                             Id: 10,
@@ -368,7 +371,7 @@
                                 },
                                 {
                                     caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
-                                    disabled: true
+                                    action: runPasteBrowserRecent4Task
                                 },
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
@@ -423,6 +426,17 @@
                 await reloadData();
             
         }
+    }
+
+    async function runPasteBrowserRecent4Task(btt, aroundRect)
+    {
+        const clipboardElements = getBrowserRecentElements()
+        showFloatingToolbar(aroundRect, BasketPreview, {
+            destinationContainer: taskRef,
+            onRefreshView: async (f) => await reloadData(),
+            clipboardElements: clipboardElements,
+            browserBasedClipboard: true
+        })
     }
 
     let summary;
@@ -618,7 +632,7 @@
                                 },
                                 {
                                     caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
-                                    disabled: true
+                                    action: runPasteBrowserRecent4Task
                                 },
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
@@ -827,7 +841,7 @@
                                 },
                                 {
                                     caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
-                                    disabled: true
+                                    action: runPasteBrowserRecent4Task
                                 },
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
@@ -869,7 +883,7 @@
                     },
                     {
                         caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
-                        disabled: true
+                        action: runPasteBrowserRecent4Editor
                     },
                     {
                         caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
@@ -909,6 +923,16 @@
             const references = transformClipboardToJSONReferences([clipboardElements[0]])
             makeLinkToElement(references)
         }
+    }
+
+    async function runPasteBrowserRecent4Editor(btt, aroundRect)
+    {
+        const clipboardElements = getBrowserRecentElements()
+        showFloatingToolbar(aroundRect, BasketPreview, {
+            onAttach: (clipboard, elements) => makeLinkToElement(elements),
+            clipboardElements: clipboardElements,
+            browserBasedClipboard: true
+        })
     }
 
     function makeLinkToElement(elements)
@@ -1160,7 +1184,11 @@
                                                     'Content-Type': file.type
                                                 }),
                                                 body: file})
-                    if(!res.ok)
+                    if(res.ok)
+                    {
+                        setBrowserRecentElement(fileLink.FileId, 'UploadedFile')
+                    }
+                    else
                     {
                         const err = await res.text()
                         console.error(err)
@@ -1180,6 +1208,8 @@
             await reloadData();
         }
     }
+
+  
 
     /*async function onAttachementSelected()
     {
@@ -1259,11 +1289,12 @@
             toolbarOperations={getPageOperations()}
             clearsContext=''
             title={task.Title}>
-    <section class="w-full flex justify-center">
+    <section class="w-full flex flex-col items-center">
+        {#if task.GetCanonicalPath}
+            <Breadcrumb class="mt-1 sm:min-w-[65ch]" path={task.GetCanonicalPath}/>
+        {/if}
+
         <article class="w-full prose prose-base prose-zinc dark:prose-invert mx-2">
-            {#if task.GetCanonicalPath}
-                <Breadcrumb class="not-prose mt-1" path={task.GetCanonicalPath} collapseLonger/>
-            {/if}
             <section class="w-full flex flex-row justify-between">
                     <p class="">
                         {task.Index}

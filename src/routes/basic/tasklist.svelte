@@ -21,7 +21,7 @@
     import {location, pop, push, querystring, link} from 'svelte-spa-router'
     import {cache} from './cache.js'
     import BasketPreview from './basket.preview.svelte'
-	import { fetchComposedClipboard4TaskList, transformClipboardToJSONReferences } from './basket.utils.js';
+	import { fetchComposedClipboard4TaskList, transformClipboardToJSONReferences, setBrowserRecentElement, getBrowserRecentElements } from './basket.utils.js';
 
     export let params = {}
 
@@ -269,6 +269,7 @@
             return null;
 
         let newTask = res.Task;
+        setBrowserRecentElement(newTask.Id, 'Task')
         await reloadTasks(newTask.Id)
     }
 
@@ -309,7 +310,7 @@
                                 },
                                 {
                                     caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
-                                    disabled: true
+                                    action: runPasteBrowserRecent
                                 },
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
@@ -355,6 +356,17 @@
             destinationContainer: listPath,
             onRefreshView: (f) => reloadTasks(listComponent.KEEP_SELECTION),
             clipboardElements: clipboardElements
+        })
+    }
+
+    async function runPasteBrowserRecent(btt, aroundRect)
+    {
+        const clipboardElements = getBrowserRecentElements()
+        showFloatingToolbar(aroundRect, BasketPreview, {
+            destinationContainer: listPath,
+            onRefreshView: (f) => reloadTasks(listComponent.KEEP_SELECTION),
+            clipboardElements: clipboardElements,
+            browserBasedClipboard: true
         })
     }
 
@@ -613,7 +625,7 @@
             <section class="w-full place-self-center max-w-3xl">
 
                 {#if currentList.GetCanonicalPath}
-                    <Breadcrumb class="mt-1 mb-5" path={currentList.GetCanonicalPath} collapseLonger/>
+                    <Breadcrumb class="mt-1 mb-5" path={currentList.GetCanonicalPath}/>
                 {/if}
             
         <List   self={currentList}

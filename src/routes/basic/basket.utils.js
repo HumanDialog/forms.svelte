@@ -1,5 +1,6 @@
 import {reef} from '@humandialog/auth.svelte'
-import { onErrorShowAlert } from '$lib';
+import { onErrorShowAlert} from '$lib';
+import {remove, insertAt, getLast, removeAt} from '$lib'
 
 export async function fetchClipboardElements()
 {
@@ -126,13 +127,20 @@ function collectElement(composedElements, element, allowedTypes)
     composedElements.push(element)
 }
 
-export function recentClipboardElements(selectedElements)
+export function recentClipboardElements(selectedElements, browserBasedClipboard)
 {
-    let refs = []
-    selectedElements.forEach((el) => refs.push(el.$ref))
-
-    reef.post('user/Clipboards/first/SetRecentElements', {refs: refs}, onErrorShowAlert)
+    if(!browserBasedClipboard)
+    {
+        let refs = []
+        selectedElements.forEach((el) => refs.push(el.$ref))
+        reef.post('user/Clipboards/first/SetRecentElements', {refs: refs}, onErrorShowAlert)
+    }
+    else
+    {
+        pushRecentBrowserElements(selectedElements)
+    }
 }
+
 
 export function transformClipboardToJSONReferences(selectedReferences)
 {
@@ -170,4 +178,85 @@ export function transformClipboardToJSONReferences(selectedReferences)
     })
 
     return references
+}
+
+
+export function getBrowserRecentElements()
+{
+    const recentElementsStore = localStorage.browserRecentElements
+    if(!recentElementsStore)
+        return []
+
+    const recentElements = JSON.parse(recentElementsStore)
+    return recentElements;
+} 
+
+
+
+export function pushBrowserRecentElements(elementId, elementType, elementNav, title, summary, icon, href, flags=0)
+{
+    let elements = getBrowserRecentElements()
+
+    let existing = elements.find((e) => e.ElementId == elementId && e.ElementType == elementType)
+    if(existing)
+    {
+        elements = remove(elements, existing)
+        elements = insertAt(elements, 0, existing)
+    }
+    else
+    {
+        const newElement = {
+            ElementId:      elementId,
+            ElementType:    elementType,
+            ElementNav:     elementNav,
+            Title:          title,
+            Summary:        summary,
+            icon:           icon,
+            href:           href,
+            ElementInfo:    flags,
+            $ref:           elementNav  // just for each loop 
+        }
+
+        if(elements.length >= 10)
+        {
+            const oldestElement = getLast(elements)
+            elements = remove(elements, oldestElement)
+        }
+
+        elements = insertAt(elements, 0, newElement)
+    }
+
+    const recentElementsStore = JSON.stringify(elements)
+    localStorage.setItem('browserRecentElements', recentElementsStore)
+    
+    return elements
+}
+
+function pushRecentBrowserElements(selectedElements)
+{
+    let elements = getBrowserRecentElements()
+    selectedElements.forEach((el) => {
+        const idx = elements.findIndex((f) => f.ElementId==el.ElementId && f.ElementType==el.ElementType)
+        if(idx > 0)
+        {
+            elements = removeAt(elements, idx)
+            elements = insertAt(elements, 0, el)
+        }
+
+    })
+
+    const recentElementsStore = JSON.stringify(elements)
+    localStorage.setItem('browserRecentElements', recentElementsStore)
+}
+
+export function setBrowserRecentElement(elementId, elementType)
+{
+    reef.get(`${elementType}/${elementId}?fields=Id,Title,Summary,href,$ref`, onErrorShowAlert).then( res => {
+        if(res)
+        {
+            const el = res[elementType]
+            if(el)
+                pushBrowserRecentElements( el.Id, elementType, el.$ref, el.Title, el.Summary, elementType, el.href)
+        }
+    })
 }

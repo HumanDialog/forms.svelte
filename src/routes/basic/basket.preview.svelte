@@ -20,6 +20,7 @@
     export let onAttachAndClear = undefined
 
     export let clipboardElements = []
+    export let browserBasedClipboard = false
 
     // gitlab mirror test
 
@@ -119,7 +120,7 @@
             }
         }
 
-        recentClipboardElements(selectedReferences)
+        recentClipboardElements(selectedReferences, browserBasedClipboard)
 
     }
 

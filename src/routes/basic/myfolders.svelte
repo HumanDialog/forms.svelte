@@ -70,7 +70,7 @@
         else
             user = null
 
-        canonicalPath = [
+        /*canonicalPath = [
             {
                 Name: user.Name,
                 href: user.href
@@ -79,7 +79,7 @@
                 Name: title,
                 href: '/myfolders'
             }
-        ]
+        ]*/
     }
 
     async function reloadFolders(selectRecommendation)

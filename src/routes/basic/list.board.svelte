@@ -36,7 +36,7 @@
     import MoveOperations from './list.board.move.svelte'
 	import { tick, onMount } from 'svelte';
     import BasketPreview from './basket.preview.svelte'
-    import {fetchComposedClipboard4TaskList, transformClipboardToJSONReferences} from './basket.utils'
+    import {fetchComposedClipboard4TaskList, transformClipboardToJSONReferences, setBrowserRecentElement, getBrowserRecentElements} from './basket.utils'
     import {cache} from './cache.js'
 
     export let params = {}
@@ -273,7 +273,7 @@
                                 },
                                 {
                                     caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
-                                    disabled: true
+                                    action: runPasteBrowserRecent
                                 },
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
@@ -426,8 +426,12 @@
             return null;
 
         let newTask = res.Task;
+        setBrowserRecentElement(newTask.Id, 'Task')
+
         await reload(newTask.Id)
 	}
+
+    
 
     let deleteModal;
     let taskToDelete;
@@ -516,7 +520,7 @@
                                 },
                                 {
                                     caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
-                                    disabled: true
+                                    action: runPasteBrowserRecent
                                 },
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
@@ -726,7 +730,7 @@
                                 },
                                 {
                                     caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
-                                    disabled: true
+                                    action: runPasteBrowserRecent
                                 },
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
@@ -775,6 +779,17 @@
             destinationContainer: listPath,
             onRefreshView: (f) => reload(kanban.KEEP_SELECTION),
             clipboardElements: clipboardElements
+        })
+    }
+
+    async function runPasteBrowserRecent(btt, aroundRect)
+    {
+        const clipboardElements = getBrowserRecentElements()
+        showFloatingToolbar(aroundRect, BasketPreview, {
+            destinationContainer: listPath,
+            onRefreshView: (f) => reload(kanban.KEEP_SELECTION),
+            clipboardElements: clipboardElements,
+            browserBasedClipboard: true
         })
     }
 
@@ -1054,7 +1069,7 @@
         <!--section class="w-full place-self-center max-w-3xl"-->
 
             {#if currentList.GetCanonicalPath}
-                <Breadcrumb class="mt-1 mb-5" path={currentList.GetCanonicalPath} collapseLonger/>
+                <Breadcrumb class="mt-1 mb-5" path={currentList.GetCanonicalPath}/>
             {/if}
 
 

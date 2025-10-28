@@ -451,7 +451,7 @@
             },
             {
                 caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
-                disabled: true
+                action: runPasteBrowserRecent
             },
             {
                 caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
@@ -482,6 +482,8 @@
                         clipboardElements: clipboardElements
                     });
     }
+
+    
 
     // tmp
     let newMessageAttachements = []

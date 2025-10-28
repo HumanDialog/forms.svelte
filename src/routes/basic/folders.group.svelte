@@ -69,14 +69,14 @@
         else
             group = null
 
-        canonicalPath = [
+        /*canonicalPath = [
             {
                 Name: group.Name
             },
             {
                 Name: title
             }
-        ]
+        ]*/
     }
 
     async function reloadFolders(selectRecommendation)

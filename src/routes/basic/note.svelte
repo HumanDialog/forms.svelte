@@ -44,7 +44,7 @@
 
     import AttachedFile from './attached.file.svelte'
     import BasketPreview from './basket.preview.svelte'
-    import {fetchComposedClipboard4Editor, fetchComposedClipboard4Note, transformClipboardToJSONReferences} from './basket.utils'
+    import {fetchComposedClipboard4Editor, fetchComposedClipboard4Note, transformClipboardToJSONReferences, pushBrowserRecentElements, setBrowserRecentElement, getBrowserRecentElements} from './basket.utils'
 
     let noteRef = ''
     let note = null;
@@ -78,6 +78,9 @@
         })
 
        await reloadData();
+
+       if(note)
+            pushBrowserRecentElements( note.Id, note.$type, note.$ref, note.Title, note.Summary, "Note", note.href)
     }
 
     async function reloadData()
@@ -110,7 +113,8 @@
                                                     'GetCanonicalPath',
                                                     '$ref',
                                                     '$type',
-                                                    '$acc'],
+                                                    '$acc',
+                                                    'href'],
                                     SubTree:[
                                         {
                                             Id: 11,
@@ -347,7 +351,7 @@
                                 },
                                 {
                                     caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
-                                    disabled: true
+                                    action: runPasteBrowserRecent4Note
                                 },
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
@@ -423,6 +427,17 @@
                 await reloadData();
             
         }
+    }
+
+    async function runPasteBrowserRecent4Note(btt, aroundRect)
+    {
+        const clipboardElements = getBrowserRecentElements()
+        showFloatingToolbar(aroundRect, BasketPreview, {
+            destinationContainer: noteRef,
+            onRefreshView: async (f) => await reloadData(),
+            clipboardElements: clipboardElements,
+            browserBasedClipboard: true
+        })
     }
 
     async function toggleNotePinned(note)
@@ -639,7 +654,7 @@
                                 },
                                 {
                                     caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
-                                    disabled: true
+                                    action: runPasteBrowserRecent4Note
                                 },
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
@@ -679,7 +694,7 @@
                     },
                     {
                         caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
-                        disabled: true
+                        action: runPasteBrowserRecent4Editor
                     },
                     {
                         caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
@@ -717,6 +732,16 @@
             const references = transformClipboardToJSONReferences([clipboardElements[0]])
             makeLinkToElement(references)
         }
+    }
+
+    async function runPasteBrowserRecent4Editor(btt, aroundRect)
+    {
+        const clipboardElements = getBrowserRecentElements()
+        showFloatingToolbar(aroundRect, BasketPreview, {
+            onAttach: (clipboard, elements) => makeLinkToElement(elements),
+            clipboardElements: clipboardElements,
+            browserBasedClipboard: true
+        })
     }
 
     function makeLinkToElement(elements)
@@ -974,7 +999,11 @@
                                                     'Content-Type': file.type
                                                 }),
                                                 body: file})
-                    if(!res.ok)
+                    if(res.ok)
+                    {
+                        setBrowserRecentElement(fileLink.FileId, 'UploadedFile')
+                    }
+                    else
                     {
                         const err = await res.text()
                         console.error(err)
@@ -1074,11 +1103,13 @@
             toolbarOperations={getPageOperations()}
             clearsContext=''
             title={note.Title}>
-    <section class="w-full flex justify-center">
-        <article class="w-full prose prose-base prose-zinc dark:prose-invert mx-2 prose-img:rounded-xl ">
-            {#if note.GetCanonicalPath}
-                <Breadcrumb class="not-prose mt-1" path={note.GetCanonicalPath} collapseLonger/>
+    <section class="w-full flex flex-col items-center">
+        {#if note.GetCanonicalPath}
+                <Breadcrumb class="mt-1 sm:min-w-[65ch]" path={note.GetCanonicalPath}/>
             {/if}
+        <article class="w-full prose prose-base prose-zinc dark:prose-invert mx-2 prose-img:rounded-xl ">
+            
+
             <section class="w-full flex flex-row justify-between">
                 
                     <p class="">

@@ -33,7 +33,7 @@
     import {onMount} from 'svelte'
     import {location, pop, push, querystring} from 'svelte-spa-router'
     import BasketPreview from './basket.preview.svelte'
-    import {fetchComposedClipboard4Folder, transformClipboardToJSONReferences} from './basket.utils'
+    import {fetchComposedClipboard4Folder, transformClipboardToJSONReferences, getBrowserRecentElements, setBrowserRecentElement} from './basket.utils'
     import FaBasketTrash from './icons/basket.trash.svelte'
     import {cache} from './cache.js'
 
@@ -140,7 +140,7 @@
                                             {
                                                 Id: 5,
                                                 Association: 'Files',
-                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href', 'IsInBasket', 'IsCanonical', '$type']
+                                                Expressions:['Id', 'FileId', '$ref', 'Title', 'Summary', 'Order', 'href', 'IsInBasket', 'IsCanonical', '$type']
 
                                             }
                                         ]
@@ -446,6 +446,7 @@
             return null;
 
         let newTask = res.FolderTask;
+        setBrowserRecentElement(newTask.TaskId, 'Task')
 
         await fetchData();
         listComponent.reload(contextItem, newTask.Id);
@@ -458,7 +459,8 @@
             return null;
 
         let newNote = res.FolderNote;
-
+        setBrowserRecentElement(newNote.NoteId, 'Note')
+        
         await fetchData();
         listComponent.reload(contextItem, newNote.Id);
     }
@@ -689,7 +691,7 @@
                 },
                 {
                     caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
-                    disabled: true
+                    action: runPasteBrowserRecent
                 },
                 {
                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
@@ -722,6 +724,17 @@
             destinationContainer: contextPath,
             onRefreshView: refreshViewAfterAttachingFromBasket,
             clipboardElements: clipboardElements
+        })
+    } 
+
+    async function runPasteBrowserRecent(btt, aroundRect)
+    {
+        const clipboardElements = getBrowserRecentElements()
+        showFloatingToolbar(aroundRect, BasketPreview, {
+            destinationContainer: contextPath,
+            onRefreshView: refreshViewAfterAttachingFromBasket,
+            clipboardElements: clipboardElements,
+            browserBasedClipboard: true
         })
     } 
 
@@ -1345,7 +1358,7 @@
                                                 body: file})
                     if(res.ok)
                     {
-                        
+                        setBrowserRecentElement(fileLink.FileId, 'UploadedFile')
                     }
                     else
                     {
@@ -1388,6 +1401,8 @@
             
             
             URL.revokeObjectURL(blobUrl)
+
+            setBrowserRecentElement(element.FileId, 'UploadedFile')
         }
         else
         {
@@ -1423,7 +1438,7 @@
             
 
             {#if contextItem.GetCanonicalPath}
-                <Breadcrumb class="mt-1 mb-5" path={contextItem.GetCanonicalPath} collapseLonger/>
+                <Breadcrumb class="mt-1 mb-5" path={contextItem.GetCanonicalPath}/>
             {/if}
 
 

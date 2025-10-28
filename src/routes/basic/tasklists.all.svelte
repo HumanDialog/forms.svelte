@@ -23,7 +23,7 @@
     let listComponent;
     let showArchived = false;
     let canonicalPath = []
-    const title = '_; All task lists; Todas las listas de tareas; Wszystkie listy zadań'
+    const title = '_; Common lists; Listas comunes; Wspólne listy'
 
     $: onParamsChanged($session, $mainContentPageReloader, $querystring);
 
@@ -108,14 +108,14 @@
                 group = null
         }
 
-        canonicalPath = [
+        /*canonicalPath = [
             {
                 Name: group.Name
             },
             {
                 Name: title
             }
-        ]
+        ]*/
 
     }
 
@@ -293,7 +293,7 @@
                 <section class="w-full place-self-center max-w-3xl">
 
                     {#if canonicalPath}
-                        <Breadcrumb class="mt-1 mb-5" path={canonicalPath} collapseLonger/>
+                        <Breadcrumb class="mt-1 mb-5" path={canonicalPath}/>
                     {/if}
 
             <List   self={group}

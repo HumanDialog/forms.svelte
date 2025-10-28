@@ -122,6 +122,15 @@ export {
     navPrevVisibleKey,
     navAutoHide,
     
+    insertAt,
+    insertAfter,
+    getPrev,
+    getNext,
+    getFirst,
+    getLast,
+    removeAt,
+    remove, 
+    swapElements
 }   from './utils'
 
 export {
