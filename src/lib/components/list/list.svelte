@@ -3,7 +3,7 @@
     import {data_tick_store, contextItemsStore, contextTypesStore } from '../../stores'
     import {activateItem, getActive, clearActiveItem, parseWidthDirective, getPrev, getNext, swapElements, getLast, insertAfter, getActiveCount, addActiveItem} from '../../utils' 
     import Icon from '../icon.svelte'
-    import {FaRegSquare, FaRegCheckSquare} from 'svelte-icons/fa/'
+    import {FaRegCircle, FaRegCheckCircle} from 'svelte-icons/fa/'
     
     import {rList_definition} from './List'
     import List_element from './internal/list.element.svelte'
@@ -525,7 +525,7 @@
 
     {#if items && items.length > 0 }
         {#if false && multiselect}
-            {@const icon = (multiselectionMode == SELECT_ALL) ? FaRegSquare : FaRegCheckSquare}
+            {@const icon = (multiselectionMode == SELECT_ALL) ? FaRegCircle : FaRegCheckCircle}
             <Icon component={icon} class="h-5 w-5 sm:h-4 sm:w-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 mr-3"
                     on:click={toggleSelectAll}/>
         {/if}

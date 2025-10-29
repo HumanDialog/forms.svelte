@@ -20,8 +20,8 @@
 				showFloatingToolbar,
                 reloadPageToolbarOperations} from '$lib'
     import {FaRegFile, FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaSync,
-        FaList, FaEllipsisH, FaChevronRight, FaChevronLeft, FaRegShareSquare, FaLink, FaUnlink, FaRegStar, FaStar, FaCut, FaRegComments, FaRegClipboard,
-        FaRegCheckSquare, FaFileUpload, FaUpload, FaFileDownload, FaCloudUploadAlt
+        FaList, FaEllipsisH, FaChevronRight, FaChevronLeft, FaUpload, FaLink, FaUnlink, FaRegStar, FaStar, FaCut, FaRegComments, FaRegClipboard,
+        FaRegCheckSquare, FaFileUpload, FaFile, FaCloudUploadAlt, FaDownload, FaCheckDouble
         } from 'svelte-icons/fa'
         
         import {FaEdit} from 'svelte-icons/fa'
@@ -584,7 +584,7 @@
         return {
             opver: 2,
             fab: 'M00',
-            tbr: 'C',
+            tbr: 'D',
             operations: [
                 {
                     caption: '_; View; Ver; Widok',
@@ -601,7 +601,10 @@
                         },
                         {
                             caption: '_; Select; Seleccionar; Zaznacz',
-                         //   icon: FaRegCheckSquare,
+                            icon: FaCheckDouble,
+                            hideToolbarCaption: true,
+                            tbr: 'C',
+                            fab: 'S20',
                             action: (f) => { listComponent.toggleMultiselection(); reloadPageToolbarOperations(multiselectPageOperations()) }
                         },
                         {
@@ -649,8 +652,8 @@
         }
 
         const newFile = {
-            caption: '_; Upload file; Subir archivo; Prześlij plik',
-            icon: FaFileUpload,
+            caption: '_; Add file; Añadir archivo; Dodaj plik',
+            icon: FaFile,
             action: (f) => { newElementKind='UploadedFile';  runFileAttacher(afterElement) },
             tbr: 'A',
             fab: 'M01'
@@ -680,7 +683,11 @@
         
         result.operations.push({
             
+            icon: FaDownload,
             caption: '_; Insert; Insertar; Wstaw',
+            hideToolbarCaption: true,
+            tbr: 'C',
+            fab: 'S10',
             menu: [
                 {
                     caption: '_; Paste; Pegar; Wklej',
@@ -756,7 +763,7 @@
         return {
             opver: 2,
             fab: 'M00',
-            tbr: 'C',
+            tbr: 'D',
             operations: [
                 newElementOperations(null),
                 {
@@ -765,7 +772,10 @@
                         ... !canPin ? [] : [pinOp()],
                         {
                             caption: '_; Select; Seleccionar; Zaznacz',
-                        //   icon: FaRegCheckSquare,
+                            icon: FaCheckDouble,
+                            hideToolbarCaption: true,
+                            tbr: 'C',
+                            fab: 'S20',
                             action: (f) => { listComponent.toggleMultiselection(); reloadPageToolbarOperations(multiselectPageOperations()) }
                         },
                         {
@@ -788,7 +798,7 @@
         return {
             opver: 2,
             fab: 'M00',
-            tbr: 'C',
+            tbr: 'D',
             operations: [
                 {
                     caption: '_; View; Ver; Widok',
@@ -803,7 +813,10 @@
                        // ... !canPin ? [] : [pinOp()],
                         {
                             caption: '_; Select; Seleccionar; Zaznacz',
-                        //   icon: FaRegCheckSquare,
+                            icon: FaCheckDouble,
+                            hideToolbarCaption: true,
+                            tbr: 'C',
+                            fab: 'S20',
                             action: (f) => { listComponent.toggleMultiselection(); reloadPageToolbarOperations(getPageOperations()) },
                             active: true
                         },
@@ -952,7 +965,7 @@
         return {
                 opver: 2,
                 fab: 'M00',
-                tbr: 'C',
+                tbr: 'D',
                 operations: [
                     {
                         caption: '_; Element; Elemento; Element',
@@ -987,7 +1000,10 @@
                         operations: [
                          {
                             caption: '_; Select; Seleccionar; Zaznacz',
-                         //   icon: FaRegCheckSquare,
+                            icon: FaCheckDouble,
+                            hideToolbarCaption: true,
+                            tbr: 'C',
+                            fab: 'S20',
                             action: (f) => { listComponent.toggleMultiselection(); reloadPageToolbarOperations(multiselectPageOperations()) }
                         },
                         {
@@ -1037,7 +1053,7 @@
         return {
                 opver: 2,
                 fab: 'M00',
-                tbr: 'C',
+                tbr: 'D',
                 operations: [
                     newElementOperations(element),
                     {
@@ -1079,8 +1095,11 @@
                                 hideToolbarCaption: true
                             },
                             {
-                                caption: '_; Send to...; Enviar a...; Wyślij do ...',
-                                icon: FaRegShareSquare,
+                                caption: '_; Send; Enviar; Wyślij',
+                                hideToolbarCaption: true,
+                                icon: FaUpload,
+                                tbr: 'D',
+                                fab: 'S00',
                                 menu: [
                                     {
                                         caption: '_; Copy; Copiar; Kopiuj',
@@ -1090,12 +1109,7 @@
                                         caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
                                         disabled: true
                                     }
-                                ], 
-                                hideToolbarCaption: true,
-                                fab: 'M30',
-                                tbr: 'A',
-                          //      disabledFunc: () => element.IsInBasket
-
+                                ]
                             },
                         /*    {
                                 caption: '_; Cut; Cortar; Wytnij',
@@ -1117,7 +1131,10 @@
                             ... !canPin ? [] : [pinOp()],
                          {
                             caption: '_; Select; Seleccionar; Zaznacz',
-                         //   icon: FaRegCheckSquare,
+                            icon: FaCheckDouble,
+                            hideToolbarCaption: true,
+                            tbr: 'C',
+                            fab: 'S20',
                             action: (f) => { listComponent.toggleMultiselection(); reloadPageToolbarOperations(multiselectPageOperations()) }
                         },
                         {
@@ -1162,7 +1179,7 @@
         return {
                 opver: 2,
                 fab: 'M00',
-                tbr: 'C',
+                tbr: 'D',
                 operations: [
                     //newElementOperations(element),
                     {
@@ -1176,8 +1193,10 @@
                                 tbr: 'A',
                             },
                             {
-                                caption: '_; Send to...; Enviar a...; Wyślij do ...',
-                                icon: FaRegShareSquare,
+                                caption: '_; Send; Enviar; Wyślij',
+                                icon: FaUpload,
+                                tbr: 'D',
+                                fab: 'S00',
                                 menu: [
                                     {
                                         caption: '_; Copy; Copiar; Kopiuj',
@@ -1188,9 +1207,7 @@
                                         disabled: true
                                     }
                                 ],
-                                hideToolbarCaption: true,
-                                fab: 'M30',
-                                tbr: 'A',
+                                hideToolbarCaption: true
                             },
                         /*    {
                                 caption: '_; Cut; Cortar; Wytnij',
@@ -1222,7 +1239,10 @@
                            // ... !canPin ? [] : [pinOp()],
                             {
                                 caption: '_; Select; Seleccionar; Zaznacz',
-                            //   icon: FaRegCheckSquare,
+                                icon: FaCheckDouble,
+                                hideToolbarCaption: true,
+                                tbr: 'C',
+                                fab: 'S20',
                                 action: (f) => { listComponent.toggleMultiselection(); reloadPageToolbarOperations(getPageOperations()); },
                                 active: true
                             },
@@ -1246,7 +1266,7 @@
         return {
                 opver: 2,
                 fab: 'M00',
-                tbr: 'C',
+                tbr: 'D',
                 operations: [
                     {
                         caption: '_; Element; Elemento; Element',
@@ -1265,7 +1285,10 @@
                         operations: [
                             {
                                 caption: '_; Select; Seleccionar; Zaznacz',
-                            //   icon: FaRegCheckSquare,
+                                icon: FaCheckDouble,
+                                hideToolbarCaption: true,
+                                tbr: 'C',
+                                fab: 'S20',
                                 action: (f) => { listComponent.toggleMultiselection(); reloadPageToolbarOperations(getPageOperations()) },
                                 active: true
                             },
@@ -1317,7 +1340,7 @@
 
         case 'UploadedFile':
         case 'FolderFile':
-            return FaFileDownload;
+            return FaFile;
         }
     }
 

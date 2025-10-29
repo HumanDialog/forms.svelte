@@ -128,7 +128,7 @@
         return {
             opver: 2,
             fab: 'M00',
-            tbr: 'C',
+            tbr: 'D',
             operations: [
                 {
                     caption: '_; View; Ver; Widok',

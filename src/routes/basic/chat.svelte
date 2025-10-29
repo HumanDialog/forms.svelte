@@ -18,7 +18,7 @@
 	import { afterUpdate, tick, onMount } from 'svelte';
     import {location, link, querystring} from 'svelte-spa-router'
 
-    import {FaPaste, FaArrowCircleRight, FaTimes, FaRegFile, FaRegCalendar, FaPaperPlane, FaRegStar, FaStar} from 'svelte-icons/fa/'
+    import {FaDownload, FaArrowCircleRight, FaTimes, FaRegFile, FaRegCalendar, FaPaperPlane, FaRegStar, FaStar} from 'svelte-icons/fa/'
     import BasketPreview from './basket.preview.svelte'
     import PopupExplorer from './popup.explorer.svelte'
     import {fetchComposedClipboard4Message, transformClipboardToJSONReferences, getBrowserRecentElements} from './basket.utils'
@@ -767,7 +767,7 @@
                             focus:outline-none dark:border-stone-600
                             flex items-center rounded"
                             on:click={showInsertMenu}>
-                        <div class="w-5 h-5 mr-1"><FaPaste/></div>
+                        <div class="w-5 h-5 mr-1"><FaDownload/></div>
                         <span class="ml-2">_; Insert; Insertar; Wstaw</span>
                     </button>
 

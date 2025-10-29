@@ -31,7 +31,7 @@
         showFloatingToolbar
 	} from '$lib';
     import {FaPlus, FaList, FaPen, FaCaretLeft, FaCaretRight, FaTrash, FaArrowsAlt, FaArchive, FaCheck, FaEllipsisH, FaChevronRight,
-        FaAngleDown, FaAngleUp, FaColumns, FaRandom, FaChevronLeft, FaRegShareSquare, FaRegCalendar, FaCaretUp, FaCaretDown
+        FaAngleDown, FaAngleUp, FaColumns, FaRandom, FaChevronLeft, FaUpload, FaRegCalendar, FaCaretUp, FaCaretDown, FaDownload
     } from 'svelte-icons/fa'
     import MoveOperations from './list.board.move.svelte'
 	import { tick, onMount } from 'svelte';
@@ -262,7 +262,11 @@
                             fab: 'M01'
                         },
                         {
+                            icon: FaDownload,
                             caption: '_; Insert; Insertar; Wstaw',
+                            hideToolbarCaption: true,
+                            tbr: 'C',
+                            fab: 'S10',
                             menu: [
                                 {
                                     caption: '_; Paste; Pegar; Wklej',
@@ -302,7 +306,7 @@
         return {
             opver: 2,
             fab: 'M00',
-            tbr: 'C',
+            tbr: 'D',
             operations: [
                 getViewOperationsP()
             ]
@@ -495,7 +499,7 @@
         return {
             opver: 2,
             fab: 'M00',
-            tbr: 'C',
+            tbr: 'D',
             operations: [
                 {
                     caption: '_; View; Ver; Widok',
@@ -509,7 +513,11 @@
                             tbr: 'A'
                         },
                         {
+                            icon: FaDownload,
                             caption: '_; Insert; Insertar; Wstaw',
+                            hideToolbarCaption: true,
+                            tbr: 'C',
+                            fab: 'S10',
                             menu: [
                                 {
                                     caption: '_; Paste; Pegar; Wklej',
@@ -611,9 +619,12 @@
                             tbr: 'A',
                             hideToolbarCaption: true
                         } ],
+
                         {
-                            caption: '_; Send to...; Enviar a...; Wyślij do ...',
-                            icon: FaRegShareSquare, 
+                            caption: '_; Send; Enviar; Wyślij',
+                            icon: FaUpload, 
+                            tbr: 'D',
+                            fab: 'S00',
                             menu: [
                                     {
                                         caption: '_; Copy; Copiar; Kopiuj',
@@ -624,10 +635,9 @@
                                         disabled: true
                                     }
                                 ], 
-                            hideToolbarCaption: true,
-                            fab: 'M30',
-                            tbr: 'A'
+                            hideToolbarCaption: true
                         },
+                        
                         ... (task.State == STATE_FINISHED) ? [] : [
                                 {
                                     caption: '_; Finish; Finalizar; Zakończ',
@@ -705,7 +715,7 @@
         return {
             opver: 2,
             fab: 'M00',
-            tbr: 'C',
+            tbr: 'D',
             operations: [
                 {
                     caption: '_; View; Ver; Widok',
@@ -719,7 +729,11 @@
                             tbr: 'A'
                         },
                         {
+                            icon: FaDownload,
                             caption: '_; Insert; Insertar; Wstaw',
+                            hideToolbarCaption: true,
+                            tbr: 'C',
+                            fab: 'S10',
                             menu: [
                                 {
                                     caption: '_; Paste; Pegar; Wklej',

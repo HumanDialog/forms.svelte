@@ -1,7 +1,7 @@
 <script>
     import {reef} from '@humandialog/auth.svelte'
     import {Spinner, onErrorShowAlert} from '$lib'
-    import {FaFileDownload} from 'svelte-icons/fa/'
+    import {FaFile} from 'svelte-icons/fa/'
 
     export let self;
     export let a;
@@ -76,7 +76,7 @@
     {#if fileInfo.downloading}
         <Spinner size={3} delay={0}/>
     {:else}
-        <span class="inline-block w-3 h-3"><FaFileDownload/></span>
+        <span class="inline-block w-3 h-3"><FaFile/></span>
     {/if}
     {getNiceFileName(decodeURIComponent(fileInfo.name))}
 </a>

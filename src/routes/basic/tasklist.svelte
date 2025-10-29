@@ -16,7 +16,7 @@
 				UI, i18n, Breadcrumb, showFloatingToolbar,
 				ext} from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaList,
-        FaEllipsisH, FaChevronRight, FaChevronLeft, FaRandom, FaCheck, FaRegShareSquare, FaUndo
+        FaEllipsisH, FaChevronRight, FaChevronLeft, FaRandom, FaCheck, FaUpload, FaUndo, FaDownload
     } from 'svelte-icons/fa'
     import {location, pop, push, querystring, link} from 'svelte-spa-router'
     import {cache} from './cache.js'
@@ -285,7 +285,7 @@
         return {
             opver: 2,
             fab: 'M00',
-            tbr: 'C',
+            tbr: 'D',
             operations: [
                 {
                     caption: '_; View; Ver; Widok',
@@ -299,7 +299,11 @@
                             tbr: 'A'
                         },
                         {
+                            icon: FaDownload,
                             caption: '_; Insert; Insertar; Wstaw',
+                            hideToolbarCaption: true,
+                            tbr: 'C',
+                            fab: 'S10',
                             menu: [
                                 {
                                     caption: '_; Paste; Pegar; Wklej',
@@ -398,7 +402,7 @@
         return {
             opver: 2,
             fab: 'M00',
-            tbr: 'C',
+            tbr: 'D',
             operations: [
                 {
                     caption: '_; View; Ver; Widok',
@@ -412,8 +416,29 @@
                             tbr: 'A'
                         },
                         {
-                            caption: '_; Paste; Pegar; Wklej',
-                            action: runPasteBasket
+                            icon: FaDownload,
+                            caption: '_; Insert; Insertar; Wstaw',
+                            hideToolbarCaption: true,
+                            tbr: 'C',
+                            fab: 'S10',
+                            menu: [
+                                {
+                                    caption: '_; Paste; Pegar; Wklej',
+                                    action: pasteRecentClipboardElement
+                                },
+                                {
+                                    caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
+                                    action: runPasteBasket
+                                },
+                                {
+                                    caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
+                                    action: runPasteBrowserRecent
+                                },
+                                {
+                                    caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
+                                    action: runPopupExplorer
+                                }
+                            ]
                         },
                         {
                             separator: true
@@ -498,9 +523,12 @@
                             tbr: 'A',
                             hideToolbarCaption: true
                         },
+
                         {
-                            caption: '_; Send to...; Enviar a...; Wyślij do ...',
-                            icon: FaRegShareSquare, 
+                            caption: '_; Send; Enviar; Wyślij',
+                            icon: FaUpload, 
+                            tbr: 'D',
+                            fab: 'S00',
                             menu: [
                                 {
                                     caption: '_; Copy; Copiar; Kopiuj',
@@ -511,10 +539,9 @@
                                     disabled: true
                                 }
                             ],
-                            hideToolbarCaption: true,
-                            fab: 'M30',
-                            tbr: 'A'
+                            hideToolbarCaption: true
                         },
+                        
                         {
                             //icon: FaArchive,
                             caption: '_; Archive; Archivar; Zarchiwizuj',

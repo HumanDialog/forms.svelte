@@ -30,7 +30,7 @@
 
     import {FaTimes, FaAlignLeft,FaCheck, FaTag, FaUser, FaCalendarAlt, FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen,
         FaCommentMedical, FaRegStar, FaStar, FaPaperPlane, FaPaperclip, FaPlus, FaComment, FaQuoteRight, FaInfo, FaListUl,
-        FaImage, FaTable, FaBold, FaItalic, FaUnderline, FaStrikethrough, FaRemoveFormat, FaCode, FaExclamationTriangle, FaRegShareSquare
+        FaImage, FaTable, FaBold, FaItalic, FaUnderline, FaStrikethrough, FaRemoveFormat, FaCode, FaExclamationTriangle, FaUpload
     } from 'svelte-icons/fa/'
 
     import FaCommentPlus from './icons/post.plus.svelte'
@@ -290,7 +290,7 @@
         return {
             opver: 2,
             fab: 'M00',
-            tbr: 'C',
+            tbr: 'D',
             operations: [
                 {
                     caption: '_; Thread; Hilo; Wątek',
@@ -324,8 +324,10 @@
                             action: (f) => {} ,
                         },
                         {
-                            icon: FaRegShareSquare,   // MdLibraryAdd
-                            caption: '_; Send to...; Enviar a...; Wyślij do ...',
+                            icon: FaUpload,
+                            caption: '_; Send; Enviar; Wyślij',
+                            tbr: 'D',
+                            fab: 'S00',
                             menu: [
                                     {
                                         caption: '_; Copy; Copiar; Kopiuj',

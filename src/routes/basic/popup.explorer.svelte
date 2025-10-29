@@ -8,7 +8,7 @@
         clearActiveItem, 
         ext
     }   from '$lib'
-    import {FaRegFolder, FaRegFile, FaRegCalendarCheck, FaRegCalendar, FaFileDownload, FaList, FaRegComments, FaRegClipboard, FaClipboardList, FaLevelUpAlt} from 'svelte-icons/fa'
+    import {FaRegFolder, FaRegFile, FaRegCalendarCheck, FaRegCalendar, FaFile, FaList, FaRegComments, FaRegClipboard, FaClipboardList, FaLevelUpAlt} from 'svelte-icons/fa'
     import { afterUpdate, onMount } from "svelte";
     import {transformClipboardToJSONReferences} from './basket.utils'
 	
@@ -826,7 +826,7 @@
 
         case 'UploadedFile':
         case 'File':
-            return FaFileDownload;
+            return FaFile;
 
         case 'TaskList':
             return FaList;

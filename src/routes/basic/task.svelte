@@ -35,9 +35,9 @@
     import {location, querystring, push, link} from 'svelte-spa-router'
     import TaskSteps from './task.steps.svelte'
     import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont,
-        FaPen, FaList, FaTimes, FaRegShareSquare, FaCut,  FaFileDownload, FaImage, FaTable, FaPaperclip, FaBold, FaItalic,
+        FaPen, FaList, FaTimes, FaUpload, FaCut,  FaFile, FaImage, FaTable, FaPaperclip, FaBold, FaItalic,
         FaUnderline, FaStrikethrough, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle, FaInfo,
-        FaListUl, FaLink, FaRegFolder, FaRegFile
+        FaListUl, FaLink, FaRegFolder, FaRegFile, FaDownload
     } from 'svelte-icons/fa/'
     import AttachedFile from './attached.file.svelte'
     import BasketPreview from './basket.preview.svelte'
@@ -327,15 +327,6 @@
                     tbr: 'B',
                     operations: [
                         {
-                            caption: "_; Save; Guardar; Zapisz",
-                            hideToolbarCaption: true,
-                            icon: FaSave,
-                            action: (f) => saveCurrentEditable(),
-                            fab: 'T02',
-                            tbr: 'C',
-                            disabledFunc: () => !hasModifications()
-                        },
-                        {
                             caption: '_; Edit...; Editar...; Edytuj...',
                             icon: FaPen,
                             grid: addOperations,
@@ -343,8 +334,11 @@
                             tbr: 'A'
                         },
                         {
-                            caption: '_; Send to...; Enviar a...; Wyślij do ...',
-                            icon: FaRegShareSquare,   // MdLibraryAdd
+                            caption: '_; Send; Enviar; Wyślij',
+                            icon: FaUpload, 
+                            hideToolbarCaption: true,
+                            tbr: 'D',
+                            fab: 'S00',
                             menu: [
                                 {
                                     caption: '_; Copy; Copiar; Kopiuj',
@@ -354,13 +348,15 @@
                                     caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
                                     disabled: true
                                 }
-                            ], 
-                            fab: 'M30',
-                            tbr: 'A',
+                            ]
 
                         },
                         {
+                            icon: FaDownload,
                             caption: '_; Insert; Insertar; Wstaw',
+                            hideToolbarCaption: true,
+                            tbr: 'C',
+                            fab: 'S10',
                             menu: [
                                 {
                                     caption: '_; Paste; Pegar; Wklej',
@@ -379,7 +375,16 @@
                                     action: runPopupExplorer4Task
                                 }
                             ]
-                        }
+                        },
+                        {
+                            caption: "_; Save; Guardar; Zapisz",
+                            hideToolbarCaption: true,
+                            icon: FaSave,
+                            action: (f) => saveCurrentEditable(),
+                            fab: 'T02',
+                            tbr: 'C',
+                            disabledFunc: () => !hasModifications()
+                        },
                     ]
                 },
                 {
@@ -561,7 +566,7 @@
         },
         {
             caption: '_; Attachement; Anexo; Załącznik',
-            icon: FaFileDownload,
+            icon: FaFile,
             action: async (f) => runFileAttacher()
         },
         {
@@ -588,21 +593,13 @@
         return {
             opver: 2,
             fab: 'M00',
-            tbr: 'C',
+            tbr: 'D',
             operations: [
                 {
                     caption: '_; Task; Tarea; Zadanie',
                     //tbr: 'B',
                     operations: [
-                        {
-                            caption: "_; Save; Guardar; Zapisz",
-                            hideToolbarCaption: true,
-                            icon: FaSave,
-                            action: (f) => saveCurrentEditable(),
-                            fab: 'T02',
-                            tbr: 'C',
-                            disabledFunc: () => !hasModifications()
-                        },
+                        
                         {
                             caption: '_; Edit...; Editar...; Edytuj...',
                             icon: FaPen,
@@ -612,8 +609,11 @@
                         },
 
                         {
-                            caption: '_; Send to...; Enviar a...; Wyślij do ...',
-                            icon: FaRegShareSquare,   // MdLibraryAdd
+                            caption: '_; Send; Enviar; Wyślij',
+                            icon: FaUpload,
+                            hideToolbarCaption: true,
+                            tbr: 'D',
+                            fab: 'S00',
                             menu: [
                                 {
                                     caption: '_; Copy; Copiar; Kopiuj',
@@ -623,13 +623,15 @@
                                     caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
                                     disabled: true
                                 }
-                            ], 
-                            fab: 'M30',
-                            tbr: 'A'
+                            ]
 
                         },
                         {
+                            icon: FaDownload,
                             caption: '_; Insert; Insertar; Wstaw',
+                            hideToolbarCaption: true,
+                            tbr: 'C',
+                            fab: 'S10',
                             menu: [
                                 {
                                     caption: '_; Paste; Pegar; Wklej',
@@ -648,7 +650,16 @@
                                     action: runPopupExplorer4Task
                                 }
                             ]
-                        }
+                        },
+                        {
+                            caption: "_; Save; Guardar; Zapisz",
+                            hideToolbarCaption: true,
+                            icon: FaSave,
+                            action: (f) => saveCurrentEditable(),
+                            fab: 'T02',
+                            tbr: 'C',
+                            disabledFunc: () => !hasModifications()
+                        },
                     ]
                 }
             ]
@@ -663,7 +674,7 @@
         return {
             opver: 2,
             fab: 'M00',
-            tbr: 'C',
+            tbr: 'D',
             preAction: description.preventBlur,
             operations: [
                 {
@@ -767,6 +778,7 @@
                     ]
                 },
                 {
+                    icon: FaDownload,
                     caption: '_; Insert; Insertar; Wstaw',
                     //tbr: 'B',
                     preAction: description.preventBlur,
@@ -803,15 +815,7 @@
                     caption: '_; Task; Tarea; Zadanie',
                     //tbr: 'B',
                     operations: [
-                        {
-                            caption: "_; Save; Guardar; Zapisz",
-                            hideToolbarCaption: true,
-                            icon: FaSave,
-                            action: (f) => description?.save(),
-                            //fab: 'S00',
-                            tbr: 'C',
-                            disabledFunc: () => !hasModifications()
-                        },
+                        
                         {
                             caption: '_; Edit...; Editar...; Edytuj...',
                             icon: FaPen,
@@ -821,8 +825,11 @@
                         },
 
                         {
-                            caption: '_; Send to...; Enviar a...; Wyślij do ...',
-                            icon: FaRegShareSquare,   // MdLibraryAdd
+                            caption: '_; Send; Enviar; Wyślij',
+                            icon: FaUpload,
+                            hideToolbarCaption: true,
+                            tbr: 'D',
+                            fab: 'S00',
                             menu: [
                                 {
                                     caption: '_; Copy; Copiar; Kopiuj',
@@ -832,13 +839,15 @@
                                     caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
                                     disabled: true
                                 }
-                            ], 
-                        //    fab: 'M30',
-                        //    tbr: 'A'
+                            ]
 
                         },
                         {
+                            icon: FaDownload,
                             caption: '_; Insert; Insertar; Wstaw',
+                            hideToolbarCaption: true,
+                            tbr: 'C',
+                            fab: 'S10',
                             menu: [
                                 {
                                     caption: '_; Paste; Pegar; Wklej',
@@ -857,7 +866,16 @@
                                     action: runPopupExplorer4Task
                                 }
                             ]
-                        }
+                        },
+                        {
+                            caption: "_; Save; Guardar; Zapisz",
+                            hideToolbarCaption: true,
+                            icon: FaSave,
+                            action: (f) => description?.save(),
+                            //fab: 'S00',
+                            tbr: 'C',
+                            disabledFunc: () => !hasModifications()
+                        },
                     ]
                 }
 
@@ -878,7 +896,7 @@
 
     const extraInsertPalletteCommands = [
         {
-            icon: FaLink,
+            icon: FaDownload,
             caption: '_; Insert; Insertar; Wstaw',
             action: () => {
                 const operations = [
@@ -1055,8 +1073,8 @@
     const extraBackPaletteCommands = []
     const extraBackPaletteCommandsExt = [
          {
-            caption: '_; Send to...; Enviar a...; Wyślij do ...',
-            icon: FaRegShareSquare,   // MdLibraryAdd
+            caption: '_; Send; Enviar; Wyślij',
+            icon: FaUpload,
             menu: [
                 {
                     caption: '_; Copy; Copiar; Kopiuj',
@@ -1486,7 +1504,7 @@
                         {#each task.Files as file}
                             <a  class="mr-2 whitespace-nowrap" on:click={(e) => downloadAttachedFile(e, file.href, file.Title)} href={file.href}>
                                 <span class="inline-block w-4 h-4 relative top-0.5">
-                                    <FaFileDownload/>
+                                    <FaFile/>
                                 </span>
                                 <span>
                                     {file.Title}

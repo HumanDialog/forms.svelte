@@ -44,6 +44,7 @@
         let AOperations = []
         let BOperations = []
         let COperations = []
+        let DOperations = []
 
         if(opVer == 1)
         {
@@ -54,11 +55,13 @@
                     AOperations = [...AOperations, ...group.operations.filter(o => o.tbr == 'A')  ]
                     BOperations = [...BOperations, ...group.operations.filter(o => o.tbr == 'B')  ]
                     COperations = [...COperations, ...group.operations.filter(o => o.tbr == 'C')  ]
+                    DOperations = [...DOperations, ...group.operations.filter(o => o.tbr == 'D')  ]
                 }
             })
 
             leftOperations = [...AOperations, ...BOperations]
             rightOperations = COperations.toReversed()
+            rightOperations = [...rightOperations, ...DOperations.toReversed()]
         }
         else if(opVer == 2)
         {
@@ -96,6 +99,10 @@
                 case 'C':
                     COperations.push(allOperationsMenu)
                     break;
+
+                case 'D':
+                    DOperations.push(allOperationsMenu)
+                    break;
                 }
             }
 
@@ -124,6 +131,10 @@
                     case 'C':
                         COperations.push(expandOperation)
                         break;
+
+                    case 'D':
+                        DOperations.push(expandOperation)
+                        break;
                     }
                 }
 
@@ -150,6 +161,10 @@
                         case 'C':
                             COperations.push(tbrOperation)
                             break;
+
+                        case 'D':
+                            DOperations.push(tbrOperation)
+                            break;
                         }
                     }
                 })
@@ -157,6 +172,7 @@
 
             leftOperations = [...AOperations, ...BOperations]
             rightOperations = COperations.toReversed()
+            rightOperations = [...rightOperations, ...DOperations.toReversed()]
         }
         else
         {

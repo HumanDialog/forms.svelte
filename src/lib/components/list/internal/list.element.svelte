@@ -22,7 +22,7 @@
                 
     import {rList_definition, rList_property_type} from '../List'
 	import { push, link } from 'svelte-spa-router';
-    import {FaExternalLinkAlt, FaRegSquare, FaRegCheckSquare} from 'svelte-icons/fa/'
+    import {FaExternalLinkAlt, FaRegCircle, FaRegCheckCircle} from 'svelte-icons/fa/'
     import Tags from '../../tags.svelte'
     import {ext} from '../../../i18n'
     
@@ -435,7 +435,7 @@
             bind:this={rootElement}> <!--  on:contextmenu={on_contextmenu} -->
 
     {#if multiselect}
-        {@const icon=is_row_active ? FaRegCheckSquare : FaRegSquare}
+        {@const icon=is_row_active ? FaRegCheckCircle : FaRegCircle}
          <Icon  component={icon} 
                 class="flex-none h-4 w-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-1 ml-2 mr-3 "
                 on:click={onToggleMultiSelect}/>
