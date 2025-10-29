@@ -21,6 +21,7 @@
     import {location, pop, push, querystring, link} from 'svelte-spa-router'
     import {cache} from './cache.js'
     import BasketPreview from './basket.preview.svelte'
+    import PopupExplorer from './popup.explorer.svelte'
 	import { fetchComposedClipboard4TaskList, transformClipboardToJSONReferences, setBrowserRecentElement, getBrowserRecentElements } from './basket.utils.js';
 
     export let params = {}
@@ -99,7 +100,7 @@
         const cachedValue = cache.get(cacheKey)
         showCachedDataFirst(cachedValue);
 
-        listPath = `/group/AllLists/${listId}`;
+        listPath = `/TaskList/${listId}`;
 
         const readList = await readListItem();
         if(readList && readList.Id != listId)
@@ -314,7 +315,7 @@
                                 },
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                                    disabled: true
+                                    action: runPopupExplorer
                                 }
                             ]
                         },
@@ -367,6 +368,14 @@
             onRefreshView: (f) => reloadTasks(listComponent.KEEP_SELECTION),
             clipboardElements: clipboardElements,
             browserBasedClipboard: true
+        })
+    }
+
+    async function runPopupExplorer(btt, aroundRect)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            destinationContainer: listPath,
+            onRefreshView: (f) => reloadTasks(listComponent.KEEP_SELECTION)
         })
     }
 

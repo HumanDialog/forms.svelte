@@ -33,6 +33,7 @@
     import {onMount} from 'svelte'
     import {location, pop, push, querystring} from 'svelte-spa-router'
     import BasketPreview from './basket.preview.svelte'
+    import PopupExplorer from './popup.explorer.svelte'
     import {fetchComposedClipboard4Folder, transformClipboardToJSONReferences, getBrowserRecentElements, setBrowserRecentElement} from './basket.utils'
     import FaBasketTrash from './icons/basket.trash.svelte'
     import {cache} from './cache.js'
@@ -695,7 +696,7 @@
                 },
                 {
                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                    disabled: true
+                    action: runPopupExplorer
                 }
             ]
             
@@ -737,6 +738,14 @@
             browserBasedClipboard: true
         })
     } 
+
+    async function runPopupExplorer(btt, aroundRect)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            destinationContainer: contextPath,
+            onRefreshView: refreshViewAfterAttachingFromBasket
+        })
+    }
 
     function  folderPageOperations()
     {

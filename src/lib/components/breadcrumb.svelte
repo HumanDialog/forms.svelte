@@ -43,6 +43,7 @@
         return idx < entriesNo-maxEntriesNo
     }
 
+    let containerElement
     let scrollableElement
     /*let isScrolling = false
     let startScrollLeft = 0
@@ -84,14 +85,21 @@
         const elementsNo = pathElements.length
         if(elementsNo > 0)
         {
-            const lastElement = pathElements[elementsNo-1]    
-            lastElement.scrollIntoView({ container: "nearest"})
+            // container: "nearest" not supported on iOS and mobile FF 
+            //const lastElement = pathElements[elementsNo-1]    
+            //lastElement.scrollIntoView({ container: "nearest"})  
+
+            const containerRect = containerElement.getBoundingClientRect()
+            const wholeWidth = containerElement.scrollWidth
+            const visibleWidth = containerRect.width
+            containerElement.scrollLeft = wholeWidth - visibleWidth
+            
         }
     })
 
 </script>
 
-<nav class="{userClass} w-full sm:w-fit sm:max-w-full overflow-x-auto sm:overflow-x-hidden" aria-label="Breadcrumb">
+<nav class="{userClass} w-full sm:w-fit sm:max-w-full overflow-x-auto sm:overflow-x-hidden" aria-label="Breadcrumb" bind:this={containerElement}>
   <ol class="flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse flex-nowrap min-h-[1.25rem]" bind:this={scrollableElement}>
     
         {#if (segments && segments.length > 0)}

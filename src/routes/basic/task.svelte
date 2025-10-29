@@ -41,6 +41,7 @@
     } from 'svelte-icons/fa/'
     import AttachedFile from './attached.file.svelte'
     import BasketPreview from './basket.preview.svelte'
+    import PopupExplorer from './popup.explorer.svelte'
     import {fetchComposedClipboard4Editor, fetchComposedClipboard4Task, transformClipboardToJSONReferences, pushBrowserRecentElements, setBrowserRecentElement, getBrowserRecentElements} from './basket.utils'
 	
     let taskRef = ''
@@ -375,7 +376,7 @@
                                 },
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                                    disabled: true
+                                    action: runPopupExplorer4Task
                                 }
                             ]
                         }
@@ -436,6 +437,14 @@
             onRefreshView: async (f) => await reloadData(),
             clipboardElements: clipboardElements,
             browserBasedClipboard: true
+        })
+    }
+
+    async function runPopupExplorer4Task(btt, aroundRect)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            destinationContainer: taskRef,
+            onRefreshView: async (f) => await reloadData()
         })
     }
 
@@ -636,7 +645,7 @@
                                 },
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                                    disabled: true
+                                    action: runPopupExplorer4Task
                                 }
                             ]
                         }
@@ -845,7 +854,7 @@
                                 },
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                                    disabled: true
+                                    action: runPopupExplorer4Task
                                 }
                             ]
                         }
@@ -887,7 +896,7 @@
                     },
                     {
                         caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                        disabled: true
+                        action: runPopupExplorer4Editor
                     }
                 ]
 
@@ -932,6 +941,13 @@
             onAttach: (clipboard, elements) => makeLinkToElement(elements),
             clipboardElements: clipboardElements,
             browserBasedClipboard: true
+        })
+    }
+
+    async function runPopupExplorer4Editor(btt, aroundRect)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            onAttach: (clipboard, elements) => makeLinkToElement(elements)
         })
     }
 

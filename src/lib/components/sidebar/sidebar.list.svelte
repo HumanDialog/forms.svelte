@@ -5,6 +5,7 @@
 	import { getPrev, getNext, swapElements, getLast, getFirst, remove, insertAt } from '$lib/utils';
 	import { informModification, pushChanges } from '$lib/updates';
 	import { tick } from 'svelte';
+    import {i18n} from '../../i18n'
 
     export let objects: object[];
     export let orderAttrib: string | undefined = undefined;
@@ -139,11 +140,21 @@
 
 </script>
 
-{#each objects as item, idx (item.Id)}
-    {#key item}             <!-- Forces to fully rerender when item changed to fire use: callbacks again -->
-        <slot {item} {idx}/>
-    {/key}
-{/each }
+
+{#if objects && objects.length > 0}
+    {#each objects as item, idx (item.Id)}
+        {#key item}             <!-- Forces to fully rerender when item changed to fire use: callbacks again -->
+            <slot {item} {idx}/>
+        {/key}
+    {/each }
+{:else}
+    <p class="text-xs text-center uppercase text-stone-900 dark:text-stone-400"> 
+        {i18n({ 
+            en: 'No elements', 
+            es: 'Falta de elementos', 
+            pl: 'Brak elementów'})}
+    </p>
+{/if}
 
 {#if inserter}
     <Edit   class=" mb-2 ml-2

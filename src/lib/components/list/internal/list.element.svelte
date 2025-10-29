@@ -494,14 +494,19 @@
                                 active: true,
                                 readonly: definition.title_readonly,
                             }}> 
-                                {element_title}
+                                <span   class="sm:hover:cursor-pointer underline"
+                                        on:click|stopPropagation={(e) => definition.onOpen(item)}>
+                                    {element_title}
+                                </span>
 
+                            <!--
                             {#if definition.onOpen}
                                 <button class="ml-3 w-5 h-5 sm:w-3 sm:h-3"
                                         on:click={(e) => definition.onOpen(item)}>
                                     <FaExternalLinkAlt/>
                                 </button>
                             {/if}
+                            -->
                         </p>
                     {/if}
                 {/key}

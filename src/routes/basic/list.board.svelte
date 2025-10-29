@@ -36,6 +36,7 @@
     import MoveOperations from './list.board.move.svelte'
 	import { tick, onMount } from 'svelte';
     import BasketPreview from './basket.preview.svelte'
+    import PopupExplorer from './popup.explorer.svelte'
     import {fetchComposedClipboard4TaskList, transformClipboardToJSONReferences, setBrowserRecentElement, getBrowserRecentElements} from './basket.utils'
     import {cache} from './cache.js'
 
@@ -110,7 +111,7 @@
         const cachedValue = cache.get(cacheKey)
         prevDef = showCachedDataFirst(cachedValue, prevDef);
 
-        listPath = `/group/Lists/${listId}`;
+        listPath = `TaskList/${listId}`;
         const loadedItem = await readContextItem();
         if(loadedItem)
         {
@@ -277,7 +278,7 @@
                                 },
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                                    disabled: true
+                                    action: runPopupExplorer
                                 }
                             ]
                         },
@@ -524,7 +525,7 @@
                                 },
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                                    disabled: true
+                                    action: runPopupExplorer
                                 }
                             ]
                         },
@@ -734,7 +735,7 @@
                                 },
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                                    disabled: true
+                                    action: runPopupExplorer
                                 }
                             ]
                         },
@@ -790,6 +791,14 @@
             onRefreshView: (f) => reload(kanban.KEEP_SELECTION),
             clipboardElements: clipboardElements,
             browserBasedClipboard: true
+        })
+    }
+
+    async function runPopupExplorer(btt, aroundRect)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            destinationContainer: listPath,
+            onRefreshView: (f) => reload(kanban.KEEP_SELECTION)
         })
     }
 

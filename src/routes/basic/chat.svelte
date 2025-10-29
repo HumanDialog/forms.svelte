@@ -20,7 +20,8 @@
 
     import {FaPaste, FaArrowCircleRight, FaTimes, FaRegFile, FaRegCalendar, FaPaperPlane, FaRegStar, FaStar} from 'svelte-icons/fa/'
     import BasketPreview from './basket.preview.svelte'
-    import {fetchComposedClipboard4Message, transformClipboardToJSONReferences} from './basket.utils'
+    import PopupExplorer from './popup.explorer.svelte'
+    import {fetchComposedClipboard4Message, transformClipboardToJSONReferences, getBrowserRecentElements} from './basket.utils'
 
     let channelRef = ''
     let channel = null;
@@ -455,7 +456,7 @@
             },
             {
                 caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                disabled: true
+                action: runPopupExplorer
             }
         ]
 
@@ -483,6 +484,23 @@
                     });
     }
 
+
+    async function runPasteBrowserRecent(btt, aroundRect)
+    {
+        const clipboardElements = getBrowserRecentElements()
+        showFloatingToolbar(aroundRect, BasketPreview, {
+            onAttach: (basketItem, refs) => onAttachBasket(refs),
+            clipboardElements: clipboardElements,
+            browserBasedClipboard: true
+        })
+    } 
+
+    async function runPopupExplorer(btt, aroundRect)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            onAttach: (basketItem, refs) => onAttachBasket(refs)
+        })
+    }
     
 
     // tmp
@@ -502,7 +520,7 @@
 ]*/
     async function onAttachBasket(references)
     {
-       newMessageAttachements = [...references]
+       newMessageAttachements = [...newMessageAttachements, ...references]
     }
 
     async function onAttachAndClearBasket(references)

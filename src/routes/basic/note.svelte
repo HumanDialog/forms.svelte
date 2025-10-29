@@ -44,6 +44,7 @@
 
     import AttachedFile from './attached.file.svelte'
     import BasketPreview from './basket.preview.svelte'
+    import PopupExplorer from './popup.explorer.svelte'
     import {fetchComposedClipboard4Editor, fetchComposedClipboard4Note, transformClipboardToJSONReferences, pushBrowserRecentElements, setBrowserRecentElement, getBrowserRecentElements} from './basket.utils'
 
     let noteRef = ''
@@ -355,7 +356,7 @@
                                 },
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                                    disabled: true
+                                    action: runPopupExplorer4Note
                                 }
                             ]
                         },
@@ -437,6 +438,14 @@
             onRefreshView: async (f) => await reloadData(),
             clipboardElements: clipboardElements,
             browserBasedClipboard: true
+        })
+    }
+
+    async function runPopupExplorer4Note(btt, aroundRect)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            destinationContainer: noteRef,
+            onRefreshView: async (f) => await reloadData()
         })
     }
 
@@ -658,7 +667,7 @@
                                 },
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                                    disabled: true
+                                    action: runPopupExplorer4Note
                                 }
                             ]
                         },
@@ -698,7 +707,7 @@
                     },
                     {
                         caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                        disabled: true
+                        action: runPopupExplorer4Editor
                     }
                 ]
 
@@ -741,6 +750,13 @@
             onAttach: (clipboard, elements) => makeLinkToElement(elements),
             clipboardElements: clipboardElements,
             browserBasedClipboard: true
+        })
+    }
+
+    async function runPopupExplorer4Editor(btt, aroundRect)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            onAttach: (clipboard, elements) => makeLinkToElement(elements)
         })
     }
 

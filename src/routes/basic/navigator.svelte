@@ -18,10 +18,11 @@
 
     export let sidebar = true;
 
-    let taskLists = [];
+    let userTaskLists = [];
+    let groupTaskLists = [];
     let user = {};
-    let navLists;
-    let navItems = [];
+    let navUserLists;
+    let navGroupLists;
     
     $: currentPath = $location;
 
@@ -45,41 +46,64 @@
     
     async function initNavigator()
     {
-        
-        if($session.isActive)
-        {
-            reef.get("/user", onErrorShowAlert).then((res) => {
-                if(res != null)
-                    user = res.User;
-            })
-           
-        }
-
         initGroupSelector();
 
-        const cacheKey = `listsNavigator`
-        const cachedValue = cache.get(cacheKey)
-        if(cachedValue)
+        const cachedUserLists = cache.get('listsNavigator_0')
+        if(cachedUserLists)
         {
-            taskLists = cachedValue;
-            navLists?.reload(taskLists)
+            userTaskLists = cachedUserLists;
+            navUserLists?.reload(userTaskLists)
+        }
+
+        const cachedGroupLists = cache.get('listsNavigator_1')
+        if(cachedGroupLists)
+        {
+            groupTaskLists = cachedGroupLists;
+            navGroupLists?.reload(groupTaskLists)
         }
 
         await fetchData()
-        navLists?.reload(taskLists)
-        cache.set(cacheKey, taskLists);
+
+        navGroupLists?.reload(groupTaskLists)
+        navUserLists?.reload(userTaskLists)
+
+        cache.set('listsNavigator_0', userTaskLists);
+        cache.set('listsNavigator_1', groupTaskLists);
     }
 
     async function fetchData()
     {
-        let res = await reef.post('group/query', {
+        const limit = isDeviceSmallerThan("sm") ? 7 : 12
+
+        const userTasklistsPromise = reef.post('user/query', {
             Id: 1,
-            Name: "collector",
-            ExpandLevel: 1,
-            Limit: isDeviceSmallerThan("sm") ? 7 : 12,
+            Name: 'user tasklists',
+            Limit: limit,
             Tree: [
                 {
-                    Id: 2,
+                    Id: 11,
+                    Association: '',
+                    Expressions: ['Id', '$ref', 'href', 'Name'],
+                    SubTree: [
+                        {
+                            Id: 110,
+                            Association: 'MyLists',
+                            Sort: 'Order',
+                            Expressions: ['Id', 'Name', 'Summary', 'Order', 'href', '$ref', '$type']
+                        }
+                    ]
+                }
+            ]
+        }, onErrorShowAlert)
+
+        const groupTasklistsPromise = reef.post('group/query', {
+            Id: 2,
+            Name: "group tasklists",
+            ExpandLevel: 1,
+            Limit: limit,
+            Tree: [
+                {
+                    Id: 21,
                     Association: 'Lists',
                     Sort: "Order",
                     Expressions: ['Id', 'Name', 'Summary', 'Order', 'href', '$ref', '$type']
@@ -87,16 +111,30 @@
             ]
         }, onErrorShowAlert)
 
-        if(res != null)
-            taskLists = res.TaskList;
+        const results = await Promise.all([userTasklistsPromise, groupTasklistsPromise])
+
+        if(results[0])
+        {
+            user = results[0].User;
+            userTaskLists = user.MyLists
+        }
         else
-            taskLists = [];
+        {
+            user = null
+            userTaskLists = []
+        }
+        
+        if(results[1])
+            groupTaskLists = results[1].TaskList;
+        else
+            groupTaskLists = []
     }
 
     async function reload()
     {
         await fetchData();
-        navLists.reload(taskLists)
+        navGroupLists.reload(groupTaskLists)
+        navUserLists.reload(userTaskLists)
     }
 
     async function addList(listName, order)
@@ -242,17 +280,17 @@
             },
             {
                 caption: '_; Move on top; Mover a la parte superior; Przesuń na szczyt',
-                action: (f) => navLists.moveTop(dataItem)
+                action: (f) => navGroupLists.moveTop(dataItem)
             },
             {
                 caption: '_; Move up; Desplazar hacia arriba; Przesuń w górę',
                 icon: FaCaretUp,
-                action: (f) => navLists.moveUp(dataItem)
+                action: (f) => navGroupLists.moveUp(dataItem)
             },
             {
                 caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                 icon: FaCaretDown,
-                action: (f) => navLists.moveDown(dataItem)
+                action: (f) => navGroupLists.moveDown(dataItem)
 
             },
             {
@@ -287,7 +325,7 @@
 
     export function requestAdd()
     {
-        navLists.add(async (listName, order) => {
+        navGroupLists.add(async (listName, order) => {
             await addList(listName, order)
         })
     }
@@ -416,7 +454,7 @@
 
 {#key currentPath}
 {#if sidebar}
-    {#if taskLists && taskLists.length > 0}
+    {#if groupTaskLists && groupTaskLists.length > 0}
         {#if showGroupsSwitchMenu}
             <SidebarGroup>
                 <SidebarItem    href=""    
@@ -439,19 +477,37 @@
                     _; My Tasks; Mis tareas; Moje zadania
                 </SidebarItem>
             </SidebarGroup>
+
+            <SidebarGroup   title={i18n({en: 'My lists', es: 'Mis listas', pl: 'Moje listy'})}
+                            moreHref="/mylists">
+            
+                <SidebarList    objects={userTaskLists} 
+                                orderAttrib='Order'
+                                bind:this={navUserLists}>
+                    <svelte:fragment let:item let:idx>
+                        {@const href = item.href}
+                        <SidebarItem   {href}
+                                        icon={FaList}
+                                        active={isRoutingTo(href, currentPath)}
+                                        summary={ext(item.Summary)}>
+                            {ext(item.Name)}
+                        </SidebarItem>
+                    </svelte:fragment>
+                </SidebarList> 
+            </SidebarGroup>
+
         {/if}
 
-        <SidebarGroup   title={i18n({en: 'Task lists', es: 'Listas de tareas', pl: 'Listy zadań'})}
+        <SidebarGroup   title={i18n({en: 'Common lists', es: 'Listas comunes', pl: 'Wspólne listy'})}
                         moreHref="/alllists">
            
-            <SidebarList    objects={taskLists} 
+            <SidebarList    objects={groupTaskLists} 
                             orderAttrib='Order'
-                            bind:this={navLists}>
+                            bind:this={navGroupLists}>
                 <svelte:fragment let:item let:idx>
                     {@const href = item.href}
                     <SidebarItem   {href}
                                     icon={FaList}
-                                    bind:this={navItems[idx]}
                                     active={isRoutingTo(href, currentPath)}
                                     summary={ext(item.Summary)}>
                         {ext(item.Name)}
@@ -466,7 +522,7 @@
 
 {:else} <!-- !sidebar -->
 
-    {#if taskLists && taskLists.length > 0}
+    {#if groupTaskLists && groupTaskLists.length > 0}
 
     {#if showGroupsSwitchMenu}
         <SidebarGroup>
@@ -489,20 +545,36 @@
                     _; My Tasks; Mis tareas; Moje zadania
                 </SidebarItem>
             </SidebarGroup>
+
+            <SidebarGroup title={i18n({en: 'My lists', es: 'Mis listas', pl: 'Moje listy'})}
+                            moreHref="/mylists">
+                            
+                <SidebarList    objects={userTaskLists} 
+                                orderAttrib='Order'
+                                bind:this={navUserLists}>
+                    <svelte:fragment let:item let:idx>
+                        {@const href = item.href}
+                        <SidebarItem   {href}
+                                        icon={FaList}
+                                        {item}
+                                        summary={ext(item.Summary)}>
+                            {ext(item.Name)}
+                        </SidebarItem>
+                    </svelte:fragment>
+                </SidebarList> 
+            </SidebarGroup>
         {/if}
         
-        <SidebarGroup title={i18n({en: 'Task lists', es: 'Listas de tareas', pl: 'Listy zadań'})}
+        <SidebarGroup title={i18n({en: 'Common lists', es: 'Listas comunes', pl: 'Wspólne listy'})}
                         moreHref="/alllists">
                         
-            <SidebarList    objects={taskLists} 
+            <SidebarList    objects={groupTaskLists} 
                             orderAttrib='Order'
-                            bind:this={navLists}>
+                            bind:this={navGroupLists}>
                 <svelte:fragment let:item let:idx>
                     {@const href = item.href}
                     <SidebarItem   {href}
                                     icon={FaList}
-                                    bind:this={navItems[idx]}
-                                    
                                     {item}
                                     summary={ext(item.Summary)}>
                         {ext(item.Name)}
