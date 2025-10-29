@@ -437,7 +437,7 @@
     {#if multiselect}
         {@const icon=is_row_active ? FaRegCheckSquare : FaRegSquare}
          <Icon  component={icon} 
-                class="flex-none h-5 w-5 sm:h-4 sm:w-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 mr-3 "
+                class="flex-none h-4 w-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-1 ml-2 mr-3 "
                 on:click={onToggleMultiSelect}/>
     {/if}
     

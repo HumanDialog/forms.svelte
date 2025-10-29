@@ -236,7 +236,7 @@
 
                     <span slot="left" let:element>
                         <Icon component={getElementIcon(element)}
-                            class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
+                            class="text-stone-500 dark:text-stone-400 h-5 w-5  cursor-pointer mt-0.5  ml-2  mr-1"/>
                     </span>
                 </List>
             {/if}
