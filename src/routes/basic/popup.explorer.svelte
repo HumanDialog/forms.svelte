@@ -5,12 +5,13 @@
         List, ListTitle, ListSummary, Spinner, i18n,
         contextItemsStore,
         getActiveItems,
-        clearActiveItem
+        clearActiveItem, 
+        ext
     }   from '$lib'
     import {FaRegFolder, FaRegFile, FaRegCalendarCheck, FaRegCalendar, FaFileDownload, FaList, FaRegComments, FaRegClipboard, FaClipboardList, FaLevelUpAlt} from 'svelte-icons/fa'
     import { afterUpdate, onMount } from "svelte";
     import {transformClipboardToJSONReferences} from './basket.utils'
-	import { element } from "svelte/internal";
+	
 	
     export let destinationContainer = ''
     export let onHide = undefined
@@ -804,32 +805,18 @@
 
     }
 
-    function getFolderIcon(folder)
-    {
-        if(folder.icon)
-        {
-            switch(folder.icon)
-            {
-            case 'Folder':
-                return FaRegFolder;
-            case 'Clipboard':
-                return FaRegClipboard;
-            case 'Discussion':
-                return FaRegComments;
-            default:
-                return FaRegFolder
-            }
-        }
-        else
-            return FaRegFolder
-    }
-
     function getElementIcon(element)
     {
         switch(element.icon)
         {
         case 'Folder':
-            return getFolderIcon(element)
+            return FaRegFolder;
+        
+        case 'Clipboard':
+            return FaRegClipboard;
+        
+        case 'Discussion':
+            return FaRegComments;
 
         case 'Note':
             return FaRegFile;
@@ -907,7 +894,7 @@
                 {/if}
 
                 <h2 class="text-lg font-semibold ">
-                    {currentLevelTitle}
+                    {ext(currentLevelTitle)}
                 </h2>
             </div>
             

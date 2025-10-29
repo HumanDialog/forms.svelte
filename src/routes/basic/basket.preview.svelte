@@ -155,32 +155,18 @@
     }
     */
 
-    function getFolderIcon(folder)
-    {
-        if(folder.icon)
-        {
-            switch(folder.icon)
-            {
-            case 'Folder':
-                return FaRegFolder;
-            case 'Clipboard':
-                return FaRegClipboard;
-            case 'Discussion':
-                return FaRegComments;
-            default:
-                return FaRegFolder
-            }
-        }
-        else
-            return FaRegFolder
-    }
-
     function getElementIcon(element)
     {
         switch(element.icon)
         {
         case 'Folder':
-            return getFolderIcon(element)
+            return FaRegFolder;
+        
+        case 'Clipboard':
+            return FaRegClipboard;
+        
+        case 'Discussion':
+            return FaRegComments;
 
         case 'Note':
             return FaRegFile;
