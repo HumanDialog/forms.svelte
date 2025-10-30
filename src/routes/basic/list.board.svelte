@@ -628,7 +628,11 @@
                             menu: [
                                     {
                                         caption: '_; Copy; Copiar; Kopiuj',
-                                        action: (f) => copyTaskToBasket(task),
+                                        action: (f) => copyTaskToBasket(task)
+                                    },
+                                    {
+                                        caption: '_; Cut; Cortar; Wytnij',
+                                        action: (f) => cutTaskToBasket(task)
                                     },
                                     {
                                         caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
@@ -915,7 +919,20 @@
 
     async function copyTaskToBasket(task)
     {
-        await reef.post(`${task.$ref}/CopyToBasket`, { } , onErrorShowAlert);
+        await reef.post(`${currentList.$ref}/CopyTaskToBasket`, {
+                task: task.$ref, 
+                flags: 0}, 
+                onErrorShowAlert)
+    }
+
+    async function cutTaskToBasket(task)
+    {
+        await reef.post(`${currentList.$ref}/CutTaskToBasket`, {
+                task: task.$ref, 
+                flags: 0}, 
+                onErrorShowAlert)
+
+        reload(kanban.SELECT_NEXT);
     }
 
     const STATE_FINISHED = 7000

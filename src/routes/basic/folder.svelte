@@ -943,18 +943,10 @@
 
     async function cutElementToBasketMulti(items)
     {
-        //const refs = items.map( (e) => e.$ref)
         let refs = []
-        items.forEach(i => 
-            refs.push({
-                Type: i.$type,
-                Id: i.Id,
-                Title: i.Title,
-                ref: i.$ref
-                })   
-        )
+        items.forEach((i) => refs.push(i.$ref))
         
-        await reef.post(`${contextItem.$ref}/CutToBasketMulti`, { items: refs } , onErrorShowAlert);
+        await reef.post(`${contextItem.$ref}/CutToBasketMulti`, { refs: refs } , onErrorShowAlert);
         await fetchData();
         listComponent.reload(contextItem, listComponent.SELECT_NEXT);
     }
@@ -1106,20 +1098,16 @@
                                         action: (f) => copyElementToBasket(element, kind),
                                     },
                                     {
+                                        caption: '_; Cut; Cortar; Wytnij',
+                                        action: (f) => cutElementToBasket(element, kind)
+                                    },
+                                    {
                                         caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
                                         disabled: true
                                     }
                                 ]
                             },
-                        /*    {
-                                caption: '_; Cut; Cortar; Wytnij',
-                                icon: FaCut, //FaCut,
-                                action: (f) => cutElementToBasket(element, kind),
-                                hideToolbarCaption: true,
-                                fab: 'M40',
-                                tbr: 'A'
-                            },
-                        */    {
+                            {
                                 separator: true
                             },
                             ...linkOperations
@@ -1203,21 +1191,17 @@
                                         action: (f) => copyElementToBasketMulti(items),
                                     },
                                     {
+                                        caption: '_; Cut; Cortar; Wytnij',
+                                        action: (f) => cutElementToBasketMulti(items)
+                                    },
+                                    {
                                         caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
                                         disabled: true
                                     }
                                 ],
                                 hideToolbarCaption: true
                             },
-                        /*    {
-                                caption: '_; Cut; Cortar; Wytnij',
-                                icon: FaCut, //FaCut,
-                                action: (f) => cutElementToBasketMulti(items),
-                                hideToolbarCaption: true,
-                                fab: 'M40',
-                                tbr: 'A'
-                            },
-                        */    {
+                            {
                                 separator: true
                             },
                             {

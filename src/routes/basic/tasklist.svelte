@@ -535,6 +535,10 @@
                                     action: (f) => copyTaskToBasket(task),
                                 },
                                 {
+                                    caption: '_; Cut; Cortar; Wytnij',
+                                    action: (f) => cutTaskToBasket(task)
+                                },
+                                {
                                     caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
                                     disabled: true
                                 }
@@ -638,8 +642,22 @@
 
     async function copyTaskToBasket(task)
     {
-        await reef.post(`${task.$ref}/CopyToBasket`, { } , onErrorShowAlert);
+        await reef.post(`${listPath}/CopyTaskToBasket`, {
+                task: task.$ref, 
+                flags: 0}, 
+                onErrorShowAlert)
     }
+
+    async function cutTaskToBasket(task)
+    {
+        await reef.post(`${listPath}/CutTaskToBasket`, {
+                task: task.$ref, 
+                flags: 0}, 
+                onErrorShowAlert)
+
+        reloadTasks(listComponent.SELECT_NEXT);
+    }
+   
 
 </script>
 
