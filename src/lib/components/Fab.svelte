@@ -272,7 +272,7 @@
             showFloatingToolbar(rect, operation.toolbar, operation.props ?? {})
         else if(operation.grid)
         {
-            if(mobile)
+            if(false && mobile)
                 showMenu(rect, operation.grid)     // mobile screen too small
             else
                 showGridMenu(rect, operation.grid)

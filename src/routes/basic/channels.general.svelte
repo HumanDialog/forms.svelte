@@ -166,11 +166,11 @@
                             fab:'M20',
                             grid:[
                                 {
-                                    caption: '_; Edit Title; Editar título; Edytuj tytuł',
+                                    caption: '_; Title; Título; Tytuł',
                                     action: (f) =>  { listComponent.edit(channel, 'Title') },
                                 },
                                 {
-                                    caption: '_; Edit summary; Editar resumen; Edytuj podsumowanie',
+                                    caption: '_; Summary; Resumen; Podsumowanie',
                                     action: (f) =>  { listComponent.edit(channel, 'Summary') }
                                 }
                             ]

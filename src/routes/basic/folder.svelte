@@ -1066,13 +1066,13 @@
                                 fab:'M20',
                                 grid:[
                                     {
-                                        caption: '_; Edit Title; Editar título; Edytuj tytuł',
+                                        caption: '_; Title; Título; Tytuł',
                                         action: (focused) =>  { listComponent.edit(element, 'Title') },
                                         tbr: 'A',
 
                                     },
                                     {
-                                        caption: '_; Edit summary; Editar resumen; Edytuj podsumowanie',
+                                        caption: '_; Summary; Resumen; Podsumowanie',
                                         action: (focused) =>  { listComponent.edit(element, 'Summary') }
                                     }
                                 ]

@@ -271,7 +271,7 @@
                 action: (f) => startEditing(domNode)
             },
             {
-                caption: '_; Edit summary; Editar resumen; Edytuj podsumowanie',
+                caption: '_; Summary; Resumen; Podsumowanie',
                 action: (f) => navItem.editSummary()
             },
             {
@@ -308,7 +308,7 @@
                 separator: true
             },
           */  {
-                caption: '_; Edit summary; Editar resumen; Edytuj podsumowanie',
+                caption: '_; Summary; Resumen; Podsumowanie',
                 action: (f) => navItem.editSummary()
             },
             {
