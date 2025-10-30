@@ -1697,8 +1697,12 @@
                             if(range)
                                 editor.chain().focus().deleteRange(range).run();
 
+                            let stayFocused = false
                             if(exc.action)
-                                exc.action();
+                                stayFocused = exc.action();
+
+                            if(!stayFocused)
+                                editor.commands.blur()
                         },
                     is_active: () => {
                         if(exc.is_active)
@@ -1733,8 +1737,12 @@
                             if(range)
                                 editor.chain().focus().deleteRange(range).run();
 
+                            let stayFocused = false
                             if(exc.action)
-                                exc.action();
+                                stayFocused = exc.action();
+
+                            if(!stayFocused)
+                                editor.commands.blur()
                         },
                     is_active: () => {
                         if(exc.is_active)
@@ -1763,8 +1771,12 @@
                             if(range)
                                 editor.chain().focus().deleteRange(range).run();
 
+                            let stayFocused = false
                             if(exc.action)
-                                exc.action();
+                                stayFocused = exc.action();
+
+                            if(!stayFocused)
+                                editor.commands.blur()
                         },
                     is_active: () => {
                         if(exc.is_active)

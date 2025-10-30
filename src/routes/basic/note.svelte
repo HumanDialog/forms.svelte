@@ -728,6 +728,7 @@
                 const aroundRect = range.getBoundingClientRect();
 
                 showMenu(aroundRect, operations, SHOW_MENU_BELOW)
+                return false;   // do not focus editor again
             }
         }
     ]
