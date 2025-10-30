@@ -40,9 +40,10 @@
 <li class=" mx-2 pt-2 pb-4 px-1 rounded-md border border-transparent
             bg-stone-100 dark:bg-stone-700">
 
+    <!-- whitespace-nowrap overflow-clip  -->
     <h3  class=" text-base font-semibold min-h-[1.75rem]
                  sm:min-h-[1.25rem]
-                whitespace-nowrap overflow-clip w-full sm:flex-none "
+                w-full sm:flex-none "
                 use:editable={{
                     action: (text) => onInsert(text, ''),
                     active: false,

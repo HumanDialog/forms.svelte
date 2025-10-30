@@ -118,8 +118,9 @@
 
 <section class="flex flex-row justify-between">
     {#each properties as prop, idx}
-        {#if item[prop.a] || placeholder==prop.name}
-            {#if prop.type == rList_property_type.Date}
+        {#if true}
+            {@const notEmpty = item[prop.a] || placeholder==prop.name}
+            {#if prop.type == rList_property_type.Date && notEmpty}
                 <DatePicker
                     self={item}
                     a={prop.a}
@@ -127,7 +128,7 @@
                     s="sm"
                     inContext="props"
                     bind:this={propElements[idx]}/>
-            {:else if prop.type == rList_property_type.Combo}
+            {:else if prop.type == rList_property_type.Combo && notEmpty}
                 <Combo
                         compact={true}
                         inContext="props"
@@ -151,7 +152,7 @@
                                 bind:this={propElements[idx]}>
                     {item[prop.a]}
                 </p>
-            {:else if prop.type == rList_property_type.Tags}
+            {:else if prop.type == rList_property_type.Tags && notEmpty}
                 <Tags
                     class="mt-1"
                     compact

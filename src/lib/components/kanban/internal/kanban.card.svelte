@@ -293,8 +293,9 @@
         {@const canOpen = isLinkLike || hasOpen}
         {@const openableClass = canOpen ? "sm:hover:cursor-pointer underline" : ""}
         {@const showIcon = showAttachementIcon()}
+            <!-- whitespace-nowrap overflow-clip  -->
             <h3 class=" h3 text-base font-semibold pb-1
-                        whitespace-nowrap overflow-clip truncate w-full sm:flex-none
+                         w-full sm:flex-none
                         relative {openableClass}"
                 use:editable={{
                     action: (text) => onTitleChanged(text), 
@@ -329,9 +330,10 @@
           
                         
     {:else}
+        <!-- whitespace-nowrap overflow-clip  -->
         <h3  class=" text-base font-semibold pb-1
                     sm:text-base sm:font-semibold 
-                    whitespace-nowrap overflow-clip truncate w-full sm:flex-none
+                    w-full sm:flex-none
                     relative">
             {item[definition.titleAttrib]}
 
