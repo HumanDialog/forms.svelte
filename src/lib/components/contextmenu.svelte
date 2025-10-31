@@ -24,7 +24,7 @@
     let submenus = [];
     let around_rect :DOMRect;
     let around_preference: number = 0
-    let css_position = ''
+    let css_position = 'display: none'
     let closeButtonPos = ''
 
     $: display = visible ? 'block' : 'none';

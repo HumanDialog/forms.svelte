@@ -1698,3 +1698,17 @@
     <Spinner delay={0}/>
     <span class="ml-3">_; Your file is uploading to the server; Tu archivo se está cargando en el servidor; Twój plik jest przesyłany na serwer</span>
 </Modal>
+
+<Modal  title={i18n(['Delete', 'Eliminar', 'Usuń'])}
+        icon={FaTrash}
+        onOkCallback={deleteAttachement}
+        bind:this={deleteModal}>
+    <p class="text-sm text-stone-500 dark:text-stone-300">
+        <span>
+            _; 
+            Are you sure you want to delete selected element?;
+            ¿Está seguro de que desea eliminar el elemento seleccionado?;
+            Czy na pewno chcesz usunąć wybrany element?
+        </span>
+    </p>
+</Modal>

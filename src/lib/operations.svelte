@@ -109,6 +109,7 @@
 
             operations.forEach(group => {
 
+                let previousOperationGroupName = ''
                 if(group.tbr)
                 {
                     const expandOperation = {
@@ -144,18 +145,41 @@
                     {
                         const tbrOperation = {
                             ...op,
+                            group: group.caption
                         }
 
                         if(op.hideToolbarCaption)
                             tbrOperation.caption = ''
 
+                        const shouldAddSeparator = (list, groupName) => {
+                            if(!groupName)
+                                return false
+
+                            if(list && list.length > 0)
+                            {
+                                const last = list[list.length-1]
+                                if(last.group && (last.group != groupName))
+                                {
+                                    return true
+                                }
+                                else
+                                    return false
+                            }
+                            else
+                                return false;
+                        }
+
                         switch(op.tbr)
                         {
                         case 'A':
+                            if(shouldAddSeparator(AOperations, tbrOperation.group))
+                                AOperations.push({separator: true})        
                             AOperations.push(tbrOperation)
                             break;
 
                         case 'B':
+                            if(shouldAddSeparator(BOperations, group.caption))
+                                BOperations.push({separator: true})       
                             BOperations.push(tbrOperation)
                             break;
 
@@ -174,6 +198,9 @@
             leftOperations = [...AOperations, ...BOperations]
             rightOperations = COperations.toReversed()
             rightOperations = [...rightOperations, ...DOperations.toReversed()]
+
+           
+
         }
         else
         {
@@ -280,7 +307,7 @@
                                 on:mousedown={(e) => mousedown(e, operation)}
                                 on:click={(e) => {on_click(e, operation, isDisabled)}}>
                             {#if operation.icon}
-                                <div class="w-5 h-5 mr-1"><svelte:component this={operation.icon}/></div>
+                                <div class="w-4 h-4 mr-1"><svelte:component this={operation.icon}/></div>
                             {/if}
                             {#if operation.caption}
                                 <span class="ml-1">{operation.caption}</span>
@@ -310,7 +337,7 @@
                             on:mousedown={(e) => mousedown(e, operation)}
                             on:click={(e) => {on_click(e, operation, isDisabled)}}>
                         {#if operation.icon}
-                            <div class="w-5 h-5 mr-1"><svelte:component this={operation.icon}/></div>
+                            <div class="w-4 h-4 mr-1"><svelte:component this={operation.icon}/></div>
                         {/if}
                         {#if operation.caption}
                             <span class="ml-1">{operation.caption}</span>
@@ -318,7 +345,7 @@
                     </button>
                 {/if}
             {:else}
-                <div class="border-l py-4"></div>
+                <div class="border border-l my-1.5 mx-2 border-stone-200 dark:border-stone-800"></div>
                 <!--div class="border-l my-2"></div-->
             {/if}
         {/each}
@@ -352,7 +379,7 @@
                         on:mousedown={(e) => mousedown(e, operation)}
                         on:click={(e) => {on_click(e, operation, isDisabled)}}>
                     {#if operation.icon}
-                        <div class="w-5 h-5 mr-1"><svelte:component this={operation.icon}/></div>
+                        <div class="w-4 h-4 mr-1"><svelte:component this={operation.icon}/></div>
                     {/if}
                     {#if operation.caption}
                         <span class="ml-1">{operation.caption}</span>
