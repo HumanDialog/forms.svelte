@@ -110,7 +110,7 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex-->
 
-<ul >
+<ul on:click>
     {#each steps as step, idx (step[a])}
         {@const finished = isFinished(step) ? "line-through" : ""}
         <li class="{finished} editable focus:outline-none neglect-brs"

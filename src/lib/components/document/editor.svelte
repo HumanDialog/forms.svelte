@@ -1796,7 +1796,8 @@
 
 
 
-<div bind:this={editorElement} />
+<div on:click 
+    bind:this={editorElement} />
 
 <Palette    commands={getPaletteCommands()}
             bind:this={palette}

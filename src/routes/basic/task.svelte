@@ -28,8 +28,8 @@
             showFloatingToolbar,
 			randomString,
 			showMenu,
-            SHOW_MENU_BELOW
-
+            SHOW_MENU_BELOW,
+            List, ListTitle, ListSummary, Icon
             } from '$lib'
 	import { onMount, tick } from 'svelte';
     import {location, querystring, push, link} from 'svelte-spa-router'
@@ -37,7 +37,7 @@
     import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont,
         FaPen, FaList, FaTimes, FaUpload, FaCut,  FaFile, FaImage, FaTable, FaPaperclip, FaBold, FaItalic,
         FaUnderline, FaStrikethrough, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle, FaInfo,
-        FaListUl, FaLink, FaRegFolder, FaRegFile, FaDownload
+        FaListUl, FaLink, FaRegFolder, FaRegFile, FaDownload, FaTrash, FaRegCalendar
     } from 'svelte-icons/fa/'
     import AttachedFile from './attached.file.svelte'
     import BasketPreview from './basket.preview.svelte'
@@ -133,22 +133,22 @@
                                         {
                                             Id: 12,
                                             Association: 'TaskList',
-                                            Expressions:['$ref', 'Name', 'TaskStates', 'href']
+                                            Expressions:['$ref', 'Name', 'Summary', 'TaskStates', 'href']
                                         },
                                         {
                                             Id: 13,
                                             Association: 'InFolders/Folder',
-                                            Expressions:['$ref', 'Title', 'href']
+                                            Expressions:['$ref', 'Title', 'Summary', 'href', 'icon']
                                         },
                                         {
                                             Id: 14,
                                             Association: 'Notes',
-                                            Expressions:['$ref', 'Title', 'href']
+                                            Expressions:['$ref', 'Title', 'Summary', 'href', 'IsCanonical']
                                         },
                                         {
                                             Id: 15,
                                             Association: 'Files',
-                                            Expressions:['$ref', 'Title', 'href']
+                                            Expressions:['$ref', 'Title', 'Summary', 'href', 'IsCanonical']
                                         }
                                     ]
                                 }
@@ -192,6 +192,38 @@
                 })
             })
         }
+
+        task.connectedToList = []
+        if(task['InFolders/Folder'] && task['InFolders/Folder'].length > 0)
+        {
+            task['InFolders/Folder'].forEach((f) => {
+                    task.connectedToList.push({
+                        Title: f.Title,
+                        Summary: f.Summary,
+                        href: f.href,
+                        $ref: f.$ref,
+                        icon: f.icon
+                })
+            })
+        }
+
+        if(task.TaskList)
+            task.connectedToList.push({
+                Title: task.TaskList.Name,
+                Summary: task.TaskList.Summary,
+                href: task.TaskList.href,
+                $ref: task.TaskList.$ref,
+                icon: 'TaskList'
+        })
+
+        if(task.Actor)
+            task.connectedToList.push({
+                Title: task.Actor.Name,
+                Summary: '',
+                href: task.Actor.href,
+                $ref: task.Actor.$ref,
+                icon: 'User'
+        })
 
     }
 
@@ -415,7 +447,7 @@
         showFloatingToolbar(aroundRect, BasketPreview, 
             {
                 destinationContainer: taskRef,
-                onRefreshView: async (f) => await reloadData(),
+                onRefreshView: async (f) => await reloadWithAttachements(),
                 clipboardElements: clipboardElements
             }
         )
@@ -429,7 +461,7 @@
             const references = transformClipboardToJSONReferences([clipboardElements[0]])
             const res = await reef.post(`${taskRef}/AttachClipboard`, { references: references }, onErrorShowAlert)
             if(res)
-                await reloadData();
+                await reloadWithAttachements();
             
         }
     }
@@ -439,7 +471,7 @@
         const clipboardElements = getBrowserRecentElements()
         showFloatingToolbar(aroundRect, BasketPreview, {
             destinationContainer: taskRef,
-            onRefreshView: async (f) => await reloadData(),
+            onRefreshView: async (f) => await reloadWithAttachements(),
             clipboardElements: clipboardElements,
             browserBasedClipboard: true
         })
@@ -449,8 +481,15 @@
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
             destinationContainer: taskRef,
-            onRefreshView: async (f) => await reloadData()
+            onRefreshView: async (f) => await reloadWithAttachements()
         })
+    }
+
+    async function reloadWithAttachements()
+    {
+        await reloadData();
+        attachementsNotesComponent.reload(task, attachementsNotesComponent.CLEAR_SELECTION);
+        attachementsFilesComponent.reload(task, attachementsFilesComponent.CLEAR_SELECTION);
     }
 
     let summary;
@@ -505,7 +544,7 @@
         }, */
         {
             caption: '_; Due Date; Fecha; Termin',
-            icon: FaCalendarAlt,
+        //    icon: FaCalendarAlt,
             action: async (f) =>
                 {
                     if(dueDate)
@@ -523,7 +562,7 @@
         },
         {
             caption: '_; Responsible; Responsable; Odpowiedzialny',
-            icon: FaUser,
+        //    icon: FaUser,
             action: async (f) =>
                 {
                     if(responsible)
@@ -539,12 +578,12 @@
 
         {
             caption: '_; Tag; Etiqueta; Etykieta',
-            icon: FaTag,
+       //     icon: FaTag,
             action: async (f) => runTagInserter()
         },
         {
             caption: '_; Step; Paso; Krok',
-            icon: FaCheck,
+        //    icon: FaCheck,
             action: async (f) =>
                 {
                     if(steps)
@@ -566,12 +605,12 @@
         },
         {
             caption: '_; Attachement; Anexo; Załącznik',
-            icon: FaFile,
+       //     icon: FaFile,
             action: async (f) => runFileAttacher()
         },
         {
             caption: '_; Description; Descripción; Opis',
-            icon: FaAlignLeft,
+        //    icon: FaAlignLeft,
             action: async (f) =>
                 {
                     if(description)
@@ -1306,6 +1345,286 @@
         }
     }
 
+    let attachementsNotesComponent
+    let attachementsFilesComponent
+    let connectedToComponent
+    const attList = (kind) => kind == 'TaskNote' ? attachementsNotesComponent : attachementsFilesComponent
+    function attachementOperations(element, kind)
+    {
+        const isCanonical = element.IsCanonical
+
+        let list = attList(kind);
+
+        let linkOperations = []
+        if(isCanonical)
+        {
+            linkOperations = [
+                {
+                    caption: '_; Delete; Eliminar; Usuń',
+                    action: (f) => askToDeleteAttachement(element, kind)
+                }
+            ]
+        }
+        else
+        {
+             linkOperations = [
+                {
+                    caption: '_; Detach; Desconectar; Odłącz',
+                    action: (f) => dettachAttachement(element, kind)
+                },
+                {
+                    caption: '_; Set as primary location; Establecer como ubicación principal; Ustaw jako główną lokalizację',
+                    action: (f) => setAttachementLocationAsCanonical(element, kind)
+                }
+             ]
+        }
+
+        
+        return {
+                opver: 2,
+                fab: 'M00',
+                tbr: 'D',
+                operations: [
+                    {
+                        caption: '_; Element; Elemento; Element',
+                        operations: [
+                            {
+                                caption: '_; Edit; Editar; Edytuj',
+                                icon: FaPen,
+                                tbr: 'A',
+                                fab:'M20',
+                                grid:[
+                                    {
+                                        caption: '_; Title; Título; Tytuł',
+                                        action: (focused) =>  { list.edit(element, 'Title') },
+                                    },
+                                    {
+                                        caption: '_; Summary; Resumen; Podsumowanie',
+                                        action: (focused) =>  { list.edit(element, 'Summary') }
+                                    }
+                                ]
+
+                            },
+                            {
+                                caption: '_; Send; Enviar; Wyślij',
+                                hideToolbarCaption: true,
+                                icon: FaUpload,
+                                tbr: 'D',
+                                fab: 'S00',
+                                menu: [
+                                    {
+                                        caption: '_; Copy; Copiar; Kopiuj',
+                                        action: (f) => copyAttachementToBasket(element, kind),
+                                    },
+                                    {
+                                        caption: '_; Cut; Cortar; Wytnij',
+                                        action: (f) => cutAttachementToBasket(element, kind)
+                                    },
+                                    {
+                                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
+                                        disabled: true
+                                    }
+                                ]
+                            },
+                            {
+                                separator: true
+                            },
+                            ...linkOperations
+                        ]
+                    }
+                ]
+            }
+    }
+
+    async function changeAttachementProperty(item, value, propName)
+    {
+        item[propName] = value
+
+        switch(propName)
+        {
+        case 'Title':
+            await reef.post(`${item.$ref}/SetTitle`, { value: value }, onErrorShowAlert)
+            break;
+
+        case 'Summary':
+            await reef.post(`${item.$ref}/SetSummary`, { value: value }, onErrorShowAlert)
+            break;
+        }
+
+    }
+
+    async function copyAttachementToBasket(element, kind)
+    {
+        switch(kind)
+        {
+        case 'Note':
+        case 'TaskNote':
+            return copyNoteToBasket(element)
+        case 'UploadedFile':
+        case 'TaskFile':
+            return copyFileToBasket(element)
+        }
+    }
+
+    async function cutAttachementToBasket(element, kind)
+    {
+        switch(kind)
+        {
+        case 'Note':
+        case 'TaskNote':
+            return cutNoteToBasket(element)
+        case 'UploadedFile':
+        case 'TaskFile':
+            return cutFileToBasket(element)
+        }
+    }
+
+    async function copyNoteToBasket(note)
+    {
+        await reef.post(`${taskRef}/CopyNoteToBasket`, { noteLink: note.$ref } , onErrorShowAlert);
+    }
+
+    async function cutNoteToBasket(note)
+    {
+        await reef.post(`${taskRef}/CutNoteToBasket`, { noteLink: note.$ref } , onErrorShowAlert);
+        await reloadData();
+        attachementsNotesComponent.reload(task, attachementsNotesComponent.SELECT_NEXT);
+    }
+
+    async function copyFileToBasket(file)
+    {
+        await reef.post(`${taskRef}/CopyFileToBasket`, { fileLink: file.$ref } , onErrorShowAlert);
+    }
+
+    async function cutFileToBasket(file)
+    {
+        await reef.post(`${taskRef}/CutFileToBasket`, { fileLink: file.$ref } , onErrorShowAlert);
+        await reloadData();
+        attachementsFilesComponent.reload(task, attachementsFilesComponent.SELECT_NEXT);
+    }
+
+    async function dettachAttachement(element, kind)
+    {
+        switch(kind)
+        {
+        case 'Note':
+        case 'TaskNote':
+            return dettachNote(element)
+        case 'UploadedFile':
+        case 'TaskFile':
+            return dettachFile(element)
+        }
+    }
+
+    async function dettachNote(note)
+    {
+        await reef.post(`${taskRef}/DettachNote`, { noteLink: note.$ref } , onErrorShowAlert);
+        await reloadData();
+        attachementsNotesComponent.reload(task, attachementsNotesComponent.SELECT_NEXT);
+    }
+
+    async function dettachFile(file)
+    {
+        await reef.post(`${taskRef}/DettachFile`, { fileLink: file.$ref } , onErrorShowAlert);
+        await reloadData();
+        attachementsFilesComponent.reload(task, attachementsFilesComponent.SELECT_NEXT);
+    }
+
+    async function setAttachementLocationAsCanonical(element, kind)
+    {
+        await reef.get(`${element.$ref}/SetLocationAsCanonical`, onErrorShowAlert)
+        await reloadData();
+
+        switch(kind)
+        {
+        case 'Note':
+        case 'TaskNote':
+            attachementsNotesComponent.reload(task, attachementsNotesComponent.KEEP_SELECTION);
+        case 'UploadedFile':
+        case 'TaskFile':
+            attachementsFilesComponent.reload(task, attachementsFilesComponent.KEEP_SELECTION);
+        }    
+    }
+
+    let deleteModal;
+    let objectToDelete;
+    let deleteObjectKind = ''
+    function askToDeleteAttachement(object, kind)
+    {
+        deleteObjectKind = kind;
+        objectToDelete = object;
+        deleteModal.show()
+    }
+
+
+    async function deleteAttachement()
+    {
+        if(!objectToDelete)
+            return;
+
+        switch(deleteObjectKind)
+        {
+        case 'Note':
+        case 'TaskNote':
+            await reef.post(`${taskRef}/DeletePermanentlyNote`, { noteLink: objectToDelete.$ref } , onErrorShowAlert);
+            deleteModal.hide();
+            await reloadData();
+            attachementsNotesComponent.reload(task, attachementsNotesComponent.SELECT_NEXT);
+            break;
+
+        case 'UploadedFile':
+        case 'TaskFile':
+            await reef.post(`${taskRef}/DeletePermanentlyFile`, { fileLink: objectToDelete.$ref } , onErrorShowAlert);
+            deleteModal.hide();
+            await reloadData();
+            attachementsFilesComponent.reload(task, attachementsFilesComponent.SELECT_NEXT);
+            break;
+        }
+    }
+
+    function connectedToOperations(element)
+    {
+        return {
+                opver: 2,
+                fab: 'M00',
+                tbr: 'D',
+                disabled: true,
+                operations: [
+                    {
+                        caption: '_; Element; Elemento; Element',
+                        operations: [
+                            
+                        ]
+                    }
+                ]
+            }
+    }
+
+    function getElementIcon(element)
+    {
+        switch(element.icon)
+        {
+        case 'Folder':
+            return FaRegFolder
+
+        case 'Note':
+            return FaRegFile;
+
+        case 'Task':
+            return FaRegCalendar;
+
+        case 'UploadedFile':
+        case 'File':
+            return FaFile;
+
+        case 'TaskList':
+            return FaList;
+
+        case 'User':
+            return FaUser;
+        }
+    }
+
 </script>
 
 <svelte:head>
@@ -1322,7 +1641,7 @@
 <!-- svelte-ignore a11y-no-noninteractive-tabindex-->
 <Page   self={task}
             toolbarOperations={getPageOperations()}
-            clearsContext=''
+            clearsContext='props'
             title={task.Title}>
     <section class="w-full flex flex-col items-center">
         {#if task.GetCanonicalPath}
@@ -1455,7 +1774,8 @@
 
 
             {#if (task.Steps && task.Steps.length > 0) || stepsPlaceholder}
-                <TaskSteps steps={task.Steps}
+                <TaskSteps      on:click={(e) => e.stopPropagation()}
+                                steps={task.Steps}
                                 a='Label'
                                 checkedAttribute='Done'
                                 onRemove={onRemoveStep}
@@ -1468,7 +1788,8 @@
 
             {#if task.Description || descriptionPlaceholder}
                 <hr/>
-                <Editor     class="mb-40"
+                <Editor     on:click={(e) => e.stopPropagation()}
+                            class="mb-20"
                             a='Description'
                             compact={true}
                             bind:this={description}
@@ -1486,73 +1807,77 @@
             <hr/>
 
             {#if (task.Notes && task.Notes.length > 0) || (task.Files && task.Files.length > 0)}
-                <h4>_;Attachments; Anexos; Załączniki</h4>
-                <p>
+                <h4 class="ml-2">_;Attachments; Anexos; Załączniki</h4>
+                <section class="not-prose"> 
                     {#if task.Notes && task.Notes.length > 0}
-                        {#each task.Notes as note}
-                            <a  class="mr-2 whitespace-nowrap" href={'#'+note.href}>
-                                <span class="inline-block w-4 h-4 relative top-0.5">
-                                    <FaRegFile/>
-                                </span>
-                                <span>
-                                    {note.Title}
-                                </span>
-                            </a>        
-                        {/each}
+                        <List   self={task}
+                                a='Notes'
+                                bind:this={attachementsNotesComponent}
+                                toolbarOperations={(el) => attachementOperations(el, 'TaskNote')}>
+                            
+                            <ListTitle      a='Title'
+                                            hrefFunc={(el) => `${el.href}`}
+                                            onChange={changeAttachementProperty}/>
+
+                            <ListSummary    a='Summary' 
+                                            onChange={changeAttachementProperty}/>
+
+                            <span slot="left" let:element>
+                                <Icon component={FaRegFile}
+                                    class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
+                            </span>
+                        </List>
                     {/if}
 
                     {#if task.Files && task.Files.length > 0}
-                        {#each task.Files as file}
-                            <a  class="mr-2 whitespace-nowrap" on:click={(e) => downloadAttachedFile(e, file.href, file.Title)} href={file.href}>
-                                <span class="inline-block w-4 h-4 relative top-0.5">
-                                    <FaFile/>
-                                </span>
-                                <span>
-                                    {file.Title}
-                                </span>
-                            </a>        
-                        {/each}
+                        <List   self={task}
+                                a='Files'
+                                bind:this={attachementsFilesComponent}
+                                toolbarOperations={(el) => attachementOperations(el, 'TaskFile')}>
+                            
+                            <ListTitle      a='Title'
+                                            hrefFunc={(el) => `${el.href}`}
+                                            downloadable
+                                            onOpen={async (f) => await downloadFileFromHRef(f.href, f.Title)}
+                                            onChange={changeAttachementProperty}/>
+
+                            <ListSummary    a='Summary'
+                                            onChange={changeAttachementProperty}/>
+
+                            <span slot="left" let:element>
+                                <Icon component={FaFile}
+                                    class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
+                            </span>
+                        </List>
                     {/if}
-                </p>    
+                </section>
             {/if}
 
-            <h4>_; Attached to; Adjunto a; Przyłączony do</h4>
-            <p>
-                {#if task.TaskList}
-                    <a  class="mr-2 whitespace-nowrap" href={'#'+task.TaskList.href}>
-                        <span class="inline-block w-4 h-4 relative top-0.5">
-                            <FaList/>
-                        </span>
-                        <span>
-                            {ext(task.TaskList.Name)}
-                        </span>
-                    </a>
-                {/if}
+            <h4 class="ml-2">_; Attached to; Adjunto a; Przyłączony do</h4>
+            <section class="not-prose"> 
+                <List   self={task}
+                        a='connectedToList'
+                        bind:this={connectedToComponent}
+                        toolbarOperations = {(el) => connectedToOperations(el)}>
+                
+                    <ListTitle      a='Title'
+                                    hrefFunc={(el) => `${el.href}`}
+                                    readonly/>
 
-                {#if task.Actor}
-                    <a  class="mr-2 whitespace-nowrap" href={'#'+task.Actor.href}>
-                        <span class="inline-block w-4 h-4 relative top-0.5">
-                            <FaUser/>
-                        </span>
-                        <span>
-                            {task.Actor.Name}
-                        </span>
-                    </a>
-                {/if}
+                    <ListSummary    a='Summary' 
+                                    readonly/>
 
-                {#if task['InFolders/Folder'] && task['InFolders/Folder'].length > 0}
-                    {#each task['InFolders/Folder'] as inFolder}
-                        <a  class="mr-2 whitespace-nowrap" href={'#'+inFolder.href}>
-                            <span class="inline-block w-4 h-4 relative top-0.5">
-                                <FaRegFolder/>
-                            </span>
-                            <span>
-                                {ext(inFolder.Title)}
-                            </span>
-                        </a>
-                    {/each}
-                {/if}
-            </p>
+                    <span slot="left" let:element>
+                        <Icon component={getElementIcon(element)}
+                            class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
+                    </span>
+                </List>
+            </section>
+
+            <!-- empty section fot have bottom free area -->
+            <section class="mb-64">
+
+            </section>
 
         </article>
 
@@ -1565,7 +1890,22 @@
 </Page>
 {/if}
 
-<Modal title='Uploading...' bind:open={pendingUploading} mode={3} icon={FaCloudUploadAlt}>
+<Modal title={i18n(['Uploading...', 'Carga...', 'Przesyłanie...'])}
+    bind:open={pendingUploading} mode={3} icon={FaCloudUploadAlt}>
     <Spinner delay={0}/>
     <span class="ml-3">_; Your file is uploading to the server; Tu archivo se está cargando en el servidor; Twój plik jest przesyłany na serwer</span>
+</Modal>
+
+<Modal  title={i18n(['Delete', 'Eliminar', 'Usuń'])}
+        icon={FaTrash}
+        onOkCallback={deleteAttachement}
+        bind:this={deleteModal}>
+    <p class="text-sm text-stone-500 dark:text-stone-300">
+        <span>
+            _; 
+            Are you sure you want to delete selected element?;
+            ¿Está seguro de que desea eliminar el elemento seleccionado?;
+            Czy na pewno chcesz usunąć wybrany element?
+        </span>
+    </p>
 </Modal>

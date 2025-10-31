@@ -30,7 +30,8 @@
 			randomString,
             showMenu,
             SHOW_MENU_BELOW,
-            ext
+            ext,
+            List, ListTitle, ListSummary, Icon
             } from '$lib'
 	import { onMount, tick } from 'svelte';
 
@@ -38,7 +39,7 @@
 
     import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen, FaList, FaUpload, FaFile,
         FaImage, FaTable, FaPaperclip, FaBold, FaItalic, FaUnderline, FaStrikethrough, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle,
-        FaInfo, FaListUl, FaLink, FaRegFolder, FaRegCalendar, FaRegFile, FaDownload
+        FaInfo, FaListUl, FaLink, FaRegFolder, FaRegCalendar, FaRegFile, FaDownload, FaTrash
     } from 'svelte-icons/fa/'
 
 
@@ -131,28 +132,28 @@
                                         {
                                             Id: 13,
                                             Association: 'InFolders/Folder',
-                                            Expressions:['$ref', 'Title', 'href']
+                                            Expressions:['$ref', 'Title', 'Summary', 'href', 'icon']
                                         },
                                         {
                                             Id: 14,
                                             Association: 'InTasks/Task',
-                                            Expressions:['$ref', 'Title', 'href']
+                                            Expressions:['$ref', 'Title', 'Summary', 'href']
                                         },
                                         {
                                             Id: 15,
                                             Association: 'InNotes/InNote',
-                                            Expressions:['$ref', 'Title', 'href']
+                                            Expressions:['$ref', 'Title', 'Summary', 'href']
                                         },
 
                                         {
                                             Id: 16,
                                             Association: 'Notes',
-                                            Expressions:['$ref', 'Title', 'href']
+                                            Expressions:['$ref', 'Title', 'Summary', 'href', 'IsCanonical']
                                         },
                                         {
                                             Id: 17,
                                             Association: 'Files',
-                                            Expressions:['$ref', 'Title', 'href']
+                                            Expressions:['$ref', 'Title', 'Summary', 'href', 'IsCanonical']
                                         }
                                     ]
                                 }
@@ -182,6 +183,46 @@
                 attachedFiles.push({
                     name: n,
                     downloading: false
+                })
+            })
+        }
+
+        note.connectedToList = []
+        if(note['InFolders/Folder'] && note['InFolders/Folder'].length > 0)
+        {
+            note['InFolders/Folder'].forEach((f) => {
+                    note.connectedToList.push({
+                        Title: f.Title,
+                        Summary: f.Summary,
+                        href: f.href,
+                        $ref: f.$ref,
+                        icon: f.icon
+                })
+            })
+        }
+
+        if(note['InTasks/Task'] && note['InTasks/Task'].length > 0)
+        {
+            note['InTasks/Task'].forEach((f) => {
+                    note.connectedToList.push({
+                        Title: f.Title,
+                        Summary: f.Summary,
+                        href: f.href,
+                        $ref: f.$ref,
+                        icon: 'Task'
+                })
+            })
+        }
+
+        if(note['InNotes/InNote'] && note['InNotes/InNote'].length > 0)
+        {
+            note['InNotes/InNote'].forEach((f) => {
+                    note.connectedToList.push({
+                        Title: f.Title,
+                        Summary: f.Summary,
+                        href: f.href,
+                        $ref: f.$ref,
+                        icon: 'Note'
                 })
             })
         }
@@ -267,7 +308,7 @@
 
         {
             caption: '_; Tag; Etiqueta; Etykieta',
-            icon: FaTag,
+        //    icon: FaTag,
             action: async (f) => runTagInserter()
         },
 
@@ -276,12 +317,12 @@
         },
         {
             caption: '_; Attachement; Anexo; Załącznik',
-            icon: FaFile,
+       //     icon: FaFile,
             action: async (f) => runFileAttacher()
         },
         {
             caption: '_; Content; Contenido; Treść',
-            icon: FaAlignLeft,
+        //    icon: FaAlignLeft,
             action: async (f) =>
                 {
                     if(description)
@@ -416,7 +457,7 @@
         showFloatingToolbar(aroundRect, BasketPreview, 
             {
                 destinationContainer: noteRef,
-                onRefreshView: async (f) => await reloadData(),
+                onRefreshView: async (f) => await reloadWithAttachements(),
                 clipboardElements: clipboardElements
             }
         )
@@ -430,7 +471,7 @@
             const references = transformClipboardToJSONReferences([clipboardElements[0]])
             const res = await reef.post(`${noteRef}/AttachClipboard`, { references: references }, onErrorShowAlert)
             if(res)
-                await reloadData();
+                await reloadWithAttachements();
             
         }
     }
@@ -440,7 +481,7 @@
         const clipboardElements = getBrowserRecentElements()
         showFloatingToolbar(aroundRect, BasketPreview, {
             destinationContainer: noteRef,
-            onRefreshView: async (f) => await reloadData(),
+            onRefreshView: async (f) => await reloadWithAttachements(),
             clipboardElements: clipboardElements,
             browserBasedClipboard: true
         })
@@ -450,8 +491,15 @@
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
             destinationContainer: noteRef,
-            onRefreshView: async (f) => await reloadData()
+            onRefreshView: async (f) => await reloadWithAttachements()
         })
+    }
+
+    async function reloadWithAttachements()
+    {
+        await reloadData();
+        attachementsNotesComponent.reload(note, attachementsNotesComponent.CLEAR_SELECTION);
+        attachementsFilesComponent.reload(note, attachementsFilesComponent.CLEAR_SELECTION);
     }
 
     async function toggleNotePinned(note)
@@ -1112,6 +1160,288 @@
             return false
     }
 
+
+
+
+    let attachementsNotesComponent
+    let attachementsFilesComponent
+    let connectedToComponent
+    const attList = (kind) => kind == 'NoteNote' ? attachementsNotesComponent : attachementsFilesComponent
+    function attachementOperations(element, kind)
+    {
+        const isCanonical = element.IsCanonical
+
+        let list = attList(kind);
+
+        let linkOperations = []
+        if(isCanonical)
+        {
+            linkOperations = [
+                {
+                    caption: '_; Delete; Eliminar; Usuń',
+                    action: (f) => askToDeleteAttachement(element, kind)
+                }
+            ]
+        }
+        else
+        {
+             linkOperations = [
+                {
+                    caption: '_; Detach; Desconectar; Odłącz',
+                    action: (f) => dettachAttachement(element, kind)
+                },
+                {
+                    caption: '_; Set as primary location; Establecer como ubicación principal; Ustaw jako główną lokalizację',
+                    action: (f) => setAttachementLocationAsCanonical(element, kind)
+                }
+             ]
+        }
+
+        
+        return {
+                opver: 2,
+                fab: 'M00',
+                tbr: 'D',
+                operations: [
+                    {
+                        caption: '_; Element; Elemento; Element',
+                        operations: [
+                            {
+                                caption: '_; Edit; Editar; Edytuj',
+                                icon: FaPen,
+                                tbr: 'A',
+                                fab:'M20',
+                                grid:[
+                                    {
+                                        caption: '_; Title; Título; Tytuł',
+                                        action: (focused) =>  { list.edit(element, 'Title') },
+                                    },
+                                    {
+                                        caption: '_; Summary; Resumen; Podsumowanie',
+                                        action: (focused) =>  { list.edit(element, 'Summary') }
+                                    }
+                                ]
+
+                            },
+                            {
+                                caption: '_; Send; Enviar; Wyślij',
+                                hideToolbarCaption: true,
+                                icon: FaUpload,
+                                tbr: 'D',
+                                fab: 'S00',
+                                menu: [
+                                    {
+                                        caption: '_; Copy; Copiar; Kopiuj',
+                                        action: (f) => copyAttachementToBasket(element, kind),
+                                    },
+                                    {
+                                        caption: '_; Cut; Cortar; Wytnij',
+                                        action: (f) => cutAttachementToBasket(element, kind)
+                                    },
+                                    {
+                                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
+                                        disabled: true
+                                    }
+                                ]
+                            },
+                            {
+                                separator: true
+                            },
+                            ...linkOperations
+                        ]
+                    }
+                ]
+            }
+    }
+
+    async function changeAttachementProperty(item, value, propName)
+    {
+        item[propName] = value
+
+        switch(propName)
+        {
+        case 'Title':
+            await reef.post(`${item.$ref}/SetTitle`, { value: value }, onErrorShowAlert)
+            break;
+
+        case 'Summary':
+            await reef.post(`${item.$ref}/SetSummary`, { value: value }, onErrorShowAlert)
+            break;
+        }
+
+    }
+
+    async function copyAttachementToBasket(element, kind)
+    {
+        switch(kind)
+        {
+        case 'Note':
+        case 'NoteNote':
+            return copyNoteToBasket(element)
+        case 'UploadedFile':
+        case 'NoteFile':
+            return copyFileToBasket(element)
+        }
+    }
+
+    async function cutAttachementToBasket(element, kind)
+    {
+        switch(kind)
+        {
+        case 'Note':
+        case 'NoteNote':
+            return cutNoteToBasket(element)
+        case 'UploadedFile':
+        case 'NoteFile':
+            return cutFileToBasket(element)
+        }
+    }
+
+    async function copyNoteToBasket(forNote)
+    {
+        await reef.post(`${noteRef}/CopyNoteToBasket`, { noteLink: forNote.$ref } , onErrorShowAlert);
+    }
+
+    async function cutNoteToBasket(forNote)
+    {
+        await reef.post(`${noteRef}/CutNoteToBasket`, { noteLink: forNote.$ref } , onErrorShowAlert);
+        await reloadData();
+        attachementsNotesComponent.reload(note, attachementsNotesComponent.SELECT_NEXT);
+    }
+
+    async function copyFileToBasket(file)
+    {
+        await reef.post(`${noteRef}/CopyFileToBasket`, { fileLink: file.$ref } , onErrorShowAlert);
+    }
+
+    async function cutFileToBasket(file)
+    {
+        await reef.post(`${noteRef}/CutFileToBasket`, { fileLink: file.$ref } , onErrorShowAlert);
+        await reloadData();
+        attachementsFilesComponent.reload(note, attachementsFilesComponent.SELECT_NEXT);
+    }
+
+    async function dettachAttachement(element, kind)
+    {
+        switch(kind)
+        {
+        case 'Note':
+        case 'NoteNote':
+            return dettachNote(element)
+        case 'UploadedFile':
+        case 'NoteFile':
+            return dettachFile(element)
+        }
+    }
+
+    async function dettachNote(forNote)
+    {
+        await reef.post(`${noteRef}/DettachNote`, { noteLink: forNote.$ref } , onErrorShowAlert);
+        await reloadData();
+        attachementsNotesComponent.reload(note, attachementsNotesComponent.SELECT_NEXT);
+    }
+
+    async function dettachFile(file)
+    {
+        await reef.post(`${noteRef}/DettachFile`, { fileLink: file.$ref } , onErrorShowAlert);
+        await reloadData();
+        attachementsFilesComponent.reload(note, attachementsFilesComponent.SELECT_NEXT);
+    }
+
+    async function setAttachementLocationAsCanonical(element, kind)
+    {
+        await reef.get(`${element.$ref}/SetLocationAsCanonical`, onErrorShowAlert)
+        await reloadData();
+
+        switch(kind)
+        {
+        case 'Note':
+        case 'NoteNote':
+            attachementsNotesComponent.reload(note, attachementsNotesComponent.KEEP_SELECTION);
+        case 'UploadedFile':
+        case 'NoteFile':
+            attachementsFilesComponent.reload(note, attachementsFilesComponent.KEEP_SELECTION);
+        }    
+    }
+
+    let deleteModal;
+    let objectToDelete;
+    let deleteObjectKind = ''
+    function askToDeleteAttachement(object, kind)
+    {
+        deleteObjectKind = kind;
+        objectToDelete = object;
+        deleteModal.show()
+    }
+
+
+    async function deleteAttachement()
+    {
+        if(!objectToDelete)
+            return;
+
+        switch(deleteObjectKind)
+        {
+        case 'Note':
+        case 'NoteNote':
+            await reef.post(`${noteRef}/DeletePermanentlyNote`, { noteLink: objectToDelete.$ref } , onErrorShowAlert);
+            deleteModal.hide();
+            await reloadData();
+            attachementsNotesComponent.reload(note, attachementsNotesComponent.SELECT_NEXT);
+            break;
+
+        case 'UploadedFile':
+        case 'NoteFile':
+            await reef.post(`${noteRef}/DeletePermanentlyFile`, { fileLink: objectToDelete.$ref } , onErrorShowAlert);
+            deleteModal.hide();
+            await reloadData();
+            attachementsFilesComponent.reload(note, attachementsFilesComponent.SELECT_NEXT);
+            break;
+        }
+    }
+
+    function connectedToOperations(element)
+    {
+        return {
+                opver: 2,
+                fab: 'M00',
+                tbr: 'D',
+                disabled: true,
+                operations: [
+                    {
+                        caption: '_; Element; Elemento; Element',
+                        operations: [
+                            
+                        ]
+                    }
+                ]
+            }
+    }
+
+    function getElementIcon(element)
+    {
+        switch(element.icon)
+        {
+        case 'Folder':
+            return FaRegFolder
+
+        case 'Note':
+            return FaRegFile;
+
+        case 'Task':
+            return FaRegCalendar;
+
+        case 'UploadedFile':
+        case 'File':
+            return FaFile;
+
+        case 'TaskList':
+            return FaList;
+
+        case 'User':
+            return FaUser;
+        }
+    }
     
 
 </script>
@@ -1130,7 +1460,7 @@
 <!-- svelte-ignore a11y-no-noninteractive-tabindex-->
 <Page   self={note}
             toolbarOperations={getPageOperations()}
-            clearsContext=''
+            clearsContext='props'
             title={note.Title}>
     <section class="w-full flex flex-col items-center">
         {#if note.GetCanonicalPath}
@@ -1251,7 +1581,8 @@
                              -->
             <hr/>
             <div class="relative">
-                <Editor     class="mb-40"
+                <Editor     on:click={(e) => e.stopPropagation()}
+                            class="mb-20"
                             a='Content'
                             compact={true}
                             bind:this={description}
@@ -1279,77 +1610,77 @@
             <hr/>
 
             {#if (note.Notes && note.Notes.length > 0) || (note.Files && note.Files.length > 0)}
-                <h4>_;Attachments; Anexos; Załączniki</h4>
-                <p>
+                <h4 class="ml-2">_;Attachments; Anexos; Załączniki</h4>
+                <section class="not-prose"> 
                     {#if note.Notes && note.Notes.length > 0}
-                        {#each note.Notes as note}
-                            <a  class="mr-2 underline whitespace-nowrap" href={'#'+note.href}>
-                                <span class="inline-block w-4 h-4 relative top-0.5">
-                                    <FaRegFile/>
-                                </span>
-                                <span class="">
-                                    {note.Title}
-                                </span>
-                            </a>        
-                        {/each}
+                        <List   self={note}
+                                a='Notes'
+                                bind:this={attachementsNotesComponent}
+                                toolbarOperations={(el) => attachementOperations(el, 'NoteNote')}>
+                            
+                            <ListTitle      a='Title'
+                                            hrefFunc={(el) => `${el.href}`}
+                                            onChange={changeAttachementProperty}/>
+
+                            <ListSummary    a='Summary' 
+                                            onChange={changeAttachementProperty}/>
+
+                            <span slot="left" let:element>
+                                <Icon component={FaRegFile}
+                                    class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
+                            </span>
+                        </List>
                     {/if}
 
                     {#if note.Files && note.Files.length > 0}
-                        {#each note.Files as file}
-                            <a  class="mr-2 whitespace-nowrap" on:click={(e) => downloadAttachedFile(e, file.href, file.Title)} href={file.href}>
-                                <span class="inline-block w-4 h-4 relative top-0.5">
-                                    <FaFile/>
-                                </span>
-                                <span>
-                                    {file.Title}
-                                </span>
-                            </a>        
-                        {/each}
+                        <List   self={note}
+                                a='Files'
+                                bind:this={attachementsFilesComponent}
+                                toolbarOperations={(el) => attachementOperations(el, 'NoteFile')}>
+                            
+                            <ListTitle      a='Title'
+                                            hrefFunc={(el) => `${el.href}`}
+                                            downloadable
+                                            onOpen={async (f) => await downloadFileFromHRef(f.href, f.Title)}
+                                            onChange={changeAttachementProperty}/>
+
+                            <ListSummary    a='Summary'
+                                            onChange={changeAttachementProperty}/>
+
+                            <span slot="left" let:element>
+                                <Icon component={FaFile}
+                                    class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
+                            </span>
+                        </List>
                     {/if}
-                </p>    
+                </section>    
             {/if}
 
-            <h4>_; Attached to; Adjunto a; Przyłączony do</h4>
-            <p>
-                {#if note['InFolders/Folder'] && note['InFolders/Folder'].length > 0}
-                    {#each note['InFolders/Folder'] as inFolder}
-                        <a  class="mr-2 whitespace-nowrap" href={'#'+inFolder.href}>
-                            <span class="inline-block w-4 h-4 relative top-0.5">
-                                <FaRegFolder/>
-                            </span>
-                            <span>
-                                {ext(inFolder.Title)}
-                            </span>
-                        </a>
-                    {/each}
-                {/if}
+            <h4 class="ml-2">_; Attached to; Adjunto a; Przyłączony do</h4>
+            <section class="not-prose"> 
+                <List   self={note}
+                        a='connectedToList'
+                        bind:this={connectedToComponent}
+                        toolbarOperations = {(el) => connectedToOperations(el)}>
+                
+                    <ListTitle      a='Title'
+                                    hrefFunc={(el) => `${el.href}`}
+                                    readonly/>
 
-                {#if note['InTasks/Task'] && note['InTasks/Task'].length > 0}
-                    {#each note['InTasks/Task'] as inTask}
-                        <a  class="mr-2 whitespace-nowrap" href={'#'+inTask.href}>
-                            <span class="inline-block w-4 h-4 relative top-0.5">
-                                <FaRegCalendar/>
-                            </span>
-                            <span>
-                                {inTask.Title}
-                            </span>
-                        </a>
-                    {/each}
-                {/if}
+                    <ListSummary    a='Summary' 
+                                    readonly/>
 
-                {#if note['InNotes/InNote'] && note['InNotes/InNote'].length > 0}
-                    {#each note['InNotes/InNote'] as inNote}
-                        <a  class="mr-2 whitespace-nowrap" href={'#'+inNote.href}>
-                            <span class="inline-block w-4 h-4 relative top-0.5">
-                                <FaRegFile/>
-                            </span>
-                            <span>
-                                {inNote.Title}
-                            </span>
-                        </a>
-                    {/each}
-                {/if}
-            </p>
+                    <span slot="left" let:element>
+                        <Icon component={getElementIcon(element)}
+                            class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
+                    </span>
+                </List>
+            </section>
+
+            <!-- empty section fot have bottom free area -->
+            <section class="mb-64">
+
+            </section>
 
         </article>
 
@@ -1362,7 +1693,8 @@
 </Page>
 {/if}
 
-<Modal title='Uploading...' bind:open={pendingUploading} mode={3} icon={FaCloudUploadAlt}>
+<Modal title={i18n(['Uploading...', 'Carga...', 'Przesyłanie...'])}
+    bind:open={pendingUploading} mode={3} icon={FaCloudUploadAlt}>
     <Spinner delay={0}/>
     <span class="ml-3">_; Your file is uploading to the server; Tu archivo se está cargando en el servidor; Twój plik jest przesyłany na serwer</span>
 </Modal>

@@ -627,6 +627,14 @@
         const canAddTasks = !(isRootPinned || isClipboard)
         const canAddFiles = !(isRootPinned || isClipboard)
 
+        const newFile = {
+            caption: '_; Add file; Añadir archivo; Dodaj plik',
+            icon: FaFile,
+            action: (f) => { newElementKind='UploadedFile';  runFileAttacher(afterElement) },
+            tbr: 'A',
+            fab: 'M04'
+        }
+
         const newFolder = {
             caption: '_; New folder; Nueva carpeta; Nowy folder',
             icon: FaRegFolder,
@@ -647,14 +655,6 @@
             caption: '_; New task; Nueva tarea; Nowe zadanie',
             icon: FaRegCalendar,
             action: (f) => { newElementKind='Task';  listComponent.addRowAfter(afterElement) },
-            tbr: 'A',
-            fab: 'M01'
-        }
-
-        const newFile = {
-            caption: '_; Add file; Añadir archivo; Dodaj plik',
-            icon: FaFile,
-            action: (f) => { newElementKind='UploadedFile';  runFileAttacher(afterElement) },
             tbr: 'A',
             fab: 'M01'
         }
@@ -966,7 +966,7 @@
                                 caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                                 icon: FaCaretUp,
                                 action: (f) => list.moveUp(element),
-                                fab:'M05',
+                                fab:'M06',
                                 tbr:'A',
                                 hideToolbarCaption: true
                             },
@@ -974,7 +974,7 @@
                                 caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                                 icon: FaCaretDown,
                                 action: (f) => list.moveDown(element),
-                                fab:'M04',
+                                fab:'M05',
                                 tbr:'A',
                                 hideToolbarCaption: true
                             },
@@ -1074,7 +1074,7 @@
                                 caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                                 icon: FaCaretUp,
                                 action: (f) => list.moveUp(element),
-                                fab:'M05',
+                                fab:'M06',
                                 tbr:'A',
                                 hideToolbarCaption: true
                             },
@@ -1082,7 +1082,7 @@
                                 caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                                 icon: FaCaretDown,
                                 action: (f) => list.moveDown(element),
-                                fab:'M04',
+                                fab:'M05',
                                 tbr:'A' ,
                                 hideToolbarCaption: true
                             },
@@ -1518,7 +1518,8 @@
     </p>
 </Modal>
 
-<Modal title='Uploading...' bind:open={pendingUploading} mode={3} icon={FaCloudUploadAlt}>
+<Modal title={i18n(['Uploading...', 'Carga...', 'Przesyłanie...'])}
+    bind:open={pendingUploading} mode={3} icon={FaCloudUploadAlt}>
     <Spinner delay={500}/>
     <span class="ml-3">_; Your file is uploading to the server; Tu archivo se está cargando en el servidor; Twój plik jest przesyłany na serwer</span>
 </Modal>

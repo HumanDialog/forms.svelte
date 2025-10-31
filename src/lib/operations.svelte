@@ -83,7 +83,8 @@
                     icon: operationsRoot.icon ?? FaEllipsisV,
                     menu: allFlatOperations,
                     tbr: operationsRoot.tbr,
-                    preAction: operationsRoot.preAction ?? undefined
+                    preAction: operationsRoot.preAction ?? undefined,
+                    disabled: operationsRoot.disabled
                 }
 
                 switch(operationsRoot.tbr)
