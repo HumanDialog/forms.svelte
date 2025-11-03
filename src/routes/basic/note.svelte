@@ -39,7 +39,7 @@
 
     import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen, FaList, FaUpload, FaFile,
         FaImage, FaTable, FaPaperclip, FaBold, FaItalic, FaUnderline, FaStrikethrough, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle,
-        FaInfo, FaListUl, FaLink, FaRegFolder, FaRegCalendar, FaRegCalendarCheck, FaRegFile, FaDownload, FaTrash
+        FaInfo, FaListUl, FaLink, FaRegFolder, FaRegCalendar, FaRegCalendarCheck, FaRegFile, FaDownload, FaTrash, FaExternalLinkSquareAlt
     } from 'svelte-icons/fa/'
 
 
@@ -132,18 +132,18 @@
 
                                         {
                                             Id: 13,
-                                            Association: 'InFolders/Folder',
-                                            Expressions:['$ref', 'Title', 'Summary', 'href', 'icon']
+                                            Association: 'InFolders',
+                                            Expressions:['$ref', 'InTitle', 'InSummary', 'InHRef', 'InIcon', 'IsCanonical']
                                         },
                                         {
                                             Id: 14,
-                                            Association: 'InTasks/Task',
-                                            Expressions:['$ref', 'Title', 'Summary', 'href', 'icon']
+                                            Association: 'InTasks',
+                                            Expressions:['$ref', 'InTitle', 'InSummary', 'InHRef', 'InIcon', 'IsCanonical']
                                         },
                                         {
                                             Id: 15,
-                                            Association: 'InNotes/InNote',
-                                            Expressions:['$ref', 'Title', 'Summary', 'href']
+                                            Association: 'InNotes',
+                                            Expressions:['$ref', 'InTitle', 'InSummary', 'InHRef', 'IsCanonical']
                                         },
 
                                         {
@@ -189,45 +189,14 @@
         }
 
         note.connectedToList = []
-        if(note['InFolders/Folder'] && note['InFolders/Folder'].length > 0)
-        {
-            note['InFolders/Folder'].forEach((f) => {
-                    note.connectedToList.push({
-                        Title: f.Title,
-                        Summary: f.Summary,
-                        href: f.href,
-                        $ref: f.$ref,
-                        icon: f.icon
-                })
-            })
-        }
-
-        if(note['InTasks/Task'] && note['InTasks/Task'].length > 0)
-        {
-            note['InTasks/Task'].forEach((f) => {
-                    note.connectedToList.push({
-                        Title: f.Title,
-                        Summary: f.Summary,
-                        href: f.href,
-                        $ref: f.$ref,
-                        icon: f.icon
-                })
-            })
-        }
-
-        if(note['InNotes/InNote'] && note['InNotes/InNote'].length > 0)
-        {
-            note['InNotes/InNote'].forEach((f) => {
-                    note.connectedToList.push({
-                        Title: f.Title,
-                        Summary: f.Summary,
-                        href: f.href,
-                        $ref: f.$ref,
-                        icon: 'Note'
-                })
-            })
-        }
-
+        if(note.InFolders)
+            note.InFolders.forEach((f) => note.connectedToList.push(f))
+        
+        if(note.InTasks)
+            note.InTasks.forEach((f) => note.connectedToList.push(f))
+        
+        if(note.InNotes)
+            note.InNotes.forEach((f) => note.connectedToList.push(f))
     }
 
     async function onTitleChanged(text)
@@ -1615,9 +1584,14 @@
                             <ListSummary    a='Summary' 
                                             onChange={changeAttachementProperty}/>
 
-                            <span slot="left" let:element>
+                            <span slot="left" let:element class="relative">
                                 <Icon component={getElementIcon('Note')}
                                     class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
+                                {#if element.IsCanonical == 0}
+                                    <Icon component={FaExternalLinkSquareAlt}
+                                        class="absolute left-1 top-1/2 w-1/2 h-1/2 
+                                                text-stone-500 dark:text-stone-300 " />
+                                {/if}
                             </span>
                         </List>
                     {/if}
@@ -1637,9 +1611,14 @@
                             <ListSummary    a='Summary'
                                             onChange={changeAttachementProperty}/>
 
-                            <span slot="left" let:element>
+                            <span slot="left" let:element class="relative">
                                 <Icon component={getElementIcon('File')}
                                     class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
+                                {#if element.IsCanonical == 0}
+                                    <Icon component={FaExternalLinkSquareAlt}
+                                        class="absolute left-1 top-1/2 w-1/2 h-1/2 
+                                                text-stone-500 dark:text-stone-300 " />
+                                {/if}
                             </span>
                         </List>
                     {/if}
@@ -1653,16 +1632,21 @@
                         bind:this={connectedToComponent}
                         toolbarOperations = {(el) => connectedToOperations(el)}>
                 
-                    <ListTitle      a='Title'
+                    <ListTitle      a='InTitle'
                                     hrefFunc={(el) => `${el.href}`}
                                     readonly/>
 
-                    <ListSummary    a='Summary' 
+                    <ListSummary    a='InSummary' 
                                     readonly/>
 
-                    <span slot="left" let:element>
+                    <span slot="left" let:element class="relative">
                         <Icon component={getElementIcon(element)}
                             class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
+                        {#if element.IsCanonical == 0}
+                                <Icon component={FaExternalLinkSquareAlt}
+                                class="absolute left-1 top-1/2 w-1/2 h-1/2 
+                                        text-stone-500 dark:text-stone-300 " />
+                        {/if}
                     </span>
                 </List>
             </section>

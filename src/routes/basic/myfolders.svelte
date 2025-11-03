@@ -292,6 +292,10 @@
 
         </List>
     </section>
+
+        <!-- empty section fot have bottom free area -->
+        <section class="mb-64"></section>
+        
     </Page>
 {:else}
     <Spinner delay={3000}/>

@@ -39,6 +39,7 @@
     import GroupFolders from './folders.group.svelte'
     import GeneralChannels from './channels.general.svelte'
     import PrivateChannels from './channels.private.svelte'
+    import MyNotes from './notes.my.svelte'
     //import StaticDoc from './tilos/static.doc.svelte'
 
     import { tick, onMount } from 'svelte';
@@ -251,6 +252,7 @@
                         '/tcontact':    {component: TilosContact},
                         '/alllists':    {component: AllTaskLists},
                         '/mylists':     {component: MyTaskLists},
+                        '/mynotes':     {component: MyNotes},
                         '/group-folders': {component: GroupFolders},
                         '/general-channels': {component: GeneralChannels},
                         '/private-channels':{component: PrivateChannels}

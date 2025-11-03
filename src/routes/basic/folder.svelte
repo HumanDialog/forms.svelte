@@ -21,7 +21,7 @@
                 reloadPageToolbarOperations} from '$lib'
     import {FaRegFile, FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaSync,
         FaList, FaEllipsisH, FaChevronRight, FaChevronLeft, FaUpload, FaLink, FaUnlink, FaRegStar, FaStar, FaCut, FaRegComments, FaRegClipboard,
-        FaRegCheckSquare, FaFileUpload, FaFile, FaCloudUploadAlt, FaDownload, FaCheckDouble
+        FaRegCheckSquare, FaFileUpload, FaFile, FaCloudUploadAlt, FaDownload, FaCheckDouble, FaExternalLinkSquareAlt
         } from 'svelte-icons/fa'
         
         import {FaEdit} from 'svelte-icons/fa'
@@ -38,7 +38,8 @@
     import FaBasketTrash from './icons/basket.trash.svelte'
     import {cache} from './cache.js'
     import {getElementIcon} from './icons'
-
+	import { element } from 'svelte/internal';
+    
     export let params = {}
 
     let contextItem = null;
@@ -1450,11 +1451,21 @@
 
                 <ListInserter   action={addElement} icon/>
 
-                <span slot="left" let:element>
+                <span slot="left" let:element class="relative">
                     <Icon component={getElementIcon(element)}
                         class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
+                    {#if element.IsCanonical == 0}
+                        <Icon component={FaExternalLinkSquareAlt}
+                            class="absolute left-1 top-1/2 w-1/2 h-1/2 
+                                    text-stone-500 dark:text-stone-300 " />
+                    {/if}
                 </span>
             </List>
+        </section>
+
+        <!-- empty section fot have bottom free area -->
+        <section class="mb-64">
+
         </section>
 
         <input hidden type="file" id="attachementFile" accept="*/*" bind:this={attInput} on:change={onAttachementSelected}/>

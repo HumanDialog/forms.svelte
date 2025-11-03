@@ -372,6 +372,9 @@
                 </div>
         </section>
 
+            <!-- empty section fot have bottom free area -->
+        <section class="mb-64"></section>
+
         </Page>
     {/key}
 {:else}

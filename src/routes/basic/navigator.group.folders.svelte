@@ -439,9 +439,19 @@
                 </SidebarGroup>
             {/if}
 
+            <SidebarGroup border>
+                <SidebarItem   href="/mynotes"
+                                icon={getElementIcon("Note")}
+                                active={isRoutingTo("/mynotes", currentPath)}
+                                summary={i18n(["Recently edited notes", "Notas editadas recientemente", "Ostatnio edytowane notatki"])}
+                                selectable={user}>
+                    _; My notes; Mis notas; Moje notatki
+                </SidebarItem>
+            </SidebarGroup>
+
             <SidebarGroup title={i18n({en: 'Personal', es: 'Personales', pl: 'Osobiste'})}>
                 <SidebarItem   href="/myfolders"
-                                icon={FaRegFolder}
+                                icon={getElementIcon("Folder")}
                                 active={isRoutingTo("/myfolders", currentPath)}
                                 summary={i18n(["Personal folders", "Carpetas personales", "Foldery osobiste"])}>
                     _; My Folders; Mis carpetas; Moje Foldery
@@ -511,10 +521,19 @@
             {/if}
 
 
+            <SidebarGroup border>
+                <SidebarItem    href="/mynotes"
+                                icon={getElementIcon("Note")}
+                                summary={i18n(["Recently edited notes", "Notas editadas recientemente", "Ostatnio edytowane notatki"])}
+                                item={user}>
+                    _; My notes; Mis notas; Moje notatki
+                </SidebarItem>
+            </SidebarGroup>
+
 
             <SidebarGroup title={i18n({en: 'Personal', es: 'Personales', pl: 'Osobiste'})}>
                 <SidebarItem    href="/myfolders"
-                                icon={FaRegFolder}
+                                icon={getElementIcon("Folder")}
                                 summary={i18n(["Personal folders", "Carpetas personales", "Foldery osobiste"])}
                                 item={user}>
                     _; My Folders; Mis carpetas; Moje Foldery

@@ -83,6 +83,8 @@ export function getElementIcon(element)
                 return FaUser;
             }
         }
+        else if (element.InIcon) 
+            return getIconByLabel(element.InIcon)
         else
             return null;
     }

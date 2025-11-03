@@ -63,7 +63,7 @@
             google_analytics.init();
     }
 
-    const r = /^\/listboard|tdownload|tcontact|tasklist|task|note|folder|mytasks|mylists|alllists|myfolders|group-folders|general-channels|private-channels|members|chat|thread|newthread|forum|thome|profile|doc|request-license-file|nav\/(.*)\/?$/i
+    const r = /^\/listboard|tdownload|tcontact|tasklist|task|note|folder|mytasks|mylists|mynotes|alllists|myfolders|group-folders|general-channels|private-channels|members|chat|thread|newthread|forum|thome|profile|doc|request-license-file|nav\/(.*)\/?$/i
 
     const routes = new Map()
     routes.set('/',                     Main)

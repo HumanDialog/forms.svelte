@@ -37,7 +37,7 @@
     import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont,
         FaPen, FaList, FaTimes, FaUpload, FaCut,  FaFile, FaImage, FaTable, FaPaperclip, FaBold, FaItalic,
         FaUnderline, FaStrikethrough, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle, FaInfo,
-        FaListUl, FaLink, FaRegFolder, FaRegFile, FaDownload, FaTrash, FaRegCalendar, FaRegCalendarCheck
+        FaListUl, FaLink, FaRegFolder, FaRegFile, FaDownload, FaTrash, FaRegCalendar, FaRegCalendarCheck, FaExternalLinkSquareAlt
     } from 'svelte-icons/fa/'
     import AttachedFile from './attached.file.svelte'
     import BasketPreview from './basket.preview.svelte'
@@ -138,8 +138,8 @@
                                         },
                                         {
                                             Id: 13,
-                                            Association: 'InFolders/Folder',
-                                            Expressions:['$ref', 'Title', 'Summary', 'href', 'icon']
+                                            Association: 'InFolders',
+                                            Expressions:['$ref', 'InTitle', 'InSummary', 'InHRef', 'InIcon', 'IsCanonical']
                                         },
                                         {
                                             Id: 14,
@@ -195,15 +195,16 @@
         }
 
         task.connectedToList = []
-        if(task['InFolders/Folder'] && task['InFolders/Folder'].length > 0)
+        if(task.InFolders)
         {
-            task['InFolders/Folder'].forEach((f) => {
+            task.InFolders.forEach((f) => {
                     task.connectedToList.push({
-                        Title: f.Title,
-                        Summary: f.Summary,
-                        href: f.href,
+                        Title: f.InTitle,
+                        Summary: f.InSummary,
+                        href: f.InHRef,
                         $ref: f.$ref,
-                        icon: f.icon
+                        icon: f.InIcon,
+                        IsCanonical: f.IsCanonical
                 })
             })
         }
@@ -214,7 +215,8 @@
                 Summary: task.TaskList.Summary,
                 href: task.TaskList.href,
                 $ref: task.TaskList.$ref,
-                icon: 'TaskList'
+                icon: 'TaskList',
+                IsCanonical: 1
         })
 
         if(task.Actor)
@@ -223,7 +225,8 @@
                 Summary: '',
                 href: task.Actor.href,
                 $ref: task.Actor.$ref,
-                icon: 'User'
+                icon: 'User',
+                IsCanonical: 1
         })
 
     }
@@ -1814,9 +1817,14 @@
                             <ListSummary    a='Summary' 
                                             onChange={changeAttachementProperty}/>
 
-                            <span slot="left" let:element>
+                            <span slot="left" let:element class="relative">
                                 <Icon component={getElementIcon('Note')}
                                     class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
+                                {#if element.IsCanonical == 0}
+                                    <Icon component={FaExternalLinkSquareAlt}
+                                        class="absolute left-1 top-1/2 w-1/2 h-1/2 
+                                                text-stone-500 dark:text-stone-300 " />
+                                {/if}
                             </span>
                         </List>
                     {/if}
@@ -1836,9 +1844,14 @@
                             <ListSummary    a='Summary'
                                             onChange={changeAttachementProperty}/>
 
-                            <span slot="left" let:element>
+                            <span slot="left" let:element class="relative">
                                 <Icon component={getElementIcon('File')}
                                     class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
+                                {#if element.IsCanonical == 0}
+                                    <Icon component={FaExternalLinkSquareAlt}
+                                        class="absolute left-1 top-1/2 w-1/2 h-1/2 
+                                                text-stone-500 dark:text-stone-300 " />
+                                {/if}
                             </span>
                         </List>
                     {/if}
@@ -1859,9 +1872,14 @@
                     <ListSummary    a='Summary' 
                                     readonly/>
 
-                    <span slot="left" let:element>
+                    <span slot="left" let:element class="relative">
                         <Icon component={getElementIcon(element)}
                             class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
+                        {#if element.IsCanonical == 0}
+                            <Icon component={FaExternalLinkSquareAlt}
+                                class="absolute left-1 top-1/2 w-1/2 h-1/2 
+                                        text-stone-500 dark:text-stone-300 " />
+                        {/if}
                     </span>
                 </List>
             </section>
