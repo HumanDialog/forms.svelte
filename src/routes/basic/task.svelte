@@ -37,11 +37,12 @@
     import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont,
         FaPen, FaList, FaTimes, FaUpload, FaCut,  FaFile, FaImage, FaTable, FaPaperclip, FaBold, FaItalic,
         FaUnderline, FaStrikethrough, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle, FaInfo,
-        FaListUl, FaLink, FaRegFolder, FaRegFile, FaDownload, FaTrash, FaRegCalendar
+        FaListUl, FaLink, FaRegFolder, FaRegFile, FaDownload, FaTrash, FaRegCalendar, FaRegCalendarCheck
     } from 'svelte-icons/fa/'
     import AttachedFile from './attached.file.svelte'
     import BasketPreview from './basket.preview.svelte'
     import PopupExplorer from './popup.explorer.svelte'
+    import {getElementIcon} from './icons'
     import {fetchComposedClipboard4Editor, fetchComposedClipboard4Task, transformClipboardToJSONReferences, pushBrowserRecentElements, setBrowserRecentElement, getBrowserRecentElements} from './basket.utils'
 	
     let taskRef = ''
@@ -100,7 +101,7 @@
         await reloadData();
 
         if(task)
-            pushBrowserRecentElements( task.Id, task.$type, task.$ref, task.Title, task.Summary, "Task", task.href)
+            pushBrowserRecentElements( task.Id, task.$type, task.$ref, task.Title, task.Summary, task.icon, task.href)
     }
 
     async function reloadData()
@@ -118,7 +119,7 @@
                                 {
                                     Id: 1,
                                     Association: '',
-                                    Expressions:['Id', 'Index', 'Title','Summary', 'Description', 'DueDate', 'Tags', 'State', 'AttachedFiles', 'GetCanonicalPath', '$ref', '$type', '$acc', 'href'],
+                                    Expressions:['Id', 'Index', 'Title','Summary', 'Description', 'DueDate', 'Tags', 'State', 'AttachedFiles', 'GetCanonicalPath', '$ref', '$type', '$acc', 'href', 'icon'],
                                     SubTree:[
                                         {
                                             Id: 10,
@@ -378,7 +379,7 @@
                                 },
                                 {
                                     caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                    disabled: true
+                                    action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, task)
                                 }
                             ]
 
@@ -482,6 +483,17 @@
         showFloatingToolbar(aroundRect, PopupExplorer, {
             destinationContainer: taskRef,
             onRefreshView: async (f) => await reloadWithAttachements()
+        })
+    }
+
+    async function runPopupExplorerToPlaceElement(btt, aroundRect, element)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            canSelectRootElements: true,
+            onAttach: async (tmp, references) => {
+                await reef.post(`${element.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
+                await reloadWithAttachements()
+            }
         })
     }
 
@@ -660,7 +672,7 @@
                                 },
                                 {
                                     caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                    disabled: true
+                                    action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, task)
                                 }
                             ]
 
@@ -876,7 +888,7 @@
                                 },
                                 {
                                     caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                    disabled: true
+                                    action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, task)
                                 }
                             ]
 
@@ -1122,7 +1134,7 @@
                 },
                 {
                     caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                    disabled: true
+                    action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, task)
                 }
             ], 
         }
@@ -1422,7 +1434,7 @@
                                     },
                                     {
                                         caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                        disabled: true
+                                        action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, element, kind)
                                     }
                                 ]
                             },
@@ -1600,30 +1612,7 @@
             }
     }
 
-    function getElementIcon(element)
-    {
-        switch(element.icon)
-        {
-        case 'Folder':
-            return FaRegFolder
-
-        case 'Note':
-            return FaRegFile;
-
-        case 'Task':
-            return FaRegCalendar;
-
-        case 'UploadedFile':
-        case 'File':
-            return FaFile;
-
-        case 'TaskList':
-            return FaList;
-
-        case 'User':
-            return FaUser;
-        }
-    }
+    
 
 </script>
 
@@ -1643,7 +1632,10 @@
             toolbarOperations={getPageOperations()}
             clearsContext='props'
             title={task.Title}>
-    <section class="w-full flex flex-col items-center">
+    <section class="w-full flex flex-col items-center
+                    sm:bg-white sm:dark:bg-stone-800/40 sm:shadow-slate-700/10 sm:dark:shadow-black/10 
+                    sm:mt-6 sm:px-6 sm:py-12 sm:shadow-xl md:mx-auto sm:max-w-3xl sm:rounded
+                    sm:ring-1 sm:ring-stone-900/5 sm:dark:ring-stone-950/20">
         {#if task.GetCanonicalPath}
             <Breadcrumb class="mt-1 sm:min-w-[65ch]" path={task.GetCanonicalPath}/>
         {/if}
@@ -1823,7 +1815,7 @@
                                             onChange={changeAttachementProperty}/>
 
                             <span slot="left" let:element>
-                                <Icon component={FaRegFile}
+                                <Icon component={getElementIcon('Note')}
                                     class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
                             </span>
                         </List>
@@ -1845,7 +1837,7 @@
                                             onChange={changeAttachementProperty}/>
 
                             <span slot="left" let:element>
-                                <Icon component={FaFile}
+                                <Icon component={getElementIcon('File')}
                                     class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
                             </span>
                         </List>
@@ -1874,14 +1866,16 @@
                 </List>
             </section>
 
-            <!-- empty section fot have bottom free area -->
-            <section class="mb-64">
-
-            </section>
+            
 
         </article>
 
 
+
+    </section>
+
+    <!-- empty section fot have bottom free area -->
+    <section class="mb-64">
 
     </section>
 

@@ -37,6 +37,7 @@
     import {fetchComposedClipboard4Folder, transformClipboardToJSONReferences, getBrowserRecentElements, setBrowserRecentElement} from './basket.utils'
     import FaBasketTrash from './icons/basket.trash.svelte'
     import {cache} from './cache.js'
+    import {getElementIcon} from './icons'
 
     export let params = {}
 
@@ -135,7 +136,7 @@
                                                 Association: 'Tasks',
                                                 //Filter: 'State <> STATE_FINISHED',
                                                 //Sort: 'Order',
-                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'href', 'IsInBasket', 'IsCanonical', '$type']
+                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'href', 'IsInBasket', 'IsCanonical', 'icon', '$type']
 
                                             },
                                             {
@@ -754,6 +755,16 @@
         })
     }
 
+    async function runPopupExplorerToPlaceElement(btt, aroundRect, element, kind)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            canSelectRootElements: true,
+            onAttach: async (tmp, references) => {
+                await reef.post(`${element.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
+            }
+        })
+    }
+
     function  folderPageOperations()
     {
         const isClipboard = contextItem.IsBasket
@@ -1103,7 +1114,7 @@
                                     },
                                     {
                                         caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                        disabled: true
+                                        action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, element, kind)
                                     }
                                 ]
                             },
@@ -1286,47 +1297,6 @@
         }
     }
 
-    function getFolderIcon(folder)
-    {
-        if(folder.icon)
-        {
-            switch(folder.icon)
-            {
-            case 'Folder':
-                return FaRegFolder;
-            case 'Clipboard':
-                return FaRegClipboard;
-            case 'Discussion':
-                return FaRegComments;
-            default:
-                return FaRegFolder
-            }
-        }
-        else
-            return FaRegFolder
-    }
-
-    function getElementIcon(element)
-    {
-        switch(element.$type)
-        {
-        case 'Folder':
-        case 'FolderFolder':
-            return getFolderIcon(element)
-
-        case 'Note':
-        case 'FolderNote':
-            return FaRegFile;
-
-        case 'Task':
-        case 'FolderTask':
-            return FaRegCalendar;
-
-        case 'UploadedFile':
-        case 'FolderFile':
-            return FaFile;
-        }
-    }
 
     let attInput;
     let insertFileAfterElement = null;
@@ -1446,7 +1416,8 @@
             clearsContext='props sel'
             title={folderTitle}>
 
-            <section class="w-full place-self-center max-w-3xl">
+            <section class="w-full place-self-center max-w-3xl
+                            ">
 
             <!--p class="hidden sm:block mt-3 ml-3 pb-5 text-lg text-left">
                 {folderTitle}

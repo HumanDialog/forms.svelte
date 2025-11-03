@@ -383,6 +383,16 @@
         })
     }
 
+    async function runPopupExplorerToPlaceElement(btt, aroundRect, task)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            canSelectRootElements: true,
+            onAttach: async (tmp, references) => {
+                await reef.post(`${task.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
+            }
+        })
+    }
+
     async function switchToKanban()
     {
         let res = await reef.post(`${listPath}/SwitchToKanban`,{ }, onErrorShowAlert)
@@ -540,7 +550,7 @@
                                 },
                                 {
                                     caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                    disabled: true
+                                    action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, task)
                                 }
                             ],
                             hideToolbarCaption: true

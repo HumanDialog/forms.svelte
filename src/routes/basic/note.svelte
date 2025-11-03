@@ -39,7 +39,7 @@
 
     import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen, FaList, FaUpload, FaFile,
         FaImage, FaTable, FaPaperclip, FaBold, FaItalic, FaUnderline, FaStrikethrough, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle,
-        FaInfo, FaListUl, FaLink, FaRegFolder, FaRegCalendar, FaRegFile, FaDownload, FaTrash
+        FaInfo, FaListUl, FaLink, FaRegFolder, FaRegCalendar, FaRegCalendarCheck, FaRegFile, FaDownload, FaTrash
     } from 'svelte-icons/fa/'
 
 
@@ -47,6 +47,7 @@
     import BasketPreview from './basket.preview.svelte'
     import PopupExplorer from './popup.explorer.svelte'
     import {fetchComposedClipboard4Editor, fetchComposedClipboard4Note, transformClipboardToJSONReferences, pushBrowserRecentElements, setBrowserRecentElement, getBrowserRecentElements} from './basket.utils'
+    import {getElementIcon} from './icons'
 
     let noteRef = ''
     let note = null;
@@ -137,7 +138,7 @@
                                         {
                                             Id: 14,
                                             Association: 'InTasks/Task',
-                                            Expressions:['$ref', 'Title', 'Summary', 'href']
+                                            Expressions:['$ref', 'Title', 'Summary', 'href', 'icon']
                                         },
                                         {
                                             Id: 15,
@@ -209,7 +210,7 @@
                         Summary: f.Summary,
                         href: f.href,
                         $ref: f.$ref,
-                        icon: 'Task'
+                        icon: f.icon
                 })
             })
         }
@@ -368,7 +369,7 @@
                                     },
                                     {
                                         caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                        disabled: true
+                                        action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, note)
                                     }
                                 ]
                         },
@@ -492,6 +493,17 @@
         showFloatingToolbar(aroundRect, PopupExplorer, {
             destinationContainer: noteRef,
             onRefreshView: async (f) => await reloadWithAttachements()
+        })
+    }
+
+    async function runPopupExplorerToPlaceElement(btt, aroundRect, element)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            canSelectRootElements: true,
+            onAttach: async (tmp, references) => {
+                await reef.post(`${element.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
+                await reloadWithAttachements()
+            }
         })
     }
 
@@ -690,7 +702,7 @@
                                     },
                                     {
                                         caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                        disabled: true
+                                        action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, note)
                                     }
                                 ]
 
@@ -934,7 +946,7 @@
                     },
                     {
                         caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                        disabled: true
+                        action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, note)
                     }
                 ], 
         }
@@ -1240,7 +1252,7 @@
                                     },
                                     {
                                         caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                        disabled: true
+                                        action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, element)
                                     }
                                 ]
                             },
@@ -1416,33 +1428,7 @@
                     }
                 ]
             }
-    }
-
-    function getElementIcon(element)
-    {
-        switch(element.icon)
-        {
-        case 'Folder':
-            return FaRegFolder
-
-        case 'Note':
-            return FaRegFile;
-
-        case 'Task':
-            return FaRegCalendar;
-
-        case 'UploadedFile':
-        case 'File':
-            return FaFile;
-
-        case 'TaskList':
-            return FaList;
-
-        case 'User':
-            return FaUser;
-        }
-    }
-    
+    }    
 
 </script>
 
@@ -1462,11 +1448,15 @@
             toolbarOperations={getPageOperations()}
             clearsContext='props'
             title={note.Title}>
-    <section class="w-full flex flex-col items-center">
+    <section class="w-full flex flex-col items-center
+                    sm:bg-white sm:dark:bg-stone-800/40 sm:shadow-slate-700/10 sm:dark:shadow-black/10 
+                    sm:mt-6 sm:px-6 sm:py-12 sm:shadow-xl md:mx-auto sm:max-w-3xl sm:rounded
+                    sm:ring-1 sm:ring-stone-900/5 sm:dark:ring-stone-950/20">
         {#if note.GetCanonicalPath}
                 <Breadcrumb class="mt-1 sm:min-w-[65ch]" path={note.GetCanonicalPath}/>
             {/if}
         <article class="w-full prose prose-base prose-zinc dark:prose-invert mx-2 prose-img:rounded-xl ">
+            
             
 
             <section class="w-full flex flex-row justify-between">
@@ -1626,7 +1616,7 @@
                                             onChange={changeAttachementProperty}/>
 
                             <span slot="left" let:element>
-                                <Icon component={FaRegFile}
+                                <Icon component={getElementIcon('Note')}
                                     class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
                             </span>
                         </List>
@@ -1648,7 +1638,7 @@
                                             onChange={changeAttachementProperty}/>
 
                             <span slot="left" let:element>
-                                <Icon component={FaFile}
+                                <Icon component={getElementIcon('File')}
                                     class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
                             </span>
                         </List>
@@ -1677,14 +1667,14 @@
                 </List>
             </section>
 
-            <!-- empty section fot have bottom free area -->
-            <section class="mb-64">
-
-            </section>
+            
 
         </article>
 
+    </section>
 
+    <!-- empty section fot have bottom free area -->
+    <section class="mb-64">
 
     </section>
 

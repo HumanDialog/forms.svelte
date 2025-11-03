@@ -18,7 +18,7 @@
 	import { afterUpdate, tick, onMount } from 'svelte';
     import {location, link, querystring} from 'svelte-spa-router'
 
-    import {FaDownload, FaArrowCircleRight, FaTimes, FaRegFile, FaRegCalendar, FaPaperPlane, FaRegStar, FaStar} from 'svelte-icons/fa/'
+    import {FaDownload, FaArrowCircleRight, FaTimes, FaRegFile, FaRegCalendar, FaRegCalendarCheck, FaPaperPlane, FaRegStar, FaStar} from 'svelte-icons/fa/'
     import BasketPreview from './basket.preview.svelte'
     import PopupExplorer from './popup.explorer.svelte'
     import {fetchComposedClipboard4Message, transformClipboardToJSONReferences, getBrowserRecentElements} from './basket.utils'

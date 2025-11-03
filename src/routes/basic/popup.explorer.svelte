@@ -11,6 +11,7 @@
     import {FaRegFolder, FaRegFile, FaRegCalendarCheck, FaRegCalendar, FaFile, FaList, FaRegComments, FaRegClipboard, FaClipboardList, FaLevelUpAlt} from 'svelte-icons/fa'
     import { afterUpdate, onMount } from "svelte";
     import {transformClipboardToJSONReferences} from './basket.utils'
+    import {getElementIcon} from './icons'
 	
 	
     export let destinationContainer = ''
@@ -18,6 +19,7 @@
     export let onSizeChanged = undefined
     export let onRefreshView = undefined
     export let onAttach = undefined
+    export let canSelectRootElements = false
     
     export let whatToShow = undefined
     
@@ -169,7 +171,7 @@
         levelUpHRef = '/root'
         currentLevelTitle = '_; My tasks; Mis tareas; Moje zadania'
 
-        let res = await reef.get(`/user/MyTasks?State<>STATE_FINISHED&fields=Id,$type,$ref,Title,Summary,href&sort=UserOrder`, onErrorShowAlert);
+        let res = await reef.get(`/user/MyTasks?State<>STATE_FINISHED&fields=Id,$type,$ref,Title,Summary,href,icon&sort=UserOrder`, onErrorShowAlert);
         if(!res)
             return [  ]
         else
@@ -183,7 +185,7 @@
                     ElementNav: t.$ref,
                     Title: t.Title,
                     Summary: t.Summary,
-                    icon: 'Task',
+                    icon: t.icon,
                     href: t.href,
                     ElementInfo: 0,
                     $ref: t.$ref
@@ -196,7 +198,7 @@
 
     async function generateMyListsReferences()
     {
-        canSelectElements = false
+        canSelectElements = canSelectRootElements
         levelUpHRef = '/root'
         currentLevelTitle = '_; My lists; Mis listas; Moje listy'
         let res = await reef.get(`/user/MyLists?Status<>TLS_GROUP_ARCHVIVED_LIST&fields=Id,$type,$ref,Name,Summary,href&sort=Order`, onErrorShowAlert);
@@ -226,7 +228,7 @@
 
     async function generateGroupListsReferences()
     {
-        canSelectElements = false
+        canSelectElements = canSelectRootElements
         levelUpHRef = '/root'
         currentLevelTitle = '_; Common lists; Listas comunes; Wspólne listy'
 
@@ -257,7 +259,7 @@
 
     async function generateMyFoldersReferences()
     {
-        canSelectElements = false
+        canSelectElements = canSelectRootElements
         levelUpHRef = '/root'
         currentLevelTitle = '_; My Folders; Mis carpetas; Moje foldery'
 
@@ -288,7 +290,7 @@
 
     async function generateGroupFoldersReferences()
     {
-        canSelectElements = false
+        canSelectElements = canSelectRootElements
         levelUpHRef = '/root'
         currentLevelTitle = '_; Common folders; Carpetas comunes; Wspólne foldery'
 
@@ -353,7 +355,7 @@
                                             {
                                                 Id: 4,
                                                 Association: 'Tasks',
-                                                Expressions:['TaskId', '$ref', 'Title', 'Summary', 'Order', 'href', '$type']
+                                                Expressions:['TaskId', '$ref', 'Title', 'Summary', 'Order', 'href', 'icon', '$type']
 
                                             },
                                             {
@@ -430,7 +432,7 @@
                         $type: 'Task',
                         Title: f.Title,
                         Summary: f.Summary,
-                        icon: "Task",
+                        icon: f.icon,
                         href: f.href,
                         Order: f.Order,
                         $ref: `./Task/${f.TaskId}`
@@ -498,7 +500,7 @@
                                                 Id: 3,
                                                 Association: 'Tasks',
                                                 Sort: 'ListOrder',
-                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'href', '$type']
+                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'href', 'icon', '$type']
 
                                             }
                                         ]
@@ -535,7 +537,7 @@
                     ElementNav: t.$ref,
                     Title: t.Title,
                     Summary: t.Summary,
-                    icon: 'Task',
+                    icon: t.icon,
                     href: t.href,
                     ElementInfo: 0,
                     $ref: t.$ref
@@ -805,36 +807,7 @@
 
     }
 
-    function getElementIcon(element)
-    {
-        switch(element.icon)
-        {
-        case 'Folder':
-            return FaRegFolder;
-        
-        case 'Clipboard':
-            return FaRegClipboard;
-        
-        case 'Discussion':
-            return FaRegComments;
-
-        case 'Note':
-            return FaRegFile;
-
-        case 'Task':
-            return FaRegCalendar;
-
-        case 'UploadedFile':
-        case 'File':
-            return FaFile;
-
-        case 'TaskList':
-            return FaList;
-
-        case 'Multi':
-                return FaClipboardList
-        }
-    }
+    
 
     function clearSelection(e)
     {

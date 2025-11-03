@@ -31,7 +31,7 @@
         showFloatingToolbar
 	} from '$lib';
     import {FaPlus, FaList, FaPen, FaCaretLeft, FaCaretRight, FaTrash, FaArrowsAlt, FaArchive, FaCheck, FaEllipsisH, FaChevronRight,
-        FaAngleDown, FaAngleUp, FaColumns, FaRandom, FaChevronLeft, FaUpload, FaRegCalendar, FaCaretUp, FaCaretDown, FaDownload
+        FaAngleDown, FaAngleUp, FaColumns, FaRandom, FaChevronLeft, FaUpload, FaRegCalendar, FaRegCalendarCheck, FaCaretUp, FaCaretDown, FaDownload
     } from 'svelte-icons/fa'
     import MoveOperations from './list.board.move.svelte'
 	import { tick, onMount } from 'svelte';
@@ -636,7 +636,7 @@
                                     },
                                     {
                                         caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                        disabled: true
+                                        action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, task)
                                     }
                                 ], 
                             hideToolbarCaption: true
@@ -817,6 +817,16 @@
         showFloatingToolbar(aroundRect, PopupExplorer, {
             destinationContainer: listPath,
             onRefreshView: (f) => reload(kanban.KEEP_SELECTION)
+        })
+    }
+
+    async function runPopupExplorerToPlaceElement(btt, aroundRect, task)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            canSelectRootElements: true,
+            onAttach: async (tmp, references) => {
+                await reef.post(`${task.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
+            }
         })
     }
 

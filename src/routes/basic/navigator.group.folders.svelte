@@ -9,11 +9,12 @@
                 reloadWholeApp,
                 Input,
                 onErrorShowAlert, UI, i18n, ext} from '$lib'
-    import {FaRegFolder, FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaArchive, FaUsers, FaPlus, FaRegStar, FaStar, FaPaste, FaRegClipboard, FaRegComments, FaRegFile, FaRegCalendar} from 'svelte-icons/fa'
+    import {FaRegFolder, FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaArchive, FaUsers, FaPlus, FaRegStar, FaStar, FaPaste, FaRegClipboard, FaRegComments, FaRegFile, FaRegCalendar, FaRegCalendarCheck} from 'svelte-icons/fa'
     import {location, push} from 'svelte-spa-router'
     import {reef, session} from '@humandialog/auth.svelte'
 	import { onMount, tick } from 'svelte';
     import { cache} from './cache.js'
+    import {getElementIcon} from './icons'
 
     export let sidebar = true;
 
@@ -102,7 +103,7 @@
                                     {
                                         Id: 123,
                                         Association: 'Tasks',
-                                        Expressions:['Id','$ref', 'Title', 'href', 'Summary', 'Order', '$type'],
+                                        Expressions:['Id','$ref', 'Title', 'href', 'Summary', 'Order', 'icon', '$type'],
                                     }
                                 ]
                             }
@@ -410,43 +411,6 @@
         return (res != null);
     }
 
-    function getFolderIcon(folder)
-    {
-        if(folder.icon)
-        {
-            switch(folder.icon)
-            {
-            case 'Folder':
-                return FaRegFolder;
-            case 'Clipboard':
-                return FaRegClipboard;
-            case 'Discussion':
-                return FaRegComments;
-            default:
-                return FaRegFolder
-            }
-        }
-        else
-            return FaRegFolder
-    }
-
-    function getElementIcon(element)
-    {
-        switch(element.$type)
-        {
-        case 'Folder':
-        case 'FolderFolder':
-            return getFolderIcon(element)
-
-        case 'Note':
-        case 'FolderNote':
-            return FaRegFile;
-
-        case 'Task':
-        case 'FolderTask':
-            return FaRegCalendar;
-        }
-    }
 
 </script>
 
@@ -494,7 +458,7 @@
                 <svelte:fragment let:item let:idx>
                     {@const href = item.href}
                     <SidebarItem   {href}
-                                    icon={getFolderIcon(item)}
+                                    icon={getElementIcon(item)}
                                     bind:this={navGroupItems[idx]}
                                     active={isRoutingTo(href, currentPath)}
                                     summary={ext(item.Summary)}>

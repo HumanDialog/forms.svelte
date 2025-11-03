@@ -7,10 +7,10 @@
         getActiveItems,
         clearActiveItem
     }   from '$lib'
-    import {FaRegFolder, FaRegFile, FaRegCalendarCheck, FaRegCalendar, FaFile, FaList, FaRegComments, FaRegClipboard, FaClipboardList} from 'svelte-icons/fa'
-	import { afterUpdate, onMount } from "svelte";
+    import { afterUpdate, onMount } from "svelte";
 	import { push } from "svelte-spa-router";
 	import { recentClipboardElements, transformClipboardToJSONReferences } from "./basket.utils";
+    import {getElementIcon} from './icons'
 
     export let destinationContainer = ''
     export let onHide = undefined
@@ -154,37 +154,6 @@
         }
     }
     */
-
-    function getElementIcon(element)
-    {
-        switch(element.icon)
-        {
-        case 'Folder':
-            return FaRegFolder;
-        
-        case 'Clipboard':
-            return FaRegClipboard;
-        
-        case 'Discussion':
-            return FaRegComments;
-
-        case 'Note':
-            return FaRegFile;
-
-        case 'Task':
-            return FaRegCalendar;
-
-        case 'UploadedFile':
-        case 'File':
-            return FaFile;
-
-        case 'TaskList':
-            return FaList;
-
-        case 'Multi':
-                return FaClipboardList
-        }
-    }
 
     function clearSelection(e)
     {
