@@ -110,11 +110,17 @@
 
     async function addFolder(newFolderAttribs)
     {
-        let res = await reef.post("/group/Folders/new", newFolderAttribs, onErrorShowAlert);
+        //let res = await reef.post("/group/Folders/new", newFolderAttribs, onErrorShowAlert);
+        let res = await reef.post("/group/CreateFolder", {
+            title: newFolderAttribs.Title,
+            order: newFolderAttribs.Order ?? 0,
+            summary: newFolderAttribs.Summary ?? ''
+        }, onErrorShowAlert)
+        
         if(!res)
             return null;
 
-        let newFolder = res.Folder[0];
+        let newFolder = res.Folder;
         await reloadFolders(newFolder.Id)
     }
 

@@ -1633,7 +1633,7 @@
                         toolbarOperations = {(el) => connectedToOperations(el)}>
                 
                     <ListTitle      a='InTitle'
-                                    hrefFunc={(el) => `${el.href}`}
+                                    hrefFunc={(el) => `${el.InHRef}`}
                                     readonly/>
 
                     <ListSummary    a='InSummary' 
