@@ -31,7 +31,7 @@
             showMenu,
             SHOW_MENU_BELOW,
             ext,
-            List, ListTitle, ListSummary, Icon
+            List, ListTitle, ListSummary, ListInserter, Icon
             } from '$lib'
 	import { onMount, tick } from 'svelte';
 
@@ -51,6 +51,7 @@
 
     let noteRef = ''
     let note = null;
+    let noteId = 0
     let allTags = '';
 
     let availableStates = [];
@@ -72,8 +73,8 @@
         if(foundIdx < 0)
             return;
 
-        const taskId = segments[segments.length-1]
-        noteRef = `./Note/${taskId}`
+        const id = parseInt(segments[segments.length-1])
+        noteRef = `./Note/${id}`
 
         reef.get('/group/AllTags', onErrorShowAlert).then((res) => {
             allTags = res
@@ -81,6 +82,7 @@
         })
 
        await reloadData();
+       noteId = id
 
        if(note)
             pushBrowserRecentElements( note.Id, note.$type, note.$ref, note.Title, note.Summary, "Note", note.href)
@@ -133,17 +135,17 @@
                                         {
                                             Id: 13,
                                             Association: 'InFolders',
-                                            Expressions:['$ref', 'InTitle', 'InSummary', 'InHRef', 'InIcon', 'IsCanonical']
+                                            Expressions:['$ref', 'InTitle', 'InSummary', 'InHRef', 'InIcon', 'IsCanonical', '$type']
                                         },
                                         {
                                             Id: 14,
                                             Association: 'InTasks',
-                                            Expressions:['$ref', 'InTitle', 'InSummary', 'InHRef', 'InIcon', 'IsCanonical']
+                                            Expressions:['$ref', 'InTitle', 'InSummary', 'InHRef', 'InIcon', 'IsCanonical', '$type']
                                         },
                                         {
                                             Id: 15,
                                             Association: 'InNotes',
-                                            Expressions:['$ref', 'InTitle', 'InSummary', 'InHRef', 'IsCanonical']
+                                            Expressions:['$ref', 'InTitle', 'InSummary', 'InHRef', 'IsCanonical', '$type']
                                         },
 
                                         {
@@ -285,12 +287,13 @@
         {
             separator: true
         },
-        {
+    /*    {
             caption: '_; Attachement; Anexo; Załącznik',
        //     icon: FaFile,
             action: async (f) => runFileAttacher()
         },
-        {
+    */
+   /*    {
             caption: '_; Content; Contenido; Treść',
         //    icon: FaAlignLeft,
             action: async (f) =>
@@ -305,6 +308,7 @@
                     }
                 }
         }
+    */
     ];
 
     function getPageOperations()
@@ -364,6 +368,17 @@
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
                                     action: runPopupExplorer4Note
+                                },
+                                {
+                                    separator: true
+                                },
+                                {
+                                    caption: '_; New note; Nueva nota; Nowa notatka',
+                                    action: () => runNoteInserter()
+                                },
+                                {
+                                    caption: '_; Add file; Añadir archivo; Dodaj plik',
+                                    action: () => runFileAttacher()
                                 }
                             ]
                         },
@@ -471,7 +486,8 @@
             canSelectRootElements: true,
             onAttach: async (tmp, references) => {
                 await reef.post(`${element.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
-                await reloadWithAttachements()
+                await reloadData();
+                connectedToComponent?.reload(note, connectedToComponent.CLEAR_SELECTION);
             }
         })
     }
@@ -479,8 +495,8 @@
     async function reloadWithAttachements()
     {
         await reloadData();
-        attachementsNotesComponent.reload(note, attachementsNotesComponent.CLEAR_SELECTION);
-        attachementsFilesComponent.reload(note, attachementsFilesComponent.CLEAR_SELECTION);
+        attachementsNotesComponent?.reload(note, attachementsNotesComponent.CLEAR_SELECTION);
+        attachementsFilesComponent?.reload(note, attachementsFilesComponent.CLEAR_SELECTION);
     }
 
     async function toggleNotePinned(note)
@@ -698,6 +714,17 @@
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
                                     action: runPopupExplorer4Note
+                                },
+                                {
+                                    separator: true
+                                },
+                                {
+                                    caption: '_; New note; Nueva nota; Nowa notatka',
+                                    action: () => runNoteInserter()
+                                },
+                                {
+                                    caption: '_; Add file; Añadir archivo; Dodaj plik',
+                                    action: () => runFileAttacher()
                                 }
                             ]
                         },
@@ -749,6 +776,17 @@
                     {
                         caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
                         action: runPopupExplorer4Editor
+                    },
+                    {
+                        separator: true
+                    },
+                    {
+                        caption: '_; New note; Nueva nota; Nowa notatka',
+                        action: () => runNoteCreator4Editor()
+                    },
+                    {
+                        caption: '_; Add file; Añadir archivo; Dodaj plik',
+                        action: () => runFileAttacher4Editor()
                     }
                 ]
 
@@ -800,6 +838,41 @@
         showFloatingToolbar(aroundRect, PopupExplorer, {
             onAttach: (clipboard, elements) => makeLinkToElement(elements)
         })
+    }
+
+    async function runNoteCreator4Editor() 
+    {
+        const cursorPos = description.getCurrentCursorPos()
+
+        const insertNewNoteLink = async (newNote) => {
+            const res = await reef.get(`${newNote.$ref}?fields=Title,href`, onErrorShowAlert)
+            const note = res.NoteNote
+            description.setCursorPos(cursorPos)
+            makeLinkToElement([{
+                Title: note.Title,
+                href: note.href
+            }])
+        }
+
+        runNoteInserter(insertNewNoteLink)
+    }
+
+    async function runFileAttacher4Editor()
+    {
+        const cursorPos = description.getCurrentCursorPos()
+
+        const insertNewFileLink = async (newFile) => {
+            const res = await reef.get(`${newFile.$ref}?fields=Title,href`, onErrorShowAlert)
+            const file = res.NoteFile
+            description.setCursorPos(cursorPos)
+
+            makeLinkToElement([{
+                Title: file.Title,
+                href: file.href
+            }])
+        }
+
+        runFileAttacher(insertNewFileLink)
     }
 
     function makeLinkToElement(elements)
@@ -1019,9 +1092,10 @@
     }
 
     let attInput;
-    function runFileAttacher()
+    function runFileAttacher(afterAction=null)
     {
         attInput?.click();
+        additionalAfterCreateAction = afterAction
     }
 
     async function onAttachementSelected() 
@@ -1079,6 +1153,10 @@
             pendingUploading = false;
 
             await reloadData();
+            attachementsFilesComponent.reload(note, fileLink.$ref);
+
+            if(additionalAfterCreateAction)
+                additionalAfterCreateAction(fileLink)
         }
     }
 
@@ -1383,21 +1461,110 @@
 
     function connectedToOperations(element)
     {
+        // TaskNote
+        // FolderNote
+        // NoteNote
+        const isCanonical = element.IsCanonical
+
+        let linkOperations = []
+        if(isCanonical)
+        {
+            linkOperations = [ ]
+        }
+        else
+        {
+            linkOperations = [
+                {
+                    caption: '_; Detach; Desconectar; Odłącz',
+                    action: (f) => dettachParent(element)
+                },
+                {
+                    caption: '_; Set as primary location; Establecer como ubicación principal; Ustaw jako główną lokalizację',
+                    action: (f) => setParentLocationAsCanonical(element)
+                }
+             ]
+        }
+        
+        
         return {
                 opver: 2,
                 fab: 'M00',
                 tbr: 'D',
-                disabled: true,
+                disabled: linkOperations.length == 0,
                 operations: [
                     {
                         caption: '_; Element; Elemento; Element',
-                        operations: [
-                            
-                        ]
+                        operations: linkOperations
                     }
                 ]
             }
+        
     }    
+
+    async function dettachParent(element)
+    {
+        switch(element.$type)
+        {
+        case 'FolderNote':
+            await reef.post(`${element.$ref}/Folder/DettachNote`, { noteLink: element.$ref } , onErrorShowAlert);
+            break;
+
+        case 'TaskNote':
+            await reef.post(`${element.$ref}/Task/DettachNote`, { noteLink: element.$ref } , onErrorShowAlert);
+            break;
+
+        case 'NoteNote':
+            await reef.post(`${element.$ref}/InNote/DettachNote`, { noteLink: element.$ref } , onErrorShowAlert);
+        }
+
+        await reloadData();
+        connectedToComponent.reload(note, connectedToComponent.SELECT_NEXT);
+    }
+
+    async function setParentLocationAsCanonical(element)
+    {
+        await reef.get(`${element.$ref}/SetLocationAsCanonical`, onErrorShowAlert)
+        await reloadData();
+        connectedToComponent.reload(note, connectedToComponent.KEEP_SELECTION);
+    }
+
+    let notesPlaceholder = false
+    let additionalAfterCreateAction = null
+    async function runNoteInserter(afterCreateAction=null) 
+    {
+        if(!attachementsNotesComponent)
+        {
+            notesPlaceholder = true   
+            await tick();
+        }
+        
+        await attachementsNotesComponent.addRowAfter(null)    
+        additionalAfterCreateAction = afterCreateAction
+    }
+
+    async function addEmptyNote(newNoteAttribs)
+    {
+        notesPlaceholder = false   
+        let res = await reef.post(`${noteRef}/CreateSubNote`,{ 
+            title: newNoteAttribs.Title,
+            summary: '',
+            order: 0 
+        }, onErrorShowAlert)
+        
+        if(!res)
+            return null;
+
+        let newNote = res.NoteNote;
+        setBrowserRecentElement(newNote.NoteId, 'Note')
+        
+        await reloadData();
+        attachementsNotesComponent.reload(note, newNote.$ref);
+
+        if(additionalAfterCreateAction)
+        {
+            additionalAfterCreateAction(newNote)
+        }
+    }
 
 </script>
 
@@ -1409,8 +1576,9 @@
     {/if}
 </svelte:head>
 
-{#if note != null}
 
+{#key noteId}
+{#if note != null}
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex-->
 <Page   self={note}
@@ -1568,10 +1736,10 @@
 
             <hr/>
 
-            {#if (note.Notes && note.Notes.length > 0) || (note.Files && note.Files.length > 0)}
+            {#if (note.Notes && note.Notes.length > 0) || (note.Files && note.Files.length > 0) || notesPlaceholder}
                 <h4 class="ml-2">_;Attachments; Anexos; Załączniki</h4>
                 <section class="not-prose"> 
-                    {#if note.Notes && note.Notes.length > 0}
+                    {#if (note.Notes && note.Notes.length > 0) || notesPlaceholder}
                         <List   self={note}
                                 a='Notes'
                                 bind:this={attachementsNotesComponent}
@@ -1583,6 +1751,8 @@
 
                             <ListSummary    a='Summary' 
                                             onChange={changeAttachementProperty}/>
+
+                            <ListInserter   action={addEmptyNote} icon incremental={false}/>
 
                             <span slot="left" let:element class="relative">
                                 <Icon component={getElementIcon('Note')}
@@ -1665,7 +1835,9 @@
     <input hidden type="file" id="imageFile" accept="image/*" bind:this={imgInput} on:change={onImageSelected}/> <!-- capture="environment" -->
     <input hidden type="file" id="attachementFile" accept="*/*" bind:this={attInput} on:change={onAttachementSelected}/>
 </Page>
+
 {/if}
+{/key}
 
 <Modal title={i18n(['Uploading...', 'Carga...', 'Przesyłanie...'])}
     bind:open={pendingUploading} mode={3} icon={FaCloudUploadAlt}>

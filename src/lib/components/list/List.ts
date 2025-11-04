@@ -73,6 +73,7 @@ export class rList_definition
     public can_insert           :boolean = false;
     public onInsert             :Function | undefined = undefined;
     public inserter_icon        :boolean = false;
+    public insert_incremental   :boolean = true 
     public onOpen               :Function | undefined = undefined;
     public downloadable         :boolean = false
     public downloadableFunc     :Function | undefined = undefined

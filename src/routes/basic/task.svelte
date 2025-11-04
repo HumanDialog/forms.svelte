@@ -29,7 +29,7 @@
 			randomString,
 			showMenu,
             SHOW_MENU_BELOW,
-            List, ListTitle, ListSummary, Icon
+            List, ListTitle, ListSummary, ListInserter, Icon
             } from '$lib'
 	import { onMount, tick } from 'svelte';
     import {location, querystring, push, link} from 'svelte-spa-router'
@@ -129,17 +129,17 @@
                                         {
                                             Id: 11,
                                             Association: 'Actor',
-                                            Expressions:['$ref', 'Name', 'href']
+                                            Expressions:['$ref', 'Name', 'href', '$type']
                                         },
                                         {
                                             Id: 12,
                                             Association: 'TaskList',
-                                            Expressions:['$ref', 'Name', 'Summary', 'TaskStates', 'href']
+                                            Expressions:['$ref', 'Name', 'Summary', 'TaskStates', 'href', '$type']
                                         },
                                         {
                                             Id: 13,
                                             Association: 'InFolders',
-                                            Expressions:['$ref', 'InTitle', 'InSummary', 'InHRef', 'InIcon', 'IsCanonical']
+                                            Expressions:['$ref', 'InTitle', 'InSummary', 'InHRef', 'InIcon', 'IsCanonical', '$type']
                                         },
                                         {
                                             Id: 14,
@@ -204,6 +204,7 @@
                         href: f.InHRef,
                         $ref: f.$ref,
                         icon: f.InIcon,
+                        $type: f.$type,
                         IsCanonical: f.IsCanonical
                 })
             })
@@ -216,6 +217,7 @@
                 href: task.TaskList.href,
                 $ref: task.TaskList.$ref,
                 icon: 'TaskList',
+                $type: task.TaskList.$type,
                 IsCanonical: 1
         })
 
@@ -226,6 +228,7 @@
                 href: task.Actor.href,
                 $ref: task.Actor.$ref,
                 icon: 'User',
+                $type: task.Actor.$type,
                 IsCanonical: 1
         })
 
@@ -409,6 +412,17 @@
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
                                     action: runPopupExplorer4Task
+                                },
+                                {
+                                    separator: true
+                                },
+                                {
+                                    caption: '_; New note; Nueva nota; Nowa notatka',
+                                    action: () => runNoteInserter()
+                                },
+                                {
+                                    caption: '_; Add file; Añadir archivo; Dodaj plik',
+                                    action: () => runFileAttacher()
                                 }
                             ]
                         },
@@ -495,7 +509,8 @@
             canSelectRootElements: true,
             onAttach: async (tmp, references) => {
                 await reef.post(`${element.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
-                await reloadWithAttachements()
+                await reloadData();
+                connectedToComponent?.reload(task, connectedToComponent.CLEAR_SELECTION);
             }
         })
     }
@@ -618,12 +633,12 @@
         {
             separator: true
         },
-        {
+    /*    {
             caption: '_; Attachement; Anexo; Załącznik',
        //     icon: FaFile,
             action: async (f) => runFileAttacher()
         },
-        {
+    */    {
             caption: '_; Description; Descripción; Opis',
         //    icon: FaAlignLeft,
             action: async (f) =>
@@ -702,6 +717,17 @@
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
                                     action: runPopupExplorer4Task
+                                },
+                                {
+                                    separator: true
+                                },
+                                {
+                                    caption: '_; New note; Nueva nota; Nowa notatka',
+                                    action: () => runNoteInserter()
+                                },
+                                {
+                                    caption: '_; Add file; Añadir archivo; Dodaj plik',
+                                    action: () => runFileAttacher()
                                 }
                             ]
                         },
@@ -918,6 +944,17 @@
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
                                     action: runPopupExplorer4Task
+                                },
+                                {
+                                    separator: true
+                                },
+                                {
+                                    caption: '_; New note; Nueva nota; Nowa notatka',
+                                    action: () => runNoteInserter()
+                                },
+                                {
+                                    caption: '_; Add file; Añadir archivo; Dodaj plik',
+                                    action: () => runFileAttacher()
                                 }
                             ]
                         },
@@ -969,6 +1006,17 @@
                     {
                         caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
                         action: runPopupExplorer4Editor
+                    },
+                    {
+                        separator: true
+                    },
+                    {
+                        caption: '_; New note; Nueva nota; Nowa notatka',
+                        action: () => runNoteCreator4Editor()
+                    },
+                    {
+                        caption: '_; Add file; Añadir archivo; Dodaj plik',
+                        action: () => runFileAttacher4Editor()
                     }
                 ]
 
@@ -1022,6 +1070,41 @@
         showFloatingToolbar(aroundRect, PopupExplorer, {
             onAttach: (clipboard, elements) => makeLinkToElement(elements)
         })
+    }
+
+    async function runNoteCreator4Editor() 
+    {
+        const cursorPos = description.getCurrentCursorPos()
+
+        const insertNewNoteLink = async (newNote) => {
+            const res = await reef.get(`${newNote.$ref}?fields=Title,href`, onErrorShowAlert)
+            const note = res.TaskNote
+            description.setCursorPos(cursorPos)
+            makeLinkToElement([{
+                Title: note.Title,
+                href: note.href
+            }])
+        }
+
+        runNoteInserter(insertNewNoteLink)
+    }
+
+    async function runFileAttacher4Editor()
+    {
+        const cursorPos = description.getCurrentCursorPos()
+
+        const insertNewFileLink = async (newFile) => {
+            const res = await reef.get(`${newFile.$ref}?fields=Title,href`, onErrorShowAlert)
+            const file = res.TaskFile
+            description.setCursorPos(cursorPos)
+
+            makeLinkToElement([{
+                Title: file.Title,
+                href: file.href
+            }])
+        }
+
+        runFileAttacher(insertNewFileLink)
     }
 
     function makeLinkToElement(elements)
@@ -1233,9 +1316,10 @@
 
 
     let attInput;
-    function runFileAttacher()
+    function runFileAttacher(afterAction=null)
     {
         attInput?.click();
+        additionalAfterCreateAction = afterAction
     }
 
     async function onAttachementSelected()
@@ -1295,6 +1379,10 @@
             pendingUploading = false;
 
             await reloadData();
+            attachementsFilesComponent.reload(task, fileLink.$ref);
+
+            if(additionalAfterCreateAction)
+                additionalAfterCreateAction(fileLink)
         }
     }
 
@@ -1599,23 +1687,122 @@
 
     function connectedToOperations(element)
     {
+        // TaskList
+        // FolderTask
+        // User
+
+        let linkOperations = []
+
+        switch(element.$type)
+        {
+        case 'TaskList':
+        case 'User':
+            linkOperations = [
+                {
+                    caption: '_; Detach; Desconectar; Odłącz',
+                    action: (f) => dettachParent(element)
+                }
+            ]
+            break;
+
+        case 'FolderTask':
+            {
+                const isCanonical = element.IsCanonical
+                if(!isCanonical)
+                {
+                    linkOperations = [
+                        {
+                            caption: '_; Detach; Desconectar; Odłącz',
+                            action: (f) => dettachParent(element)
+                        },
+                        {
+                            caption: '_; Set as primary location; Establecer como ubicación principal; Ustaw jako główną lokalizację',
+                            action: (f) => setParentLocationAsCanonical(element)
+                        }
+                    ]
+                }
+            }
+            break;
+        }
+
         return {
                 opver: 2,
                 fab: 'M00',
                 tbr: 'D',
-                disabled: true,
+                disabled: linkOperations.length == 0,
                 operations: [
                     {
                         caption: '_; Element; Elemento; Element',
-                        operations: [
-                            
-                        ]
+                        operations: linkOperations
                     }
                 ]
             }
     }
 
-    
+    async function dettachParent(element)
+    {
+        switch(element.$type)
+        {
+        case 'TaskList':
+            await reef.get(`${taskRef}/set?TaskList=null` , onErrorShowAlert);
+            break;
+
+        case 'User':
+            await reef.get(`${taskRef}/set?Actor=null` , onErrorShowAlert);
+            break;
+
+        case 'FolderTask':
+            await reef.post(`${element.$ref}/Folder/DettachTask`, { taskLink: element.$ref } , onErrorShowAlert);
+        }
+
+        await reloadData();
+        connectedToComponent.reload(task, connectedToComponent.SELECT_NEXT);
+    }
+
+    async function setParentLocationAsCanonical(element)
+    {
+        await reef.get(`${element.$ref}/SetLocationAsCanonical`, onErrorShowAlert)
+        await reloadData();
+        connectedToComponent.reload(task, connectedToComponent.KEEP_SELECTION);
+    }
+
+    let notesPlaceholder = false
+    let additionalAfterCreateAction = null
+    async function runNoteInserter(afterCreateAction=null) 
+    {
+        if(!attachementsNotesComponent)
+        {
+            notesPlaceholder = true   
+            await tick();
+        }
+        
+        await attachementsNotesComponent.addRowAfter(null)    
+        additionalAfterCreateAction = afterCreateAction
+    }
+
+    async function addEmptyNote(newNoteAttribs)
+    {
+        notesPlaceholder = false   
+        let res = await reef.post(`${taskRef}/CreateSubNote`,{ 
+            title: newNoteAttribs.Title,
+            summary: '',
+            order: 0 
+        }, onErrorShowAlert)
+        
+        if(!res)
+            return null;
+
+        let newNote = res.TaskNote;
+        setBrowserRecentElement(newNote.NoteId, 'Note')
+        
+        await reloadData();
+        attachementsNotesComponent.reload(task, newNote.$ref);
+
+        if(additionalAfterCreateAction)
+        {
+            additionalAfterCreateAction(newNote)
+        }
+    }
 
 </script>
 
@@ -1801,10 +1988,10 @@
 
             <hr/>
 
-            {#if (task.Notes && task.Notes.length > 0) || (task.Files && task.Files.length > 0)}
+            {#if (task.Notes && task.Notes.length > 0) || (task.Files && task.Files.length > 0) || notesPlaceholder}
                 <h4 class="ml-2">_;Attachments; Anexos; Załączniki</h4>
                 <section class="not-prose"> 
-                    {#if task.Notes && task.Notes.length > 0}
+                    {#if (task.Notes && task.Notes.length > 0) || notesPlaceholder}
                         <List   self={task}
                                 a='Notes'
                                 bind:this={attachementsNotesComponent}
@@ -1816,6 +2003,8 @@
 
                             <ListSummary    a='Summary' 
                                             onChange={changeAttachementProperty}/>
+
+                            <ListInserter   action={addEmptyNote} icon incremental={false}/>
 
                             <span slot="left" let:element class="relative">
                                 <Icon component={getElementIcon('Note')}

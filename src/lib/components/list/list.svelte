@@ -279,7 +279,7 @@
                 activate_after_dom_update = last_activated_element;
             else  
             {
-                if(detail.incremental)
+                if(detail.incremental && definition.insert_incremental)
                 {
                     let current_active = getActive(selectionKey);
                     await addRowAfter(current_active);

@@ -65,6 +65,7 @@ export function getElementIcon(element)
             case 'Note':
             case 'FolderNote':
             case 'TaskNote':
+            case 'NoteNote':
                 return FaRegFile
 
             case 'Task':

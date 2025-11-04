@@ -1280,6 +1280,7 @@
     {
         editor
         .chain()
+        .insertContent(' ')
         .setLink({ href })
         .insertContent(title)
         .unsetMark("link")
@@ -1586,6 +1587,16 @@
     export function hasChanged()
     {
         return hasChangedValue
+    }
+
+    export function getCurrentCursorPos()
+    {
+        return editor.state.selection.$anchor.pos
+    }
+
+    export function setCursorPos(num)
+    {
+        editor.commands.focus(num);
     }
 
 
