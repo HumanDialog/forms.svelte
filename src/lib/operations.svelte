@@ -149,7 +149,11 @@
                         }
 
                         if(op.hideToolbarCaption)
+                        {
+                            if(!tbrOperation.tooltip)
+                                tbrOperation.tooltip = tbrOperation.caption
                             tbrOperation.caption = ''
+                        }
 
                         const shouldAddSeparator = (list, groupName) => {
                             if(!groupName)
@@ -280,6 +284,16 @@
         else
             return operation.disabled ?? false;
     }
+
+    function operationTooltip(operation)
+    {
+        if(!operation)
+            return '';
+        else if(operation.tooltip)
+            return operation.tooltip
+        else 
+            return ''
+    }
 </script>
 
 {#if hasOperations}
@@ -304,6 +318,7 @@
                                 inline-flex items-center"
                                 class:bg-stone-700={isActive}
                                 class:dark:bg-stone-800={isActive}
+                                title={operationTooltip(operation)}
                                 on:mousedown={(e) => mousedown(e, operation)}
                                 on:click={(e) => {on_click(e, operation, isDisabled)}}>
                             {#if operation.icon}
@@ -334,6 +349,7 @@
                             class:bg-stone-200={isActive}
                             class:dark:bg-stone-800={isActive}
                             disabled={isDisabled}
+                            title={operationTooltip(operation)}
                             on:mousedown={(e) => mousedown(e, operation)}
                             on:click={(e) => {on_click(e, operation, isDisabled)}}>
                         {#if operation.icon}
@@ -376,6 +392,7 @@
                         class:bg-stone-200={isActive}
                         class:dark:bg-stone-800={isActive}
                         disabled={isDisabled}
+                        title={operationTooltip(operation)}
                         on:mousedown={(e) => mousedown(e, operation)}
                         on:click={(e) => {on_click(e, operation, isDisabled)}}>
                     {#if operation.icon}

@@ -5,7 +5,7 @@
                 FaInfoCircle,
                 FaUserSlash,
                 FaChevronDown,
-                FaInfo} from 'svelte-icons/fa'
+                FaInfo, FaLink} from 'svelte-icons/fa'
     
     import Page from './page.svelte'
     import List from './components/list/list.svelte'
@@ -189,7 +189,8 @@
         auth_group: 0,
         files_group: 0,
         acc_role: '',
-        silently: false
+        silently: false,
+        accepted: false
     }
 
     let name_input;
@@ -367,7 +368,8 @@
                 caption: i18n({en: 'Fetch info', es: 'Obtener información', pl: 'Pobierz informacje'}),
                 icon: FaInfo,
                 action: (f) => fetch_user_details(user),
-                tbr: 'A'
+                tbr: 'A',
+                fab: 'S00'
             }
         ];
 
@@ -375,11 +377,11 @@
         {
             operations = [ ...operations,
                 {
-                    icon: FaUserPlus,
+                    //icon: FaUserPlus,
                     caption: i18n({en: 'Revert removing', es: 'Revertir eliminación', pl: 'Cofnij usunięcie'}),
                     action: (f) => askToAddAgain(user),
 //                    fab: 'M10',
-                    tbr: 'A'
+                   // tbr: 'A'
                 }
             ];
         }
@@ -391,16 +393,24 @@
                                 icon: FaPen,
                                 caption: i18n({en: 'Change', es: 'Cambiar', pl: 'Zmień'}),
                                 menu: edit_operations,
-                                //fab: 'M20',
+                                fab: 'M20',
                                 tbr: 'A'
                             });
             
             operations.push({
                                 caption: i18n({en: 'Remove user', es: 'Eliminar usuario', pl: 'Usuń użytkownika'}),
-                                icon: FaUserMinus,
+                            //    icon: FaUserMinus,
                                 action: (focused) => askToRemove(user),
                              //   fab: 'M30',
-                                tbr: 'A'
+                             //   tbr: 'A'
+                            });
+
+            operations.push({
+                                caption: i18n({en: 'Copy the invitation link', es: 'Copie el enlace de invitación', pl: 'Skopuj link zapraszający'}),
+                                //icon: FaLink,
+                                action: (focused) => regenerateAndCopyInvitationLink(user),
+                                //   fab: 'M30',
+                                //tbr: 'A'
                             });
         }
 
@@ -408,6 +418,7 @@
         return {
             opver: 2,
             fab: 'M00',
+            tbr: 'D',
             operations: [
                 {
                     caption: i18n({en: 'User', es: 'Usuario', pl: 'Użytkownik'}),
@@ -418,7 +429,37 @@
         }
     }
 
-    
+    async function regenerateAndCopyInvitationLink(user)
+    {
+        try {
+                let params = `username=${user[emailAttrib]}`
+                params += `&client_id=${$session.configuration.client_id}`
+                params += `&redirect_uri=${encodeURIComponent(window.location.origin+'/#/auth/cb')}`
+                params += `&state=${encodeURIComponent(window.location.origin+'/#/auth/signin')}`
+                params += `&tenant=${$session.tid}`
+                params += `&scope=${$session.appId}`
+
+                console.log(params)
+
+                const res = await reef.fetch(`/auth/regenerate_invitation_link?${params}`)
+
+                if(res.ok)
+                {
+                    const result = await res.json();
+                    console.log(result.invitation_link)
+                    navigator.clipboard.writeText(result.invitation_link)
+                }
+                else
+                {
+                    const err_msg = await res.text();
+                    onErrorShowAlert(err_msg);
+                }
+        }
+        catch (err)
+        {
+            onErrorShowAlert(err);
+        }
+    }
 
     let data_item = 
     { 
@@ -541,6 +582,7 @@
                                 state: `${window.location.origin}/#/auth/signin`,
                                 idempotency_token: inviteUserIdempotencyToken,
                                 silently: new_user.silently ?? false,
+                                accepted: new_user.accepted ?? false,
                                 set:
                                 {
                                     [nameAttrib]: new_user.name,
@@ -593,6 +635,7 @@
         new_user.files_group = 0;
         new_user.acc_role = ''
         new_user.silently = false;
+        new_user.accepted = false;
 
         create_new_user_enabled = false;
     }
@@ -605,6 +648,7 @@
         new_user.files_group = 0;
         new_user.acc_role = ''
         new_user.silently = false;
+        new_user.accepted = false;
 
         create_new_user_enabled = false;
     }
@@ -693,6 +737,7 @@
         new_user.email = user[emailAttrib];
         new_user.name = user[nameAttrib];      
         new_user.silently = true;
+        new_user.accepted = true;
 
         //name_input?.setReadonly(true)
         //email_input?.setReadonly(true)
@@ -725,7 +770,8 @@
                 title='Members' 
                 toolbarOperations={user_operations} 
                 bind:this={list}>
-            <ListTitle a={nameAttrib} onChange={on_name_changed} hrefFunc={getHRefFunc()}/>
+            <!-- hrefFunc={getHRefFunc()}-->
+            <ListTitle a={nameAttrib} onChange={on_name_changed} />
             <ListSummary a={emailAttrib} readonly/>
 
             <ListStaticProperty name="Membership" a="membership_tag"/>
@@ -770,14 +816,14 @@
                     a="email" 
                     validation={is_valid_email_address}
                     bind:this={email_input}
-                    readonly={new_user.silently}/>
+                    readonly={new_user.accepted}/>
 
             <Input  label={i18n({en: 'Name', es: 'Nombre', pl: 'Imię'})} 
                     placeholder='Optional' 
                     self={new_user} 
                     a="name"
                     bind:this={name_input}
-                    readonly={new_user.silently}/>
+                    readonly={new_user.accepted}/>
 
             <!--Checkbox class="mt-2 text-xs font-normal" self={new_user} a="maintainer">
                 <div class="flex flex-row items-center">
@@ -788,6 +834,10 @@
                     </Popover>
                 </div>
             </Checkbox-->
+
+            <Checkbox class="mt-2 text-xs font-normal" self={new_user} a="silently">
+                {i18n({en: 'Add user without sending an email', es: 'Añadir usuario sin enviar correo electrónico', pl: 'Dodaj użytkownika bez wysyłania e-maila'})}
+            </Checkbox>
 
             <!-- There is problem with dropdown/combo on dialogs (nested fixed stacks) -->
             <!--Combo class="mt-2" label='Privileges' a='auth_group' self={new_user} >

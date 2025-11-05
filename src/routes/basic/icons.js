@@ -51,9 +51,9 @@ export function getElementIcon(element)
     else if(typeof element === 'object')
     {
         if(element.icon)
-        {
             return getIconByLabel(element.icon)
-        }
+        else if (element.InIcon) 
+            return getIconByLabel(element.InIcon)
         else if(element.$type)
         {
             switch(element.$type)
@@ -84,8 +84,6 @@ export function getElementIcon(element)
                 return FaUser;
             }
         }
-        else if (element.InIcon) 
-            return getIconByLabel(element.InIcon)
         else
             return null;
     }

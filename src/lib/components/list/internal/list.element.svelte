@@ -484,7 +484,7 @@
                                 </a>
                             {/if}
                         </p>
-                    {:else}
+                    {:else if definition.onOpen}
                         <p  class=" text-base font-semibold 
                                     
                                     whitespace-nowrap overflow-clip w-full sm:flex-none sm:{name_w}"
@@ -507,6 +507,19 @@
                                 </button>
                             {/if}
                             -->
+                        </p>
+                    {:else}
+                        <p  class=" text-base font-semibold 
+                                    whitespace-nowrap overflow-clip w-full sm:flex-none sm:{name_w}"
+                            id="__hd_list_ctrl_{getItemKey(item)}_Title"
+                            use:editable={{
+                                action: (text) => {change_name(text)},
+                                active: true,
+                                readonly: definition.title_readonly,
+                            }}> 
+                                <span>
+                                    {element_title}
+                                </span>
                         </p>
                     {/if}
                 {/key}
