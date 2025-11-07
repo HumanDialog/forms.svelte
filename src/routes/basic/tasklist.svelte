@@ -23,6 +23,7 @@
     import BasketPreview from './basket.preview.svelte'
     import PopupExplorer from './popup.explorer.svelte'
 	import { fetchComposedClipboard4TaskList, transformClipboardToJSONReferences, setBrowserRecentElement, getBrowserRecentElements } from './basket.utils.js';
+    import TaskProperties from './properties.task.svelte'
 
     export let params = {}
 
@@ -565,10 +566,26 @@
                             //icon: FaTrash,
                             caption: '_; Delete; Eliminar; Usuń',
                             action: (f) => askToDelete(task)
+                        },
+                        {
+                            caption: '_; Properties; Propiedades; Właściwości',
+                            action: (btt, rect)=> runElementProperties(btt, rect, task, 'Task')
                         }
                     ]
                 }
             ]
+        }
+    }
+
+    let taskPropertiesDialog;
+    function runElementProperties(btt, aroundRect, element, kind)
+    {
+        switch(kind)
+        {
+        case 'Task':
+        case 'FolderTask':
+            taskPropertiesDialog.show(element)
+            break
         }
     }
 
@@ -772,3 +789,5 @@
         okCaption={i18n(['Change', 'Cambiar', 'Zmień'])}
         bind:this={changeKindModal}
         />
+
+<TaskProperties bind:this={taskPropertiesDialog} />

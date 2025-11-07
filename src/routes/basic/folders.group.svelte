@@ -16,6 +16,7 @@
                 Breadcrumb} from '$lib'
     import {querystring, location} from 'svelte-spa-router'
     import {FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegComments, FaRegClipboard, FaPen, FaArchive, FaEllipsisH} from 'svelte-icons/fa'
+    import FolderProperties from './properties.folder.svelte'
 
     export let params = {}
 
@@ -56,7 +57,7 @@
                                                 {
                                                     Id: 2,
                                                     Association: 'Folders',
-                                                    Expressions:['Id','Title', 'Summary', 'href', 'Order', '$ref', 'icon'],
+                                                    Expressions:['Id','Title', 'Summary', 'href', 'Order', '$ref', 'icon', '$type'],
                                                     Sort: "Order",
                                                 }
                                             ]
@@ -213,6 +214,10 @@
                             action: (f) => askToDelete(folder),
                             //fab:'M30',
                             //tbr:'B'
+                        },
+                        {
+                            caption: '_; Properties; Propiedades; Właściwości',
+                            action: (btt, rect)=> runElementProperties(btt, rect, folder, 'Folder')
                         }
                         
                     ]
@@ -236,6 +241,18 @@
             await reloadFolders(listComponent.SELECT_NEXT)
     }
     */
+
+    let folderPropertiesDialog;
+    function runElementProperties(btt, aroundRect, element, kind)
+    {
+        switch(kind)
+        {
+        case 'Folder':
+        case 'FolderFolder':
+            folderPropertiesDialog.show(element)
+            break;
+        }
+    }
 
     
     function getFolderIcon(folder)
@@ -312,3 +329,5 @@
         onOkCallback={deleteFolder}
         bind:this={deleteModal}
         />
+
+<FolderProperties bind:this={folderPropertiesDialog} />

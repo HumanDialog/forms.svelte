@@ -17,6 +17,7 @@
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaList, FaPen, FaArchive, FaChevronLeft, FaChevronRight} from 'svelte-icons/fa'
     import {querystring, location, push} from 'svelte-spa-router'
 	import { getElementIcon } from './icons';
+    import NoteProperties from './properties.note.svelte'
 
     export let params = {}
 
@@ -236,6 +237,10 @@
                         {
                             caption: '_; Delete; Eliminar; Usuń',
                             action: (f) => askToDelete(list)
+                        },
+                        {
+                            caption: '_; Properties; Propiedades; Właściwości',
+                            action: (btt, rect)=> runElementProperties(btt, rect, list, 'Note')
                         }
 
                     ]
@@ -254,6 +259,18 @@
         const path = $location
         const loc = `${path}?page=${pageNo}`
         push(loc)
+    }
+
+    let notePropertiesDialog;
+    function runElementProperties(btt, aroundRect, element, kind)
+    {
+        switch(kind)
+        {
+        case 'Note':
+        case 'FolderNote':
+            notePropertiesDialog.show(element)
+            break;
+        }
     }
 
 </script>
@@ -336,3 +353,4 @@
         bind:this={deleteModal}
         />
 
+<NoteProperties bind:this={notePropertiesDialog} />

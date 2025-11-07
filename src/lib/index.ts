@@ -60,6 +60,7 @@ export { default as ListStaticProperty} from './components/list/list.static.svel
 export { default as ListTags} from './components/list/list.tags.svelte'
 
 export { default as Modal} from './modal.svelte'
+export { default as Dialog} from './dialog.svelte'
 export { default as MembersPage} from './tenant.members.svelte'
 export { default as Console} from './console.svelte'
 
@@ -110,7 +111,6 @@ export {
     isOnScreenKeyboardVisible,
     randomString,
     UI,
-
     NAV_MODE_SIDEBAR,
     NAV_MODE_FULL_PAGE,
     navGetMode,

@@ -44,6 +44,8 @@
     import PopupExplorer from './popup.explorer.svelte'
     import {getElementIcon} from './icons'
     import {fetchComposedClipboard4Editor, fetchComposedClipboard4Task, transformClipboardToJSONReferences, pushBrowserRecentElements, setBrowserRecentElement, getBrowserRecentElements} from './basket.utils'
+    import FileProperties from './properties.file.svelte'
+	import NoteProperties from './properties.note.svelte'
 	
     let taskRef = ''
     let task = null;
@@ -144,12 +146,12 @@
                                         {
                                             Id: 14,
                                             Association: 'Notes',
-                                            Expressions:['$ref', 'Title', 'Summary', 'href', 'IsCanonical']
+                                            Expressions:['$ref', 'Title', 'Summary', 'href', 'IsCanonical', '$type', 'NoteId']
                                         },
                                         {
                                             Id: 15,
                                             Association: 'Files',
-                                            Expressions:['$ref', 'Title', 'Summary', 'href', 'IsCanonical']
+                                            Expressions:['$ref', 'Title', 'Summary', 'href', 'IsCanonical', '$type', 'FileId']
                                         }
                                     ]
                                 }
@@ -518,8 +520,8 @@
     async function reloadWithAttachements()
     {
         await reloadData();
-        attachementsNotesComponent.reload(task, attachementsNotesComponent.CLEAR_SELECTION);
-        attachementsFilesComponent.reload(task, attachementsFilesComponent.CLEAR_SELECTION);
+        attachementsNotesComponent?.reload(task, attachementsNotesComponent.CLEAR_SELECTION);
+        attachementsFilesComponent?.reload(task, attachementsFilesComponent.CLEAR_SELECTION);
     }
 
     let summary;
@@ -1474,11 +1476,11 @@
                 {
                     caption: '_; Detach; Desconectar; Odłącz',
                     action: (f) => dettachAttachement(element, kind)
-                },
-                {
+                }
+            /*    {
                     caption: '_; Set as primary location; Establecer como ubicación principal; Ustaw jako główną lokalizację',
                     action: (f) => setAttachementLocationAsCanonical(element, kind)
-                }
+                }*/
              ]
         }
 
@@ -1532,11 +1534,33 @@
                             {
                                 separator: true
                             },
-                            ...linkOperations
+                            ...linkOperations,
+                            {
+                                caption: '_; Properties; Propiedades; Właściwości',
+                                action: (btt, rect)=> runElementProperties(btt, rect, element, kind)
+                            }
                         ]
                     }
                 ]
             }
+    }
+
+    let filePropertiesDialog;
+    let notePropertiesDialog;
+    function runElementProperties(btt, aroundRect, element, kind)
+    {
+        switch(kind)
+        {
+        case 'Note':
+        case 'TaskNote':
+            notePropertiesDialog.show(element)
+            break;
+
+        case 'UploadedFile':
+        case 'TaskFile':
+            filePropertiesDialog.show(element)
+            break;
+        }
     }
 
     async function changeAttachementProperty(item, value, propName)
@@ -1591,7 +1615,10 @@
     {
         await reef.post(`${taskRef}/CutNoteToBasket`, { noteLink: note.$ref } , onErrorShowAlert);
         await reloadData();
-        attachementsNotesComponent.reload(task, attachementsNotesComponent.SELECT_NEXT);
+        if(attachementsNotesComponent)
+            attachementsNotesComponent.reload(task, attachementsNotesComponent.SELECT_NEXT);
+        else
+            clearActiveItem('props')
     }
 
     async function copyFileToBasket(file)
@@ -1603,7 +1630,10 @@
     {
         await reef.post(`${taskRef}/CutFileToBasket`, { fileLink: file.$ref } , onErrorShowAlert);
         await reloadData();
-        attachementsFilesComponent.reload(task, attachementsFilesComponent.SELECT_NEXT);
+        if(attachementsFilesComponent)
+            attachementsFilesComponent.reload(task, attachementsFilesComponent.SELECT_NEXT);
+        else
+            clearActiveItem('props')
     }
 
     async function dettachAttachement(element, kind)
@@ -1623,14 +1653,20 @@
     {
         await reef.post(`${taskRef}/DettachNote`, { noteLink: note.$ref } , onErrorShowAlert);
         await reloadData();
-        attachementsNotesComponent.reload(task, attachementsNotesComponent.SELECT_NEXT);
+        if(attachementsNotesComponent)
+            attachementsNotesComponent.reload(task, attachementsNotesComponent.SELECT_NEXT);
+        else
+            clearActiveItem('props')
     }
 
     async function dettachFile(file)
     {
         await reef.post(`${taskRef}/DettachFile`, { fileLink: file.$ref } , onErrorShowAlert);
         await reloadData();
-        attachementsFilesComponent.reload(task, attachementsFilesComponent.SELECT_NEXT);
+        if(attachementsFilesComponent)
+            attachementsFilesComponent.reload(task, attachementsFilesComponent.SELECT_NEXT);
+        else
+            clearActiveItem('props')
     }
 
     async function setAttachementLocationAsCanonical(element, kind)
@@ -1642,10 +1678,10 @@
         {
         case 'Note':
         case 'TaskNote':
-            attachementsNotesComponent.reload(task, attachementsNotesComponent.KEEP_SELECTION);
+            attachementsNotesComponent?.reload(task, attachementsNotesComponent.KEEP_SELECTION);
         case 'UploadedFile':
         case 'TaskFile':
-            attachementsFilesComponent.reload(task, attachementsFilesComponent.KEEP_SELECTION);
+            attachementsFilesComponent?.reload(task, attachementsFilesComponent.KEEP_SELECTION);
         }    
     }
 
@@ -1672,7 +1708,10 @@
             await reef.post(`${taskRef}/DeletePermanentlyNote`, { noteLink: objectToDelete.$ref } , onErrorShowAlert);
             deleteModal.hide();
             await reloadData();
-            attachementsNotesComponent.reload(task, attachementsNotesComponent.SELECT_NEXT);
+            if(attachementsNotesComponent)
+                attachementsNotesComponent.reload(task, attachementsNotesComponent.SELECT_NEXT);
+            else
+                clearActiveItem('props')
             break;
 
         case 'UploadedFile':
@@ -1680,7 +1719,10 @@
             await reef.post(`${taskRef}/DeletePermanentlyFile`, { fileLink: objectToDelete.$ref } , onErrorShowAlert);
             deleteModal.hide();
             await reloadData();
-            attachementsFilesComponent.reload(task, attachementsFilesComponent.SELECT_NEXT);
+            if(attachementsFilesComponent)
+                attachementsFilesComponent.reload(task, attachementsFilesComponent.SELECT_NEXT);
+            else
+                clearActiveItem('props')
             break;
         }
     }
@@ -1756,7 +1798,10 @@
         }
 
         await reloadData();
-        connectedToComponent.reload(task, connectedToComponent.SELECT_NEXT);
+        if(connectedToComponent)
+            connectedToComponent.reload(task, connectedToComponent.SELECT_NEXT);
+        else
+            clearActiveItem('props')
     }
 
     async function setParentLocationAsCanonical(element)
@@ -2110,3 +2155,6 @@
         </span>
     </p>
 </Modal>
+
+<FileProperties bind:this={filePropertiesDialog} />
+<NoteProperties bind:this={notePropertiesDialog} />

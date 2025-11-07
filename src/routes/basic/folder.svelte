@@ -34,11 +34,14 @@
     import {location, pop, push, querystring} from 'svelte-spa-router'
     import BasketPreview from './basket.preview.svelte'
     import PopupExplorer from './popup.explorer.svelte'
-    import {fetchComposedClipboard4Folder, transformClipboardToJSONReferences, getBrowserRecentElements, setBrowserRecentElement} from './basket.utils'
+    import {fetchComposedClipboard4Folder, transformClipboardToJSONReferences, getBrowserRecentElements, setBrowserRecentElement, recentClipboardElements} from './basket.utils'
     import FaBasketTrash from './icons/basket.trash.svelte'
     import {cache} from './cache.js'
     import {getElementIcon} from './icons'
-	import { element } from 'svelte/internal';
+	import FolderProperties from './properties.folder.svelte'
+    import FileProperties from './properties.file.svelte'
+	import TaskProperties from './properties.task.svelte'
+    import NoteProperties from './properties.note.svelte'
     
     export let params = {}
 
@@ -121,7 +124,7 @@
                                                 Association: 'Folders',
                                                 //Filter: 'State <> STATE_FINISHED',
                                                 //Sort: 'Order',
-                                                Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'IsInBasket' , 'IsCanonical',  'icon', '$type']
+                                                Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'IsInBasket' , 'IsCanonical',  'icon', 'FolderId', '$type']
 
                                             },
                                             {
@@ -129,7 +132,7 @@
                                                 Association: 'Notes',
                                                 //Filter: 'State <> STATE_FINISHED',
                                                 //Sort: 'Order',
-                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href', 'IsInBasket', 'IsCanonical','$type']
+                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href', 'IsInBasket', 'IsCanonical', 'NoteId', '$type']
 
                                             },
                                             {
@@ -137,13 +140,13 @@
                                                 Association: 'Tasks',
                                                 //Filter: 'State <> STATE_FINISHED',
                                                 //Sort: 'Order',
-                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'href', 'IsInBasket', 'IsCanonical', 'icon', '$type']
+                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'href', 'IsInBasket', 'IsCanonical', 'icon', 'TaskId', '$type']
 
                                             },
                                             {
                                                 Id: 5,
                                                 Association: 'Files',
-                                                Expressions:['Id', 'FileId', '$ref', 'Title', 'Summary', 'Order', 'href', 'IsInBasket', 'IsCanonical', '$type']
+                                                Expressions:['Id', 'FileId', '$ref', 'Title', 'Summary', 'Order', 'href', 'IsInBasket', 'IsCanonical', 'FileId', '$type']
 
                                             }
                                         ]
@@ -1045,11 +1048,11 @@
                 {
                     caption: '_; Detach; Desconectar; Odłącz',
                     action: (f) => dettachElement(element, kind)
-                },
-                {
+                }
+            /*    {
                     caption: '_; Set as primary location; Establecer como ubicación principal; Ustaw jako główną lokalizację',
                     action: (f) => setLocationAsCanonical(element)
-                }
+                }*/
              ]
         }
 
@@ -1081,6 +1084,10 @@
                                     }
                                 ]
 
+                            },
+                            {
+                                caption: '_; Move to top of list; Mover al principio de la lista; Przesuń na szczyt listy',
+                                action: (f) => list.moveTop(element),
                             },
                             {
                                 caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
@@ -1122,7 +1129,11 @@
                             {
                                 separator: true
                             },
-                            ...linkOperations
+                            ...linkOperations,
+                            {
+                                caption: '_; Properties; Propiedades; Właściwości',
+                                action: (btt, rect)=> runElementProperties(btt, rect, element, kind)
+                            }
                         ]
                     },
                     {
@@ -1399,6 +1410,36 @@
         }
     }
 
+    let folderPropertiesDialog;
+    let filePropertiesDialog;
+    let taskPropertiesDialog;
+    let notePropertiesDialog;
+    function runElementProperties(btt, aroundRect, element, kind)
+    {
+        switch(kind)
+        {
+        case 'Folder':
+        case 'FolderFolder':
+            folderPropertiesDialog.show(element)
+            break;
+
+        case 'Note':
+        case 'FolderNote':
+            notePropertiesDialog.show(element)
+            break;
+
+        case 'Task':
+        case 'FolderTask':
+            taskPropertiesDialog.show(element)
+            break
+
+        case 'UploadedFile':
+        case 'FolderFile':
+            filePropertiesDialog.show(element)
+            break;
+        }
+    }
+
 </script>
 
 <svelte:head>
@@ -1505,3 +1546,8 @@
     <Spinner delay={500}/>
     <span class="ml-3">_; Your file is uploading to the server; Tu archivo se está cargando en el servidor; Twój plik jest przesyłany na serwer</span>
 </Modal>
+
+<FolderProperties bind:this={folderPropertiesDialog} />
+<FileProperties bind:this={filePropertiesDialog} />
+<TaskProperties bind:this={taskPropertiesDialog} />
+<NoteProperties bind:this={notePropertiesDialog} />

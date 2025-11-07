@@ -1,7 +1,7 @@
 <script lang="ts">
     import {setContext, getContext, afterUpdate, tick, onMount} from 'svelte'
     import {data_tick_store, contextItemsStore, contextTypesStore } from '../../stores'
-    import {activateItem, getActive, clearActiveItem, parseWidthDirective, getPrev, getNext, swapElements, getLast, insertAfter, getActiveCount, addActiveItem} from '../../utils' 
+    import {activateItem, getActive, clearActiveItem, parseWidthDirective, getPrev, getNext, swapElements, getLast, insertAfter, getActiveCount, addActiveItem, getFirst, insertAt, remove as removeFrom} from '../../utils' 
     import Icon from '../icon.svelte'
     import {FaRegCircle, FaRegCheckCircle} from 'svelte-icons/fa/'
     
@@ -204,6 +204,8 @@
                 }
             }       
         }
+        else
+            clearActiveItem(selectionKey)
 
         //if(!activate_after_dom_update)
         //    activateItem(selectionKey, null, [])
@@ -249,6 +251,46 @@
         informModification(element, orderAttrib)
         informModification(next, orderAttrib)
         pushChanges();
+    }
+
+    export async function moveTop(element: object)
+    {
+        if(!orderAttrib)
+            return;
+
+        let current = getFirst(items);
+
+        if(current == element)
+            return;
+
+        const firstOrder = current[orderAttrib];
+
+        while(current != element)
+        {
+            const next = getNext(items, current);
+            const nextOrder = next[orderAttrib];
+            
+            current[orderAttrib] = nextOrder;
+            informModification(current, orderAttrib);
+
+            current = next;
+        }
+
+        element[orderAttrib] = firstOrder
+        informModification(element, orderAttrib);
+
+        items = removeFrom(items, element);
+        items = insertAt(items, 0, element);
+        
+        await tick();
+        scrollToSelectedElement()
+
+        pushChanges()
+    }
+
+    export async function moveBottom(element: object)
+    {
+
     }
 
     let last_activated_element :object | null = null;

@@ -18,6 +18,7 @@
             i18n} from '$lib'
     import {FaCheck, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaArchive, FaUndo} from 'svelte-icons/fa'
     import {setBrowserRecentElement} from './basket.utils'
+    import TaskProperties from './properties.task.svelte'
 
     export let params = {}
 
@@ -346,6 +347,10 @@
                         {
                             caption: '_; Delete; Eliminar; Usuń',
                             action: (f) => askToDelete(task)
+                        },
+                        {
+                            caption: '_; Properties; Propiedades; Właściwości',
+                            action: (btt, rect)=> runElementProperties(btt, rect, task, 'Task')
                         }
 
                     ]
@@ -354,7 +359,17 @@
         }
     }
 
-   
+    let taskPropertiesDialog;
+    function runElementProperties(btt, aroundRect, element, kind)
+    {
+        switch(kind)
+        {
+        case 'Task':
+        case 'FolderTask':
+            taskPropertiesDialog.show(element)
+            break
+        }
+    }
 
 </script>
 
@@ -433,3 +448,5 @@
         onOkCallback={archiveTask}
         bind:this={archiveModal}
         />
+
+<TaskProperties bind:this={taskPropertiesDialog} />
