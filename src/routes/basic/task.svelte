@@ -2125,7 +2125,7 @@
             {#if (task.Notes && task.Notes.length > 0) || (task.Files && task.Files.length > 0) || notesPlaceholder}
                 <h4 class="ml-2">_;Attachments; Anexos; Załączniki</h4>
                 <section class="not-prose"> 
-                    {#if (task.Notes && task.Notes.length > 0) || notesPlaceholder}
+                    {#if (task.attachements && task.attachements.length > 0) || notesPlaceholder}
                         <List   self={task}
                                 a='attachements'
                                 bind:this={attachementsComponent}
