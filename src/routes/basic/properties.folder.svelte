@@ -142,7 +142,8 @@
                     onSizeChanged();
             }
 
-            closeButtonPos = `top: calc(${myRect.top}px - 2.25rem); left: calc(${myRect.right}px - 1rem)`
+            //closeButtonPos = `top: calc(${myRect.top}px - 2.25rem); left: calc(${myRect.right}px - 1rem)`
+            closeButtonPos = `top: calc(${myRect.top}px - 0.25rem); left: calc(${myRect.right}px - 1.25rem)`
         }
     })
 
@@ -262,22 +263,19 @@
 <Dialog bind:this={rootDialog}>
 
 <menu bind:this={rootElement} on:click={clearSelection}
-    class="w-full sm:min-w-[20rem] max-h-80 sm:max-h-none overflow-y-auto overflow-x-hidden" >
+    class="w-full sm:min-w-[20rem] max-h-80 sm:max-h-none overflow-y-auto overflow-x-hidden overscroll-contain" >
     
     {#if closeButtonPos}
-        <button class="     fixed w-6 h-6 flex items-center justify-center
-                            text-stone-500 bg-stone-200/70 hover:bg-stone-200
-                            focus:outline-none font-medium rounded-full text-sm text-center
-                            dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700 
-                            focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800
-                            " 
+        <button class="     text-stone-800 dark:text-stone-400
+                            fixed w-6 h-6 flex items-center justify-center
+                            focus:outline-none font-medium  text-sm text-center" 
                             style={closeButtonPos}
-                on:click={ closeDialog }>
+                on:click={ closeDialog }>   <!-- rounded-full text-stone-500 bg-stone-200/70 hover:bg-stone-200 dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 -->
             <Icon component={FaTimes} s="md"/>
         </button>
     {/if}
 
-    <article class="w-full prose prose-base prose-zinc dark:prose-invert sm:my-5">
+    <article class="w-full prose prose-base prose-zinc dark:prose-invert mb-20 sm:my-5">
 
         <h3>_;Folder properties; Propiedades de la carpeta; Właściwości folderu</h3>
         

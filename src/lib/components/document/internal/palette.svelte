@@ -1,6 +1,6 @@
 <svelte:options accessors={true}/>
 <script lang="ts">
-    import { tick, afterUpdate } from 'svelte';
+    import { tick, afterUpdate, onMount } from 'svelte';
     import type {Document_command} from './Document_command'
     import Pallete_row from './palette.row.svelte'
     import { createEventDispatcher } from 'svelte';
@@ -75,11 +75,9 @@
         // OCT-273: not only for toolbox case. Z order problems are also for large screen, full palette case
           if(/*isToolbox && */visible && paletteElement)
           {
-              let layoutRoot = document.getElementById("__hd_svelte_layout_root")
-              if(!layoutRoot)
-                    layoutRoot = document.getElementById("app")
+              const layoutRoot = getLayoutElement()
 
-              if(!!layoutRoot && paletteElement.parentElement != layoutRoot)
+              if(layoutRoot && paletteElement.parentElement != layoutRoot)
               {
                 await tick();
                 layoutRoot.appendChild(paletteElement)
@@ -87,6 +85,34 @@
           }
       }
     )
+
+    onMount(
+        () => {
+
+            return () => {
+                
+                // i.e.
+                // when palette is visible and user clicks 'back' in browser nav
+                // palette stays visible on screen
+                if(paletteElement)
+                {
+                    const layoutRoot = getLayoutElement()
+
+                    visible = false
+                    if(layoutRoot && paletteElement.parentElement == layoutRoot)
+                        layoutRoot.removeChild(paletteElement)
+                }
+            }
+        }
+    )
+
+    function getLayoutElement()
+    {
+        let layoutRoot = document.getElementById("__hd_svelte_layout_root")
+        if(!layoutRoot)
+            layoutRoot = document.getElementById("app")
+        return layoutRoot;
+    }
 
     let closeButtonPos = ''
     export function show(x :number, y :number, up :boolean = false)
@@ -106,8 +132,9 @@
         {
             setTimeout(() => {
                 const rect = paletteElement.getBoundingClientRect()
-                closeButtonPos = `right: ${15}px; top: calc(${rect.y}px - 1.75rem)`
-            //    console.log('closeButtonPos', closeButtonPos)
+                //closeButtonPos = `right: ${15}px; top: calc(${rect.y}px - 1.75rem)`
+                closeButtonPos = `right: 0.5rem; top: 0.25rem`
+                console.log('closeButtonPos', closeButtonPos)
             },0)
         }
 
@@ -452,50 +479,52 @@
 {:else}
     <!--div hidden={!visible}-->
 
-        {#if visible &&  closeButtonPos}
-            {#key closeButtonPos}
-                <button class="     fixed w-6 h-6 flex items-center justify-center
-                                    text-stone-500 bg-stone-200/70 hover:bg-stone-200
-                                    focus:outline-none font-medium rounded-full text-sm text-center
-                                    dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700 
-                                    focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800" 
-                        style={closeButtonPos}
-                        on:mousedown={buttonMousedown}
-                        on:click={ () => hide() }>
-                    <Icon component={FaTimes} s="md"/>
-                </button>
-            {/key}
-        {/if}
-    
         <div    hidden={!visible}
-                class="bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md overflow-y-auto z-40 fixed"
+                class=" bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md 
+                        z-40 fixed"
                 id="__hd_FormattingPalette"
                 bind:this={paletteElement}
                 style={css_style} >
 
-            {#if filtered_commands && filtered_commands.length}
-                {#each filtered_commands as cmd, idx }
-                    {#if cmd.separator}
-                        {#if idx>0 && idx<filtered_commands.length-1}   <!-- not first or last place -->
-                            <hr class="mx-4 my-1 border-stone-300 dark:border-stone-700"/>
-                        {/if}
-                    {:else}
-                        {@const id = "cpi_" + idx}
-                        {@const active=isRowActive(cmd)}
-                        <Pallete_row    {id}
-                                        cmd={cmd}
-                                        is_highlighted={cmd == current_command}
-                                        on:click={ () => { execute_mouse_click(cmd.on_choice); }}
-                                        on:mousemove={ () => { on_mouse_over(cmd); }}
-                                        on:mousedown={buttonMousedown}
-                                        bind:this={rows[idx]}
-                                        {active}
-                                        />
-                    {/if}
-                {/each}
-            {:else}
-                <p class="text-sm text-stone-500">No results</p>
+             {#if visible &&  closeButtonPos}
+                {#key closeButtonPos}
+                    <button class="     text-stone-800 dark:text-stone-400
+                                        fixed w-6 h-6 flex items-center justify-center
+                                        focus:outline-none font-medium  text-sm text-center" 
+                            style={closeButtonPos}
+                            on:mousedown={buttonMousedown}
+                            on:click={ () => hide() }>  <!-- rounded-full text-stone-500 bg-stone-200/70 hover:bg-stone-200  dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 -->
+                        <Icon component={FaTimes} s="md"/>
+                    </button>
+                {/key}
             {/if}
+
+            <div class="w-full overflow-y-auto overscroll-contain" style="max-height: {max_height_px}px">
+
+                {#if filtered_commands && filtered_commands.length}
+                    {#each filtered_commands as cmd, idx }
+                        {#if cmd.separator}
+                            {#if idx>0 && idx<filtered_commands.length-1}   <!-- not first or last place -->
+                                <hr class="mx-4 my-1 border-stone-300 dark:border-stone-700"/>
+                            {/if}
+                        {:else}
+                            {@const id = "cpi_" + idx}
+                            {@const active=isRowActive(cmd)}
+                            <Pallete_row    {id}
+                                            cmd={cmd}
+                                            is_highlighted={cmd == current_command}
+                                            on:click={ () => { execute_mouse_click(cmd.on_choice); }}
+                                            on:mousemove={ () => { on_mouse_over(cmd); }}
+                                            on:mousedown={buttonMousedown}
+                                            bind:this={rows[idx]}
+                                            {active}
+                                            />
+                        {/if}
+                    {/each}
+                {:else}
+                    <p class="text-sm text-stone-500">No results</p>
+                {/if}
+            </div>
 
         </div>
     <!---/div-->

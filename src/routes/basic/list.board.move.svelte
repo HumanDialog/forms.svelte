@@ -8,6 +8,9 @@
     export let onMoveUp = undefined;
     export let onMoveDown = undefined;
     export let onReplace;
+    export let maxHeight = 0
+
+    $: maxHeightStyle = maxHeight > 0 ? `max-height: ${maxHeight}px;` : ''
 
     function replaceMenu()
     {
@@ -69,88 +72,90 @@
     {/if}
 </menu>
 
-<menu class="flex sm:hidden flex-col gap-3">
-    {#if onMoveUp && onMoveDown}
-        <section class="flex flex-row">
-            <p class="text-base truncate "></p>
-            <div class="flex flex-row ml-auto gap-3">
-                <button class=" bg-transparent
-                                w-[55px] h-[55px] 
-                                m-0
-                                flex items-center justify-center
-                                disable-dbl-tap-zoom"
-                                on:click={(e) => { onMoveUp(item); replaceMenu()}}>
-                    <div class="    w-10 h-10
-                                    text-white bg-zinc-500 hover:bg-zinc-500 
-                                    font-medium rounded-full text-sm text-center shadow-md
-                                    dark:bg-zinc-500 dark:hover:bg-zinc-500
-                                    flex items-center justify-center">
-                        <div class="w-5 h-5">
-                            <FaAngleUp/>
+<menu class="block sm:hidden overflow-y-auto overscroll-contain" style={maxHeightStyle}>
+    <section class="flex flex-col gap-3 mb-20">
+        {#if onMoveUp && onMoveDown}
+            <section class="flex flex-row">
+                <p class="text-base truncate "></p>
+                <div class="flex flex-row ml-auto gap-3">
+                    <button class=" bg-transparent
+                                    w-[55px] h-[55px] 
+                                    m-0
+                                    flex items-center justify-center
+                                    disable-dbl-tap-zoom"
+                                    on:click={(e) => { onMoveUp(item); replaceMenu()}}>
+                        <div class="    w-10 h-10
+                                        text-white bg-zinc-500 hover:bg-zinc-500 
+                                        font-medium rounded-full text-sm text-center shadow-md
+                                        dark:bg-zinc-500 dark:hover:bg-zinc-500
+                                        flex items-center justify-center">
+                            <div class="w-5 h-5">
+                                <FaAngleUp/>
+                            </div>
                         </div>
-                    </div>
-                </button>
+                    </button>
 
-                <button class=" bg-transparent
-                                w-[55px] h-[55px] 
-                                m-0
-                                flex items-center justify-center
-                                disable-dbl-tap-zoom"
-                                on:click={(e) => { onMoveDown(item); replaceMenu()}}>
-                    <div class="    w-10 h-10
-                                    text-white bg-zinc-500 hover:bg-zinc-500 
-                                    font-medium rounded-full text-sm text-center shadow-md
-                                    dark:bg-zinc-500 dark:hover:bg-zinc-500
-                                    flex items-center justify-center">
-                        <div class="w-5 h-5">
-                            <FaAngleDown/>
+                    <button class=" bg-transparent
+                                    w-[55px] h-[55px] 
+                                    m-0
+                                    flex items-center justify-center
+                                    disable-dbl-tap-zoom"
+                                    on:click={(e) => { onMoveDown(item); replaceMenu()}}>
+                        <div class="    w-10 h-10
+                                        text-white bg-zinc-500 hover:bg-zinc-500 
+                                        font-medium rounded-full text-sm text-center shadow-md
+                                        dark:bg-zinc-500 dark:hover:bg-zinc-500
+                                        flex items-center justify-center">
+                            <div class="w-5 h-5">
+                                <FaAngleDown/>
+                            </div>
                         </div>
-                    </div>
-                </button>
-            </div>
-        </section>
-    {/if}
+                    </button>
+                </div>
+            </section>
+        {/if}
 
-    {#if taskStates && taskStates.length > 0}
-    {#each taskStates as taskState, idx}
-        <section class="flex flex-row">
-            <p class="text-base mt-4 truncate w-[120px]  text-stone-900 dark:text-stone-400">{ext(taskState.name)}</p>
-            <div class="flex flex-row ml-auto mr-10 gap-3">
-                <button class=" bg-transparent
-                                w-[55px] h-[55px] 
-                                m-0
-                                flex items-center justify-center
-                                disable-dbl-tap-zoom"
-                                on:click={(e) => { onReplace(item, idx, KanbanColumnTop); replaceMenu()}}>
-                    <div class="    w-10 h-10
-                                    text-white bg-zinc-500 hover:bg-zinc-500 
-                                    font-medium rounded-full text-sm text-center shadow-md
-                                    dark:bg-zinc-500 dark:hover:bg-zinc-500
-                                    flex items-center justify-center">
-                        <div class="w-5 h-5">
-                            <FaAngleDoubleUp/>
+        {#if taskStates && taskStates.length > 0}
+        {#each taskStates as taskState, idx}
+            <section class="flex flex-row">
+                <p class="text-base mt-4 truncate w-[120px]  text-stone-900 dark:text-stone-400">{ext(taskState.name)}</p>
+                <div class="flex flex-row ml-auto mr-10 gap-3">
+                    <button class=" bg-transparent
+                                    w-[55px] h-[55px] 
+                                    m-0
+                                    flex items-center justify-center
+                                    disable-dbl-tap-zoom"
+                                    on:click={(e) => { onReplace(item, idx, KanbanColumnTop); replaceMenu()}}>
+                        <div class="    w-10 h-10
+                                        text-white bg-zinc-500 hover:bg-zinc-500 
+                                        font-medium rounded-full text-sm text-center shadow-md
+                                        dark:bg-zinc-500 dark:hover:bg-zinc-500
+                                        flex items-center justify-center">
+                            <div class="w-5 h-5">
+                                <FaAngleDoubleUp/>
+                            </div>
                         </div>
-                    </div>
-                </button>
+                    </button>
 
-                <button class=" bg-transparent
-                                w-[55px] h-[55px] 
-                                m-0
-                                flex items-center justify-center
-                                disable-dbl-tap-zoom"
-                                on:click={(e) => { onReplace(item, idx, KanbanColumnBottom); replaceMenu()}}>
-                    <div class="    w-10 h-10
-                                    text-white bg-zinc-500 hover:bg-zinc-500 
-                                    font-medium rounded-full text-sm text-center shadow-md
-                                    dark:bg-zinc-500 dark:hover:bg-zinc-500
-                                    flex items-center justify-center">
-                        <div class="w-5 h-5">
-                            <FaAngleDoubleDown/>
+                    <button class=" bg-transparent
+                                    w-[55px] h-[55px] 
+                                    m-0
+                                    flex items-center justify-center
+                                    disable-dbl-tap-zoom"
+                                    on:click={(e) => { onReplace(item, idx, KanbanColumnBottom); replaceMenu()}}>
+                        <div class="    w-10 h-10
+                                        text-white bg-zinc-500 hover:bg-zinc-500 
+                                        font-medium rounded-full text-sm text-center shadow-md
+                                        dark:bg-zinc-500 dark:hover:bg-zinc-500
+                                        flex items-center justify-center">
+                            <div class="w-5 h-5">
+                                <FaAngleDoubleDown/>
+                            </div>
                         </div>
-                    </div>
-                </button>
-            </div>
-        </section>
-    {/each}
-    {/if}
+                    </button>
+                </div>
+            </section>
+        {/each}
+        {/if}
+    </section>
 </menu>

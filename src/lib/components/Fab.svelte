@@ -275,7 +275,7 @@
             if(false && mobile)
                 showMenu(rect, operation.grid)     // mobile screen too small
             else
-                showGridMenu(rect, operation.grid)
+                showGridMenu(rect, operation.grid, operation.caption ?? '')
         }
     }
 
@@ -334,7 +334,7 @@
 
         const width = 55;   //px
         const height = 55;   //px
-        const margin = 10;
+        const margin = 0 ;//10;
 
         let lShift = 0
         let tShift = 0
@@ -456,11 +456,7 @@
                 {@const position = calculatePosition(operation)}
                 {#if position}
                     <button
-                        class=" text-stone-500 bg-stone-200/70 hover:bg-stone-200
-                                focus:outline-none font-medium rounded-full text-sm text-center
-                                dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700 
-                                focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800
-                                w-[30px] h-[30px]
+                        class=" w-[55px] h-[55px]
                                 fixed m-0                            
                                 flex items-center justify-center
                                 disable-dbl-tap-zoom
@@ -468,7 +464,18 @@
                                 style={position}
                                 on:click|stopPropagation={(e) => {on_click(e, operation)}}
                                 on:mousedown={mousedown} >
-                        <div class="w-5 h-5"><svelte:component this={operation.icon}/></div>
+                        
+                            <div class="    text-stone-500 bg-stone-200/70 hover:bg-stone-200
+                                            focus:outline-none font-medium rounded-full text-sm text-center
+                                            dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700 
+                                            focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800
+
+                                            flex items-center justify-center
+                                            w-[30px] h-[30px]">
+                                <div class="w-5 h-5">
+                                    <svelte:component this={operation.icon}/>
+                                </div>
+                            </div>
                     </button>
                 {/if}
             {/if}

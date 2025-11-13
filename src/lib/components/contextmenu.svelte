@@ -87,7 +87,7 @@
                 x = margin;
                 y = screenRect.bottom - maxHeight - margin;
 
-                result = `left: ${x}px; top: ${y}px; width: ${width}px; max-height: ${maxHeight}px; display: block`
+                result = `left: ${x}px; bottom: ${margin}px; width: ${width}px; max-height: ${maxHeight}px; display: block`
             }
             else
             {
@@ -96,10 +96,11 @@
                 x = margin;
                 y = screenRect.bottom - maxHeight - margin;
 
-                result = `left: ${x}px; top: ${y}px; width: ${width}px; max-height: ${maxHeight}px; display: block`
+                result = `left: ${x}px; bottom: ${margin}px; width: ${width}px; max-height: ${maxHeight}px; display: block`
             }
 
-            closeButtonPos = `right: ${margin}px; top: calc(${y}px - 1.75rem)`
+            //closeButtonPos = `right: ${margin}px; top: calc(${y}px - 1.75rem)`
+            closeButtonPos = `right: 0.5rem; top: calc(${y}px + 0.25rem)`
 
         }
         else
@@ -495,7 +496,7 @@
                 if(false && mobile)
                     showMenu(rect, operation.grid)
                 else
-                    showGridMenu(rect, operation.grid)
+                    showGridMenu(rect, operation.grid, operation.caption ?? '')
             }
             else if(operation.menu)
             {
@@ -634,18 +635,16 @@
     class=" bg-white dark:bg-stone-800
             text-stone-800 dark:text-stone-400 rounded-lg border
             border-stone-200 dark:border-stone-700 shadow-md
-            z-40 fixed min-w-60 max-h-screen overflow-y-auto"
+            z-40 fixed min-w-60 max-h-screen overflow-y-auto overscroll-contain"
     style={css_position}
+    visible={visible}
     bind:this={menu_root}>
 
     {#if closeButtonPos}
         <button class="     fixed w-6 h-6 flex items-center justify-center
-                            text-stone-500 bg-stone-200/70 hover:bg-stone-200
-                            focus:outline-none font-medium rounded-full text-sm text-center
-                            dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700 
-                            focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800" 
+                            focus:outline-none font-medium text-sm text-center" 
                 style={closeButtonPos}
-                on:click={ hide }>
+                on:click={ hide }> <!--focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 rounded-full  text-stone-500 bg-stone-200/70 hover:bg-stone-200  dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700 -->
             <Icon component={FaTimes} s="md"/>
         </button>
     {/if}
@@ -669,7 +668,7 @@
             {@const active = calculateBackground(isFocused || isOperationActivated(operation), false)}
             {@const has_submenu = operation.menu !== undefined && operation.menu.length > 0}
 
-            <button class="block  w-full pr-4 text-left flex flex-row cursor-context-menu {active} focus:outline-none items-center"
+            <button class="block w-full pr-4 text-left flex flex-row cursor-context-menu {active} focus:outline-none items-center"
                     id={menu_item_id}
                     bind:this={menu_items[index]}
                     on:click|stopPropagation={(e) => { execute_action(e, operation, index) } }
@@ -712,3 +711,10 @@
         {/if}
     {/each}
 </div>
+
+<style>
+    :global(body:has(#__hd_svelte_contextmenu[visible="true"])) 
+    {
+        overflow: hidden;
+    }
+</style>

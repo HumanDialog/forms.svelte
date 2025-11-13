@@ -411,6 +411,7 @@
         return (res != null);
     }
 
+    const mynotes_selection = {}
 
 </script>
 
@@ -444,7 +445,7 @@
                                 icon={getElementIcon("Note")}
                                 active={isRoutingTo("/mynotes", currentPath)}
                                 summary={i18n(["Recently edited notes", "Notas editadas recientemente", "Ostatnio edytowane notatki"])}
-                                selectable={user}>
+                                selectable={mynotes_selection}>
                     _; My notes; Mis notas; Moje notatki
                 </SidebarItem>
             </SidebarGroup>
@@ -525,7 +526,7 @@
                 <SidebarItem    href="/mynotes"
                                 icon={getElementIcon("Note")}
                                 summary={i18n(["Recently edited notes", "Notas editadas recientemente", "Ostatnio edytowane notatki"])}
-                                item={user}>
+                                item={mynotes_selection}>
                     _; My notes; Mis notas; Moje notatki
                 </SidebarItem>
             </SidebarGroup>

@@ -848,7 +848,7 @@
  <!--svelte-ignore a11y-no-noninteractive-element-interactions -->
 <menu class="" bind:this={rootElement} on:click={clearSelection}>
     {#if elements && elements.length >= 0}
-        <div class="w-full sm:w-80 h-64 sm:h-80 sm:max-w-sm overflow-y-auto overflow-x-clip
+        <div class="w-full sm:w-80 h-64 sm:h-80 sm:max-w-sm overflow-y-auto overflow-x-clip overscroll-contain
                 text-stone-600 dark:text-stone-400">
 
             <div class="flex flex-row">

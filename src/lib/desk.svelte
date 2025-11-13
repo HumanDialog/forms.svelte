@@ -400,7 +400,7 @@
                                 {sidebar_small_width} sm:w-[320px] 
                                 z-20 overflow-x-hidden">
 
-                    <div class=" bg-stone-50 w-full h-full dark:bg-stone-800 overflow-y-auto py-0 px-0">
+                    <div class=" bg-stone-50 w-full h-full dark:bg-stone-800 overflow-y-auto overscroll-contain py-0 px-0">
                         <Configurable config={layout.sidebar[visible_sidebar]}>
                             <div slot='alt'></div>
                         </Configurable>
@@ -442,7 +442,7 @@
                                     {content_top}
                                     {lg_content_area_horizontal_dim}
                                     z-0 overflow-x-hidden 
-                                    {content_height} sm:overflow-y-auto" 
+                                    {content_height} sm:overflow-y-auto sm:overscroll-contain" 
                                     >
                             <Configurable config={layout.mainContent} min_h_class="min-h-screen">
                                 <div slot='alt'></div>

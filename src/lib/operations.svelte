@@ -256,7 +256,7 @@
         else if(operation.toolbar)
             showFloatingToolbar(rect, operation.toolbar, operation.props ?? {} )
         else if(operation.grid)
-            showGridMenu(rect, operation.grid)
+            showGridMenu(rect, operation.grid, operation.caption ?? '')
 
     }
 

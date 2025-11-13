@@ -168,7 +168,7 @@
 
 </script>
 
-<div class="h-full overflow-y-auto">
+<div class="h-full overflow-y-auto overscroll-contain">
     <button class="fixed right-0 m-2 w-6 h-6 text-stone-200 {protoButtonBorderClass}" on:click={protoChange}>
         <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M16 4C14 4 11 5 11 9C11 13 11 15 11 18C11 21 6 23 6 23C6 23 11 25 11 28C11 31 11 35 11 39C11 43 14 44 16 44"/>

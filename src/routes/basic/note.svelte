@@ -86,7 +86,8 @@
             reloadVisibleTags()
         })
 
-        isReadOnly = true;
+        // turn off read-only mode by default. 
+        //isReadOnly = true; 
 
        await reloadData();
        noteId = id
@@ -183,7 +184,9 @@
         else
             modificationDate = null
 
+        isReadOnly = (note.$acc & 0x2) == 0
         canBeEditable = (note.$acc & 0x2) > 0
+        
         
         if(note.AttachedFiles)
         {

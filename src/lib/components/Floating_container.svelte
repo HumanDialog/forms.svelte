@@ -17,6 +17,7 @@
     let rootElement;
     let internalElement;
     let closeButtonPos = ''
+    let maxHeight = 0
     
     //$: display = visible ? 'fixed' : 'hidden';
 
@@ -192,7 +193,7 @@
             
             if(myRect)
             {
-                let maxHeight = screenRect.height / 2 - margin;
+                maxHeight = screenRect.height / 2 - margin;
 
                 if(myRect.height < maxHeight)
                     maxHeight = myRect.height
@@ -201,19 +202,20 @@
                 x = margin;
                 y = screenRect.bottom - maxHeight - margin;
 
-                result = `left: ${x}px; top: ${y}px; width: ${width}px; max-height: ${maxHeight}px; display: block`
+                result = `left: ${x}px; bottom: ${margin}px; width: ${width}px; max-height: ${maxHeight}px; display: block`
             }
             else
             {
-                const maxHeight = screenRect.height / 2 - margin;
+                maxHeight = screenRect.height / 2 - margin;
                 const width = screenRect.width - 2*margin;
                 x = margin;
                 y = screenRect.bottom - maxHeight - margin;
 
-                result = `left: ${x}px; top: ${y}px; width: ${width}px; max-height: ${maxHeight}px; display: block`
+                result = `left: ${x}px; bottom: ${margin}px; width: ${width}px; max-height: ${maxHeight}px; display: block`
             }
 
-            closeButtonPos = `right: ${margin}px; top: calc(${y}px - 1.75rem)`
+            //closeButtonPos = `right: ${margin}px; top: calc(${y}px - 1.75rem)`
+            closeButtonPos = `right: 0.5rem; top: calc(${y}px + 0.25rem)`
         }
         else
         {
@@ -258,21 +260,26 @@
 <div    id="__hd_svelte_floating_container"
         class="p-2 bg-stone-100 dark:bg-stone-800 rounded-lg shadow-md shadow-stone-500 dark:shadow-black z-40 fixed "
         style={cssPosition}
+        visible={visible}
         bind:this={rootElement}>
         {#if closeButtonPos}
-    <button class="     fixed w-6 h-6 flex items-center justify-center
-                        text-stone-500 bg-stone-200/70 hover:bg-stone-200
-                        focus:outline-none font-medium rounded-full text-sm text-center
-                        dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700 
-                        focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800" 
+    <button class="     text-stone-800 dark:text-stone-400
+                        fixed w-6 h-6 flex items-center justify-center
+                        focus:outline-none font-medium  text-sm text-center" 
             style={closeButtonPos}
-            on:click={ hide }>
+            on:click={ hide }>  <!--rounded-full focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 text-stone-500 bg-stone-200/70 hover:bg-stone-200 dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700  -->
             <Icon component={FaTimes} s="md"/>
         </button>
     {/if}
 
     {#if toolbar}
-        <svelte:component this={toolbar} {...props} bind:this={internalElement} />
+        <svelte:component this={toolbar} {...props} {maxHeight} bind:this={internalElement} />
     {/if}
 </div>
 
+<style>
+    :global(body:has(#__hd_svelte_floating_container[visible="true"])) 
+    {
+        overflow: hidden;
+    }
+</style>

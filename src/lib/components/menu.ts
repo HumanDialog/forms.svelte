@@ -93,7 +93,7 @@ export function hideFloatingToolbar()
     }
 }
 
-export function showGridMenu(around :DOMRect|DOMPoint, operations)
+export function showGridMenu(around :DOMRect|DOMPoint, operations, label :string = '')
 {
-    showFloatingToolbar(around, Grid, {operations: operations})
+    showFloatingToolbar(around, Grid, {operations: operations, label: label})
 }

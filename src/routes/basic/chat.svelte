@@ -724,7 +724,7 @@
                             bind:this={newMessageElement}>
 
                 <p   class="w-full min-h-40 bg-stone-50 dark:bg-stone-800 outline-none
-                            overflow-x-clip text-wrap break-words"
+                            overflow-x-clip text-wrap break-words overscroll-contain"
                             bind:innerHTML={newMessageContent}
                             contenteditable="true"
                             bind:this={editableElement}

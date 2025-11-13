@@ -562,7 +562,7 @@
     <!--hr class="hidden sm:block w-full"-->
 {/if}
 
-<!--div class="w-full h-full overflow-y-auto"-->
+<!--div class="w-full h-full overflow-y-auto overscroll-contain"-->
 
 
     {#if items && items.length > 0 }

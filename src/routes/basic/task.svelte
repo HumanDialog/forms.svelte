@@ -31,13 +31,14 @@
             SHOW_MENU_BELOW,
             List, ListTitle, ListSummary, ListInserter, Icon
             } from '$lib'
-	import { onMount, tick } from 'svelte';
+	import { onMount, tick, afterUpdate } from 'svelte';
     import {location, querystring, push, link} from 'svelte-spa-router'
     import TaskSteps from './task.steps.svelte'
     import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont,
         FaPen, FaList, FaTimes, FaUpload, FaCut,  FaFile, FaImage, FaTable, FaPaperclip, FaBold, FaItalic,
         FaUnderline, FaStrikethrough, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle, FaInfo,
-        FaListUl, FaLink, FaRegFolder, FaRegFile, FaDownload, FaTrash, FaRegCalendar, FaRegCalendarCheck, FaExternalLinkSquareAlt
+        FaListUl, FaLink, FaRegFolder, FaRegFile, FaDownload, FaTrash, FaRegCalendar, FaRegCalendarCheck, FaExternalLinkSquareAlt,
+        FaCaretDown, FaCaretUp
     } from 'svelte-icons/fa/'
     import AttachedFile from './attached.file.svelte'
     import BasketPreview from './basket.preview.svelte'
@@ -46,6 +47,7 @@
     import {fetchComposedClipboard4Editor, fetchComposedClipboard4Task, transformClipboardToJSONReferences, pushBrowserRecentElements, setBrowserRecentElement, getBrowserRecentElements} from './basket.utils'
     import FileProperties from './properties.file.svelte'
 	import NoteProperties from './properties.note.svelte'
+    import TaskDescriptionNote from './task.description.svelte'
 	
     let taskRef = ''
     let task = null;
@@ -61,6 +63,12 @@
     const s = session;
 
     const STATE_FINISHED = 7000
+
+    const NR_NONE               = 0
+    const NR_DESCRIPTION        = 1
+    const NR_COVER              = 2
+
+    let descriptionNotes = []
 
     $: onParamsChanged($location)
 
@@ -146,12 +154,14 @@
                                         {
                                             Id: 14,
                                             Association: 'Notes',
-                                            Expressions:['$ref', 'Title', 'Summary', 'href', 'IsCanonical', '$type', 'NoteId']
+                                            Sort: 'Order',
+                                            Expressions:['Id', '$ref', 'Title', 'Summary', 'href', 'IsCanonical', '$type', 'TaskId', 'NoteId', 'Role', 'Order']
                                         },
                                         {
                                             Id: 15,
                                             Association: 'Files',
-                                            Expressions:['$ref', 'Title', 'Summary', 'href', 'IsCanonical', '$type', 'FileId']
+                                            Sort: 'Order',
+                                            Expressions:['Id', '$ref', 'Title', 'Summary', 'href', 'IsCanonical', '$type', 'TaskId', 'FileId', 'Role', 'Order']
                                         }
                                     ]
                                 }
@@ -234,6 +244,21 @@
                 IsCanonical: 1
         })
 
+
+        task.attachements = []
+        if(task.Notes && task.Notes.length > 0)
+            task.Notes.forEach((n) => task.attachements.push(n))
+
+        if(task.Files && task.Files.length > 0)
+            task.Files.forEach((n) => task.attachements.push(n))
+
+        if(task.attachements && task.attachements.length > 0)
+            task.attachements.sort((a,b) => a.Order-b.Order)
+
+        if(task.Notes)
+            descriptionNotes = task.Notes.filter((n) => n.Role == NR_DESCRIPTION)
+        else
+            descriptionNotes = []
     }
 
     async function onTitleChanged(text)
@@ -520,8 +545,7 @@
     async function reloadWithAttachements()
     {
         await reloadData();
-        attachementsNotesComponent?.reload(task, attachementsNotesComponent.CLEAR_SELECTION);
-        attachementsFilesComponent?.reload(task, attachementsFilesComponent.CLEAR_SELECTION);
+        attachementsComponent?.reload(task, attachementsComponent.CLEAR_SELECTION);
     }
 
     let summary;
@@ -1381,7 +1405,7 @@
             pendingUploading = false;
 
             await reloadData();
-            attachementsFilesComponent.reload(task, fileLink.$ref);
+            attachementsComponent.reload(task, fileLink.$ref);
 
             if(additionalAfterCreateAction)
                 additionalAfterCreateAction(fileLink)
@@ -1450,10 +1474,9 @@
         }
     }
 
-    let attachementsNotesComponent
-    let attachementsFilesComponent
+    let attachementsComponent
     let connectedToComponent
-    const attList = (kind) => kind == 'TaskNote' ? attachementsNotesComponent : attachementsFilesComponent
+    const attList = (kind) => attachementsComponent
     function attachementOperations(element, kind)
     {
         const isCanonical = element.IsCanonical
@@ -1484,6 +1507,16 @@
              ]
         }
 
+        let noteOperations = []
+        if(kind == 'TaskNote')
+        {
+            noteOperations.push({
+                caption: '_; Set as task description; Establecer como descripción de la tarea; Ustaw jako opis zadania',
+                action: (f) => toggleNoteDescriptionRole(element),
+                active: element.Role == NR_DESCRIPTION
+            })
+        }
+
         
         return {
                 opver: 2,
@@ -1511,6 +1544,22 @@
 
                             },
                             {
+                                caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
+                                icon: FaCaretUp,
+                                action: (f) => list.moveUp(element),
+                                fab:'M06',
+                                tbr:'A',
+                                hideToolbarCaption: true
+                            },
+                            {
+                                caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
+                                icon: FaCaretDown,
+                                action: (f) => list.moveDown(element),
+                                fab:'M05',
+                                tbr:'A' ,
+                                hideToolbarCaption: true
+                            },
+                            {
                                 caption: '_; Send; Enviar; Wyślij',
                                 hideToolbarCaption: true,
                                 icon: FaUpload,
@@ -1531,6 +1580,7 @@
                                     }
                                 ]
                             },
+                            ...noteOperations,
                             {
                                 separator: true
                             },
@@ -1543,6 +1593,13 @@
                     }
                 ]
             }
+    }
+
+    async function toggleNoteDescriptionRole(noteLink)
+    {
+        await reef.get(`${noteLink.$ref}/ToggleDescriptionRole`, onErrorShowAlert)
+        await reloadData();
+        attachementsComponent?.reload(task, attachementsComponent.KEEP_SELECTION)
     }
 
     let filePropertiesDialog;
@@ -1615,8 +1672,8 @@
     {
         await reef.post(`${taskRef}/CutNoteToBasket`, { noteLink: note.$ref } , onErrorShowAlert);
         await reloadData();
-        if(attachementsNotesComponent)
-            attachementsNotesComponent.reload(task, attachementsNotesComponent.SELECT_NEXT);
+        if(attachementsComponent)
+            attachementsComponent.reload(task, attachementsComponent.SELECT_NEXT);
         else
             clearActiveItem('props')
     }
@@ -1630,8 +1687,8 @@
     {
         await reef.post(`${taskRef}/CutFileToBasket`, { fileLink: file.$ref } , onErrorShowAlert);
         await reloadData();
-        if(attachementsFilesComponent)
-            attachementsFilesComponent.reload(task, attachementsFilesComponent.SELECT_NEXT);
+        if(attachementsComponent)
+            attachementsComponent.reload(task, attachementsComponent.SELECT_NEXT);
         else
             clearActiveItem('props')
     }
@@ -1653,8 +1710,8 @@
     {
         await reef.post(`${taskRef}/DettachNote`, { noteLink: note.$ref } , onErrorShowAlert);
         await reloadData();
-        if(attachementsNotesComponent)
-            attachementsNotesComponent.reload(task, attachementsNotesComponent.SELECT_NEXT);
+        if(attachementsComponent)
+            attachementsComponent.reload(task, attachementsComponent.SELECT_NEXT);
         else
             clearActiveItem('props')
     }
@@ -1663,8 +1720,8 @@
     {
         await reef.post(`${taskRef}/DettachFile`, { fileLink: file.$ref } , onErrorShowAlert);
         await reloadData();
-        if(attachementsFilesComponent)
-            attachementsFilesComponent.reload(task, attachementsFilesComponent.SELECT_NEXT);
+        if(attachementsComponent)
+            attachementsComponent.reload(task, attachementsComponent.SELECT_NEXT);
         else
             clearActiveItem('props')
     }
@@ -1678,10 +1735,10 @@
         {
         case 'Note':
         case 'TaskNote':
-            attachementsNotesComponent?.reload(task, attachementsNotesComponent.KEEP_SELECTION);
+            attachementsComponent?.reload(task, attachementsComponent.KEEP_SELECTION);
         case 'UploadedFile':
         case 'TaskFile':
-            attachementsFilesComponent?.reload(task, attachementsFilesComponent.KEEP_SELECTION);
+            attachementsComponent?.reload(task, attachementsComponent.KEEP_SELECTION);
         }    
     }
 
@@ -1708,8 +1765,8 @@
             await reef.post(`${taskRef}/DeletePermanentlyNote`, { noteLink: objectToDelete.$ref } , onErrorShowAlert);
             deleteModal.hide();
             await reloadData();
-            if(attachementsNotesComponent)
-                attachementsNotesComponent.reload(task, attachementsNotesComponent.SELECT_NEXT);
+            if(attachementsComponent)
+                attachementsComponent.reload(task, attachementsComponent.SELECT_NEXT);
             else
                 clearActiveItem('props')
             break;
@@ -1719,8 +1776,8 @@
             await reef.post(`${taskRef}/DeletePermanentlyFile`, { fileLink: objectToDelete.$ref } , onErrorShowAlert);
             deleteModal.hide();
             await reloadData();
-            if(attachementsFilesComponent)
-                attachementsFilesComponent.reload(task, attachementsFilesComponent.SELECT_NEXT);
+            if(attachementsComponent)
+                attachementsComponent.reload(task, attachementsComponent.SELECT_NEXT);
             else
                 clearActiveItem('props')
             break;
@@ -1815,13 +1872,13 @@
     let additionalAfterCreateAction = null
     async function runNoteInserter(afterCreateAction=null) 
     {
-        if(!attachementsNotesComponent)
+        if(!attachementsComponent)
         {
             notesPlaceholder = true   
             await tick();
         }
         
-        await attachementsNotesComponent.addRowAfter(null)    
+        await attachementsComponent.addRowAfter(null)    
         additionalAfterCreateAction = afterCreateAction
     }
 
@@ -1841,13 +1898,33 @@
         setBrowserRecentElement(newNote.NoteId, 'Note')
         
         await reloadData();
-        attachementsNotesComponent.reload(task, newNote.$ref);
+        attachementsComponent.reload(task, newNote.$ref);
 
         if(additionalAfterCreateAction)
         {
             additionalAfterCreateAction(newNote)
         }
     }
+
+    let descriptionElements = []
+    let descriptionKeyToSelect = ''
+    async function refreshTaskAfterDescriptionChanged(selectDescriptionAfterRefresh)
+    {
+        descriptionKeyToSelect = selectDescriptionAfterRefresh
+        await reloadData();
+        attachementsComponent.reload(task, attachementsComponent.CLEAR_SELECTION);
+    }
+
+    afterUpdate(() => {
+        if(descriptionKeyToSelect)
+        {
+            const idx = descriptionNotes.findIndex((n) => n.$ref == descriptionKeyToSelect)
+            descriptionKeyToSelect = ''        
+
+            if(idx >= 0 && descriptionElements && descriptionElements.length > idx)
+                setTimeout(() => descriptionElements[idx].selectTitle(), 100)
+        }
+    })
 
 </script>
 
@@ -2031,6 +2108,18 @@
 
             {/if}
 
+            {#key descriptionNotes}
+                {#if descriptionNotes.length > 0}
+                    {#each descriptionNotes as noteLink, idx (noteLink.$ref)}
+                        <TaskDescriptionNote {noteLink} 
+                                            refreshParent={refreshTaskAfterDescriptionChanged} 
+                                            bind:this={descriptionElements[idx]}
+                                            {runNoteInserter}
+                                            {runFileAttacher}/>
+                    {/each}
+                {/if}
+            {/key}
+
             <hr/>
 
             {#if (task.Notes && task.Notes.length > 0) || (task.Files && task.Files.length > 0) || notesPlaceholder}
@@ -2038,12 +2127,15 @@
                 <section class="not-prose"> 
                     {#if (task.Notes && task.Notes.length > 0) || notesPlaceholder}
                         <List   self={task}
-                                a='Notes'
-                                bind:this={attachementsNotesComponent}
-                                toolbarOperations={(el) => attachementOperations(el, 'TaskNote')}>
+                                a='attachements'
+                                bind:this={attachementsComponent}
+                                orderAttrib='Order'
+                                toolbarOperations={(el) => attachementOperations(el, el.$type)}>
                             
                             <ListTitle      a='Title'
                                             hrefFunc={(el) => `${el.href}`}
+                                            downloadableFunc={(el) => el.$type == 'TaskFile'}
+                                            onOpen={async (f) => await downloadFileFromHRef(f.href, f.Title)}
                                             onChange={changeAttachementProperty}/>
 
                             <ListSummary    a='Summary' 
@@ -2052,7 +2144,7 @@
                             <ListInserter   action={addEmptyNote} icon incremental={false}/>
 
                             <span slot="left" let:element class="relative">
-                                <Icon component={getElementIcon('Note')}
+                                <Icon component={getElementIcon(element)}
                                     class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
                                 {#if element.IsCanonical == 0}
                                     <Icon component={FaExternalLinkSquareAlt}
@@ -2064,7 +2156,7 @@
                     {/if}
 
                     {#if task.Files && task.Files.length > 0}
-                        <List   self={task}
+                        <!--List   self={task}
                                 a='Files'
                                 bind:this={attachementsFilesComponent}
                                 toolbarOperations={(el) => attachementOperations(el, 'TaskFile')}>
@@ -2087,7 +2179,7 @@
                                                 text-stone-500 dark:text-stone-300 " />
                                 {/if}
                             </span>
-                        </List>
+                        </List-->
                     {/if}
                 </section>
             {/if}

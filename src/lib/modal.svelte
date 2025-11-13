@@ -105,7 +105,9 @@
 </script>
 
 {#if open}
-<div class="relative z-30" aria-labelledby="modal-title" role="dialog" aria-modal="true" bind:this={root}>
+<div id="__hd_svelte_modal_container" 
+    visible={open}
+    class="relative z-30" aria-labelledby="modal-title" role="dialog" aria-modal="true" bind:this={root}>
     <!--
       Background backdrop, show/hide based on modal state.
   
@@ -118,7 +120,7 @@
     -->
     <div class="fixed w-screen h-screen inset-0 bg-stone-500 dark:bg-stone-800 bg-opacity-75 dark:bg-opacity-75 transition-opacity"></div>
   
-    <div class="fixed z-30 inset-0 w-screen overflow-y-auto">
+    <div class="fixed z-30 inset-0 w-screen overflow-y-auto overscroll-contain">
       <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
         <!--
           Modal panel, show/hide based on modal state.
@@ -179,3 +181,10 @@
     </div>
   </div>
   {/if}
+
+<style>
+    :global(body:has(#__hd_svelte_modal_container[visible="true"])) 
+    {
+        overflow: hidden;
+    }
+</style>
