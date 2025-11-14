@@ -6,6 +6,7 @@
     import {hideWholeContextMenu, showMenu, showFloatingToolbar, showGridMenu,
         SHOW_MENU_BELOW, SHOW_MENU_ABOVE, SHOW_MENU_RIGHT, SHOW_MENU_LEFT } from './menu'
     import {FaTimes} from 'svelte-icons/fa'
+	import { usePreventScroll } from './react-aria/preventScroll';
 
     export let widthPx     :number = 400;
 
@@ -236,6 +237,7 @@
         return ((left <= right) && (top <= bottom));
     }
 
+    let preventScrollRestorer = null
     export async function show(around :DOMRect|DOMPoint, _operations, preference :number = 0)
     {
         if(around instanceof DOMRect)
@@ -287,6 +289,9 @@
         {
             hide_window_indicator = 0;
             window.addEventListener('click', on_before_window_click, true)
+
+            if(isDeviceSmallerThan('sm'))
+                preventScrollRestorer = usePreventScroll();
         }
 
 
@@ -345,6 +350,8 @@
 
         window.removeEventListener('click', on_before_window_click, true);
         menu_root?.removeEventListener('click', on_before_container_click, true);
+        if(preventScrollRestorer)
+            preventScrollRestorer();
     }
 
     export function getRenderedRect() :DOMRect | undefined
@@ -712,9 +719,10 @@
     {/each}
 </div>
 
-<style>
-    :global(body:has(#__hd_svelte_contextmenu[visible="true"])) 
+<!--style>
+    :global(#__hd_svelte_layout_root:has(#__hd_svelte_contextmenu[visible="true"])) 
     {
         overflow: hidden;
+        position: fixed;
     }
-</style>
+</style-->
