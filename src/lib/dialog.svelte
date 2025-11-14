@@ -5,7 +5,7 @@
     import {isDeviceSmallerThan} from './utils'
     import {FaTimes} from 'svelte-icons/fa'
     import {i18n} from './i18n.js'
-    import {usePreventScroll} from './react-aria/preventScroll'
+    import {usePreventScroll} from './components/react-aria/preventScroll'
     
     export let open :boolean = false;
     
