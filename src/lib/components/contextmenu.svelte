@@ -77,9 +77,10 @@
                 }
             }
 
+            let maxHeight
             if(myRect)
             {
-                let maxHeight = screenRect.height / 2 - margin;
+                maxHeight = screenRect.height / 2 - margin;
 
                 if(myRect.height < maxHeight)
                     maxHeight = myRect.height
@@ -92,7 +93,7 @@
             }
             else
             {
-                const maxHeight = screenRect.height / 2 - margin;
+                maxHeight = screenRect.height / 2 - margin;
                 const width = screenRect.width - 2*margin;
                 x = margin;
                 y = screenRect.bottom - maxHeight - margin;
@@ -101,7 +102,7 @@
             }
 
             //closeButtonPos = `right: ${margin}px; top: calc(${y}px - 1.75rem)`
-            closeButtonPos = `right: 0.5rem; top: calc(${y}px + 0.25rem)`
+            closeButtonPos = `right: 0.5rem; bottom: calc(${margin + maxHeight}px - 1.75rem)`
 
         }
         else

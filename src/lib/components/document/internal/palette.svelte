@@ -134,7 +134,7 @@
                 const rect = paletteElement.getBoundingClientRect()
                 //closeButtonPos = `right: ${15}px; top: calc(${rect.y}px - 1.75rem)`
                 closeButtonPos = `right: 0.5rem; top: 0.25rem`
-                console.log('closeButtonPos', closeButtonPos)
+              //  console.log('closeButtonPos', closeButtonPos)
             },0)
         }
 

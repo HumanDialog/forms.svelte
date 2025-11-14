@@ -225,7 +225,7 @@
             }
 
             //closeButtonPos = `right: ${margin}px; top: calc(${y}px - 1.75rem)`
-            closeButtonPos = `right: 0.5rem; top: calc(${y}px + 0.25rem)`
+            closeButtonPos = `right: 0.5rem; bottom: calc(${margin + maxHeight}px - 1.75rem)`
         }
         else
         {
