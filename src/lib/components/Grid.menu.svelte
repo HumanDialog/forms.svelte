@@ -117,7 +117,7 @@
 
 
 <div  class="">  
-    <p class="text-stone-800 dark:text-stone-400 text-sm ml-1 mb-1">{label}</p>
+    <p class="block sm:hidden text-stone-800 dark:text-stone-400 text-sm ml-1 mb-1">{label}</p>
     <div class="grid gap-2 {grid_cols} ">
         {#each operations as operation}
             {#if !operation.separator}

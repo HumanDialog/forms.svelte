@@ -351,7 +351,10 @@
         window.removeEventListener('click', on_before_window_click, true);
         menu_root?.removeEventListener('click', on_before_container_click, true);
         if(preventScrollRestorer)
+        {
             preventScrollRestorer();
+            preventScrollRestorer = null
+        }
     }
 
     export function getRenderedRect() :DOMRect | undefined
@@ -719,6 +722,7 @@
     {/each}
 </div>
 
+<!-- use usePreventScroll instead -->
 <!--style>
     :global(#__hd_svelte_layout_root:has(#__hd_svelte_contextmenu[visible="true"])) 
     {

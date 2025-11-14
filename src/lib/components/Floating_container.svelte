@@ -5,6 +5,7 @@
     import {pushToolsActionsOperations, popToolsActionsOperations, fabHiddenDueToPopup} from '../stores'
     import {FaTimes} from 'svelte-icons/fa'
     import Icon from './icon.svelte'
+    import {usePreventScroll} from './react-aria/preventScroll'
 
     let x :number;
     let y :number;
@@ -18,6 +19,7 @@
     let internalElement;
     let closeButtonPos = ''
     let maxHeight = 0
+    let preventScrollRestorer = null
     
     //$: display = visible ? 'fixed' : 'hidden';
 
@@ -54,6 +56,9 @@
 
         hide_window_indicator = 0;
         window.addEventListener('click', on_before_window_click, true);
+
+        if(isDeviceSmallerThan('sm'))
+            preventScrollRestorer = usePreventScroll();
 
         if(isDeviceSmallerThan("sm"))
         {    
@@ -103,6 +108,11 @@
         
         window.removeEventListener('click', on_before_window_click, true);
         rootElement?.removeEventListener('click', on_before_container_click, true);
+        if(preventScrollRestorer)
+        {
+            preventScrollRestorer()
+            preventScrollRestorer = null
+        }
     }
 
     export function isSameToolbar(_toolbar)
@@ -277,9 +287,10 @@
     {/if}
 </div>
 
-<style>
+<!-- use usePreventScroll instead -->
+<!--style>
     :global(body:has(#__hd_svelte_floating_container[visible="true"])) 
     {
         overflow: hidden;
     }
-</style>
+</style-->

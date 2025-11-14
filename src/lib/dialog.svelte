@@ -5,9 +5,11 @@
     import {isDeviceSmallerThan} from './utils'
     import {FaTimes} from 'svelte-icons/fa'
     import {i18n} from './i18n.js'
+    import {usePreventScroll} from './react-aria/preventScroll'
     
     export let open :boolean = false;
     
+    let preventScrollRestorer = null
     export function show( on_close_callback :Function|undefined = undefined)
     {
         open = true;
@@ -33,6 +35,8 @@
                     }
                 ]
             })*/
+
+            preventScrollRestorer = usePreventScroll();
         }
     }
 
@@ -44,6 +48,12 @@
       open = false;
       //popToolsActionsOperations()
       $fabHiddenDueToPopup = false
+
+      if(preventScrollRestorer)
+      {
+        preventScrollRestorer()
+        preventScrollRestorer = null    
+      }
     }
 
     let root;
@@ -83,9 +93,10 @@
   </div>
   {/if}
 
-<style>
+<!-- use usePreventScroll instead -->  
+<!--style>
     :global(body:has(#__hd_svelte_property_dialog_container[visible="true"])) 
     {
         overflow: hidden;
     }
-</style>
+</style-->
