@@ -24,6 +24,7 @@
 	export let toolbarOperations = undefined;
 	export let clearsContext = '';
 	export let title = '';
+	export let paper=false
 
 	switch (c) {
 		case 'main':

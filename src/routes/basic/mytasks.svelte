@@ -14,7 +14,7 @@
 				mainContentPageReloader,
                 Modal,
                 onErrorShowAlert,
-                Breadcrumb,
+                Breadcrumb, Paper,
             i18n} from '$lib'
     import {FaCheck, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaArchive, FaUndo} from 'svelte-icons/fa'
     import {setBrowserRecentElement} from './basket.utils'
@@ -383,6 +383,8 @@
             clearsContext='props sel'
             title={title}>
 
+            <Paper class="mb-64">
+
             <section class="w-full place-self-center max-w-3xl">
 
             {#if canconicalPath}
@@ -426,8 +428,7 @@
 
         </List>
             
-        <!-- empty section fot have bottom free area -->
-            <section class="mb-64"></section>
+       </Paper>
 
     </Page>
 {:else}

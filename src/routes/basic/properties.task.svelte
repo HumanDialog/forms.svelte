@@ -31,7 +31,7 @@
     async function initData(...args)
     {
 
-        console.log('initData', elementLink.$type, elementLink.$ref)
+        //console.log('initData', elementLink.$type, elementLink.$ref)
         //if(lastReloadTicket == reloadTicket)
         //    return;
 

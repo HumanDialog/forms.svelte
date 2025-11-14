@@ -32,7 +32,7 @@
             SHOW_MENU_BELOW,
             ext,
             List, ListTitle, ListSummary, ListInserter, Icon,
-            reloadPageToolbarOperations
+            reloadPageToolbarOperations, Paper
             } from '$lib'
 	import { onMount, tick } from 'svelte';
 
@@ -40,7 +40,8 @@
 
     import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen, FaList, FaUpload, FaFile,
         FaImage, FaTable, FaPaperclip, FaBold, FaItalic, FaUnderline, FaStrikethrough, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle,
-        FaInfo, FaListUl, FaLink, FaRegFolder, FaRegCalendar, FaRegCalendarCheck, FaRegFile, FaDownload, FaTrash, FaExternalLinkSquareAlt
+        FaInfo, FaListUl, FaLink, FaRegFolder, FaRegCalendar, FaRegCalendarCheck, FaRegFile, FaDownload, FaTrash, FaExternalLinkSquareAlt,
+        FaCaretUp, FaCaretDown
     } from 'svelte-icons/fa/'
 
 
@@ -159,12 +160,14 @@
                                         {
                                             Id: 16,
                                             Association: 'Notes',
-                                            Expressions:['$ref', 'Title', 'Summary', 'href', 'IsCanonical', '$type', 'NoteId']
+                                            Sort: 'Order',
+                                            Expressions:['Id', '$ref', 'Title', 'Summary', 'href', 'IsCanonical', '$type', 'NoteId', 'Order']
                                         },
                                         {
                                             Id: 17,
                                             Association: 'Files',
-                                            Expressions:['$ref', 'Title', 'Summary', 'href', 'IsCanonical', '$type', 'FileId']
+                                            Sort: 'Order',
+                                            Expressions:['Id', '$ref', 'Title', 'Summary', 'href', 'IsCanonical', '$type', 'FileId', 'Order']
                                         }
                                     ]
                                 }
@@ -209,6 +212,16 @@
         
         if(note.InNotes)
             note.InNotes.forEach((f) => note.connectedToList.push(f))
+
+        note.attachements = []
+        if(note.Notes && note.Notes.length > 0)
+            note.Notes.forEach((n) => note.attachements.push(n))
+
+        if(note.Files && note.Files.length > 0)
+            note.Files.forEach((n) => note.attachements.push(n))
+
+        if(note.attachements && note.attachements.length > 0)
+            note.attachements.sort((a,b) => a.Order-b.Order)
     }
 
     async function onTitleChanged(text)
@@ -547,8 +560,8 @@
     async function reloadWithAttachements()
     {
         await reloadData();
-        attachementsNotesComponent?.reload(note, attachementsNotesComponent.CLEAR_SELECTION);
-        attachementsFilesComponent?.reload(note, attachementsFilesComponent.CLEAR_SELECTION);
+        attachementsComponent?.reload(note, attachementsComponent.CLEAR_SELECTION);
+        //attachementsFilesComponent?.reload(note, attachementsFilesComponent.CLEAR_SELECTION);
     }
 
     async function toggleNotePinned(note)
@@ -1205,7 +1218,7 @@
             pendingUploading = false;
 
             await reloadData();
-            attachementsFilesComponent.reload(note, fileLink.$ref);
+            attachementsComponent.reload(note, fileLink.$ref);
 
             if(additionalAfterCreateAction)
                 additionalAfterCreateAction(fileLink)
@@ -1274,10 +1287,10 @@
 
 
 
-    let attachementsNotesComponent
-    let attachementsFilesComponent
+    let attachementsComponent
+    //let attachementsFilesComponent
     let connectedToComponent
-    const attList = (kind) => kind == 'NoteNote' ? attachementsNotesComponent : attachementsFilesComponent
+    const attList = (kind) => attachementsComponent //kind == 'NoteNote' ? attachementsNotesComponent : attachementsFilesComponent
     function attachementOperations(element, kind)
     {
         const isCanonical = element.IsCanonical
@@ -1333,6 +1346,22 @@
                                     }
                                 ]
 
+                            },
+                            {
+                                caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
+                                icon: FaCaretUp,
+                                action: (f) => list.moveUp(element),
+                                fab:'M06',
+                                tbr:'A',
+                                hideToolbarCaption: true
+                            },
+                            {
+                                caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
+                                icon: FaCaretDown,
+                                action: (f) => list.moveDown(element),
+                                fab:'M05',
+                                tbr:'A' ,
+                                hideToolbarCaption: true
                             },
                             {
                                 caption: '_; Send; Enviar; Wyślij',
@@ -1439,8 +1468,8 @@
     {
         await reef.post(`${noteRef}/CutNoteToBasket`, { noteLink: forNote.$ref } , onErrorShowAlert);
         await reloadData();
-        if(attachementsNotesComponent)
-            attachementsNotesComponent.reload(note, attachementsNotesComponent.SELECT_NEXT);
+        if(attachementsComponent)
+            attachementsComponent.reload(note, attachementsComponent.SELECT_NEXT);
         else
             clearActiveItem('props')
     }
@@ -1454,8 +1483,8 @@
     {
         await reef.post(`${noteRef}/CutFileToBasket`, { fileLink: file.$ref } , onErrorShowAlert);
         await reloadData();
-        if(attachementsFilesComponent)
-            attachementsFilesComponent.reload(note, attachementsFilesComponent.SELECT_NEXT);
+        if(attachementsComponent)
+            attachementsComponent.reload(note, attachementsComponent.SELECT_NEXT);
         else
             clearActiveItem('props')
     }
@@ -1477,8 +1506,8 @@
     {
         await reef.post(`${noteRef}/DettachNote`, { noteLink: forNote.$ref } , onErrorShowAlert);
         await reloadData();
-        if(attachementsNotesComponent)
-            attachementsNotesComponent.reload(note, attachementsNotesComponent.SELECT_NEXT);
+        if(attachementsComponent)
+            attachementsComponent.reload(note, attachementsComponent.SELECT_NEXT);
         else
             clearActiveItem('props')
     }
@@ -1487,8 +1516,8 @@
     {
         await reef.post(`${noteRef}/DettachFile`, { fileLink: file.$ref } , onErrorShowAlert);
         await reloadData();
-        if(attachementsFilesComponent)
-            attachementsFilesComponent.reload(note, attachementsFilesComponent.SELECT_NEXT);
+        if(attachementsComponent)
+            attachementsComponent.reload(note, attachementsComponent.SELECT_NEXT);
         else
             clearActiveItem('props')
     }
@@ -1502,10 +1531,10 @@
         {
         case 'Note':
         case 'NoteNote':
-            attachementsNotesComponent.reload(note, attachementsNotesComponent.KEEP_SELECTION);
+            attachementsComponent.reload(note, attachementsComponent.KEEP_SELECTION);
         case 'UploadedFile':
         case 'NoteFile':
-            attachementsFilesComponent.reload(note, attachementsFilesComponent.KEEP_SELECTION);
+            attachementsComponent.reload(note, attachementsComponent.KEEP_SELECTION);
         }    
     }
 
@@ -1532,8 +1561,8 @@
             await reef.post(`${noteRef}/DeletePermanentlyNote`, { noteLink: objectToDelete.$ref } , onErrorShowAlert);
             deleteModal.hide();
             await reloadData();
-            if(attachementsNotesComponent)
-                attachementsNotesComponent.reload(note, attachementsNotesComponent.SELECT_NEXT);
+            if(attachementsComponent)
+                attachementsComponent.reload(note, attachementsComponent.SELECT_NEXT);
             else
                 clearActiveItem('props')
             break;
@@ -1543,8 +1572,8 @@
             await reef.post(`${noteRef}/DeletePermanentlyFile`, { fileLink: objectToDelete.$ref } , onErrorShowAlert);
             deleteModal.hide();
             await reloadData();
-            if(attachementsFilesComponent)
-                attachementsFilesComponent.reload(note, attachementsFilesComponent.SELECT_NEXT);
+            if(attachementsComponent)
+                attachementsComponent.reload(note, attachementsComponent.SELECT_NEXT);
             else
                 clearActiveItem('props')
             break;
@@ -1627,13 +1656,13 @@
     let additionalAfterCreateAction = null
     async function runNoteInserter(afterCreateAction=null) 
     {
-        if(!attachementsNotesComponent)
+        if(!attachementsComponent)
         {
             notesPlaceholder = true   
             await tick();
         }
         
-        await attachementsNotesComponent.addRowAfter(null)    
+        await attachementsComponent.addRowAfter(null)    
         additionalAfterCreateAction = afterCreateAction
     }
 
@@ -1653,7 +1682,7 @@
         setBrowserRecentElement(newNote.NoteId, 'Note')
         
         await reloadData();
-        attachementsNotesComponent.reload(note, newNote.$ref);
+        attachementsComponent.reload(note, newNote.$ref);
 
         if(additionalAfterCreateAction)
         {
@@ -1680,10 +1709,7 @@
             toolbarOperations={getPageOperations()}
             clearsContext='props'
             title={note.Title}>
-    <section class="w-full flex flex-col items-center
-                    sm:bg-white sm:dark:bg-stone-800/40 sm:shadow-slate-700/10 sm:dark:shadow-black/10 
-                    sm:mt-6 sm:px-6 sm:py-12 sm:shadow-xl md:mx-auto sm:max-w-3xl sm:rounded
-                    sm:ring-1 sm:ring-stone-900/5 sm:dark:ring-stone-950/20">
+    <Paper class="mb-64">
         {#if note.GetCanonicalPath}
                 <Breadcrumb class="mt-1 sm:min-w-[65ch]" path={note.GetCanonicalPath}/>
             {/if}
@@ -1836,14 +1862,17 @@
             {#if (note.Notes && note.Notes.length > 0) || (note.Files && note.Files.length > 0) || notesPlaceholder}
                 <h4 class="ml-2">_;Attachments; Anexos; Załączniki</h4>
                 <section class="not-prose"> 
-                    {#if (note.Notes && note.Notes.length > 0) || notesPlaceholder}
+                    {#if (note.attachements && note.attachements.length > 0) || notesPlaceholder}
                         <List   self={note}
-                                a='Notes'
-                                bind:this={attachementsNotesComponent}
-                                toolbarOperations={(el) => attachementOperations(el, 'NoteNote')}>
+                                a='attachements'
+                                bind:this={attachementsComponent}
+                                orderAttrib='Order'
+                                toolbarOperations={(el) => attachementOperations(el, el.$type)}>
                             
                             <ListTitle      a='Title'
                                             hrefFunc={(el) => `${el.href}`}
+                                            downloadableFunc={(el) => el.$type == 'NoteFile'}
+                                            onOpen={async (f) => await downloadFileFromHRef(f.href, f.Title)}
                                             onChange={changeAttachementProperty}/>
 
                             <ListSummary    a='Summary' 
@@ -1852,7 +1881,7 @@
                             <ListInserter   action={addEmptyNote} icon incremental={false}/>
 
                             <span slot="left" let:element class="relative">
-                                <Icon component={getElementIcon('Note')}
+                                <Icon component={getElementIcon(element)}
                                     class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
                                 {#if element.IsCanonical == 0}
                                     <Icon component={FaExternalLinkSquareAlt}
@@ -1864,7 +1893,7 @@
                     {/if}
 
                     {#if note.Files && note.Files.length > 0}
-                        <List   self={note}
+                        <!--List   self={note}
                                 a='Files'
                                 bind:this={attachementsFilesComponent}
                                 toolbarOperations={(el) => attachementOperations(el, 'NoteFile')}>
@@ -1887,7 +1916,7 @@
                                                 text-stone-500 dark:text-stone-300 " />
                                 {/if}
                             </span>
-                        </List>
+                        </List-->
                     {/if}
                 </section>    
             {/if}
@@ -1922,12 +1951,7 @@
 
         </article>
 
-    </section>
-
-    <!-- empty section fot have bottom free area -->
-    <section class="mb-64">
-
-    </section>
+    </Paper>
 
     <input hidden type="file" id="imageFile" accept="image/*" bind:this={imgInput} on:change={onImageSelected}/> <!-- capture="environment" -->
     <input hidden type="file" id="attachementFile" accept="*/*" bind:this={attInput} on:change={onAttachementSelected}/>

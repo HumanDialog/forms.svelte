@@ -29,7 +29,7 @@
 			randomString,
 			showMenu,
             SHOW_MENU_BELOW,
-            List, ListTitle, ListSummary, ListInserter, Icon
+            List, ListTitle, ListSummary, ListInserter, Icon, Paper
             } from '$lib'
 	import { onMount, tick, afterUpdate } from 'svelte';
     import {location, querystring, push, link} from 'svelte-spa-router'
@@ -1944,10 +1944,7 @@
             toolbarOperations={getPageOperations()}
             clearsContext='props'
             title={task.Title}>
-    <section class="w-full flex flex-col items-center
-                    sm:bg-white sm:dark:bg-stone-800/40 sm:shadow-slate-700/10 sm:dark:shadow-black/10 
-                    sm:mt-6 sm:px-6 sm:py-12 sm:shadow-xl md:mx-auto sm:max-w-3xl sm:rounded
-                    sm:ring-1 sm:ring-stone-900/5 sm:dark:ring-stone-950/20">
+    <Paper class="mb-64">
         {#if task.GetCanonicalPath}
             <Breadcrumb class="mt-1 sm:min-w-[65ch]" path={task.GetCanonicalPath}/>
         {/if}
@@ -2216,13 +2213,9 @@
 
 
 
-    </section>
+    </Paper>
 
-    <!-- empty section fot have bottom free area -->
-    <section class="mb-64">
-
-    </section>
-
+    
     <input hidden type="file" id="imageFile" accept="image/*" bind:this={imgInput} on:change={onImageSelected}/> <!-- capture="environment" -->
     <input hidden type="file" id="attachementFile" accept="*/*" bind:this={attInput} on:change={onAttachementSelected}/>
 </Page>

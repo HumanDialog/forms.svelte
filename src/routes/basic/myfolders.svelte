@@ -12,7 +12,7 @@
                 ListComboProperty,
 				mainContentPageReloader,
                 Modal,
-                onErrorShowAlert, i18n,
+                onErrorShowAlert, i18n, Paper,
                 Breadcrumb} from '$lib'
     import {querystring, location} from 'svelte-spa-router'
     import {FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCalendar, FaRegCalendarCheck, FaPen, FaArchive, FaEllipsisH} from 'svelte-icons/fa'
@@ -288,6 +288,7 @@
             toolbarOperations={pageOperations}
             clearsContext='props sel'
             title={title}>
+            <Paper class="mb-64">
             <section class="w-full place-self-center max-w-3xl">
 
             {#if canonicalPath}
@@ -316,9 +317,8 @@
         </List>
     </section>
 
-        <!-- empty section fot have bottom free area -->
-        <section class="mb-64"></section>
         
+     </Paper>   
     </Page>
 {:else}
     <Spinner delay={3000}/>

@@ -1,6 +1,6 @@
 <script>   
 	import { reef, session, signInHRef } from '@humandialog/auth.svelte';
-    import { onErrorShowAlert, mainContentPageReloader, Spinner, Page, editable, getNiceStringDateTime, startEditing, i18n} from '$lib';
+    import { onErrorShowAlert, mainContentPageReloader, Spinner, Page, editable, getNiceStringDateTime, startEditing, i18n, Paper} from '$lib';
 	import { location, querystring, link, push } from 'svelte-spa-router';
     import {tick} from 'svelte'
     import {FaComments} from 'svelte-icons/fa'
@@ -138,6 +138,7 @@
             toolbarOperations={getPageOperations()}
             clearsContext=''
             title={user.Name}>
+            <Paper class="mb-64">
         <section class="w-full flex justify-center">
             <article class="w-full prose prose-base prose-zinc dark:prose-invert mx-2  mb-64">
                 <h1 use:editable={{
@@ -217,6 +218,7 @@
                 
             </article>
         </section>
+        </Paper>
     </Page>
 {:else}
     <Spinner/>

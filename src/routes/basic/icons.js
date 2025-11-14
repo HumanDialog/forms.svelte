@@ -75,6 +75,7 @@ export function getElementIcon(element)
             case 'UploadedFile':
             case 'FolderFile':
             case 'TaskFile':
+            case 'NoteFile':
                 return FaFile;
 
             case 'TaskList':
