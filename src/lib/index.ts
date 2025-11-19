@@ -89,6 +89,9 @@ export {
     breadcrumbClipName
 }   from './components/breadcrumb_utils'
 
+export {default as EditableSpan} from './components/prose.editable.span.svelte'
+export {default as EditableParagraph} from './components/prose.editable.p.svelte'
+
 export {
     selectItem,
     activateItem,
@@ -131,7 +134,9 @@ export {
     getLast,
     removeAt,
     remove, 
-    swapElements
+    swapElements,
+
+    isValidEmail
 }   from './utils'
 
 export {

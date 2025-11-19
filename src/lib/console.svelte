@@ -24,6 +24,7 @@
         {
             prevLines = [...prevLines, `${prompt} ${input}`];
 
+            const orgInput = input
             if(input.startsWith('self'))
             {
                 let navItem = getNav('props');
@@ -37,12 +38,14 @@
             const req = input;
             input = "";
 
+        //    console.log('console', req)
+
             const apiVer = $session.configuration.api_version;
             const result = await reef.fetch(`/${protocol}/${apiVer}/${req}`)
             const res = await result.text();
             prevLines = [...prevLines, res]
             
-            updateHistory(req)
+            updateHistory(orgInput)
         }
         else if(e.key == 'Esc' || e.key == 'Escape')
         {

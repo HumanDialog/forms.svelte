@@ -174,8 +174,9 @@
 
     function onNewTagColorSelected(color)
     {
+        const label = inputText.trim()
         if(inputText && onNewTag)
-            onNewTag(inputText, inputText, color)
+            onNewTag(label, label, color)
         
         inputText = ''
 

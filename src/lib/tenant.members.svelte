@@ -25,6 +25,8 @@
     import {showMenu} from '$lib/components/menu'
     import {onErrorShowAlert} from './stores'
     import {randomString} from './utils'
+
+    import InviteUser from './tenant.members.invite.svelte'
 	
 
     // ==============================================================================
@@ -46,11 +48,12 @@
 
 	let list;
 
-    let create_new_user_enabled = false;
+    //let create_new_user_enabled = false;
 
     let reef_users = [];
     let new_reef_user_id = 1;
     let access_roles = [];
+    let invitationDialog;
 
     let fake_users;
 
@@ -60,7 +63,7 @@
         {   name: i18n({en: 'Can only read permissions', es: 'Solo puede leer permisos', pl: 'Może tylko czytać uprawnienia'}), 
             key: 1 },
         //{ name: 'Can invite others', key: 3 },
-        {   name: i18n({en: 'Full access to permissions', es: 'Acceso completo a los permisos', pl: 'Pełny dostęp do uprawnień'}),
+        {   name: i18n({en: 'Can change permissions', es: 'Puede cambiar los permisos', pl: 'Może zmieniać uprawnienia'}),
             key: 7 },
     ]
 
@@ -183,18 +186,18 @@
     )
     */
     
-    let new_user = {
-        name: '',
-        email: '',
-        auth_group: 0,
-        files_group: 0,
-        acc_role: '',
-        silently: false,
-        accepted: false
-    }
+    //let new_user = {
+    //    name: '',
+    //    email: '',
+    //    auth_group: 0,
+    //    files_group: 0,
+    //    acc_role: '',
+    //    silently: false,
+    //    accepted: false
+    //}
 
-    let name_input;
-    let email_input;
+    //let name_input;
+    //let email_input;
 
     async function on_name_changed(user, name, property)
     {
@@ -292,14 +295,22 @@
         return false;
     }
     
-    let inviteUserIdempotencyToken = ''
-    function create_new_user()
+    //let inviteUserIdempotencyToken = ''
+    function create_new_user(email='', name='', silently=false, accepted=false)
     {
-        if(showAccessRoles && access_roles.length > 0)
-            new_user.acc_role = access_roles[0].name ?? ""
+        //if(showAccessRoles && access_roles.length > 0)
+        //    new_user.acc_role = access_roles[0].name ?? ""
 
-        create_new_user_enabled = true;
-        inviteUserIdempotencyToken = randomString(8);
+        //create_new_user_enabled = true;
+        invitationDialog.show({
+            authAccessKinds: authAccessKinds(),
+            appRoles: showAccessRoles ? access_roles : [],
+            email: email,
+            name: name,
+            silently: silently,
+            accepted: accepted
+        })
+        //inviteUserIdempotencyToken = randomString(8);
 
     }
 
@@ -466,101 +477,36 @@
        
     }
 
-    function is_valid_email_address(e)
-    {
-        //let pattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-        //return (e.match(pattern) != null);
-
-        var at_idx = e.indexOf("@"); 
-        var dot_idx = e.lastIndexOf("."); 
-        var space_idx = e.indexOf(" "); 
-
-        if ((at_idx != -1) && 
-            (at_idx != 0) && 
-            (dot_idx != -1) && 
-            (dot_idx != 0) && 
-            (dot_idx > at_idx + 1) && 
-            (e.length > dot_idx + 1) && 
-            (space_idx == -1)) 
-        { 
-            return true; 
-        } 
-        else 
-        { 
-            return false; 
-        } 
-        
-    }
+    //function is_valid_email_address(e)
+    //{
+    //    //let pattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    //    //return (e.match(pattern) != null);
+//
+    //    var at_idx = e.indexOf("@"); 
+    //    var dot_idx = e.lastIndexOf("."); 
+    //    var space_idx = e.indexOf(" "); 
+//
+    //    if ((at_idx != -1) && 
+    //        (at_idx != 0) && 
+    //        (dot_idx != -1) && 
+    //        (dot_idx != 0) && 
+    //        (dot_idx > at_idx + 1) && 
+    //        (e.length > dot_idx + 1) && 
+    //        (space_idx == -1)) 
+    //    { 
+    //        return true; 
+    //    } 
+    //    else 
+    //    { 
+    //        return false; 
+    //    } 
+    //    
+    //}
 
     
-    function add_fake_users(reef_users)
-    {
-        const names = [
-            "Evangeline Burnett",
-            "Veronica Shaffer",
-            "Evan Moyer",
-            "Maisey Knox",
-            "Princess Taylor",
-            "Lilli Brown",
-            "Celine Terrell",
-            "Alexander Simmons",
-            "Leslie Rowland",
-            "Amira Reeves",
-            "Remi Parks",
-            "Daniela Holder",
-            "Sonny Watkins",
-            "Kiran Patton",
-            "Nadia O'Brien",
-            "Aine Lyons",
-            "Arran Mccoy",
-            "Aliya Hart",
-            "Zara Ross",
-            "Chad Ramirez",
-            "Aron Briggs",
-            "Nicole Hall",
-            "Mitchell Hendricks",
-            "Lila Chandler",
-            "Carter Padilla",
-            "Christian Thompson",
-            "Ishaq Smith",
-            "Sofia Blanchard",
-            "Taha Kelly",
-            "Jensen Huber",
-            "Jaya Hewitt",
-            "Hari Nielsen",
-            "Celeste Higgins",
-            "Soraya Farrell",
-            "Jacob Copeland",
-            "Robbie Soto",
-            "Krishan Kelley",
-            "Erica Ferrell",
-            "Moshe Valenzuela",
-            "Ahmed Mathews",
-            "Emilie Moore",
-            "Anisa Gamble",
-            "Esmee Haines",
-            "Francesca Fischer",
-            "Md Mcdaniel",
-            "Saarah Zamora",
-            "Tomos Ponce",
-            "Sonia Barrera",
-            "Pedro Hogan",
-            "Connie Weeks"
-        ]
-        const how_many = 50
-        for(let i=0; i<how_many; i++)
-        {
-            reef_users.push(
-                {
-                    Id: 1000+i,
-                    [nameAttrib]: names[i],
-                    [emailAttrib]: 'u@fake.com',
-                    [refAttrib]: `./User/${1000+i}`
-                }
-            )
-        }
-    }
+    
 
+    /*
     async function on_new_user_requested()
     {
         if(!name_input?.validate())
@@ -637,7 +583,8 @@
         new_user.silently = false;
         new_user.accepted = false;
 
-        create_new_user_enabled = false;
+        //create_new_user_enabled = false;
+        invitationDialog.hide()
     }
 
     function on_new_user_canceled()
@@ -650,8 +597,10 @@
         new_user.silently = false;
         new_user.accepted = false;
 
-        create_new_user_enabled = false;
+        //create_new_user_enabled = false;
+        invitationDialog.hide()
     }
+    */
 
     let removeModal;
     let userToRemove;
@@ -732,17 +681,54 @@
         }
     }
 
-    function askToAddAgain(user)
+    async function askToAddAgain(user)
     {
-        new_user.email = user[emailAttrib];
-        new_user.name = user[nameAttrib];      
-        new_user.silently = true;
-        new_user.accepted = true;
+        let email = user[emailAttrib];
+        let name = user[nameAttrib] ?? '';      
+        let idempotencyToken = randomString(8)
 
-        //name_input?.setReadonly(true)
-        //email_input?.setReadonly(true)
+        let accRole = ''
+        if(showAccessRoles && access_roles.length > 0)
+            accRole = access_roles[0].name ?? ""
+        
+        try {
+                const res = await reef.fetch('/json/anyv/sys/invite_user', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                email: email,
+                                auth_group: 0,
+                                files_group: 0,
+                                role: accRole,
+                                client_id: $session.configuration.client_id,
+                                redirect_uri: `${window.location.origin}/#/auth/cb`,
+                                state: `${window.location.origin}/#/auth/signin`,
+                                idempotency_token: idempotencyToken,
+                                silently: true,
+                                accepted: true,
+                                set:
+                                {
+                                    [nameAttrib]: name,
+                                    [emailAttrib]: email
+                                }
+                            })
+                        })
 
-        create_new_user();
+                if(res.ok)
+                {
+                    const result = await res.json();
+                    let created_user = result.User;
+                    await onNewUserAdded(created_user)
+                }
+                else
+                {
+                    const err_msg = await res.text();
+                    onErrorShowAlert(err_msg);
+                }
+        }
+        catch (err)
+        {
+            onErrorShowAlert(err);
+        }
     }
 
    function getHRefFunc()
@@ -752,6 +738,32 @@
         else
             return (user) => { return user[hrefAttrib]} 
    }
+
+   async function onNewUserAdded(created_user)
+   {
+        let new_reef_user = {
+            [nameAttrib]: created_user[nameAttrib],
+            [emailAttrib]: created_user[emailAttrib],
+            [refAttrib]: created_user[refAttrib]
+        }
+
+        let details = await reef.get(`/sys/user_details?email=${new_reef_user[emailAttrib]}`)
+        set_user_info(new_reef_user, details);
+
+        let sameUserIdx = reef_users.findIndex(ru => ru[refAttrib] == new_reef_user[refAttrib])
+        if(sameUserIdx >= 0)
+        {
+            reef_users[sameUserIdx] = new_reef_user;
+            reef_users = [... reef_users];
+        }
+        else
+        {
+            reef_users = [...reef_users, new_reef_user]
+        }
+
+        
+        list?.reload(reef_users);
+   } 
     
 </script>
 
@@ -803,7 +815,7 @@
     
 </Page>
 
-<Modal  bind:open={create_new_user_enabled}
+<!--Modal  bind:open={create_new_user_enabled}
         title={i18n({en: 'Invite someone', es: 'Invitar a alguien', pl: 'Zaproś kogoś'})}
         okCaption={i18n({en: 'Invite', es: 'Invitar', pl: 'Zaproś'})}
         onOkCallback={on_new_user_requested}
@@ -825,27 +837,9 @@
                     bind:this={name_input}
                     readonly={new_user.accepted}/>
 
-            <!--Checkbox class="mt-2 text-xs font-normal" self={new_user} a="maintainer">
-                <div class="flex flex-row items-center">
-                    <span class="">Maintainer</span>
-                    <Icon id="b1" s="md" component={FaInfoCircle} class="text-stone-400 ml-5 pt-0 mt-1"/>
-                    <Popover class="w-64 text-sm font-light text-stone-500 bg-white dark:bg-stone-800 dark:border-stone-600 dark:text-stone-400" triggeredBy="#b1" color="dropdown">
-                        Means that the invited user will be able to add/remove others and manage permissions in this organization.
-                    </Popover>
-                </div>
-            </Checkbox-->
-
             <Checkbox class="mt-2 text-xs font-normal" self={new_user} a="silently">
                 {i18n({en: 'Add user without sending an email', es: 'Añadir usuario sin enviar correo electrónico', pl: 'Dodaj użytkownika bez wysyłania e-maila'})}
             </Checkbox>
-
-            <!-- There is problem with dropdown/combo on dialogs (nested fixed stacks) -->
-            <!--Combo class="mt-2" label='Privileges' a='auth_group' self={new_user} >
-                <ComboItem name='No auth access'    key={0}  />
-                <ComboItem name='Read auth access'  key={1}  />
-                <ComboItem name='Can invite others' key={3}  />
-                <ComboItem name='Full auth access'  key={7}  />
-            </Combo-->
 
             <section class="mt-2 grid grid-cols-2 gap-2">
                 <div class="flex flex-col">
@@ -962,7 +956,7 @@
                     </div>
                 {/if}
             </section>
-</Modal>
+</Modal-->
 
 <Modal  title={i18n({en: 'User removal', es: 'Eliminar usuario', pl: 'Usuwanie użytkownika'})} 
         content={i18n({en: `Are you sure you want to remove ${userToRemove ? userToRemove[nameAttrib] : 'user'}?`, es: `¿Estás seguro de que deseas eliminar al ${userToRemove ? userToRemove[nameAttrib] : 'usuario'}?`, pl: `Czy na pewno chcesz usunąć ${userToRemove ? userToRemove[nameAttrib] : 'użytkownika'}?`})}
@@ -979,3 +973,7 @@
         onOkCallback={deleteApplicationAccount}
         bind:this={deleteAccountModal}
         />
+
+<InviteUser bind:this={invitationDialog} 
+    {nameAttrib} {emailAttrib} {refAttrib} {hrefAttrib} 
+    {onNewUserAdded}/>
