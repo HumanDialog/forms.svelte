@@ -1,9 +1,9 @@
 <script>
     import {reef, AuthorizedView} from '@humandialog/auth.svelte'
-	
+
     import Router from 'svelte-spa-router'
     import {wrap} from 'svelte-spa-router/wrap'
-    
+
     import Cookies from './cookies.svelte';
     import Main from './main.svelte'
     import NotFound from './landing/not.found.svelte'
@@ -23,7 +23,7 @@
     const privacy = __PRIVACY_PAGE__
     const terms = __TERMS_PAGE__
 
-    
+
     reef.configure( {
                     mode: mode,
                     remote: {
@@ -44,12 +44,12 @@
                         apiVersion: "v001"}
                    });
 
-    const r = /^\/listboard|tdownload|tcontact|tasklist|task|note|folder|mytasks|mylists|mynotes|alllists|myfolders|group-folders|general-channels|private-channels|members|chat|thread|newthread|forum|thome|profile|doc|request-license-file|nav\/(.*)\/?$/i
+    const r = /^\/listboard|tdownload|tcontact|tasklist|design|ask|note|folder|mytasks|mylists|mynotes|alllists|myfolders|group-folders|general-channels|private-channels|members|chat|thread|newthread|forum|thome|profile|doc|request-license-file|nav\/(.*)\/?$/i
 
     const routes = new Map()
     routes.set('/',                     Main)
     routes.set('/contact',              wrap({ asyncComponent: () => import('./landing/contact.svelte')}))
-    routes.set('/privacy-policy',       wrap({ asyncComponent: () => import('./landing/privacy.policy.svelte')})) 
+    routes.set('/privacy-policy',       wrap({ asyncComponent: () => import('./landing/privacy.policy.svelte')}))
     routes.set('/terms-and-conditions', wrap({ asyncComponent: () => import('./landing/terms.and.conditions.svelte')}))
     routes.set('/doc/*',                wrap({ asyncComponent: () => import('./tilos/static.doc.svelte')}))
     routes.set('/blog',                 wrap({ asyncComponent: () => import('./landing/blog/blog.svelte')}))

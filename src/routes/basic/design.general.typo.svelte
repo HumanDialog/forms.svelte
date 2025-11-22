@@ -1,0 +1,2100 @@
+<script>
+    import {reef, session} from '@humandialog/auth.svelte'
+    import {location, push, link} from 'svelte-spa-router'
+    import {
+		Page,
+		Kanban,
+		KanbanColumn,
+		KanbanTitle,
+		KanbanSummary,
+		Spinner,
+		ComboSource,
+		KanbanCallbacks,
+        KanbanDateProperty,
+        KanbanComboProperty,
+        KanbanTagsProperty,
+        KanbanStaticProperty,
+        mainContentPageReloader,
+		KanbanSource,
+        Modal,
+		KanbanColumnBottom,
+        onErrorShowAlert,
+        Input,
+		showMenu,
+        Combo,
+		ComboItem,
+        UI,
+        reloadVisibleTags,
+        i18n, ext,
+		isDeviceSmallerThan,
+        Breadcrumb,
+        showFloatingToolbar
+	} from '$lib';
+    import {FaPlus, FaList, FaPen, FaCaretLeft, FaCaretRight, FaTrash, FaArrowsAlt, FaArchive, FaCheck, FaEllipsisH, FaChevronRight,
+        FaAngleDown, FaAngleUp, FaColumns, FaRandom, FaChevronLeft, FaUpload, FaRegCalendar, FaRegCalendarCheck, FaCaretUp, FaCaretDown, FaDownload
+    } from 'svelte-icons/fa'
+    import MoveOperations from './list.board.move.svelte'
+	import { tick, onMount } from 'svelte';
+    import BasketPreview from './basket.preview.svelte'
+    import PopupExplorer from './popup.explorer.svelte'
+    import {fetchComposedClipboard4TaskList, transformClipboardToJSONReferences, setBrowserRecentElement, getBrowserRecentElements} from './basket.utils'
+    import {cache} from './cache.js'
+    import TaskProperties from './properties.task.svelte'
+
+    export let params = {}
+
+    let currentList = null;
+
+    let listId = 0;
+    let listPath = '';
+
+    let users = [];
+    let taskStates = [];
+    let allTags = ''
+    let kanban;
+    let definitionChangedTicket = 1
+    let usersComboSource;
+
+    const TLK_KANBAN_CHECKLIST = 0
+    const TLK_KANBAN_PROCESS = 1
+    const TLK_LIST = 2
+
+    $: onParamsChanged($location, $mainContentPageReloader);
+
+	async function onParamsChanged(...args)
+    {
+        const segments = $location.split('/');
+
+        const foundIdx = segments.findIndex( s => s == 'design');
+        if(foundIdx < 0)
+            return;
+
+        if(users.length == 0)
+        {
+            //let res = await reef.get('/app/Users')
+            reef.post('group/query',
+                            {
+                                Id: 1,
+                                Name: 'Users',
+                                Tree:[
+                                    {
+                                        Id: 1,
+                                        Association: 'Members/User'
+                                    }
+                                ]
+                            },
+                            onErrorShowAlert
+                        ).then( (res) => {
+                            if(res)
+                            {
+                                users = res.User;
+                                usersComboSource?.updateObjects(users);
+                            }
+                        })
+        }
+
+        reef.get('/group/AllTags', onErrorShowAlert).then((res) => {
+            allTags = res;
+            reloadVisibleTags()
+        })
+
+        if(!segments.length)
+            listId = 1;
+        else
+            listId = parseInt(segments[segments.length-1])
+
+        if(isNaN(listId))
+            listId = 1
+
+        let prevDef = currentList?.$ref
+
+        const cacheKey = `design/${listId}`
+        const cachedValue = cache.get(cacheKey)
+        prevDef = showCachedDataFirst(cachedValue, prevDef);
+
+        listPath = `TaskList/${listId}`;
+        const loadedItem = await readContextItem();
+        if(loadedItem)
+        {
+            if(loadedItem.Id != listId)
+                return;
+
+            currentList = loadedItem
+            if(currentList.GetTaskStates && Array.isArray( currentList.GetTaskStates))
+                taskStates = currentList.GetTaskStates
+            else
+                taskStates = [];
+        }
+
+        if(currentList.$ref != prevDef)
+        {
+            definitionChangedTicket++;
+        }
+        else
+        {
+            kanban?.reload(currentList, kanban.KEEP_SELECTION);
+        }
+    }
+
+    function showCachedDataFirst(cachedValue, prevDef)
+    {
+        if(!cachedValue)
+            return;
+
+        currentList = cachedValue
+        kanban?.reload(currentList, kanban.KEEP_SELECTION);
+
+        if(currentList.GetTaskStates && Array.isArray( currentList.GetTaskStates))
+            taskStates = currentList.GetTaskStates
+        else
+            taskStates = [];
+
+        if(currentList.$ref != prevDef)
+            definitionChangedTicket++;
+
+        return currentList.$ref
+
+    }
+
+    async function readContextItem()
+    {
+        let res = await reef.post(`${listPath}/query`,
+                            {
+                                Id: 1,
+                                Name: "collector",
+                                ExpandLevel: 3,
+                                Tree:
+                                [
+                                    {
+                                        Id: 1,
+                                        Association: '',
+                                        Expressions:['$ref','Id','Name', 'Kind', 'GetTaskStates','href', 'GetCanonicalPath', '$type'],
+                                        SubTree:
+                                        [
+                                            {
+                                                Id: 2,
+                                                Association: 'Tasks',
+                                                //Filter: 'Status <> STATUS_CLOSED',
+                                                Sort: 'ListOrder',
+                                                SubTree:[
+                                                    {
+                                                        Id: 3,
+                                                        Association: 'Actor',
+                                                        Expressions:['$ref', 'Name']
+                                                    },
+                                                    {
+                                                        Id: 4,
+                                                        Association: 'TaskList',
+                                                        Expressions:['$ref', 'Name']
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            onErrorShowAlert);
+        if(res)
+        {
+            const taskList = res.TaskList
+            const cacheKey = `design/${taskList.Id}`
+            cache.set(cacheKey, taskList)
+
+            return taskList;
+        }
+        else
+            return null
+    }
+
+    async function fetchData()
+    {
+        let res = await readContextItem();
+
+        currentList = res;
+        if(!currentList)
+            return;
+
+        if(currentList.GetTaskStates && Array.isArray( currentList.GetTaskStates))
+        {
+            taskStates = currentList.GetTaskStates
+        }
+        else
+        {
+            taskStates = [];
+        }
+    }
+
+    async function reload(selectRecommendations)
+    {
+        await fetchData();
+        kanban.reload(currentList, selectRecommendations);
+    }
+
+
+    /*const switchToListOperation = () => {
+        if(!currentList)
+            return { }
+
+        if(currentList.Kind == TLK_KANBAN_CHECKLIST)
+        {
+            return {
+                icon: FaList,
+                right: true,
+                action: (f) => switchToList(),
+                fab: 'S01',
+                tbr: 'C'
+            }
+        }
+        else
+            return { }
+    }
+    */
+    function getViewOperationsP()
+    {
+        return {
+                    caption: '_; View; Ver; Widok',
+
+                    operations: [
+                        {
+                            caption: '_; New task; Nueva tarea; Nowe zadanie',
+                            icon: FaRegCalendar,
+                            action: (f) => kanban.add(KanbanColumnBottom, 0),
+                            tbr: 'A',
+                            fab: 'M01'
+                        },
+                        {
+                            icon: FaDownload,
+                            caption: '_; Insert; Insertar; Wstaw',
+                            hideToolbarCaption: true,
+                            tbr: 'C',
+                            fab: 'S10',
+                            menu: [
+                                {
+                                    caption: '_; Paste; Pegar; Wklej',
+                                    action: pasteRecentClipboardElement
+                                },
+                                {
+                                    caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
+                                    action: runPasteBasket
+                                },
+                                {
+                                    caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
+                                    action: runPasteBrowserRecent
+                                },
+                                {
+                                    caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
+                                    action: runPopupExplorer
+                                }
+                            ]
+                        },
+                        {
+                            separator: true
+                        },
+                        {
+                            //icon: FaRandom,
+                            caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
+                            action: changeListKind,
+                        //    fab: 'S02',
+                        //    tbr: 'C'
+                        },
+                        //switchToListOperation()
+                    ]
+                }
+    }
+
+    function getPageOperations()
+    {
+        return {
+            opver: 2,
+            fab: 'M00',
+            tbr: 'D',
+            operations: [
+                getViewOperationsP()
+            ]
+        }
+    }
+
+    function switchToList()
+    {
+        reef.post(`${listPath}/SwitchToList`,{  }, onErrorShowAlert)
+        push(`/tasklist/${listId}`);
+    }
+
+    function getDefaultTypeSummary(list)
+    {
+        if(!list.TaskStates)
+            return '';
+
+        let result = ''
+        list.TaskStates.forEach(s => {
+            if(result)
+                result += ', '
+            result += ext(s.name)
+        })
+
+        return result
+    }
+
+    async function changeListKind(button, aroundRect)
+    {
+        const listTypes = await reef.get('group/GetTaskListTypes', onErrorShowAlert)
+        if(!listTypes || !Array.isArray(listTypes) || listTypes.length == 0)
+            return;
+
+        let menuOperations = []
+        let prevKind = 0;
+
+        listTypes.forEach(template => {
+
+            //if(prevKind != template.Kind)
+            //    menuOperations.push({separator: true})
+            //prevKind = template.Kind
+
+            menuOperations.push({
+                caption: ext(template.Name),
+                description: template.Summary ? ext(template.Summary) : getDefaultTypeSummary(template),
+                action: (f) => askToChangeListKind(template)
+            })
+        })
+
+        if(menuOperations.length > 0)
+        {
+            let rect;
+            if(aroundRect)
+                rect = aroundRect
+            else
+                rect = button.getBoundingClientRect()
+            showMenu(rect, menuOperations)
+        }
+    }
+
+    let changeKindModal;
+    let changeListTo = null;
+    function askToChangeListKind(template)
+    {
+        changeListTo = template
+
+        changeKindModal.show();
+    }
+
+    async function handleChangeListKind()
+    {
+        changeKindModal.hide();
+
+        if(!changeListTo)
+            return
+
+        let newHref = await reef.post(`${listPath}/ChangeListKind`, {
+            template: changeListTo
+        }, onErrorShowAlert)
+
+        changeListTo = null
+
+        if(!newHref)
+            return null;
+
+        if(!newHref || currentList.href == newHref)
+        {
+            await fetchData()
+            //reload(kanban.KEEP_SELECTION);
+            definitionChangedTicket++;
+            //await kanban.rerender();
+        }
+        else
+        {
+            push(newHref)
+            if(UI.navigator)
+                UI.navigator.refresh();
+        }
+    }
+
+    async function onReplace(moveParams)
+    {
+        let res = await reef.post(`${listPath}/ChangeTaskColumn`, {
+            task: moveParams.item.$ref,
+            columnNo: moveParams.toColumn
+        }, onErrorShowAlert)
+
+        if(!res)
+            return null;
+
+        let newTask = res.Task;
+        await reload(newTask.Id)
+    }
+
+    async function onAdd(newTaskAttribs, columnIdx)
+    {
+        let res = await reef.post(`${listPath}/CreateTaskInColumn`, {
+                properties: newTaskAttribs,
+                pos: columnIdx },
+                onErrorShowAlert)
+        if(!res)
+            return null;
+
+        let newTask = res.Task;
+        setBrowserRecentElement(newTask.Id, 'Task')
+
+        await reload(newTask.Id)
+	}
+
+
+
+    let deleteModal;
+    let taskToDelete;
+    function askToDelete(task)
+    {
+        taskToDelete = task;
+        deleteModal.show()
+    }
+
+	async function deleteTask()
+    {
+        if(!taskToDelete)
+            return;
+
+        await reef.post(`${taskToDelete.$ref}/DeletePermanently`, { } , onErrorShowAlert);
+        deleteModal.hide();
+
+        reload(kanban.SELECT_NEXT);
+	}
+
+    let archiveModal;
+    let taskToArchive;
+    function askToArchive(task)
+    {
+        taskToArchive = task;
+        archiveModal.show();
+    }
+
+    async function archiveTask(task)
+    {
+        if(!taskToArchive)
+            return;
+
+        await reef.post(`${taskToArchive.$ref}/Archive`, {}, onErrorShowAlert)
+        archiveModal.hide();
+
+        reload(kanban.SELECT_NEXT);
+    }
+
+    async function finishTask(task)
+    {
+        await reef.post(`${task.$ref}/Finish`, {}, onErrorShowAlert);
+        reload(task.Id);
+    }
+
+
+    async function onUpdateAllTags(allAllTags)
+    {
+        allTags = allAllTags
+        await reef.post('group/set', { AllTags: allTags}, onErrorShowAlert)
+    }
+
+
+    function getCardOperations(task)
+    {
+        const columnIdx = taskStates.findIndex(s => s.state == task.State)
+        const isOutOfStates = columnIdx < 0
+        const mobile = isDeviceSmallerThan("sm")
+
+        return {
+            opver: 2,
+            fab: 'M00',
+            tbr: 'D',
+            operations: [
+                {
+                    caption: '_; View; Ver; Widok',
+                    //tbr: 'B',
+                    operations:[
+                        {
+                            caption: '_; New task; Nueva tarea; Nowe zadanie',
+                            icon: FaRegCalendar,
+                            action: (f) => { kanban.add(task) },
+                            fab: "M01",
+                            tbr: 'A'
+                        },
+                        {
+                            icon: FaDownload,
+                            caption: '_; Insert; Insertar; Wstaw',
+                            hideToolbarCaption: true,
+                            tbr: 'C',
+                            fab: 'S10',
+                            menu: [
+                                {
+                                    caption: '_; Paste; Pegar; Wklej',
+                                    action: pasteRecentClipboardElement
+                                },
+                                {
+                                    caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
+                                    action: runPasteBasket
+                                },
+                                {
+                                    caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
+                                    action: runPasteBrowserRecent
+                                },
+                                {
+                                    caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
+                                    action: runPopupExplorer
+                                }
+                            ]
+                        },
+                        {
+                            separator: true
+                        },
+                        {
+                            caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
+                            action: changeListKind,
+                        },
+                    ]
+                },
+                ... isOutOfStates ? [] : [
+                {
+                    caption: '_; Column; Columna; Kolumna',
+                    //tbr: 'B',
+                    operations: getColumnContextMenu(columnIdx, undefined, !mobile)
+                }],
+                {
+                    caption: '_; Task; Tarea; Zadanie',
+                    //tbr: 'B',
+                    operations: [
+                        {
+                            caption: '_; Edit...; Editar...; Edytuj...',
+                            icon: FaPen,
+                            tbr: 'A',
+                            fab: 'M20',
+                            grid: [
+                                {
+                                    caption: '_; Title; Título; Tytuł',
+                                    columns: 2,
+                                    action: (f) =>  { kanban.edit(task, 'Title') }
+                                },
+                                {
+                                    caption: '_; Summary; Resumen; Podsumowanie',
+                                    action: (f) =>  { kanban.edit(task, 'Summary') }
+                                },
+                                {
+                                    separator: true
+                                },
+                                {
+                                    caption: '_; Responsible; Responsable; Odpowiedzialny',
+                                    action: (f) => { kanban.edit(task, 'Actor') }
+                                },
+                                {
+                                    caption: '_; Due Date; Fecha; Termin',
+                                    action: (f) => { kanban.edit(task, 'DueDate') }
+                                },
+                                {
+                                    caption: '_; Tag; Etiqueta; Etykieta',
+                                    action: (f) => { kanban.edit(task, 'Tags') }
+                                }
+                            ]
+                        },
+                        {
+                            caption: '_; Move...; Desplazar...; Przesuń...',
+                            icon: FaArrowsAlt,
+                            toolbar: MoveOperations,
+                            props: {
+                                    taskStates: taskStates,
+                                    item: task,
+                                    afterActionOperation: kanban.scrollViewToCard,
+                                 //   onMoveUp: isOutOfStates ? undefined : kanban.moveUp,
+                                 //   onMoveDown: isOutOfStates ? undefined : kanban.moveDown,
+                                    onReplace: kanban.replace},
+                            fab: 'M03',
+                            tbr: 'A'
+                        },
+                        ... (isOutOfStates) ? [] : [
+                        {
+                            caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
+                            icon: FaCaretUp,
+                            action: (f) => { kanban.moveUp(task); setTimeout(() => kanban.scrollViewToCard(), 0) },
+                            fab: 'M05',
+                            tbr: 'A',
+                            hideToolbarCaption: true
+                        },
+                        {
+                            caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
+                            icon: FaCaretDown,
+                            action: (f) => { kanban.moveDown(task); setTimeout(() => kanban.scrollViewToCard(), 0)},
+                            fab: 'M04',
+                            tbr: 'A',
+                            hideToolbarCaption: true
+                        } ],
+
+                        {
+                            caption: '_; Send; Enviar; Wyślij',
+                            icon: FaUpload,
+                            tbr: 'D',
+                            fab: 'S00',
+                            menu: [
+                                    {
+                                        caption: '_; Copy; Copiar; Kopiuj',
+                                        action: (f) => copyTaskToBasket(task)
+                                    },
+                                    {
+                                        caption: '_; Cut; Cortar; Wytnij',
+                                        action: (f) => cutTaskToBasket(task)
+                                    },
+                                    {
+                                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
+                                        action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, task)
+                                    }
+                                ],
+                            hideToolbarCaption: true
+                        },
+
+                        ... (task.State == STATE_FINISHED) ? [] : [
+                                {
+                                    caption: '_; Finish; Finalizar; Zakończ',
+                                    //icon: FaCheck,
+                                    action: (f) => finishTask(task),
+                                    //fab: 'S20',
+                                    //tbr: 'A', hideToolbarCaption: true
+                                }
+                        ],
+                        {
+                            caption: '_; Archive; Archivar; Zarchiwizuj',
+                            //icon: FaArchive,
+                            action: (f) => askToArchive(task)
+                        },
+                        {
+                            caption: '_; Delete; Eliminar; Usuń',
+                            //icon: FaTrash,
+                            action: (f) => askToDelete(task)
+                        },
+                        {
+                            caption: '_; Properties; Propiedades; Właściwości',
+                            action: (btt, rect)=> runElementProperties(btt, rect, task, 'Task')
+                        }
+                    ]
+                }
+
+
+            ]
+
+        }
+
+    }
+
+    let taskPropertiesDialog;
+    function runElementProperties(btt, aroundRect, element, kind)
+    {
+        switch(kind)
+        {
+        case 'Task':
+        case 'FolderTask':
+            taskPropertiesDialog.show(element)
+            break
+        }
+    }
+
+    function getColumnContextMenu(columnIdx, taskState, inColumnContext=true)
+    {
+        return [
+            {
+                caption: '_; Edit column name; Editar nombre de columna; Edytuj nazwę kolumny',
+                //icon: FaPen, //inColumnContext ? FaPen : undefined,
+                action: (f) => kanban.editColumnName(columnIdx)
+            },
+            /*{
+                caption: inColumnContext ? 'Set as finished' : 'Set column as finished',
+                icon: inColumnContext ? FaCheck : undefined,
+                action: (f) => setColumnAsFinishing(columnIdx)
+            },*/
+            {
+                caption: '_; Move column left; Mueve la columna hacia la izquierda; Przesuń kolumnę w lewo',
+                //icon: FaCaretLeft, //inColumnContext ? FaCaretLeft : undefined,
+                action: (f) => onColumnMoveLeft(columnIdx)
+            },
+            {
+                caption: '_; Move column right; Mueve la columna hacia la derecha; Przesuń kolumnę w prawo',
+                //icon: FaCaretRight, //inColumnContext ? FaCaretRight : undefined,
+                action: (f) => onColumnMoveRight(columnIdx)
+            },
+            {
+                caption:  '_; Delete column; Eliminar columna; Usuń kolumnę',
+                //icon: FaTrash, //inColumnContext ? FaTrash : undefined,
+               // menu: getColumnDeleteOptions(columnIdx, taskState)
+               action: (f) => deleteColumnAndSetCardsState(columnIdx, 0)
+            },
+            {
+                separator: true
+            },
+            {
+                caption: '_; Add column; Añadir columna; Dodaj kolumnę',
+                //icon: FaPlus, //inColumnContext ? FaPlus : undefined,
+                action: (f) => addColumn("", columnIdx+1)
+            }
+        ];
+    }
+
+
+
+    function getColumnOperations(columnIdx, taskState)
+    {
+        const mobile = isDeviceSmallerThan("sm")
+        return {
+            opver: 2,
+            fab: 'M00',
+            tbr: 'D',
+            operations: [
+                {
+                    caption: '_; View; Ver; Widok',
+                    //tbr: 'B',
+                    operations: [
+                        {
+                            caption: '_; New Task; Nueva tarea; Nowe zadanie',
+                            icon: FaRegCalendar,
+                            action: (f) => kanban.add(KanbanColumnBottom, columnIdx),
+                            fab: 'M01',
+                            tbr: 'A'
+                        },
+                        {
+                            icon: FaDownload,
+                            caption: '_; Insert; Insertar; Wstaw',
+                            hideToolbarCaption: true,
+                            tbr: 'C',
+                            fab: 'S10',
+                            menu: [
+                                {
+                                    caption: '_; Paste; Pegar; Wklej',
+                                    action: pasteRecentClipboardElement
+                                },
+                                {
+                                    caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
+                                    action: runPasteBasket
+                                },
+                                {
+                                    caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
+                                    action: runPasteBrowserRecent
+                                },
+                                {
+                                    caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
+                                    action: runPopupExplorer
+                                }
+                            ]
+                        },
+                        {
+                            separator: true
+                        },
+                        {
+                            //icon: FaRandom,
+                            caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
+                            action: changeListKind,
+                        //    fab: 'S02',
+                        //    tbr: 'C'
+                        },
+                        //switchToListOperation()
+                    ]
+                },
+                {
+                    caption: 'Column',
+                    //tbr: 'B',
+                    operations: getColumnContextMenu(columnIdx, taskState, !mobile)
+                }
+            ]
+        }
+    }
+
+    async function pasteRecentClipboardElement(btt, aroundRect)
+    {
+        const clipboardElements = await fetchComposedClipboard4TaskList()
+        if(clipboardElements && clipboardElements.length > 0)
+        {
+            const references = transformClipboardToJSONReferences([clipboardElements[0]])
+            const res = await reef.post(`${listPath}/AttachClipboard`, { references: references }, onErrorShowAlert)
+            if(res)
+                reload(kanban.KEEP_SELECTION)
+        }
+    }
+
+    async function runPasteBasket(btt, aroundRect)
+    {
+        const clipboardElements = await fetchComposedClipboard4TaskList()
+        showFloatingToolbar(aroundRect, BasketPreview, {
+            destinationContainer: listPath,
+            onRefreshView: (f) => reload(kanban.KEEP_SELECTION),
+            clipboardElements: clipboardElements
+        })
+    }
+
+    async function runPasteBrowserRecent(btt, aroundRect)
+    {
+        const clipboardElements = getBrowserRecentElements()
+        showFloatingToolbar(aroundRect, BasketPreview, {
+            destinationContainer: listPath,
+            onRefreshView: (f) => reload(kanban.KEEP_SELECTION),
+            clipboardElements: clipboardElements,
+            browserBasedClipboard: true
+        })
+    }
+
+    async function runPopupExplorer(btt, aroundRect)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            destinationContainer: listPath,
+            onRefreshView: (f) => reload(kanban.KEEP_SELECTION)
+        })
+    }
+
+    async function runPopupExplorerToPlaceElement(btt, aroundRect, task)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            canSelectRootElements: true,
+            onAttach: async (tmp, references) => {
+                await reef.post(`${task.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
+            }
+        })
+    }
+
+    function getColumnDeleteOptions(columnIdx, taskState)
+    {
+        if(!taskStates)
+            return [];
+
+        let moveTos = taskStates.filter(c => c.state != taskState.state).map(
+            ({name, state}) =>
+                ({  caption: `Move items to ${name}`,
+                    action: (f) => deleteColumnAndSetCardsState(columnIdx, state)}))
+
+        return moveTos;
+    }
+
+    async function deleteColumnAndSetCardsState(columnIdx, newState)
+    {
+
+        const res = await reef.post(`${currentList.$ref}/RemoveColumn`, {
+                        pos: columnIdx,
+                        moveTasksTo: newState
+                    }, onErrorShowAlert);
+
+        if(res && Array.isArray(res))
+        {
+            taskStates = [...res]
+            await kanban.rerender();
+        }
+
+        //const columnState = taskStates[columnIdx].state;
+        //const toColumnIdx = taskStates.findIndex(s => s.state == newState)
+        //const tasks = currentList.Tasks.filter(t => t.State == columnState)
+        //kanban.moveCardsTo(tasks, toColumnIdx);
+
+        //taskStates.splice(columnIdx, 1);
+        //await saveTaskStates();
+
+        //taskStates = [...taskStates]
+        //await kanban.rerender();
+
+    }
+
+    async function onColumnNameChanged(columnIdx, name)
+    {
+        const res = await reef.post(`${currentList.$ref}/ChangeColumnName`, {
+                        pos: columnIdx,
+                        newName: name
+                    }, onErrorShowAlert);
+
+
+        if(res && Array.isArray(res))
+        {
+            taskStates = [...res]
+            await kanban.rerender();
+            kanban.activateColumn(columnIdx)
+        }
+
+        //taskStates[columnIdx].name = name;
+        //await saveTaskStates();
+    }
+
+    async function onColumnMoveLeft(columnIdx)
+    {
+        if(columnIdx <= 0)
+            return;
+
+        const res = await reef.post(`${currentList.$ref}/MoveColumn`, {
+                        pos: columnIdx,
+                        shift: -1
+                    }, onErrorShowAlert);
+
+        await fetchData()
+
+        if(res && Array.isArray(res))
+        {
+            await kanban.rerender();
+            kanban.activateColumn(columnIdx-1)
+        }
+    }
+
+    async function onColumnMoveRight(columnIdx)
+    {
+        if(columnIdx >= taskStates.length-1)
+            return;
+
+        const res = await reef.post(`${currentList.$ref}/MoveColumn`, {
+                        pos: columnIdx,
+                        shift: 1
+                    }, onErrorShowAlert);
+
+        await fetchData()
+
+        if(res && Array.isArray(res))
+        {
+            await kanban.rerender();
+            kanban.activateColumn(columnIdx+1)
+        }
+    }
+
+    async function copyTaskToBasket(task)
+    {
+        await reef.post(`${currentList.$ref}/CopyTaskToBasket`, {
+                task: task.$ref,
+                flags: 0},
+                onErrorShowAlert)
+    }
+
+    async function cutTaskToBasket(task)
+    {
+        await reef.post(`${currentList.$ref}/CutTaskToBasket`, {
+                task: task.$ref,
+                flags: 0},
+                onErrorShowAlert)
+
+        reload(kanban.SELECT_NEXT);
+    }
+
+    const STATE_FINISHED = 7000
+    /*async function setColumnAsFinishing(columnIdx)
+    {
+        for(let i=0; i<taskStates.length; i++)
+        {
+            let taskState = taskStates[i];
+            if(taskState.state == STATE_FINISHED)
+            {
+                if(i == columnIdx)
+                    return;
+                else
+                {
+                    let maxStateValue=0;
+                    for(let j=0; j<taskStates.length; j++)
+                    {
+                        const taskState = taskStates[j];
+                        if(taskState.state > maxStateValue)
+                            maxStateValue = taskState.state;
+                    }
+
+                    const newState = maxStateValue + 1;
+                    const tasks = currentList.Tasks.filter(t => t.State == taskState.state)
+                    kanban.setCardsState(tasks, newState)
+                    taskState.state = newState
+                }
+            }
+        }
+
+        const taskState = taskStates[columnIdx]
+        const tasks = currentList.Tasks.filter(t => t.State == taskState.state)
+        kanban.setCardsState(tasks, STATE_FINISHED)
+        taskState.state = STATE_FINISHED
+
+        await saveTaskStates();
+        taskStates = [...taskStates]
+        await kanban.rerender(columnIdx);
+    }*/
+
+    async function addColumn(name, idx=-1)
+    {
+        if(idx < 0)
+            idx = 0
+
+        if(currentList && currentList.Kind == TLK_KANBAN_PROCESS)
+        {
+            await addProcessColumn(idx);
+        }
+        else
+        {
+
+            const res = await reef.post(`${currentList.$ref}/AddColumn`, {
+                            pos: idx,
+                            state: 0,
+                            name: ""
+                        }, onErrorShowAlert);
+
+
+            if(res && Array.isArray(res))
+            {
+                taskStates = [...res]
+                await kanban.rerender();
+
+                kanban.activateColumn(idx)
+                //kanban.editColumnName(idx);
+            }
+        }
+    }
+
+    /*
+    async function saveTaskStates()
+    {
+        currentList.TaskStates = JSON.stringify(taskStates);
+
+        await reef.post(`${listPath}/set`,
+                    {
+                        TaskStates: currentList.TaskStates
+                    },
+                    onErrorShowAlert);
+    }
+    */
+
+
+    let addColumnDialog;
+    let newColumnProps = {
+        name: '_; New column; Nueva columna; Nowa kolumna',
+        state: 0
+    }
+    let newColumnStates = []
+    let newColumnPos = 0
+    let numericStateElement;
+    let stateValueVisible = false;
+
+    async function addProcessColumn(pos)
+    {
+        newColumnPos = pos;
+        if(!newColumnStates.length)
+        {
+            newColumnStates = await reef.get(`group/GetPredefinedTaskStates`, onErrorShowAlert)
+            await tick();
+        }
+
+        addColumnDialog.show();
+
+    }
+
+    async function onNewProcessColumnRequested()
+    {
+        addColumnDialog.hide();
+
+        let newState
+        if (typeof newColumnProps.state === 'string' || newColumnProps.state instanceof String)
+            newState = parseInt(newColumnProps.state)
+        else
+            newState = newColumnProps.state
+
+        const res = await reef.post(`${currentList.$ref}/AddColumn`, {
+                            pos: newColumnPos,
+                            state: newState,
+                            name: newColumnProps.name
+                        }, onErrorShowAlert);
+
+        newColumnProps.name = '_; New column; Nueva columna; Nowa kolumna'
+        newColumnProps.state = 0
+
+        if(res && Array.isArray(res))
+        {
+            taskStates = [...res]
+            await kanban.rerender();
+
+            kanban.activateColumn(idx)
+            //kanban.editColumnName(idx);
+        }
+        else
+        {
+            // ?
+        }
+    }
+
+    function onNewProcessColumnCanceled()
+    {
+        addColumnDialog.hide();
+        newColumnProps.name = '_; New column; Nueva columna; Nowa kolumna'
+        newColumnProps.state = 0
+    }
+
+    function onNewColumnStateSelected(state, name)
+    {
+        numericStateElement?.refresh();
+    }
+
+    let otherCaption = '_; <Other>; <Otros>; <Inne>'
+
+    let dsColumnWidth = dsCalcColumnWidth();
+
+    function dsCalcColumnWidth_org()
+    {
+        const container = document.getElementById("__hd_svelte_main_content_container")
+        const containerRect = container?.getBoundingClientRect();
+
+        const assumed_space = containerRect.width
+        const columns_no = 2;
+        const column_width = Math.floor( assumed_space / columns_no );
+        if(window.innerWidth >= 640)
+            return `width: ${column_width}px; min-width: 200px; max-width: ${column_width}px;`
+        else
+            return 'width: 92%;'
+
+    }
+
+    function dsCalcColumnWidth()
+    {
+        const container = document.getElementById("__hd_svelte_main_content_container")
+        const containerRect = container?.getBoundingClientRect();
+
+        const assumed_space = containerRect.width
+        const columns_no = 2;
+        const column_width = Math.floor( assumed_space / columns_no );
+        if(window.innerWidth >= 640)
+            return `width: 480px; min-width: 200px; max-width: 480px;`
+        else
+            return 'width: 92%;'
+
+    }
+
+   let prose_base_class = "prose prose-base prose-zinc"
+
+</script>
+
+<svelte:head>
+    {#if currentList && currentList.Name}
+        <title>{ext(currentList.Name)} | {__APP_TITLE__}</title>
+    {:else}
+        <title>{__APP_TITLE__}</title>
+    {/if}
+</svelte:head>
+
+{#key definitionChangedTicket}
+{#if currentList}
+	<Page self={currentList} toolbarOperations={getPageOperations()} clearsContext="props sel"
+	    title={ext(currentList.Name)}>
+	    <!--section class="w-full place-self-center max-w-3xl"-->
+
+	    {#if currentList.GetCanonicalPath}
+                <Breadcrumb class="mt-1 mb-5" path={currentList.GetCanonicalPath}/>
+            {/if}
+
+
+        <!--/section-->
+<!--------------------------------------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
+    <p class="hidden sm:block mt-3 ml-3 pb-5 text-lg text-left">DESIGM GENERAL TYPOGRAPHY</p>
+    <!--hr class="hidden sm:block w-full"-->
+
+<!--TABLE-------------------------------------------------------------------------------------------------->
+<div id="__hd_svelte_kanban_columns_container" class="h-full mt-5 flex flex-row no-wrap
+                overflow-x-auto snap-x snap-mandatory sm:snap-none">
+    <!--COLUMN------------------------------------------------------------------------------------------------->
+    <div class="    snap-center
+                    sm:snap-align-none
+                    flex-none sm:flex-1
+                    sm:min-h-[calc(100vh-8rem)]
+                    min-h-[calc(100vh-5rem)]
+                    rounded-md border border-transparent
+                " style={dsColumnWidth}>
+
+        <header>
+            <h2
+                class="mt-2 mb-2 text-base sm:text-base uppercase w-full min-h-[1rem] text-center whitespace-nowrap relative">
+                <span>
+                    COLUMNTITLE
+                </span>
+
+                <div class="inline-block text-green-600 h-3 w-3 ml-2">
+                    <FaCheck />
+                </div>
+                <!--button class="absolute right-2 w-4 sm:w-2.5"
+                    on:click|stopPropagation={(e) => add(KanbanColumnTop)}>
+                <FaPlus/>
+            </button-->
+            </h2>
+        </header>
+        <!--CONTENT------------------------------------------------------------------------------------------------->
+        <!--CONTENT------------------------------------------------------------------------------------------------->
+        <!--CT TENT------------------------------------------------------------------------------------------------->
+        <!--C1NTENT------------------------------------------------------------------------------------------------->
+        <div class="px-4">
+            <!--class="relative w-full px-6 py-12 shadow-xl shadow-slate-700/10 ring-1 ring-gray-900/5 md:max-w-3xl md:mx-auto lg:max-w-4xl lg:pt-16 lg:pb-28"-->
+            <div class="w-full prose prose-base prose-zinc dark:prose-invert ">
+                <h1>Tailwind Typography</h1>
+                <p class="lead">
+                    Until now, trying to style an article, document, or blog
+                    post with Tailwind has been a tedious task that required a
+                    keen eye for typography and a lot of complex custom CSS.
+                </p>
+                <p>
+                    By default, Tailwind removes all of the default browser
+                    styling from paragraphs, headings, lists and more. This ends
+                    up being really useful for building application UIs because
+                    you spend less time undoing user-agent styles, but when you <em>really are</em> just trying to style
+                    some content that came from a rich-text
+                    editor in a CMS or a markdown file, it can be surprising and
+                    unintuitive.
+                </p>
+                <p>
+                    We get lots of complaints about it actually, with people
+                    regularly asking us things like:
+                </p>
+                <div class="relative">
+                    <blockquote>
+                        <p>
+                            Why is Tailwind removing the default styles on my <code>h1</code> elements? How do I disable
+                            this? What do you mean I lose
+                            all the other base styles too?
+                        </p>
+
+                    </blockquote>
+                    <!--!div class="absolute h-12 -top-4 -right-20 bg-yellow-300">
+                        <p>Comment</p>
+                    </--div-->
+                </div>
+                <p>
+                    We hear you, but we're not convinced that simply disabling
+                    our base styles is what you really want. You don't want to
+                    have to remove annoying margins every time you use a <code>p</code>
+                    element in a piece of your dashboard UI. And I doubt you
+                    really want your blog posts to use the user-agent styles
+                    either — you want them to look <em>awesome</em>, not awful.
+                </p>
+                <figure>
+                    <figcaption>The <code>@tailwindcss/typography</code> plugin is our
+                        attempt to give you what you <em>actually</em> want, without
+                        any of the downsides of doing something stupid like disabling
+                        our base styles.
+                    </figcaption>
+                    <figcaption>
+                        It adds a new <code>prose</code> class that you can slap on any
+                        block of vanilla HTML content and turn it into a beautiful, well-formatted
+                        document:
+                    </figcaption>
+                </figure>
+                <p>
+                    It adds a new <code>prose</code> class that you can slap on any
+                    block of vanilla HTML content and turn it into a beautiful, well-formatted
+                    document:
+                </p>
+
+                <hr />
+                <h2>What to expect from here on out</h2>
+                <p>
+                    It's important to cover all of these use cases for a few
+                    reasons:
+                </p>
+                <ol>
+                    <li>We want everything to look good out of the box.</li>
+                    <li>
+                        Really just the first reason, that's the whole point of
+                        the plugin.
+                    </li>
+                    <li>
+                        Here's a third pretend reason though a list with three
+                        items looks more realistic than a list with two items.
+                    </li>
+                </ol>
+                <p>Now we're going to try out another header style.</p>
+                <h3>Typography should be easy</h3>
+                <p>Something a wise person once told me about typography is:</p>
+                <figure>
+                    <img src="https://images.unsplash.com/photo-1556740758-90de374c12ad?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=crop&amp;w=1000&amp;q=80"
+                        alt="" />
+                    <figcaption>
+                        Contrary to popular belief, Lorem Ipsum is not simply
+                        random text. It has roots in a piece of classical Latin
+                        literature from 45 BC, making it over 2000 years old.
+                    </figcaption>
+                </figure>
+                <p>And that's the end of this section.</p>
+                <h2>What if we stack headings?</h2>
+                <h3>We should make sure that looks good, too.</h3>
+                <p>
+                    Sometimes you have headings directly underneath each other.
+                    In those cases you often have to undo the top margin on the
+                    second heading because it usually looks better for the
+                    headings to be closer together than a paragraph followed by
+                    a heading should be.
+                </p>
+            <h3>When a heading comes after a paragraph …</h3>
+                <p>
+                    When a heading comes after a paragraph, we need a bit more
+                    space, like I already mentioned above. Now let's see what a
+                    more complex list would look like.
+                </p>
+                <ul>
+                    <li>
+
+                        <p>
+                            <strong>I often do this thing where list items have
+                                headings.</strong>
+                        </p>
+                        <p>
+                            For some reason I think this looks cool which is
+                            unfortunate because it's pretty annoying to get the
+                            styles right.
+                        </p>
+                        <p>
+                            I often have two or three paragraphs in these list
+                            items, too, so the hard part is getting the spacing
+                            between the paragraphs, list item heading, and
+                            separate list items to all make sense. Pretty tough
+                            honestly, you could make a strong argument that you
+                            just shouldn't write this way.
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            <strong>Since this is a list, I need at least two
+                                items.</strong>
+                        </p>
+                        <p>
+                            I explained what I'm doing already in the previous
+                            list item, but a list wouldn't be a list if it only
+                            had one item, and we really want this to look
+                            realistic. That's why I've added this second list
+                            item so I actually have something to look at when
+                            writing the styles.
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            <strong>It's not a bad idea to add a third item either.</strong>
+                        </p>
+                        <p>
+                            I think it probably would've been fine to just use
+                            two items but three is definitely not worse, and
+                            since I seem to be having no trouble making up
+                            arbitrary things to type, I might as well include
+                            it.
+                        </p>
+                    </li>
+                </ul>
+                <p>
+                    After this sort of list I usually have a closing statement
+                    or paragraph, because it kinda looks weird jumping right to
+                    a heading.
+                </p>
+            <h3>Lista z ikonami - nawigatory i explorer …</h3>
+                <p>
+                    Lista z ikonami. Nawigatory i explorer.
+                </p>
+                <ul>
+                    <li>
+
+                        <p>
+                            <strong>I often do this thing where list items have
+                                headings.</strong>
+                        </p>
+                        <p>
+                            For some reason I think this looks cool which is
+                            unfortunate because it's pretty annoying to get the
+                            styles right.
+                        </p>
+                        <p>
+                            I often have two or three paragraphs in these list
+                            items, too, so the hard part is getting the spacing
+                            between the paragraphs, list item heading, and
+                            separate list items to all make sense. Pretty tough
+                            honestly, you could make a strong argument that you
+                            just shouldn't write this way.
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            <strong>Since this is a list, I need at least two
+                                items.</strong>
+                        </p>
+                        <p>
+                            I explained what I'm doing already in the previous
+                            list item, but a list wouldn't be a list if it only
+                            had one item, and we really want this to look
+                            realistic. That's why I've added this second list
+                            item so I actually have something to look at when
+                            writing the styles.
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            <strong>It's not a bad idea to add a third item either.</strong>
+                        </p>
+                        <p>
+                            I think it probably would've been fine to just use
+                            two items but three is definitely not worse, and
+                            since I seem to be having no trouble making up
+                            arbitrary things to type, I might as well include
+                            it.
+                        </p>
+                    </li>
+                </ul>
+                <p>
+                    After this sort of list I usually have a closing statement
+                    or paragraph, because it kinda looks weird jumping right to
+                    a heading.
+                </p>
+                <h2>Lista elementów bez ikon z summary</h2>
+                <p>Elementy na kanbanie przypominają figury z opisami oraz wytłuszczonym tytułem elementu.</p>
+                <figure>
+                    <figcaption>
+                        <div class="grid gap-4 grid-cols-3 grid-rows-1">
+                        <span>OCT-254</span>
+                        <span class = "text-center">Ready</span>
+                        <span class = "text-right">15 listopad 25</span>
+                        </div>
+                    </figcaption>
+                    <h4>Jednoznaczne zasady budowy elementow interfejsu</h4>
+                    <figcaption>
+                        Typografia bardzo pomaga ale jej zasady są z definicji ukryte i nie pokrywają do wszystkich układów interfejsu użytkownika.
+                    </figcaption>
+                    <figcaption>
+                        <div class="grid gap-4 grid-cols-3">
+                        <span>01</span>
+                        <span class = "text-center">02</span>
+                        <span class = "text-right">03</span>
+                        <span>04</span>
+                        <span class = "text-center">05</span>
+                        <span class = "text-right">06</span>
+                        </div>
+                    </figcaption>
+                </figure>
+                <figure>
+                    <figcaption>
+                        <div class="grid gap-4 grid-cols-3 grid-rows-1">
+                        <span>OCT-254</span>
+                        <span class = "text-center"></span>
+                        <span class = "text-right">15 listopad 25</span>
+                        </div>
+                    </figcaption>
+                    <h4>Wybór metody budowania deklarowania elementów interfejsu</h4>
+                    <figcaption>
+                        <div class="grid gap-4 grid-cols-3 grid-rows-1">
+                        <span>Andrzej</span>
+                        <span class = "text-center"></span>
+                        <span class = "text-right">Specyfikacje</span>
+                        </div>
+                    </figcaption>
+                    <figcaption>
+                        Bardzo kusząca wydaje sie opcja, by usunąć z interfejsu jakiekolwiek formatowania i zdać sie na typografię, jednak istnieje poważne zagrożenie, że w takiej sytuacji nie będdziemy mogli zrobić wszystkiego, co jest potrzebne.
+                    </figcaption>
+                </figure>
+
+                <figure>
+                    <h4>Element listy z opisem</h4>
+                    <figcaption>
+                        Contrary to popular belief, Lorem Ipsum is not simply
+                        random text. It has roots in a piece of classical Latin
+                        literature from 45 BC, making it over 2000 years old.
+                    </figcaption>
+                </figure>
+                <figure>
+                    <h4>Element listy bez opisu</h4>
+                </figure>
+                <figure>
+                    <h4>Element listy bez opisu</h4>
+                </figure>
+
+                <h2>There are other elements we need to style</h2>
+                <p>We even included table styles, check it out:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Wrestler</th>
+                            <th>Origin</th>
+                            <th>Finisher</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Bret "The Hitman" Hart</td>
+                            <td>Calgary, AB</td>
+                            <td>Sharpshooter</td>
+                        </tr>
+                        <tr>
+                            <td>Stone Cold Steve Austin</td>
+                            <td>Austin, TX</td>
+                            <td>Stone Cold Stunner</td>
+                        </tr>
+                        <tr>
+                            <td>Randy Savage</td>
+                            <td>Sarasota, FL</td>
+                            <td>Elbow Drop</td>
+                        </tr>
+                        <tr>
+                            <td>Vader</td>
+                            <td>Boulder, CO</td>
+                            <td>Vader Bomb</td>
+                        </tr>
+                        <tr>
+                            <td>Razor Ramon</td>
+                            <td>Chuluota, FL</td>
+                            <td>Razor's Edge</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>
+                    We also need to make sure inline code looks good, like if I
+                    wanted to talk about <code>&lt;span&gt;</code> elements or
+                    tell you the good news about
+                    <code>@tailwindcss/typography</code>.
+                </p>
+                <h3>Sometimes I even use <code>code</code> in headings</h3>
+                <p>
+                    Even though it's probably a bad idea, and historically I've
+                    had a hard time making it look good. This <em>"wrap the code blocks in backticks"</em> trick works
+                    pretty well though really.
+                </p>
+                <p>
+                    Another thing I've done in the past is put a <code>code</code>
+                    tag inside of a link, like if I wanted to tell you about the
+                    <a href="https://github.com/tailwindcss/docs"><code>tailwindcss/docs</code></a> repository. I don't
+                    love that there is an underline below the
+                    backticks but it is absolutely not worth the madness it would
+                    require to avoid it.
+                </p>
+                <h4>We haven't used an <code>h4</code> yet</h4>
+                <p>
+                    But now we have. Please don't use <code>h5</code> or
+                    <code>h6</code>
+                    in your content, Medium only supports two heading levels for
+                    a reason, you animals. I honestly considered using a
+                    <code>before</code>
+                    pseudo-element to scream at you if you use an
+                    <code>h5</code>
+                    or <code>h6</code>.
+                </p>
+                <p>
+                    We don't style them at all out of the box because <code>h4</code>
+                    elements are already so small that they are the same size as
+                    the body copy. What are we supposed to do with an
+                    <code>h5</code>, make it <em>smaller</em> than the body copy?
+                    No thanks.
+                </p>
+                <h3>We still need to think about stacked headings though.</h3>
+                <h4>
+                    Let's make sure we don't screw that up with <code>h4</code> elements,
+                    either.
+                </h4>
+                <p>
+                    Phew, with any luck we have styled the headings above this
+                    text and they look pretty good.
+                </p>
+                <p>
+                    Let's add a closing paragraph here so things end with a
+                    decently sized block of text. I can't explain why I want
+                    things to end that way but I have to assume it's because I
+                    think things will look weird or unbalanced if there is a
+                    heading too close to the end of the document.
+                </p>
+                <p>
+                    What I've written here is probably long enough, but adding
+                    this final sentence can't hurt.
+                </p>
+            </div>
+        </div>
+
+        <!--/CONTENT------------------------------------------------------------------------------------------------>
+
+    </div>
+    <!--COLUMN------------------------------------------------------------------------------------------------->
+    <!--COLUMN------------------------------------------------------------------------------------------------->
+    <div class="    snap-center
+                    sm:snap-align-none
+                    flex-none sm:flex-1
+                    sm:min-h-[calc(100vh-8rem)]
+                    min-h-[calc(100vh-5rem)]
+                    rounded-md border border-transparent
+                " style={dsColumnWidth}>
+
+        <header>
+            <h2
+                class="mt-2 mb-2 text-base sm:text-base uppercase w-full min-h-[1rem] text-center whitespace-nowrap relative">
+                <span>
+                    COLUMNTITLE
+                </span>
+
+                <div class="inline-block text-green-600 h-3 w-3 ml-2">
+                    <FaCheck />
+                </div>
+                <!--button class="absolute right-2 w-4 sm:w-2.5"
+                    on:click|stopPropagation={(e) => add(KanbanColumnTop)}>
+                <FaPlus/>
+            </button-->
+            </h2>
+        </header>
+        <!--CONTENT------------------------------------------------------------------------------------------------->
+        <!--CONTENT------------------------------------------------------------------------------------------------->
+        <!--CT NTENT------------------------------------------------------------------------------------------------>
+        <!--C2NTENT------------------------------------------------------------------------------------------------->
+        <div class="px-4">
+            <h1 class="pt-0 mb-8 text-4xl font-black"> Tailwind Typography </h1>
+            <p class="text-xl font-light my-6 leading-relaxed">
+                Until now, trying to style an article, document, or blog
+                post with Tailwind has been a tedious task that required a
+                keen eye for typography and a lot of complex custom CSS.
+            </p>
+            <p class="text-base font-normal my-5 leading-7">
+                By default, Tailwind removes all of the default browser
+                styling from paragraphs, headings, lists and more. This ends
+                up being really useful for building application UIs because
+                you spend less time undoing user-agent styles, but when you <em>really are</em> just trying to style
+                some content that came from a rich-text
+                editor in a CMS or a markdown file, it can be surprising and
+                unintuitive.
+            </p>
+            <p class="text-base font-thin my-5 leading-7">
+                We get lots of complaints about it actually, with people
+                regularly asking us things like:
+            </p>
+            <div class="pl-4 my-6">
+                    <blockquote>
+                        <p class="text-base italic font-thin  my-5 leading-7">
+                            Why is Tailwind removing the default styles on my <code>h1</code> elements? How do I disable
+                            this? What do you mean I lose
+                            all the other base styles too?
+                        </p>
+
+                    </blockquote>
+                    <!--!div class="absolute h-12 -top-4 -right-20 bg-yellow-300">
+                        <p>Comment</p>
+                    </--div-->
+            </div>
+            <p class="text-base font-thin my-5 leading-7">
+                We hear you, but we're not convinced that simply disabling
+                our base styles is what you really want. You don't want to
+                have to remove annoying margins every time you use a <code>p</code>
+                element in a piece of your dashboard UI. And I doubt you
+                really want your blog posts to use the user-agent styles
+                either — you want them to look <em>awesome</em>, not awful.
+            </p>
+            <figure class="my-8">
+                <figcaption class="text-sm font-thin mt-3 leading-5 tracking-wide" >
+                    The <code>@tailwindcss/typography</code> plugin is our
+                    attempt to give you what you <em>actually</em> want, without
+                    any of the downsides of doing something stupid like disabling
+                    our base styles.
+                </figcaption>
+                <figcaption class="text-sm font-thin mt-3 leading-5 tracking-wide" >
+                    It adds a new <code>prose</code> class that you can slap on any
+                    block of vanilla HTML content and turn it into a beautiful, well-formatted
+                    document:
+                </figcaption>
+            </figure>
+            <p class="text-base font-thin my-5 leading-7">
+                It adds a new <code>prose</code> class that you can slap on any
+                block of vanilla HTML content and turn it into a beautiful, well-formatted
+                document:
+            </p>
+            <hr class = "font-thin my-12"/>
+            <h2 class="text-2xl font-bold mb-6 leading-7">What to expect from here on out</h2>
+            <p class="font-thin my-5 leading-7">
+                It's important to cover all of these use cases for a few
+                reasons:
+            </p>
+            <ol class = "my-5 pl-7">
+                <li class ="pl-2 font-thin my-2 leading-7">We want everything to look good out of the box.</li>
+                <li class ="pl-2 font-normal my-2 leading-7">
+                    Really just the first reason, that's the whole point of
+                    the plugin.
+                </li>
+                <li class ="pl-2 font-normal my-2 leading-7">
+                    Here's a third pretend reason though a list with three
+                    items looks more realistic than a list with two items.
+                </li>
+            </ol>
+            <p class="font-thin my-5 leading-7">
+                Now we're going to try out another header style.
+            </p>
+            <h3 class="text-xl font-bold mt-8 mb-3 leading-7">Typography should be easy</h3>
+            <p class="font-thin my-5 leading-7">
+                Something a wise person once told me about typography is:
+            </p>
+            <figure class="my-5 py-2">
+                <img src="https://images.unsplash.com/photo-1556740758-90de374c12ad?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=crop&amp;w=1000&amp;q=80"
+                    alt="" />
+                 <figcaption class="text-sm font-thin mt-3 leading-5 tracking-wide" >
+                    Contrary to popular belief, Lorem Ipsum is not simply
+                    random text. It has roots in a piece of classical Latin
+                    literature from 45 BC, making it over 2000 years old.
+                </figcaption>
+            </figure>
+                <p class="font-thin my-5 leading-7">
+                    And that's the end of this section.</p>
+                <h2 class="text-2xl font-bold mt-12 mb-6 leading-7">What if we stack headings?</h2>
+                <h3 class="text-xl font-bold mt-8 mb-3 leading-7">We should make sure that looks good, too.</h3>
+                <p class="font-thin my-5 leading-7">
+                    Sometimes you have headings directly underneath each other.
+                    In those cases you often have to undo the top margin on the
+                    second heading because it usually looks better for the
+                    headings to be closer together than a paragraph followed by
+                    a heading should be.
+                </p>
+                <h3 class="text-xl font-bold mt-8 mb-3 leading-7">When a heading comes after a paragraph …</h3>
+                <p class="font-thin mb-5 leading-7">
+                    When a heading comes after a paragraph, we need a bit more
+                    space, like I already mentioned above. Now let's see what a
+                    more complex list would look like.
+                </p>
+                <ul class = "my-5 pl-7">
+                    <li class = "my-1 pl-2">
+                        <p class = "mt-5 mb-3 leading-7">
+                            <strong>I often do this thing where list items have
+                                headings.</strong>
+                        </p>
+                        <p class = "mt-3 mb-3  leading-7">
+                            For some reason I think this looks cool which is
+                            unfortunate because it's pretty annoying to get the
+                            styles right.
+                        </p>
+                        <p class = "mt-3 mb-5 leading-7">
+                            I often have two or three paragraphs in these list
+                            items, too, so the hard part is getting the spacing
+                            between the paragraphs, list item heading, and
+                            separate list items to all make sense. Pretty tough
+                            honestly, you could make a strong argument that you
+                            just shouldn't write this way.
+                        </p>
+                    </li>
+                    <li class = "my-1 pl-2">
+                        <p class = "mt-5 mb-3 leading-7">
+                            <strong>Since this is a list, I need at least two
+                                items.</strong>
+                        </p>
+                        <p class = "mt-3 mb-5 leading-7">
+                            I explained what I'm doing already in the previous
+                            list item, but a list wouldn't be a list if it only
+                            had one item, and we really want this to look
+                            realistic. That's why I've added this second list
+                            item so I actually have something to look at when
+                            writing the styles.
+                        </p>
+                    </li>
+                    <li class = "my-1 pl-2">
+                        <p class = "mt-5 mb-3 leading-7">
+                            <strong>It's not a bad idea to add a third item either.</strong>
+                        </p>
+                        <p class = "mt-3 mb-5 leading-7">
+                            I think it probably would've been fine to just use
+                            two items but three is definitely not worse, and
+                            since I seem to be having no trouble making up
+                            arbitrary things to type, I might as well include
+                            it.
+                        </p>
+                    </li>
+                </ul>
+                <p class = "mt-5 mb-5 leading-7">
+                    After this sort of list I usually have a closing statement
+                    or paragraph, because it kinda looks weird jumping right to
+                    a heading.
+                </p>
+                <h3 class="text-xl font-bold mt-8 mb-3 leading-7">Lista z ikonami - nawigatory i explorer …</h3>
+                <p class="font-thin mb-5 leading-7">
+                    Lista z ikonami. Nawigatory i explorer
+                </p>
+                <div class = "my-5 pl-0 ">
+
+                    <div class = "my-1 pl-2 block">
+
+                        <h4 class = "mt-5 mb-3 leading-7">
+                            <div class="inline-block text-green-600 h-3 w-3 mr-2">
+                                <FaCheck />
+                            </div>
+                            <strong>I often do this thing where list items have
+                                headings.</strong>
+
+                        </h4>
+                        <p class = "mt-3 mb-3 pl-6 leading-7">
+                            For some reason I think this looks cool which is
+                            unfortunate because it's pretty annoying to get the
+                            styles right.
+                        </p>
+                        <p class = "mt-3 mb-5 pl-6 leading-7">
+                            I often have two or three paragraphs in these list
+                            items, too, so the hard part is getting the spacing
+                            between the paragraphs, list item heading, and
+                            separate list items to all make sense. Pretty tough
+                            honestly, you could make a strong argument that you
+                            just shouldn't write this way.
+                        </p>
+                    </div>
+                    <div class = "my-1 pl-2">
+                        <p class = "mt-5 mb-3 leading-7">
+                            <strong>Since this is a list, I need at least two
+                                items.</strong>
+                        </p>
+                        <p class = "mt-3 mb-5 leading-7">
+                            I explained what I'm doing already in the previous
+                            list item, but a list wouldn't be a list if it only
+                            had one item, and we really want this to look
+                            realistic. That's why I've added this second list
+                            item so I actually have something to look at when
+                            writing the styles.
+                        </p>
+                    </div>
+                    <div class = "my-1 pl-2">
+                        <p class = "mt-5 mb-3 leading-7">
+                            <strong>It's not a bad idea to add a third item either.</strong>
+                        </p>
+                        <p class = "mt-3 mb-5 leading-7">
+                            I think it probably would've been fine to just use
+                            two items but three is definitely not worse, and
+                            since I seem to be having no trouble making up
+                            arbitrary things to type, I might as well include
+                            it.
+                        </p>
+                    </div>
+                </div>
+                <p class = "mt-5 mb-5 leading-7">
+                    After this sort of list I usually have a closing statement
+                    or paragraph, because it kinda looks weird jumping right to
+                    a heading.
+                </p>
+                <h2 class="text-2xl font-bold mt-12 mb-6 leading-7">There are other elements we need to style</h2>
+
+                <p class = "mt-5 mb-5 leading-7">We even included table styles, check it out:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Wrestler</th>
+                            <th>Origin</th>
+                            <th>Finisher</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Bret "The Hitman" Hart</td>
+                            <td>Calgary, AB</td>
+                            <td>Sharpshooter</td>
+                        </tr>
+                        <tr>
+                            <td>Stone Cold Steve Austin</td>
+                            <td>Austin, TX</td>
+                            <td>Stone Cold Stunner</td>
+                        </tr>
+                        <tr>
+                            <td>Randy Savage</td>
+                            <td>Sarasota, FL</td>
+                            <td>Elbow Drop</td>
+                        </tr>
+                        <tr>
+                            <td>Vader</td>
+                            <td>Boulder, CO</td>
+                            <td>Vader Bomb</td>
+                        </tr>
+                        <tr>
+                            <td>Razor Ramon</td>
+                            <td>Chuluota, FL</td>
+                            <td>Razor's Edge</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>
+                    We also need to make sure inline code looks good, like if I
+                    wanted to talk about <code>&lt;span&gt;</code> elements or
+                    tell you the good news about
+                    <code>@tailwindcss/typography</code>.
+                </p>
+
+        <div >
+            <!--class="relative w-full px-6 py-12 shadow-xl shadow-slate-700/10 ring-1 ring-gray-900/5 md:max-w-3xl md:mx-auto lg:max-w-4xl lg:pt-16 lg:pb-28"-->
+            <div class="w-full prose prose-base prose-zinc dark:prose-invert ">
+                <h2>There are other elements we need to style</h2>
+                <h3>Sometimes I even use <code>code</code> in headings</h3>
+                <p>
+                    Even though it's probably a bad idea, and historically I've
+                    had a hard time making it look good. This <em>"wrap the code blocks in backticks"</em> trick works
+                    pretty well though really.
+                </p>
+                <p>
+                    Another thing I've done in the past is put a <code>code</code>
+                    tag inside of a link, like if I wanted to tell you about the
+                    <a href="https://github.com/tailwindcss/docs"><code>tailwindcss/docs</code></a> repository. I don't
+                    love that there is an underline below the
+                    backticks but it is absolutely not worth the madness it would
+                    require to avoid it.
+                </p>
+                <h4>We haven't used an <code>h4</code> yet</h4>
+                <p>
+                    But now we have. Please don't use <code>h5</code> or
+                    <code>h6</code>
+                    in your content, Medium only supports two heading levels for
+                    a reason, you animals. I honestly considered using a
+                    <code>before</code>
+                    pseudo-element to scream at you if you use an
+                    <code>h5</code>
+                    or <code>h6</code>.
+                </p>
+                <p>
+                    We don't style them at all out of the box because <code>h4</code>
+                    elements are already so small that they are the same size as
+                    the body copy. What are we supposed to do with an
+                    <code>h5</code>, make it <em>smaller</em> than the body copy?
+                    No thanks.
+                </p>
+                <h3>We still need to think about stacked headings though.</h3>
+                <h4>
+                    Let's make sure we don't screw that up with <code>h4</code> elements,
+                    either.
+                </h4>
+                <p>
+                    Phew, with any luck we have styled the headings above this
+                    text and they look pretty good.
+                </p>
+                <p>
+                    Let's add a closing paragraph here so things end with a
+                    decently sized block of text. I can't explain why I want
+                    things to end that way but I have to assume it's because I
+                    think things will look weird or unbalanced if there is a
+                    heading too close to the end of the document.
+                </p>
+                <p>
+                    What I've written here is probably long enough, but adding
+                    this final sentence can't hurt.
+                </p>
+            </div>
+        </div>
+
+        </div>
+    </div>
+    <!--COLUMN------------------------------------------------------------------------------------------------->
+
+</div>
+<!---------------------------------------------------------------------------------------------------------><!--/TABLE-------------------------------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
+
+		<Kanban class="grow-0"
+                title={ext(currentList.Name)}
+                bind:this={kanban}>
+
+            <KanbanSource self={currentList}
+                          a='Tasks'
+                          stateAttrib='State'
+                          orderAttrib='ListOrder'/>
+
+
+                {#each taskStates as taskState, columnIdx (taskState.name+taskState.state)}
+                    <KanbanColumn   title={ext(taskState.name)}
+                                    state={taskState.state}
+                                    operations={getColumnOperations(columnIdx, taskState)}
+                                    onTitleChanged={(title) => onColumnNameChanged(columnIdx, title)}
+                                    finishing={taskState.state == STATE_FINISHED}/>
+                {/each}
+
+
+            <KanbanColumn   title={otherCaption}
+                            state={-1} />
+
+
+			<KanbanCallbacks {onAdd} {getCardOperations} {onReplace}/>
+
+			<KanbanTitle    a="Title"
+                            hrefFunc={(task) => `/task/${task.Id}`}
+                            hasAttachment={(task) => task.Description || (task.Steps && task.Steps.length > 0) || task.AttachedFiles }/>
+			<KanbanSummary a="Summary" />
+
+            <KanbanStaticProperty top a='Index'/>
+            <KanbanDateProperty top a='DueDate'/>
+
+            <KanbanComboProperty middle a='Actor' association>
+                <ComboSource objects={users} key="$ref" name='Name' bind:this={usersComboSource}/>
+            </KanbanComboProperty>
+
+            <KanbanTagsProperty bottom a='Tags'
+                                getAllTags={() => allTags}
+                                {onUpdateAllTags}
+                                canChangeColor/>
+        </Kanban>
+
+        <div class="ml-3 mt-20 mb-10">
+            <a  href={`/tasklist/${listId}?archivedTasks`}
+                use:link
+                class="hover:underline">
+                    _; Show archived tasks; Mostrar tareas archivadas; Pokaż zarchiwizowane zadania
+                    <div class="inline-block mt-1.5 w-3 h-3"><FaChevronRight/></div>
+            </a>
+        </div>
+	</Page>
+{:else}
+	<Spinner delay={3000} />
+{/if}
+{/key}
+
+<Modal  title={i18n(['Delete', 'Eliminar', 'Usuń'])}
+        content={i18n(["Are you sure you want to delete selected task?", "¿Está seguro de que desea eliminar la tarea seleccionada?", "Czy na pewno chcesz usunąć wybrane zadanie?"])}
+        icon={FaTrash}
+        onOkCallback={deleteTask}
+        bind:this={deleteModal}
+        />
+
+<Modal  title={i18n(['Archive', 'Archivar', 'Zarchiwizuj'])}
+        content={i18n(["Are you sure you want to archive selected task?", "¿Está seguro de que desea archivar la tarea seleccionada?", "Czy na pewno chcesz zarchiwizować wybrane zadanie?"])}
+        icon={FaArchive}
+        onOkCallback={archiveTask}
+        bind:this={archiveModal}
+        />
+
+<Modal  title={i18n(['Change list kind', 'Cambiar tipo de lista', 'Zmień rodzaj listy'])}
+        content={i18n(["Are you sure you want to change current list kind?", "¿Estás seguro de que deseas cambiar el tipo de lista actual?", "Czy na pewno chcesz zmienić aktualny rodzaj listy?"])}
+        icon={FaRandom}
+        onOkCallback={handleChangeListKind}
+        okCaption={i18n(['Change', 'Cambiar', 'Zmień'])}
+        bind:this={changeKindModal}
+        />
+
+{#key newColumnStates}
+<Modal  title={i18n(['Add column', 'Añadir columna', 'Dodaj kolumnę'])}
+        okCaption={i18n(['Add', 'Añadir', 'Dodaj'])}
+        onOkCallback={onNewProcessColumnRequested}
+        onCancelCallback={onNewProcessColumnCanceled}
+        icon={FaColumns}
+        bind:this={addColumnDialog}>
+
+    <Input  label={i18n(['Name', 'Nombre', 'Nazwa'])}
+        placeholder=''
+        self={newColumnProps}
+        a="name"/>
+
+    <section class="mt-2 grid grid-cols-2 gap-2">
+        <Combo label={i18n(['State', 'Estado', 'Stan'])}
+                self={newColumnProps}
+                a='state'
+                changed={onNewColumnStateSelected}>
+
+            {#each newColumnStates as column}
+                <ComboItem key={column.state} name={ext(column.name)}/>
+            {/each}
+        </Combo>
+
+        <div class="col-span-1 flex flex-row">
+            <button class="mt-6 w-3 h-3 mr-2" on:click={() => stateValueVisible = !stateValueVisible}>
+                {#if stateValueVisible}
+                    <FaChevronLeft/>
+                {:else}
+                    <FaChevronRight/>
+                {/if}
+
+            </button>
+
+            {#if stateValueVisible}
+                <Input class="inline-block"
+                    label={i18n(['State value', 'Valor del estado', 'Wartość stanu'])}
+                    placeholder=''
+                    self={newColumnProps}
+                    a="state"
+                    bind:this={numericStateElement}/>
+            {/if}
+        </div>
+
+    </section>
+
+</Modal>
+{/key}
+
+<TaskProperties bind:this={taskPropertiesDialog} />
