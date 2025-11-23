@@ -21,6 +21,7 @@
     import Note from './note.svelte'
     import Board from './list.board.svelte';
     import DesignGT from './design.general.typo.svelte';
+    import DesignLists from './design.general.lists.svelte';
     import MyTasks from './mytasks.svelte'
     import MyFolders from './myfolders.svelte'
     import Chat from './chat.svelte'
@@ -235,7 +236,9 @@
                         '/listboard' :  { component: Board},
                         '/listboard/*': { component: Board},
                         '/design' :     { component: DesignGT},
-                        '/design/*' :     { component: DesignGT},
+                        '/design/*' :   { component: DesignGT},
+                        '/deslis' :     { component: DesignLists},
+                        '/deslis/*' :   { component: DesignLists},
                         '/mytasks' :    { component: MyTasks },
                         '/mytasks/*' :  { component: MyTasks },
                         '/folder'    :  { component: Folder },
