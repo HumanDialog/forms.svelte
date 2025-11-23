@@ -18,7 +18,7 @@
                 Breadcrumb,
                 refreshToolbarOperations,
 				showFloatingToolbar,
-                reloadPageToolbarOperations} from '$lib'
+                reloadPageToolbarOperations, Paper} from '$lib'
     import {FaRegFile, FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaSync,
         FaList, FaEllipsisH, FaChevronRight, FaChevronLeft, FaUpload, FaLink, FaUnlink, FaRegStar, FaStar, FaCut, FaRegComments, FaRegClipboard,
         FaRegCheckSquare, FaFileUpload, FaFile, FaCloudUploadAlt, FaDownload, FaCheckDouble, FaExternalLinkSquareAlt
@@ -947,6 +947,7 @@
     {
         let refs = []
         items.forEach((i) => refs.push(i.$ref))
+        refs.reverse()  // elements need to be pushed in reverse order to have first element on top of the clipboard
         
         await reef.post(`${contextItem.$ref}/CopyToBasketMulti`, { refs: refs } , onErrorShowAlert);
         
@@ -960,7 +961,8 @@
     {
         let refs = []
         items.forEach((i) => refs.push(i.$ref))
-        
+        refs.reverse()  // elements need to be pushed in reverse order to have first element on top of the clipboard
+
         await reef.post(`${contextItem.$ref}/CutToBasketMulti`, { refs: refs } , onErrorShowAlert);
         await fetchData();
         listComponent.reload(contextItem, listComponent.SELECT_NEXT);
@@ -1458,6 +1460,7 @@
             clearsContext='props sel'
             title={folderTitle}>
 
+            <Paper class="mb-64">
             <section class="w-full place-self-center max-w-3xl
                             ">
 
@@ -1504,12 +1507,10 @@
             </List>
         </section>
 
-        <!-- empty section fot have bottom free area -->
-        <section class="mb-64">
-
-        </section>
-
+        
         <input hidden type="file" id="attachementFile" accept="*/*" bind:this={attInput} on:change={onAttachementSelected}/>
+        
+    </Paper>
     
     </Page>
     {/key}

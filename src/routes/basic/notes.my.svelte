@@ -12,7 +12,7 @@
                 ListComboProperty,
 				mainContentPageReloader,
                 Modal,
-                onErrorShowAlert, Breadcrumb, Paginator,
+                onErrorShowAlert, Breadcrumb, Paginator, Paper,
             i18n} from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaList, FaPen, FaArchive, FaChevronLeft, FaChevronRight} from 'svelte-icons/fa'
     import {querystring, location, push} from 'svelte-spa-router'
@@ -284,7 +284,9 @@
         <Page   self={user}
                 toolbarOperations={pageOperations}
                 clearsContext='props sel'
-                title={title}>
+                title={title}
+                >
+                <Paper class="mb-64">
                 <section class="w-full place-self-center max-w-3xl">
 
                     {#if canonicalPath}
@@ -326,10 +328,7 @@
                 </section>
             </div>
 
-            <!-- empty section fot have bottom free area -->
-            <section class="mb-64">
-
-            </section>
+           
            
             <!--div class="ml-3 mt-20 mb-10">
                 <a  href={`/alllists?archived`}
@@ -339,6 +338,7 @@
                         <div class="inline-block mt-1.5 w-3 h-3"><FaChevronRight/></div>
                 </a>
             </div-->
+            </Paper>
         </Page>
     {/key}
 {:else}

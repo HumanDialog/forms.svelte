@@ -12,7 +12,7 @@
                 ListComboProperty,
 				mainContentPageReloader,
                 Modal,
-                onErrorShowAlert, Breadcrumb,
+                onErrorShowAlert, Breadcrumb, Paper,
             i18n} from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaList, FaPen, FaArchive, FaChevronLeft, FaChevronRight} from 'svelte-icons/fa'
     import {querystring, pop, link} from 'svelte-spa-router'
@@ -290,6 +290,9 @@
                 toolbarOperations={pageOperations}
                 clearsContext='props sel'
                 title={title}>
+
+                <Paper class="mb-64">
+
                 <section class="w-full place-self-center max-w-3xl">
 
                     {#if canonicalPath}
@@ -322,12 +325,15 @@
                         <div class="inline-block mt-1.5 w-3 h-3"><FaChevronRight/></div>
                 </a>
             </div-->
+            </section>    
+            </Paper>
         </Page>
     {:else}
         <Page   self={user}
                 toolbarOperations={[]}
                 clearsContext='props sel'
                 title={title}>
+                <Paper class="mb-64">
                 <section class="w-full place-self-center max-w-3xl">
             <List   self={user}
                     a='MyLists'
@@ -351,6 +357,8 @@
                     _; Back; Volver; Wróć
                 </button>
             </div>
+        </section>
+        </Paper>
             
         </Page>
     {/if}

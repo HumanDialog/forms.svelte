@@ -8,7 +8,7 @@
                 ListSummary,
                 ListInserter,
 				mainContentPageReloader,
-                Modal, showMenu,
+                Modal, showMenu, Paper,
                 onErrorShowAlert, i18n} from '$lib'
     import {querystring, location} from 'svelte-spa-router'
     import {FaRegFolder, FaRegComment, FaCaretUp, FaCaretDown, FaTrash, FaRegComments, FaRegClipboard, FaPen, FaArchive, FaEllipsisH} from 'svelte-icons/fa'
@@ -244,6 +244,7 @@
             toolbarOperations={pageOperations}
             clearsContext='props sel'
             title={title}>
+            <Paper class="mb-64">
             <section class="w-full place-self-center max-w-3xl">
 
             <p class="hidden sm:block mt-3 ml-3 pb-5 text-lg text-left">
@@ -266,8 +267,8 @@
 
         </List>
     </section>
-        <!-- empty section fot have bottom free area -->
-        <section class="mb-64"></section>
+    
+       </Paper>
         
     </Page>
 {:else}

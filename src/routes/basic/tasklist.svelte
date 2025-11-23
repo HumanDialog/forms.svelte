@@ -13,7 +13,7 @@
 				mainContentPageReloader,
                 Modal,
                 onErrorShowAlert, showMenu,
-				UI, i18n, Breadcrumb, showFloatingToolbar,
+				UI, i18n, Breadcrumb, showFloatingToolbar, Paper,
 				ext} from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaList,
         FaEllipsisH, FaChevronRight, FaChevronLeft, FaRandom, FaCheck, FaUpload, FaUndo, FaDownload
@@ -702,6 +702,8 @@
             toolbarOperations={ getPageOperations() }
             clearsContext='props sel'
             title={listTitle}>
+
+            <Paper class="mb-64">
             
             <section class="w-full place-self-center max-w-3xl">
 
@@ -740,7 +742,7 @@
 
 
         </List>
-    </section>
+    
         {#if !isArchivedTasks}
             {#if !isArchivedList}
                 <div class="ml-3 mt-20 mb-10">
@@ -761,6 +763,8 @@
 
             </div>
         {/if}
+        </section>
+        </Paper>
     </Page>
     {/key}
 {:else}

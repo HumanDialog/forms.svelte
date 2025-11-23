@@ -9,6 +9,7 @@ export { default as Row } from "./tiles.row.svelte";
 export { default as Box } from "./form.box.svelte";
 //export { default as TilesVerticalRow } from "./tiles.vertical.row.svelte";
 export { default as Operations } from './operations.svelte'
+export { default as Paper} from './paper.svelte'
 
 export {default as Layout } from './desk.svelte'
 export {default as VerticalToolbar} from './vertical.toolbar.svelte'
@@ -88,6 +89,9 @@ export {
     breadcrumbClipName
 }   from './components/breadcrumb_utils'
 
+export {default as EditableSpan} from './components/prose.editable.span.svelte'
+export {default as EditableParagraph} from './components/prose.editable.p.svelte'
+
 export {
     selectItem,
     activateItem,
@@ -130,7 +134,9 @@ export {
     getLast,
     removeAt,
     remove, 
-    swapElements
+    swapElements,
+
+    isValidEmail
 }   from './utils'
 
 export {

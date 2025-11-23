@@ -345,6 +345,7 @@ export function editable(node, params)
     let onFinish = undefined;
     let onSoftEnter = undefined;
     let onSingleChange = undefined
+    let enterAsNewLine = false
     if(params instanceof Object)
     {
         action = params.action ?? params;
@@ -353,7 +354,8 @@ export function editable(node, params)
         onFinish = params.onFinish ?? undefined
         onSoftEnter = params.onSoftEnter ?? undefined;
         onSingleChange = params.onSingleChange ?? undefined
-       
+        enterAsNewLine = params.enterAsNewLine ?? false
+
         if(params.readonly)
             return;
     }
@@ -376,6 +378,22 @@ export function editable(node, params)
         await finish_editing({cancel: cancel});
     }
 
+    const putNewLine = async (e) => 
+    {
+        const sel = window.getSelection()
+        
+        let selNode = sel?.focusNode
+        let selOffset = sel?.focusOffset
+        let text = selNode?.textContent
+        const left = text?.substring(0, selOffset)
+        const right = text?.substring(selOffset)
+        text = left + '\n' + right
+        node.textContent = text
+        
+        await tick()
+        window.getSelection()?.setPosition(node.firstChild, selOffset+1)
+    }
+
     const key_listener = async (e) =>
     {
         //e.ctrlKey
@@ -395,11 +413,18 @@ export function editable(node, params)
         case 'Enter':
             e.stopPropagation();
             e.preventDefault();
-            
-            if(e.shiftKey && onSoftEnter)
-                await finish_editing({ softEnter: true});
+
+            if(enterAsNewLine)
+            {
+                await putNewLine(e);
+            }
             else
-                await finish_editing({ incremental: true});
+            {
+                if(e.shiftKey && onSoftEnter)
+                    await finish_editing({ softEnter: true});
+                else
+                    await finish_editing({ incremental: true});
+            }
             break;
 
         case 'Backspace':
@@ -1040,3 +1065,28 @@ export function navAutoHide()
 }
 
 
+export function isValidEmail(e)
+{
+    //let pattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    //return (e.match(pattern) != null);
+
+    var at_idx = e.indexOf("@"); 
+    var dot_idx = e.lastIndexOf("."); 
+    var space_idx = e.indexOf(" "); 
+
+    if ((at_idx != -1) && 
+        (at_idx != 0) && 
+        (dot_idx != -1) && 
+        (dot_idx != 0) && 
+        (dot_idx > at_idx + 1) && 
+        (e.length > dot_idx + 1) && 
+        (space_idx == -1)) 
+    { 
+        return true; 
+    } 
+    else 
+    { 
+        return false; 
+    } 
+    
+}

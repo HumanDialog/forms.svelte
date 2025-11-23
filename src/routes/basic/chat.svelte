@@ -13,7 +13,7 @@
             forceKicksChecking,
             i18n, ext,
 			showMenu,
-            SHOW_MENU_ABOVE
+            SHOW_MENU_ABOVE, Paper
             } from '$lib'
 	import { afterUpdate, tick, onMount } from 'svelte';
     import {location, link, querystring} from 'svelte-spa-router'
@@ -616,6 +616,7 @@
             toolbarOperations={getPageOperations()}
             clearsContext=''
             title={channel.Title}>
+    <Paper class="mb-64">
     <section class="w-full flex justify-center">
         <article class="w-full prose prose-base prose-zinc dark:prose-invert mx-2 prose-img:rounded-xl ">
             <!--section class="w-full flex flex-row justify-between">
@@ -800,7 +801,7 @@
 
     </section>
 
-
+    </Paper>
 
     <!--input hidden type="file" id="imageFile" accept="image/*" bind:this={imgInput} on:change={onImageSelected}/--> <!-- capture="environment" -->
 </Page>
