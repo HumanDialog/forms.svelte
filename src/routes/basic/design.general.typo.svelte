@@ -1146,24 +1146,22 @@
 
     }
 
-   let prose_base_class = "prose prose-base prose-zinc"
+    let prose_base_class = "prose prose-base prose-zinc"
+    let cl = 'w-full flex flex-col bg-white dark:bg-stone-900 overflow-x-hidden py-1 px-1 border-0'; // border-green-500
 
 </script>
 
 <svelte:head>
+    {#if currentList && currentList.Name}
+        <title>{ext(currentList.Name)} | {__APP_TITLE__}</title>
+    {:else}
         <title>{__APP_TITLE__}</title>
+    {/if}
 </svelte:head>
 
-	<Page self={currentList} toolbarOperations={getPageOperations()} clearsContext="props sel"
-	    title={ext(currentList.Name)}>
-	    <!--section class="w-full place-self-center max-w-3xl"-->
+{#key definitionChangedTicket}
+    <div class="bg-stone-100 dark:bg-stone-800 {cl}" >
 
-	    {#if currentList.GetCanonicalPath}
-                <Breadcrumb class="mt-1 mb-5" path={currentList.GetCanonicalPath}/>
-            {/if}
-
-
-        <!--/section-->
 <!--------------------------------------------------------------------------------------------------------->
 <!--------------------------------------------------------------------------------------------------------->
 <!--------------------------------------------------------------------------------------------------------->
@@ -2033,4 +2031,10 @@
 <!--------------------------------------------------------------------------------------------------------->
 <!--------------------------------------------------------------------------------------------------------->
 
-	</Page>
+
+	</div>
+
+{/key}
+
+
+<TaskProperties bind:this={taskPropertiesDialog} />
