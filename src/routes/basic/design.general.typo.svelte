@@ -1151,15 +1151,9 @@
 </script>
 
 <svelte:head>
-    {#if currentList && currentList.Name}
-        <title>{ext(currentList.Name)} | {__APP_TITLE__}</title>
-    {:else}
         <title>{__APP_TITLE__}</title>
-    {/if}
 </svelte:head>
 
-{#key definitionChangedTicket}
-{#if currentList}
 	<Page self={currentList} toolbarOperations={getPageOperations()} clearsContext="props sel"
 	    title={ext(currentList.Name)}>
 	    <!--section class="w-full place-self-center max-w-3xl"-->
@@ -2039,132 +2033,4 @@
 <!--------------------------------------------------------------------------------------------------------->
 <!--------------------------------------------------------------------------------------------------------->
 
-		<Kanban class="grow-0"
-                title={ext(currentList.Name)}
-                bind:this={kanban}>
-
-            <KanbanSource self={currentList}
-                          a='Tasks'
-                          stateAttrib='State'
-                          orderAttrib='ListOrder'/>
-
-
-                {#each taskStates as taskState, columnIdx (taskState.name+taskState.state)}
-                    <KanbanColumn   title={ext(taskState.name)}
-                                    state={taskState.state}
-                                    operations={getColumnOperations(columnIdx, taskState)}
-                                    onTitleChanged={(title) => onColumnNameChanged(columnIdx, title)}
-                                    finishing={taskState.state == STATE_FINISHED}/>
-                {/each}
-
-
-            <KanbanColumn   title={otherCaption}
-                            state={-1} />
-
-
-			<KanbanCallbacks {onAdd} {getCardOperations} {onReplace}/>
-
-			<KanbanTitle    a="Title"
-                            hrefFunc={(task) => `/task/${task.Id}`}
-                            hasAttachment={(task) => task.Description || (task.Steps && task.Steps.length > 0) || task.AttachedFiles }/>
-			<KanbanSummary a="Summary" />
-
-            <KanbanStaticProperty top a='Index'/>
-            <KanbanDateProperty top a='DueDate'/>
-
-            <KanbanComboProperty middle a='Actor' association>
-                <ComboSource objects={users} key="$ref" name='Name' bind:this={usersComboSource}/>
-            </KanbanComboProperty>
-
-            <KanbanTagsProperty bottom a='Tags'
-                                getAllTags={() => allTags}
-                                {onUpdateAllTags}
-                                canChangeColor/>
-        </Kanban>
-
-        <div class="ml-3 mt-20 mb-10">
-            <a  href={`/tasklist/${listId}?archivedTasks`}
-                use:link
-                class="hover:underline">
-                    _; Show archived tasks; Mostrar tareas archivadas; Pokaż zarchiwizowane zadania
-                    <div class="inline-block mt-1.5 w-3 h-3"><FaChevronRight/></div>
-            </a>
-        </div>
 	</Page>
-{:else}
-	<Spinner delay={3000} />
-{/if}
-{/key}
-
-<Modal  title={i18n(['Delete', 'Eliminar', 'Usuń'])}
-        content={i18n(["Are you sure you want to delete selected task?", "¿Está seguro de que desea eliminar la tarea seleccionada?", "Czy na pewno chcesz usunąć wybrane zadanie?"])}
-        icon={FaTrash}
-        onOkCallback={deleteTask}
-        bind:this={deleteModal}
-        />
-
-<Modal  title={i18n(['Archive', 'Archivar', 'Zarchiwizuj'])}
-        content={i18n(["Are you sure you want to archive selected task?", "¿Está seguro de que desea archivar la tarea seleccionada?", "Czy na pewno chcesz zarchiwizować wybrane zadanie?"])}
-        icon={FaArchive}
-        onOkCallback={archiveTask}
-        bind:this={archiveModal}
-        />
-
-<Modal  title={i18n(['Change list kind', 'Cambiar tipo de lista', 'Zmień rodzaj listy'])}
-        content={i18n(["Are you sure you want to change current list kind?", "¿Estás seguro de que deseas cambiar el tipo de lista actual?", "Czy na pewno chcesz zmienić aktualny rodzaj listy?"])}
-        icon={FaRandom}
-        onOkCallback={handleChangeListKind}
-        okCaption={i18n(['Change', 'Cambiar', 'Zmień'])}
-        bind:this={changeKindModal}
-        />
-
-{#key newColumnStates}
-<Modal  title={i18n(['Add column', 'Añadir columna', 'Dodaj kolumnę'])}
-        okCaption={i18n(['Add', 'Añadir', 'Dodaj'])}
-        onOkCallback={onNewProcessColumnRequested}
-        onCancelCallback={onNewProcessColumnCanceled}
-        icon={FaColumns}
-        bind:this={addColumnDialog}>
-
-    <Input  label={i18n(['Name', 'Nombre', 'Nazwa'])}
-        placeholder=''
-        self={newColumnProps}
-        a="name"/>
-
-    <section class="mt-2 grid grid-cols-2 gap-2">
-        <Combo label={i18n(['State', 'Estado', 'Stan'])}
-                self={newColumnProps}
-                a='state'
-                changed={onNewColumnStateSelected}>
-
-            {#each newColumnStates as column}
-                <ComboItem key={column.state} name={ext(column.name)}/>
-            {/each}
-        </Combo>
-
-        <div class="col-span-1 flex flex-row">
-            <button class="mt-6 w-3 h-3 mr-2" on:click={() => stateValueVisible = !stateValueVisible}>
-                {#if stateValueVisible}
-                    <FaChevronLeft/>
-                {:else}
-                    <FaChevronRight/>
-                {/if}
-
-            </button>
-
-            {#if stateValueVisible}
-                <Input class="inline-block"
-                    label={i18n(['State value', 'Valor del estado', 'Wartość stanu'])}
-                    placeholder=''
-                    self={newColumnProps}
-                    a="state"
-                    bind:this={numericStateElement}/>
-            {/if}
-        </div>
-
-    </section>
-
-</Modal>
-{/key}
-
-<TaskProperties bind:this={taskPropertiesDialog} />
