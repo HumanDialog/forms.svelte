@@ -1790,14 +1790,14 @@
                 </p>
                 <div class = "my-5 pl-0 ">
 
-                    <div class = "my-1 pl-2 block">
+                    <div class = "my-1 pl-2 ">
 
-                        <h4 class = "mt-5 mb-3 leading-7">
+                        <h4 class = "mt-5 mb-3 leading-7 font-bold">
                             <div class="inline-block text-green-600 h-3 w-3 mr-2">
-                                <FaCheck />
+                                <FaList />
                             </div>
-                            <strong>I often do this thing where list items have
-                                headings.</strong>
+                            I often do this thing where list items have
+                                headings.
 
                         </h4>
                         <p class = "mt-3 mb-3 pl-6 leading-7">
@@ -1815,11 +1815,14 @@
                         </p>
                     </div>
                     <div class = "my-1 pl-2">
-                        <p class = "mt-5 mb-3 leading-7">
-                            <strong>Since this is a list, I need at least two
-                                items.</strong>
-                        </p>
-                        <p class = "mt-3 mb-5 leading-7">
+                        <h4 class = "mt-5 mb-3 leading-7 font-bold">
+                            <div class="inline-block text-green-600 h-3 w-3 mr-2">
+                                <FaArchive />
+                            </div>
+                            Since this is a list, I need at least two
+                            items.
+                        </h4>
+                        <p class = "mt-3 mb-5 pl-6 leading-7">
                             I explained what I'm doing already in the previous
                             list item, but a list wouldn't be a list if it only
                             had one item, and we really want this to look
@@ -1829,10 +1832,13 @@
                         </p>
                     </div>
                     <div class = "my-1 pl-2">
-                        <p class = "mt-5 mb-3 leading-7">
-                            <strong>It's not a bad idea to add a third item either.</strong>
-                        </p>
-                        <p class = "mt-3 mb-5 leading-7">
+                        <h4 class = "mt-5 mb-3 leading-7 font-bold">
+                            <div class="inline-block text-green-600 h-3 w-3 mr-2">
+                                <FaCheck />
+                            </div>
+                            It's not a bad idea to add a third item either.
+                        </h4>
+                        <p class = "mt-3 mb-5 pl-6 leading-7">
                             I think it probably would've been fine to just use
                             two items but three is definitely not worse, and
                             since I seem to be having no trouble making up
@@ -1846,6 +1852,70 @@
                     or paragraph, because it kinda looks weird jumping right to
                     a heading.
                 </p>
+                <h2 class="text-2xl font-bold mt-14 mb-6 leading-7">Lista elementów bez ikon z summary</h2>
+                <p class = "mt-5 mb-5 leading-7">Elementy na kanbanie przypominają figury z opisami oraz wytłuszczonym tytułem elementu.</p>
+                <figure class = "my-8">
+                    <figcaption class = "text-sm font-thin">
+                        <div class="grid gap-4 grid-cols-3 grid-rows-1">
+                        <span>OCT-254</span>
+                        <span class = "text-center">Ready</span>
+                        <span class = "text-right">15 listopad 25</span>
+                        </div>
+                    </figcaption>
+                    <h4 class = "font-bold text-base">
+                        Jednoznaczne zasady budowy elementow interfejsu
+                    </h4>
+                    <figcaption class = "mt-3 text-sm font-thin tracking-wide">
+                        Typografia bardzo pomaga ale jej zasady są z definicji ukryte i nie pokrywają do wszystkich układów interfejsu użytkownika.
+                    </figcaption>
+                    <figcaption class = "mt-3 text-sm font-thin">
+                        <div class="grid gap-4 grid-cols-3">
+                        <span>01</span>
+                        <span class = "text-center">02</span>
+                        <span class = "text-right">03</span>
+                        <span>04</span>
+                        <span class = "text-center">05</span>
+                        <span class = "text-right">06</span>
+                        </div>
+                    </figcaption>
+                </figure>
+                <figure class = "my-8">
+                    <figcaption class = "text-sm font-thin">
+                        <div class="grid gap-4 grid-cols-3 grid-rows-1">
+                        <span>OCT-254</span>
+                        <span class = "text-center"></span>
+                        <span class = "text-right">15 listopad 25</span>
+                        </div>
+                    </figcaption>
+                    <h4 class = "mt-1 font-bold text-base">Wybór metody budowania deklarowania elementów interfejsu</h4>
+                    <figcaption class = "mt-2 text-sm font-thin">
+                        <div class="grid gap-4 grid-cols-3 grid-rows-1">
+                        <span>Andrzej</span>
+                        <span class = "text-center"></span>
+                        <span class = "text-right">Specyfikacje</span>
+                        </div>
+                    </figcaption>
+                    <figcaption class = "mt-3 text-sm font-thin tracking-wide">
+                        Bardzo kusząca wydaje sie opcja, by usunąć z interfejsu jakiekolwiek formatowania i zdać sie na typografię, jednak istnieje poważne zagrożenie, że w takiej sytuacji nie będdziemy mogli zrobić wszystkiego, co jest potrzebne.
+                    </figcaption>
+                </figure>
+
+                <figure class = "my-8">
+                    <h4 class = "mt-1 font-bold text-base">Element listy z opisem</h4>
+                    <figcaption class = "mt-2 text-sm font-thin tracking-wide">
+                        Contrary to popular belief, Lorem Ipsum is not simply
+                        random text. It has roots in a piece of classical Latin
+                        literature from 45 BC, making it over 2000 years old.
+                    </figcaption>
+                </figure>
+                <figure class = "my-8">
+                    <h4 class = "font-bold text-base">Element listy bez opisu</h4>
+                </figure>
+                <figure class = "my-8">
+                    <h4 class = "font-bold text-base">Element listy bez opisu</h4>
+                </figure>
+
+
                 <h2 class="text-2xl font-bold mt-12 mb-6 leading-7">There are other elements we need to style</h2>
 
                 <p class = "mt-5 mb-5 leading-7">We even included table styles, check it out:</p>
