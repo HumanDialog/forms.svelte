@@ -160,6 +160,79 @@
                 </p>
 
                 <!--WRK LEFT------------------------------------------------------------------------------------------------->
+                                <h3 class="text-xl font-bold mt-8 mb-3 leading-7">Lista z ikonami - nawigatory i explorer …</h3>
+                <p class="font-thin mb-5 leading-7">
+                    Lista z ikonami. Nawigatory i explorer
+                </p>
+                <div class="my-5 pl-0 ">
+
+                    <div class="my-1 pl-2 ">
+
+                        <h4 class="mt-5 mb-3 leading-7 font-bold">
+                            <div class="inline-block text-green-600 h-3 w-3 mr-2">
+                                <FaList />
+                            </div>
+                            I often do this thing where list items have
+                            headings.
+
+                        </h4>
+                        <p class="mt-3 mb-3 pl-6 leading-7">
+                            For some reason I think this looks cool which is
+                            unfortunate because it's pretty annoying to get the
+                            styles right.
+                        </p>
+                        <p class="mt-3 mb-5 pl-6 leading-7">
+                            I often have two or three paragraphs in these list
+                            items, too, so the hard part is getting the spacing
+                            between the paragraphs, list item heading, and
+                            separate list items to all make sense. Pretty tough
+                            honestly, you could make a strong argument that you
+                            just shouldn't write this way.
+                        </p>
+                    </div>
+                    <div class="my-1 pl-2">
+                        <h4 class="mt-5 mb-3 leading-7 font-bold">
+                            <div class="inline-block text-green-600 h-3 w-3 mr-2">
+                                <FaArchive />
+                            </div>
+                            Since this is a list, I need at least two
+                            items.
+                        </h4>
+                        <p class="mt-3 mb-5 pl-6 leading-7">
+                            I explained what I'm doing already in the previous
+                            list item, but a list wouldn't be a list if it only
+                            had one item, and we really want this to look
+                            realistic. That's why I've added this second list
+                            item so I actually have something to look at when
+                            writing the styles.
+                        </p>
+                    </div>
+                    <div class="my-1 pl-2">
+                        <h4 class="mt-5 mb-3 leading-7 font-bold">
+                            <div class="inline-block text-green-600 h-3 w-3 mr-2">
+                                <FaCheck />
+                            </div>
+                            It's not a bad idea to add a third item either.
+                        </h4>
+                        <p class="mt-3 mb-5 pl-6 leading-7">
+                            I think it probably would've been fine to just use
+                            two items but three is definitely not worse, and
+                            since I seem to be having no trouble making up
+                            arbitrary things to type, I might as well include
+                            it.
+                        </p>
+                    </div>
+                </div>
+                <p class="mt-5 mb-5 leading-7">
+                    After this sort of list I usually have a closing statement
+                    or paragraph, because it kinda looks weird jumping right to
+                    a heading.
+                </p>
+
+
+
+
+
 
                 <h2 class="text-2xl font-bold mt-14 mb-6 leading-7">Lista elementów bez ikon z summary</h2>
                 <p class="mt-5 mb-5 leading-7">Elementy na kanbanie przypominają figury z opisami oraz wytłuszczonym
@@ -589,6 +662,127 @@
                     Przykłady list w oparciu o typografię.
                 </p>
                 <!--WRK RIGHT------------------------------------------------------------------------------------------------->
+                <h3 class="text-xl font-bold mt-8 mb-3 leading-7">Lista z ikonami - nawigatory i explorer …</h3>
+                <p class="font-thin mb-5 leading-7">
+                    Lista z ikonami. Nawigatory i explorer
+                </p>
+
+                <!-- LIST  -->
+                <div class="my-5 pl-0 ">
+                    <!-- ROW -->
+                    <section class="mt-6 pl-1 flex flex-row w-full text-stone-900 dark:text-stone-300">
+                        <!-- ICON -->
+                        <span >
+                            <div class="h-4 w-4 text-stone-700 dark:text-stone-400 cursor-pointer mt-1  ml-0  mr-0">
+                                <FaList />
+                            </div>
+                        </span>
+                        <!-- TEXT BLOCK -->
+                        <div class="ml-3 w-full py-0">
+
+                            <h4 class="text-base font-bold whitespace-nowrap overflow-clip w-full ">
+                            I often do this thing where list items have
+                            headings.
+                        </h4>
+                        <p class="mt-3 mb-3 leading-7">
+                            For some reason I think this looks cool which is
+                            unfortunate because it's pretty annoying to get the
+                            styles right.
+                        </p>
+                        <p class="mt-3 mb-5 leading-7">
+                            I often have two or three paragraphs in these list
+                            items, too, so the hard part is getting the spacing
+                            between the paragraphs, list item heading, and
+                            separate list items to all make sense. Pretty tough
+                            honestly, you could make a strong argument that you
+                            just shouldn't write this way.
+                        </p>
+                    </div>
+                    </section>
+                    <!-- ROW -->
+                    <section class="my-1 pl-1 flex flex-row w-full text-stone-900 dark:text-stone-300">
+                        <!-- ICON -->
+                        <span >
+                            <div class="h-4 w-4 text-stone-700 dark:text-stone-400 cursor-pointer mt-1  ml-0  mr-0">
+                                <FaList />
+                            </div>
+                        </span>
+                        <!-- TEXT BLOCK -->
+                        <div class="ml-3 w-full py-0">
+
+
+                            <h4 class="text-base font-bold whitespace-nowrap overflow-clip w-full ">
+                            Since this is a list, I need at least two
+                            items.
+                            </h4>
+                        <p class="mt-3 mb-5 leading-7">
+                            I explained what I'm doing already in the previous
+                            list item, but a list wouldn't be a list if it only
+                            had one item, and we really want this to look
+                            realistic. That's why I've added this second list
+                            item so I actually have something to look at when
+                            writing the styles.
+                        </p>
+
+                        </div>
+                    </section>
+                    <!-- ROW -->
+                    <section class="my-1 pl-1 flex flex-row w-full text-stone-900 dark:text-stone-300">
+                        <!-- ICON -->
+                        <span >
+                            <div class="h-4 w-4 text-stone-700 dark:text-stone-400 cursor-pointer mt-1  ml-0  mr-0">
+                                <FaList />
+                            </div>
+                        </span>
+                        <!-- TEXT BLOCK -->
+                        <div class="ml-3 w-full py-0">
+
+
+                            <h4 class="text-base font-bold whitespace-nowrap overflow-clip w-full ">
+                            It's not a bad idea to add a third item either.
+                            items.
+                            </h4>
+                        <p class="mt-3 mb-5 leading-7">
+                            I think it probably would've been fine to just use
+                            two items but three is definitely not worse, and
+                            since I seem to be having no trouble making up
+                            arbitrary things to type, I might as well include
+                            it.
+                        </p>
+
+                        </div>
+                    </section>
+
+
+
+
+
+
+
+
+
+                </div>
+                <p class="mt-5 mb-5 leading-7">
+                    After this sort of list I usually have a closing statement
+                    or paragraph, because it kinda looks weird jumping right to
+                    a heading.
+                </p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 <h2 class="text-2xl font-bold mt-14 mb-6 leading-7">Lista elementów bez ikon z summary</h2>
                 <p class="mt-5 mb-5 leading-7">Elementy na kanbanie przypominają figury z opisami oraz wytłuszczonym
                     tytułem
@@ -964,74 +1158,6 @@
                         </p>
                     </li>
                 </ul>
-                <p class="mt-5 mb-5 leading-7">
-                    After this sort of list I usually have a closing statement
-                    or paragraph, because it kinda looks weird jumping right to
-                    a heading.
-                </p>
-                <h3 class="text-xl font-bold mt-8 mb-3 leading-7">Lista z ikonami - nawigatory i explorer …</h3>
-                <p class="font-thin mb-5 leading-7">
-                    Lista z ikonami. Nawigatory i explorer
-                </p>
-                <div class="my-5 pl-0 ">
-
-                    <div class="my-1 pl-2 ">
-
-                        <h4 class="mt-5 mb-3 leading-7 font-bold">
-                            <div class="inline-block text-green-600 h-3 w-3 mr-2">
-                                <FaList />
-                            </div>
-                            I often do this thing where list items have
-                            headings.
-
-                        </h4>
-                        <p class="mt-3 mb-3 pl-6 leading-7">
-                            For some reason I think this looks cool which is
-                            unfortunate because it's pretty annoying to get the
-                            styles right.
-                        </p>
-                        <p class="mt-3 mb-5 pl-6 leading-7">
-                            I often have two or three paragraphs in these list
-                            items, too, so the hard part is getting the spacing
-                            between the paragraphs, list item heading, and
-                            separate list items to all make sense. Pretty tough
-                            honestly, you could make a strong argument that you
-                            just shouldn't write this way.
-                        </p>
-                    </div>
-                    <div class="my-1 pl-2">
-                        <h4 class="mt-5 mb-3 leading-7 font-bold">
-                            <div class="inline-block text-green-600 h-3 w-3 mr-2">
-                                <FaArchive />
-                            </div>
-                            Since this is a list, I need at least two
-                            items.
-                        </h4>
-                        <p class="mt-3 mb-5 pl-6 leading-7">
-                            I explained what I'm doing already in the previous
-                            list item, but a list wouldn't be a list if it only
-                            had one item, and we really want this to look
-                            realistic. That's why I've added this second list
-                            item so I actually have something to look at when
-                            writing the styles.
-                        </p>
-                    </div>
-                    <div class="my-1 pl-2">
-                        <h4 class="mt-5 mb-3 leading-7 font-bold">
-                            <div class="inline-block text-green-600 h-3 w-3 mr-2">
-                                <FaCheck />
-                            </div>
-                            It's not a bad idea to add a third item either.
-                        </h4>
-                        <p class="mt-3 mb-5 pl-6 leading-7">
-                            I think it probably would've been fine to just use
-                            two items but three is definitely not worse, and
-                            since I seem to be having no trouble making up
-                            arbitrary things to type, I might as well include
-                            it.
-                        </p>
-                    </div>
-                </div>
                 <p class="mt-5 mb-5 leading-7">
                     After this sort of list I usually have a closing statement
                     or paragraph, because it kinda looks weird jumping right to
