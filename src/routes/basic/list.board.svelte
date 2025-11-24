@@ -28,7 +28,8 @@
         i18n, ext,
 		isDeviceSmallerThan,
         Breadcrumb,
-        showFloatingToolbar
+        showFloatingToolbar,
+        refreshToolbarOperations
 	} from '$lib';
     import {FaPlus, FaList, FaPen, FaCaretLeft, FaCaretRight, FaTrash, FaArrowsAlt, FaArchive, FaCheck, FaEllipsisH, FaChevronRight,
         FaAngleDown, FaAngleUp, FaColumns, FaRandom, FaChevronLeft, FaUpload, FaRegCalendar, FaRegCalendarCheck, FaCaretUp, FaCaretDown, FaDownload
@@ -168,7 +169,7 @@
                                     {
                                         Id: 1,
                                         Association: '',
-                                        Expressions:['$ref','Id','Name', 'Kind', 'GetTaskStates','href', 'GetCanonicalPath', '$type'],
+                                        Expressions:['$ref','Id','Name', 'Kind', 'GetTaskStates','href', 'GetCanonicalPath', '$type', 'IsSubscribed'],
                                         SubTree:
                                         [
                                             {
@@ -289,6 +290,11 @@
                         },
                         {
                             separator: true
+                        },
+                        {
+                            caption: '_; Follow; Seguir; Obserwuj',
+                            action: (f) => toggleSubscribe(),
+                            activeFunc: () => currentList.IsSubscribed
                         },
                         {
                             //icon: FaRandom,
@@ -542,6 +548,11 @@
                             separator: true
                         },
                         {
+                            caption: '_; Follow; Seguir; Obserwuj',
+                            action: (f) => toggleSubscribe(),
+                            activeFunc: () => currentList.IsSubscribed
+                        },
+                        {
                             caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
                             action: changeListKind,
                         },
@@ -776,6 +787,11 @@
                         },
                         {
                             separator: true
+                        },
+                        {
+                            caption: '_; Follow; Seguir; Obserwuj',
+                            action: (f) => toggleSubscribe(),
+                            activeFunc: () => currentList.IsSubscribed
                         },
                         {
                             //icon: FaRandom,
@@ -1110,6 +1126,24 @@
     function onNewColumnStateSelected(state, name)
     {
         numericStateElement?.refresh();
+    }
+
+    async function toggleSubscribe() 
+    {
+        if(currentList.IsSubscribed)
+        {
+            const res = await reef.get(`${currentList.$ref}/Unsubscribe`, onErrorShowAlert)
+            if(res)
+                currentList.IsSubscribed = false
+        }   
+        else
+        {
+            const res = await reef.get(`${currentList.$ref}/Subscribe`, onErrorShowAlert)
+            if(res)
+                currentList.IsSubscribed = true
+        }
+
+        refreshToolbarOperations() 
     }
 
     let otherCaption = '_; <Other>; <Otros>; <Inne>'

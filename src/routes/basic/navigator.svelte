@@ -10,12 +10,12 @@
                 Input, 
                 onErrorShowAlert,
                 randomString, UI, i18n, ext, isDeviceSmallerThan} from '$lib'
-    import {FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaArchive, FaUsers, FaPlus} from 'svelte-icons/fa'
+    import {FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaArchive, FaUsers, FaPlus, FaCalendarDay, FaUserFriends, FaRegCalendar} from 'svelte-icons/fa'
     import {location, push, link} from 'svelte-spa-router'
     import {reef, session} from '@humandialog/auth.svelte'
 	import { afterUpdate, onMount, tick } from 'svelte';
     import {cache} from './cache.js'
-
+    
     export let sidebar = true;
 
     let userTaskLists = [];
@@ -450,6 +450,9 @@
         newGroupModalVisible = false;
     }
 
+    const myday = {}
+    const teamday = {}
+
 </script>
 
 {#key currentPath}
@@ -468,13 +471,24 @@
         
         {#if $session.isActive}
             {@const border=showGroupsSwitchMenu}
-            <SidebarGroup border>
+            <SidebarGroup border title={i18n({en: 'Current work', es: 'Trabajo actual', pl: 'Bieżąca praca'})}>
+                <SidebarItem   href="/myday"
+                                icon={FaCalendarDay}
+                                active={isRoutingTo("/myday", currentPath)}
+                                selectable={myday}>
+                    _; My day; Mi día; Mój dzień
+                </SidebarItem>
+                <SidebarItem   href="/teamday"
+                                icon={FaUserFriends}
+                                active={isRoutingTo("/teamday", currentPath)}
+                                selectable={teamday}>
+                    _; Common work; Trabajo común; Wspólna praca
+                </SidebarItem>
                 <SidebarItem   href="/mytasks"
-                                icon={FaList}
+                                icon={FaRegCalendar}
                                 active={isRoutingTo("/mytasks", currentPath)}
-                                summary={i18n(["All active tasks assigned to me.", "Tareas activas asignadas a mí.", "Aktywne zadania przypisane do mnie."])}
-                                selectable={user}>
-                    _; My Tasks; Mis tareas; Moje zadania
+                                selectable={user}> <!-- summary={i18n(["All active tasks assigned to me", "Tareas activas asignadas a mí", "Aktywne zadania przypisane do mnie"])} -->
+                    _; Assigned to me; Asignado a mí; Przydzielone do mnie
                 </SidebarItem>
             </SidebarGroup>
 
@@ -537,12 +551,21 @@
         
         {#if $session.isActive}
             {@const border=showGroupsSwitchMenu}
-            <SidebarGroup border>
+            <SidebarGroup border title={i18n({en: 'Current work', es: 'Trabajo actual', pl: 'Bieżąca praca'})}>
+                <SidebarItem    href="/myday"
+                                icon={FaCalendarDay}
+                                item={myday}>
+                    _; My day; Mi día; Mój dzień
+                </SidebarItem>
+                <SidebarItem    href="/teamday"
+                                icon={FaUserFriends}
+                                item={teamday}>
+                    _; Common work; Trabajo común; Wspólna praca
+                </SidebarItem>
                 <SidebarItem    href="/mytasks"
-                                icon={FaList}
-                                summary={i18n(["All active tasks assigned to me.", "Tareas activas asignadas a mí.", "Aktywne zadania przypisane do mnie."])}
-                                item={user}>
-                    _; My Tasks; Mis tareas; Moje zadania
+                                icon={FaRegCalendar}
+                                item={user}> <!-- summary={i18n(["All active tasks assigned to me", "Tareas activas asignadas a mí", "Aktywne zadania przypisane do mnie"])} -->
+                    _; Assigned to me; Asignado a mí; Przydzielone do mnie
                 </SidebarItem>
             </SidebarGroup>
 

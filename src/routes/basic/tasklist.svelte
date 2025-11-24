@@ -14,7 +14,8 @@
                 Modal,
                 onErrorShowAlert, showMenu,
 				UI, i18n, Breadcrumb, showFloatingToolbar, Paper,
-				ext} from '$lib'
+				ext, refreshToolbarOperations
+            } from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaList,
         FaEllipsisH, FaChevronRight, FaChevronLeft, FaRandom, FaCheck, FaUpload, FaUndo, FaDownload
     } from 'svelte-icons/fa'
@@ -151,7 +152,7 @@
                                     {
                                         Id: 1,
                                         Association: '',
-                                        Expressions:['Id','Name', 'href', 'GetCanonicalPath'],
+                                        Expressions:['Id','Name', 'href', 'GetCanonicalPath', 'IsSubscribed'],
                                         SubTree:
                                         [
                                             {
@@ -328,6 +329,11 @@
                             separator: true
                         },
                         {
+                            caption: '_; Follow; Seguir; Obserwuj',
+                            action: (f) => toggleSubscribe(),
+                            activeFunc: () => currentList.IsSubscribed
+                        },
+                        {
                             //icon: FaRandom,
                             caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
                             action: changeListKind,
@@ -453,6 +459,11 @@
                         },
                         {
                             separator: true
+                        },
+                        {
+                            caption: '_; Follow; Seguir; Obserwuj',
+                            action: (f) => toggleSubscribe(),
+                            activeFunc: () => currentList.IsSubscribed
                         },
                         {
                             caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
@@ -685,6 +696,23 @@
         reloadTasks(listComponent.SELECT_NEXT);
     }
    
+    async function toggleSubscribe() 
+    {
+        if(currentList.IsSubscribed)
+        {
+            const res = await reef.get(`${listPath}/Unsubscribe`, onErrorShowAlert)
+            if(res)
+                currentList.IsSubscribed = false
+        }   
+        else
+        {
+            const res = await reef.get(`${listPath}/Subscribe`, onErrorShowAlert)
+            if(res)
+                currentList.IsSubscribed = true
+        }
+
+        refreshToolbarOperations() 
+    }
 
 </script>
 

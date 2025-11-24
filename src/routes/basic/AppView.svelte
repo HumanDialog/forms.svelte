@@ -40,6 +40,8 @@
     import GeneralChannels from './channels.general.svelte'
     import PrivateChannels from './channels.private.svelte'
     import MyNotes from './notes.my.svelte'
+    import MyDay from './dashboard.myday.svelte'
+    import TeamDay from './dashboard.teamday.svelte'
     //import StaticDoc from './tilos/static.doc.svelte'
 
     import { tick, onMount } from 'svelte';
@@ -255,7 +257,9 @@
                         '/mynotes':     {component: MyNotes},
                         '/group-folders': {component: GroupFolders},
                         '/general-channels': {component: GeneralChannels},
-                        '/private-channels':{component: PrivateChannels}
+                        '/private-channels':{component: PrivateChannels},
+                        '/myday':       {component: MyDay},
+                        '/teamday':     {component: TeamDay}
                     }
                 },
                 mainToolbar : {

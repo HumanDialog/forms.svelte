@@ -14,13 +14,18 @@
 				mainContentPageReloader,
                 Modal,
                 onErrorShowAlert,
-                Breadcrumb, Paper,
+                Breadcrumb, Paper, Paginator,
             i18n} from '$lib'
     import {FaCheck, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaArchive, FaUndo} from 'svelte-icons/fa'
     import {setBrowserRecentElement} from './basket.utils'
     import TaskProperties from './properties.task.svelte'
+    import {querystring, location, push} from 'svelte-spa-router'
 
     export let params = {}
+
+    let pageNo = 0
+    let allPagesNo = 1
+    let pageElementsNo = 25
 
     let user = null;
     let listComponent;
@@ -30,7 +35,7 @@
     let canconicalPath = []
     const title = '_; My tasks; Mis tareas; Moje zadania'
 
-    $: onParamsChanged($session, $mainContentPageReloader);
+    $: onParamsChanged($session, $mainContentPageReloader, $querystring);
 
     async function onParamsChanged(...args)
     {
@@ -47,11 +52,33 @@
                 lists = res.TaskList;
         }
 
+        const params = new URLSearchParams($querystring);
+        if(params.has("page"))
+            pageNo = parseInt(params.get("page"))
+        else
+            pageNo = 0
+
         await fetchData()
+
+        const allElementsNo = user.AssignedTasksCount
+        allPagesNo = Math.floor(allElementsNo / pageElementsNo)
+        if(allElementsNo % pageElementsNo)
+            allPagesNo += 1
+
+        pageNo = Math.max(0, Math.min(pageNo, allPagesNo-1))
+
+        paginatorTop?.updatePageNo(pageNo)
+        paginatorTop?.updateAllPagesNo(allPagesNo)
+        paginatorBtt?.updatePageNo(pageNo)
+        paginatorBtt?.updateAllPagesNo(allPagesNo)
     }
 
     async function fetchData()
     {
+        if(pageNo < 0)
+            pageNo = 0
+        const pageOffset = pageNo * pageElementsNo
+
         let res = await reef.post(`/user/query`,
                                 {
                                     Id: 1,
@@ -62,7 +89,9 @@
                                         {
                                             Id: 1,
                                             Association: '',
-                                            Expressions:['Id','Name', 'href'],
+                                            Expressions:['Id','Name', 'href', 'AssignedTasksCount'],
+                                            SubTreeOffset: pageOffset,
+                                            SubTreeLimit: pageElementsNo,
                                             SubTree:
                                             [
                                                 {
@@ -359,6 +388,17 @@
         }
     }
 
+    let paginatorTop
+    let paginatorBtt
+    function onPage(page)
+    {
+        pageNo = page
+
+        const path = $location
+        const loc = `${path}?page=${pageNo}`
+        push(loc)
+    }
+
     let taskPropertiesDialog;
     function runElementProperties(btt, aroundRect, element, kind)
     {
@@ -392,9 +432,15 @@
             {/if}
 
 
-            <p class="hidden sm:block mt-3 ml-3 pb-5 text-lg text-left">
-                {title}
-            </p>
+            <section class="hidden w-full sm:flex flex-row mt-3 mr-2">
+                <p class="ml-3 pb-5 text-lg text-left">
+                    {title}
+                </p>
+
+                <section class="ml-auto">
+                    <Paginator {onPage} {pageNo} {allPagesNo} bind:this={paginatorTop}/>
+                </section>
+            </section>
 
         <List   self={user}
                 a='MyTasks'
@@ -427,6 +473,12 @@
 
 
         </List>
+
+        <div class="flex sm:hidden flex-row mt-10 mb-20">
+            <section class="ml-auto mr-2">
+                <Paginator {onPage} {pageNo} {allPagesNo} bind:this={paginatorBtt}/>
+            </section>
+        </div>
             
        </Paper>
 

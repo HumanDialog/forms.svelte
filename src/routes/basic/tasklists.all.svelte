@@ -13,7 +13,8 @@
 				mainContentPageReloader,
                 Modal,
                 onErrorShowAlert, Breadcrumb, Paper,
-            i18n} from '$lib'
+                i18n, refreshToolbarOperations
+        } from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaList, FaPen, FaArchive, FaChevronLeft, FaChevronRight} from 'svelte-icons/fa'
     import {querystring, pop, link} from 'svelte-spa-router'
 
@@ -63,7 +64,7 @@
                                                         Association: 'Lists',
                                                         //Filter: 'State <> STATE_FINISHED',
                                                         Sort: "Order",
-                                                        Expressions: ['Id', 'Name', 'Summary', 'Order', 'href', '$ref']
+                                                        Expressions: ['Id', 'Name', 'Summary', 'Order', 'href', '$ref', 'IsSubscribed']
                                                     }
                                                 ]
                                             }
@@ -260,7 +261,12 @@
                             fab: 'M04',
                             tbr: 'A'
                         },
-
+                        {
+                            //caption: list.IsSubscribed ? '_; Unfollow; Dejar de seguir; Przestań obserwować' : '_; Follow; Seguir; Obserwuj',
+                            caption: '_; Follow; Seguir; Obserwuj',
+                            action: (f) => toggleSubscribe(list),
+                            activeFunc: () => list.IsSubscribed
+                        },
                         {
                             caption: '_; Archive; Archivar; Zarchiwizuj',
                             action: (f) => askToArchive(list)
@@ -275,6 +281,24 @@
                
             ]
         }
+    }
+
+    async function toggleSubscribe(list) 
+    {
+        if(list.IsSubscribed)
+        {
+            const res = await reef.get(`${list.$ref}/Unsubscribe`, onErrorShowAlert)
+            if(res)
+                list.IsSubscribed = false
+        }   
+        else
+        {
+            const res = await reef.get(`${list.$ref}/Subscribe`, onErrorShowAlert)
+            if(res)
+                list.IsSubscribed = true
+        }
+
+        refreshToolbarOperations() 
     }
 
 </script>

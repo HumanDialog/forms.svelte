@@ -25,7 +25,7 @@ export default defineConfig( ({command, mode}) => {
 			__OCTOPUS_MODULES__:'\'tasklists,folders,messages\'',
 			__APP_TITLE__: '\'Octopus Basic\'',
 			__APP_ICON__:'\'/ico/objectreeficon.png\'',
-			__APP_DEFAULT_PAGE__: '\'/mytasks\'',
+			__APP_DEFAULT_PAGE__: '\'/myday\'',
 			__APP_DEFAULT_GUEST_PAGE__: '\'/listboard\'',
 			__USERS_SET__: '\'octopus\'',
 			__LANDING__: '\'octopus\'',

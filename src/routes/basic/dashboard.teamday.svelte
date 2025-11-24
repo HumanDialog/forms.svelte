@@ -1,0 +1,213 @@
+<script>
+    import { reef} from '@humandialog/auth.svelte';
+    import { onErrorShowAlert, mainContentPageReloader, Spinner, Page, 
+            editable, selectable, getNiceStringDateTime, startEditing, i18n, Paper,
+            contextItemsStore,
+			activateItem,
+			isActive,
+			isSelected,
+            reloadVisibleTags,
+			getActive
+
+        } from '$lib';
+	import { location, querystring, link, push } from 'svelte-spa-router';
+    import LatestNote from './dashboard.note.svelte'
+    import SubscibedList from './dashboard.list.svelte'
+    import {afterUpdate} from 'svelte'
+    import {cache} from './cache.js'
+    
+    let user = null
+    let tasksNo = 0
+    let allTags = ''
+    let users = []
+
+    let usersComboSource;
+    let listElements = []
+
+    $: onParamsChanged($mainContentPageReloader);
+
+
+    async function onParamsChanged(...args)
+    {
+        reef.get('/group/AllTags', onErrorShowAlert).then((res) => {
+            allTags = res;
+            reloadVisibleTags()
+        })
+
+        reef.post('group/query',
+                        {
+                            Id: 1,
+                            Name: 'Users',
+                            Tree:[
+                                {
+                                    Id: 1,
+                                    Association: 'Members/User'
+                                }
+                            ]
+                        },
+                        onErrorShowAlert
+                    ).then( (res) => { 
+                        if(res)
+                        {
+                            users = res.User;
+                        }
+                    })
+        
+                        
+        await loadData(true)
+    }
+
+    async function loadData(useCache=false)
+    {
+        const cacheKey = `teamday`
+        
+        if(useCache)
+            showCachedDataFirst(cacheKey);
+
+        const res = await reef.post(`user/query`, {
+                            Id: 1,
+                            Name: "collector",
+                            ExpandLevel: 5,
+                            Tree: [
+                                {
+                                    Id: 1,
+                                    Association: '',
+                                    Expressions:['Id', '$ref', 'Name', 'Email', 'Avatar', 'Bio', '$acc'],
+                                    SubTree: [
+                                        {
+                                            Id: 10,
+                                            Association: 'SubscribedLists',
+                                            Sort: "Order",
+                                            Filter: "not IsPersonal and IsInGroup(group)",
+                                            Expressions: ['Id', '$ref', 'Name', 'Summary', 'href', 'LinkInfo', 'Order'],
+                                            SubTree:[
+                                                {
+                                                    Id: 100,
+                                                    Association: 'List',
+                                                    SubTree:[
+                                                        {
+                                                            Id: 1000,
+                                                            Association: 'Tasks',
+                                                            Filter: 'State>=3900 and State<6500',
+                                                            Sort: '-State,ListOrder',
+                                                            Expressions:['Id', '$ref', 'Title', 'Summary', 'ListOrder', 'State', 'Tags', 'DueDate', 'Index', 'href', 'icon', '$type'],
+                                                            SubTree:[
+                                                                {
+                                                                    Id:10000,
+                                                                    Association: 'Actor',
+                                                                    Expressions: ['$ref', 'Name', 'href']
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                                
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+        }, onErrorShowAlert)
+        user = res.User
+
+        cache.set(cacheKey, user)
+
+        tasksNo = 0
+        user.SubscribedLists.forEach((l) => {
+            if(l.List && l.List.Tasks)
+                tasksNo += l.List.Tasks.length
+        })
+    }
+
+    function showCachedDataFirst(cacheKey)
+    {
+        const cachedValue = cache.get(cacheKey)
+
+        if(!cachedValue)
+            return;
+
+        user = cachedValue
+        
+        tasksNo = 0
+        user.SubscribedLists.forEach((l) => {
+            if(l.List && l.List.Tasks)
+                tasksNo += l.List.Tasks.length
+        })
+    }
+
+    async function onUpdateAllTags(allAllTags)
+    {
+        allTags = allAllTags
+        await reef.post('group/set', { AllTags: allTags}, onErrorShowAlert)
+    }
+
+    
+    async function onRefreshDashboard(selectedRef='')
+    {
+        listToSelectAfterRefreshing = selectedRef
+        await loadData()
+    }
+
+    let listToSelectAfterRefreshing = ''
+    afterUpdate( () => 
+    {
+        if(listToSelectAfterRefreshing)
+        {
+            if(user.SubscribedLists && user.SubscribedLists.length > 0)
+            {
+                const listIdx = user.SubscribedLists.findIndex((l) => l.$ref == listToSelectAfterRefreshing)
+                if((listIdx >= 0) && (listIdx < listElements.length))
+                {
+                    const listComponent = listElements[listIdx]
+                    listComponent.activate()
+                }
+            }
+
+            listToSelectAfterRefreshing = ''
+        }
+        
+    })
+
+    const pageOperations = []
+
+
+    const title = "_; Common work; Trabajo común; Wspólna praca"
+</script>
+
+<svelte:head>
+    <title>{title} | {__APP_TITLE__}</title>
+</svelte:head>
+
+
+<!-- svelte-ignore a11y-no-noninteractive-tabindex-->
+
+{#if user}
+    <Page   self={user} 
+            toolbarOperations={pageOperations}
+            clearsContext='props sel'
+            title={user.Name}>
+        <Paper class="mb-64">
+        <section class="w-full flex justify-center">
+            <article class="w-full prose prose-base prose-zinc dark:prose-invert mx-2  mb-64">
+                <h1>{title}</h1>
+                
+                {#if tasksNo > 0 && user.SubscribedLists && user.SubscribedLists.length > 0}
+                    <h2>_; Tasks; Tareas; Zadania</h2>
+                    {#each user.SubscribedLists as list, idx}
+                        <SubscibedList {list} 
+                                    tasks={list.List.Tasks}
+                                    getAllTags={() => allTags}
+                                    {onUpdateAllTags}
+                                    {users}
+                                    {onRefreshDashboard}
+                                    bind:this={listElements[idx]}/>
+                    {/each}
+                {/if}
+ 
+            </article>
+        </section>
+        </Paper>
+    </Page>
+{:else}
+    <Spinner/>
+{/if}
