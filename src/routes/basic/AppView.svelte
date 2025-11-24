@@ -20,6 +20,9 @@
     import Task from './task.svelte'
     import Note from './note.svelte'
     import Board from './list.board.svelte';
+    import DesignGT from './design.general.typo.svelte';
+    import DesignLists from './design.general.lists.svelte';
+    import DesignNavs from './design.general.navlists.svelte';
     import MyTasks from './mytasks.svelte'
     import MyFolders from './myfolders.svelte'
     import Chat from './chat.svelte'
@@ -156,18 +159,18 @@
     function mountMessagesObserver(rerenderTabsCb)
     {
         rerenderTabs = rerenderTabsCb;
-        let lazyFetcher = setTimeout(() => { 
-            lazyFetcher=0; 
+        let lazyFetcher = setTimeout(() => {
+            lazyFetcher=0;
             fetchSubscribedChannels()}, 1000)
 
         return () => {
-        
+
             if(lazyFetcher)
             {
                 clearTimeout(lazyFetcher)
                 lazyFetcher = 0
             }
-            
+
             if(kicksObserver)
             {
                 unregisterKicksObserver(kicksObserver)
@@ -189,7 +192,7 @@
     }
 
     async function refreshMessagesTab(labels)
-    {       
+    {
         if(rerenderTabs)
         {
             setTimeout(() => rerenderTabs(), 4000)
@@ -235,6 +238,12 @@
                         '/note/*' :     { component: Note },
                         '/listboard' :  { component: Board},
                         '/listboard/*': { component: Board},
+                        '/design' :     { component: DesignGT},
+                        '/design/*' :   { component: DesignGT},
+                        '/deslis' :     { component: DesignLists},
+                        '/deslis/*' :   { component: DesignLists},
+                        '/desnav' :     { component: DesignNavs},
+                        '/desnav/*' :   { component: DesignNavs},
                         '/mytasks' :    { component: MyTasks },
                         '/mytasks/*' :  { component: MyTasks },
                         '/folder'    :  { component: Folder },
