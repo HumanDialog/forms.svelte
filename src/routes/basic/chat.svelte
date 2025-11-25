@@ -96,7 +96,8 @@
     onMount(() => {
         const observerId = registerKicksObserver(channelRefreshLabel, 60, onRemoteChanged)
         return () => {
-            unregisterKicksObserver(observerId)
+            if(observerId)
+                unregisterKicksObserver(observerId)
         }
     })
 
