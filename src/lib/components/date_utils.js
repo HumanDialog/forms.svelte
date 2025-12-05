@@ -30,8 +30,14 @@ export function getFormattedStringDate(d, type = "datetime")
         return `${year}-${month}-${day}`;
 }
 
-export function getNiceStringDateTime(d)
+export function getNiceStringDateTime(dat)
 {
+    let d
+    if(typeof dat == 'string')
+        d = new Date(dat)
+    else
+        d = dat
+    
     const dt = getNiceStringDate(d);
     const tm = d.toLocaleTimeString(undefined, {
         timeStyle: 'short'
@@ -40,8 +46,14 @@ export function getNiceStringDateTime(d)
 }
 
 
-export function getNiceStringDate(d)
+export function getNiceStringDate(dat)
 {
+    let d
+    if(typeof dat == 'string')
+        d = new Date(dat)
+    else
+        d = dat
+
     if(!d)
         return '';
 

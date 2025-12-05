@@ -135,7 +135,7 @@ export {
     removeAt,
     remove, 
     swapElements,
-
+    setSelectionAtEnd,
     isValidEmail
 }   from './utils'
 

@@ -6,11 +6,15 @@ let registeredObservers = []
 let minInterval = 0
 let lastCheckAt = 0
 let timerId = 0;
+let paused = false
 
 let lastKicks = new Map();
 
 export function registerKicksObserver(labels, interval, callback)
 {
+    // temporary disabled
+    return 0;
+
     let lbs = []
     if(labels && Array.isArray(labels))
         lbs = labels
@@ -33,6 +37,9 @@ export function registerKicksObserver(labels, interval, callback)
 
 export function unregisterKicksObserver(regId)
 {
+    // temporary disabled
+    return
+
     const fIdx = registeredObservers.findIndex( (o) => o.id == regId)
     if(fIdx >=0)
         registeredObservers.splice(fIdx, 1)
@@ -95,6 +102,26 @@ function updateTimer()
     if(isFirstTimeLaunch)
         checkKicks(false)
 }
+
+function pauseTimer()
+{
+    if(timerId > 0)
+    {
+        clearTimeout(timerId)
+        timerId = 0
+        paused = true
+    }
+}
+
+function restoreTimer()
+{
+    if(paused && minInterval)
+    {
+        timerId = setTimeout(timerHandler, minInterval*1000)
+        paused = false
+    }
+}
+
 
 function checkKicks(informObservers=true)
 {
