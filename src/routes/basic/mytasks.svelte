@@ -23,9 +23,9 @@
 
     export let params = {}
 
-    let pageNo = 0
-    let allPagesNo = 1
-    let pageElementsNo = 25
+    //let pageNo = 0
+    //let allPagesNo = 1
+    //let pageElementsNo = 25
 
     let user = null;
     let listComponent;
@@ -35,7 +35,7 @@
     let canconicalPath = []
     const title = '_; My tasks; Mis tareas; Moje zadania'
 
-    $: onParamsChanged($session, $mainContentPageReloader, $querystring);
+    $: onParamsChanged($session, $mainContentPageReloader/*, $querystring*/);
 
     async function onParamsChanged(...args)
     {
@@ -46,38 +46,35 @@
         }
 
         if(lists.length == 0)
-        {
-            let res = await reef.get('/group/Lists', onErrorShowAlert)
-            if(res)
-                lists = res.TaskList;
-        }
-
-        const params = new URLSearchParams($querystring);
-        if(params.has("page"))
-            pageNo = parseInt(params.get("page"))
-        else
-            pageNo = 0
+            reef.get('/group/Lists', onErrorShowAlert).then( (res) => { if(res) lists=res.TaskList} );
+        
+        //const params = new URLSearchParams($querystring);
+        //if(params.has("page"))
+        //    pageNo = parseInt(params.get("page"))
+        //else
+        //    pageNo = 0
 
         await fetchData()
 
-        const allElementsNo = user.AssignedTasksCount
-        allPagesNo = Math.floor(allElementsNo / pageElementsNo)
-        if(allElementsNo % pageElementsNo)
-            allPagesNo += 1
+        //const allElementsNo = user.AssignedTasksCount
+        //allPagesNo = Math.floor(allElementsNo / pageElementsNo)
+        //if(allElementsNo % pageElementsNo)
+        //    allPagesNo += 1
 
-        pageNo = Math.max(0, Math.min(pageNo, allPagesNo-1))
+        //pageNo = Math.max(0, Math.min(pageNo, allPagesNo-1))
 
-        paginatorTop?.updatePageNo(pageNo)
-        paginatorTop?.updateAllPagesNo(allPagesNo)
-        paginatorBtt?.updatePageNo(pageNo)
-        paginatorBtt?.updateAllPagesNo(allPagesNo)
+        //paginatorTop?.updateParams(pageNo, allPagesNo)
+        //paginatorBtt?.updateParams(pageNo, allPagesNo)
+
+        //if(listComponent)
+        //    listComponent.reload(user, listComponent.KEEP_SELECTION)
     }
 
     async function fetchData()
     {
-        if(pageNo < 0)
-            pageNo = 0
-        const pageOffset = pageNo * pageElementsNo
+        //if(pageNo < 0)
+        //    pageNo = 0
+        //const pageOffset = pageNo * pageElementsNo
 
         let res = await reef.post(`/user/query`,
                                 {
@@ -90,8 +87,8 @@
                                             Id: 1,
                                             Association: '',
                                             Expressions:['Id','Name', 'href', 'AssignedTasksCount'],
-                                            SubTreeOffset: pageOffset,
-                                            SubTreeLimit: pageElementsNo,
+                                        //    SubTreeOffset: pageOffset,
+                                        //    SubTreeLimit: pageElementsNo,
                                             SubTree:
                                             [
                                                 {
@@ -388,16 +385,16 @@
         }
     }
 
-    let paginatorTop
-    let paginatorBtt
-    function onPage(page)
-    {
-        pageNo = page
-
-        const path = $location
-        const loc = `${path}?page=${pageNo}`
-        push(loc)
-    }
+    //let paginatorTop
+    //let paginatorBtt
+    //function onPage(page)
+    //{
+    //    pageNo = page
+    //
+    //    const path = $location
+    //    const loc = `${path}?page=${pageNo}`
+    //    push(loc)
+    //}
 
     let taskPropertiesDialog;
     function runElementProperties(btt, aroundRect, element, kind)
@@ -437,9 +434,9 @@
                     {title}
                 </p>
 
-                <section class="ml-auto">
+                <!--section class="ml-auto">
                     <Paginator {onPage} {pageNo} {allPagesNo} bind:this={paginatorTop}/>
-                </section>
+                </section-->
             </section>
 
         <List   self={user}
@@ -474,11 +471,11 @@
 
         </List>
 
-        <div class="flex sm:hidden flex-row mt-10 mb-20">
+        <!--div class="flex sm:hidden flex-row mt-10 mb-20">
             <section class="ml-auto mr-2">
                 <Paginator {onPage} {pageNo} {allPagesNo} bind:this={paginatorBtt}/>
             </section>
-        </div>
+        </div-->
             
        </Paper>
 

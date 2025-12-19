@@ -10,6 +10,13 @@
     let visiblePages = []
     $: update()
 
+    export function updateParams(p, allP)
+    {
+        pageNo = p
+        allPagesNo = allP
+        update()
+    }
+
     export function updatePageNo(p)
     {
         pageNo = p
