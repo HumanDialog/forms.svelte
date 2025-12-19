@@ -39,10 +39,35 @@
             {
                 whatToShow = REDIRECT;
 
+                let pageToRedirect = ''
                 if($session.isUnauthorizedGuest)
-                    push(__APP_DEFAULT_GUEST_PAGE__);
+                    pageToRedirect = __APP_DEFAULT_GUEST_PAGE__;
                 else
-                    push(__APP_DEFAULT_PAGE__);
+                    pageToRedirect = __APP_DEFAULT_PAGE__;
+
+                try 
+                {
+                    const lastNavigationStr = window.localStorage.getItem('lastNavigation')
+                    if(lastNavigationStr)
+                    {
+                        let lastNavigation = JSON.parse(lastNavigationStr)   
+                        if(lastNavigation && lastNavigation.path && lastNavigation.timestamp)
+                        {
+                            const when = Date.now() - lastNavigation.timestamp
+                            const threshold = 7 * 24 * 60 * 60 * 1000;   // 7 days in miliseconds
+                            if(when < threshold)
+                            {
+                                pageToRedirect = lastNavigation.path
+                            }
+                        }
+                    }
+                }
+                catch(e)
+                {
+                    console.error(e)
+                }
+
+                push(pageToRedirect);
             }
             else
             {

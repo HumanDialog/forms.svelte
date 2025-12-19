@@ -7,7 +7,7 @@
     import SidebarMessages from './sidebar.messages.svelte'
     import SidebarTilos from './sidebar.tilos.svelte'
 
-    import {push} from 'svelte-spa-router'
+    import {push, querystring, location} from 'svelte-spa-router'
 
     import AppIcon from './appicon.svelte'
     import TilosIcon from './icons/tilos.icon.svelte'
@@ -58,7 +58,7 @@
     let layout = null
 
     $: init($session)
-
+    
     async function init(...args)
     {
         if(!$session.isActive && !$session.isUnauthorizedGuest)
@@ -512,6 +512,34 @@
             return;
 
         push(href)
+    }
+
+    onMount( () => {
+
+        window.addEventListener('hashchange', onNavigationChanged)
+        window.addEventListener('visibilitychange', onNavigationChanged)
+        return () => {
+            window.removeEventListener('hashchange', onNavigationChanged)
+            window.removeEventListener('visibilitychange', onNavigationChanged)
+        }
+    })
+
+    function onNavigationChanged(...args)
+    {
+        if(!document.hidden)
+        {
+            const hashPosition = window.location.href.indexOf('#/')
+            let location = (hashPosition > -1) ? window.location.href.substr(hashPosition + 1) : '/'
+            if(location.length > 1)
+            {
+                const state = {
+                    path: location,
+                    timestamp: Date.now()
+                }
+
+                window.localStorage.setItem('lastNavigation', JSON.stringify(state))   
+            }
+        }
     }
 
 </script>
