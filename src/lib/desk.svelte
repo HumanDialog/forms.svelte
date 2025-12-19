@@ -1,6 +1,7 @@
 <script>
     import HorizontalToolbar from './horizontal.toolbar.svelte'
     import VerticalToolbar from './vertical.toolbar.svelte'
+    import HorizontalNavigatorTabs from './horizontal.nav.tabs.svelte'
     import Configurable from './internal/configurable.content.svelte'
     import Operations from './operations.svelte'
     import Fab from './components/Fab.svelte'
@@ -109,6 +110,7 @@
     let vertical_toolbar_visibility = "hidden sm:block"
     let content_left = "left-0 sm:left-[40px]";
     let content_width = "w-screen  sm:w-[calc(100vw-40px)] ";
+    let horizontal_nav_tabs_visibility = "hidden"
                                 
     let content_top = ""
     let content_height = ""              
@@ -198,18 +200,25 @@
             vertical_toolbar_visibility = "hidden sm:block"
             content_left = "left-0 sm:left-[40px]";
             content_width = "w-screen  sm:w-[calc(100vw-40px)]";
+
+            horizontal_nav_tabs_visibility = "hidden"
             return false;
         }
         else
         {
             if(navIsVisible())
-            {
-                vertical_toolbar_visibility = "block"
-                content_left = "left-[50px]";
-                content_width = "w-[calc(100vw-50px)] ";
-                return true;
-            }
+                horizontal_nav_tabs_visibility = "block"
             else
+                horizontal_nav_tabs_visibility = "hidden"
+
+            //if(navIsVisible())
+            //{
+            //    vertical_toolbar_visibility = "block"
+            //    content_left = "left-[50px]";
+            //    content_width = "w-[calc(100vw-50px)] ";
+            //    return true;
+            //}
+            //else
             {
                 vertical_toolbar_visibility = "hidden sm:block"
                 content_left = "left-0 sm:left-[40px]";
@@ -383,6 +392,12 @@
                         <VerticalToolbar appConfig={layout} mobile={is_small}/>
                     </div>    
                 </div>
+
+                 <header class="{horizontal_nav_tabs_visibility}  fixed w-screen bottom-0 h-[50px] sm:h-[40px] z-20 shadow  shadow-stone-900/5 dark:shadow-none     overflow-auto" >
+                        <div class=" flex flex-row justify-between  h-full  bg-stone-950   text-stone-100 ">
+                            <HorizontalNavigatorTabs appConfig={layout}/>
+                        <div>
+                </header> 
 
                 <!--VerticalToolbar /-->
 
