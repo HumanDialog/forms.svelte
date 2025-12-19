@@ -365,9 +365,7 @@
                 disabled: tInfo.id == $session.tid,
                 action: async (f) => {
                     $session.setCurrentTenantAPI(tInfo.url, tInfo.id)
-                    push('/')
-                    
-                    await tick()
+                    await push('/')
                     reloadWholeApp();
                 }
             })
