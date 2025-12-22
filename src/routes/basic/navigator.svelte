@@ -364,9 +364,11 @@
                 icon: FaUsers,
                 disabled: tInfo.id == $session.tid,
                 action: async (f) => {
-                    $session.setCurrentTenantAPI(tInfo.url, tInfo.id)
-                    await push('/')
-                    reloadWholeApp();
+                    await push(__APP_DEFAULT_PAGE__)
+                    setTimeout(() => {
+                        $session.setCurrentTenantAPI(tInfo.url, tInfo.id)
+                        reloadWholeApp()
+                    }, 200)
                 }
             })
         )

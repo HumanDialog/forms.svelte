@@ -586,7 +586,7 @@
     :global(body.dark)
     {
       --tw-bg-opacity: 1;
-      background-color: rgb(28 25 23 / var(--tw-bg-opacity));
+      background-color: rgb(12 10 9 / var(--tw-bg-opacity));
       
     }
     
