@@ -6,6 +6,7 @@
             ComboSource,
             ComboItem,
             DatePicker,
+            Date,
             Tags,
             editable,
             Editable,
@@ -1998,11 +1999,8 @@
                 </span>
                 <span>
                     {#if task.DueDate || dueDatePlaceholder}
-                            <DatePicker     a='DueDate'
-                                            compact
-                                            typo
-                                            s="prose"
-                                            inContext="data"
+                            <Date     self={task}
+                                            a='DueDate'
                                             bind:this={dueDate}
                                 />
                     {/if}

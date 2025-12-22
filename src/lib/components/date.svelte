@@ -254,10 +254,31 @@
 </script>
 
 {#if typo}
-    <span class="inline-block relative flex flex-row  items-center">
+    <div class="inline-block relative flex flex-row  items-center">
         <span class="mr-1">{pretty_value}</span>
         <Ricon icon = "chevron-down" size="xs"/>
-    </span>
+
+        {#if can_be_activated}
+            {#if type == "datetime-local"}
+                <input  type="datetime-local"
+                        class="datepicker-input"
+                        tabindex="-1"
+                        on:change={on_changed}
+                        bind:value={rValue}
+                        bind:this={input_element}>
+            {:else}
+                <input  type="date"
+                        class="datepicker-input"
+                        tabindex="-1"
+                        on:change={on_changed}
+                        bind:value={rValue}
+                        bind:this={input_element}
+                        on:blur={blur}>
+            {/if}
+        {/if}
+
+
+    </div>
 
 
 {:else if is_compact}
@@ -319,3 +340,35 @@
         />
     {/if}
 {/if}
+
+<style>
+    input:focus {
+    outline: 0px solid transparent;
+    }
+    .datepicker-input{
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+        box-sizing: border-box;
+    }
+    .datepicker-input::-webkit-calendar-picker-indicator {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        cursor: pointer;
+    }
+    @media print
+    {
+        .no-print, .no-print *{
+            display: none !important;
+        }
+    }
+</style>

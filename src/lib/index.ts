@@ -25,6 +25,8 @@ export { default as IconT } from "./components/icon.ex.svelte"
 export { default as Ricon } from "./components/r.icon.svelte";
 export { default as REdit } from "./components/r.edit.svelte";
 export { default as Editable } from "./components/r.editable.svelte";
+export { default as Date} from "./components/r.datepicker.svelte";
+
 
 
 export { default as Button } from './components/button.svelte';
