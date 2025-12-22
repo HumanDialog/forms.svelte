@@ -8,6 +8,7 @@
             DatePicker,
             Tags,
             editable,
+            Editable,
 			saveCurrentEditable,
 			activateItem,
 			isActive,
@@ -2008,16 +2009,8 @@
 
                 </span>
             </div>
+            <h1><Editable self={task} a='Title'/></h1>
 
-            <h1     class=""
-                    use:editable={{
-                        action: (text) => onTitleChanged(text),
-                        onSingleChange: (txt) => onPropertySingleChange(txt, 'Title'),
-                        active: true,
-                        readonly: isReadOnly}}
-                        tabindex="0">
-                {task.Title}
-            </h1>
             <div class="w-full flex flex-row justify-between">
                 <span>
                     {#if task.Actor || responsiblePlaceholder}
@@ -2073,16 +2066,7 @@
 
             {#if task.Summary || summaryPlaceholder}
                 {#key task.Summary}
-                    <p  class="lead"
-                        use:editable={{
-                            action: (text) => onSummaryChanged(text),
-                            onSingleChange: (txt) => onPropertySingleChange(txt, 'Summary'),
-                            active: true,
-                            readonly: isReadOnly}}
-                        tabindex="0"
-                        bind:this={summary}>
-                        {task.Summary}
-                    </p>
+                    <p  class="lead"><Editable self={task} a='Summary' /></p>
                 {/key}
 
             {/if}
@@ -2144,7 +2128,7 @@
             <hr/>
 
             {#if (task.Notes && task.Notes.length > 0) || (task.Files && task.Files.length > 0) || notesPlaceholder}
-                <h3>_;Attachments; Anexos; Załączniki</h3>
+                <h2>_;Attachments; Anexos; Załączniki</h2>
                 <section>
                     {#if (task.attachements && task.attachements.length > 0) || notesPlaceholder}
                         <List   self={task}
@@ -2187,7 +2171,7 @@
                 </section>
             {/if}
 
-            <h3>_; Attached to; Adjunto a; Przyłączony do</h3>
+            <h2>_; Attached to; Adjunto a; Przyłączony do</h2>
             <section >
                 <List   self={task}
                         a='connectedToList'

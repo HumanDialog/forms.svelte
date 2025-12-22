@@ -1827,9 +1827,7 @@
 
         {#if note.Summary || summaryPlaceholder}
             {#key note.Summary}
-                <p  class="lead">
-                    <Editable self={note} a='Summary' />
-                </p>
+                <p  class="lead"><Editable self={note} a='Summary' /></p>
             {/key}
 
         {/if}
@@ -1880,7 +1878,7 @@
             <hr/>
 
             {#if (note.Notes && note.Notes.length > 0) || (note.Files && note.Files.length > 0) || notesPlaceholder}
-                <h3>_;Attachments; Anexos; Załączniki</h3>
+                <h2>_;Attachments; Anexos; Załączniki</h2>
                 <section>
                     {#if (note.attachements && note.attachements.length > 0) || notesPlaceholder}
                         <List   self={note}
@@ -1924,7 +1922,7 @@
                 </section>
             {/if}
 
-            <h3>_; Attached to; Adjunto a; Przyłączony do</h3>
+            <h2>_; Attached to; Adjunto a; Przyłączony do</h2>
             <section>
                 <List   self={note}
                         a='connectedToList'
