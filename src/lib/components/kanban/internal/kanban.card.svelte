@@ -1,10 +1,10 @@
 <script lang="ts">
 	import {getContext, tick} from 'svelte'
     import{ push, link } from 'svelte-spa-router'
-    import {    contextItemsStore, 
-                isActive, 
-                isSelected, 
-                activateItem, 
+    import {    contextItemsStore,
+                isActive,
+                isSelected,
+                activateItem,
                 selectable,
                 editable,
 				showFloatingToolbar,
@@ -15,7 +15,7 @@
     import Properties from './kanban.props.svelte'
     import {KanbanCardTop, KanbanCardMiddle, KanbanCardBottom} from '../Kanban'
     //import { Tooltip } from 'flowbite-svelte';
-    
+
     export let item: object;
    // export let showMoveOperationsForItem: Function | undefined = undefined;
    // export let scrollViewToCard: Function | undefined = undefined;
@@ -24,16 +24,19 @@
     //export let onMoveUp: Function;
     //export let onMoveDown: Function;
     //export let onReplace: Function;
-    
+
     let definition = getContext("rKanban-definition");
 
     $: isCardActive = calculate_active(item, $contextItemsStore)
     $: isCardSelected = selected(item, $contextItemsStore)
 
     $: selectedClass = isCardSelected ? "!border-blue-300 dark:!border-blue-300/50" : "";
-    $: focusedClass = isCardActive ? "bg-stone-100 dark:bg-stone-700" : "";
+    $: focusedClass = isCardActive ? "bg-stone-300 dark:bg-stone-700 outline outline-8 outline-stone-300 dark:outline-stone-700 ring-1 ring-offset-8 ring-stone-300 dark:ring-stone-700" : "";
+
+
+
     $: isLinkLike = isCardActive && (!!definition.titleHref || !!definition.titleHrefFunc)
-    
+
 
     function calculate_active(...args)
     {
@@ -84,7 +87,7 @@
     {
         let rect = moveButton.getBoundingClientRect()
 
-        showFloatingToolbar(rect, MoveOperations, 
+        showFloatingToolbar(rect, MoveOperations,
                                 {
                                     definition: definition,
                                     item: item,
@@ -144,7 +147,7 @@
         sel.removeAllRanges();
         sel.addRange(range);
     }
-    
+
     let topProps :any;
     let middleProps :any;
     let bottomProps :any;
@@ -165,7 +168,7 @@
                 await tick();
                 setSelectionAtEnd(titleElement)
             }
-            
+
         }
         else if(field == "Summary")
         {
@@ -258,10 +261,9 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 
-<li class="mx-2 pt-2 pb-4 px-1 rounded-md border border-transparent {selectedClass} {focusedClass} scroll-mt-[50px] sm:scroll-mt-[40px]"
-     class:cursor-pointer={!isCardActive}
+<figure class="{selectedClass} {focusedClass} "
      on:click={activate}
-     use:selectable={item} 
+     use:selectable={item}
      bind:this={card}>
 
     <!--  -->
@@ -272,7 +274,7 @@
                 bind:this={moveButton}>
             <FaArrowsAlt/>
         </button>
-        
+
         {#if $$slots.kanbanCardTopProps}
             <div class="ml-auto flex flex-row gap-2">
                 <slot name="kanbanCardTopProps" element={item}/>
@@ -281,37 +283,31 @@
     </section-->
 
     {#if $$slots.kanbanCardTopProps}
-        <section class="flex flex-row justify-between">
             <slot name="kanbanCardTopProps" element={item}/>
-        </section>
     {/if}
     <Properties position={KanbanCardTop} {item} bind:this={topProps}/>
-    
+
 
     {#if isCardActive}
         {@const hasOpen = !!definition.onOpen}
         {@const canOpen = isLinkLike || hasOpen}
-        {@const openableClass = canOpen ? "sm:hover:cursor-pointer underline" : ""}
         {@const showIcon = showAttachementIcon()}
             <!-- whitespace-nowrap overflow-clip  -->
-            <h3 class=" h3 text-base font-semibold pb-1
-                         w-full sm:flex-none
-                        relative {openableClass}"
-                use:editable={{
-                    action: (text) => onTitleChanged(text), 
+            <h4     class = "font-semibold"
+                    use:editable={{
+                    action: (text) => onTitleChanged(text),
                     active: false,
                     readonly: definition.titleReadOnly,
                     onFinish: (d) => {titleElement.blur()},
                     onSoftEnter: async (text) => { onTitleChanged(text); await editProperty('Summary') }
                     }}
                 use:conditionalClick={{
-                    condition: hasOpen, 
+                    condition: hasOpen,
                     callback: performOpen}}
                 bind:this={titleElement}>
-
                 {#if isLinkLike}
-                    <a href={getHRef()} use:link>
-                        {item[definition.titleAttrib]}    
+                    <a class= "font-bols" href={getHRef()} use:link>
+                        {item[definition.titleAttrib]}
                     </a>
                 {:else}
                     {item[definition.titleAttrib]}
@@ -323,28 +319,23 @@
                         <FaRegFileAlt/>
                     </span>
                 {/if}
-            </h3>
 
+            </h4>
             <!--Tooltip type='light' triggeredBy="#attachement">Has attachement</Tooltip-->
-        
-          
-                        
+
+
+
     {:else}
         <!-- whitespace-nowrap overflow-clip  -->
-        <h3  class=" text-base font-semibold pb-1
-                    sm:text-base sm:font-semibold 
-                    w-full sm:flex-none
-                    relative">
+        <h4>
             {item[definition.titleAttrib]}
 
-        </h3>
+        </h4>
     {/if}
 
 
     {#if $$slots.kanbanCardMiddleProps}
-        <section class="w-full flex flex-row">
              <slot name="kanbanCardMiddleProps" element={item} />
-        </section>
     {/if}
 
     <Properties position={KanbanCardMiddle} {item} bind:this={middleProps}/>
@@ -352,27 +343,18 @@
     {#if item[definition.summaryAttrib] || summaryPlaceholder}
         {#key item[definition.summaryAttrib]}
             {#if isCardActive}
-                <p class="  text-sm sm:text-sm 
-                            
-                            text-stone-600 dark:text-stone-400
-                            
-                            overflow-hidden"
-                            use:editable={{
-                                action: (text) => onSummaryChanged(text), 
+                <figcaption use:editable={{
+                                action: (text) => onSummaryChanged(text),
                                 active: true,
                                 readonly: definition.summaryReadOnly,
                                 onFinish: (d) => {summaryPlaceholder = false}}}
                             bind:this={summaryElement}>
                     {item[definition.summaryAttrib]}
-                </p>
+                </figcaption>
             {:else}
-                <p class=" text-sm  sm:text-sm 
-                               
-                                text-stone-600 dark:text-stone-400
-                                
-                                overflow-hidden">
+                <figcaption>
                     {item[definition.summaryAttrib]}
-                </p>
+                </figcaption>
             {/if}
         {/key}
     {/if}
@@ -382,4 +364,4 @@
     {/if}
 
     <Properties position={KanbanCardBottom} {item} bind:this={bottomProps}/>
-</li>
+</figure>

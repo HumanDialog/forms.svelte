@@ -26,39 +26,31 @@
 
 </script>
 
+<hr class="my-0">
 {#if title}
-    <div class="w-full flex flex-row justify-between {title_border} mb-2">
-        <p class="text-xs uppercase font-semibold">
-         {title}
-            {#if collapsable}
-                <button class="inline-block ml-3 sm:ml-2 sm:mt-0.5 w-4 sm:w-3 h-4 sm:h-3" on:click={toggleCollapsed}>
-                    {#if collapsed}
-                        <FaChevronDown/>
-                    {:else}
-                        <FaChevronUp/>
-                    {/if}
-                </button>
-            {/if}
-        </p>
-
+    <figure >
         {#if moreHref}
-            <p class="text-xs uppercase font-semibold mr-2 text-stone-900 dark:text-stone-400">
+
+            <figcaption>
+                <div class="grid gap-4 grid-cols-2 grid-rows-1">
+                <span>{title}</span>
                 <a href={moreHref} class="text-right" use:link>
-                    {i18n({en: 'More...', es: 'Más...', pl: 'Więcej...'})}
+                <span class="text-sky-500 text-right">
+                        {i18n({en: 'More...', es: 'Más...', pl: 'Więcej...'})}
+                </span>
                 </a>
-            </p>
+                </div>
+            </figcaption>
+
+        {:else}
+            <figcaption >
+                {title}
+            </figcaption>
         {/if}
-    </div>
+    </figure>
 
 {/if}
 
-{#if !collapsable}
-    <ul class= "{list_border}">
-        <slot/>
-    </ul>
-{:else if !collapsed}
-    <ul class="{list_border}">
-        <slot/>
-    </ul>
-{/if}
-
+<div >
+    <slot/>
+</div>

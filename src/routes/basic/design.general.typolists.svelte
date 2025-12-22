@@ -864,17 +864,31 @@
                     <!--row 3------------------------------------------------------------------------------------------->
                     <figure class="pl-8">
                         <figcaption>
-                            <div class="grid gap-4 grid-cols-3 grid-rows-1">
-                                <span>OCT-254</span>
-                                <span class="text-center"></span>
+                            <div class="flex flex-row justify-between">
+                                <span>OCT-006</span>
+                                <span class="text-center">-ax-</span>
                                 <span class="text-right">15 listopad 25</span>
                             </div>
                         </figcaption>
-                        <h4 class="mt-1 -indent-8 ">
+                        <h4 class="-indent-8 ">
                                 <div class="inline-block w-4 h-4 ml-0 mr-3 align-baseline
                                         text-stone-700 dark:text-stone-400 ">
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calculator-icon lucide-calculator"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>                                </div>
-                                Since this is a list, I need at least two items.
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                                            class="lucide lucide-calculator-icon lucide-calculator">
+                                            <rect width="16" height="20" x="4" y="2" rx="2" />
+                                            <line x1="8" x2="16" y1="6" y2="6" />
+                                            <line x1="16" x2="16" y1="14" y2="18" />
+                                            <path d="M16 10h.01" />
+                                            <path d="M12 10h.01" />
+                                            <path d="M8 10h.01" />
+                                            <path d="M12 14h.01" />
+                                            <path d="M8 14h.01" />
+                                            <path d="M12 18h.01" />
+                                            <path d="M8 18h.01" />
+                                        </svg>
+                                </div>
+                                R2: Since this is a list, I need at least two items.
                         </h4>
 
 
@@ -891,6 +905,331 @@
                             zrobić wszystkiego, co jest potrzebne.
                         </figcaption>
                     </figure>
+                    <figure class="pl-8">
+                        <figcaption>
+                            <div class="flex flex-row justify-between">
+                                <span>OCT-006</span>
+                                <span class="text-center">-ax-</span>
+                                <span class="text-right">15 listopad 25</span>
+                            </div>
+                        </figcaption>
+                        <h4 class="-indent-8 ">
+                                <div class="inline-block w-4 h-4 ml-0 mr-3 align-baseline
+                                        text-stone-700 dark:text-stone-400 ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                                            class="lucide lucide-calculator-icon lucide-calculator">
+                                            <rect width="16" height="20" x="4" y="2" rx="2" />
+                                            <line x1="8" x2="16" y1="6" y2="6" />
+                                            <line x1="16" x2="16" y1="14" y2="18" />
+                                            <path d="M16 10h.01" />
+                                            <path d="M12 10h.01" />
+                                            <path d="M8 10h.01" />
+                                            <path d="M12 14h.01" />
+                                            <path d="M8 14h.01" />
+                                            <path d="M12 18h.01" />
+                                            <path d="M8 18h.01" />
+                                        </svg>
+                                </div>
+                                R2i: Since this is a list, I need at least two items.
+                        </h4>
+
+                    </figure>
+                    <figure class="pl-8">
+                        <figcaption>
+                            <div class="flex flex-row justify-between">
+                                <span>OCT-006</span>
+                                <span class="text-center">-ax-</span>
+                                <span class="text-right">15 listopad 25</span>
+                            </div>
+                        </figcaption>
+                        <h4 class="-indent-8 ">
+                                <div class="inline-block w-4 h-4 ml-0 mr-3 align-baseline
+                                        text-stone-700 dark:text-stone-400 ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                                            class="lucide lucide-calculator-icon lucide-calculator">
+                                            <rect width="16" height="20" x="4" y="2" rx="2" />
+                                            <line x1="8" x2="16" y1="6" y2="6" />
+                                            <line x1="16" x2="16" y1="14" y2="18" />
+                                            <path d="M16 10h.01" />
+                                            <path d="M12 10h.01" />
+                                            <path d="M8 10h.01" />
+                                            <path d="M12 14h.01" />
+                                            <path d="M8 14h.01" />
+                                            <path d="M12 18h.01" />
+                                            <path d="M8 18h.01" />
+                                        </svg>
+                                </div>
+                                R2ii: Since this is a list, I need at least two items.
+                        </h4>
+                    </figure>
+                    <figure class="pl-8">
+                        <figcaption>
+                            <div class="flex flex-row justify-between">
+                                <span>OCT-006</span>
+                                <span class="text-center">-ax-</span>
+                                <span class="text-right">15 listopad 25</span>
+                            </div>
+                        </figcaption>
+                        <h4 class="-indent-8 ">
+                                <div class="inline-block w-4 h-4 ml-0 mr-3 align-baseline
+                                        text-stone-700 dark:text-stone-400 ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                                            class="lucide lucide-calculator-icon lucide-calculator">
+                                            <rect width="16" height="20" x="4" y="2" rx="2" />
+                                            <line x1="8" x2="16" y1="6" y2="6" />
+                                            <line x1="16" x2="16" y1="14" y2="18" />
+                                            <path d="M16 10h.01" />
+                                            <path d="M12 10h.01" />
+                                            <path d="M8 10h.01" />
+                                            <path d="M12 14h.01" />
+                                            <path d="M8 14h.01" />
+                                            <path d="M12 18h.01" />
+                                            <path d="M8 18h.01" />
+                                        </svg>
+                                </div>
+                                R2iii: Since this is a list, I need at least two items.
+                        </h4>
+
+                    </figure>
+                    <figure class="pl-8">
+                        <figcaption>
+                            <div class="grid gap-4 grid-cols-3 grid-rows-1">
+                                <span>OCT-007</span>
+                                <span class="text-center"></span>
+                                <span class="text-right">15 listopad 25</span>
+                            </div>
+                        </figcaption>
+                        <h4 class="-indent-8 ">
+                                <div class="inline-block w-4 h-4 ml-0 mr-3 align-baseline
+                                        text-stone-700 dark:text-stone-400 ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                                            class="lucide lucide-calculator-icon lucide-calculator">
+                                            <rect width="16" height="20" x="4" y="2" rx="2" />
+                                            <line x1="8" x2="16" y1="6" y2="6" />
+                                            <line x1="16" x2="16" y1="14" y2="18" />
+                                            <path d="M16 10h.01" />
+                                            <path d="M12 10h.01" />
+                                            <path d="M8 10h.01" />
+                                            <path d="M12 14h.01" />
+                                            <path d="M8 14h.01" />
+                                            <path d="M12 18h.01" />
+                                            <path d="M8 18h.01" />
+                                        </svg>
+                                </div>
+                                R3: Since this is a list, I need at least two items.
+                        </h4>
+
+
+                        <figcaption>
+                            <div class="grid gap-4 grid-cols-3 grid-rows-1">
+                                <span>Andrzej</span>
+                                <span class="text-center"></span>
+                                <span class="text-right">Specyfikacje</span>
+                            </div>
+                        </figcaption>
+                        <figcaption>
+                            Bardzo kusząca wydaje sie opcja, by usunąć z interfejsu jakiekolwiek formatowania i zdać sie
+                            na typografię, jednak istnieje poważne zagrożenie, że w takiej sytuacji nie będdziemy mogli
+                            zrobić wszystkiego, co jest potrzebne.
+                        </figcaption>
+                    </figure>
+                    <!--row 4------------------------------------------------------------------------------------------>
+                    <figure class="pl-8">
+                        <figcaption>
+                            <span>FGC-008</span>
+                        </figcaption>
+                        <h4 class="-indent-8 ">
+                                <div class="inline-block w-4 h-4 ml-0 mr-3 align-baseline
+                                        text-stone-700 dark:text-stone-400 ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                                            class="lucide lucide-calculator-icon lucide-calculator">
+                                            <rect width="16" height="20" x="4" y="2" rx="2" />
+                                            <line x1="8" x2="16" y1="6" y2="6" />
+                                            <line x1="16" x2="16" y1="14" y2="18" />
+                                            <path d="M16 10h.01" />
+                                            <path d="M12 10h.01" />
+                                            <path d="M8 10h.01" />
+                                            <path d="M12 14h.01" />
+                                            <path d="M8 14h.01" />
+                                            <path d="M12 18h.01" />
+                                            <path d="M8 18h.01" />
+                                        </svg>
+                                </div>
+                                R4: Since this is a list, I need at least two items.
+                        </h4>
+
+
+                        <figcaption>
+                            <div class="grid gap-4 grid-cols-3 grid-rows-1">
+                                <span>Andrzej</span>
+                                <span class="text-center"></span>
+                                <span class="text-right">Specyfikacje</span>
+                            </div>
+                        </figcaption>
+                        <figcaption>
+                            Bardzo kusząca wydaje sie opcja, by usunąć z interfejsu jakiekolwiek formatowania i zdać sie
+                            na typografię, jednak istnieje poważne zagrożenie, że w takiej sytuacji nie będdziemy mogli
+                            zrobić wszystkiego, co jest potrzebne.
+                        </figcaption>
+                    </figure>
+                    <!--row 4------------------------------------------------------------------------------------------>
+                    <figure class="pl-8">
+                        <h4 class=" -indent-8 ">
+                                <div class="inline-block w-4 h-4 ml-0 mr-3 align-baseline
+                                        text-stone-700 dark:text-stone-400 ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                                            class="lucide lucide-calculator-icon lucide-calculator">
+                                            <rect width="16" height="20" x="4" y="2" rx="2" />
+                                            <line x1="8" x2="16" y1="6" y2="6" />
+                                            <line x1="16" x2="16" y1="14" y2="18" />
+                                            <path d="M16 10h.01" />
+                                            <path d="M12 10h.01" />
+                                            <path d="M8 10h.01" />
+                                            <path d="M12 14h.01" />
+                                            <path d="M8 14h.01" />
+                                            <path d="M12 18h.01" />
+                                            <path d="M8 18h.01" />
+                                        </svg>
+                                </div>
+                                R5: Since this is a list, I need at least two items.
+                        </h4>
+
+                        <figcaption>
+                            Bardzo kusząca wydaje sie opcja, by usunąć z interfejsu jakiekolwiek formatowania i zdać sie
+                            na typografię, jednak istnieje poważne zagrożenie, że w takiej sytuacji nie będdziemy mogli
+                            zrobić wszystkiego, co jest potrzebne.
+                        </figcaption>
+                    </figure>
+                    <!--row 4------------------------------------------------------------------------------------------>
+                    <figure class="pl-8">
+                        <h4 class="mt-1 -indent-8 ">
+                                <div class="inline-block w-4 h-4 ml-0 mr-3 align-baseline
+                                        text-stone-700 dark:text-stone-400 ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                                            class="lucide lucide-calculator-icon lucide-calculator">
+                                            <rect width="16" height="20" x="4" y="2" rx="2" />
+                                            <line x1="8" x2="16" y1="6" y2="6" />
+                                            <line x1="16" x2="16" y1="14" y2="18" />
+                                            <path d="M16 10h.01" />
+                                            <path d="M12 10h.01" />
+                                            <path d="M8 10h.01" />
+                                            <path d="M12 14h.01" />
+                                            <path d="M8 14h.01" />
+                                            <path d="M12 18h.01" />
+                                            <path d="M8 18h.01" />
+                                        </svg>
+                                </div>
+                                R5: Since this is a list, I need at least two items.
+                        </h4>
+
+                        <figcaption>
+                            Bardzo kusząca wydaje sie opcja, by usunąć z interfejsu jakiekolwiek formatowania i zdać sie
+                            na typografię, jednak istnieje poważne zagrożenie, że w takiej sytuacji nie będdziemy mogli
+                            zrobić wszystkiego, co jest potrzebne.
+                        </figcaption>
+                    </figure>
+                    <!--row 4------------------------------------------------------------------------------------------>
+                    <div class="pl-8">
+                        <h4 class="-indent-8 ">
+                                <div class="inline-block w-4 h-4 ml-0 mr-3 align-baseline
+                                        text-stone-700 dark:text-stone-400 ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                                            class="lucide lucide-calculator-icon lucide-calculator">
+                                            <rect width="16" height="20" x="4" y="2" rx="2" />
+                                            <line x1="8" x2="16" y1="6" y2="6" />
+                                            <line x1="16" x2="16" y1="14" y2="18" />
+                                            <path d="M16 10h.01" />
+                                            <path d="M12 10h.01" />
+                                            <path d="M8 10h.01" />
+                                            <path d="M12 14h.01" />
+                                            <path d="M8 14h.01" />
+                                            <path d="M12 18h.01" />
+                                            <path d="M8 18h.01" />
+                                        </svg>
+                                </div>
+                                R6i: Since this is a list, I need at least two items.
+                        </h4>
+                    </div>
+                    <!--row 4------------------------------------------------------------------------------------------>
+                    <div class="pl-8">
+                        <h4 class="-indent-8 ">
+                                <div class="inline-block w-4 h-4 ml-0 mr-3 align-baseline
+                                        text-stone-700 dark:text-stone-400 ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                                            class="lucide lucide-calculator-icon lucide-calculator">
+                                            <rect width="16" height="20" x="4" y="2" rx="2" />
+                                            <line x1="8" x2="16" y1="6" y2="6" />
+                                            <line x1="16" x2="16" y1="14" y2="18" />
+                                            <path d="M16 10h.01" />
+                                            <path d="M12 10h.01" />
+                                            <path d="M8 10h.01" />
+                                            <path d="M12 14h.01" />
+                                            <path d="M8 14h.01" />
+                                            <path d="M12 18h.01" />
+                                            <path d="M8 18h.01" />
+                                        </svg>
+                                </div>
+                                R6ii: Since this is a list, I need at least two items.
+                        </h4>
+
+                    </div>
+                    <div class="pl-8">
+                        <h4 class="-indent-8 ">
+                                <div class="inline-block w-4 h-4 ml-0 mr-3 align-baseline
+                                        text-stone-700 dark:text-stone-400 ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                                            class="lucide lucide-calculator-icon lucide-calculator">
+                                            <rect width="16" height="20" x="4" y="2" rx="2" />
+                                            <line x1="8" x2="16" y1="6" y2="6" />
+                                            <line x1="16" x2="16" y1="14" y2="18" />
+                                            <path d="M16 10h.01" />
+                                            <path d="M12 10h.01" />
+                                            <path d="M8 10h.01" />
+                                            <path d="M12 14h.01" />
+                                            <path d="M8 14h.01" />
+                                            <path d="M12 18h.01" />
+                                            <path d="M8 18h.01" />
+                                        </svg>
+                                </div>
+                                R7i: Since this is a list, I need at least two items.
+                        </h4>
+                    </div>
+                    <!--row 4------------------------------------------------------------------------------------------>
+                    <div class="pl-8">
+                        <h4 class="-indent-8 ">
+                                <div class="inline-block w-4 h-4 ml-0 mr-3 align-baseline
+                                        text-stone-700 dark:text-stone-400 ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                                            class="lucide lucide-calculator-icon lucide-calculator">
+                                            <rect width="16" height="20" x="4" y="2" rx="2" />
+                                            <line x1="8" x2="16" y1="6" y2="6" />
+                                            <line x1="16" x2="16" y1="14" y2="18" />
+                                            <path d="M16 10h.01" />
+                                            <path d="M12 10h.01" />
+                                            <path d="M8 10h.01" />
+                                            <path d="M12 14h.01" />
+                                            <path d="M8 14h.01" />
+                                            <path d="M12 18h.01" />
+                                            <path d="M8 18h.01" />
+                                        </svg>
+                                </div>
+                                R7ii: Since this is a list, I need at least two items.
+                        </h4>
+
+                    </div>
+                    <!--row 4------------------------------------------------------------------------------------------->
+
                     <!--row 4------------------------------------------------------------------------------------------->
                     <figure class="pl-8">
                         <figcaption>

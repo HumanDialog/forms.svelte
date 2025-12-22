@@ -4,6 +4,7 @@
                 SidebarGroup,
                 SidebarList,
                 SidebarItem,
+                PaperNav,
                 reloadMainContentPage,
                 Modal,
                 reloadWholeApp,
@@ -55,7 +56,7 @@
             {
                 user = cachedUser;
                 basket = user.BasketFolder
-                
+
                 pinnedElements = []
                 if(user.PinnedFolders.Folders)
                     pinnedElements = [...pinnedElements, ...user.PinnedFolders.Folders]
@@ -65,7 +66,7 @@
 
                 if(user.PinnedFolders.Tasks)
                     pinnedElements = [...pinnedElements, ...user.PinnedFolders.Tasks]
-                
+
                 pinnedElements.sort( (a, b) => a.Order - b.Order)
 
                 navPinnedElements?.reload(pinnedElements)
@@ -125,7 +126,7 @@
 
                     if(user.PinnedFolders.Tasks)
                         pinnedElements = [...pinnedElements, ...user.PinnedFolders.Tasks]
-                    
+
                     pinnedElements.sort( (a, b) => a.Order - b.Order)
 
                     navPinnedElements?.reload(pinnedElements)
@@ -416,10 +417,12 @@
 </script>
 
 {#key currentPath}
+<PaperNav>
 {#if sidebar}
     {#if groupFolders && groupFolders.length > 0}
         {#if $session.isActive}
             {#if pinnedElements && pinnedElements.length > 0}
+
                 <SidebarGroup title={i18n({en: 'Pinned', es: 'Sujetado', pl: 'Przypięte'})}
                         moreHref={user.PinnedFolders.href}>
 
@@ -429,7 +432,7 @@
                         <svelte:fragment let:item let:idx>
                             {@const href = item.href}
                             <SidebarItem   {href}
-                                            icon={getElementIcon(item)}
+                                            icon = 'file-text'
                                             bind:this={navPinnedItems[idx]}
                                             active={isRoutingTo(href, currentPath)}
                                             summary={ext(item.Summary)}>
@@ -442,17 +445,17 @@
 
             <SidebarGroup border>
                 <SidebarItem   href="/mynotes"
-                                icon={getElementIcon("Note")}
+                                icon = 'file-text'
                                 active={isRoutingTo("/mynotes", currentPath)}
                                 summary={i18n(["Recently edited notes", "Notas editadas recientemente", "Ostatnio edytowane notatki"])}
                                 selectable={mynotes_selection}>
-                    _; My notes; Mis notas; Moje notatki
+                    _; My notes; Mis notas; Moje notatki %
                 </SidebarItem>
             </SidebarGroup>
 
             <SidebarGroup title={i18n({en: 'Personal', es: 'Personales', pl: 'Osobiste'})}>
                 <SidebarItem   href="/myfolders"
-                                icon={getElementIcon("Folder")}
+                                icon = 'folder'
                                 active={isRoutingTo("/myfolders", currentPath)}
                                 summary={i18n(["Personal folders", "Carpetas personales", "Foldery osobiste"])}>
                     _; My Folders; Mis carpetas; Moje Foldery
@@ -469,7 +472,7 @@
                 <svelte:fragment let:item let:idx>
                     {@const href = item.href}
                     <SidebarItem   {href}
-                                    icon={getElementIcon(item)}
+                                    icon = {item.icon}
                                     bind:this={navGroupItems[idx]}
                                     active={isRoutingTo(href, currentPath)}
                                     summary={ext(item.Summary)}>
@@ -502,6 +505,7 @@
 
         {#if $session.isActive}
             {#if pinnedElements && pinnedElements.length > 0}
+                <p>##sidebar</p>
                 <SidebarGroup   title={i18n({en: 'Pinned', es: 'Sujetado', pl: 'Przypięte'})}
                                 moreHref={user.PinnedFolders.href}>
                     <SidebarList    objects={pinnedElements}
@@ -577,6 +581,7 @@
         <Spinner delay={3000}/>
     {/if}
 {/if}
+</PaperNav>
 {/key}
 
 <Modal  title={i18n(['Delete', 'Eliminar', 'Usuń'])}

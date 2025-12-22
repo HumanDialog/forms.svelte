@@ -1,8 +1,9 @@
 <script lang="ts">
     import {getContext} from 'svelte'
     import type {rList_definition} from './List'
-	
+
     export let a        :string;
+    export let icon     :string;
     export let editable :boolean = false;
     export let onChange :Function | undefined = undefined; // function(element, text, property)
     export let onOpen   :Function | undefined = undefined;
@@ -12,10 +13,11 @@
     export let downloadable : boolean = false
     export let downloadableFunc :Function | undefined = undefined
 
-    
+
     let definition :rList_definition = getContext("rList-definition");
-    
+
     definition.title=a;
+    definition.icon=icon;
     definition.title_editable=editable;
     definition.on_title_changed=onChange;
     definition.title_readonly = readonly;

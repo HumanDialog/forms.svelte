@@ -14,7 +14,7 @@
 				mainContentPageReloader,
                 Modal,
                 onErrorShowAlert,
-                Breadcrumb, Paper, Paginator,
+                Breadcrumb, Paper, PaperHeader, Paginator,
             i18n} from '$lib'
     import {FaCheck, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaArchive, FaUndo} from 'svelte-icons/fa'
     import {setBrowserRecentElement} from './basket.utils'
@@ -65,6 +65,8 @@
         if(allElementsNo % pageElementsNo)
             allPagesNo += 1
 
+        allPagesNo = 10
+
         pageNo = Math.max(0, Math.min(pageNo, allPagesNo-1))
 
         paginatorTop?.updatePageNo(pageNo)
@@ -97,6 +99,7 @@
                                                 {
                                                     Id: 2,
                                                     Association: 'MyTasks',
+                                                    Expressions:['Id','Title', 'href', 'Summary', 'icon'],
                                                     Filter: 'State <> STATE_FINISHED',
                                                     Sort: "UserOrder",
                                                     SubTree:[
@@ -187,7 +190,7 @@
     function isFinishRequested(task)
     {
         const idx = finishRequested.findIndex((t) =>  t == task.$ref)
-        return idx >= 0 
+        return idx >= 0
     }
 
     function requestFinish(task)
@@ -207,14 +210,14 @@
         {
             finishRequested.splice(idx, 1)
         }
-        
+
         setupFinishingTimer()
     }
 
     async function executeFinishingRequestedTasks()
     {
         let promises = []
-        finishRequested.forEach( $ref => 
+        finishRequested.forEach( $ref =>
             promises.push( reef.post(`${$ref}/Finish`, {}, onErrorShowAlert))
         )
 
@@ -222,7 +225,7 @@
 
         await Promise.all(promises)
         await reloadTasks(listComponent.KEEP_OR_SELECT_NEXT)
-        
+
     }
 
     function setupFinishingTimer()
@@ -410,7 +413,27 @@
             break
         }
     }
+    let list_properties = {
+        Title: "Title",
+        Summary: "Summary",
+        icon: "icon",
+        element:{
+            icon: "icon",
+            href: "href",
+            Title: "Title",
+            Summary: "Summary"
+        },
+        context:{
+            Folder:{
+                Summary: "Summary",
 
+            },
+            FolderFolder:{
+                Summary: "Summary",
+                head_right: "ModificationDate"
+            }
+        }
+    }
 </script>
 
 <svelte:head>
@@ -418,59 +441,30 @@
 </svelte:head>
 
 {#if user}
-    <Page   self={user}
-            toolbarOperations={pageOperations}
-            clearsContext='props sel'
-            title={title}>
+    <Page self={user} toolbarOperations={pageOperations} clearsContext='props sel' title={title}>
 
-            <Paper class="mb-64">
-
-            <section class="w-full place-self-center max-w-3xl">
-
-            {#if canconicalPath}
-                <Breadcrumb class="mt-1 mb-5" path={canconicalPath}/>
-            {/if}
+       <Paper>
+            <PaperHeader>
+                <!--Breadcrumb class="mt-1 mb-5" path={canconicalPath}/-->
+            </PaperHeader>
 
 
-            <section class="hidden w-full sm:flex flex-row mt-3 mr-2">
-                <p class="ml-3 pb-5 text-lg text-left">
-                    {title}
-                </p>
+        <h1>{title}</h1>
 
-                <section class="ml-auto">
-                    <Paginator {onPage} {pageNo} {allPagesNo} bind:this={paginatorTop}/>
-                </section>
-            </section>
+        <div class="flex flex-row justify-between">
+            <span></span>
+            <span class="text-center"></span>
+            <span class="pr-5 text-right"> <Paginator {onPage} {pageNo} {allPagesNo} bind:this={paginatorTop}/></span>
+        </div>
+
 
         <List   self={user}
                 a='MyTasks'
+                {list_properties}
                 toolbarOperations={taskOperations}
                 orderAttrib='UserOrder'
                 bind:this={listComponent}>
-            <ListTitle a='Title' hrefFunc={(task) => `/task/${task.Id}`}/>
-            <ListSummary a='Summary'/>
             <ListInserter action={addTask} icon/>
-
-            <ListComboProperty  name="TaskList" association>
-                <ComboSource objects={lists} key="$ref" name='Name'/>
-            </ListComboProperty>
-
-            <ListDateProperty name="DueDate"/>
-
-            <span slot="left" let:element>
-                {#if element.State == STATE_FINISHED || isFinishRequested(element)}
-                    <Icon component={FaRegCalendarCheck}
-                    on:click={(e) => undoFinishTask(e, element)}
-                    class="h-5 w-5  text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
-
-                {:else}
-                    <Icon component={FaRegCalendar}
-                        on:click={(e) => finishTask(e, element)}
-                        class="h-5 w-5  text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
-
-                {/if}
-            </span>
-
 
         </List>
 
@@ -479,7 +473,7 @@
                 <Paginator {onPage} {pageNo} {allPagesNo} bind:this={paginatorBtt}/>
             </section>
         </div>
-            
+
        </Paper>
 
     </Page>

@@ -5,29 +5,29 @@
         List, ListTitle, ListSummary, Spinner, i18n,
         contextItemsStore,
         getActiveItems,
-        clearActiveItem, 
+        clearActiveItem,
         ext
     }   from '$lib'
     import {FaRegFolder, FaRegFile, FaRegCalendarCheck, FaRegCalendar, FaFile, FaList, FaRegComments, FaRegClipboard, FaClipboardList, FaLevelUpAlt} from 'svelte-icons/fa'
     import { afterUpdate, onMount } from "svelte";
     import {transformClipboardToJSONReferences} from './basket.utils'
     import {getElementIcon} from './icons'
-	
-	
+
+
     export let destinationContainer = ''
     export let onHide = undefined
     export let onSizeChanged = undefined
     export let onRefreshView = undefined
     export let onAttach = undefined
     export let canSelectRootElements = false
-    
+
     export let whatToShow = undefined
-    
+
     let elements = []
     let canSelectElements = false
     let levelUpHRef = ''
     let currentLevelTitle = __APP_TITLE__
-    
+
     let reloadTicket = -1
     let lastReloadTicket = 0
 
@@ -50,7 +50,7 @@
 
         if(whatToShow == undefined)
         {
-            if(localStorage.lastPopupExplorerLocation)        
+            if(localStorage.lastPopupExplorerLocation)
                 whatToShow = localStorage.lastPopupExplorerLocation
             else
                 whatToShow = '/root'
@@ -120,7 +120,7 @@
                 ElementId: 0,
                 ElementType: '',
                 ElementNav: '',
-                Title: '_; My lists; Mis listas; Moje listy',
+                Title: '_; My lists; Mis listas; Moje listy#',
                 Summary: '',
                 icon: 'TaskList',
                 href: '/mylists',
@@ -200,7 +200,7 @@
     {
         canSelectElements = canSelectRootElements
         levelUpHRef = '/root'
-        currentLevelTitle = '_; My lists; Mis listas; Moje listy'
+        currentLevelTitle = '_; My lists; Mis listas; Moje listy! '
         let res = await reef.get(`/user/MyLists?Status<>TLS_GROUP_ARCHVIVED_LIST&fields=Id,$type,$ref,Name,Summary,href&sort=Order`, onErrorShowAlert);
         if(!res)
             return [  ]
@@ -326,7 +326,7 @@
         const folderId = parseInt(segments[2])
 
         canSelectElements = true
-    
+
         let res = await reef.post(`/Folder/${folderId}/query`,
                             {
                                 Id: 1,
@@ -370,8 +370,8 @@
                             },
                             onErrorShowAlert);
 
-        
-        
+
+
         if(!res)
         {
             levelUpHRef = '/root'
@@ -404,7 +404,7 @@
                         href: f.href,
                         Order: f.Order,
                         $ref: `./Folder/${f.FolderId}`
-                    })    
+                    })
                 })
             }
 
@@ -420,7 +420,7 @@
                         href: f.href,
                         Order: f.Order,
                         $ref: `./Note/${f.NoteId}`
-                    })    
+                    })
                 })
             }
 
@@ -436,7 +436,7 @@
                         href: f.href,
                         Order: f.Order,
                         $ref: `./Task/${f.TaskId}`
-                    })    
+                    })
                 })
             }
 
@@ -452,7 +452,7 @@
                         href: f.href,
                         Order: f.Order,
                         $ref: `./UploadedFile/${f.FileId}`
-                    })    
+                    })
                 })
             }
 
@@ -482,7 +482,7 @@
         const listId = parseInt(segments[2])
 
         canSelectElements = true
-    
+
         let res = await reef.post(`/TaskList/${listId}/query`,
                             {
                                 Id: 1,
@@ -509,8 +509,8 @@
                             },
                             onErrorShowAlert);
 
-        
-        
+
+
         if(!res)
         {
             levelUpHRef = '/root'
@@ -529,7 +529,7 @@
             currentLevelTitle = contextItem.Name
 
             let references = [ ]
-            
+
             contextItem.Tasks.forEach(t => {
                 references.push({
                     ElementId: t.Id,
@@ -554,7 +554,7 @@
         const taskId = parseInt(segments[2])
 
         canSelectElements = true
-    
+
         let res = await reef.post(`/Task/${taskId}/query`,
                             {
                                 Id: 1,
@@ -586,8 +586,8 @@
                             },
                             onErrorShowAlert);
 
-        
-        
+
+
         if(!res)
         {
             levelUpHRef = '/root'
@@ -606,7 +606,7 @@
             currentLevelTitle = contextItem.Title
 
             let references = [ ]
-            
+
             if(contextItem.Notes && contextItem.Notes.length > 0)
             {
                 contextItem.Notes.forEach(t => {
@@ -651,7 +651,7 @@
         const noteId = parseInt(segments[2])
 
         canSelectElements = true
-    
+
         let res = await reef.post(`/Note/${noteId}/query`,
                             {
                                 Id: 1,
@@ -683,8 +683,8 @@
                             },
                             onErrorShowAlert);
 
-        
-        
+
+
         if(!res)
         {
             levelUpHRef = '/root'
@@ -703,7 +703,7 @@
             currentLevelTitle = contextItem.Title
 
             let references = []
-            
+
             if(contextItem.Notes && contextItem.Notes.length > 0)
             {
                 contextItem.Notes.forEach(t => {
@@ -740,7 +740,7 @@
 
             return references
         }
-    }   
+    }
 
 
 
@@ -781,10 +781,10 @@
             onHide();
 
         selectedElements = getSelectedItems($contextItemsStore)
-        
+
         const selectedReferences = selectedElements.sort((a,b) => a.Order-b.Order).filter((e) => (e.ElementInfo & EIF_NOT_ALLOWED) == 0 )
         const references = transformClipboardToJSONReferences(selectedReferences)
-        
+
         if(!destinationContainer)
         {
             if(onAttach)
@@ -807,7 +807,7 @@
 
     }
 
-    
+
 
     function clearSelection(e)
     {
@@ -826,7 +826,7 @@
 
         clearActiveItem('handy')
         selectedElements = getSelectedItems($contextItemsStore)
-        
+
         reload()
     }
 
@@ -841,7 +841,27 @@
             reload();
         }
     }
+let list_properties = {
+        Title: "Title",
+        Summary: "Summary",
+        icon: "icon",
+        element:{
+            icon: "icon",
+            href: "href",
+            Title: "Title",
+            Summary: "Summary"
+        },
+        context:{
+            Folder:{
+                Summary: "Summary",
 
+            },
+            FolderFolder:{
+                Summary: "Summary",
+                head_right: "ModificationDate"
+            }
+        }
+    }
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -856,11 +876,11 @@
                     {@const isDisabled = !levelUpHRef}
                     {@const textColor= isDisabled ? 'text-stone-600 dark:text-stone-500' : 'text-stone-800 dark:text-stone-300 dark:hover:text-white '}
                     <button type="button"
-                            class="ml-2 mt-1.5 mr-3 w-4 h-4 
+                            class="ml-2 mt-1.5 mr-3 w-4 h-4
                             {textColor}
                             hover:bg-stone-700 active:bg-stone-300 border-stone-200
                             dark:hover:bg-stone-800 dark:active:bg-stone-600 dark:border-stone-600"
-                            on:click={()=>goUp()} 
+                            on:click={()=>goUp()}
                             disabled={isDisabled}>
                         <FaLevelUpAlt/>
                     </button>
@@ -870,10 +890,11 @@
                     {ext(currentLevelTitle)}
                 </h2>
             </div>
-            
+
 
             <List   objects={elements}
                     orderAttrib='Order'
+                    {list_properties}
                     multiselect={canSelectElements}
                     selectionKey='handy'
                     bind:this={listElement}

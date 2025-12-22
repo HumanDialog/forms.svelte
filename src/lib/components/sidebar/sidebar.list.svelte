@@ -9,7 +9,7 @@
 
     export let objects: object[];
     export let orderAttrib: string | undefined = undefined;
-    
+
     export let inserter: Function | undefined = undefined;
     export let inserterPlaceholder = 'New'
 
@@ -32,7 +32,7 @@
         if(prev)
         {
             objects = swapElements(objects, element, prev)
-            
+
             const tmp = element[orderAttrib]
             element[orderAttrib] = prev[orderAttrib]
             prev[orderAttrib] = tmp;
@@ -59,13 +59,13 @@
         {
             const next = getNext(objects, current);
             const nextOrder = next[orderAttrib];
-            
+
             current[orderAttrib] = nextOrder;
             informModification(current, orderAttrib);
 
             current = next;
         }
-        
+
         element[orderAttrib] = firstOrder
         informModification(element, orderAttrib);
 
@@ -73,7 +73,7 @@
         objects = insertAt(objects, 0, element);
 
         pushChanges();
-        
+
     }
 
     export function moveDown(element: object)
@@ -116,7 +116,7 @@
                 newElementOrder = last[orderAttrib] + ORDER_STEP;
             else
                 newElementOrder = MIN_ORDER;
-            
+
             inserter(text, newElementOrder)
         }
         else
@@ -148,20 +148,20 @@
         {/key}
     {/each }
 {:else}
-    <p class="text-xs text-center uppercase text-stone-900 dark:text-stone-400"> 
-        {i18n({ 
-            en: 'No elements', 
-            es: 'Falta de elementos', 
+    <p class="text-center uppercase text-stone-900 dark:text-stone-400">
+        {i18n({
+            en: 'No elements',
+            es: 'Falta de elementos',
             pl: 'Brak elementów'})}
     </p>
 {/if}
 
 {#if inserter}
     <Edit   class=" mb-2 ml-2
-            text-base font-normal 
-            text-stone-500 rounded-lg dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700" 
-            onEnter={onNewElement} 
-            placeholder={inserterPlaceholder} 
+            text-base font-normal
+            text-stone-500 rounded-lg dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700"
+            onEnter={onNewElement}
+            placeholder={inserterPlaceholder}
             inserter={true}
             onBlur={onBlurInserter}
             bind:this={inserterElement}>

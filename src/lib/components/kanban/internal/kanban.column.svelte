@@ -34,7 +34,7 @@
     {
         if(!column_element)
             return;
-        
+
         switch(what_to_do)
         {
             case SET_LEFT:
@@ -54,7 +54,7 @@
 
     let definition :rKanban_definition = getContext("rKanban-definition");
     let columnDef: rKanban_column = definition.columns[currentColumnIdx];
-    
+
     let     column_items :object[] | undefined = undefined;
 
     $: setup_data();
@@ -83,7 +83,7 @@
                             return true;
                     }
                     return false;
-                }   
+                }
 
                 column_items = allItems.filter( e => !isExplicitState(e))
             }
@@ -157,7 +157,7 @@
         }
     }
 
-    
+
 
     let inserter;
     const None = 0
@@ -197,7 +197,7 @@
 
             if(detail.cancel)
                 activateAfterDomUpdate = lastActivatedElement;
-            else  
+            else
             {
                 if(detail.incremental)
                 {
@@ -216,7 +216,7 @@
         }
 
         const oa = definition.orderAttrib
-        
+
         if(after && )
         {
 
@@ -253,7 +253,7 @@
             return item.Id;
         else if(item.$ref)
             return item.$ref;
-        else 
+        else
             return 0;
     }
 
@@ -276,9 +276,9 @@
         {
             return;
         }
-       
+
         activateItem('props', columnDef, columnDef.operations);
-        
+
         if(!e)
             headerElement?.scrollIntoView(
                 {
@@ -305,7 +305,7 @@
     {
         const container = document.getElementById("__hd_svelte_main_content_container")
         const containerRect = container?.getBoundingClientRect();
-        
+
         const assumed_space = containerRect.width
         const columns_no = definition.visibleColumnsNo();
         const default_column_width = Math.floor( assumed_space / columns_no );
@@ -328,29 +328,37 @@
             await add(KanbanColumnBottom);
         }
     }
-    
+
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 
 {#if (columnDef.state >=0) || ((column_items && column_items.length > 0))}
 
-<section class="    snap-center 
-                    sm:snap-align-none 
-                    flex-none sm:flex-1
-                    sm:min-h-[calc(100vh-8rem)] 
-                    min-h-[calc(100vh-5rem)] 
-                    rounded-md border border-transparent  
-                    {selected_class} {focused_class}"
-        
-        bind:this={columnContainerElement}            
-        style={styleWidth}
+<div class="    snap-center
+                sm:snap-start
+
+                w-full
+                sm:px-4
+                sm:w-1/2
+                md:w-1/3
+                xl:w-1/4
+                sm:min-w-[300px]
+
+                flex-none
+                sm:flex-1
+
+                {selected_class} {focused_class}"
+
+        bind:this={columnContainerElement}
+
         use:selectable={columnDef}
         on:click={activate}
         on:dblclick={dblclick}>
-    <header class:cursor-pointer={!is_row_active && columnDef.operations} bind:this={headerElement}>
-        <h2 class="mt-2 mb-2 text-base sm:text-base uppercase w-full min-h-[1rem] text-center whitespace-nowrap relative">
-            <span 
+    <figure bind:this={headerElement}>
+        <figcaption class = "text-right">S304</figcaption>
+        <h3 class=" text-center whitespace-nowrap relative">
+            <span
                 use:editable={{
                     action: (text) => onTitleChanged(text),
                     active: false
@@ -358,8 +366,8 @@
                 bind:this={titleElement}>
                 {columnDef.title}
             </span>
-            
-            {#if columnDef.finishing}
+
+            {#if false && columnDef.finishing}
                 <div class="inline-block text-green-600 h-3 w-3 ml-2">
                     <FaCheck/>
                 </div>
@@ -368,9 +376,9 @@
                     on:click|stopPropagation={(e) => add(KanbanColumnTop)}>
                 <FaPlus/>
             </button-->
-        </h2>
-    </header>
-    <ul class="w-full border-stone-400 dark:border-stone-700 pb-20" bind:this={column_element}>
+        </h3>
+    </figure>
+    <div class="w-full pb-0" bind:this={column_element}>
         {#if showInserterAfterId === KanbanColumnTop}
             <Inserter   onInsert={async (title, summary) => {await onInsert(currentColumnIdx, title, summary, KanbanColumnTop)}}
                         bind:this={inserter} />
@@ -378,16 +386,16 @@
 
         {#if column_items && column_items.length > 0}
             {#each column_items as element, item_idx (getItemKey(element))}
-                <Card   item={element} 
+                <Card   item={element}
                         bind:this={cards[item_idx]}>
                     <svelte:fragment slot="kanbanCardTopProps" let:element>
                         <slot name="kanbanCardTopProps" {element}/>
                     </svelte:fragment>
-                
+
                     <svelte:fragment slot="kanbanCardMiddleProps" let:element>
                         <slot name="kanbanCardMiddleProps" {element}/>
                     </svelte:fragment>
-                
+
                     <svelte:fragment slot="kanbanCardBottomProps" let:element>
                         <slot name="kanbanCardBottomProps" {element}/>
                     </svelte:fragment>
@@ -405,6 +413,6 @@
                         bind:this={inserter} />
         {/if}
 
-    </ul>
-</section>
+            </div>
+</div>
 {/if}

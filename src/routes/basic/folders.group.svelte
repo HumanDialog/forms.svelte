@@ -117,7 +117,7 @@
             order: newFolderAttribs.Order ?? 0,
             summary: newFolderAttribs.Summary ?? ''
         }, onErrorShowAlert)
-        
+
         if(!res)
             return null;
 
@@ -160,7 +160,7 @@
             operations: [
                 {
                     caption: '_; View; Ver; Widok',
-                    operations: [ 
+                    operations: [
                         {
                             caption: '_; New folder; Nueva carpeta; Nowy folder',
                             icon: FaRegFolder,
@@ -205,9 +205,9 @@
                             icon: FaCaretDown,
                             action: (f) => listComponent.moveDown(folder),
                             fab:'M04',
-                            tbr:'A' 
+                            tbr:'A'
                         },
-                    
+
                        {
                             caption: '_; Delete; Eliminar; Usuń',
                             //icon: FaTrash,
@@ -219,7 +219,7 @@
                             caption: '_; Properties; Propiedades; Właściwości',
                             action: (btt, rect)=> runElementProperties(btt, rect, folder, 'Folder')
                         }
-                        
+
                     ]
                 }
             ]
@@ -254,7 +254,7 @@
         }
     }
 
-    
+
     function getFolderIcon(folder)
     {
         if(folder.icon)
@@ -301,6 +301,7 @@
 
         <List   self={group}
                 a='Folders'
+                {list_properties}
                 toolbarOperations={folderOperations}
                 orderAttrib='Order'
                 bind:this={listComponent}>
@@ -315,7 +316,7 @@
 
         </List>
     </section>
-       
+
     </Paper>
     </Page>
 {:else}

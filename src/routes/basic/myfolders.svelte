@@ -12,7 +12,7 @@
                 ListComboProperty,
 				mainContentPageReloader,
                 Modal,
-                onErrorShowAlert, i18n, Paper,
+                onErrorShowAlert, i18n, Paper, PaperHeader,
                 Breadcrumb} from '$lib'
     import {querystring, location} from 'svelte-spa-router'
     import {FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCalendar, FaRegCalendarCheck, FaPen, FaArchive, FaEllipsisH} from 'svelte-icons/fa'
@@ -22,7 +22,7 @@
 
     let user = null;
     let listComponent;
-    
+
     const title = '_; My Folders; Mis carpetas; Moje foldery'
     let canonicalPath = [];
 
@@ -58,7 +58,7 @@
                                                 {
                                                     Id: 2,
                                                     Association: 'Folders',
-                                                    Expressions:['Id','Title', 'Summary', 'href', 'Order', '$ref', '$type'],
+                                                    Expressions:['Id','Title', 'Summary', 'href', 'Order', '$ref', 'icon', '$type'],
                                                     Sort: "Order",
                                                 }
                                             ]
@@ -163,7 +163,7 @@
             operations: [
                 {
                     caption: '_; View; Ver; Widok',
-                    operations: [ 
+                    operations: [
                         {
                             caption: '_; New folder; Nueva carpeta; Nowy folder',
                             icon: FaRegFolder,
@@ -208,9 +208,9 @@
                             icon: FaCaretDown,
                             action: (f) => listComponent.moveDown(folder),
                             fab:'M04',
-                            tbr:'A' 
+                            tbr:'A'
                         },
-                    
+
                        {
                             caption: '_; Delete; Eliminar; Usuń',
                             //icon: FaTrash,
@@ -275,6 +275,27 @@
         else
             return FaRegFolder
     }
+    let list_properties = {
+        Title: "Title",
+        Summary: "Summary",
+        icon: "icon",
+        element:{
+            icon: "icon",
+            href: "href",
+            Title: "Title",
+            Summary: "Summary"
+        },
+        context:{
+            Folder:{
+                Summary: "Summary",
+
+            },
+            FolderFolder:{
+                Summary: "Summary",
+                head_right: "ModificationDate"
+            }
+        }
+    }
 
 </script>
 
@@ -284,41 +305,38 @@
 
 {#if user}
 
-    <Page   self={user}
-            toolbarOperations={pageOperations}
-            clearsContext='props sel'
-            title={title}>
-            <Paper class="mb-64">
-            <section class="w-full place-self-center max-w-3xl">
+<Page   self={user}
+        toolbarOperations={pageOperations}
+        clearsContext='props sel'
+        title={title}>
+    <Paper>
+        <PaperHeader>
+            <Breadcrumb class="mt-1 mb-5" path={canonicalPath}/>
+        </PaperHeader>
 
-            {#if canonicalPath}
-                <Breadcrumb class="mt-1 mb-5" path={canonicalPath} />
-            {/if}
+        <h1>{title}</h1>
+
+        <div class="flex flex-row justify-between">
+            <span></span>
+            <span class="text-center"></span>
+            <!--span class="pr-5 text-right"> <Paginator {onPage} {pageNo} {allPagesNo} bind:this={paginatorTop}/></span-->
+        </div>
 
 
-            <p class="hidden sm:block mt-3 ml-3 pb-5 text-lg text-left">
-                {title}
-            </p>
 
         <List   self={user}
                 a='Folders'
+                {list_properties}
                 toolbarOperations={folderOperations}
                 orderAttrib='Order'
                 bind:this={listComponent}>
-            <ListTitle a='Title' hrefFunc={(folder) => `${folder.href}`}/>
-            <ListSummary a='Summary'/>
             <ListInserter action={addFolder} icon/>
 
-            <span slot="left" let:element>
-                <Icon component={getFolderIcon(element)}
-                    class="h-5 w-5  text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
-            </span>
-
         </List>
-    </section>
 
-        
-     </Paper>   
+
+
+     </Paper>
     </Page>
 {:else}
     <Spinner delay={3000}/>

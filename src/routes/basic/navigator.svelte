@@ -1,13 +1,13 @@
 <script>
-    import {    Spinner, 
-                startEditing, 
-                SidebarGroup, 
-                SidebarList, 
-                SidebarItem, 
-                reloadMainContentPage, 
+    import {    Spinner,
+                startEditing,
+                SidebarGroup,
+                SidebarList,
+                SidebarItem,
+                reloadMainContentPage,
                 Modal,
                 reloadWholeApp,
-                Input, 
+                Input,
                 onErrorShowAlert,
                 randomString, UI, i18n, ext, isDeviceSmallerThan} from '$lib'
     import {FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash, FaArchive, FaUsers, FaPlus, FaCalendarDay, FaUserFriends, FaRegCalendar} from 'svelte-icons/fa'
@@ -15,7 +15,7 @@
     import {reef, session} from '@humandialog/auth.svelte'
 	import { afterUpdate, onMount, tick } from 'svelte';
     import {cache} from './cache.js'
-    
+
     export let sidebar = true;
 
     let userTaskLists = [];
@@ -23,7 +23,7 @@
     let user = {};
     let navUserLists;
     let navGroupLists;
-    
+
     $: currentPath = $location;
 
     const navRefresher = {
@@ -36,14 +36,14 @@
     {
         initNavigator();
         UI.navigator = navRefresher
-        
+
         return () => {
             if(UI.navigator == navRefresher)
                 UI.navigator = null
-        }      
+        }
     })
 
-    
+
     async function initNavigator()
     {
         initGroupSelector();
@@ -123,7 +123,7 @@
             user = null
             userTaskLists = []
         }
-        
+
         if(results[1])
             groupTaskLists = results[1].TaskList;
         else
@@ -139,8 +139,8 @@
 
     async function addList(listName, order)
     {
-        await reef.post('/group/CreateList', 
-                        { 
+        await reef.post('/group/CreateList',
+                        {
                             Name: listName,
                             Order: order
                         },
@@ -150,7 +150,7 @@
 
     async function changeName(list, name)
     {
-        let res = await reef.post(`/group/Lists/${list.Id}/set`, 
+        let res = await reef.post(`/group/Lists/${list.Id}/set`,
                                 {
                                     Name: name
                                 },
@@ -162,7 +162,7 @@
     {
         list.Summary = summary
         navItem.updateSummary(summary)
-        let res = await reef.post(`/group/Lists/${list.Id}/set`, 
+        let res = await reef.post(`/group/Lists/${list.Id}/set`,
                                 {
                                     Summary: summary
                                 },
@@ -173,8 +173,8 @@
     async function finishAllOnList(list)
     {
         await reef.post(`/group/Lists/${list.Id}/FinishAll`, {}, onErrorShowAlert)
-        
-        if( isRoutingTo(`/listboard/${list.Id}`, currentPath) || 
+
+        if( isRoutingTo(`/listboard/${list.Id}`, currentPath) ||
             isRoutingTo(`/tasklist/${list.Id}`, currentPath))
         {
             reloadMainContentPage();
@@ -182,9 +182,9 @@
     }
 
     async function finishAllMyTasks()
-    {       
+    {
         await reef.post(`/user/FinishTasks`, {}, onErrorShowAlert)
-        
+
         if(isRoutingTo('/mytasks', currentPath))
         {
             reloadMainContentPage();
@@ -201,7 +201,7 @@
         if(linkPath.startsWith('#'))
             linkPath = linkPath.substring(1)
 
-        
+
 
         if(currentPath.startsWith(linkPath))
             return true;
@@ -209,7 +209,7 @@
             return false;
     }
 
-    
+
     function getUserListOperations(domNode, dataItem)
     {
         let menuOperations = [];
@@ -223,7 +223,7 @@
         return menuOperations;
     }
 
-    
+
     let deleteModal;
     let listToDelete;
     function askToDelete(list)
@@ -347,16 +347,16 @@
                 }
             }))
         }
-        
+
         currentGroup = $session.tenants.find(t => t.id == $session.tid)
-        
+
     }
 
     function getGroupsMenu()
     {
         if(!showGroupsSwitchMenu)
             return []
-        
+
         let options = []
         $session.tenants.forEach(tInfo =>
             options.push({
@@ -366,7 +366,7 @@
                 action: async (f) => {
                     $session.setCurrentTenantAPI(tInfo.url, tInfo.id)
                     push('/')
-                    
+
                     await tick()
                     reloadWholeApp();
                 }
@@ -384,7 +384,7 @@
                 action: (f) => launchNewGroupWizzard()
             })
         }
-        
+
         return options;
     }
 
@@ -408,7 +408,7 @@
         {
             return onNewGroupCancel()
         }
-        
+
         const appInstanceId = $session.configuration.tenant
         if(!appInstanceId)
         {
@@ -435,7 +435,7 @@
             }
             else
             {
-                const result = await res.json();  
+                const result = await res.json();
                 console.error(result.error);
                 onErrorShowAlert(result.error)
             }
@@ -456,11 +456,12 @@
 </script>
 
 {#key currentPath}
+<div class="w-full prose prose-base prose-zinc dark:prose-invert prose-a:no-underline ">
 {#if sidebar}
     {#if groupTaskLists && groupTaskLists.length > 0}
         {#if showGroupsSwitchMenu}
             <SidebarGroup>
-                <SidebarItem    href=""    
+                <SidebarItem    href=""
                                 icon={FaUsers}
                                 operations={(n) => getGroupsMenu()}
                                 selectable={currentGroup}>
@@ -468,66 +469,66 @@
                 </SidebarItem>
             </SidebarGroup>
         {/if}
-        
+
         {#if $session.isActive}
             {@const border=showGroupsSwitchMenu}
             <SidebarGroup border title={i18n({en: 'Current work', es: 'Trabajo actual', pl: 'Bieżąca praca'})}>
                 <SidebarItem   href="/myday"
-                                icon={FaCalendarDay}
+                                icon='calendar'
                                 active={isRoutingTo("/myday", currentPath)}
                                 selectable={myday}>
                     _; My day; Mi día; Mój dzień
                 </SidebarItem>
                 <SidebarItem   href="/teamday"
-                                icon={FaUserFriends}
+                                icon='calendars'
                                 active={isRoutingTo("/teamday", currentPath)}
                                 selectable={teamday}>
                     _; Common work; Trabajo común; Wspólna praca
                 </SidebarItem>
                 <SidebarItem   href="/mytasks"
-                                icon={FaRegCalendar}
+                                icon='square-pen'
                                 active={isRoutingTo("/mytasks", currentPath)}
                                 selectable={user}> <!-- summary={i18n(["All active tasks assigned to me", "Tareas activas asignadas a mí", "Aktywne zadania przypisane do mnie"])} -->
                     _; Assigned to me; Asignado a mí; Przydzielone do mnie
                 </SidebarItem>
             </SidebarGroup>
 
-            <SidebarGroup   title={i18n({en: 'My lists', es: 'Mis listas', pl: 'Moje listy'})}
+            <SidebarGroup   title={i18n({en: 'My lists', es: 'Mis listas', pl: 'Moje listy%'})}
                             moreHref="/mylists">
-            
-                <SidebarList    objects={userTaskLists} 
+
+                <SidebarList    objects={userTaskLists}
                                 orderAttrib='Order'
                                 bind:this={navUserLists}>
                     <svelte:fragment let:item let:idx>
                         {@const href = item.href}
                         <SidebarItem   {href}
-                                        icon={FaList}
+                                        icon='notebook'
                                         active={isRoutingTo(href, currentPath)}
                                         summary={ext(item.Summary)}>
                             {ext(item.Name)}
                         </SidebarItem>
                     </svelte:fragment>
-                </SidebarList> 
+                </SidebarList>
             </SidebarGroup>
 
         {/if}
 
         <SidebarGroup   title={i18n({en: 'Common lists', es: 'Listas comunes', pl: 'Wspólne listy'})}
                         moreHref="/alllists">
-           
-            <SidebarList    objects={groupTaskLists} 
+
+            <SidebarList    objects={groupTaskLists}
                             orderAttrib='Order'
                             bind:this={navGroupLists}>
                 <svelte:fragment let:item let:idx>
                     {@const href = item.href}
                     <SidebarItem   {href}
-                                    icon={FaList}
+                                    icon='netebook'
                                     active={isRoutingTo(href, currentPath)}
                                     summary={ext(item.Summary)}>
                         {ext(item.Name)}
                     </SidebarItem>
                 </svelte:fragment>
-            </SidebarList> 
+            </SidebarList>
         </SidebarGroup>
 
     {:else}
@@ -540,7 +541,7 @@
 
     {#if showGroupsSwitchMenu}
         <SidebarGroup>
-            <SidebarItem    href=""    
+            <SidebarItem    href=""
                             icon={FaUsers}
                             operations={(n) => getGroupsMenu()}
                             item={currentGroup}>
@@ -548,7 +549,7 @@
             </SidebarItem>
         </SidebarGroup>
     {/if}
-        
+
         {#if $session.isActive}
             {@const border=showGroupsSwitchMenu}
             <SidebarGroup border title={i18n({en: 'Current work', es: 'Trabajo actual', pl: 'Bieżąca praca'})}>
@@ -569,10 +570,10 @@
                 </SidebarItem>
             </SidebarGroup>
 
-            <SidebarGroup title={i18n({en: 'My lists', es: 'Mis listas', pl: 'Moje listy'})}
+            <SidebarGroup title={i18n({en: 'My lists', es: 'Mis listas', pl: 'Moje listy%%'})}
                             moreHref="/mylists">
-                            
-                <SidebarList    objects={userTaskLists} 
+
+                <SidebarList    objects={userTaskLists}
                                 orderAttrib='Order'
                                 bind:this={navUserLists}>
                     <svelte:fragment let:item let:idx>
@@ -584,14 +585,14 @@
                             {ext(item.Name)}
                         </SidebarItem>
                     </svelte:fragment>
-                </SidebarList> 
+                </SidebarList>
             </SidebarGroup>
         {/if}
-        
+
         <SidebarGroup title={i18n({en: 'Common lists', es: 'Listas comunes', pl: 'Wspólne listy'})}
                         moreHref="/alllists">
-                        
-            <SidebarList    objects={groupTaskLists} 
+
+            <SidebarList    objects={groupTaskLists}
                             orderAttrib='Order'
                             bind:this={navGroupLists}>
                 <svelte:fragment let:item let:idx>
@@ -603,13 +604,14 @@
                         {ext(item.Name)}
                     </SidebarItem>
                 </svelte:fragment>
-            </SidebarList> 
+            </SidebarList>
         </SidebarGroup>
 
     {:else}
         <Spinner delay={3000}/>
     {/if}
 {/if}
+</div>
 {/key}
 
 <!--Modal  title={i18n(['Delete', 'Eliminar', 'Usuń'])}
@@ -633,9 +635,9 @@
         onCancelCallback={onNewGroupCancel}
         icon={FaUsers}
 >
-    <Input  label={i18n(['Group name', 'Nombre del grupo', 'Nazwa grupy'])} 
-            placeholder='' 
-            self={newGroupParams} 
+    <Input  label={i18n(['Group name', 'Nombre del grupo', 'Nazwa grupy'])}
+            placeholder=''
+            self={newGroupParams}
             a="name"
             required/>
 </Modal>

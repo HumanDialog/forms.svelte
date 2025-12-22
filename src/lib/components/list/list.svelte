@@ -1,17 +1,17 @@
 <script lang="ts">
     import {setContext, getContext, afterUpdate, tick, onMount} from 'svelte'
     import {data_tick_store, contextItemsStore, contextTypesStore } from '../../stores'
-    import {activateItem, getActive, clearActiveItem, parseWidthDirective, getPrev, getNext, swapElements, getLast, insertAfter, getActiveCount, addActiveItem, getFirst, insertAt, remove as removeFrom} from '../../utils' 
+    import {activateItem, getActive, clearActiveItem, parseWidthDirective, getPrev, getNext, swapElements, getLast, insertAfter, getActiveCount, addActiveItem, getFirst, insertAt, remove as removeFrom} from '../../utils'
     import Icon from '../icon.svelte'
     import {FaRegCircle, FaRegCheckCircle} from 'svelte-icons/fa/'
-    
+
     import {rList_definition} from './List'
-    import List_element from './internal/list.element.svelte'
+    import ListElement from './internal/list.element.svelte'
     import Inserter from './internal/list.inserter.svelte'
 	import { informModification, pushChanges } from '$lib/updates';
-    
+
     export let title    :string = ''
-    
+    export let list_properties:  object | undefined = undefined;
     export let self     :object | null = null;
     export let a        :string = '';
 
@@ -31,6 +31,8 @@
     export let selectionKey = 'props'
     export let multiselect: boolean = false
 
+    export let component_id: string
+
     // reload selection parameter
     export const CLEAR_SELECTION = 0;
     export const KEEP_SELECTION = -1;
@@ -47,7 +49,7 @@
     setContext('rIs-table-component', true);
 
     definition.name = `List ${a}`
-    
+
 
     let     item  :object | null = null
     let     items :object[] | undefined = undefined;
@@ -62,18 +64,18 @@
     let activate_after_dom_update :object | null =null;
 
     let inserter;
-    
+
     if(toolbarOperations)
         clearActiveItem(selectionKey)
 
-    let  last_tick = -1   
+    let  last_tick = -1
     $: setup($data_tick_store, $contextItemsStore);
 
     function setup(...args)
     {
-        last_tick = $data_tick_store            
+        last_tick = $data_tick_store
         item = self ?? $contextItemsStore[ctx];
-        
+
         items = undefined;
 
         if(objects)
@@ -98,7 +100,7 @@
             return item.$ref;
         else if(item.Id)
             return item.Id;
-        else 
+        else
             return 0;
     }
 
@@ -164,7 +166,7 @@
                     if(selectedItemIdx != undefined && selectedItemIdx >= 0 && selectedItemIdx < items.length-1)
                         altSelectElementId = getItemKey(items[selectedItemIdx+1]) ?? null;
                 }
-                
+
             }
             break;
 
@@ -182,9 +184,9 @@
         else
             self = data;
 
-        
+
         rereder();
-        
+
 
         if(selectElementId != null)
         {
@@ -202,7 +204,7 @@
                 {
                     activate_after_dom_update = itemToActivate;
                 }
-            }       
+            }
         }
         else
             clearActiveItem(selectionKey)
@@ -221,7 +223,7 @@
             return;
 
         items = swapElements(items, element, prev);
-        
+
         [element[orderAttrib], prev[orderAttrib]] = [prev[orderAttrib], element[orderAttrib]]
 
         await tick();
@@ -236,15 +238,15 @@
     {
         if(!orderAttrib)
             return;
-        
+
         let next = getNext(items, element);
         if(!next)
             return;
 
         items = swapElements(items, element, next);
-        
+
         [element[orderAttrib], next[orderAttrib]] = [next[orderAttrib], element[orderAttrib]]
-        
+
         await tick();
         scrollToSelectedElement()
 
@@ -269,7 +271,7 @@
         {
             const next = getNext(items, current);
             const nextOrder = next[orderAttrib];
-            
+
             current[orderAttrib] = nextOrder;
             informModification(current, orderAttrib);
 
@@ -281,7 +283,7 @@
 
         items = removeFrom(items, element);
         items = insertAt(items, 0, element);
-        
+
         await tick();
         scrollToSelectedElement()
 
@@ -298,7 +300,7 @@
     {
         if(!definition.can_insert)
             return;
-        
+
         show_insertion_row_after_element = after ?? END_OF_LIST;
 
         last_activated_element = getActive(selectionKey);
@@ -311,7 +313,7 @@
             return;
 
         inserter.run( async (detail) => {
-            
+
             if(detail.softEnter)
                 return;
 
@@ -319,7 +321,7 @@
 
             if(detail.cancel)
                 activate_after_dom_update = last_activated_element;
-            else  
+            else
             {
                 if(detail.incremental && definition.insert_incremental)
                 {
@@ -342,7 +344,7 @@
         if(activeIdx >= 0)
             rows[activeIdx].scrollToView()
     }
-    
+
 
     export function remove(element :object)
     {
@@ -351,7 +353,7 @@
             return;
 
         let active_element = getActive(selectionKey);
-        
+
         if(active_element == element)
         {
             if(removing_idx + 1 < items.length)
@@ -368,7 +370,7 @@
         let editing_idx = items?.findIndex( e => e == element)
         if(editing_idx < 0)
             return;
-        
+
         rows[editing_idx].editProperty(property_name);
     }
 
@@ -378,7 +380,7 @@
 
         if(multiselect)
         {
-            let lastSelectedItem = getActive(selectionKey) 
+            let lastSelectedItem = getActive(selectionKey)
             if(lastSelectedItem)
             {
                 let ops = []
@@ -394,7 +396,7 @@
         }
         else
         {
-            let lastSelectedItem = getActive(selectionKey) 
+            let lastSelectedItem = getActive(selectionKey)
             if(lastSelectedItem)
             {
                 let ops = []
@@ -405,8 +407,8 @@
             else
                 clearActiveItem(selectionKey)
         }
-        
-        
+
+
     }
 
     export function isMultiselectionEnabled()
@@ -433,10 +435,10 @@
         for(let i=fromIdx; i<items.length; i++)
         {
             let el = items[i];
-            
+
             el[orderAttrib] = order;
             informModification(el, orderAttrib)
-            
+
             order += ORDER_STEP;
         }
 
@@ -476,7 +478,7 @@
                 const lastOrder = lastElement[orderAttrib];
                 return lastOrder + ORDER_STEP;
             }
-            else 
+            else
                 return MIN_ORDER;
         }
     }
@@ -502,7 +504,7 @@
         else
             items = [...items, insertedElement];
 
-       
+
         /*if(objects)
         {
             if(after)
@@ -519,9 +521,9 @@
                 item[a].push(insertedElement);
         }
         */
-        
+
         activate_after_dom_update = insertedElement;
-        
+
         //rereder();
     }
 
@@ -545,9 +547,9 @@
         else
         {
             const operations = multiselectOperations(items);
-            items?.forEach(itm => addActiveItem(selectionKey, itm, operations))        
+            items?.forEach(itm => addActiveItem(selectionKey, itm, operations))
         }
-        
+
         if(e)
             e.stopPropagation()
     }
@@ -558,23 +560,27 @@
 
 
 {#if title}
-    <p class="hidden sm:block mt-3 ml-3 pb-5 text-lg text-left">{title}</p>
+    <p class="hidden sm:block mt-3 ml-3 pb-5 text-lg text-left">##ListTitle: {title}</p>
     <!--hr class="hidden sm:block w-full"-->
 {/if}
+
 
 <!--div class="w-full h-full overflow-y-auto overscroll-contain"-->
 
 
     {#if items && items.length > 0 }
+    <!--
         {#if false && multiselect}
             {@const icon = (multiselectionMode == SELECT_ALL) ? FaRegCircle : FaRegCheckCircle}
             <Icon component={icon} class="h-5 w-5 sm:h-4 sm:w-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 mr-3"
                     on:click={toggleSelectAll}/>
         {/if}
-        
+    -->
+
         {#each items as element, i (getItemKey(element))}
-            
-            <List_element   item={element} 
+
+            <ListElement   item={element}
+                            {list_properties}
                             {toolbarOperations}
                             {contextMenu}
                             {key}
@@ -583,12 +589,12 @@
                             {selectionKey}
                             bind:this={rows[i]}
                             >
-            
+
                 <span slot="left" let:element>
                     <slot name="left" {element}/>
                 </span>
-            </List_element>
-            
+            </ListElement>
+
             {#if show_insertion_row_after_element == element}
                 <Inserter   onInsert={async (title, summary) => {await insert(title, summary, show_insertion_row_after_element)}}
                             icon={definition.inserter_icon}
@@ -605,4 +611,3 @@
 
 
 <!--/div-->
-

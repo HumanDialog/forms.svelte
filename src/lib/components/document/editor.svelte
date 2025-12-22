@@ -35,7 +35,7 @@
     import { getAttributes } from "@tiptap/core";
 
     import {data_tick_store, contextItemsStore, contextTypesStore, onErrorShowAlert, pushToolsActionsOperations, popToolsActionsOperations, fabHiddenDueToPopup} from '../../stores.js'
-    import {informModification, pushChanges} from '../../updates.js'
+    import {setjItemProperty, pushChanges} from '../../updates.js'
     import {isDeviceSmallerThan, parseWidthDirective, refreshToolbarOperations, UI} from '../../utils.js'
     import Palette from './internal/palette.svelte'
 
@@ -59,7 +59,6 @@
     export let context = '';
     export let typename = '';
     export let compact = false;
-    export let onSingleChange: Function|undefined = undefined
     export let onApplyChanges: Function|undefined = undefined;
 
     export let onFocusCb = undefined;
@@ -793,7 +792,7 @@
         }
     })
 
-    interface CustomLinkOptions 
+    interface CustomLinkOptions
     {
         //showMap: (val: boolean) => void;
         //setMapQuery: (val: string) => void;
@@ -820,14 +819,14 @@
                     if (event.button !== 0) {
                         return false
                     }
-                    
+
                     if (!view.editable) {
                         return false
                     }
 
                     const attrs = getAttributes(view.state, "link");
                     const link = (event.target as HTMLElement)?.closest("a");
-                    
+
                     if (link && attrs.href) {
                         event.preventDefault();
                         event.stopPropagation();
@@ -853,7 +852,7 @@
             editable: !readOnly,
             editorProps: {
                 attributes: {
-                    class: `${cs} ${appearance_class} prose prose-base sm:prose-base dark:prose-invert ${additional_class}  whitespace-pre-wrap focus:outline-none`,
+                    class: `${cs} ${appearance_class} ${additional_class}  whitespace-pre-wrap focus:outline-none`,
                 },
             },
 			element: editorElement,
@@ -919,10 +918,7 @@
                     hasChangedValue = true;
                     changedValue = editor.getHTML()
 
-                    if(onSingleChange)
-                        onSingleChange(changedValue)
-                    else
-                        logChanges()
+                    logChanges()
 
                     handleImagesChanges(transaction)
                 }
@@ -1074,13 +1070,7 @@
 
     function logChanges()
     {
-        item[a] = changedValue;
-        //value = changed_value;
-
-        if(typename)
-            informModification(item, a, typename);
-        else
-            informModification(item, a);
+        setjItemProperty(item, a, changedValue);
     }
 
     // =========================================== Palette ===========================================================================
@@ -1631,15 +1621,15 @@
 
     const paletteCommands  = [
 
-                {    caption: i18n({en: 'Styles', es: 'Estilos', pl: 'Style'}),       
+                {    caption: i18n({en: 'Styles', es: 'Estilos', pl: 'Style'}),
                     separator: true },
                 ...paletteStylesCommands(),
 
-                {    caption: i18n({en: 'Text', es: 'Texto', pl: 'Tekst'}),         
+                {    caption: i18n({en: 'Text', es: 'Texto', pl: 'Tekst'}),
                     separator: true },
                 ...paletteMarksCommands(),
 
-                {   caption: i18n({en: 'Insert', es: 'Insertar', pl: 'Wstaw'}),        
+                {   caption: i18n({en: 'Insert', es: 'Insertar', pl: 'Wstaw'}),
                     separator: true },
                 ...paletteInsertCommands()
             ];
@@ -1732,7 +1722,7 @@
 
         commands = [...commands, { caption: i18n({en: 'Text', es: 'Texto', pl: 'Tekst'}),     separator: true }]
         commands = [...commands, ...paletteMarksCommands()]
-        
+
 
         commands = [...commands, {   caption: i18n({en: 'Insert', es: 'Insertar', pl: 'Wstaw'}),  separator: true }]
         if(extraInsertPaletteCommands && extraInsertPaletteCommands.length > 0)
@@ -1807,7 +1797,7 @@
 
 
 
-<div on:click 
+<div on:click
     bind:this={editorElement} />
 
 <Palette    commands={getPaletteCommands()}

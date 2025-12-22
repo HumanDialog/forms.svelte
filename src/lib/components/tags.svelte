@@ -1,6 +1,6 @@
 <script lang="ts">
     import {tick, getContext} from 'svelte'
-    import Tag from './tag.svelte' 
+    import Tag from './tag.svelte'
     import FaPlus from 'svelte-icons/fa/FaPlus.svelte'
 	import Combo from './combo/combo.svelte'
     import ComboItem from './combo/combo.item.svelte'
@@ -16,12 +16,13 @@
     export let a = '';
     export let context = '';
     export let typename = '';
+    export let typo: boolean = true
 
     export let onSelect: any|undefined = undefined
     export let onUpdateAllTags: any|undefined = undefined
     //export let onRemove: any|undefined = undefined
     export let canChangeColor: boolean = false;
-   
+
     export let compact :boolean = true;
     export let inContext :string = ''   // in compact mode
     export let pushChangesImmediately: boolean = true;
@@ -50,7 +51,7 @@
         if(!tags)
         {
             item = self ?? $contextItemsStore[ctx];
-                
+
             if(!typename)
                 typename = $contextTypesStore[ctx];
 
@@ -64,7 +65,7 @@
                     typename = s[1];
                 }
             }
-            
+
             if(!item[a])
                 tags = '';
             else
@@ -82,8 +83,8 @@
             else
             {
                 let contexts = inContext.split(' ');
-                contexts.forEach(ctx => 
-                {   
+                contexts.forEach(ctx =>
+                {
                     const selectedItem = $contextItemsStore[ctx];
                     if(selectedItem && selectedItem.Id == item.Id)
                         isEditable = !readOnly;
@@ -109,11 +110,11 @@
 
         const onAfterCloseCombo = () => {
             addComboVisible = false;
-            
+
             if(hideCallback)
                 hideCallback()
         }
-        
+
         addCombo?.show(undefined, onAfterCloseCombo);
     } */
 
@@ -123,7 +124,7 @@
         if(event)
         {
             event.stopPropagation();
-            event.preventDefault();        
+            event.preventDefault();
         }
 
         addComboVisible = true;
@@ -162,7 +163,7 @@
         else if(item != null)
         {
             item[a] = tags;
-            
+
             if(typename)
                 informModification(item, a, typename);
             else
@@ -206,7 +207,7 @@
             globalTags += `#${key}:${color} `
         else
             globalTags += `#${key} `
-        
+
         globalTagsTable = decomposeTags(globalTags)
         tagsTable = decomposeTags(tags, globalTagsTable)
 
@@ -249,7 +250,7 @@
 
         applyChange();
         onUpdateAllTags(globalTags)
-        
+
     }
 
     function decomposeTags(tags: string, referenceTable=undefined)
@@ -275,7 +276,7 @@
             let color :string;
             if(components.length > 1)
                 color = components[1];
-            
+
             if(!color)
             {
                 if(referenceTable && Array.isArray(referenceTable))
@@ -284,14 +285,14 @@
                     if(referenceItem)
                         color = referenceItem.color
                 }
-                
+
                 if(!color)
                     color = "bg-stone-400"
             }
 
             if(!color.startsWith('bg-'))    // incompatible color format, seems not to be a tailwind bg class
                 color = 'bg-stone-400'
-            
+
             table.push( {
                 label: label,
                 color: color
@@ -336,6 +337,10 @@
 
 </script>
 
+{#if typo}
+<span> #takshere# </span>
+{:else}
+
 <section class="{userClass} flex flex-row {gap} flex-wrap mr-1 sm:mr-0" bind:this={rootElement}>
     <p class="flex flex-row {gap} flex-wrap ">
         {#if tagsTable.length > 0}
@@ -362,7 +367,7 @@
                 </button>
             {/if}
         {:else}
-            <!--Combo  compact={true} 
+            <!--Combo  compact={true}
                     inContext='data'
                     onSelect={onSelectTag}
                     onNewItemCreated={getCreateTagCallback()}
@@ -377,3 +382,5 @@
         {/if}
     {/if}
 </section>
+
+{/if}

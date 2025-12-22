@@ -1,7 +1,7 @@
 <script>
     import { reef} from '@humandialog/auth.svelte';
-    import { onErrorShowAlert, mainContentPageReloader, Spinner, Page, 
-            editable, selectable, getNiceStringDateTime, startEditing, i18n, Paper,
+    import { onErrorShowAlert, mainContentPageReloader, Spinner, Page,
+            editable, selectable, getNiceStringDateTime, startEditing, i18n, Paper, PaperHeader,
             contextItemsStore,
 			activateItem,
 			isActive,
@@ -15,7 +15,7 @@
     import SubscibedList from './dashboard.list.svelte'
     import {afterUpdate} from 'svelte'
     import {cache} from './cache.js'
-    
+
     let user = null
     let tasksNo = 0
     let allTags = ''
@@ -46,21 +46,21 @@
                             ]
                         },
                         onErrorShowAlert
-                    ).then( (res) => { 
+                    ).then( (res) => {
                         if(res)
                         {
                             users = res.User;
                         }
                     })
-        
-                        
+
+
         await loadData(true)
     }
 
     async function loadData(useCache=false)
     {
         const cacheKey = `teamday`
-        
+
         if(useCache)
             showCachedDataFirst(cacheKey);
 
@@ -101,7 +101,7 @@
                                                         }
                                                     ]
                                                 }
-                                                
+
                                             ]
                                         }
                                     ]
@@ -127,7 +127,7 @@
             return;
 
         user = cachedValue
-        
+
         tasksNo = 0
         user.SubscribedLists.forEach((l) => {
             if(l.List && l.List.Tasks)
@@ -141,7 +141,7 @@
         await reef.post('group/set', { AllTags: allTags}, onErrorShowAlert)
     }
 
-    
+
     async function onRefreshDashboard(selectedRef='')
     {
         listToSelectAfterRefreshing = selectedRef
@@ -149,7 +149,7 @@
     }
 
     let listToSelectAfterRefreshing = ''
-    afterUpdate( () => 
+    afterUpdate( () =>
     {
         if(listToSelectAfterRefreshing)
         {
@@ -165,7 +165,7 @@
 
             listToSelectAfterRefreshing = ''
         }
-        
+
     })
 
     const pageOperations = []
@@ -182,19 +182,21 @@
 <!-- svelte-ignore a11y-no-noninteractive-tabindex-->
 
 {#if user}
-    <Page   self={user} 
+    <Page   self={user}
             toolbarOperations={pageOperations}
             clearsContext='props sel'
             title={user.Name}>
-        <Paper class="mb-64">
-        <section class="w-full flex justify-center">
-            <article class="w-full prose prose-base prose-zinc dark:prose-invert mx-2  mb-64">
+        <Paper >
+            <PaperHeader>
+
+            </PaperHeader>
+
                 <h1>{title}</h1>
-                
+
                 {#if tasksNo > 0 && user.SubscribedLists && user.SubscribedLists.length > 0}
-                    <h2>_; Tasks; Tareas; Zadania</h2>
+
                     {#each user.SubscribedLists as list, idx}
-                        <SubscibedList {list} 
+                        <SubscibedList {list}
                                     tasks={list.List.Tasks}
                                     getAllTags={() => allTags}
                                     {onUpdateAllTags}
@@ -203,9 +205,9 @@
                                     bind:this={listElements[idx]}/>
                     {/each}
                 {/if}
- 
-            </article>
-        </section>
+
+
+
         </Paper>
     </Page>
 {:else}

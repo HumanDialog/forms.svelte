@@ -1,8 +1,8 @@
 <script>
-       import {Sidebar, 
+       import {Sidebar,
                 SidebarBrand,
-                SidebarGroup, 
-                SidebarList, 
+                SidebarGroup,
+                SidebarList,
                 SidebarItem} from '$lib'
     import GroupFoldersNavigator from "./navigator.group.folders.svelte";
     import {session} from '@humandialog/auth.svelte'
@@ -18,27 +18,23 @@
             current_group_name = tInfo.name;
     }
     */
-    
+
 </script>
-  
+
 <Sidebar>
     <SidebarBrand class="hidden sm:block" >
-        Octopus <span class="font-thin">basic</span>
-        
-        <!--span   slot="summary" 
+        Octopus*<span class="font-thin">basic</span>
+
+        <!--span   slot="summary"
                 class="text-xs pl-2.5 font-semibold text-stone-600 dark:text-stone-300"
                 class:hidden={!current_group_name}>
             {current_group_name}
-        </span-->    
-        
+        </span-->
+
     </SidebarBrand>
-    
-        
+
+
     <GroupFoldersNavigator sidebar/>
-    
+
 
 </Sidebar>
-
-
-
-    

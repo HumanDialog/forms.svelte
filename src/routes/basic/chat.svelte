@@ -340,7 +340,7 @@
     {
         e.preventDefault();
         const pasteText = e.clipboardData.getData('text/plain');
-        
+
         const selection = window.getSelection();
         const range = selection?.getRangeAt(0);
         /*const sel = window.getSelection()*/
@@ -355,7 +355,7 @@
         if(combinedSize > charsLimit)
             return;
 
-       
+
         //const left = newMessageContent.substring(0, selNo)
         //const right = newMessageContent.substring(selNo+1)
         //newMessageContent = left + txt + right
@@ -381,11 +381,11 @@
         const incomingText = e.data ?? '';
         const currentTextSize = byteLengthUTF8(currentText)
         const incomingTextSize = byteLengthUTF8(incomingText)
-        
+
         if(currentTextSize + incomingTextSize > charsLimit)
             e.preventDefault()
-        
-        
+
+
     }
 
     function onSubmitClick(e)
@@ -464,7 +464,7 @@
         showMenu(rect, ops, SHOW_MENU_ABOVE)
     }
 
-    async function pasteRecentClipboardElement(btt, aroundRect) 
+    async function pasteRecentClipboardElement(btt, aroundRect)
     {
         const clipboardElements = await fetchComposedClipboard4Message()
         if(clipboardElements && clipboardElements.length > 0)
@@ -477,7 +477,7 @@
     async function runPasteBasket(btt, aroundRect)
     {
        const clipboardElements = await fetchComposedClipboard4Message()
-        
+
         showFloatingToolbar(aroundRect, BasketPreview, {
                         onAttach: (basketItem, refs) => onAttachBasket(refs),
                     //    onAttachAndClear: (basketItem, refs) => onAttachAndClearBasket(refs),
@@ -494,7 +494,7 @@
             clipboardElements: clipboardElements,
             browserBasedClipboard: true
         })
-    } 
+    }
 
     async function runPopupExplorer(btt, aroundRect)
     {
@@ -502,7 +502,7 @@
             onAttach: (basketItem, refs) => onAttachBasket(refs)
         })
     }
-    
+
 
     // tmp
     let newMessageAttachements = []
@@ -617,7 +617,7 @@
             toolbarOperations={getPageOperations()}
             clearsContext=''
             title={channel.Title}>
-    <Paper class="mb-64">
+    <Paper >
     <section class="w-full flex justify-center">
         <article class="w-full prose prose-base prose-zinc dark:prose-invert mx-2 prose-img:rounded-xl ">
             <!--section class="w-full flex flex-row justify-between">

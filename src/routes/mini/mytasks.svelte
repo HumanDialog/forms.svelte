@@ -200,6 +200,7 @@
 
         <List   self={user}
                 a='MyTasks'
+                {list_properties}
                 toolbarOperations={taskOperations}
                 contextMenu={taskContextMenu}
                 orderAttrib='UserOrder'

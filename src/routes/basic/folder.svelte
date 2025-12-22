@@ -18,12 +18,12 @@
                 Breadcrumb,
                 refreshToolbarOperations,
 				showFloatingToolbar,
-                reloadPageToolbarOperations, Paper} from '$lib'
+                reloadPageToolbarOperations, Paper, PaperHeader} from '$lib'
     import {FaRegFile, FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaSync,
         FaList, FaEllipsisH, FaChevronRight, FaChevronLeft, FaUpload, FaLink, FaUnlink, FaRegStar, FaStar, FaCut, FaRegComments, FaRegClipboard,
         FaRegCheckSquare, FaFileUpload, FaFile, FaCloudUploadAlt, FaDownload, FaCheckDouble, FaExternalLinkSquareAlt
         } from 'svelte-icons/fa'
-        
+
         import {FaEdit} from 'svelte-icons/fa'
         import FaHighlighter from 'svelte-icons/fa/FaHighlighter.svelte'
 
@@ -42,7 +42,7 @@
     import FileProperties from './properties.file.svelte'
 	import TaskProperties from './properties.task.svelte'
     import NoteProperties from './properties.note.svelte'
-    
+
     export let params = {}
 
     let contextItem = null;
@@ -81,7 +81,7 @@
         {
             contextItem = cachedValue;
             folderTitle = ext(contextItem.Title);
-            
+
             listComponent?.reload(contextItem, listComponent.KEEP_SELECTION)
         }
 
@@ -107,53 +107,39 @@
     async function readContextItem(contextItemId)
     {
         let res = await reef.post(`/Folder/${contextItemId}/query`,
-                            {
-                                Id: 1,
-                                Name: "collector",
-                                ExpandLevel: 3,
-                                Tree:
-                                [
-                                    {
-                                        Id: 1,
-                                        Association: '',
-                                        Expressions:['Id', '$ref','Title','Summary', 'IsPinned', 'IsBasket', 'IsRootPinned', 'GetCanonicalPath'],
-                                        SubTree:
-                                        [
-                                            {
-                                                Id: 2,
-                                                Association: 'Folders',
-                                                //Filter: 'State <> STATE_FINISHED',
-                                                //Sort: 'Order',
-                                                Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'IsInBasket' , 'IsCanonical',  'icon', 'FolderId', '$type']
+        {
+            Id: 1,
+            Name: "collector",
+            ExpandLevel: 3,
+            Tree:
+            [
+            {   Id: 1, Association: '',
+                Expressions:['Id', '$ref', 'icon', 'Title','Summary', 'ModificationDate', 'CreatedBy', 'IsPinned', 'IsBasket', 'IsRootPinned', 'GetCanonicalPath'],
+                SubTree:[
+                    {   Id: 2, Association: 'Folders',
+                        Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'icon', 'IsInBasket' , 'IsCanonical',  'icon', 'FolderId', '$type']
+                    },{ Id: 3, Association: 'Notes',
+                        Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href', 'icon', 'IsInBasket', 'IsCanonical', 'NoteId', '$type']
+                    },
+                    {
+                        Id: 4,
+                        Association: 'Tasks',
+                        //Filter: 'State <> STATE_FINISHED',
+                        //Sort: 'Order',
+                        Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'href', 'icon', 'IsInBasket', 'IsCanonical', 'icon', 'TaskId', '$type']
 
-                                            },
-                                            {
-                                                Id: 3,
-                                                Association: 'Notes',
-                                                //Filter: 'State <> STATE_FINISHED',
-                                                //Sort: 'Order',
-                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href', 'IsInBasket', 'IsCanonical', 'NoteId', '$type']
+                    },
+                    {
+                        Id: 5,
+                        Association: 'Files',
+                        Expressions:['Id', 'FileId', '$ref', 'Title', 'Summary', 'Order', 'href', 'icon', 'IsInBasket', 'IsCanonical', 'FileId', '$type']
 
-                                            },
-                                            {
-                                                Id: 4,
-                                                Association: 'Tasks',
-                                                //Filter: 'State <> STATE_FINISHED',
-                                                //Sort: 'Order',
-                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'href', 'IsInBasket', 'IsCanonical', 'icon', 'TaskId', '$type']
-
-                                            },
-                                            {
-                                                Id: 5,
-                                                Association: 'Files',
-                                                Expressions:['Id', 'FileId', '$ref', 'Title', 'Summary', 'Order', 'href', 'IsInBasket', 'IsCanonical', 'FileId', '$type']
-
-                                            }
-                                        ]
-                                    }
-                                ]
-                            },
-                            onErrorShowAlert);
+                    }
+                ]
+            }
+        ]
+        },
+        onErrorShowAlert);
         if(res)
         {
             const folderItem = res.Folder
@@ -207,29 +193,29 @@
         case 'c':
             if(e.ctrlKey || e.metaKey)
             {
-                console.log('handle Ctrl+C')   
+                console.log('handle Ctrl+C')
                 e.stopPropagation()
                 e.preventDefault()
             }
-            break;  
-            
+            break;
+
         case 'x':
             if(e.ctrlKey || e.metaKey)
             {
-                console.log('handle Ctrl+X')   
+                console.log('handle Ctrl+X')
                 e.stopPropagation()
                 e.preventDefault()
             }
-            break;  
+            break;
 
         case 'v':
             if(e.ctrlKey || e.metaKey)
             {
-                console.log('handle Ctrl+V')   
+                console.log('handle Ctrl+V')
                 e.stopPropagation()
                 e.preventDefault()
             }
-            break;  
+            break;
         }
     }
     */
@@ -287,13 +273,13 @@
         case 'multi':
             {
                 let refs = []
-                objectToDelete.forEach(i => 
+                objectToDelete.forEach(i =>
                     refs.push({
                         Type: i.$type,
                         Id: i.Id,
                         Title: i.Title,
                         ref: i.$ref
-                        })   
+                        })
                 )
                 await reef.post(`${contextItem.$ref}/DeletePermanentlyMulti`, { items: refs } , onErrorShowAlert);
                 deleteModal.hide();
@@ -407,7 +393,7 @@
         await fetchData();
         listComponent.reload(contextItem, listComponent.SELECT_NEXT);
     }
-    
+
 
     async function finishTask(event, task)
     {
@@ -423,7 +409,7 @@
     }
 
     let newElementKind = ''
-    async function addElement(newElementAttribs) 
+    async function addElement(newElementAttribs)
     {
         switch(newElementKind)
         {
@@ -466,7 +452,7 @@
 
         let newNote = res.FolderNote;
         setBrowserRecentElement(newNote.NoteId, 'Note')
-        
+
         await fetchData();
         listComponent.reload(contextItem, newNote.Id);
     }
@@ -485,7 +471,7 @@
 
     async function addFolder(newFolderAttribs)
     {
-        let res = await reef.post(`${contextPath}/CreateSubFolder`,{ 
+        let res = await reef.post(`${contextPath}/CreateSubFolder`,{
             title: newFolderAttribs.Title,
             summary:  newFolderAttribs.Summary,
             order: newFolderAttribs.Order,
@@ -685,9 +671,8 @@
         if(result.operations.length > 0)
             result.operations.push({separator: true})
 
-        
+
         result.operations.push({
-            
             icon: FaDownload,
             caption: '_; Insert; Insertar; Wstaw',
             hideToolbarCaption: true,
@@ -711,14 +696,14 @@
                     action: runPopupExplorer
                 }
             ]
-            
+
             //fab: 'M01',
             //tbr: 'A'
         })
         return result
     }
 
-    async function pasteRecentClipboardElement(btt, aroundRect) 
+    async function pasteRecentClipboardElement(btt, aroundRect)
     {
         const clipboardElements = await fetchComposedClipboard4Folder()
         if(clipboardElements && clipboardElements.length > 0)
@@ -738,7 +723,7 @@
             onRefreshView: refreshViewAfterAttachingFromBasket,
             clipboardElements: clipboardElements
         })
-    } 
+    }
 
     async function runPasteBrowserRecent(btt, aroundRect)
     {
@@ -749,7 +734,7 @@
             clipboardElements: clipboardElements,
             browserBasedClipboard: true
         })
-    } 
+    }
 
     async function runPopupExplorer(btt, aroundRect)
     {
@@ -774,7 +759,7 @@
         const isClipboard = contextItem.IsBasket
         const isRootPinned = contextItem.IsRootPinned
         const canPin = !(isRootPinned || isClipboard)
-        
+
         return {
             opver: 2,
             fab: 'M00',
@@ -822,6 +807,8 @@
                             caption: '_; All; Todos; Wszystkie',
                             icon: FaRegCheckSquare,
                             action: () => listComponent.toggleSelectAll(),
+                            ctrl: "main_list",
+                            list_action: "toggle_select_all",
                             //fab: 'M30',
                             tbr: 'A',
                         },
@@ -866,7 +853,7 @@
     }
 
 
-    
+
     async function dettachElement(element, kind)
     {
         switch(kind)
@@ -889,13 +876,13 @@
     async function dettachElementMulti(items)
     {
         let refs = []
-        items.forEach(i => 
+        items.forEach(i =>
             refs.push({
                 Type: i.$type,
                 Id: i.Id,
                 Title: i.Title,
                 ref: i.$ref
-                })   
+                })
         )
 
         await reef.post(`${contextItem.$ref}/DettachElementMulti`, { items: refs } , onErrorShowAlert);
@@ -903,7 +890,7 @@
         listComponent.reload(contextItem, listComponent.SELECT_NEXT);
     }
 
-   
+
 
     async function copyElementToBasket(element, kind)
     {
@@ -948,9 +935,9 @@
         let refs = []
         items.forEach((i) => refs.push(i.$ref))
         refs.reverse()  // elements need to be pushed in reverse order to have first element on top of the clipboard
-        
+
         await reef.post(`${contextItem.$ref}/CopyToBasketMulti`, { refs: refs } , onErrorShowAlert);
-        
+
         refreshToolbarOperations()
         // not needed
         //await fetchData();
@@ -1058,7 +1045,7 @@
              ]
         }
 
-        
+
         return {
                 opver: 2,
                 fab: 'M00',
@@ -1160,7 +1147,7 @@
             }
     }
 
-    
+
 
     let elementOperations = (element, kind) => {
 
@@ -1188,7 +1175,7 @@
             const isClipboard = contextItem.IsBasket
             const isRootPinned = contextItem.IsRootPinned
             const canPin = !(isRootPinned || isClipboard)
-            
+
         return {
                 opver: 2,
                 fab: 'M00',
@@ -1289,6 +1276,7 @@
                             }
                         ]
                     },
+
                     {
                         caption: '_; View; Ver; Widok',
                         operations: [
@@ -1330,7 +1318,7 @@
             const fileOrder = listComponent.assignOrder(insertFileAfterElement)
 
             let fileLink = await reef.post(`${contextPath}/CreateFile`,
-                                    { 
+                                    {
                                         title: file.name,
                                         mimeType: file.type,
                                         size: file.size,
@@ -1391,15 +1379,15 @@
         {
             const blob = await res.blob()
             const blobUrl = URL.createObjectURL(blob);
-    
+
             const link = document.createElement("a"); // Or maybe get it from the current document
             link.href = blobUrl;
             link.download = element.Title;
 
             //document.body.appendChild(link); // Or append it whereever you want
             link.click() //can add an id to be specific if multiple anchor tag, and use #id
-            
-            
+
+
             URL.revokeObjectURL(blobUrl)
 
             setBrowserRecentElement(element.FileId, 'UploadedFile')
@@ -1442,6 +1430,51 @@
         }
     }
 
+    let list_properties = {
+        Title: "Title",
+        Summary: "Summary",
+        icon: "icon",
+        element:{
+            icon: "icon",
+            href: "href",
+            Title: "Title",
+            Summary: "Summary"
+        },
+        context:{
+            Folder:{
+                Summary: "Summary",
+
+            },
+            FolderFolder:{
+                Summary: "Summary",
+                head_right: "ModificationDate"
+            }
+        }
+    }
+
+    let folder_properties = {
+        Title: "Title",
+        Summary: "Summary",
+        icon: "icon",
+        element:{
+            icon: "icon",
+            href: "href",
+            Title: "Title",
+            Summary: "Summary"
+        },
+        context:{
+            Folder:{
+                Summary: "Summary",
+
+            },
+            FolderFolder:{
+                Summary: "Summary",
+                head_right: "ModificationDate"
+            }
+        }
+
+    }
+
 </script>
 
 <svelte:head>
@@ -1460,58 +1493,49 @@
             clearsContext='props sel'
             title={folderTitle}>
 
-            <Paper class="mb-64">
-            <section class="w-full place-self-center max-w-3xl
-                            ">
+        <Paper class="mb-64">
+
+
 
             <!--p class="hidden sm:block mt-3 ml-3 pb-5 text-lg text-left">
                 {folderTitle}
             </p-->
-            
+            <PaperHeader>
+            <Breadcrumb  path = {contextItem.GetCanonicalPath}/>
+            </PaperHeader>
 
-            {#if contextItem.GetCanonicalPath}
-                <Breadcrumb class="mt-1 mb-5" path={contextItem.GetCanonicalPath}/>
+            <div class="w-full flex flex-row justify-between">
+                <span>Index 23</span>
+            </div>
+
+
+            <h1 >
+                {folderTitle}
+            </h1>
+            {#if contextItem.Summary}
+            <p class="lead">
+                {contextItem.Summary}
+            </p>
             {/if}
 
-
-            <p class="hidden sm:block mt-3 ml-3 pb-5 text-lg text-left">
-                {folderTitle}
-            </p>
-
-            <List   self={contextItem}
+            <List    self={contextItem}
                     a='allElements'
+                    list_properties = {folder_properties}
                     toolbarOperations={(el) => elementOperations(el, el.$type)}
                     {multiselectOperations}
                     orderAttrib='Order'
-                    bind:this={listComponent}>
-                <ListTitle      a='Title'
-                                hrefFunc={(el) => `${el.href}`}
-                                downloadableFunc={(el) => el.$type == 'FolderFile'}
-                                onOpen={downloadFile}
-                                onChange={changeElementProperty}/>
-
-                <ListSummary    a='Summary'
-                                onChange={changeElementProperty}/>
+                    bind:this={listComponent}
+                    component_id="main_list">
 
                 <ListInserter   action={addElement} icon/>
-
-                <span slot="left" let:element class="relative">
-                    <Icon component={getElementIcon(element)}
-                        class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
-                    {#if element.IsCanonical == 0}
-                        <Icon component={FaExternalLinkSquareAlt}
-                            class="absolute left-1 top-1/2 w-1/2 h-1/2 
-                                    text-stone-500 dark:text-stone-300 " />
-                    {/if}
-                </span>
             </List>
-        </section>
 
-        
-        <input hidden type="file" id="attachementFile" accept="*/*" bind:this={attInput} on:change={onAttachementSelected}/>
-        
-    </Paper>
-    
+
+
+            <input hidden type="file" id="attachementFile" accept="*/*" bind:this={attInput} on:change={onAttachementSelected}/>
+
+        </Paper>
+
     </Page>
     {/key}
 {:else}
@@ -1533,7 +1557,7 @@
                 pl: `Czy na pewno chcesz usunąć ${itemsNo} ${itemsNo < 5 ? 'elementy' : 'elementów'}?`})}
         {:else}
             <span>
-                _; 
+                _;
                 Are you sure you want to delete selected element?;
                 ¿Está seguro de que desea eliminar el elemento seleccionado?;
                 Czy na pewno chcesz usunąć wybrany element?

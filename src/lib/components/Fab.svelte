@@ -7,11 +7,11 @@
 
 
     export let mainPageCoords = undefined
-    
 
-    $: setupCurrentContextOperations(   $pageToolbarOperations, 
-                                        $contextToolbarOperations, 
-                                        $toolsActionsOperations, 
+
+    $: setupCurrentContextOperations(   $pageToolbarOperations,
+                                        $contextToolbarOperations,
+                                        $toolsActionsOperations,
                                         $fabCollapsed,
                                         $bottom_bar_visible_store,
                                         $main_sidebar_visible_store,
@@ -25,7 +25,7 @@
     let isExpandable: boolean = false;
     let vToolboxExpanded :boolean = false;
     let hToolboxExpanded: boolean = false;
-    
+
     let isDirectPositioningMode = false;
     //..
     async function setupCurrentContextOperations(...args)
@@ -33,7 +33,7 @@
         if($fabHiddenDueToPopup)
         {
             operations = []
-            return;        
+            return;
         }
 
         await tick(); // to force mainContent re-render first. We need its bounding rect
@@ -128,7 +128,7 @@
                     operations = []
             }
 
-            
+
             // ************************* USER DEFINED FABs *******************************
 
             definedOperations.forEach(group => {
@@ -139,7 +139,7 @@
                     }
                 })
             })
-            
+
             // ************************* COLLAPSE FAB ***********************************
             if(operations.length > 1)
             {
@@ -183,7 +183,7 @@
         }
    }
 
-  
+
 
    function toggleExpandAdditionalOperations()
    {
@@ -341,12 +341,12 @@
         let rShift = 0
         let bShift = 0
         let vMiddle = '50vh'
-        
+
 
         // na razie tylko dla >= sm.
         if(!isDeviceSmallerThan('sm'))
         {
-            
+
             const container = document.getElementById("__hd_svelte_main_content_container")
             if(container)
             {
@@ -358,7 +358,7 @@
                 vMiddle = `${containerRect.x + containerRect.width / 2}px`
             }
         }
-        
+
         if(!$leftHandedFAB)
         {
             switch(section)
@@ -457,22 +457,22 @@
                 {#if position}
                     <button
                         class=" w-[55px] h-[55px]
-                                fixed m-0                            
+                                fixed m-0
                                 flex items-center justify-center
                                 disable-dbl-tap-zoom
                                 cursor-pointer z-20"
                                 style={position}
                                 on:click|stopPropagation={(e) => {on_click(e, operation)}}
                                 on:mousedown={mousedown} >
-                        
+
                             <div class="    text-stone-500 bg-stone-200/70 hover:bg-stone-200
                                             focus:outline-none font-medium rounded-full text-sm text-center
-                                            dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700 
+                                            dark:text-stone-400 dark:bg-stone-700/80 dark:hover:bg-stone-700
                                             focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800
 
                                             flex items-center justify-center
-                                            w-[30px] h-[30px]">
-                                <div class="w-5 h-5">
+                                            w-6 h-6">
+                                <div class="w-4 h-4">
                                     <svelte:component this={operation.icon}/>
                                 </div>
                             </div>
@@ -513,7 +513,7 @@
                                     disable-dbl-tap-zoom"
                                     on:click|stopPropagation={toggleExpandToolboxH}
                                     on:mousedown={mousedown}>
-                        <div class="    w-10 h-10
+                        <div class="    w-2 h-2
                                         text-white bg-zinc-500 hover:bg-zinc-500
                                         font-medium rounded-full text-sm text-center shadow-md
                                         dark:bg-zinc-500 dark:hover:bg-zinc-500
@@ -536,12 +536,12 @@
                                                 disable-dbl-tap-zoom"
                                                 on:click|stopPropagation={(e) => {on_click(e, secondaryOperation)}}
                                                 on:mousedown={mousedown}>
-                                <div class="    w-10 h-10
+                                <div class="    w-2 h-2
                                                 text-white bg-zinc-500 group-hover:bg-zinc-500
                                                 dark:bg-zinc-500 dark:group-hover:bg-zinc-500
                                                 font-medium rounded-full text-sm text-center shadow-md
                                                 flex items-center justify-center">
-                                    <div class="w-5 h-5"><svelte:component this={secondaryOperation.icon}/></div>
+                                    <div class="w-4 h-4"><svelte:component this={secondaryOperation.icon}/></div>
                                 </div>
                             </button>
                         {:else if toolboxOperations.length > 0}
@@ -555,12 +555,12 @@
                                                         disable-dbl-tap-zoom"
                                                         on:click|stopPropagation={(e) => {on_click(e, operation)}}
                                                         on:mousedown={mousedown}>
-                                        <div class="    w-10 h-10
+                                        <div class="    w-2 h-2
                                                         text-white bg-zinc-500 group-hover:bg-zinc-500
                                                         dark:bg-zinc-500 dark:group-hover:bg-zinc-500
                                                         font-medium rounded-full text-sm text-center shadow-md
                                                         flex items-center justify-center">
-                                            <div class="w-5 h-5"><svelte:component this={operation.icon}/></div>
+                                            <div class="w-4 h-4"><svelte:component this={operation.icon}/></div>
                                         </div>
                                     </button>
                                 {/if}
@@ -575,12 +575,12 @@
                                     disable-dbl-tap-zoom"
                             on:click|stopPropagation={(e) => {on_click(e, secondaryOperation)}}
                             on:mousedown={mousedown}>
-                        <div class="    w-10 h-10
+                        <div class="    w-2 h-2
                                         text-white bg-zinc-500 group-hover:bg-zinc-500
                                         dark:bg-zinc-500 dark:group-hover:bg-zinc-500
                                         font-medium rounded-full text-sm text-center shadow-md
                                         flex items-center justify-center">
-                            <div class="w-5 h-5"><svelte:component this={secondaryOperation.icon}/></div>
+                            <div class="w-4 h-4"><svelte:component this={secondaryOperation.icon}/></div>
                         </div>
                     </button>
                 {/if}
@@ -609,12 +609,12 @@
                                                 mx-0 mb-2 w-[55px] h-[55px]
                                                 flex items-center justify-center
                                                 disable-dbl-tap-zoom">
-                                    <div class="    w-10 h-10
+                                    <div class="    w-2 h-2
                                                     text-white bg-zinc-500 group-hover:bg-zinc-500
                                                     dark:bg-zinc-500 dark:group-hover:bg-zinc-500
                                                     font-medium rounded-full text-sm text-center shadow-md
                                                     flex items-center justify-center">
-                                        <div class="w-5 h-5"><svelte:component this={operation.icon}/></div>
+                                        <div class="w-4 h-4"><svelte:component this={operation.icon}/></div>
                                     </div>
                                 </button>
                             </li>

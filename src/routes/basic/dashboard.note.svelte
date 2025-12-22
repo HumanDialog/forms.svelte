@@ -1,6 +1,6 @@
 <script>
     import {reef} from '@humandialog/auth.svelte'
-    import {  
+    import {
             editable, selectable, getNiceStringDateTime, startEditing, i18n,
             contextItemsStore,
 			activateItem,
@@ -22,7 +22,10 @@
     let titleElement
     let summaryElement
     let notePropertiesDialog
-    
+
+    let full_view = true
+    let demo_view = false
+
     $: isCardActive = calculate_active(note, $contextItemsStore)
     $: isCardSelected = selected(note, $contextItemsStore)
 
@@ -71,7 +74,7 @@
                         },
                         {
                             caption: '_; Send; Enviar; Wyślij',
-                            icon: FaUpload, 
+                            icon: FaUpload,
                             tbr: 'D',
                             fab: 'S00',
                             menu: [
@@ -83,10 +86,10 @@
                                         caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
                                         action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect)
                                     }
-                                ], 
+                                ],
                             hideToolbarCaption: true
                         },
-                    /*  don't know if it does make sense  
+                    /*  don't know if it does make sense
                         {
                             caption: '_; Archive; Archivar; Zarchiwizuj',
                             //icon: FaArchive,
@@ -155,7 +158,7 @@
                     summaryElement.focus();
             }
         }
-       
+
     }
 
     async function copyNoteToBasket()
@@ -175,49 +178,93 @@
 
     function runElementProperties(btt, aroundRect)
     {
-        notePropertiesDialog.show(note)    
+        notePropertiesDialog.show(note)
     }
 
 
 </script>
-
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<!-- svelte-ignore a11y-no-noninteractive-interactions -->
-<section    class="relative left-[-0.25rem] pl-1 rounded-md border border-transparent {selectedClass} {focusedClass}"
+<!-- svelte-ignore a11y-click-events-have-key-events ----->
+<!-- svelte-ignore a11y-no-noninteractive-interactions --->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+{#if !isCardActive}
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!---- INACTIVE PURE LAYOUT ----------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+    <figure class="relative rounded-md border border-transparent"
             use:selectable={note}
             on:click={activate}>
-    <!--p class="text-sm">{getNiceStringDateTime(note.ModificationDate)}</p-->
-    <h4>
-        {#if isCardActive}
-            <a href={note.href} use:link
-                use:editable={{
-                    action: (text) => onTitleChanged(text), 
-                    active: false,
-                    onFinish: (d) => {titleElement.blur()}
-                    }}
-                bind:this={titleElement}>
-                {note.Title}
-            </a>    
-        {:else}
-            <span>{note.Title}</span>
-        {/if}
-    </h4>
-    
 
-    {#if note.Summary || placeholder == 'Summary'}
-        <p>
-            {#if isCardActive}
+        <h4>
+            {note.Title}
+        </h4>
+
+
+    {#if note.Summary}
+        <figcaption>
+                {note.Summary}
+        </figcaption>
+    {/if}
+    </figure>
+
+
+
+
+
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+{:else }
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!---- ACTIVE WITH CONROLS  ----------------------------------------------------------------------->
+<!------- keep pure layout  ----------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+
+    <figure class="relative bg-stone-700 rounded outline outline-8 outline-stone-700 ring-1 ring-stone-700 ring-offset-8"
+            use:selectable={note}
+            on:click={activate}>
+        <a href={note.href} use:link>
+        <h4     use:editable={{
+                action: (text) => onTitleChanged(text),
+                active: false,
+                onFinish: (d) => {titleElement.blur()}
+                }}
+            bind:this={titleElement}>
+            {note.Title}
+
+        </h4>
+        </a>
+
+    {#if note.Summary}
+        <figcaption>
                 <span use:editable={{
-                                action: (text) => onSummaryChanged(text), 
+                                action: (text) => onSummaryChanged(text),
                                 active: true,
                                 onFinish: (d) => {placeholder = ''}}}
                             bind:this={summaryElement}>
                     {note.Summary}</span>
-            {:else}
-                <span>{note.Summary}</span>
-            {/if}
-        </p>
-    {/if}
-</section>
+        </figcaption>
+    {:else if placeholder == 'Summary'}
+        <figcaption>
+                <span use:editable={{
+                                action: (text) => onSummaryChanged(text),
+                                active: true,
+                                onFinish: (d) => {placeholder = ''}}}
+                            bind:this={summaryElement}>
+                    i</span>
 
-<NoteProperties bind:this={notePropertiesDialog} />
+        </figcaption>
+
+    {/if}
+    </figure>
+{/if}
+
+<!--NoteProperties bind:this={notePropertiesDialog} /-->

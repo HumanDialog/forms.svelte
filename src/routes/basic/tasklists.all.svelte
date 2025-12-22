@@ -45,7 +45,7 @@
     async function fetchData()
     {
         if(!showArchived)
-        { 
+        {
             let res = await reef.post(`/group/query`,
                                     {
                                         Id: 1,
@@ -166,12 +166,12 @@
 
         await reloadLists(listComponent.SELECT_NEXT)
     }
-   
+
 
     async function addList(newListAttribs)
     {
-        let res = await reef.post('/group/CreateList', 
-                        { 
+        let res = await reef.post('/group/CreateList',
+                        {
                             name: newListAttribs.Name,
                             order: newListAttribs.Order,
                             summary: newListAttribs.Summary
@@ -278,19 +278,19 @@
 
                     ]
                 }
-               
+
             ]
         }
     }
 
-    async function toggleSubscribe(list) 
+    async function toggleSubscribe(list)
     {
         if(list.IsSubscribed)
         {
             const res = await reef.get(`${list.$ref}/Unsubscribe`, onErrorShowAlert)
             if(res)
                 list.IsSubscribed = false
-        }   
+        }
         else
         {
             const res = await reef.get(`${list.$ref}/Subscribe`, onErrorShowAlert)
@@ -298,7 +298,7 @@
                 list.IsSubscribed = true
         }
 
-        refreshToolbarOperations() 
+        refreshToolbarOperations()
     }
 
 </script>
@@ -323,6 +323,7 @@
 
             <List   self={group}
                     a='Lists'
+                    {list_properties}
                     toolbarOperations={listOperations}
                     orderAttrib='Order'
                      title={title}
@@ -338,7 +339,7 @@
 
 
             </List>
-           
+
             <div class="ml-3 mt-20 mb-10">
                 <a  href={`/alllists?archived`}
                     class="hover:underline"
@@ -359,6 +360,7 @@
                 <section class="w-full place-self-center max-w-3xl">
             <List   self={group}
                     a='AllLists'
+                    {list_properties}
                     orderAttrib='Order'
                     bind:this={listComponent}>
                 <ListTitle a='Name' hrefFunc={(list) => `/tasklist/${list.Id}?archivedList`} />
@@ -381,7 +383,7 @@
             </div>
         </section>
         </Paper>
-            
+
         </Page>
     {/if}
     {/key}

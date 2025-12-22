@@ -95,7 +95,7 @@
     }
 
 
-    
+
 
     let pageOperations = {
         opver: 2,
@@ -132,7 +132,7 @@
             operations: [
                 {
                     caption: '_; View; Ver; Widok',
-                    operations: [ 
+                    operations: [
                         {
                             caption: '_; New channel; Nuevo canal; Nowy kanał',
                             icon: FaRegComment,
@@ -177,9 +177,9 @@
                             icon: FaCaretDown,
                             action: (f) => listComponent.moveDown(channel),
                             fab:'M04',
-                            tbr:'A' 
+                            tbr:'A'
                         },
-                    
+
                        {
                             caption: '_; Delete; Eliminar; Usuń',
                             //icon: FaTrash,
@@ -187,7 +187,7 @@
                             //fab:'M30',
                             //tbr:'B'
                         }
-                        
+
                     ]
                 }
             ]
@@ -205,7 +205,7 @@
 
     async function onNewDMChannel(element)
     {
-        const res = await reef.post('group/GetPossibleDirectChannelUsers', { 
+        const res = await reef.post('group/GetPossibleDirectChannelUsers', {
             excludeExisting: true
         }, onErrorShowAlert)
         if(!res)
@@ -232,6 +232,29 @@
         let rect = owner.getBoundingClientRect()
         showMenu(rect, options);
     }
+
+    let list_properties = {
+        Title: "Title",
+        Summary: "Summary",
+        icon: "icon",
+        element:{
+            icon: "icon",
+            href: "href",
+            Title: "Title",
+            Summary: "Summary"
+        },
+        context:{
+            Folder:{
+                Summary: "Summary",
+
+            },
+            FolderFolder:{
+                Summary: "Summary",
+                head_right: "ModificationDate"
+            }
+        }
+    }
+
 </script>
 
 <svelte:head>
@@ -253,6 +276,7 @@
 
         <List   self={user}
                 a='MessageChannels'
+                {list_properties}
                 toolbarOperations={channelOperations}
                 orderAttrib='Order'
                 bind:this={listComponent}>
@@ -267,9 +291,9 @@
 
         </List>
     </section>
-    
+
        </Paper>
-        
+
     </Page>
 {:else}
     <Spinner delay={3000}/>

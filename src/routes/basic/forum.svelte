@@ -1,8 +1,10 @@
 <script>
     import {reef, session} from '@humandialog/auth.svelte'
-    import {    Spinner, 
-                Page, 
-                Icon, 
+    import {    Spinner,
+                Page,
+                Paper,
+                PaperHeader,
+                Icon,
                 ComboSource,
                 List,
                 ListTitle,
@@ -24,10 +26,10 @@
             } from '$lib'
     import {FaSync, FaComments, FaComment} from 'svelte-icons/fa'
     import {location, pop, push, querystring} from 'svelte-spa-router'
-    
+
     import FaPostPlus from './icons/post.plus.svelte'
     import {cache} from './cache.js'
-	
+
     export let params = {}
 
     let contextItem = null;
@@ -43,23 +45,23 @@
     let pageElementsNo = 25
 
     $: onParamsChanged($location, $querystring, $mainContentPageReloader);
-    
+
     async function onParamsChanged(...args)
     {
         const segments = $location.split('/');
         const foundIdx = segments.findIndex( s => s == 'forum');
         if(foundIdx < 0)
             return;
-        
-        
+
+
         if(!segments.length)
             contextItemId = 1
         else
             contextItemId = parseInt(segments[segments.length-1])
-        
-        
+
+
         contextItem = null
-        contextPath = `/Folder/${contextItemId}` 
+        contextPath = `/Folder/${contextItemId}`
 
         const params = new URLSearchParams($querystring);
         if(params.has("page"))
@@ -82,13 +84,13 @@
             allTags = res;
             reloadVisibleTags()
         })
-           
+
         const readItem = await readContextItem(contextItemId)
-        
+
         // dodatkowe zabezpiecznie dla przypadku kiedy pokazalismy folder, ale jego wersje z cache'a
         // i wciąż jeszcze czekamy na odpowiedź z serwisu. W międzyczasie user przeszedł do folderu niżej
         // zostajemy więc w tym komponencie, ale zmienił się parametr folderu do załadowania
-        // wysyłamy więc nowe zapytanie, a to poprzednie, które wciąż jeszcze trwa, już nas nie interesuje 
+        // wysyłamy więc nowe zapytanie, a to poprzednie, które wciąż jeszcze trwa, już nas nie interesuje
         if(readItem.Id != contextItemId)
             return;
 
@@ -118,7 +120,7 @@
         notesComponent?.reload(contextItem, notesComponent.KEEP_SELECTION)
     }
 
-    async function readContextItem(contextItemId) 
+    async function readContextItem(contextItemId)
     {
         if(pageNo < 0)
             pageNo = 0
@@ -143,7 +145,7 @@
                                                 Association: 'Folders',
                                                 Sort: 'Order',
                                                 Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'icon', 'IsPinned', 'GetLastForumActivity']
-                                                
+
                                             },
                                             {
                                                 Id: 3,
@@ -164,9 +166,9 @@
                             },
                             onErrorShowAlert);
         if(res)
-        {    
+        {
 
-            return res.Folder;  
+            return res.Folder;
         }
         else
             return null;
@@ -194,8 +196,8 @@
         }
     }
 
-   
-    async function refreshView() 
+
+    async function refreshView()
     {
         await fetchData();
         subfoldersComponent.reload(contextItem, subfoldersComponent.KEEP_SELECTION)
@@ -228,7 +230,7 @@
                             tbr: 'C',
                             hideToolbarCaption: true
                         }
-                    
+
                     ]
                 }
             ]
@@ -277,6 +279,29 @@
         push(loc)
     }
 
+    let list_properties = {
+        Title: "Title",
+        Summary: "Summary",
+        icon: "icon",
+        element:{
+            icon: "icon",
+            href: "href",
+            Title: "Title",
+            Summary: "Summary"
+        },
+        context:{
+            Folder:{
+                Summary: "Summary",
+
+            },
+            FolderFolder:{
+                Summary: "Summary",
+                head_right: "ModificationDate"
+            }
+        }
+    }
+
+
 </script>
 
 <svelte:head>
@@ -289,62 +314,44 @@
 
 {#if contextItem}
     {#key contextItem.$ref}
-        <Page   self={contextItem} 
+        <Page   self={contextItem}
                 toolbarOperations={ getPageOperations(contextItem) }
                 clearsContext='props sel'
                 title={folderTitle}>
 
-                <section class="w-full place-self-center max-w-3xl relative">
-                    
-                    {#if contextItem.GetCanonicalPath}
-                        <Breadcrumb class="mt-1 mb-5" path={contextItem.GetCanonicalPath} />
-                    {/if}
+                    <Paper>
+        <PaperHeader>
+            <!--Breadcrumb class="mt-1 mb-5" path={canonicalPath}/-->
+        </PaperHeader>
+
+        <h1>{folderTitle}</h1>
+
+        <div class="flex flex-row justify-between">
+            <span></span>
+            <span class="text-center"></span>
+            <span class="pr-5 text-right"> <Paginator {onPage} {pageNo} {allPagesNo} bind:this={paginatorTop}/></span>
+        </div>
 
 
-                    <p class="hidden sm:block mt-3 ml-3 pb-5 text-lg text-left">
-                        {folderTitle}
-                    </p>
 
-                    <!-- paginator -->
 
-                    <div class="flex flex-row  mt-2 ">
-                        <section class="ml-auto mr-2">
-                            <Paginator {onPage} {pageNo} {allPagesNo} bind:this={paginatorTop}/>
-                        </section>
-                    </div>
-            
-                <List   self={contextItem} 
+                <List   self={contextItem}
                         a='Folders'
-                        
-                        toolbarOperations={ (el) => [] } 
+                        {list_properties}
+                        toolbarOperations={ (el) => [] }
                         orderAttrib='Order'
                         bind:this={subfoldersComponent}>
-                    <ListTitle      a='Title' 
-                                    hrefFunc={(folder) => `${folder.href}`}
-                                    />
-                    
-                    <ListSummary    a='Summary'
-                                    />
-
-                    <ListStaticProperty name="Author" getter={ (item) => getActivityTitle(item)}/>
-                    <ListStaticProperty name="Date" getter={ (item) => getActivityDate(item)}/>
-                    <!--ListStaticProperty name="Author" getter={ (item) => getActivityUser(item)}/-->
-
-                    <span slot="left" let:element>
-                        <Icon component={FaComments} 
-                            class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
-                    </span>
                 </List>
-            
-                <List   self={contextItem} 
+
+                <!--List   self={contextItem}
                         a='Notes'
-                        toolbarOperations={ (el) => [] } 
+                        toolbarOperations={ (el) => [] }
                         orderAttrib='Order'
                         bind:this={notesComponent}>
-                    <ListTitle      a='Title' 
+                    <ListTitle      a='Title'
                                     hrefFunc={(note) => `${note.href}`}
                                     />
-                    <ListSummary    a='Summary' 
+                    <ListSummary    a='Summary'
                                     />
 
                     <ListStaticProperty name="NotesCount" postfix='replies'/>
@@ -354,32 +361,28 @@
                         <ComboSource key="$ref" name='Name'/>
                     </ListComboProperty>
 
-                    <ListTags a='Tags' 
+                    <ListTags a='Tags'
                               getAllTags={() => allTags}
                               readOnly
                               />
-                    
+
                     <span slot="left" let:element>
-                        <Icon component={FaComment} 
+                        <Icon component={FaComment}
                             class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5 ml-2  mr-1"/>
                     </span>
-                </List>
+                </List-->
 
                 <div class="flex flex-row  mt-10 mb-10">
                     <section class="ml-auto mr-2">
                         <Paginator {onPage} {pageNo} {allPagesNo} bind:this={paginatorBtt}/>
                     </section>
                 </div>
-        </section>
 
-            <!-- empty section fot have bottom free area -->
-        <section class="mb-64"></section>
-
+                    <!-- empty section fot have bottom free area -->
+                <!--section class="mb-64"></section-->
+            </Paper>
         </Page>
     {/key}
 {:else}
     <Spinner delay={3000}/>
 {/if}
-
-
-

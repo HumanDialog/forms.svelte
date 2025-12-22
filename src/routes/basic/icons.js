@@ -1,6 +1,12 @@
 
 import {FaRegCalendarCheck, FaRegCalendar, FaRegFolder, FaRegClipboard, FaRegComments, FaRegFile, FaFile, FaList, FaUser, FaClipboardList} from 'svelte-icons/fa'
 
+let testIcons = {
+
+}
+
+
+
 function getIconByLabel(label)
 {
     switch(label)
@@ -13,7 +19,7 @@ function getIconByLabel(label)
 
     case 'Discussion':
         return FaRegComments;
-    
+
     case 'Task':
         return FaRegCalendar;
 
@@ -41,7 +47,7 @@ function getIconByLabel(label)
 
     default:
         return null
-    }        
+    }
 }
 
 export function getElementIcon(element)
@@ -52,7 +58,7 @@ export function getElementIcon(element)
     {
         if(element.icon)
             return getIconByLabel(element.icon)
-        else if (element.InIcon) 
+        else if (element.InIcon)
             return getIconByLabel(element.InIcon)
         else if(element.$type)
         {

@@ -1,6 +1,6 @@
 <script>
      import {reef} from '@humandialog/auth.svelte'
-     import {  
+     import {
             editable, selectable, getNiceStringDateTime, startEditing, i18n,
             contextItemsStore, onErrorShowAlert,
 			activateItem,
@@ -12,7 +12,7 @@
     import {link} from 'svelte-spa-router'
     import {FaPen, FaCaretUp, FaCaretDown} from 'svelte-icons/fa'
     import Task from './dashboard.task.svelte'
-    
+
 
     export let list;
     export let tasks = undefined;
@@ -25,7 +25,7 @@
     let placeholder = ''
     let nameElement;
     let summaryElement;
-    
+
     $: isCardActive = calculate_active(list, $contextItemsStore)
     $: isCardSelected = selected(list, $contextItemsStore)
 
@@ -100,7 +100,7 @@
                     */
                     ]
                 }
-               
+
             ]
         }
 
@@ -158,7 +158,7 @@
         }
     }
 
-    async function UnSubscribe() 
+    async function UnSubscribe()
     {
         const res = await reef.get(`${list.$ref}/List/Unsubscribe`, onErrorShowAlert)
         if(onRefreshDashboard)
@@ -172,51 +172,40 @@
             onRefreshDashboard(list.$ref)
     }
 
-    async function moveDown() 
+    async function moveDown()
     {
         await reef.get(`${list.$ref}/MoveDown`, onErrorShowAlert)
         if(onRefreshDashboard)
             onRefreshDashboard(list.$ref)
     }
-    
+
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-interactions -->
 
 {#if tasks && tasks.length > 0}
-<section    class="relative left-[-0.25rem] pl-1 rounded-md border border-transparent {selectedClass} {focusedClass}"
+
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+{#if !isCardActive}
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!---- INACTIVE PURE LAYOUT ----------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<div        class = ""
             use:selectable={list}
             on:click={activate}>
-    <h3>
-        {#if isCardActive}
-            <a href={list.href} use:link
-                use:editable={{
-                                action: (text) => changeListProperty(text, 'Name'), 
-                                active: false,
-                                onFinish: (d) => {nameElement.blur()}}}
-                            bind:this={nameElement}>
-                {list.Name}
-            </a>
-        {:else}
-            <span>{list.Name}</span>
-        {/if}
-    </h3>
-    
-    {#if list.Summary || placeholder == 'Summary'}
-        <p>
-            {#if isCardActive}
-                <span  use:editable={{
-                                    action: (text) => changeListProperty(text, 'Summary'), 
-                                    active: true,
-                                    onFinish: (d) => {placeholder = ''}}}
-                                bind:this={summaryElement}>
-                    {list.Summary}
-                </span>
-            {:else}
-                <span>{list.Summary}</span>
-            {/if}
-        </p>
+
+    <h2>{list.Name}</h2>
+
+
+    {#if list.Summary}
+                <p>{list.Summary}</p>
     {/if}
 
     {#each tasks as task}
@@ -225,5 +214,59 @@
                 {onUpdateAllTags}
                 {users}/>
     {/each}
-</section>
+</div>
+
+
+
+
+
+
+
+{:else}
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!---- ACTIVE WITH CONROLS  ----------------------------------------------------------------------->
+<!------- keep pure layout  ----------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<div    class="bg-stone-100 dark:bg-stone-700/10 outline outline-8 outline-stone-700/10"
+        >
+    {#if isCardActive}
+        <a href={list.href} use:link>
+        <h2  class="text-sky-500"
+                use:editable={{
+                action: (text) => changeListProperty(text, 'Name'),
+                active: false,
+                onFinish: (d) => {nameElement.blur()}}}
+                bind:this={nameElement}>
+            {list.Name}
+        </h2>
+        </a>
+
+    {:else}
+        <h2>{list.Name}</h2>
+    {/if}
+
+
+    {#if list.Summary || placeholder == 'Summary'}
+            {#if isCardActive}
+                <p  use:editable={{
+                                    action: (text) => changeListProperty(text, 'Summary'),
+                                    active: true,
+                                    onFinish: (d) => {placeholder = ''}}}
+                                bind:this={summaryElement}>
+                    {list.Summary}
+                </p>
+            {:else}
+                <p>{list.Summary}</p>
+            {/if}
+    {/if}
+
+    {#each tasks as task}
+        <Task   {task}
+                {getAllTags}
+                {onUpdateAllTags}
+                {users}/>
+    {/each}
+</div>
+{/if}
 {/if}

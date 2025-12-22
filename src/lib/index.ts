@@ -10,6 +10,10 @@ export { default as Box } from "./form.box.svelte";
 //export { default as TilesVerticalRow } from "./tiles.vertical.row.svelte";
 export { default as Operations } from './operations.svelte'
 export { default as Paper} from './paper.svelte'
+export { default as PaperNav} from './paper.nav.svelte'
+export { default as PaperTable} from './paper.table.svelte'
+export { default as PaperTopMargin} from './paper.top.margin.svelte'
+export { default as PaperHeader} from './paper.header.svelte'
 
 export {default as Layout } from './desk.svelte'
 export {default as VerticalToolbar} from './vertical.toolbar.svelte'
@@ -17,12 +21,16 @@ export {default as HorizontalToolbar} from './horizontal.toolbar.svelte'
 
 // @ts-ignore
 export { default as Icon } from "./components/icon.svelte";
-export { default as IconT } from "./components/icon.ex.svelte";
+export { default as IconT } from "./components/icon.ex.svelte"
+export { default as Ricon } from "./components/r.icon.svelte";
+export { default as REdit } from "./components/r.edit.svelte";
+export { default as Editable } from "./components/r.editable.svelte";
+
 
 export { default as Button } from './components/button.svelte';
 export { default as Checkbox } from './components/checkbox.svelte';
 export { default as DatePicker } from './components/date.svelte';
-export { default as Edit } from './components/edit.field.svelte';
+export { default as FieldEdit } from './components/edit.field.svelte';
 export { default as FileLoader } from './components/file.loader.svelte';
 export { default as Input } from './components/inputbox.ltop.svelte';
 export { default as Radio } from './components/radio.svelte';
@@ -125,7 +133,7 @@ export {
     navToggle,
     navPrevVisibleKey,
     navAutoHide,
-    
+
     insertAt,
     insertAfter,
     getPrev,
@@ -133,7 +141,7 @@ export {
     getFirst,
     getLast,
     removeAt,
-    remove, 
+    remove,
     swapElements,
     setSelectionAtEnd,
     isValidEmail
@@ -141,7 +149,7 @@ export {
 
 export {
     getNiceStringDateTime,
-    getFormattedStringDate, 
+    getFormattedStringDate,
     getNiceStringDate,
     dayName,
     monthName} from './components/date_utils'
@@ -162,12 +170,12 @@ export {
             showFABAlways } from './stores.js'
 
 export {    data_tick_store,    // tmp
-            hasSelectedItem, 
+            hasSelectedItem,
             hasDataItem,
             setNavigatorTitle } from "./stores";
-            
+
 export { contextToolbarOperations, pageToolbarOperations, contextItemsStore, contextTypesStore } from './stores'   // tmp
-export { informModification, informModificationEx, informItem, pushChanges, hasModifications } from './updates'   // tmp
+export { informModification, setjItemProperty, informModificationEx, informItem, pushChanges, hasModifications } from './updates'   // tmp
 
 
 

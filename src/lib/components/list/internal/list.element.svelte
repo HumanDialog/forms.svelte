@@ -1,52 +1,60 @@
 <script lang="ts">
     import {tick, getContext} from 'svelte'
+
     import {contextItemsStore} from '../../../stores'
     import {
-            isSelected, 
-            selectable, 
-            activateItem, 
+            isSelected,
+            selectable,
+            activateItem,
             isActive,
-            editable, 
+            editable,
             startEditing,
             addActiveItem,
-            removeActiveItem, 
+            removeActiveItem,
     } from '../../../utils'
 
     import {showGridMenu, showMenu} from '../../menu'
     import {pushChanges, informModification} from '../../../updates'
-    import Summary from './list.element.summary.svelte'
-    import Properties from './list.element.props.svelte'
+
     import { isDeviceSmallerThan } from '../../../utils'
-    import Icon from '../../icon.svelte'
+    import Circle from '../../ricons/circle.svelte'
+    import CircleCheck from '../../ricons/circle-check.svelte'
+    import Ricon from  '../../r.icon.svelte'
+    //import {get_ricon} from  '../../ricons.js'
     import Spinner from '../../delayed.spinner.svelte'
-                
+
     import {rList_definition, rList_property_type} from '../List'
 	import { push, link } from 'svelte-spa-router';
     import {FaExternalLinkAlt, FaRegCircle, FaRegCheckCircle} from 'svelte-icons/fa/'
     import Tags from '../../tags.svelte'
     import {ext} from '../../../i18n'
-    
+
     export let item     :object;
 
-    export let title    :string = '';
-    export let summary  :string = '';
-    
+    export let element_title    :string = '';
+
+    export let list_properties:  object | undefined = undefined;
+
     export let typename :string | undefined = undefined;
     export let toolbarOperations = undefined;
     export let contextMenu = undefined;
     export let multiselectOperations = (items) => []
-    
+
     export let key: string = '';
     export let selectionKey = 'props'
     export let multiselect:  boolean = false
+    export let layout_demo_mode: boolean = false
+    export let show_prev_interface: boolean = false
 
     let definition :rList_definition = getContext("rList-definition");
-    //console.log(definition.properties, item)
+    //console.log(definition.list_properties, item)
 
     let placeholder :string = '';
     let props_sm;
     let props_md;
-    
+    let summary  :string = '';
+
+
     $: is_row_active = calculate_active(item, $contextItemsStore)
     $: is_row_selected = selected(item, $contextItemsStore)
 
@@ -54,6 +62,11 @@
     $: focused_class = is_row_active ? "bg-stone-200 dark:bg-stone-700" : "";
     $: download = is_row_active && (definition.downloadable || (definition.downloadableFunc ? definition.downloadableFunc(item) : false))
     $: is_link_like = is_row_active && (!!definition.title_href || !!definition.title_href_func || download)
+
+    $: demo_element_class = is_row_active ?  "pl-8 bg-stone-700" : "pl-8"
+    $: multiselect_class =  is_row_active ?  "pl-16 rounded bg-stone-600 outline outline-4 outline-stone-600 " : "pl-16"
+
+
 
     if(!typename)
     {
@@ -76,32 +89,41 @@
         item_key = keys[0];
     */
 
-    if(!title)
-        title = definition.title;
 
+    element_title = list_properties?.context[item.$type]?.Title;
+    if(!element_title)
+        element_title = list_properties?.element?.Title;
 
+    summary = list_properties?.context[item.$type]?.Summary;
     if(!summary)
-        summary = definition.summary;
+        summary = list_properties?.element?.Summary;
 
-    let [name_w, props_w] = calc_horz_division();
-    function calc_horz_division()
+    let element_href = item[list_properties.element.href];
+
+
+    let element_icon     :string = get_element_icon(list_properties, item);
+
+    function get_element_icon(properties, item)
     {
-        const props_no = definition.properties.length
-        switch(props_no)
+        let element_icon = ""
+        element_icon = list_properties?.context[item.$type]?.icon;
+        if(!element_icon)
+            element_icon = list_properties?.element?.icon;
+
+        if(element_icon)
         {
-        case 0:
-            return ['w-full', ''];
-        case 1:
-            return ['w-2/3', 'w-1/3']
-        case 2:
-            return ['w-2/3', 'w-1/3']
-        case 3:
-            return ['w-1/2', 'w-1/2']
-        default:
-            return ['w-1/3', 'w-2/3']
+            if(element_icon[0]!='#')
+                element_icon = item[element_icon]
+            else
+                element_icon = element_icon.substr(1)
         }
+
+        if(!element_icon)
+            element_icon = 'turtle'
+        return element_icon
     }
-            
+
+
 
     function calculate_active(...args)
     {
@@ -124,7 +146,7 @@
             return item.$ref;
         else if(item.Id)
             return item.Id;
-        else 
+        else
             return 0;
     }
 
@@ -134,7 +156,7 @@
             return key;
         else
         {
-            const keys = Object.keys(item)        
+            const keys = Object.keys(item)
             if(keys.findIndex(e => e == '$ref') >= 0)
                 return '$ref'
             else if(keys.findIndex(e => e == 'Id') >= 0)
@@ -143,34 +165,16 @@
                 return ''
         }
     }
-    
-    async function change_name(text)
+
+
+    async function change_property(property_name, value)
     {
-        if(definition.on_title_changed)
-        {
-            definition.on_title_changed(item, text, title)
-        }
-        else
-        {
-            item[title] = text;
-            informModification(item, title, typename);
-            pushChanges();
-        }
+        item[property_name] = value
+        informModification(item, property_name, typename);
+        pushChanges();
     }
 
-    async function change_summary(text)
-    {
-        if(definition.on_summary_changed)
-        {
-            definition.on_summary_changed(item, text, summary);
-        }
-        else
-        {
-            item[summary] = text;
-            informModification(item, summary, typename);
-            pushChanges();
-        }
-    }
+
 
     function edit(e)
     {
@@ -185,87 +189,8 @@
         activate_row(null, item);
     }
 
-    function on_active_row_clicked(e, part)
-    {
-        if(!is_row_active)
-            return;
 
-        let click_on_empty_space = true;
-        let n = e.target;
 
-        while(n)
-        {
-            let is_in_cell = n.getAttribute("role") == "gridcell"
-            if(is_in_cell)
-            {
-                click_on_empty_space = false;
-                break;
-            }
-
-            n = n.parentElement;
-        }
-
-        //temporary disable
-        let can_show_context_menu = click_on_empty_space;
-        can_show_context_menu = false;
-
-        if(can_show_context_menu && contextMenu)
-        {
-            const pt = new DOMPoint(e.clientX, e.clientY)
-
-            let context_operations = contextMenu(item);
-            if(context_operations !== null)
-            {
-                if(typeof context_operations === 'object')
-                {
-                    if(Array.isArray(context_operations))
-                        showMenu(pt, context_operations);
-                    else if(context_operations.grid)
-                        showGridMenu(pt, context_operations.grid); 
-                }
-            }
-        }
-        else if(click_on_empty_space)
-        {
-            if(definition.title_href || definition.title_href_func)
-            {
-                //followDefinedHRef();
-            }
-            else
-            {
-            /*    if((part == 'top') && !definition.title_readonly)
-                    force_editing('Title')
-                else if((part == 'bottom') && !definition.summary_readonly)
-                    force_editing('Summary')
-            */
-            }
-        }
-        else
-        {
-            /*if((part == 'top') && !definition.title_readonly)
-                force_editing('Title')
-            else if((part == 'bottom') && !definition.summary_readonly)
-                force_editing('Summary')
-            */
-        }
-    }
-
-    function followDefinedHRef()
-    {
-        let link: string = getHRef();
-        if(link)
-            push(link);
-    }
-
-    function getHRef(): string
-    {
-        if(definition.title_href)
-            return definition.title_href;
-        else if(definition.title_href_func)
-            return definition.title_href_func(item);
-        else
-            return '';
-    }
 
     function activate_row(e, item)
     {
@@ -276,20 +201,20 @@
                 activateItem(selectionKey, item, multiselectOperations);
             else
                 activateItem(selectionKey, item, toolbarOperations(item));
-            
+
             if(e)
                 e.stopPropagation();
         }
         else// if(openable)
         {
             activateItem(selectionKey, item, []);
-            
+
             if(e)
                 e.stopPropagation();
         }
     }
 
-    
+
 
 
 
@@ -308,18 +233,18 @@
                 if(Array.isArray(context_operations))
                     showMenu(pt, context_operations);
                 else if(context_operations.grid)
-                    showGridMenu(pt, context_operations.grid); 
+                    showGridMenu(pt, context_operations.grid);
             }
         }
-        
+
         e.preventDefault();
     }
 
-    
+
 
     export function editProperty(field :string)
     {
-        if(field == title)
+        if(field == element_title)
             force_editing('Title')
         else if(field == summary)
             force_editing('Summary')
@@ -334,7 +259,8 @@
 
     async function force_editing(field :string)
     {
-        let element_id = `__hd_list_ctrl_${getItemKey(item)}_${field}`;
+        //let element_id = `__hd_list_ctrl_${getItemKey(item)}_${field}`;
+        let element_id = `__or_list_ctrl_${getItemKey(item)}_${field}`;
         let element_node = document.getElementById(element_id);
         if(!element_node)
         {
@@ -360,16 +286,16 @@
             else
             {
                 element_node.focus();
-                setSelectionAtEnd(element_node);
+                //setSelectionAtEnd(element_node);
             }
         }
         else
         {
             element_node.focus();
-            setSelectionAtEnd(element_node);
+            //setSelectionAtEnd(element_node);
         }
 
-        
+
     }
 
     function setSelectionAtEnd(element: HTMLElement)
@@ -423,196 +349,220 @@
         isDownloading = false
     }
 
+
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
+<!-- svelte-ignore a11y-structure -->
+
 {#if item}
-{@const element_title = ext(item[title])}
-
-<section    class="my-1 flex flex-row w-full  text-stone-900 dark:text-stone-300 cursor-default rounded-md border border-transparent {selected_class} {focused_class} scroll-mt-[50px] sm:scroll-mt-[40px]"
-            role="menu"
-            tabindex="-1"
-            bind:this={rootElement}> <!--  on:contextmenu={on_contextmenu} -->
-
-    {#if multiselect}
-        {@const icon=is_row_active ? FaRegCheckCircle : FaRegCircle}
-         <Icon  component={icon} 
-                class="flex-none h-4 w-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-1 ml-2 mr-3 "
-                on:click={onToggleMultiSelect}/>
-    {/if}
-    
-    {#if isDownloading}
-        <Spinner class="mt-0.5  ml-2  mr-1" size={5} delay={0}/>
-    {:else}
-        <slot name="left" element={item}/>
-    {/if}
-    
-    <i class="hidden sm:w-1/2 sm:w-2/3 sm:w-1/3"></i>   <!-- just to force tailwind classes including -->
-    
-    <div    class="ml-3 w-full py-0" 
-            use:selectable={item} 
-            on:click={(e) => {activate_row(e, item)}} 
-            role="row" 
-            tabindex="0">
-        <div class="block sm:flex sm:flex-row" on:click={(e) => on_active_row_clicked(e, 'top')}>
-           
-            {#if is_row_active}
-                {#key item[title]}      <!-- Wymusza pełne wyrenderowanie zwłasza po zmiane z pustego na tekst  -->
-                    {#if is_link_like}
-                        <p  class=" text-base font-semibold 
-                                   
-                                    whitespace-nowrap overflow-clip w-full sm:flex-none sm:{name_w}"
-                                    id="__hd_list_ctrl_{getItemKey(item)}_Title"
-                                    use:editable={{
-                                        action: (text) => {change_name(text)},
-                                        active: false,
-                                        readonly: definition.title_readonly,
-                                        onSoftEnter: (text) => {change_name(text); editProperty('Summary')}
-                                    }}
-                            >  <!--on:click|stopPropagation={followDefinedHRef}-->
-                            {#if download}
-                                <a  class="sm:hover:cursor-pointer underline" 
-                                    download
-                                    href={getHRef()}
-                                    on:click={onDownloadFile}>
-                                    {element_title}
-                                </a>
-                            {:else}
-                                <a  class="sm:hover:cursor-pointer underline" 
-                                    href={getHRef()} use:link>
-                                    {element_title}
-                                </a>
-                            {/if}
-                        </p>
-                    {:else if definition.onOpen}
-                        <p  class=" text-base font-semibold 
-                                    
-                                    whitespace-nowrap overflow-clip w-full sm:flex-none sm:{name_w}"
-                            id="__hd_list_ctrl_{getItemKey(item)}_Title"
-                            use:editable={{
-                                action: (text) => {change_name(text)},
-                                active: true,
-                                readonly: definition.title_readonly,
-                            }}> 
-                                <span   class="sm:hover:cursor-pointer underline"
-                                        on:click|stopPropagation={(e) => definition.onOpen(item)}>
-                                    {element_title}
-                                </span>
-
-                            <!--
-                            {#if definition.onOpen}
-                                <button class="ml-3 w-5 h-5 sm:w-3 sm:h-3"
-                                        on:click={(e) => definition.onOpen(item)}>
-                                    <FaExternalLinkAlt/>
-                                </button>
-                            {/if}
-                            -->
-                        </p>
-                    {:else}
-                        <p  class=" text-base font-semibold 
-                                    whitespace-nowrap overflow-clip w-full sm:flex-none sm:{name_w}"
-                            id="__hd_list_ctrl_{getItemKey(item)}_Title"
-                            use:editable={{
-                                action: (text) => {change_name(text)},
-                                active: true,
-                                readonly: definition.title_readonly,
-                            }}> 
-                                <span>
-                                    {element_title}
-                                </span>
-                        </p>
-                    {/if}
-                {/key}
-            {:else}
-                <p  class=" text-base font-semibold 
-                             
-                            whitespace-nowrap overflow-clip w-full sm:flex-none sm:{name_w}"
-                    id="__hd_list_ctrl_{getItemKey(item)}_Title"> 
-                    {element_title}
-                </p>
-            {/if}
-           
-
-            <section class="hidden sm:block w-full sm:flex-none sm:{props_w}">
-                <Properties {definition} {item} {placeholder} bind:this={props_md}/>
-            </section>
+{@const translated_element_title = ext(item[element_title])}
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+{#if !is_row_active && !multiselect}
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!---- INACTIVE PURE LAYOUT ----------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<figure class="pl-8"
+        bind:this={rootElement}
+        use:selectable={item}
+        on:click={(e) => {activate_row(e, item)}}>
+    <!-- comming soon - top info --
+    <figcaption>
+        <div class="grid gap-4 grid-cols-3 grid-rows-1">
+            <span>OCT-254</span>
+            <span class="text-center"></span>
+            <span class="text-right">15 listopad 25</span>
         </div>
+    </figcaption>
+    -------------------------------->
+    <!--@el------------------------->
+    <h4 class="-indent-8">
+        <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
+                text-stone-700 dark:text-stone-400 ">
+                <Ricon icon = {element_icon}/>
+        </div>{translated_element_title}
+    </h4>
+    <!-- comming soon - middle info --
+    <figcaption>
+        <div class="grid gap-4 grid-cols-3 grid-rows-1">
+            <span>Andrzej</span>
+            <span class="text-center"></span>
+            <span class="text-right">Specyfikacje</span>
+        </div>
+    </figcaption>
+    -------------------------------->
 
-        <section class="block sm:hidden w-full">
-            <Properties {definition} {item} {placeholder} bind:this={props_sm}/>
-        </section>
+    {#if summary && item[summary]}
+    <figcaption>
+        {item[summary]}
+    </figcaption>
+    {/if}
+</figure>
 
-        {#if summary && (item[summary] || placeholder=='Summary')}
-            {@const summaryText = ext(item[summary])}
-            {@const element_id = `__hd_list_ctrl_${getItemKey(item)}_Summary`}
-            {#key summaryText }           
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+{:else if multiselect}
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------SPECIAL CASE - MULTISELECTION------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<div        bind:this={rootElement}
+            use:selectable={item}
+            on:click={onToggleMultiSelect}>
+<figure class={multiselect_class} bind:this={rootElement}>
+    <!-- comming soon - top info --
+    <figcaption>
+        <div class="grid gap-4 grid-cols-3 grid-rows-1">
+            <span>OCT-254</span>
+            <span class="text-center"></span>
+            <span class="text-right">15 listopad 25</span>
+        </div>
+    </figcaption>
+    -------------------------------->
+    <!--@el------------------------->
+    <h4 class="-indent-16 "
+        >
+        <div class="inline-block w-4 h-4 ml-1 mr-1 py-0.5 align-baseline
+                text-stone-700 dark:text-stone-400 ">
                 {#if is_row_active}
-                    <p  id={element_id} 
-                        class=" text-sm                              
-                                text-stone-600 dark:text-stone-400"
-                            use:editable={{
-                                action: (text) => {change_summary(text)},
-                                readonly: definition.summary_readonly,
-                                onFinish: (d) => {placeholder='';},
-                                active: true
-                            }}>
-                        {summaryText}
-                    </p>
+                <CircleCheck size = "s"/>
                 {:else}
-                    <p  id={element_id} 
-                        class=" text-sm 
-                                    text-stone-600 dark:text-stone-400"
-                        on:click={(e) => on_active_row_clicked(e, 'bottom')}>
-                        {summaryText}
-                    </p>
+                <Circle size = "s"/>
                 {/if}
-            {/key}
-                
-        {/if}
+        </div>
+        <div class="inline-block w-4 h-4 ml-0 mr-5 align-baseline
+                text-stone-700 dark:text-stone-400 ">
+                <!--Ricon icon={ClipboardMinus}/-->
+                <Ricon icon = {element_icon} />
+        </div>{translated_element_title}
+    </h4>
+    <!-- comming soon - middle info --
+    <figcaption>
+        <div class="grid gap-4 grid-cols-3 grid-rows-1">
+            <span>Andrzej</span>
+            <span class="text-center"></span>
+            <span class="text-right">Specyfikacje</span>
+        </div>
+    </figcaption>
+    -------------------------------->
 
-        {#if definition.tags}
-                <Tags
-                    class="mt-1 mb-1"
-                    compact
-                    inContext="props"
-                    self={item}
-                    a={definition.tags.a}
-                    getGlobalTags={definition.tags.getAllTags}
-                    s="sm"
-                    onSelect={definition.tags.onSelect}
-                    onUpdateAllTags={definition.tags.onUpdateAllTags}
-                    canChangeColor={definition.tags.canChangeColor}
-                    readOnly={definition.tags.readOnly}
-                />
-            {/if}
+    {#if summary && (item[summary] || placeholder=='Summary')}
+    <figcaption>
+        {item[summary]}
+    </figcaption>
+    {/if}
+</figure>
+</div>
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+{:else}
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<div        >
 
-    </div>
-</section>
+<figure class="pl-8
+
+        bg-stone-300 dark:bg-stone-700
+        outline outline-8
+        outline-stone-300 dark:outline-stone-700
+        ring-1 ring-offset-8
+        ring-stone-300 dark:ring-stone-700
+        "
+
+        bind:this={rootElement}
+        use:selectable={item}
+        on:click={(e) => {activate_row(e, item)}}
+        >
+    <!-- comming soon - top info --
+    <figcaption>
+        <div class="grid gap-4 grid-cols-3 grid-rows-1">
+            <span>OCT-254</span>
+            <span class="text-center"></span>
+            <span class="text-right">15 listopad 25</span>
+        </div>
+    </figcaption> #active
+    -------------------------------->
+    <!--@el------------------------->
+    {#if !download}
+    <a  class="sm:hover:cursor-pointer"
+        href={element_href} use:link>
+
+    <h4 class="-indent-8 "
+        id="__or_list_ctrl_{getItemKey(item)}_Title"
+        use:editable={{
+            action: (text) => {change_property(element_title, text)},
+            active: false,
+            readonly: definition.title_readonly,
+            onSoftEnter: (text) => {change_name(text); editProperty('Summary')}
+        }}>
+        <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
+                text-stone-700 dark:text-stone-400 ">
+                <Ricon icon={element_icon} />
+        </div>{translated_element_title}
+    </h4>
+    </a>
+    {:else}
+    {/if}
+    <!-- comming soon - middle info --
+    <figcaption>
+        <div class="grid gap-4 grid-cols-3 grid-rows-1">
+            <span>Andrzej</span>
+            <span class="text-center"></span>
+            <span class="text-right">Specyfikacje</span>
+        </div>
+    </figcaption>
+    -------------------------------->
+
+    {#if summary && (item[summary])}
+        <figcaption id="__or_list_ctrl_{getItemKey(item)}_Summary" use:editable={{
+                    action: (text) => {change_property(summary, text)},
+                    readonly: definition.summary_readonly,
+                    onFinish: (d) => {placeholder='';},
+                    active: true
+                }}>{item[summary]}
+        </figcaption>
+
+    {:else if placeholder=='Summary'}
+        <figcaption id="__or_list_ctrl_{getItemKey(item)}_Summary"
+                    use:editable={{
+                    action: (text) => {change_property(summary, text)},
+                    readonly: definition.summary_readonly,
+                    onFinish: (d) => {placeholder='';},
+                    active: true
+                }}>&nbsp;
+        </figcaption>
+    {/if}
+</figure>
+</div>
+
+
+
 {/if}
 
-<style>
-    .grid-1
-    {
-        display: grid;
-        grid-template-columns: 100%;
-    }
-
-    .grid-2
-    {
-        display: grid;
-        grid-template-columns: 50% 50%;
-    }
-
-    .grid-3
-    {
-        display: grid;
-        grid-template-columns: 33% 33% 33%;
-    }
-
-    .grid-4
-    {
-        display: grid;
-        grid-template-columns: 25% 25% 25% 25%;
-    }
-
-</style>
+{/if}
