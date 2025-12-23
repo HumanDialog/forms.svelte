@@ -1,6 +1,7 @@
 <script lang="ts">
     import {getContext, tick} from 'svelte'
-    import Icon from '../icon.svelte'
+    import Rfigure from '../r.figure.svelte'
+    import Ricon from  '../r.icon.svelte'
     import {contextItemsStore, contextToolbarOperations} from '../../stores'
     import {FaBars, FaEllipsisV} from 'svelte-icons/fa'
     import {link, push} from 'svelte-spa-router'
@@ -22,16 +23,20 @@
     } from "../../utils";
 
     import {showMenu} from '../menu'
-    
+
     export let href :string;
-    export let icon :any|undefined = undefined;
+    export let icon :string = 'cat';
     export let active = false;
     export let selectable :any|undefined = undefined;
     export let editable :any|undefined = undefined;
     export let operations :any|undefined = undefined;
     export let item :object|undefined = undefined;
+    //export let summary :string;
     export let summary :string|object|undefined = undefined;
-    
+    export let iicon: string|object|undefined = undefined;
+
+
+
     let isOnPage :boolean = getContext('rIs-page-component');
 
     let summaryElement = null;
@@ -41,6 +46,17 @@
     $: context_data = $contextItemsStore;
     $: isRowActive = calculateIsRowActive($contextItemsStore)
     $: summaryText = calculateSummary(summary)
+
+    $: icom = fetch_icon(item, icon, iicon);
+
+    function fetch_icon(item, icon, iicon)
+    {
+        if(item && iicon)
+            icon = item[iicon];
+
+        if(!icon)
+            icon = 'package'
+    }
 
     function calculateSummary(...args)
     {
@@ -65,7 +81,7 @@
         }
     }
 
-    
+
     export async function editSummary()
     {
         if(!summaryEditable)
@@ -103,7 +119,7 @@
         {
             if(activeItem)
             {
-                return item.$ref == activeItem.$ref        
+                return item.$ref == activeItem.$ref
             }
             else
                 return false;
@@ -112,7 +128,7 @@
         {
             if(activeItem)
             {
-                return item.Id == activeItem.Id        
+                return item.Id == activeItem.Id
             }
             else
                 return false;
@@ -162,7 +178,7 @@
 
         if(!linkNode)
             return;
-        
+
         const href = linkNode.getAttribute('href');
         e.preventDefault();
 
@@ -200,7 +216,7 @@
         let operations_list = operations(root);
         if(!operations_list)
             return;
-        
+
         if(operations_list.length == 0)
             return;
 
@@ -235,163 +251,42 @@
         let rect = owner.getBoundingClientRect()
 
         let operations_list = operations(root);
-        
+
         if(!operations_list)
             return;
-        
+
         if(operations_list.length == 0)
             return;
 
         showMenu(rect, operations_list)
     }
 
-    function activateRow(e)
-    {
-        if(!item)
-            return;
-
-        if(!isOnPage)
-            return;
-
-        let operationsContainer;
-        if(operations)
-        {
-            let operationsList = operations(root);
-            operationsContainer = {
-                opver: 1,
-                operations: [
-                    {
-                        caption: i18n({en: 'View', es: 'Ver', pl: 'Widok'}),
-                        operations: [
-                            {
-                                icon: FaEllipsisV,
-                                menu: operationsList,
-                                fab: 'M00'
-                            }
-                        ]
-                    }
-                ]
-            }
-        }
-        else
-            operationsContainer = []
-        
-       activateItem('props', item, operationsContainer)
-
-        if(e)
-            e.stopPropagation();
-
-    }
 
 </script>
 
-<li bind:this={root}>
-    <!--svelte-ignore a11y-click-events-have-key-events -->
-    <div
-        on:click
-        on:click={activateRow}
-        on:keydown
-        on:keyup
-        class="     mb-2
-                    border border-transparent rounded-lg
-                    text-stone-900 dark:text-white  {user_class}"
-        class:sm:hover:bg-stone-100={!!href}
-        class:sm:dark:hover:bg-stone-700={!!href}
-        class:bg-stone-200={isRowActive}
-        class:dark:bg-stone-700={isRowActive}
-        class:selected={selected(selectable, context_data)}>  <!-- on:contextmenu={on_contextmenu} -->
-            <div class="flex flex-row justify-between
-                        text-base font-semibold">
-                {#if href}
-                    {#if isOnPage}
-                        {#if isRowActive}
-                            <a  on:click={on_link_clicked} 
-                                href={href} 
-                                use:link
-                                class="flex-1 ml-2 inline-flex items-center underline"
-                                >
-                                {#if icon}
-                                    <Icon class="w-5 h-5 mt-0.5 ml-2 mr-1" component={icon}/>
-                                    
-                                {/if}
-                                <span   class="ml-3"
-                                        use:editable_if_needed={editable}>
-                                    <slot/>
-                                </span>
-                            </a>
-                        {:else}
-                            <span  on:click={on_link_clicked} 
-                                class="flex-1 ml-2 inline-flex items-center"
-                                >
-                                {#if icon}
-                                    <Icon class="w-5 h-5 mt-0.5 ml-2 mr-1" component={icon}/>
-                                    
-                                {/if}
-                                <span   class="ml-3"
-                                        use:editable_if_needed={editable}>
-                                    <slot/>
-                                </span>
-                            </span>
-                        {/if}
-                    {:else}
-                        <a  on:click={on_link_clicked} 
-                            href={href} 
-                            use:link
-                            class="flex-1 ml-2 inline-flex items-center group"
-                            >
-                            {#if icon}
-                                <Icon class="w-5 h-5 mt-0.5 ml-2 mr-1" component={icon}/>
-                                
-                            {/if}
-                            <span   class="ml-3 group-hover:underline"
-                                    use:editable_if_needed={editable}>
-                                <slot/>
-                            </span>
-                        </a>
-                    {/if}
-                {:else}
-                    <p  class="flex-1 ml-2 inline-flex items-center group cursor-default"
-                        use:selectable_if_needed={selectable}>
-                        {#if icon}
-                            <Icon class="w-5 h-5 mt-0.5 ml-2 mr-1" component={icon}/>
-                        {/if}
-                        <span   class="ml-3"
-                                use:editable_if_needed={editable}>
-                            <slot/>
-                        </span>
-                    </p>
-                {/if}
-
-                {#if  !isOnPage}
-                <section    class="flex-0 w-20 sm:w-12 flex-0 flex flex-row"
-                            use:selectable_if_needed={selectable}>
-                    {#if can_show_context_menu(selectable, context_data)}
-                        <button class="w-5 h-5 mt-0.5 mr-3 ml-auto" on:click={on_show_menu}>
-                            <FaBars/>
-                        </button>
-                    {/if}
-                </section>
-                {/if}
-            </div>
-
-            {#if summaryText || summaryPlaceholder}
-                <p class="ml-14 mt-1
-                        text-stone-900 dark:text-stone-400
-                        cursor-default
-                        text-sm   "
-                    use:selectable_if_needed={selectable}
-                    use:editable_if_needed={summaryEditable}
-                    bind:this={summaryElement}>
-                    {summaryText}
-                </p>
-            {/if}
-
-    </div>
-</li>
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<!-- svelte-ignore a11y-structure -->
 
 
-<style lang="postcss">
-    .selected{
-        @apply border !border-blue-300
-    }
-</style>
+<figure class="pl-8" bind:this={root}>
+    <a  on:click={on_link_clicked}
+                                href={href}
+                                use:link>
+    <h4 class="-indent-8">
+        <div class="inline-block w-4 h-4 ml-0 mr-3 align-baseline
+                    text-stone-700 dark:text-stone-400 ">
+            <Ricon icon = {icon}/>
+        </div>
+        <slot/>
+    </h4>
+    </a>
+    {#if summaryText || summaryPlaceholder}
+        <figcaption
+            use:selectable_if_needed={selectable}
+            use:editable_if_needed={summaryEditable}
+            bind:this={summaryElement}>
+            {summaryText}
+        </figcaption>
+    {/if}
+
+</figure>

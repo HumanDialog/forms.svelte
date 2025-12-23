@@ -1,5 +1,5 @@
 <script>
-	import { setContext, getContext, onMount } from 'svelte';
+	import { setContext, getContext, onMount, onDestroy } from 'svelte';
 	import {
 		contextItemsStore,
 		data_tick_store,
@@ -10,6 +10,9 @@
 		page_title
 	} from './stores.js';
 
+	import {pushChanges} from './updates.js'
+
+
 	//import {chnages} from './utils.js'
 
 	export let context = 'data';
@@ -18,7 +21,7 @@
 	export let focused_only = false;
 	export let inContext = '';
 	export let cl =
-		'w-full flex flex-col bg-white dark:bg-stone-900 overflow-x-hidden py-1 px-1 border-0'; // border-green-500
+		'w-full overflow-x-hidden py-1 px-1 border-0'; // border-green-500
 	export let c = '';
 
 	export let toolbarOperations = undefined;
@@ -42,9 +45,15 @@
 	if($$props.class)
 		cl += ' ' + $$props.class
 
+	onDestroy(() => {
+		console.log('#jcache the component is being destroyed');
+		pushChanges();
+	});
+
+
 	onMount(() => {
 		if (toolbarOperations != undefined)
-		{ 
+		{
 			if(Array.isArray(toolbarOperations))
 				$pageToolbarOperations = [...toolbarOperations];
 			else
@@ -62,6 +71,7 @@
 			$page_title = '';
 		};
 	});
+
 
 	setContext('rIs-page-component', true);
 	setContext('ctx', context);
@@ -113,7 +123,7 @@
 			heightClass = '';
 	}
 
-	function clear_selection(e) 
+	function clear_selection(e)
 	{
 		if (!clearsContext) return;
 
@@ -130,7 +140,7 @@
 	}
 </script>
 
-<div class="bg-stone-100 dark:bg-stone-800 {visibilty} {cl} {heightClass}" on:click={clear_selection}>
+<div class="page  {visibilty} {cl} {heightClass}" on:click={clear_selection}>
 	{#if visibilty == ''}
 		<slot />
 	{/if}

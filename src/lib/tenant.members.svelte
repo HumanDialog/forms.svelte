@@ -6,7 +6,7 @@
                 FaUserSlash,
                 FaChevronDown,
                 FaInfo, FaLink} from 'svelte-icons/fa'
-    
+
     import Page from './page.svelte'
     import List from './components/list/list.svelte'
     import ListTitle from './components/list/list.title.svelte'
@@ -19,7 +19,7 @@
     import Combo from './components/combo/combo.svelte'
 	import Modal from './modal.svelte'
 	import Checkbox from '$lib/components/checkbox.svelte';
-   
+
 	import { reef, session, signInHRef } from '@humandialog/auth.svelte';
 	import { ComboSource, i18n } from '$lib';
     import {showMenu} from '$lib/components/menu'
@@ -27,7 +27,7 @@
     import {randomString} from './utils'
 
     import InviteUser from './tenant.members.invite.svelte'
-	
+
 
     // ==============================================================================
 
@@ -41,9 +41,9 @@
     export let showAccessRoles = false;
 
     // ===============================================================================
-  
+
     $: init();
-   
+
     // ===============================================================================
 
 	let list;
@@ -60,7 +60,7 @@
     const authAccessKinds = () => [
         {   name: i18n({en: 'Cannot change permissions', es: 'No puede cambiar los permisos', pl: 'Nie może zmieniać uprawnień'}),
             key: 0 },
-        {   name: i18n({en: 'Can only read permissions', es: 'Solo puede leer permisos', pl: 'Może tylko czytać uprawnienia'}), 
+        {   name: i18n({en: 'Can only read permissions', es: 'Solo puede leer permisos', pl: 'Może tylko czytać uprawnienia'}),
             key: 1 },
         //{ name: 'Can invite others', key: 3 },
         {   name: i18n({en: 'Can change permissions', es: 'Puede cambiar los permisos', pl: 'Może zmieniać uprawnienia'}),
@@ -72,7 +72,7 @@
             key: 0 },
         {   name: i18n({en: 'Can write files', es: 'Puede escribir archivos', pl: 'Może zapisywać pliki'}),
             key: 1 },
-        {   name: i18n({en: 'Full files access', es: 'Acceso completo a los archivos', pl: 'Pełny dostęp do plików'}), 
+        {   name: i18n({en: 'Full files access', es: 'Acceso completo a los archivos', pl: 'Pełny dostęp do plików'}),
             key: 3 },
     ]
 
@@ -83,7 +83,7 @@
             let roles = await reef.get('/sys/list_access_roles?details')
             access_roles = [];
             if(roles)
-                roles.forEach( roleInfo => 
+                roles.forEach( roleInfo =>
                     access_roles.push(
                         {
                             name: roleInfo.name,
@@ -113,8 +113,8 @@
                         invitation_not_accepted: false,
                         removed: false,
                         membership_tag: "",
-                        ... hrefAttrib ? { 
-                            [hrefAttrib]: u[hrefAttrib] 
+                        ... hrefAttrib ? {
+                            [hrefAttrib]: u[hrefAttrib]
                          } : { }
                     }
                 )
@@ -125,10 +125,10 @@
         //add_fake_users(fake_users);
 
       //  await fetch_details();
- 
+
     }
 
-    
+
     async function fetch_details(...args)
     {
         let users_no = reef_users.length;
@@ -143,7 +143,7 @@
             {
                 //console.log('reload', reef_users)
                 //reef_users = [...reef_users]
-                
+
                 list?.reload(reef_users);
             }
         } )
@@ -185,7 +185,7 @@
         }
     )
     */
-    
+
     //let new_user = {
     //    name: '',
     //    email: '',
@@ -210,7 +210,7 @@
         await reef.post(`${user_path}/set`,
                     {
                         [nameAttrib]: name
-                    }); 
+                    });
     }
 
     async function on_change_privileges(user, flags, name)
@@ -223,7 +223,7 @@
             {
                 const response_string = await res.text();
                 const info = JSON.parse(response_string);
-                
+
                 user.auth_group = flags;
 
                 set_user_info(user, info)
@@ -250,7 +250,7 @@
             {
                 const response_string = await res.text();
                 const info = JSON.parse(response_string);
-                
+
                 user.files_group = flags;
 
                 set_user_info(user, info)
@@ -277,8 +277,8 @@
             {
                 const response_string = await res.text();
                 const info = JSON.parse(response_string);
-                
-                user.access_details.role = role;   
+
+                user.access_details.role = role;
                 user.acc_role = role
 
                 set_user_info(user, info)
@@ -294,7 +294,7 @@
         }
         return false;
     }
-    
+
     //let inviteUserIdempotencyToken = ''
     function create_new_user(email='', name='', silently=false, accepted=false)
     {
@@ -368,12 +368,12 @@
                 action: (focused) => { list.edit(user, 'Files') }
             });
         }
-        
+
         return operations;
     }
 
-    let user_operations = (user) => { 
-        
+    let user_operations = (user) => {
+
         let operations = [
             {
                 caption: i18n({en: 'Fetch info', es: 'Obtener información', pl: 'Pobierz informacje'}),
@@ -399,7 +399,7 @@
         else
         {
             let edit_operations = get_edit_operations(user)
-            
+
             operations.push({
                                 icon: FaPen,
                                 caption: i18n({en: 'Change', es: 'Cambiar', pl: 'Zmień'}),
@@ -407,7 +407,7 @@
                                 fab: 'M20',
                                 tbr: 'A'
                             });
-            
+
             operations.push({
                                 caption: i18n({en: 'Remove user', es: 'Eliminar usuario', pl: 'Usuń użytkownika'}),
                             //    icon: FaUserMinus,
@@ -425,7 +425,7 @@
                             });
         }
 
-        
+
         return {
             opver: 2,
             fab: 'M00',
@@ -472,9 +472,9 @@
         }
     }
 
-    let data_item = 
-    { 
-       
+    let data_item =
+    {
+
     }
 
     //function is_valid_email_address(e)
@@ -482,29 +482,29 @@
     //    //let pattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     //    //return (e.match(pattern) != null);
 //
-    //    var at_idx = e.indexOf("@"); 
-    //    var dot_idx = e.lastIndexOf("."); 
-    //    var space_idx = e.indexOf(" "); 
+    //    var at_idx = e.indexOf("@");
+    //    var dot_idx = e.lastIndexOf(".");
+    //    var space_idx = e.indexOf(" ");
 //
-    //    if ((at_idx != -1) && 
-    //        (at_idx != 0) && 
-    //        (dot_idx != -1) && 
-    //        (dot_idx != 0) && 
-    //        (dot_idx > at_idx + 1) && 
-    //        (e.length > dot_idx + 1) && 
-    //        (space_idx == -1)) 
-    //    { 
-    //        return true; 
-    //    } 
-    //    else 
-    //    { 
-    //        return false; 
-    //    } 
-    //    
+    //    if ((at_idx != -1) &&
+    //        (at_idx != 0) &&
+    //        (dot_idx != -1) &&
+    //        (dot_idx != 0) &&
+    //        (dot_idx > at_idx + 1) &&
+    //        (e.length > dot_idx + 1) &&
+    //        (space_idx == -1))
+    //    {
+    //        return true;
+    //    }
+    //    else
+    //    {
+    //        return false;
+    //    }
+    //
     //}
 
-    
-    
+
+
 
     /*
     async function on_new_user_requested()
@@ -561,7 +561,7 @@
                         reef_users = [...reef_users, new_reef_user]
                     }
 
-                    
+
                     list?.reload(reef_users);
                 }
                 else
@@ -684,13 +684,13 @@
     async function askToAddAgain(user)
     {
         let email = user[emailAttrib];
-        let name = user[nameAttrib] ?? '';      
+        let name = user[nameAttrib] ?? '';
         let idempotencyToken = randomString(8)
 
         let accRole = ''
         if(showAccessRoles && access_roles.length > 0)
             accRole = access_roles[0].name ?? ""
-        
+
         try {
                 const res = await reef.fetch('/json/anyv/sys/invite_user', {
                             method: 'POST',
@@ -736,7 +736,7 @@
         if(!hrefAttrib)
             return undefined
         else
-            return (user) => { return user[hrefAttrib]} 
+            return (user) => { return user[hrefAttrib]}
    }
 
    async function onNewUserAdded(created_user)
@@ -761,36 +761,59 @@
             reef_users = [...reef_users, new_reef_user]
         }
 
-        
+
         list?.reload(reef_users);
-   } 
-    
+   }
+
+   let list_properties = {
+        Title: "Title",
+        Summary: "Summary",
+        icon: "icon",
+        element:{
+            icon: "icon",
+            href: "href",
+            Title: "Title",
+            Summary: "Summary"
+        },
+        context:{
+            Folder:{
+                Summary: "Summary",
+
+            },
+            FolderFolder:{
+                Summary: "Summary",
+                head_right: "ModificationDate"
+            }
+        }
+    }
+
 </script>
 
-<Page   self={data_item} 
-        cl="!bg-white dark:!bg-stone-900 w-full flex flex-col overflow-x-hidden py-1 px-1 border-0" 
+<Page   self={data_item}
+        cl="!bg-white dark:!bg-stone-900 w-full flex flex-col overflow-x-hidden py-1 px-1 border-0"
         toolbarOperations={page_operations}
         clearsContext='props sel'>
     <!--a href="/" class="underline text-sm font-semibold ml-3"> &lt; Back to root</a-->
 
-    
-    
-    
+
+
+
 
     {#if reef_users && reef_users.length > 0}
-    <List       objects={reef_users} 
-                title='Members' 
-                toolbarOperations={user_operations} 
+    <List       objects={reef_users}
+                title='Members'
+                properties = list_properties
+                toolbarOperations={user_operations}
                 bind:this={list}>
             <!-- hrefFunc={getHRefFunc()}-->
             <ListTitle a={nameAttrib} onChange={on_name_changed} />
             <ListSummary a={emailAttrib} readonly/>
 
             <ListStaticProperty name="Membership" a="membership_tag"/>
-            
+
             <ListComboProperty name='Privileges' a='auth_group' onSelect={on_change_privileges}>
                 {#each authAccessKinds() as kind}
-                    <ComboItem name={kind.name} key={kind.key}  />    
+                    <ComboItem name={kind.name} key={kind.key}  />
                 {/each}
             </ListComboProperty>
 
@@ -803,16 +826,16 @@
             {#if showFiles}
             <ListComboProperty name='Files' a='files_group' onSelect={on_change_files_access}>
                 {#each filesAccessKinds() as kind}
-                    <ComboItem name={kind.name} key={kind.key}  />    
+                    <ComboItem name={kind.name} key={kind.key}  />
                 {/each}
             </ListComboProperty>
             {/if}
 
-            
+
     </List>
     {/if}
 
-    
+
 </Page>
 
 <!--Modal  bind:open={create_new_user_enabled}
@@ -821,18 +844,18 @@
         onOkCallback={on_new_user_requested}
         onCancelCallback={on_new_user_canceled}
         icon={FaUserPlus}>
-            
-            <Input  label='E-mail' 
-                    placeholder='' 
-                    self={new_user} 
-                    a="email" 
+
+            <Input  label='E-mail'
+                    placeholder=''
+                    self={new_user}
+                    a="email"
                     validation={is_valid_email_address}
                     bind:this={email_input}
                     readonly={new_user.accepted}/>
 
-            <Input  label={i18n({en: 'Name', es: 'Nombre', pl: 'Imię'})} 
-                    placeholder='Optional' 
-                    self={new_user} 
+            <Input  label={i18n({en: 'Name', es: 'Nombre', pl: 'Imię'})}
+                    placeholder='Optional'
+                    self={new_user}
                     a="name"
                     bind:this={name_input}
                     readonly={new_user.accepted}/>
@@ -849,8 +872,8 @@
                     </label>
                     <button id="new_user_auth_group"
                             class=" w-full mt-0.5
-                                    bg-stone-50 border border-stone-300 text-stone-900 text-base sm:text-sm rounded-lg 
-                                    focus:ring-primary-600 focus:border-primary-600 pb-0.5 pt-0.5 px-2.5 dark:bg-stone-700 
+                                    bg-stone-50 border border-stone-300 text-stone-900 text-base sm:text-sm rounded-lg
+                                    focus:ring-primary-600 focus:border-primary-600 pb-0.5 pt-0.5 px-2.5 dark:bg-stone-700
                                     dark:border-stone-600 dark:placeholder-stone-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                             on:click={(e) => {
                         let owner = e.target;
@@ -868,7 +891,7 @@
 
                         let rect = owner.getBoundingClientRect();
                         let pt = new DOMPoint(rect.left, rect.bottom)
-                        showMenu(pt, options);   
+                        showMenu(pt, options);
                     }}>
                         {authAccessKinds().find(k => k.key == new_user.auth_group)?.name}
                         <span class="w-3 h-3 inline-block text-stone-700 dark:text-stone-300 ml-2 mt-2 sm:mt-1">
@@ -883,10 +906,10 @@
                                 class="text-xs">
                             {i18n({en: 'File access', es: 'Acceso a los archivos', pl: 'Dostęp do plików'})}
                         </label>
-                        <button 
+                        <button
                                 class=" mt-0.5 w-full
-                                        bg-stone-50 border border-stone-300 text-stone-900 text-base sm:text-sm rounded-lg 
-                                        focus:ring-primary-600 focus:border-primary-600 pb-0.5 pt-0.5 px-2.5 dark:bg-stone-700 
+                                        bg-stone-50 border border-stone-300 text-stone-900 text-base sm:text-sm rounded-lg
+                                        focus:ring-primary-600 focus:border-primary-600 pb-0.5 pt-0.5 px-2.5 dark:bg-stone-700
                                         dark:border-stone-600 dark:placeholder-stone-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                                 on:click={(e) => {
                             let owner = e.target;
@@ -904,7 +927,7 @@
 
                             let rect = owner.getBoundingClientRect();
                             let pt = new DOMPoint(rect.left, rect.bottom)
-                            showMenu(pt, options);   
+                            showMenu(pt, options);
                         }}>
                             {filesAccessKinds().find(k => k.key == new_user.files_group)?.name}
                             <span class="w-3 h-3 inline-block text-stone-700 dark:text-stone-300 ml-2 mt-2 sm:mt-1">
@@ -920,10 +943,10 @@
                                 class="text-xs">
                             {i18n({en: 'Role in the application', es: 'Papel en la aplicación', pl: 'Rola w aplikacji'})}
                         </label>
-                        <button 
+                        <button
                                 class=" mt-0.5 w-full
-                                        bg-stone-50 border border-stone-300 text-stone-900 text-base sm:text-sm rounded-lg 
-                                        focus:ring-primary-600 focus:border-primary-600 pb-0.5 pt-0.5 px-2.5 dark:bg-stone-700 
+                                        bg-stone-50 border border-stone-300 text-stone-900 text-base sm:text-sm rounded-lg
+                                        focus:ring-primary-600 focus:border-primary-600 pb-0.5 pt-0.5 px-2.5 dark:bg-stone-700
                                         dark:border-stone-600 dark:placeholder-stone-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                                 on:click={(e) => {
                             let owner = e.target;
@@ -941,14 +964,14 @@
 
                             let rect = owner.getBoundingClientRect();
                             let pt = new DOMPoint(rect.left, rect.bottom)
-                            showMenu(pt, options);   
+                            showMenu(pt, options);
                         }}>
                             {#if new_user.acc_role}
                                 {access_roles.find(r => r.name==new_user.acc_role).summary}
                             {:else}
                                 {i18n({en: '"<none>', es: '<ningún>', pl: '<żadna>'})}
                             {/if}
-                           
+
                             <span class="w-3 h-3 inline-block text-stone-700 dark:text-stone-300 ml-2 mt-2 sm:mt-1">
                                 <FaChevronDown/>
                             </span>
@@ -958,7 +981,7 @@
             </section>
 </Modal-->
 
-<Modal  title={i18n({en: 'User removal', es: 'Eliminar usuario', pl: 'Usuwanie użytkownika'})} 
+<Modal  title={i18n({en: 'User removal', es: 'Eliminar usuario', pl: 'Usuwanie użytkownika'})}
         content={i18n({en: `Are you sure you want to remove ${userToRemove ? userToRemove[nameAttrib] : 'user'}?`, es: `¿Estás seguro de que deseas eliminar al ${userToRemove ? userToRemove[nameAttrib] : 'usuario'}?`, pl: `Czy na pewno chcesz usunąć ${userToRemove ? userToRemove[nameAttrib] : 'użytkownika'}?`})}
         icon={FaUserMinus}
         okCaption={i18n({en: 'Remove', es: 'Eliminar', pl: 'Usuń'})}
@@ -974,6 +997,6 @@
         bind:this={deleteAccountModal}
         />
 
-<InviteUser bind:this={invitationDialog} 
-    {nameAttrib} {emailAttrib} {refAttrib} {hrefAttrib} 
+<InviteUser bind:this={invitationDialog}
+    {nameAttrib} {emailAttrib} {refAttrib} {hrefAttrib}
     {onNewUserAdded}/>

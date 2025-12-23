@@ -5,7 +5,7 @@
     import Combo from '../../combo/combo.svelte'
     import DatePicker from '../../date.svelte'
     import Tags from '../../tags.svelte'
-    
+
     export let position: number;
     export let item: object;
 
@@ -13,7 +13,9 @@
     let properties = definition.properties.filter(p => p.position == position);
     let propElements = [];
     let placeholder: string = ''
-    
+
+    let properties_no = count_properties();
+
     export function editProperty(field :string)
     {
         let propIdx = properties.findIndex( p => p.name == field)
@@ -21,7 +23,7 @@
             return;
 
         let property = properties[propIdx];
-        
+
         switch(property.type)
         {
         case rList_property_type.Date:
@@ -38,10 +40,24 @@
         }
     }
 
+    function count_properties()
+    {
+        let count = 0
+        for(let i = 0; i < properties.length; i++)
+        {
+            let property = properties[i];
+
+            if(item[property.a])
+                count++;
+        }
+        return count;
+
+    }
+
     function on_date_changed(value, a)
     {
         if(!value)
-            item[a] = "";    
+            item[a] = "";
         else
             item[a] = value.toJSON();
     }
@@ -112,17 +128,22 @@
         }
     }
 
-    
+
 
 </script>
 
-<section class="flex flex-row justify-between">
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<!-- svelte-ignore a11y-structure -->
+{#if properties && properties_no > 0}
+<figcaption class = "kanban-prooperties">
+<div class="flex flex-row justify-between">
     {#each properties as prop, idx}
         {#if true}
             {@const notEmpty = item[prop.a] || placeholder==prop.name}
             {#if prop.type == rList_property_type.Date && notEmpty}
                 <DatePicker
                     self={item}
+                    typo = {true}
                     a={prop.a}
                     compact={true}
                     s="sm"
@@ -131,6 +152,7 @@
             {:else if prop.type == rList_property_type.Combo && notEmpty}
                 <Combo
                         compact={true}
+                        typo
                         inContext="props"
                         self={item}
                         a={prop.a}
@@ -140,18 +162,15 @@
                         icon={false}
                         definition={prop.combo_definition}
                         s="sm"
-                        changed={(k,n) => { /*fake assignment for component rer-ender*/ item[prop.a] = item[prop.a]; }} 
+                        changed={(k,n) => { /*fake assignment for component rer-ender*/ item[prop.a] = item[prop.a]; }}
                         bind:this={propElements[idx]}/>
             {:else if prop.type == rList_property_type.Static}
-                <p
-                    class="     h-6
-                                text-sm sm:min-h-[1rem]
-                                text-base-sm min-h-[1.5rem]
-                                text-stone-600 dark:text-stone-400
+                <span
+                    class="     text-stone-600 dark:text-stone-400
                                 text-right"
                                 bind:this={propElements[idx]}>
                     {item[prop.a]}
-                </p>
+                </span>
             {:else if prop.type == rList_property_type.Tags && notEmpty}
                 <Tags
                     class="mt-1"
@@ -169,4 +188,6 @@
             {/if}
         {/if}
     {/each}
-</section>
+</div>
+</figcaption>
+{/if}

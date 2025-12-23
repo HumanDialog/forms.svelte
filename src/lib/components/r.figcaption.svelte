@@ -1,0 +1,5 @@
+
+
+<figcaption>
+  <slot/>
+</figcaption>

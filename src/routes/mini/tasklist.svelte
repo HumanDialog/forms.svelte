@@ -1,8 +1,8 @@
 <script>
     import {reef} from '@humandialog/auth.svelte'
-    import {    Spinner, 
-                Page, 
-                Icon, 
+    import {    Spinner,
+                Page,
+                Icon,
                 ComboSource,
                 List,
                 ListTitle,
@@ -23,9 +23,9 @@
     let users = [];
 
     const STATE_FINISHED = 1000;
-    
+
     $: onParamsChanged($location, $mainContentPageReloader);
-    
+
     async function onParamsChanged(...args)
     {
         const segments = $location.split('/');
@@ -39,14 +39,14 @@
             if(res)
                 users = res.User;
         }
-        
-        
+
+
         let listId;
         if(!segments.length)
             listId = 'first';
         else
             listId = segments[segments.length-1]
-        
+
         currentList = null
 
         dataPath = `/app/Lists/${listId}/query`;
@@ -102,7 +102,7 @@
         await fetchData();
         listComponent.reload(currentList, selectRecommendation);
     }
-    
+
 
     async function deleteTask(task)
     {
@@ -117,7 +117,7 @@
 
         let result = await reef.post(`${task.$ref}/Finish`, {});
         if(result)
-            await reloadTasks(listComponent.KEEP_OR_SELECT_NEXT)   
+            await reloadTasks(listComponent.KEEP_OR_SELECT_NEXT)
     }
 
     async function addTask(newTaskAttribs)
@@ -164,7 +164,7 @@
         ];
     }
 
-    let taskOperations = (task) => { 
+    let taskOperations = (task) => {
         let editOperations = getEditOperations(task)
         return [
                 {
@@ -206,16 +206,17 @@
 
 
 {#if currentList}
-    <Page   self={currentList} 
-            cl="!bg-white dark:!bg-stone-900 w-full flex flex-col overflow-x-hidden py-1 px-1 border-0" 
+    <Page   self={currentList}
+            cl="!bg-white dark:!bg-stone-900 w-full flex flex-col overflow-x-hidden py-1 px-1 border-0"
             toolbarOperations={pageOperations}
             clearsContext='props sel'
             title={currentList.Name}>
 
-        <List   self={currentList} 
-                a='ActiveTasks' 
-                title={currentList.Name} 
-                toolbarOperations={taskOperations} 
+        <List   self={currentList}
+                a='ActiveTasks'
+                {list_properties}
+                title={currentList.Name}
+                toolbarOperations={taskOperations}
                 contextMenu={taskContextMenu}
                 orderAttrib='ListOrder'
                 bind:this={listComponent}>
@@ -230,16 +231,14 @@
             <ListDateProperty name="DueDate"/>
 
             <span slot="left" let:element>
-                <Icon component={element.State == STATE_FINISHED ? FaRegCheckCircle : FaRegCircle} 
-                    on:click={(e) => finishTask(e, element)} 
+                <Icon component={element.State == STATE_FINISHED ? FaRegCheckCircle : FaRegCircle}
+                    on:click={(e) => finishTask(e, element)}
                     class="h-5 w-5 sm:w-4 sm:h-4 text-stone-500 dark:text-stone-400 cursor-pointer mt-2 sm:mt-1.5 ml-2 "/>
             </span>
 
-            
+
         </List>
     </Page>
 {:else}
     <Spinner delay={3000}/>
 {/if}
-
-

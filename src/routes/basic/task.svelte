@@ -6,8 +6,10 @@
             ComboSource,
             ComboItem,
             DatePicker,
+            Date,
             Tags,
             editable,
+            Editable,
 			saveCurrentEditable,
 			activateItem,
 			isActive,
@@ -29,7 +31,7 @@
 			randomString,
 			showMenu,
             SHOW_MENU_BELOW,
-            List, ListTitle, ListSummary, ListInserter, Icon, Paper
+            List, ListTitle, ListSummary, ListInserter, Icon, Paper, PaperTopMargin, PaperHeader
             } from '$lib'
 	import { onMount, tick, afterUpdate } from 'svelte';
     import {location, querystring, push, link} from 'svelte-spa-router'
@@ -48,7 +50,7 @@
     import FileProperties from './properties.file.svelte'
 	import NoteProperties from './properties.note.svelte'
     import TaskDescriptionNote from './task.description.svelte'
-	
+
     let taskRef = ''
     let task = null;
     let allTags = '';
@@ -228,7 +230,7 @@
                 Summary: task.TaskList.Summary,
                 href: task.TaskList.href,
                 $ref: task.TaskList.$ref,
-                icon: 'TaskList',
+                icon: 'netebook',
                 $type: task.TaskList.$type,
                 IsCanonical: 1
         })
@@ -239,7 +241,7 @@
                 Summary: '',
                 href: task.Actor.href,
                 $ref: task.Actor.$ref,
-                icon: 'User',
+                icon: 'cat',
                 $type: task.Actor.$type,
                 IsCanonical: 1
         })
@@ -401,7 +403,7 @@
                         },
                         {
                             caption: '_; Send; Enviar; Wyślij',
-                            icon: FaUpload, 
+                            icon: FaUpload,
                             hideToolbarCaption: true,
                             tbr: 'D',
                             fab: 'S00',
@@ -489,7 +491,7 @@
     {
         const clipboardElements = await fetchComposedClipboard4Task()
 
-        showFloatingToolbar(aroundRect, BasketPreview, 
+        showFloatingToolbar(aroundRect, BasketPreview,
             {
                 destinationContainer: taskRef,
                 onRefreshView: async (f) => await reloadWithAttachements(),
@@ -498,7 +500,7 @@
         )
     }
 
-    async function pasteRecentClipboardElement4Task(btt, aroundRect) 
+    async function pasteRecentClipboardElement4Task(btt, aroundRect)
     {
         const clipboardElements = await fetchComposedClipboard4Task()
         if(clipboardElements && clipboardElements.length > 0)
@@ -507,7 +509,7 @@
             const res = await reef.post(`${taskRef}/AttachClipboard`, { references: references }, onErrorShowAlert)
             if(res)
                 await reloadWithAttachements();
-            
+
         }
     }
 
@@ -694,7 +696,7 @@
                     caption: '_; Task; Tarea; Zadanie',
                     //tbr: 'B',
                     operations: [
-                        
+
                         {
                             caption: '_; Edit...; Editar...; Edytuj...',
                             icon: FaPen,
@@ -921,7 +923,7 @@
                     caption: '_; Task; Tarea; Zadanie',
                     //tbr: 'B',
                     operations: [
-                        
+
                         {
                             caption: '_; Edit...; Editar...; Edytuj...',
                             icon: FaPen,
@@ -1056,13 +1058,13 @@
         }
     ]
 
-    
+
 
     async function runPasteBasket4Editor(btt, aroundRect)
     {
         const clipboardElements = await fetchComposedClipboard4Editor()
 
-        showFloatingToolbar(aroundRect, BasketPreview, 
+        showFloatingToolbar(aroundRect, BasketPreview,
             {
                 onAttach: (clipboard, elements) => makeLinkToElement(elements),
                 //onAttachAndClear: (clipboard, elements) => makeLinkToElement(elements),
@@ -1071,7 +1073,7 @@
         )
     }
 
-    async function pasteRecentClipboardElement(btt, aroundRect) 
+    async function pasteRecentClipboardElement(btt, aroundRect)
     {
         const clipboardElements = await fetchComposedClipboard4Editor()
         if(clipboardElements && clipboardElements.length > 0)
@@ -1098,7 +1100,7 @@
         })
     }
 
-    async function runNoteCreator4Editor() 
+    async function runNoteCreator4Editor()
     {
         const cursorPos = description.getCurrentCursorPos()
 
@@ -1137,7 +1139,7 @@
     {
         if(elements && Array.isArray(elements) && elements.length > 0)
         {
-            elements.forEach((el) => 
+            elements.forEach((el) =>
             {
                 let href;
                 if(el.href.endsWith('/blob'))
@@ -1152,11 +1154,11 @@
                     href = el.href
 
                 description.addLink(el.Title, href)
-            })   
+            })
         }
     }
 
-    async function downloadFileFromHRef(href, title) 
+    async function downloadFileFromHRef(href, title)
     {
         let ref;
         let name;
@@ -1187,15 +1189,15 @@
         {
             const blob = await res.blob()
             const blobUrl = URL.createObjectURL(blob);
-    
+
             const link = document.createElement("a"); // Or maybe get it from the current document
             link.href = blobUrl;
             link.download = name;
 
             //document.body.appendChild(link); // Or append it whereever you want
             link.click() //can add an id to be specific if multiple anchor tag, and use #id
-            
-            
+
+
             URL.revokeObjectURL(blobUrl)
         }
         else
@@ -1248,7 +1250,7 @@
                     caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
                     action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, task)
                 }
-            ], 
+            ],
         }
     ]
 
@@ -1356,7 +1358,7 @@
             pendingUploading = true
 
              let fileLink = await reef.post(`${taskRef}/CreateFile`,
-                                    { 
+                                    {
                                         title: file.name,
                                         mimeType: file.type,
                                         size: file.size,
@@ -1367,7 +1369,7 @@
 
             fileLink = fileLink.TaskFile
             const res = await reef.post(`UploadedFile/${fileLink.FileId}/Key/blob?name=${file.name}&size=${file.size}`, {}, onErrorShowAlert)
-            
+
 
             if(res && res.key && res.uploadUrl)
             {
@@ -1412,7 +1414,7 @@
         }
     }
 
-  
+
 
     /*async function onAttachementSelected()
     {
@@ -1438,7 +1440,7 @@
                                                 body: file})
                     if(res.ok)
                     {
-                       
+
                     }
                     else
                     {
@@ -1517,7 +1519,7 @@
             })
         }
 
-        
+
         return {
                 opver: 2,
                 fab: 'M00',
@@ -1739,7 +1741,7 @@
         case 'UploadedFile':
         case 'TaskFile':
             attachementsComponent?.reload(task, attachementsComponent.KEEP_SELECTION);
-        }    
+        }
     }
 
     let deleteModal;
@@ -1870,33 +1872,33 @@
 
     let notesPlaceholder = false
     let additionalAfterCreateAction = null
-    async function runNoteInserter(afterCreateAction=null) 
+    async function runNoteInserter(afterCreateAction=null)
     {
         if(!attachementsComponent)
         {
-            notesPlaceholder = true   
+            notesPlaceholder = true
             await tick();
         }
-        
-        await attachementsComponent.addRowAfter(null)    
+
+        await attachementsComponent.addRowAfter(null)
         additionalAfterCreateAction = afterCreateAction
     }
 
     async function addEmptyNote(newNoteAttribs)
     {
-        notesPlaceholder = false   
-        let res = await reef.post(`${taskRef}/CreateSubNote`,{ 
+        notesPlaceholder = false
+        let res = await reef.post(`${taskRef}/CreateSubNote`,{
             title: newNoteAttribs.Title,
             summary: '',
-            order: 0 
+            order: 0
         }, onErrorShowAlert)
-        
+
         if(!res)
             return null;
 
         let newNote = res.TaskNote;
         setBrowserRecentElement(newNote.NoteId, 'Note')
-        
+
         await reloadData();
         attachementsComponent.reload(task, newNote.$ref);
 
@@ -1919,12 +1921,35 @@
         if(descriptionKeyToSelect)
         {
             const idx = descriptionNotes.findIndex((n) => n.$ref == descriptionKeyToSelect)
-            descriptionKeyToSelect = ''        
+            descriptionKeyToSelect = ''
 
             if(idx >= 0 && descriptionElements && descriptionElements.length > idx)
                 setTimeout(() => descriptionElements[idx].selectTitle(), 100)
         }
     })
+
+    let list_properties = {
+        Title: "Title",
+        Summary: "Summary",
+        icon: "icon",
+        element:{
+            icon: "icon",
+            href: "href",
+            Title: "Title",
+            Summary: "Summary"
+        },
+        context:{
+            Folder:{
+                Summary: "Summary",
+
+            },
+            FolderFolder:{
+                Summary: "Summary",
+                head_right: "ModificationDate"
+            }
+        }
+    }
+
 
 </script>
 
@@ -1941,26 +1966,21 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex-->
 <Page   self={task}
-            toolbarOperations={getPageOperations()}
-            clearsContext='props'
-            title={task.Title}>
-    <Paper class="mb-64">
-        {#if task.GetCanonicalPath}
+        toolbarOperations={getPageOperations()}
+        clearsContext='props'
+        title={task.Title}>
+    <Paper>
+            <PaperHeader>
             <Breadcrumb class="mt-1 sm:min-w-[65ch]" path={task.GetCanonicalPath}/>
-        {/if}
+            </PaperHeader>
 
-        <article class="w-full prose prose-base prose-zinc dark:prose-invert mx-2">
-            <section class="w-full flex flex-row justify-between">
-                    <p class="">
-                        {task.Index}
-                    </p>
-                    <div>
-                        {#if false && (task.TaskList || onListPlaceholder)}
-                            <p>
+            <div class="w-full flex flex-row justify-between">
+                <span>{task.Index}</span>
+                <span>
+                    {#if (task.TaskList || onListPlaceholder)}
                                 <a href={task.TaskList.href} use:link >
                                     {ext(task.TaskList.Name)}
                                 </a>
-                            </p>
                             <!--Combo  compact
                                     inContext='data'
                                     a='TaskList'
@@ -1974,51 +1994,27 @@
                                                 key="$ref"
                                                 name='Name'/>
                             </Combo-->
-                        {/if}
-                    </div>
-                    <div>
-                        {#if task.DueDate || dueDatePlaceholder}
-                            <DatePicker     a='DueDate'
-                                            compact
-                                            s="prose"
-                                            inContext="data"
+
+                    {/if}
+                </span>
+                <span>
+                    {#if task.DueDate || dueDatePlaceholder}
+                            <Date     self={task}
+                                            a='DueDate'
                                             bind:this={dueDate}
                                 />
-                        {/if}
-                    </div>
-            </section>
+                    {/if}
 
-            <h1     class=""
-                    use:editable={{
-                        action: (text) => onTitleChanged(text),
-                        onSingleChange: (txt) => onPropertySingleChange(txt, 'Title'),
-                        active: true,
-                        readonly: isReadOnly}}
-                        tabindex="0">
-                {task.Title}
-            </h1>
+                </span>
+            </div>
+            <h1><Editable self={task} a='Title'/></h1>
 
-            {#if task.Summary || summaryPlaceholder}
-                {#key task.Summary}
-                    <p  class="lead"
-                        use:editable={{
-                            action: (text) => onSummaryChanged(text),
-                            onSingleChange: (txt) => onPropertySingleChange(txt, 'Summary'),
-                            active: true,
-                            readonly: isReadOnly}}
-                        tabindex="0"
-                        bind:this={summary}>
-                        {task.Summary}
-                    </p>
-                {/key}
-
-            {/if}
-
-            <section class="w-full flex flex-row flex-wrap justify-between">
-                <div class="grow-0">
+            <div class="w-full flex flex-row justify-between">
+                <span>
                     {#if task.Actor || responsiblePlaceholder}
                         <Combo  compact={true}
                                 inContext='data'
+                                typo
                                 a='Actor'
                                 isAssociation
                                 icon={false}
@@ -2032,12 +2028,13 @@
                                             name='Name'/>
                         </Combo>
                     {/if}
-                </div>
+                </span>
 
-                <div>
+                <span>
                     {#if availableStates && availableStates.length > 0}
                         <Combo  compact={true}
                                 inContext='data'
+                                typo
                                 a='State'
                                 icon
                                 placeholder='State'
@@ -2049,9 +2046,9 @@
                                             icon="icon"/>
                         </Combo>
                     {/if}
-                </div>
+                </span>
 
-                <div>
+                <span>
                     {#if task.Tags || tagsPlaceholder}
                         <Tags class="w-full "
                             a='Tags'
@@ -2061,8 +2058,17 @@
                             canChangeColor
                             bind:this={tags}/>
                     {/if}
-                </div>
-            </section>
+                </span>
+            </div>
+
+
+            {#if task.Summary || summaryPlaceholder}
+                {#key task.Summary}
+                    <p  class="lead"><Editable self={task} a='Summary' /></p>
+                {/key}
+
+            {/if}
+
 
             {#if attachedFiles && attachedFiles.length > 0}
                 <!--p>
@@ -2090,7 +2096,7 @@
             {#if task.Description || descriptionPlaceholder}
                 <hr/>
                 <Editor     on:click={(e) => e.stopPropagation()}
-                            class="mb-20"
+
                             a='Description'
                             compact={true}
                             bind:this={description}
@@ -2108,8 +2114,8 @@
             {#key descriptionNotes}
                 {#if descriptionNotes.length > 0}
                     {#each descriptionNotes as noteLink, idx (noteLink.$ref)}
-                        <TaskDescriptionNote {noteLink} 
-                                            refreshParent={refreshTaskAfterDescriptionChanged} 
+                        <TaskDescriptionNote {noteLink}
+                                            refreshParent={refreshTaskAfterDescriptionChanged}
                                             bind:this={descriptionElements[idx]}
                                             {runNoteInserter}
                                             {runFileAttacher}/>
@@ -2120,35 +2126,17 @@
             <hr/>
 
             {#if (task.Notes && task.Notes.length > 0) || (task.Files && task.Files.length > 0) || notesPlaceholder}
-                <h4 class="ml-2">_;Attachments; Anexos; Załączniki</h4>
-                <section class="not-prose"> 
+                <h2>_;Attachments; Anexos; Załączniki</h2>
+                <section>
                     {#if (task.attachements && task.attachements.length > 0) || notesPlaceholder}
                         <List   self={task}
                                 a='attachements'
+                                {list_properties}
                                 bind:this={attachementsComponent}
                                 orderAttrib='Order'
                                 toolbarOperations={(el) => attachementOperations(el, el.$type)}>
-                            
-                            <ListTitle      a='Title'
-                                            hrefFunc={(el) => `${el.href}`}
-                                            downloadableFunc={(el) => el.$type == 'TaskFile'}
-                                            onOpen={async (f) => await downloadFileFromHRef(f.href, f.Title)}
-                                            onChange={changeAttachementProperty}/>
-
-                            <ListSummary    a='Summary' 
-                                            onChange={changeAttachementProperty}/>
 
                             <ListInserter   action={addEmptyNote} icon incremental={false}/>
-
-                            <span slot="left" let:element class="relative">
-                                <Icon component={getElementIcon(element)}
-                                    class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
-                                {#if element.IsCanonical == 0}
-                                    <Icon component={FaExternalLinkSquareAlt}
-                                        class="absolute left-1 top-1/2 w-1/2 h-1/2 
-                                                text-stone-500 dark:text-stone-300 " />
-                                {/if}
-                            </span>
                         </List>
                     {/if}
 
@@ -2157,7 +2145,7 @@
                                 a='Files'
                                 bind:this={attachementsFilesComponent}
                                 toolbarOperations={(el) => attachementOperations(el, 'TaskFile')}>
-                            
+
                             <ListTitle      a='Title'
                                             hrefFunc={(el) => `${el.href}`}
                                             downloadable
@@ -2172,7 +2160,7 @@
                                     class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
                                 {#if element.IsCanonical == 0}
                                     <Icon component={FaExternalLinkSquareAlt}
-                                        class="absolute left-1 top-1/2 w-1/2 h-1/2 
+                                        class="absolute left-1 top-1/2 w-1/2 h-1/2
                                                 text-stone-500 dark:text-stone-300 " />
                                 {/if}
                             </span>
@@ -2181,41 +2169,25 @@
                 </section>
             {/if}
 
-            <h4 class="ml-2">_; Attached to; Adjunto a; Przyłączony do</h4>
-            <section class="not-prose"> 
+            <h2>_; Attached to; Adjunto a; Przyłączony do</h2>
+            <section >
                 <List   self={task}
                         a='connectedToList'
+                        {list_properties}
                         bind:this={connectedToComponent}
                         toolbarOperations = {(el) => connectedToOperations(el)}>
-                
-                    <ListTitle      a='Title'
-                                    hrefFunc={(el) => `${el.href}`}
-                                    readonly/>
-
-                    <ListSummary    a='Summary' 
-                                    readonly/>
-
-                    <span slot="left" let:element class="relative">
-                        <Icon component={getElementIcon(element)}
-                            class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
-                        {#if element.IsCanonical == 0}
-                            <Icon component={FaExternalLinkSquareAlt}
-                                class="absolute left-1 top-1/2 w-1/2 h-1/2 
-                                        text-stone-500 dark:text-stone-300 " />
-                        {/if}
-                    </span>
                 </List>
             </section>
 
-            
 
-        </article>
+
+
 
 
 
     </Paper>
 
-    
+
     <input hidden type="file" id="imageFile" accept="image/*" bind:this={imgInput} on:change={onImageSelected}/> <!-- capture="environment" -->
     <input hidden type="file" id="attachementFile" accept="*/*" bind:this={attInput} on:change={onAttachementSelected}/>
 </Page>
@@ -2233,7 +2205,7 @@
         bind:this={deleteModal}>
     <p class="text-sm text-stone-500 dark:text-stone-300">
         <span>
-            _; 
+            _;
             Are you sure you want to delete selected element?;
             ¿Está seguro de que desea eliminar el elemento seleccionado?;
             Czy na pewno chcesz usunąć wybrany element?

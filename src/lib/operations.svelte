@@ -177,13 +177,13 @@
                         {
                         case 'A':
                             if(shouldAddSeparator(AOperations, tbrOperation.group))
-                                AOperations.push({separator: true})        
+                                AOperations.push({separator: true})
                             AOperations.push(tbrOperation)
                             break;
 
                         case 'B':
                             if(shouldAddSeparator(BOperations, group.caption))
-                                BOperations.push({separator: true})       
+                                BOperations.push({separator: true})
                             BOperations.push(tbrOperation)
                             break;
 
@@ -203,7 +203,7 @@
             rightOperations = COperations.toReversed()
             rightOperations = [...rightOperations, ...DOperations.toReversed()]
 
-           
+
 
         }
         else
@@ -217,7 +217,7 @@
 
     function on_click(e, operation, isDisabled)
     {
-        
+
         if(!operation)
             return;
 
@@ -225,7 +225,7 @@
         {
             e.preventDefault()
             e.stopPropagation()
-            return;   
+            return;
         }
 
         let owner = e.target;
@@ -291,13 +291,15 @@
             return '';
         else if(operation.tooltip)
             return operation.tooltip
-        else 
+        else
             return ''
     }
 </script>
 
 {#if hasOperations}
-<section class="flex flex-row no-print h-10 bg-stone-50 dark:bg-stone-950 overflow-x-hidden overflow-y-clip py-0 text-xs whitespace-nowrap">
+<section class="operations-0 flex flex-row no-print h-full
+
+                overflow-x-hidden overflow-y-clip py-0 text-xs whitespace-nowrap">
     <div    class="flex flex-row"
             class:flex-row-reverse={mobile}>
 
@@ -309,7 +311,7 @@
                     {#each operation.toolbox as operation}
                         {@const textColor= isDisabled ? 'text-stone-600 dark:text-stone-500' : 'text-stone-800 dark:text-stone-300 dark:hover:text-white '}
                         <button type="button"
-                                class="py-2.5 px-1
+                                class="operation-1 px-1
                                 text-xs font-thin
                                 {textColor}
                                 hover:bg-stone-700 active:bg-stone-300 border-stone-200
@@ -335,13 +337,13 @@
 
                     {@const enabledDarkColors ='dark:text-stone-300 dark:hover:text-white dark:hover:bg-stone-800 dark:active:bg-stone-600 dark:border-stone-600'}
                     {@const disabledDarkColors ='dark:text-stone-500 dark:border-stone-600'}
-                    
+
                     {@const disabledColors =`${disabledLightColors} ${disabledDarkColors}`}
                     {@const enabledColors =`${enabledLightColors} ${enabledDarkColors}`}
                     {@const colors = isDisabled ? disabledColors : enabledColors}
 
                     <button type="button"
-                            class="py-2.5 px-2
+                            class="operation-2 px-2
                             text-xs font-thin
                             focus:outline-none
                             inline-flex items-center
@@ -378,7 +380,7 @@
 
             {@const enabledDarkColors ='dark:text-stone-300 dark:hover:text-white dark:hover:bg-stone-800 dark:active:bg-stone-600 dark:border-stone-600'}
             {@const disabledDarkColors ='dark:text-stone-500 dark:border-stone-600'}
-            
+
             {@const disabledColors =`${disabledLightColors} ${disabledDarkColors}`}
             {@const enabledColors =`${enabledLightColors} ${enabledDarkColors}`}
             {@const colors = isDisabled ? disabledColors : enabledColors}

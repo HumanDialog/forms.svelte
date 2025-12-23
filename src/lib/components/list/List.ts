@@ -57,7 +57,8 @@ export class rList_property_tags extends rList_property
 
 export class rList_definition
 {
-    public name                 :string = ''
+    public name                 :string = '';
+    public icon                 :string = '';
     public title                :string = '';
     public title_editable       :boolean = false;
     public on_title_changed     :Function | undefined = undefined;
@@ -73,7 +74,7 @@ export class rList_definition
     public can_insert           :boolean = false;
     public onInsert             :Function | undefined = undefined;
     public inserter_icon        :boolean = false;
-    public insert_incremental   :boolean = true 
+    public insert_incremental   :boolean = true
     public onOpen               :Function | undefined = undefined;
     public downloadable         :boolean = false
     public downloadableFunc     :Function | undefined = undefined

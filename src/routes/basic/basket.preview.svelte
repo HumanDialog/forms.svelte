@@ -26,7 +26,7 @@
 
     let clipboardItem;
     let basketEntriesNo = -1
-    
+
     const EIF_ITEM              =  0x00000000
     const EIF_CUT               =  0x00000001
     const EIF_BEGIN_GROUP       =  0x00000100
@@ -94,7 +94,7 @@
             push(clipboardItem.href)
     }
     */
-    
+
     async function attachTo()
     {
         if(onHide)
@@ -102,7 +102,7 @@
 
         const selectedReferences = selectedElements.sort((a,b) => a.Order-b.Order).filter((e) => (e.ElementInfo & EIF_NOT_ALLOWED) == 0 )
         const references = transformClipboardToJSONReferences(selectedReferences)
-        
+
         if(!destinationContainer)
         {
             if(onAttach)
@@ -165,6 +165,28 @@
         clearActiveItem('handy')
     })
 
+    let list_properties = {
+        Title: "Title",
+        Summary: "Summary",
+        icon: "icon",
+        element:{
+            icon: "icon",
+            href: "href",
+            Title: "Title",
+            Summary: "Summary"
+        },
+        context:{
+            Folder:{
+                Summary: "Summary",
+
+            },
+            FolderFolder:{
+                Summary: "Summary",
+                head_right: "ModificationDate"
+            }
+        }
+    }
+
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -181,6 +203,7 @@
             {:else}
                 <List   self={clipboardItem}
                         a='Elements'
+                        {list_properties}
                         orderAttrib='Order'
                         multiselect
                         selectionKey='handy'

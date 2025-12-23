@@ -5,7 +5,7 @@
     import {reef, session, signInHRef} from '@humandialog/auth.svelte'
     import {FaComment} from 'svelte-icons/fa'
     import {link} from 'svelte-spa-router'
-	
+
     $: init($session)
 
     let latestThreads = []
@@ -46,10 +46,10 @@
                                         }
                                     ]
                                 }, onErrorShowAlert)
-            
+
             if(res && res.Folder &&  Array.isArray(res.Folder) && res.Folder.length > 0 && res.Folder[0].Notes)
                 latestThreads = res.Folder[0].Notes
-            
+
         }
 
         const releases = await getDoc('/doc/tilos-releases.json')
@@ -88,7 +88,7 @@
     <title>Home | {__APP_TITLE__}</title>
 </svelte:head>
 
-<Page   self={{}} 
+<Page   self={{}}
             toolbarOperations={getPageOperations()}
             clearsContext='sel props'
             title="Home">
@@ -106,15 +106,16 @@
             {#if $session.isActive}
                 {#if latestThreads && latestThreads.length > 0}
                     <h2>Latest discussions</h2>
-                    
+
                     <section class="not-prose">
                     <List   objects={latestThreads}
-                            toolbarOperations={ (el) => [] } 
+                            {list_properties}
+                            toolbarOperations={ (el) => [] }
                             orderAttrib='Order'>
-                        <ListTitle      a='Title' 
+                        <ListTitle      a='Title'
                                         hrefFunc={(note) => `${note.href}`}
                                         />
-                        <ListSummary    a='Summary' 
+                        <ListSummary    a='Summary'
                                         />
 
                         <ListStaticProperty name="NotesCount" postfix='replies'/>
@@ -124,13 +125,13 @@
                             <ComboSource key="$ref" name='Name'/>
                         </ListComboProperty>
 
-                        <!--ListTags a='Tags' 
+                        <!--ListTags a='Tags'
                                 getAllTags={() => allTags}
                                 readOnly
                                 /-->
-                        
+
                         <span slot="left" let:element>
-                            <Icon component={FaComment} 
+                            <Icon component={FaComment}
                                 class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5 ml-2  mr-1"/>
                         </span>
                     </List>
@@ -158,7 +159,7 @@
                     {/each}
                 </ul>
             {/if}
-            
+
         </article>
     </section>
 

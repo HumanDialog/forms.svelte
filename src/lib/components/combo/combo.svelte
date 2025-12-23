@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {data_tick_store, contextItemsStore, contextTypesStore, pushToolsActionsOperations, popToolsActionsOperations, fabHiddenDueToPopup} from '../../stores.js' 
+    import {data_tick_store, contextItemsStore, contextTypesStore, pushToolsActionsOperations, popToolsActionsOperations, fabHiddenDueToPopup} from '../../stores.js'
     import {informModification, pushChanges} from '../../updates.js'
     import {isDeviceSmallerThan, parseWidthDirective,shouldBeComapact} from '../../utils.js'
     import {afterUpdate, getContext, onMount, setContext} from 'svelte';
@@ -9,6 +9,7 @@
     import { reef } from '@humandialog/auth.svelte/dist/index.js';
 	import { showMenu } from '../menu.js';
 	import { ext, i18n } from '$lib/i18n.js';
+    import Ricon from  '../r.icon.svelte'
 
     export let label = ''
     export let self = null;
@@ -22,6 +23,8 @@
     export let changed = undefined;
     export let onNewItemCreated = undefined;
 
+    export let typo = false;
+
     export let icon :boolean = false;
 
     export let placeholder = '';
@@ -33,15 +36,15 @@
     export let inContext :string = 'sel'   // in compact mode
     export let cached :boolean = false;
     export let filtered: boolean = false;
-    
+
     export let pushChangesImmediately: boolean = true;
     export let hasNone :boolean = isAssociation;
     export let readOnly: boolean = false
-    
+
     let userClass = $$restProps.class ?? '';
 
     let is_compact :boolean = getContext('rIs-table-component') || compact;
-    
+
     if(!definition)
     {
         definition = new rCombo_definition;
@@ -56,7 +59,7 @@
     let   filtered_source :rCombo_item[] = null;
     let   mutation_observer : MutationObserver = null;
     let   highlighted_option :rCombo_item = null;
-        
+
     let   item = null
     let   root_element;
 
@@ -66,14 +69,14 @@
     let font_size = 'text-lg sm:text-sm'
     let line_h = 'h-6 sm:h-5'
     let chevron_mt = 'mt-2 sm:mt-0'
-    
+
     switch (s)
     {
         case 'md':
             label_mb = 'mb-2';
             input_pt = 'pt-2.5'
-            input_pb = 'pb-2.5';     
-            font_size = 'text-base'      
+            input_pb = 'pb-2.5';
+            font_size = 'text-base'
             line_h = 'h-5 sm:h-5'
             chevron_mt = 'mt-2 sm:mt-1'
             break;
@@ -82,7 +85,7 @@
             label_mb = 'mb-0.5';
             input_pt = 'pt-0.5'
             input_pb = 'pb-0.5';
-            font_size = 'text-xs'           
+            font_size = 'text-xs'
             line_h = 'h-6 '
             chevron_mt = ''
             break;
@@ -90,19 +93,19 @@
             label_mb = 'mb-0.5';
             input_pt = 'pt-0.5'
             input_pb = 'pb-0.5';
-            font_size = 'text-sm'           
+            font_size = 'text-sm'
             line_h = 'h-6 '
             chevron_mt = ''
-            break;           
-            
+            break;
+
         default:
             label_mb =  '';
             input_pt =  ''
             input_pb =  '';
-            font_size = ''           
+            font_size = ''
             line_h =    ''
             chevron_mt = ''
-                
+
     }
 
     let background_class = is_compact && !icon ? "" : ""; //bg-stone-900/10 dark:bg-stone-100/10 rounded-lg" : ""
@@ -111,16 +114,16 @@
     if(is_compact)
         appearance_class = `${font_size}`;
     else
-        appearance_class = `   bg-stone-50 border border-stone-300 text-stone-900 ${font_size} rounded-lg 
-                                focus:ring-primary-600 focus:border-primary-600 block w-full  ${input_pb} ${input_pt} px-2.5 dark:bg-stone-700 
+        appearance_class = `   bg-stone-50 border border-stone-300 text-stone-900 ${font_size} rounded-lg
+                                focus:ring-primary-600 focus:border-primary-600 block w-full  ${input_pb} ${input_pt} px-2.5 dark:bg-stone-700
                                 dark:border-stone-600 dark:placeholder-stone-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500`;
 
-   
+
     let cs =  c ? parseWidthDirective(c) : 'col-span-1';
     let ctx = context ? context : getContext('ctx');
     let can_be_activated :boolean  = !readOnly;
-    
-    let  last_tick = -1    
+
+    let  last_tick = -1
 
     $: setup($data_tick_store, $contextItemsStore);
 
@@ -131,7 +134,7 @@
         //    return;
 
         last_tick = $data_tick_store;
-        item = self ?? $contextItemsStore[ctx];    
+        item = self ?? $contextItemsStore[ctx];
 
         if(!typename)
             typename = $contextTypesStore[ctx];
@@ -147,24 +150,24 @@
             }
         }
 
-        
-        //if(item && a)    
+
+        //if(item && a)
         //    val = item[a]
 
         //if(!label)
         //    label = a
 
         tick_request_internal = tick_request_internal + 1;
-        
+
         if(readOnly)
             can_be_activated = false
         else if(is_compact)
         {
             can_be_activated = false;
 
-            
+
             let contexts = inContext.split(' ');
-            contexts.forEach(ctx => 
+            contexts.forEach(ctx =>
             {
                 if($contextItemsStore[ctx] == item)
                     can_be_activated = true;
@@ -187,7 +190,7 @@
 
         //tick_request_internal = tick_request_internal + 1;
         tick_request_internal = tick_request_internal + 1;
-        
+
         return () => {}
     })
 
@@ -231,14 +234,14 @@
     {
         if(!can_be_activated)
             return;
-        
+
         if(!textbox)
             return;
- 
+
         if(is_dropdown_open)
             return;
 
-         
+
         if(event)
         {
             event.stopPropagation();
@@ -259,13 +262,13 @@
         /*
 
         let rect;
-        
+
         if(is_compact)
            rect = textbox.getBoundingClientRect();
         else
             rect = combo.getBoundingClientRect();
 
-        
+
 
         let top_space = rect.y;
         let bottom_space = client_rect.height - (rect.y + rect.height);
@@ -298,7 +301,7 @@
             y = rect.y;
             show_above = true;
         }
-        else    // like bottom 
+        else    // like bottom
             y = rect.y + rect.height;
 
         closeButtonPos = ''
@@ -313,7 +316,7 @@
 
             const margin = 5
 
-           
+
             const maxHeight = screenRect.height / 2 - margin;
             const width = screenRect.width - 2*margin;
             x = margin;
@@ -348,7 +351,7 @@
        openDropdownAsMenu()
 
         is_dropdown_open = true;
-        
+
         if(filtered)
         {
             if(!textbox)
@@ -368,7 +371,7 @@
         }
 
         if(isDeviceSmallerThan("sm"))
-        {    
+        {
             $fabHiddenDueToPopup = true
             /*pushToolsActionsOperations({
                 opver: 1,
@@ -387,7 +390,7 @@
                 ]
             })*/
         }
-        
+
         //filtered_source = definition.source.map( e => e);
         //highlighted_option = filtered_source.length > 0 ? filtered_source[0] : null;
     }
@@ -438,7 +441,7 @@
         dropdown_position = 'display: none;'
 
         combo_text = get_combo_text();
-        
+
         if(!!textbox)
             textbox.innerHtml = combo_text;
 
@@ -448,11 +451,11 @@
         tick_request_internal = tick_request_internal + 1;
     }
 
-   
+
     function selected_item(itm, a) :rCombo_item
     {
         let choosed_value = itm[a];
-        
+
         if(typeof choosed_value === 'object' )
         {
             if(choosed_value)
@@ -475,9 +478,9 @@
                     else
                         itm.Avatar = choosed_value.$icon;
                 }
-                
+
                 return itm;
-            }   
+            }
             else
                 return null;
         }
@@ -567,7 +570,7 @@
 
                         tick_request_internal = tick_request_internal + 1;
                     }
-                    
+
                 }
                 else
                 {
@@ -578,7 +581,7 @@
                         path = `/${typename}/${item.Id}/set`;
 
 
-                    let result = await reef.post(path, 
+                    let result = await reef.post(path,
                                         {
                                             [a]: itm ? itm.Key : null
                                         });
@@ -602,7 +605,7 @@
                         tick_request_internal = tick_request_internal + 1;
                     }
 
-                    
+
                 }
             }
             else    // or simple property
@@ -636,7 +639,7 @@
                     if(item && a && typename)
                     {
                         informModification(item, a, typename);
-                        
+
                         if(pushChangesImmediately)
                             pushChanges();
                     }
@@ -647,7 +650,7 @@
         if(!!changed && success)
         {
             if(itm)
-                changed(itm.Key, itm.Name); 
+                changed(itm.Key, itm.Name);
             else
                 changed(null, null);
         }
@@ -661,7 +664,7 @@
         case 'Escape':
             hide();
             break;
-        
+
         case 'ArrowDown':
             {
                 e.cancelBubble = true;
@@ -669,7 +672,7 @@
 
                 const _filtered_source = filtered_source ? filtered_source : definition.source;
                 let idx = _filtered_source.findIndex( e => e==highlighted_option);
-                
+
                 if(idx < 0)
                     idx = 0;
                 else if(idx < _filtered_source.length-1)
@@ -686,7 +689,7 @@
 
                 const _filtered_source = filtered_source ? filtered_source : definition.source;
                 let idx = _filtered_source.findIndex( e => e==highlighted_option);
-                
+
                 if(idx < 0)
                     idx = _filtered_source.length-1;
                 else if(idx > 0)
@@ -717,7 +720,7 @@
         //highlighted_option = filtered_source.length > 0 ? filtered_source[0] : null;
         openDropdownAsMenu()
     }
-    
+
     let new_item_option: rCombo_item
 
     function get_filtered_source() :rCombo_item[]
@@ -751,7 +754,7 @@
 
     let sel_item = null;
     let combo_text = placeholder;
-    
+
     let tick_request_internal = 0;
     let last_tick_internal = -1;
 
@@ -773,7 +776,7 @@
             {
                 if(!prop.$ref)
                     return null;
-                
+
                 if(!prop.$col)
                     return null;
 
@@ -798,7 +801,7 @@
     {
         let fields :string = '?fields=';
         if(definition.element_key)
-            fields += definition.element_key  
+            fields += definition.element_key
         else
             fields += '$ref';
 
@@ -812,10 +815,10 @@
         {
             if(definition.element_avatar)
                 fields += ',' + definition.element_avatar
-            else    
+            else
                 fields += ',$icon'
         }
-        
+
         return fields;
     }
 
@@ -828,7 +831,7 @@
                 let fields = calc_path_fields_param();
                 if(fields)
                     path += fields;
-                
+
                 let res = await reef.get(path);
                 resolve( res );
             });
@@ -838,7 +841,7 @@
             else
                 cached_sources.set(cache_key, promise);
         }
-            
+
         let promise = cached_sources.get(cache_key);
         return await promise;
     }
@@ -885,8 +888,8 @@
                     el.Icon = e[definition.element_icon];
                 else
                     el.Avatar = e.$icon;
-            } 
-            
+            }
+
             definition.source.push(el);
         })
 
@@ -908,7 +911,7 @@
         combo_text = get_combo_text();
 
         //console.log('combo setup view', JSON.stringify(definition), JSON.stringify(sel_item), a, combo_text)
-        
+
         if(textbox)
             textbox.innerHTML = combo_text;
 
@@ -933,7 +936,16 @@
 
 {#if true}
     {@const c = setup_view(item, a, tick_request_internal) }
-    
+
+{#if typo}
+    <span class="inline-block relative flex flex-row  items-center">
+        <span class="mr-1">{combo_text}</span>
+        <Ricon icon = "chevron-down" size="s"/>
+    </span>
+{/if}
+
+{#if !typo}
+
 <div class="{cs} max-w-full inline-block {userClass}"
     on:focusout={on_focus_out}
     bind:this={root_element}>
@@ -941,14 +953,14 @@
         <label for="name" class="block {label_mb} text-xs font-small text-stone-900 dark:text-white">{label}</label>
     {/if}
     <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <div    bind:this={combo}    
+    <div    bind:this={combo}
             class="max-w-full {appearance_class} flex flex-row content-between items-center"
          >
-            
+
         <p  class="max-w-full flex-1 flex flex-row items-center"
             on:click={(e) => { show(e, undefined) }}
             class:cursor-pointer={can_be_activated && is_compact}>
-            
+
             {#if true || !is_dropdown_open}
                 {#if icon && sel_item}
                     {#if sel_item.Color}
@@ -963,7 +975,7 @@
                 {/if}
             {/if}
 
-            
+
             <span  bind:this={textbox}
                 class="dark:text-stone-300 {line_h} truncate pl-0 pr-2.5 {background_class} min-w-[2.5rem]"
                 class:ml-2={icon}
@@ -982,8 +994,8 @@
                 </div>
             {/if}
         </p>
-        
-        
+
+
     </div>
 
     <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -993,8 +1005,8 @@
                 <button class="     fixed w-6 h-6 flex items-center justify-center
                                     text-stone-500 bg-stone-200/70 hover:bg-stone-200
                                     focus:outline-none font-medium rounded-full text-sm text-center
-                                    dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700 
-                                    focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800" 
+                                    dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700
+                                    focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800"
                         style={closeButtonPos}
                         on:click={ hide }>
                     <Icon component={FaTimes} s="md"/>
@@ -1007,16 +1019,16 @@
                 style={dropdown_position}
                 bind:this={dropdownElement}
                 use:dropdown_action>
-            
-                
+
+
 
             <ul class="py-1">
 
                 {#if definition.source && definition.source.length}
                     {#if hasNone}
-                        
+
                         <li class="rounded flex flex-row items-center {font_size}
-                                    space-x-10 px-4 py-2 ml-12 sm:ml-0" 
+                                    space-x-10 px-4 py-2 ml-12 sm:ml-0"
                             class:bg-stone-100={highlighted_option == null}
                             class:dark:bg-stone-700={highlighted_option == null}
                             class:dark:hover:bg-stone-700={highlighted_option == null}
@@ -1035,7 +1047,7 @@
                         {#each _filtered_source as item (item.Key)}
                             {@const active=(highlighted_option == item) ? 'bg-stone-400/30 dark:bg-stone-400/30' : ''}
                             <li class="rounded flex flex-row items-center {font_size}
-                                    space-x-10 px-4 py-2 pl-12 sm:pl-2 {active}" 
+                                    space-x-10 px-4 py-2 pl-12 sm:pl-2 {active}"
                                 on:mousemove={() => on_mouse_move(item)}
                                 on:click|preventDefault|stopPropagation={async () => await on_choose(item)}
                                 tabindex="-1">
@@ -1043,7 +1055,7 @@
                                 {#if icon}
                                     {#if item.Color}
                                         <Icon s="md" circle={true} color={item.Color}/>
-                                    {:else if item.Avatar} 
+                                    {:else if item.Avatar}
                                         <Icon s="md" circle={true} symbol={item.Avatar}/>
                                     {:else if item.Icon}
                                         <Icon s="md" component={item.Icon}/>
@@ -1073,9 +1085,10 @@
     </div-->
 </div>
 {/if}
-
+{/if}
+{#if !typo}
 <style>
-    
+
 [contenteditable]:focus {
     outline: 0px solid transparent;
 }
@@ -1088,3 +1101,4 @@
     }
 
 </style>
+{/if}

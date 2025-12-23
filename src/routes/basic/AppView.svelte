@@ -20,8 +20,9 @@
     import Task from './task.svelte'
     import Note from './note.svelte'
     import Board from './list.board.svelte';
-    import DesignGT from './design.general.typo.svelte';
+    import DesignGT from './design.general.typography.svelte';
     import DesignLists from './design.general.lists.svelte';
+    import DesignTypoLists from './design.general.typolists.svelte';
     import DesignNavs from './design.general.navlists.svelte';
     import MyTasks from './mytasks.svelte'
     import MyFolders from './myfolders.svelte'
@@ -242,6 +243,9 @@
                         '/design/*' :   { component: DesignGT},
                         '/deslis' :     { component: DesignLists},
                         '/deslis/*' :   { component: DesignLists},
+                        '/destlis' :     { component: DesignTypoLists},
+                        '/destlis/*' :   { component: DesignTypoLists},
+
                         '/desnav' :     { component: DesignNavs},
                         '/desnav/*' :   { component: DesignNavs},
                         '/mytasks' :    { component: MyTasks },

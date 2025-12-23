@@ -1,16 +1,19 @@
 <script>
      import {reef} from '@humandialog/auth.svelte'
-     import {  
+     import {
             editable, selectable, getNiceStringDateTime, startEditing, i18n,
+            getNiceStringDate,
             contextItemsStore, showFloatingToolbar,
 			activateItem,
 			isActive,
 			isSelected,
 			DatePicker,
+            Ricon,
             Combo, Tags, ComboSource,
             informModification, pushChanges, onErrorShowAlert, setSelectionAtEnd
         } from '$lib';
     import PopupExplorer from './popup.explorer.svelte'
+
     import TaskProperties from './properties.task.svelte'
     import {link} from 'svelte-spa-router'
     import {tick} from 'svelte'
@@ -21,6 +24,10 @@
     export let getAllTags = undefined
     export let onUpdateAllTags = undefined
     export let users = []
+    export let layout_demo_mode = false
+    export let layout_ctrl_mode = true
+    export let action_ctrl_mode = false
+    export let demo_view = true
 
     const STATE_FINISHED = 7000
 
@@ -31,6 +38,10 @@
 
     $: selectedClass = isCardSelected ? "!border-blue-300 dark:!border-blue-300/50" : "";
     $: focusedClass = isCardActive ? "bg-stone-100 dark:bg-stone-700" : "";
+    $: demo_element_class = isCardSelected ?  "bg-stone-700" : ""
+
+    export let layout24 = false;
+
 
     function calculate_active(...args)
     {
@@ -90,7 +101,7 @@
                         },
                         {
                             caption: '_; Send; Enviar; Wyślij',
-                            icon: FaUpload, 
+                            icon: FaUpload,
                             tbr: 'D',
                             fab: 'S00',
                             menu: [
@@ -102,10 +113,10 @@
                                         caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
                                         action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect)
                                     }
-                                ], 
+                                ],
                             hideToolbarCaption: true
                         },
-                    /*  don't know if it does make sense  
+                    /*  don't know if it does make sense
                         {
                             caption: '_; Archive; Archivar; Zarchiwizuj',
                             //icon: FaArchive,
@@ -204,8 +215,8 @@
         }
     }
 
-    
-    
+
+
     function onTitleChanged(text)
     {
         task.Title = text;
@@ -213,9 +224,12 @@
         pushChanges();
     }
 
-    function onSummaryChanged(text)
+    function onSummaryChanged(text, trim = false)
     {
-        task.Summary = text;
+        if(trim)
+            task.Summary = text.trim();
+        else
+            task.Summary = text;
         informModification(task, 'Summary');
         pushChanges();
     }
@@ -238,10 +252,192 @@
     let taskPropertiesDialog;
     function runElementProperties(btt, aroundRect)
     {
-        taskPropertiesDialog.show(task)    
+        taskPropertiesDialog.show(task)
     }
 
 </script>
+
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<!-- svelte-ignore a11y-no-noninteractive-interactions -->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+{#if !isCardActive}
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!---- INACTIVE PURE LAYOUT ----------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<figure classpx="bg-stone-100 dark:bg-stone-700/10 outline outline-8 outline-stone-700/10"
+        use:selectable={task}
+        on:click={activate}>
+    <!-------- TOP PROPERTIES ---------------------------------------------------->
+    <figcaption>
+        <div class="flex flex-row justify-between">
+            <span>{task.Index}</span>
+            <span class="text-center"></span>
+            <span class="pr-5 text-right">{getNiceStringDate(task.DueDate)}</span>
+        </div>
+    </figcaption>
+    <!-------- MAIN LINE    ------------------------------------------------------>
+    <h4 class=" text-sky-300/50">
+        {task.Title}
+    </h4>
+    <!-------- BOTTOM PROPERTIES ------------------------------------------------->
+    {#if task.Actor || task.DueDate}
+    <figcaption>
+        <div class="flex flex-row justify-between">
+            <span>{task.Actor.Name}</span>
+            <span></span>
+            <span class="pr-5 text-right">{getNiceStringDate(task.DueDate)}</span>
+        </div>
+    </figcaption>
+    {/if}
+    <!-------- SUMMARY TEXT ------------------------------------------------------>
+    {#if task.Summary}
+    <figcaption>
+        {task.Summary}
+    </figcaption>
+    {/if}
+</figure>
+
+
+
+
+{:else}
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!---- ACTIVE WITH CONROLS  ----------------------------------------------------------------------->
+<!------- keep pure layout  ----------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+
+<figure class="bg-stone-100 dark:bg-stone-900 outline outline-8 outline-stone-900 ring-1 ring-stone-700 ring-offset-8"
+        use:selectable={task}
+        on:click={activate}>
+    <!-- comming soon - top info -->
+    <figcaption>
+        <div class="flex flex-row justify-between">
+            <span>{task.Index}</span>
+            <span class="text-center"></span>
+            {#if task.DueDate || placeholder=='DueDate'}
+            <DatePicker
+                        self={task}
+                        a={'DueDate'}
+                        typo = {true}
+                        s="sm"
+                        inContext="props"
+                        bind:this={dueDateElement}/>
+            {/if}
+
+        </div>
+    </figcaption>
+    <!------------------------------>
+    <!--@el------------------------->
+
+    <a  href={task.href} use:link >
+    <h4 class="mt-1 text-sky-500"
+
+                    use:editable={{
+                    action: (text) => onTitleChanged(text),
+                    active: false,
+                    onFinish: (d) => {titleElement.blur()},
+                    onSoftEnter: async (text) => { onTitleChanged(text); await editProperty('Summary') }
+                    }}
+                bind:this={titleElement}>
+        <!--div class="inline-block w-4 h-4 ml-1 mr-3 align-baseline
+                text-stone-700 dark:text-stone-400 ">
+
+                <Ricon icon = "turtle"/>
+        </div-->
+        {task.Title}
+    </h4>
+    </a>
+    <!-- comming soon - middle info --
+    <figcaption>
+        <div class="grid gap-4 grid-cols-3 grid-rows-1">
+            <span>Andrzej</span>
+            <span class="text-center"></span>
+            <span class="text-right">Specyfikacje</span>
+        </div>
+    </figcaption>
+    -------------------------------->
+    {#if task.Actor || placeholder=='Actor' || task.DueDate || placeholder=='DueDate'}
+     <figcaption>
+        <div class="flex flex-row justify-between">
+            {#if task.Actor || placeholder=='Actor'}
+            <Combo  compact={true}
+                    inContext="props"
+                    self={task}
+                    a='Actor'
+                    isAssociation
+                    hasNone
+                    typo = {true}
+                    icon={false}
+                    s="sm"
+                    bind:this={actorElement}> <!-- changed={(k,n) => { /*fake assignment for component rer-ender*/ item[prop.a] = item[prop.a]; }}  -->
+                <ComboSource objects={users} key="$ref" name='Name'/>
+            </Combo>
+            {/if}
+            <span class="text-center"></span>
+            {#if task.DueDate || placeholder=='DueDate'}
+            <DatePicker
+                        self={task}
+                        a={'DueDate'}
+                        typo = {true}
+                        s="sm"
+                        inContext="props"
+                        bind:this={dueDateElement}/>
+            {/if}
+
+        </div>
+
+    </figcaption>
+    {/if}
+
+
+    {#if task.Summary}
+    <figcaption use:editable={{
+                            action: (text) => onSummaryChanged(text),
+                            active: true,
+                            onFinish: (d) => {placeholder = ''}}}
+                bind:this={summaryElement}>
+        {task.Summary}
+    </figcaption>
+    {:else if placeholder=='Summary'}
+    <figcaption use:editable={{
+                            action: (text) => onSummaryChanged(text, true),
+                            active: true,
+                            onFinish: (d) => {placeholder = ''}}}
+                bind:this={summaryElement}>
+            &nbsp
+    </figcaption>
+
+    {/if}
+</figure>
+{/if}
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------->
+{#if layout24}
+
+
+<!-- x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x- -->
+<!-- x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x- -->
+<!-- x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x- -->
+<!-- x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x- -->
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-interactions -->
@@ -277,11 +473,11 @@
     <h4 class=" text-base font-semibold
                 sm:text-base sm:font-semibold">
         {#if isCardActive}
-            <a  href={task.href} 
-                use:link 
+            <a  href={task.href}
+                use:link
                 class="cursor-pointer underline"
                 use:editable={{
-                    action: (text) => onTitleChanged(text), 
+                    action: (text) => onTitleChanged(text),
                     active: false,
                     onFinish: (d) => {titleElement.blur()},
                     onSoftEnter: async (text) => { onTitleChanged(text); await editProperty('Summary') }
@@ -300,7 +496,7 @@
             <Combo  compact={true}
                     inContext="props"
                     self={task}
-                    a='Actor'                   
+                    a='Actor'
                     isAssociation
                     hasNone
                     icon={false}
@@ -310,13 +506,13 @@
             </Combo>
         </section>
     {/if}
-    
+
     {#if task.Summary || placeholder=='Summary'}
-        <p class="  text-sm sm:text-sm 
+        <p class="  text-sm sm:text-sm
                     text-stone-600 dark:text-stone-400">
         {#if isCardActive}
             <span use:editable={{
-                                action: (text) => onSummaryChanged(text), 
+                                action: (text) => onSummaryChanged(text),
                                 active: true,
                                 onFinish: (d) => {placeholder = ''}}}
                             bind:this={summaryElement}>
@@ -346,4 +542,8 @@
     {/if}
 </section>
 
+
+
 <TaskProperties bind:this={taskPropertiesDialog} />
+
+{/if}

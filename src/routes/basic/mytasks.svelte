@@ -14,7 +14,7 @@
 				mainContentPageReloader,
                 Modal,
                 onErrorShowAlert,
-                Breadcrumb, Paper, Paginator,
+                Breadcrumb, Paper, PaperHeader, Paginator,
             i18n} from '$lib'
     import {FaCheck, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaArchive, FaUndo} from 'svelte-icons/fa'
     import {setBrowserRecentElement} from './basket.utils'
@@ -23,9 +23,9 @@
 
     export let params = {}
 
-    //let pageNo = 0
-    //let allPagesNo = 1
-    //let pageElementsNo = 25
+    let pageNo = 0
+    let allPagesNo = 1
+    let pageElementsNo = 25
 
     let user = null;
     let listComponent;
@@ -35,7 +35,7 @@
     let canconicalPath = []
     const title = '_; My tasks; Mis tareas; Moje zadania'
 
-    $: onParamsChanged($session, $mainContentPageReloader/*, $querystring*/);
+    $: onParamsChanged($session, $mainContentPageReloader, $querystring);
 
     async function onParamsChanged(...args)
     {
@@ -46,35 +46,40 @@
         }
 
         if(lists.length == 0)
-            reef.get('/group/Lists', onErrorShowAlert).then( (res) => { if(res) lists=res.TaskList} );
-        
-        //const params = new URLSearchParams($querystring);
-        //if(params.has("page"))
-        //    pageNo = parseInt(params.get("page"))
-        //else
-        //    pageNo = 0
+        {
+            let res = await reef.get('/group/Lists', onErrorShowAlert)
+            if(res)
+                lists = res.TaskList;
+        }
+
+        const params = new URLSearchParams($querystring);
+        if(params.has("page"))
+            pageNo = parseInt(params.get("page"))
+        else
+            pageNo = 0
 
         await fetchData()
 
-        //const allElementsNo = user.AssignedTasksCount
-        //allPagesNo = Math.floor(allElementsNo / pageElementsNo)
-        //if(allElementsNo % pageElementsNo)
-        //    allPagesNo += 1
+        const allElementsNo = user.AssignedTasksCount
+        allPagesNo = Math.floor(allElementsNo / pageElementsNo)
+        if(allElementsNo % pageElementsNo)
+            allPagesNo += 1
 
-        //pageNo = Math.max(0, Math.min(pageNo, allPagesNo-1))
+        allPagesNo = 10
 
-        //paginatorTop?.updateParams(pageNo, allPagesNo)
-        //paginatorBtt?.updateParams(pageNo, allPagesNo)
+        pageNo = Math.max(0, Math.min(pageNo, allPagesNo-1))
 
-        //if(listComponent)
-        //    listComponent.reload(user, listComponent.KEEP_SELECTION)
+        paginatorTop?.updatePageNo(pageNo)
+        paginatorTop?.updateAllPagesNo(allPagesNo)
+        paginatorBtt?.updatePageNo(pageNo)
+        paginatorBtt?.updateAllPagesNo(allPagesNo)
     }
 
     async function fetchData()
     {
-        //if(pageNo < 0)
-        //    pageNo = 0
-        //const pageOffset = pageNo * pageElementsNo
+        if(pageNo < 0)
+            pageNo = 0
+        const pageOffset = pageNo * pageElementsNo
 
         let res = await reef.post(`/user/query`,
                                 {
@@ -87,13 +92,14 @@
                                             Id: 1,
                                             Association: '',
                                             Expressions:['Id','Name', 'href', 'AssignedTasksCount'],
-                                        //    SubTreeOffset: pageOffset,
-                                        //    SubTreeLimit: pageElementsNo,
+                                            SubTreeOffset: pageOffset,
+                                            SubTreeLimit: pageElementsNo,
                                             SubTree:
                                             [
                                                 {
                                                     Id: 2,
                                                     Association: 'MyTasks',
+                                                    Expressions:['Id','Title', 'href', 'Summary', 'icon'],
                                                     Filter: 'State <> STATE_FINISHED',
                                                     Sort: "UserOrder",
                                                     SubTree:[
@@ -184,7 +190,7 @@
     function isFinishRequested(task)
     {
         const idx = finishRequested.findIndex((t) =>  t == task.$ref)
-        return idx >= 0 
+        return idx >= 0
     }
 
     function requestFinish(task)
@@ -204,14 +210,14 @@
         {
             finishRequested.splice(idx, 1)
         }
-        
+
         setupFinishingTimer()
     }
 
     async function executeFinishingRequestedTasks()
     {
         let promises = []
-        finishRequested.forEach( $ref => 
+        finishRequested.forEach( $ref =>
             promises.push( reef.post(`${$ref}/Finish`, {}, onErrorShowAlert))
         )
 
@@ -219,7 +225,7 @@
 
         await Promise.all(promises)
         await reloadTasks(listComponent.KEEP_OR_SELECT_NEXT)
-        
+
     }
 
     function setupFinishingTimer()
@@ -385,16 +391,16 @@
         }
     }
 
-    //let paginatorTop
-    //let paginatorBtt
-    //function onPage(page)
-    //{
-    //    pageNo = page
-    //
-    //    const path = $location
-    //    const loc = `${path}?page=${pageNo}`
-    //    push(loc)
-    //}
+    let paginatorTop
+    let paginatorBtt
+    function onPage(page)
+    {
+        pageNo = page
+
+        const path = $location
+        const loc = `${path}?page=${pageNo}`
+        push(loc)
+    }
 
     let taskPropertiesDialog;
     function runElementProperties(btt, aroundRect, element, kind)
@@ -407,7 +413,27 @@
             break
         }
     }
+    let list_properties = {
+        Title: "Title",
+        Summary: "Summary",
+        icon: "icon",
+        element:{
+            icon: "icon",
+            href: "href",
+            Title: "Title",
+            Summary: "Summary"
+        },
+        context:{
+            Folder:{
+                Summary: "Summary",
 
+            },
+            FolderFolder:{
+                Summary: "Summary",
+                head_right: "ModificationDate"
+            }
+        }
+    }
 </script>
 
 <svelte:head>
@@ -415,68 +441,39 @@
 </svelte:head>
 
 {#if user}
-    <Page   self={user}
-            toolbarOperations={pageOperations}
-            clearsContext='props sel'
-            title={title}>
+    <Page self={user} toolbarOperations={pageOperations} clearsContext='props sel' title={title}>
 
-            <Paper class="mb-64">
-
-            <section class="w-full place-self-center max-w-3xl">
-
-            {#if canconicalPath}
-                <Breadcrumb class="mt-1 mb-5" path={canconicalPath}/>
-            {/if}
+       <Paper>
+            <PaperHeader>
+                <!--Breadcrumb class="mt-1 mb-5" path={canconicalPath}/-->
+            </PaperHeader>
 
 
-            <section class="hidden w-full sm:flex flex-row mt-3 mr-2">
-                <p class="ml-3 pb-5 text-lg text-left">
-                    {title}
-                </p>
+        <h1>{title}</h1>
 
-                <!--section class="ml-auto">
-                    <Paginator {onPage} {pageNo} {allPagesNo} bind:this={paginatorTop}/>
-                </section-->
-            </section>
+        <div class="flex flex-row justify-between">
+            <span></span>
+            <span class="text-center"></span>
+            <span class="pr-5 text-right"> <Paginator {onPage} {pageNo} {allPagesNo} bind:this={paginatorTop}/></span>
+        </div>
+
 
         <List   self={user}
                 a='MyTasks'
+                {list_properties}
                 toolbarOperations={taskOperations}
                 orderAttrib='UserOrder'
                 bind:this={listComponent}>
-            <ListTitle a='Title' hrefFunc={(task) => `/task/${task.Id}`}/>
-            <ListSummary a='Summary'/>
             <ListInserter action={addTask} icon/>
-
-            <ListComboProperty  name="TaskList" association>
-                <ComboSource objects={lists} key="$ref" name='Name'/>
-            </ListComboProperty>
-
-            <ListDateProperty name="DueDate"/>
-
-            <span slot="left" let:element>
-                {#if element.State == STATE_FINISHED || isFinishRequested(element)}
-                    <Icon component={FaRegCalendarCheck}
-                    on:click={(e) => undoFinishTask(e, element)}
-                    class="h-5 w-5  text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
-
-                {:else}
-                    <Icon component={FaRegCalendar}
-                        on:click={(e) => finishTask(e, element)}
-                        class="h-5 w-5  text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
-
-                {/if}
-            </span>
-
 
         </List>
 
-        <!--div class="flex sm:hidden flex-row mt-10 mb-20">
+        <div class="flex sm:hidden flex-row mt-10 mb-20">
             <section class="ml-auto mr-2">
                 <Paginator {onPage} {pageNo} {allPagesNo} bind:this={paginatorBtt}/>
             </section>
-        </div-->
-            
+        </div>
+
        </Paper>
 
     </Page>

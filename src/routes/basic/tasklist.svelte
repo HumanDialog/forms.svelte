@@ -349,7 +349,7 @@
 
     }
 
-    async function pasteRecentClipboardElement(btt, aroundRect) 
+    async function pasteRecentClipboardElement(btt, aroundRect)
     {
         const clipboardElements = await fetchComposedClipboard4TaskList()
         if(clipboardElements && clipboardElements.length > 0)
@@ -361,7 +361,7 @@
         }
     }
 
-    async function runPasteBasket(btt, aroundRect) 
+    async function runPasteBasket(btt, aroundRect)
     {
         const clipboardElements = await fetchComposedClipboard4TaskList()
         showFloatingToolbar(aroundRect, BasketPreview, {
@@ -548,7 +548,7 @@
 
                         {
                             caption: '_; Send; Enviar; Wyślij',
-                            icon: FaUpload, 
+                            icon: FaUpload,
                             tbr: 'D',
                             fab: 'S00',
                             menu: [
@@ -567,7 +567,7 @@
                             ],
                             hideToolbarCaption: true
                         },
-                        
+
                         {
                             //icon: FaArchive,
                             caption: '_; Archive; Archivar; Zarchiwizuj',
@@ -681,29 +681,29 @@
     async function copyTaskToBasket(task)
     {
         await reef.post(`${listPath}/CopyTaskToBasket`, {
-                task: task.$ref, 
-                flags: 0}, 
+                task: task.$ref,
+                flags: 0},
                 onErrorShowAlert)
     }
 
     async function cutTaskToBasket(task)
     {
         await reef.post(`${listPath}/CutTaskToBasket`, {
-                task: task.$ref, 
-                flags: 0}, 
+                task: task.$ref,
+                flags: 0},
                 onErrorShowAlert)
 
         reloadTasks(listComponent.SELECT_NEXT);
     }
-   
-    async function toggleSubscribe() 
+
+    async function toggleSubscribe()
     {
         if(currentList.IsSubscribed)
         {
             const res = await reef.get(`${listPath}/Unsubscribe`, onErrorShowAlert)
             if(res)
                 currentList.IsSubscribed = false
-        }   
+        }
         else
         {
             const res = await reef.get(`${listPath}/Subscribe`, onErrorShowAlert)
@@ -711,9 +711,29 @@
                 currentList.IsSubscribed = true
         }
 
-        refreshToolbarOperations() 
+        refreshToolbarOperations()
     }
+    let list_properties = {
+        Title: "Title",
+        Summary: "Summary",
+        icon: "icon",
+        element:{
+            icon: "icon",
+            href: "href",
+            Title: "Title",
+            Summary: "Summary"
+        },
+        context:{
+            Folder:{
+                Summary: "Summary",
 
+            },
+            FolderFolder:{
+                Summary: "Summary",
+                head_right: "ModificationDate"
+            }
+        }
+    }
 </script>
 
 <svelte:head>
@@ -732,15 +752,16 @@
             title={listTitle}>
 
             <Paper class="mb-64">
-            
+
             <section class="w-full place-self-center max-w-3xl">
 
                 {#if currentList.GetCanonicalPath}
                     <Breadcrumb class="mt-1 mb-5" path={currentList.GetCanonicalPath}/>
                 {/if}
-            
+
         <List   self={currentList}
                 a={assocName}
+                {list_properties}
                 title={listTitle}
                 toolbarOperations={taskOperations}
                 orderAttrib='ListOrder'
@@ -770,7 +791,7 @@
 
 
         </List>
-    
+
         {#if !isArchivedTasks}
             {#if !isArchivedList}
                 <div class="ml-3 mt-20 mb-10">

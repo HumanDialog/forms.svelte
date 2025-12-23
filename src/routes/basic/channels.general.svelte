@@ -97,7 +97,7 @@
 
     async function addChannel(newChannelAttribs)
     {
-        let res = await reef.post("/group/AddGeneralMessageChannel", 
+        let res = await reef.post("/group/AddGeneralMessageChannel",
             {
                 title: newChannelAttribs.Title,
                 summary: newChannelAttribs.Summary ?? '',
@@ -145,7 +145,7 @@
             operations: [
                 {
                     caption: '_; View; Ver; Widok',
-                    operations: [ 
+                    operations: [
                         {
                             caption: '_; New channel; Nuevo canal; Nowy kanał',
                             icon: FaHashtag,
@@ -190,9 +190,9 @@
                             icon: FaCaretDown,
                             action: (f) => listComponent.moveDown(channel),
                             fab:'M04',
-                            tbr:'A' 
+                            tbr:'A'
                         },
-                    
+
                        {
                             caption: '_; Delete; Eliminar; Usuń',
                             //icon: FaTrash,
@@ -200,13 +200,34 @@
                             //fab:'M30',
                             //tbr:'B'
                         }
-                        
+
                     ]
                 }
             ]
         }
     }
 
+    let list_properties = {
+        Title: "Title",
+        Summary: "Summary",
+        icon: "icon",
+        element:{
+            icon: "icon",
+            href: "href",
+            Title: "Title",
+            Summary: "Summary"
+        },
+        context:{
+            Folder:{
+                Summary: "Summary",
+
+            },
+            FolderFolder:{
+                Summary: "Summary",
+                head_right: "ModificationDate"
+            }
+        }
+    }
 
 </script>
 
@@ -230,6 +251,7 @@
 
         <List   self={group}
                 a='MessageChannels'
+                {list_properties}
                 toolbarOperations={channelOperations}
                 orderAttrib='Order'
                 bind:this={listComponent}>

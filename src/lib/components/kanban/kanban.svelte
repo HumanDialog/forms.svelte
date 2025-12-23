@@ -1,11 +1,11 @@
 <script lang="ts">
     import {setContext, getContext, afterUpdate, tick} from 'svelte'
     import {KanbanColumnBottom, KanbanColumnTop, rKanban_definition} from './Kanban'
-    import {parseWidthDirective, clearActiveItem, getPrev, getNext, remove, insertAt, insertAfter, swapElements, getActive} from '../../utils' 
+    import {parseWidthDirective, clearActiveItem, getPrev, getNext, remove, insertAt, insertAfter, swapElements, getActive} from '../../utils'
     import {contextItemsStore, contextTypesStore, data_tick_store } from '../../stores'
-    import Column from './internal/kanban.column.svelte'
+    import KanbanColumn from './internal/kanban.column.svelte'
 	import { informModification, pushChanges } from '$lib/updates';
-    
+
     export let title:               string = ''
     export let c = '';
 
@@ -29,9 +29,9 @@
 
     function setup(...args)
     {
-        
+
     }
-        
+
     let renderToken = 0;
     export async function rerender(selectColumnIdx: number = -1, selectCardId :number = -1)
     {
@@ -119,7 +119,7 @@
                     if(nextSelected)
                         altSelectElementId = nextSelected.Id;
                 }
-                
+
             }
             break;
 
@@ -148,7 +148,7 @@
         allItems = definition.getItems();
         if(selectElementId > 0)
         {
-            
+
             if(selectedColumnIdx < 0)
             {
                 let selectedElement = allItems.find(e => e.Id == selectElementId)
@@ -162,8 +162,8 @@
             {
                 const columnState = definition.columns[selectedColumnIdx].state;
                 const columnItems = allItems.filter(e => e[sa] == columnState)
-                let selectedElement = allItems.find(e => e.Id == selectElementId) 
-                
+                let selectedElement = allItems.find(e => e.Id == selectElementId)
+
                 if(selectedElement == undefined)
                 {
                     if(altSelectElementId > 0)
@@ -204,36 +204,6 @@
 
     let columns = []
 
-    afterUpdate( () =>
-    {
-        for(let i=1; i<columns.length; i++)
-        {
-            let left_column = columns[i-1];
-            let right_column = columns[i];
-            const left_column_height = left_column?.getHeight()
-            const right_column_height = right_column?.getHeight()
-            if(left_column_height > right_column_height)
-            {
-                left_column?.setBorder(left_column.SET_RIGHT)
-                right_column?.setBorder(right_column.CLEAR_LEFT)
-            }
-            else
-            {
-                left_column?.setBorder(left_column.CLEAR_RIGHT)
-                right_column?.setBorder(right_column.SET_LEFT)
-            }
-
-        }
-    })
-
-    /*export function showMoveOperationsForItem(item)
-    {
-        columns.forEach( c => {
-            const card = c.findCardByItem(item)
-            if(card)
-                card.showMoveOperations()
-        })
-    }*/
 
     export function scrollViewToCard(item)
     {
@@ -257,7 +227,7 @@
         let prev = allItems.findLast(e => e[sa] == columnState && e[oa] < item[oa])
         if(!prev)
             return;
-        
+
         swapElements(allItems, item, prev);
         [item[oa], prev[oa]] = [prev[oa], item[oa]]
 
@@ -277,7 +247,7 @@
         const sa = definition.stateAttrib
         const column = columns[columnIdx]
         const columnState = definition.columns[columnIdx].state
-        
+
         let next = allItems.find(e => e[sa] == columnState && e[oa] > item[oa])
         if(!next)
             return;
@@ -314,10 +284,10 @@
         for(let i=fromIdx; i<items.length; i++)
         {
             let el = items[i];
-            
+
             el[oa] = order;
             informModification(el, oa)
-            
+
             order += ORDER_STEP;
         }
 
@@ -325,16 +295,16 @@
             pushChanges();
     }
 
-    export async function replace(item, toColumnIdx, afterElement) 
+    export async function replace(item, toColumnIdx, afterElement)
     {
-        
+
         const fromColumnIdx = getColumnIdx(item)
         let allItems = definition.getItems();
 
         const oa = definition.orderAttrib
         const sa = definition.stateAttrib
         const toColumnState = definition.columns[toColumnIdx].state
-        
+
         const toListTop = allItems.find(e => e[sa] == toColumnState)
         const toListBottom = allItems.findLast(e => e[sa] == toColumnState)
 
@@ -363,7 +333,7 @@
                 {
                     //item[sa] = toColumnState;
                     //informModification(item, sa);
-                    
+
                     item[oa] = toListTop[oa] - ORDER_STEP;
                     informModification(item, oa);
                     propsChanges.state = toColumnState;
@@ -384,7 +354,7 @@
                         nextOrder = toListTop[oa];
                         orderSpace = nextOrder - prevOrder;
                     }
-                
+
                     //item[sa] = toColumnState;
                     //informModification(item, sa);
 
@@ -393,7 +363,7 @@
                     propsChanges.state = toColumnState
                     propsChanges.order = item[oa];
 
-                    
+
                     remove(allItems, item)
                     insertAfter(allItems, prevItem, item);
                 }
@@ -421,7 +391,7 @@
 
                     item[oa] = toListBottom[oa] + ORDER_STEP;
                     informModification(item, oa);
-                    
+
                     propsChanges.state = toColumnState
                     propsChanges.order = item[oa];
 
@@ -440,7 +410,7 @@
                         nextOrder = nextItem[oa];
                         orderSpace = nextOrder - prevOrder;
                     }
-                    
+
                     //item[sa] = toColumnState;
                     //informModification(item, sa);
 
@@ -467,7 +437,7 @@
             // there was some changes in order, mayby even reorderElements
             if(propsChanges.state >= 0)
             {
-                pushChanges();   
+                pushChanges();
             }
 
             const req = {
@@ -483,7 +453,7 @@
             if(propsChanges.state >= 0)
             {
                 item[sa] = propsChanges.state
-                informModification(item, sa)   
+                informModification(item, sa)
             }
 
             pushChanges();
@@ -519,7 +489,7 @@
                     const lastItem = allItems[allItems.length-1]
                     maxOrder = lastItem[oa]
                 }
-                
+
                 newElement[oa] = maxOrder + ORDER_STEP
             }
             else
@@ -556,7 +526,7 @@
                     const lastItem = allItems[allItems.length-1]
                     maxOrder = lastItem[oa]
                 }
-                
+
                 newElement[oa] = maxOrder + ORDER_STEP
             }
             else
@@ -594,7 +564,7 @@
                     const lastItem = allItems[allItems.length-1]
                     maxOrder = lastItem[oa]
                 }
-                
+
                 newElement[oa] = maxOrder + ORDER_STEP
             }
             else
@@ -632,7 +602,7 @@
     {
         columns[columnIdx].activate();
     }
-    
+
     export function editColumnName(columnIdx: number, onFinish: Function|undefined = undefined)
     {
         columns[columnIdx].editName(onFinish)
@@ -652,7 +622,7 @@
                 item[sa] = state
                 informModification(item, sa)
             })
-            
+
         pushChanges();
     }
 
@@ -669,80 +639,36 @@
 <slot/> <!-- Launch definition settings -->
 
 {#if title}
-    <p class="hidden sm:block mt-3 ml-3 pb-5 text-lg text-left">{title}</p>
+    <h1 class="px-4">{title}</h1>
     <!--hr class="hidden sm:block w-full"-->
 {/if}
 
 <section    id="__hd_svelte_kanban_columns_container"
-            class="h-full mt-5 flex flex-row no-wrap  
-                overflow-x-auto snap-x snap-mandatory sm:snap-none
-                {user_class}"> <!--sm:justify-center -->
+            class="h-full flex flex-row no-wrap
+                overflow-x-auto snap-x snap-mandatory
+                sm: space-x-0
+                sm:divide-x
+                divide-stone-500 dark:divide-stone-700
+                "> <!--sm:justify-center -->
     {#each definition.columns as column, idx (column.id)}
-        <Column currentColumnIdx={idx}
+        <KanbanColumn currentColumnIdx={idx}
                 {onInsert}
                 bind:this={columns[idx]}>
 
-            
+
             <svelte:fragment slot="kanbanCardTopProps" let:element>
                 <slot name="kanbanCardTopProps" {element}/>
             </svelte:fragment>
-        
+
             <svelte:fragment slot="kanbanCardMiddleProps" let:element>
                 <slot name="kanbanCardMiddleProps" {element}/>
             </svelte:fragment>
-        
+
             <svelte:fragment slot="kanbanCardBottomProps" let:element>
                 <slot name="kanbanCardBottomProps" {element}/>
             </svelte:fragment>
-            
-        </Column>
+
+        </KanbanColumn>
     {/each}
 </section>
 {/key}
-
-<style>
-    .grid-1
-    {
-        display: grid;
-        grid-template-columns: 100%;
-    }
-
-    .grid-2
-    {
-        display: grid;
-        grid-template-columns: 50% 50%;
-    }
-
-    .grid-3
-    {
-        display: grid;
-        grid-template-columns: 33% 33% 33%;
-    }
-
-    .grid-4
-    {
-        display: grid;
-        grid-template-columns: 25% 25% 25% 25%;
-    }
-    .grid-5
-    {
-        display: grid;
-        grid-template-columns: 20% 20% 20% 20% 20%;
-    }
-    .grid-6
-    {
-        display: grid;
-        grid-template-columns: 16.6% 16.6% 16.6% 16.6% 16.6% 16.6;
-    }
-    .grid-7
-    {
-        display: grid;
-        grid-template-columns: 14.3% 14.3% 14.3% 14.3% 14.3% 14.3% 14.3%;
-    }
-    .grid-8
-    {
-        display: grid;
-        grid-template-columns: 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5%;
-    }
-
-</style>

@@ -432,7 +432,7 @@
             <!--CT NTENT------------------------------------------------------------------------------------------------>
             <!--C2NTENT------------------------------------------------------------------------------------------------->
             <div class="px-4">
-                <h1 class="pt-0 mb-8 text-4xl font-black"> Tailwind CSS </h1>
+                <h1 class="pt-0 mb-8 text-4xl font-black">Nav Lists CSS</h1>
                 <!--WRK RIGHT------------------------------------------------------------------------------------------------->
                 <h2 class="text-2xl font-bold mt-14 mb-6 leading-7">Lista elementów #LT bez ikon z summary</h2>
 

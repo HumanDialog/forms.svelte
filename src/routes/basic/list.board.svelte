@@ -29,7 +29,10 @@
 		isDeviceSmallerThan,
         Breadcrumb,
         showFloatingToolbar,
-        refreshToolbarOperations
+        refreshToolbarOperations,
+        PaperTable,
+        PaperHeader
+
 	} from '$lib';
     import {FaPlus, FaList, FaPen, FaCaretLeft, FaCaretRight, FaTrash, FaArrowsAlt, FaArchive, FaCheck, FaEllipsisH, FaChevronRight,
         FaAngleDown, FaAngleUp, FaColumns, FaRandom, FaChevronLeft, FaUpload, FaRegCalendar, FaRegCalendarCheck, FaCaretUp, FaCaretDown, FaDownload
@@ -200,7 +203,7 @@
             const taskList = res.TaskList
             const cacheKey = `listboard/${taskList.Id}`
             cache.set(cacheKey, taskList)
-            
+
             return taskList;
         }
         else
@@ -443,7 +446,7 @@
         await reload(newTask.Id)
 	}
 
-    
+
 
     let deleteModal;
     let taskToDelete;
@@ -634,7 +637,7 @@
 
                         {
                             caption: '_; Send; Enviar; Wyślij',
-                            icon: FaUpload, 
+                            icon: FaUpload,
                             tbr: 'D',
                             fab: 'S00',
                             menu: [
@@ -650,10 +653,10 @@
                                         caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
                                         action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, task)
                                     }
-                                ], 
+                                ],
                             hideToolbarCaption: true
                         },
-                        
+
                         ... (task.State == STATE_FINISHED) ? [] : [
                                 {
                                     caption: '_; Finish; Finalizar; Zakończ',
@@ -679,7 +682,7 @@
                         }
                     ]
                 }
-                
+
 
             ]
 
@@ -812,7 +815,7 @@
         }
     }
 
-    async function pasteRecentClipboardElement(btt, aroundRect) 
+    async function pasteRecentClipboardElement(btt, aroundRect)
     {
         const clipboardElements = await fetchComposedClipboard4TaskList()
         if(clipboardElements && clipboardElements.length > 0)
@@ -824,7 +827,7 @@
         }
     }
 
-    async function runPasteBasket(btt, aroundRect) 
+    async function runPasteBasket(btt, aroundRect)
     {
         const clipboardElements = await fetchComposedClipboard4TaskList()
         showFloatingToolbar(aroundRect, BasketPreview, {
@@ -910,7 +913,7 @@
                         newName: name
                     }, onErrorShowAlert);
 
-        
+
         if(res && Array.isArray(res))
         {
             taskStates = [...res]
@@ -963,16 +966,16 @@
     async function copyTaskToBasket(task)
     {
         await reef.post(`${currentList.$ref}/CopyTaskToBasket`, {
-                task: task.$ref, 
-                flags: 0}, 
+                task: task.$ref,
+                flags: 0},
                 onErrorShowAlert)
     }
 
     async function cutTaskToBasket(task)
     {
         await reef.post(`${currentList.$ref}/CutTaskToBasket`, {
-                task: task.$ref, 
-                flags: 0}, 
+                task: task.$ref,
+                flags: 0},
                 onErrorShowAlert)
 
         reload(kanban.SELECT_NEXT);
@@ -1128,14 +1131,14 @@
         numericStateElement?.refresh();
     }
 
-    async function toggleSubscribe() 
+    async function toggleSubscribe()
     {
         if(currentList.IsSubscribed)
         {
             const res = await reef.get(`${currentList.$ref}/Unsubscribe`, onErrorShowAlert)
             if(res)
                 currentList.IsSubscribed = false
-        }   
+        }
         else
         {
             const res = await reef.get(`${currentList.$ref}/Subscribe`, onErrorShowAlert)
@@ -1143,7 +1146,7 @@
                 currentList.IsSubscribed = true
         }
 
-        refreshToolbarOperations() 
+        refreshToolbarOperations()
     }
 
     let otherCaption = '_; <Other>; <Otros>; <Inne>'
@@ -1167,18 +1170,20 @@
 		title={ext(currentList.Name)}
 	>
 
+    <PaperTable>
         <!--section class="w-full place-self-center max-w-3xl"-->
-
+        <PaperHeader>
+        <div class="px-4">
             {#if currentList.GetCanonicalPath}
-                <Breadcrumb class="mt-1 mb-5" path={currentList.GetCanonicalPath}/>
+                <Breadcrumb  path={currentList.GetCanonicalPath}/>
             {/if}
-
-
+        </div>
+        </PaperHeader>
         <!--/section-->
 
 		<Kanban class="grow-0"
                 title={ext(currentList.Name)}
-                bind:this={kanban}> 
+                bind:this={kanban}>
 
             <KanbanSource self={currentList}
                           a='Tasks'
@@ -1227,6 +1232,8 @@
                     <div class="inline-block mt-1.5 w-3 h-3"><FaChevronRight/></div>
             </a>
         </div>
+
+        </PaperTable>
 	</Page>
 
 {:else}

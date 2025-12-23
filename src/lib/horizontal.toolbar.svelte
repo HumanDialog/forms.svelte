@@ -27,11 +27,11 @@
 
     export let definedTabs = undefined
     export let mainToolbarConfig = undefined
-    
+
     let config = null;
     let has_selection_details = false;
     let selection_details_caption = i18n({en: 'Properties', es: 'Propiedades', pl: 'Właściwości'});
-    
+
     let show_sign_in_out_icons = false;
     let is_logged_in = false;
     let sign_in_href = '';
@@ -70,14 +70,14 @@
 
         if(definedTabs && Array.isArray(definedTabs) && definedTabs.length > 0)
         {
-            
+
         }
         else
         {
             tabs = Object.keys(appConfig.sidebar);
             if(tabs.length > 1)
                 icon = FaBars;
-            else    
+            else
             {
                 let first_tab = appConfig.sidebar[tabs[0]];
                 icon = first_tab.icon;
@@ -116,7 +116,7 @@
                 let navKey = navPrevVisibleKey()
                 if(!navKey)
                     navKey = Object.keys(appConfig.sidebar)[0]
-                
+
                 navShow(navKey);
             }
             else
@@ -180,7 +180,7 @@
                 }
 
                 options.push({separator: true})
-                
+
         }
 
         if(!config || config.darkMode)
@@ -244,9 +244,9 @@
                         action: (focused) => { $bottom_bar_visible_store = !$bottom_bar_visible_store }
                     });
         }
-        
+
         let pt = new DOMPoint(rect.left, rect.bottom)
-        showMenu(pt, options);    
+        showMenu(pt, options);
     }
 
     function show_groups(e)
@@ -274,9 +274,9 @@
             })
         )
 
-        
+
         let pt = new DOMPoint(rect.left, rect.bottom)
-        showMenu(pt, options);    
+        showMenu(pt, options);
     }
 
     function clearSelection()
@@ -299,26 +299,27 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class="no-print flex flex-row w-full" on:click={clearSelection}>
+    <p>toolbar</p>
     <div class="flex-none left-0 flex h-12 sm:h-10">
         {#if definedTabs && definedTabs.length > 0}
             {#each definedTabs as tab}
                 <button class="w-12 sm:w-10 h-full flex justify-center items-center text-stone-300 hover:text-stone-100" on:click={tab.onclick}>
-                    <Icon s="xl" component={tab.icon}/>
-                </button>    
+                    <Icon s="s" component={tab.icon}/>
+                </button>
             {/each}
         {:else}
             <button class="w-12 sm:w-10 h-full flex justify-center items-center text-stone-300 hover:text-stone-100" on:click|stopPropagation={toggle_navigator}>
-                <Icon s="xl" component={icon}/>
+                <Icon s="s" component={icon}/>
             </button>
         {/if}
     </div>
 
     <div class="grow">
-        
+
         <div class="block sm:hidden mt-4 sm:mt-3 uppercase text-sm text-center">{@html title}</div>
     </div>
 
-    <div class="flex-none ml-auto flex h-12 sm:h-10">   
+    <div class="flex-none ml-auto flex h-12 sm:h-10">
         {#if user_is_in_multiple_groups}
             <button class="h-full w-12 sm:w-10 px-0 flex justify-center items-center   text-stone-300 hover:text-stone-100"
                     on:click|stopPropagation={show_groups}>
@@ -340,8 +341,8 @@
     <div  class="no-print flex-none block fixed left-0 top-[40px] w-[40px] h-screen z-20 inset-0   overflow-hidden">
         <div class="sticky top-0 flex h-full w-10 bg-stone-900 flex-col items-center text-stone-100 shadow">
             <VerticalToolbar {appConfig} mobile={true}/>
-        </div>    
-    </div>    
+        </div>
+    </div>
 {/if}
 
 <!--Menu bind:this={menu}/-->
