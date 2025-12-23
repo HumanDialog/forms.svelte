@@ -136,7 +136,12 @@ export {
     remove, 
     swapElements,
     setSelectionAtEnd,
-    isValidEmail
+    isValidEmail,
+    localStorageSave,
+    localStorageRead,
+    sessionStorageSave,
+    sessionStorageRead,
+    hasLocalStorage
 }   from './utils'
 
 export {

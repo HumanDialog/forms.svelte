@@ -947,16 +947,14 @@ export function popNavigationPage()
 export const NAV_MODE_SIDEBAR = 0
 export const NAV_MODE_FULL_PAGE = 1
 
-let navMode = isDeviceSmallerThan("sm") ? NAV_MODE_FULL_PAGE : NAV_MODE_SIDEBAR
-
 export function navGetMode()
 {
-    return navMode;
+    return isDeviceSmallerThan("sm") ? NAV_MODE_FULL_PAGE : NAV_MODE_SIDEBAR;
 }
 
 export function navIsVisible()
 {
-    switch(navMode)
+    switch(navGetMode())
     {
     case NAV_MODE_SIDEBAR:
         return get(main_sidebar_visible_store) != '*'
@@ -968,7 +966,7 @@ export function navIsVisible()
 
 export function navGetKey()
 {
-    switch(navMode)
+    switch(navGetMode())
     {
     case NAV_MODE_SIDEBAR:
         return get(main_sidebar_visible_store)
@@ -987,7 +985,7 @@ export function navGetKey()
 
 export function navShow(key)
 {
-    switch(navMode)
+    switch(navGetMode())
     {
     case NAV_MODE_SIDEBAR:
         show_sidebar(key)
@@ -1001,7 +999,7 @@ export function navShow(key)
 
 export function navHide()
 {
-    switch(navMode)
+    switch(navGetMode())
     {
     case NAV_MODE_SIDEBAR:
         hide_sidebar()
@@ -1030,7 +1028,7 @@ export function navToggle(key)
 
 export function navPrevVisibleKey()
 {
-    switch(navMode)
+    switch(navGetMode())
     {
     case NAV_MODE_SIDEBAR:
         if(!previously_visible_sidebar)
@@ -1053,7 +1051,7 @@ export function navPrevVisibleKey()
 
 export function navAutoHide()
 {
-    switch(navMode)
+    switch(navGetMode())
     {
     case NAV_MODE_SIDEBAR:
         auto_hide_sidebar()
@@ -1104,4 +1102,76 @@ export function setSelectionAtEnd(element)
     let sel = window.getSelection();
     sel.removeAllRanges();
     sel.addRange(range);
+}
+
+export function localStorageSave(key, value)
+{
+    try 
+    {
+        if (typeof localStorage === "undefined") 
+           return;
+
+        localStorage.setItem(key, value);
+    } 
+    catch 
+    {
+        
+    }
+}
+
+export function localStorageRead(key, fallback = '')
+{
+    try 
+    {
+        if (typeof localStorage === "undefined") 
+            return fallback;
+        return localStorage.getItem(key) ?? fallback;
+    } 
+    catch 
+    {
+        return fallback;
+    }
+}
+
+export function hasLocalStorage(key)
+{
+    try 
+    {
+        if (typeof localStorage === "undefined") 
+            return false;
+        return localStorage.getItem(key) ? true : false;
+    } 
+    catch 
+    {
+        return false;
+    }
+}
+
+export function sessionStorageSave(key, value)
+{
+    try 
+    {
+        if (typeof sessionStorage === "undefined") 
+           return;
+
+        sessionStorage.setItem(key, value);
+    } 
+    catch 
+    {
+        
+    }
+}
+
+export function sessionStorageRead(key, fallback = '')
+{
+    try 
+    {
+        if (typeof sessionStorage === "undefined") 
+            return fallback;
+        return sessionStorage.getItem(key) ?? fallback;
+    } 
+    catch 
+    {
+        return fallback;
+    }
 }

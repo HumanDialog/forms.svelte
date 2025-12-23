@@ -1,7 +1,7 @@
 
 import {writable, get, derived} from 'svelte/store';
 import {SCREEN_SIZES, randomString} from './utils.js'
-import {navGetKey} from './utils.js'
+import {navGetKey, localStorageSave, localStorageRead, hasLocalStorage} from './utils.js'
 import { location } from 'svelte-spa-router';
 
 export const data_tick_store = writable(1);
@@ -110,16 +110,12 @@ export function reloadVisibleTags()
 let has_saved_dark_mode = false;
 function create_dark_mode_store()
 {
-    if(localStorage.dark_mode != undefined)
-        has_saved_dark_mode = true;
-    else
-        has_saved_dark_mode = false;
-
-    return writable( (localStorage.dark_mode) || '')
+    has_saved_dark_mode = hasLocalStorage('dark_mode')
+    return writable( localStorageRead('dark_mode') )
 }
 
 export const dark_mode_store = create_dark_mode_store();
-dark_mode_store.subscribe( (value) => {  localStorage.dark_mode = value } );
+dark_mode_store.subscribe( (value) => {  localStorageSave('dark_mode', value) } );
 
 export function set_dark_mode_default(value)
 {
@@ -127,8 +123,8 @@ export function set_dark_mode_default(value)
         dark_mode_store.set(value ? 'dark' : '')
 }
 
-export const main_sidebar_visible_store = writable((localStorage.main_sidebar_visible_store) || '*');
-main_sidebar_visible_store.subscribe( (value) => { localStorage.main_sidebar_visible_store = value });
+export const main_sidebar_visible_store = writable(localStorageRead('main_sidebar_visible_store', '*'));
+main_sidebar_visible_store.subscribe( (value) => { localStorageSave('main_sidebar_visible_store', value) });
 
 export let previously_visible_sidebar = "";
 export const sidebar_left_pos = writable(0)
@@ -136,16 +132,13 @@ export const sidebar_left_pos = writable(0)
 let has_saved_tools_visible = false;
 function create_tools_visible_store()
 {
-    if(localStorage.tools_visible_store !== undefined)
-        has_saved_tools_visible = true;
-    else
-        has_saved_tools_visible = false;
-
-    return writable ((localStorage.tools_visible_store && localStorage.tools_visible_store == 'true') || false);
+    has_saved_tools_visible = hasLocalStorage('tools_visible_store')
+    
+    return writable (   localStorageRead('tools_visible_store') == 'true'  );
 }
 
 export const tools_visible_store = create_tools_visible_store();
-tools_visible_store.subscribe( (value) => { localStorage.tools_visible_store = (value ? 'true' : '') } );
+tools_visible_store.subscribe( (value) => { localStorageSave('tools_visible_store', (value ? 'true' : '')) } );
 
 export function set_default_tools_visible(value, force)
 {
@@ -153,20 +146,20 @@ export function set_default_tools_visible(value, force)
         tools_visible_store.set(value)
 }
 
-export const bottom_bar_visible_store = writable( (localStorage.bottom_bar_visible_store && localStorage.bottom_bar_visible_store == 'true') || false);
-bottom_bar_visible_store.subscribe( (value) => { localStorage.bottom_bar_visible_store = (value ? 'true' : '') } );
+export const bottom_bar_visible_store = writable( localStorageRead('bottom_bar_visible_store') == 'true');
+bottom_bar_visible_store.subscribe( (value) => { localStorageSave('bottom_bar_visible_store', (value ? 'true' : '')) } );
 
 export const right_sidebar_visible_store = writable(false)
 export const visible_property_tab_store = writable('');
 
-export const fabCollapsed = writable( (localStorage.fabCollapsed && localStorage.fabCollapsed == 'true') || false )
-fabCollapsed.subscribe( (value) => { localStorage.fabCollapsed = (value ? 'true' : '') } );
+export const fabCollapsed = writable( localStorageRead('fabCollapsed') == 'true') 
+fabCollapsed.subscribe( (value) => { localStorageSave('fabCollapsed', (value ? 'true' : '')) } );
 
-export const showFABAlways = writable( (localStorage.showFABAlways && localStorage.showFABAlways == 'true') || false )
-showFABAlways.subscribe( (value) => { localStorage.showFABAlways = (value ? 'true' : '') } );
+export const showFABAlways = writable( localStorageRead('showFABAlways') == 'true') 
+showFABAlways.subscribe( (value) => { localStorageSave('showFABAlways', (value ? 'true' : '')) } );
 
-export const leftHandedFAB = writable( (localStorage.leftHandedFAB && localStorage.leftHandedFAB == 'true') || false )
-leftHandedFAB.subscribe( (value) => { localStorage.leftHandedFAB = (value ? 'true' : '') } );
+export const leftHandedFAB = writable( localStorageRead('leftHandedFAB') == 'true')
+leftHandedFAB.subscribe( (value) => { localStorageSave('leftHandedFAB', (value ? 'true' : '')) } );
 
 export const fabHiddenDueToPopup = writable(false)
 
