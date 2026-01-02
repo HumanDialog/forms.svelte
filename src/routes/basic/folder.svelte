@@ -621,6 +621,7 @@
         const newFile = {
             caption: '_; Add file; Añadir archivo; Dodaj plik',
             icon: FaFile,
+            mricon: 'file-archive',
             action: (f) => { newElementKind='UploadedFile';  runFileAttacher(afterElement) },
             tbr: 'A',
             fab: 'M04'
@@ -629,6 +630,7 @@
         const newFolder = {
             caption: '_; New folder; Nueva carpeta; Nowy folder',
             icon: FaRegFolder,
+            mricon: 'folder',
             action: (f) => { newElementKind='Folder';  listComponent.addRowAfter(afterElement) },
             tbr: 'A',
             fab: 'M03'
@@ -637,6 +639,7 @@
         const newNote = {
             caption: '_; New note; Nueva nota; Nowa notatka',
             icon: FaRegFile,
+            mricon:'file-text',
             action: (f) => { newElementKind='Note';  listComponent.addRowAfter(afterElement) },
             tbr: 'A',
             fab: 'M02'
@@ -645,6 +648,7 @@
         const newTask = {
             caption: '_; New task; Nueva tarea; Nowe zadanie',
             icon: FaRegCalendar,
+            mricon:'square-pen',
             action: (f) => { newElementKind='Task';  listComponent.addRowAfter(afterElement) },
             tbr: 'A',
             fab: 'M01'
@@ -674,6 +678,7 @@
 
         result.operations.push({
             icon: FaDownload,
+            mricon: 'download',
             caption: '_; Insert; Insertar; Wstaw',
             hideToolbarCaption: true,
             tbr: 'C',
@@ -1098,6 +1103,7 @@
                                 caption: '_; Send; Enviar; Wyślij',
                                 hideToolbarCaption: true,
                                 icon: FaUpload,
+                                mricon: 'upload',
                                 tbr: 'D',
                                 fab: 'S00',
                                 menu: [
@@ -1132,6 +1138,7 @@
                          {
                             caption: '_; Select; Seleccionar; Zaznacz',
                             icon: FaCheckDouble,
+                            mricon: 'check-check',
                             hideToolbarCaption: true,
                             tbr: 'C',
                             fab: 'S20',

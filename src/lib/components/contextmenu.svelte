@@ -679,7 +679,8 @@
         {@const is_separator = operation.separator}
         {#if is_separator}
             {#if index>0 && index < operations.length-1}
-                <hr class="my-1 mx-4 border-1 border-stone-300 dark:border-stone-700">
+                <!--hr class="my-1 mx-4 border-1 border-stone-300 dark:border-stone-700"-->
+                <hr class="my-4">
             {/if}
         {:else}
             {@const mobile = isDeviceSmallerThan("sm")}
@@ -710,9 +711,13 @@
         <!-------------------------------------------------------------------->
             <h4 class = "flex-none mt-2">
                 <div class=" w-full flex flex-row justify-between">
-
-                    <div class="py-1 mr-1 w-4"><Ricon icon = 'cat' s/></div>
-
+                    {#if operation.mricon}
+                    <div class="py-1 mr-1 w-4"><Ricon icon = {operation.mricon} s/></div>
+                    {:else if operation.icon}
+                    <div class="py-1 mr-1 w-4 text-orange-500"><Icon s="md" component={operation.icon}/></div>
+                    {:else}
+                    <div class="py-1 mr-1 w-4"></div>
+                    {/if}
                     <div class="grow">
                         <span class="px-2 text-left">{operation.caption}
                         </span>

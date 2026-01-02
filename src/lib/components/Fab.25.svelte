@@ -449,43 +449,183 @@
 
 </script>
 
+{#if isDirectPositioningMode}
+    {#if operations && operations.length > 0}
+        {#each operations as operation}
+            {#if operationVisible(operation)}
+                {@const position = calculatePosition(operation)}
+                {#if position}
+                    <button
+                        class=" w-[55px] h-[55px]
+                                fixed m-0
+                                flex items-center justify-center
+                                disable-dbl-tap-zoom
+                                cursor-pointer z-20"
+                                style={position}
+                                on:click|stopPropagation={(e) => {on_click(e, operation)}}
+                                on:mousedown={mousedown} >
 
-{#if operations && operations.length > 0}
-    {#each operations as operation}
-        {#if operationVisible(operation)}
-            {@const position = calculatePosition(operation)}
-            {#if position}
-                <button
-                    class=" w-[55px] h-[55px]
-                            fixed m-0
-                            flex items-center justify-center
-                            disable-dbl-tap-zoom
-                            cursor-pointer z-20"
-                            style={position}
-                            on:click|stopPropagation={(e) => {on_click(e, operation)}}
-                            on:mousedown={mousedown} >
+                            <div class="    text-stone-500 bg-stone-200/70 hover:bg-stone-200
+                                            focus:outline-none font-medium rounded-full text-sm text-center
+                                            dark:text-stone-400 dark:bg-stone-700/80 dark:hover:bg-stone-700
+                                            focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800
 
-                        <div class="    text-stone-500 bg-stone-200/70 hover:bg-stone-200
-                                        focus:outline-none font-medium rounded-full text-sm text-center
-                                        dark:text-stone-400 dark:bg-stone-700/70 dark:hover:bg-stone-700
-                                        focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800
-
-                                        flex items-center justify-center
-                                        w-8 h-8">
-                            {#if operation.mricon}
-                                <div class="py-1 mr-1 w-4"><Ricon icon = {operation.mricon} s/></div>
-                            {:else }
-                            <div class="w-4 h-4 text-orange-500">
-                                <svelte:component this={operation.icon}/>
+                                            flex items-center justify-center
+                                            w-6 h-6">
+                                <div class="w-4 h-4">
+                                    <svelte:component this={operation.icon}/>
+                                </div>
                             </div>
-                            {/if}
-                        </div>
-                </button>
+                    </button>
+                {/if}
             {/if}
-        {/if}
-    {/each}
-{/if}
+        {/each}
+    {/if}
+{:else}
 
+    {#if operations && operations.length > 0}
+        {@const topPosition = 350}
+        {@const verticalPosition = mainOperation.aboveKeyboard ? `bottom: ${topPosition}px` : "bottom: 10px"}
+        <button     id="__hd_fab_mainOperation"
+                    class="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300
+                        font-medium rounded-full text-sm text-center shadow-md
+                        w-[55px] h-[55px]
+                        fixed m-0 bottom-0 right-[0px]
+                        dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800
+                        flex items-center justify-center
+                        disable-dbl-tap-zoom"
+                        style={verticalPosition}
+                        on:click|stopPropagation={(e) => {on_click(e, mainOperation)}}
+                        on:mousedown={mousedown} >
+            <div class="w-7 h-7"><svelte:component this={mainOperation.icon}/></div>
+        </button>
+
+        {#if secondaryOperation || isExpandable}
+
+            <!-- horizontal container -->
+            <div class="flex flex-row m-0 fixed bottom-[10px] right-[60px]">
+
+                {#if isExpandable}
+                    <!-- Expander -->
+                    <button class=" bg-transparent mr-2
+                                    w-[55px] h-[55px]
+                                    flex items-center justify-center
+                                    disable-dbl-tap-zoom"
+                                    on:click|stopPropagation={toggleExpandToolboxH}
+                                    on:mousedown={mousedown}>
+                        <div class="    w-2 h-2
+                                        text-white bg-zinc-500 hover:bg-zinc-500
+                                        font-medium rounded-full text-sm text-center shadow-md
+                                        dark:bg-zinc-500 dark:hover:bg-zinc-500
+                                        flex items-center justify-center">
+                            <div class="w-2 h-2">
+                                {#if hToolboxExpanded}
+                                    <FaCircle/>
+                                {:else}
+                                    <FaCircle/>
+                                {/if}
+                            </div>
+                        </div>
+                    </button>
+
+                    {#if hToolboxExpanded}
+                        {#if secondaryOperation}
+                            <button class="     bg-transparent
+                                                mx-0 mr-2 w-[55px] h-[55px]
+                                                flex items-center justify-center
+                                                disable-dbl-tap-zoom"
+                                                on:click|stopPropagation={(e) => {on_click(e, secondaryOperation)}}
+                                                on:mousedown={mousedown}>
+                                <div class="    w-2 h-2
+                                                text-white bg-zinc-500 group-hover:bg-zinc-500
+                                                dark:bg-zinc-500 dark:group-hover:bg-zinc-500
+                                                font-medium rounded-full text-sm text-center shadow-md
+                                                flex items-center justify-center">
+                                    <div class="w-4 h-4"><svelte:component this={secondaryOperation.icon}/></div>
+                                </div>
+                            </button>
+                        {:else if toolboxOperations.length > 0}
+                            {@const toolbox=toolboxOperations.reverse()}
+                            {#each toolbox as operation}
+                                {#if !operation.separator}
+                                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                                    <button class=" bg-transparent
+                                                        mx-0 mr-2 w-[55px] h-[55px]
+                                                        flex items-center justify-center
+                                                        disable-dbl-tap-zoom"
+                                                        on:click|stopPropagation={(e) => {on_click(e, operation)}}
+                                                        on:mousedown={mousedown}>
+                                        <div class="    w-2 h-2
+                                                        text-white bg-zinc-500 group-hover:bg-zinc-500
+                                                        dark:bg-zinc-500 dark:group-hover:bg-zinc-500
+                                                        font-medium rounded-full text-sm text-center shadow-md
+                                                        flex items-center justify-center">
+                                            <div class="w-4 h-4"><svelte:component this={operation.icon}/></div>
+                                        </div>
+                                    </button>
+                                {/if}
+                            {/each}
+
+                        {/if}
+                    {/if}
+                {:else}
+                    <button class=" bg-transparent
+                                    mx-0 mr-2 w-[55px] h-[55px]
+                                    flex items-center justify-center
+                                    disable-dbl-tap-zoom"
+                            on:click|stopPropagation={(e) => {on_click(e, secondaryOperation)}}
+                            on:mousedown={mousedown}>
+                        <div class="    w-2 h-2
+                                        text-white bg-zinc-500 group-hover:bg-zinc-500
+                                        dark:bg-zinc-500 dark:group-hover:bg-zinc-500
+                                        font-medium rounded-full text-sm text-center shadow-md
+                                        flex items-center justify-center">
+                            <div class="w-4 h-4"><svelte:component this={secondaryOperation.icon}/></div>
+                        </div>
+                    </button>
+                {/if}
+
+            </div>
+        {/if}
+
+        {#if operations.length > 2} <!-- has vertical operations -->
+            <!-- vertical tools container  -->
+            <ul class="list-none m-0 fixed bottom-[70px] right-0">
+                {#if (isExpandable && vToolboxExpanded) || !isExpandable}
+                    {@const verticalOperations = operations.slice(2).reverse()}
+                    {#each verticalOperations as operation}
+                        {#if !operation.separator}
+                            <!-- svelte-ignore a11y-click-events-have-key-events -->
+                            <li class="flex flex-row px-0 py-0 justify-end group"
+                                on:click|stopPropagation={(e) => {on_click(e, operation)}}
+                                on:mousedown={mousedown}>
+                                {#if operation.caption}
+                                    <div>
+                                        <span class="block whitespace-nowrap text-sm mt-3 font-semibold text-white mr-3
+                                        select-none bg-stone-700 group-hover:bg-stone-800 px-1 shadow-lg rounded">{operation.caption}</span>
+                                    </div>
+                                {/if}
+                                <button class=" bg-transparent
+                                                mx-0 mb-2 w-[55px] h-[55px]
+                                                flex items-center justify-center
+                                                disable-dbl-tap-zoom">
+                                    <div class="    w-2 h-2
+                                                    text-white bg-zinc-500 group-hover:bg-zinc-500
+                                                    dark:bg-zinc-500 dark:group-hover:bg-zinc-500
+                                                    font-medium rounded-full text-sm text-center shadow-md
+                                                    flex items-center justify-center">
+                                        <div class="w-4 h-4"><svelte:component this={operation.icon}/></div>
+                                    </div>
+                                </button>
+                            </li>
+                        {/if}
+                    {/each}
+                {/if}
+            </ul>
+        {/if}
+
+    {/if}
+{/if}
 
 <style>
 

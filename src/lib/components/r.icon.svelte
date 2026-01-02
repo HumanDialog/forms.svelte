@@ -1,5 +1,5 @@
 <script>
-  export let icon = "turtle";
+  export let icon = '';
 
   export let size = "n";
 
@@ -19,9 +19,15 @@
   import ChevronDown from './ricons/chevron-down.svelte'
   import ChevronRight from './ricons/chevron-right.svelte'
 
+  import FileText from './ricons/file-text.svelte'
+  import FileArchive from './ricons/file-archive.svelte'
+  import Upload  from './ricons/upload.svelte'
+  import Download from './ricons/download.svelte'
+
+
   import SquarePen from './ricons/square-pen.svelte'
   import SquareCheckBig from './ricons/square-check-big.svelte'
-  import FileText from './ricons/file-text.svelte'
+
   import MssagesSquare from './ricons/messages-square.svelte'
   import Mssagesquare from './ricons/message-square.svelte'
   import Package from './ricons/package.svelte'
@@ -47,7 +53,13 @@
     "clipboard-list": ClipboardList,
     "chevron-down": ChevronDown,
     "chevron-right": ChevronRight,
+
     "file-text": FileText,
+    "file-archive": FileArchive,
+
+    "upload": Upload,
+    "download": Download,
+
     "messages-square": MssagesSquare,
     "message-square": Mssagesquare,
     "package": Package,
