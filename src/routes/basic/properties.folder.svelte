@@ -4,14 +4,14 @@
     import {
         onErrorShowAlert, Icon,
         List, ListTitle, ListSummary, Spinner, ext, i18n, showMenu, Dialog,
-        clearActiveItem, SHOW_MENU_LEFT, getNiceStringDate
+        clearActiveItem, SHOW_MENU_LEFT, getNiceStringDate, Ricon
     }   from '$lib'
 
     import {link} from 'svelte-spa-router'
 
     import {getElementIcon} from './icons'
     import {FaExternalLinkSquareAlt, FaEllipsisV, FaTimes} from 'svelte-icons/fa'
-	
+
     export let element = undefined
     export let onHide = undefined
     export let onSizeChanged = undefined
@@ -44,7 +44,7 @@
     const FK_DISCUSSION         = 2
     const FK_TABLE              = 3
     const FK_DOCUMENT           = 4
-    
+
     $: initData()
 
     async function initData(...args)
@@ -73,15 +73,15 @@
     {
         element = folderElement
         initData().then((res) => rootDialog.show())
-        
+
     }
 
     async function reloadData()
-    {   
+    {
         if(!elementRef)
             return
 
-        let res = await reef.post(`${elementRef}/query`, 
+        let res = await reef.post(`${elementRef}/query`,
                 {
                     Id: 1,
                     Name: "collector",
@@ -239,7 +239,7 @@
         showMenu(rect, operations, SHOW_MENU_LEFT)
     }
 
-    async function dettachElement(inFolder) 
+    async function dettachElement(inFolder)
     {
         await reef.post(`${inFolder.$ref}/InFolder/DettachSubFolder`, { folderLink: inFolder.$ref } , onErrorShowAlert);
         await reloadData();
@@ -261,33 +261,66 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
  <!--svelte-ignore a11y-no-noninteractive-element-interactions -->
 <Dialog bind:this={rootDialog}>
+        <div class="
+                paper w-full
+                prose prose-base prose-zinc dark:prose-invert prose-a:no-underline
 
-<menu bind:this={rootElement} on:click={clearSelection}
-    class="w-full sm:min-w-[20rem] max-h-80 sm:max-h-none overflow-y-auto overflow-x-hidden overscroll-contain" >
-    
-    {#if closeButtonPos}
-        <button class="     text-stone-800 dark:text-stone-400
-                            fixed w-6 h-6 flex items-center justify-center
-                            focus:outline-none font-medium  text-sm text-center" 
-                            style={closeButtonPos}
-                on:click={ closeDialog }>   <!-- rounded-full text-stone-500 bg-stone-200/70 hover:bg-stone-200 dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 -->
-            <Icon component={FaTimes} s="md"/>
-        </button>
-    {/if}
+                m-0 pt-5 pb-5 px-8
+                sm:rounded
+                bg-stone-200 dark:bg-stone-900
+                flex flex-col
+                "
+        bind:this={rootElement} on:click={clearSelection}>
 
-    <article class="w-full prose prose-base prose-zinc dark:prose-invert mb-20 sm:my-5">
+        <!-------------------------------------------------------------------->
+        <!-- POPUP HEADER ---------------------------------------------------->
+        <!-------------------------------------------------------------------->
+        <h3 class = "flex-none">
+            <div class="w-full flex flex-row justify-between">
+                <!--div class="py-1.5  flex flex-row justify-between">
+                    <button class="mr-4 w-6
+                                hover:bg-stone-300 hover:dark:bg-stone-700
+                                hover:outline hover:outline-8
+                                hover:outline-stone-300 hover:dark:outline-stone-700"
+                        ><Ricon icon = 'arrow-up' />
+                    </button>
+                    <button class="mr-4 w-6
+                                hover:bg-stone-300 hover:dark:bg-stone-700
+                                hover:outline hover:outline-8
+                                hover:outline-stone-300 hover:dark:outline-stone-700">
+                        <Ricon icon = 'check-check' />
+                    </button>
+                </div-->
+                <div class="grow ">
+                    <span>{ext(folder.Title)} - </span><span class="text-left">_;Folder properties; Propiedades de la carpeta; Właściwości folderu</span>
+                </div>
+                <div class="py-1.5  flex flex-row justify-between">
+                    <button class="ml-4 w-6
+                                hover:bg-stone-300 hover:dark:bg-stone-700
+                                hover:outline hover:outline-8
+                                hover:outline-stone-300 hover:dark:outline-stone-700"
+                                on:click={ closeDialog }>
+                        <Ricon icon = 'x' />
+                    </button>
+                </div>
+            </div>
+        </h3>
 
-        <h3>_;Folder properties; Propiedades de la carpeta; Właściwości folderu</h3>
-        
+        <!-------------------------------------------------------------------->
+        <!-- POPUP CONTENT---------------------------------------------------->
+        <!-------------------------------------------------------------------->
+        <div class="grow max-h-[40dvh] sm:max-h-[75dvh] overflow-y-auto overscroll-contain">
         {#if folder}
-            <h4>_; Name; Nombre; Nazwa</h4>
-            <p>{ext(folder.Title)}</p>
-
+            <div class="px-2 outline outline-4  bg-stone-100 outline-stone-100 dark:bg-stone-800 dark:outline-stone-800">
+            <h4 >_; Name; Nombre; Nazwa</h4>
+            <p class="mr-4 ">{ext(folder.Title)}</p>
+            </div >
+            <div class="px-2 outline outline-4  bg-stone-100 outline-stone-100 dark:bg-stone-800 dark:outline-stone-800">
             <h4>_; Type; Tipo; Rodzaj</h4>
             <p class="flex flex-row">
                 {#each allKinds as kind}
                     {@const isActive = kind == folder.Kind}
-                    <button class=" px-2 mx-1
+                    <span class=" px-2 mx-1
                                 text-stone-700 dark:text-stone-300 dark:hover:text-white
                                 hover:bg-stone-200 dark:hover:bg-stone-700
                                 border border-stone-300 focus:outline-none dark:border-stone-600
@@ -298,11 +331,13 @@
                                 disabled={isActive}
                                 on:click={(e)=>setFolderKind(kind)}>
                         {folderKind(kind)}
-                    </button>
+                    </span>
                 {/each}
-                
-            </p>
 
+            </p>
+            </div>
+
+            <div class="px-2 outline outline-4  bg-stone-100 outline-stone-100 dark:bg-stone-800 dark:outline-stone-800">
             <h4>_; Number of columns; Número de columnas; Ilość kolumn</h4>
             <p class="flex flex-row">
                 {#each allColumns as colsNo}
@@ -320,9 +355,10 @@
                         {colsNo}
                     </button>
                 {/each}
-                
-            </p>
 
+            </p>
+            </div>
+            <div class="px-2 outline outline-4  bg-stone-100 outline-stone-100 dark:bg-stone-800 dark:outline-stone-800">
             <h4>_; Path; Ruta; Ścieżka</h4>
             <p>
                 {#if folder.GetCanonicalPath && folder.GetCanonicalPath.length > 0}
@@ -335,24 +371,25 @@
                     {/each}
                 {/if}
             </p>
-
+            </div>
+            <div class="px-2 outline outline-4  bg-stone-100 outline-stone-100 dark:bg-stone-800 dark:outline-stone-800">
             {#if folder.InFolders && folder.InFolders.length > 0}
                 <h4>_; Attached to; Adjunto a; Przyłączony do</h4>
                     <p>
                     {#each folder.InFolders as inFolder}
-                        
+
                             <span class="flex flex-row items-center">
                                 <span class="relative">
                                     <Icon component={getElementIcon(inFolder)}
                                         class="block-inline h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-1  mr-1"/>
                                     <Icon component={FaExternalLinkSquareAlt}
-                                        class="absolute left-0 top-1/2 w-1/2 h-1/2 
+                                        class="absolute left-0 top-1/2 w-1/2 h-1/2
                                                 text-stone-500 dark:text-stone-300 " />
                                 </span>
                                 <a  class="font-normal text-zinc-700 dark:text-zinc-300 "
                                     href={inFolder.InHRef} use:link>
                                         {ext(inFolder.InTitle)}
-                                    
+
                                 </a>
 
                                 <button class=" ms-auto
@@ -363,22 +400,22 @@
                                 <FaEllipsisV/>
                             </button>
                             </span>
-                            
+
                     {/each}
                     </p>
-                
-                <!--section class="not-prose"> 
+
+                <!--section class="not-prose">
                     <List   self={folder}
                             a='InFolders'
                             selectionKey='handy'
                             bind:this={connectedToComponent}
                             toolbarOperations = {(el) => connectedToOperations(el)}>
-                    
+
                         <ListTitle      a='InTitle'
                                         hrefFunc={(el) => `${el.InHRef}`}
                                         readonly/>
 
-                        <ListSummary    a='InSummary' 
+                        <ListSummary    a='InSummary'
                                         readonly/>
 
                         <span slot="left" let:element class="relative">
@@ -386,22 +423,24 @@
                                 class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
                             {#if element.IsCanonical == 0}
                                     <Icon component={FaExternalLinkSquareAlt}
-                                    class="absolute left-1 top-1/2 w-1/2 h-1/2 
+                                    class="absolute left-1 top-1/2 w-1/2 h-1/2
                                             text-stone-500 dark:text-stone-300 " />
                             {/if}
                         </span>
                     </List>
                 </section-->
             {/if}
-
+            </div>
+            <div class="px-2 outline outline-4  bg-stone-100 outline-stone-100 dark:bg-stone-800 dark:outline-stone-800">
             <h4>_; Status; Estado; Status</h4>
             <p>{folderStatus(folder.Status)}</p>
-
+            </div>
+            <div class="px-2 outline outline-4  bg-stone-100 outline-stone-100 dark:bg-stone-800 dark:outline-stone-800">
             {#if creationDate}
                 <h4>_; Created; Creado; Utworzony</h4>
                 <p>
                     <span>{getNiceStringDate(creationDate)}</span>
-                    
+
                     {#if folder.CreatedBy}
                         <span>_; by; por; przez</span>
                         <a  class="font-normal text-zinc-700 dark:text-zinc-300 "
@@ -412,10 +451,32 @@
 
                 </p>
             {/if}
+            </div>
         {:else}
             <Spinner />
         {/if}
-    </article>
+        </div>
+        <!-------------------------------------------------------------------->
+        <!-- POPUP FOOTER----------------------------------------------------->
+        <!-------------------------------------------------------------------->
+        <h4 class = "flex-none">
 
-</menu>
+            <div class="flex flex-row justify-end gap-2">
+
+                <button class="px-4 mx-2
+                        bg-stone-100 dark:bg-stone-700
+                        outline outline-offset-2 outline-2
+                        outline-stone-200 dark:outline-stone-500
+                        hover:bg-stone-300 hover:dark:bg-stone-700
+                        "
+
+                        on:click={ closeDialog }> Ok
+                </button>
+            </div>
+        </h4>
+
+
+
+
+</div>
 </Dialog>

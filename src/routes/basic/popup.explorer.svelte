@@ -866,7 +866,7 @@ let list_properties = {
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
- <!--svelte-ignore a11y-no-noninteractive-element-interactions -->
+<!--svelte-ignore a11y-no-noninteractive-element-interactions -->
 
     <div class="
                 paper w-full sm:w-[24rem]
@@ -925,7 +925,7 @@ let list_properties = {
             </List>
         </div>
         <!-------------------------------------------------------------------->
-        <!-- POPUP FOOTER---------------------------------------------------->
+        <!-- POPUP FOOTER----------------------------------------------------->
         <!-------------------------------------------------------------------->
         <h4 class = "flex-none">
 
