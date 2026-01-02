@@ -592,7 +592,7 @@
                         },
                         {
                             caption: '_; Select; Seleccionar; Zaznacz',
-                            icon: FaCheckDouble,
+                            mricon: 'check-check',
                             hideToolbarCaption: true,
                             tbr: 'C',
                             fab: 'S20',
@@ -747,7 +747,8 @@
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
             destinationContainer: contextPath,
-            onRefreshView: refreshViewAfterAttachingFromBasket
+            onRefreshView: refreshViewAfterAttachingFromBasket,
+            ownCloseButton: true
         })
     }
 
@@ -757,7 +758,8 @@
             canSelectRootElements: true,
             onAttach: async (tmp, references) => {
                 await reef.post(`${element.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
-            }
+            },
+            ownCloseButton: true
         })
     }
 
@@ -779,7 +781,7 @@
                         ... !canPin ? [] : [pinOp()],
                         {
                             caption: '_; Select; Seleccionar; Zaznacz',
-                            icon: FaCheckDouble,
+                            mricon: 'check-check',
                             hideToolbarCaption: true,
                             tbr: 'C',
                             fab: 'S20',
@@ -822,7 +824,7 @@
                        // ... !canPin ? [] : [pinOp()],
                         {
                             caption: '_; Select; Seleccionar; Zaznacz',
-                            icon: FaCheckDouble,
+                            mricon: 'check-check',
                             hideToolbarCaption: true,
                             tbr: 'C',
                             fab: 'S20',
@@ -1003,7 +1005,7 @@
                         operations: [
                          {
                             caption: '_; Select; Seleccionar; Zaznacz',
-                            icon: FaCheckDouble,
+                            mricon: 'check-check',
                             hideToolbarCaption: true,
                             tbr: 'C',
                             fab: 'S20',
@@ -1139,7 +1141,6 @@
                             ... !canPin ? [] : [pinOp()],
                          {
                             caption: '_; Select; Seleccionar; Zaznacz',
-                            icon: FaCheckDouble,
                             mricon: 'check-check',
                             hideToolbarCaption: true,
                             tbr: 'C',
@@ -1244,7 +1245,7 @@
                            // ... !canPin ? [] : [pinOp()],
                             {
                                 caption: '_; Select; Seleccionar; Zaznacz',
-                                icon: FaCheckDouble,
+                                mricon: 'check-check',
                                 hideToolbarCaption: true,
                                 tbr: 'C',
                                 fab: 'S20',
@@ -1291,7 +1292,7 @@
                         operations: [
                             {
                                 caption: '_; Select; Seleccionar; Zaznacz',
-                                icon: FaCheckDouble,
+                                mricon: 'check-check',
                                 hideToolbarCaption: true,
                                 tbr: 'C',
                                 fab: 'S20',

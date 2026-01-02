@@ -852,7 +852,8 @@
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
             destinationContainer: listPath,
-            onRefreshView: (f) => reload(kanban.KEEP_SELECTION)
+            onRefreshView: (f) => reload(kanban.KEEP_SELECTION),
+            ownCloseButton: true
         })
     }
 
@@ -862,7 +863,8 @@
             canSelectRootElements: true,
             onAttach: async (tmp, references) => {
                 await reef.post(`${task.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
-            }
+            },
+            ownCloseButton: true
         })
     }
 

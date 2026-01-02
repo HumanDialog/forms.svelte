@@ -20,6 +20,7 @@
     let closeButtonPos = ''
     let maxHeight = 0
     let preventScrollRestorer = null
+    let ownCloseButton = false
 
     //$: display = visible ? 'fixed' : 'hidden';
 
@@ -48,6 +49,11 @@
         visible = true;
         toolbar = _toolbar;
         props = _props;
+
+        if(props && props.hasOwnProperty('ownCloseButton'))
+            ownCloseButton = props.ownCloseButton
+        else
+            ownCloseButton = false
 
         cssPosition = calculatePosition(x, y, around_rect, true, true);
 
@@ -203,7 +209,7 @@
 
             if(myRect)
             {
-                maxHeight = screenRect.height / 2 - margin;
+                maxHeight = screenRect.height  - margin;
 
                 if(myRect.height < maxHeight)
                     maxHeight = myRect.height
@@ -216,7 +222,7 @@
             }
             else
             {
-                maxHeight = screenRect.height / 2 - margin;
+                maxHeight = screenRect.height  - margin;
                 const width = screenRect.width - 2*margin;
                 x = margin;
                 y = screenRect.bottom - maxHeight - margin;
@@ -225,7 +231,10 @@
             }
 
             //closeButtonPos = `right: ${margin}px; top: calc(${y}px - 1.75rem)`
-            closeButtonPos = `right: 0.5rem; bottom: calc(${margin + maxHeight}px - 1.75rem)`
+            if(!ownCloseButton)
+                closeButtonPos = `right: 0.5rem; bottom: calc(${margin + maxHeight}px - 1.75rem)`
+            else
+                closeButtonPos = ''
         }
         else
         {

@@ -13,6 +13,7 @@
     import { afterUpdate, onMount } from "svelte";
     import {transformClipboardToJSONReferences} from './basket.utils'
     import {getElementIcon} from './icons'
+	import { readonly } from "svelte/store";
 
 
     export let destinationContainer = ''
@@ -216,7 +217,7 @@
                     ElementNav: t.$ref,
                     Title: t.Name,
                     Summary: t.Summary,
-                    icon: 'TaskList',
+                    icon: 'clipboard-list',
                     href: t.href,
                     ElementInfo: 0,
                     $ref: t.$ref
@@ -247,7 +248,7 @@
                     ElementNav: t.$ref,
                     Title: t.Name,
                     Summary: t.Summary,
-                    icon: 'TaskList',
+                    icon: 'clipboard-list',
                     href: t.href,
                     ElementInfo: 0,
                     $ref: t.$ref
@@ -350,7 +351,7 @@
                                             {
                                                 Id: 3,
                                                 Association: 'Notes',
-                                                Expressions:['NoteId', '$ref', 'Title', 'Summary', 'Order', 'href', '$type']
+                                                Expressions:['NoteId', '$ref', 'Title', 'Summary', 'Order', 'href', 'icon',  '$type']
 
                                             },
                                             {
@@ -362,7 +363,7 @@
                                             {
                                                 Id: 5,
                                                 Association: 'Files',
-                                                Expressions:['FileId', '$ref', 'Title', 'Summary', 'Order', 'href', '$type']
+                                                Expressions:['FileId', '$ref', 'Title', 'Summary', 'Order', 'href', 'icon', '$type']
 
                                             }
                                         ]
@@ -417,7 +418,7 @@
                         $type: 'Note',
                         Title: f.Title,
                         Summary: f.Summary,
-                        icon: "Note",
+                        icon: f.icon,
                         href: f.href,
                         Order: f.Order,
                         $ref: `./Note/${f.NoteId}`
@@ -449,7 +450,7 @@
                         $type: 'UploadedFile',
                         Title: f.Title,
                         Summary: f.Summary,
-                        icon: "UploadedFile",
+                        icon: f.icon,
                         href: f.href,
                         Order: f.Order,
                         $ref: `./UploadedFile/${f.FileId}`
@@ -572,13 +573,13 @@
                                             {
                                                 Id: 3,
                                                 Association: 'Notes',
-                                                Expressions:['NoteId', 'Title', 'Summary', 'href']
+                                                Expressions:['NoteId', 'Title', 'Summary', 'href', 'icon']
 
                                             },
                                             {
                                                 Id: 4,
                                                 Association: 'Files',
-                                                Expressions:['FileId', 'Title', 'Summary', 'href']
+                                                Expressions:['FileId', 'Title', 'Summary', 'href', 'icon']
 
                                             }
                                         ]
@@ -617,7 +618,7 @@
                         ElementNav: `./Note/${t.NoteId}`,
                         Title: t.Title,
                         Summary: t.Summary,
-                        icon: 'Note',
+                        icon: t.icon,
                         href: t.href,
                         ElementInfo: 0,
                         $ref: `./Note/${t.NoteId}`
@@ -634,7 +635,7 @@
                         ElementNav: `./UploadedFile/${t.FileId}`,
                         Title: t.Title,
                         Summary: t.Summary,
-                        icon: 'UploadedFile',
+                        icon: t.icon,
                         href: t.href,
                         ElementInfo: 0,
                         $ref: `./UploadedFile/${t.FileId}`
@@ -669,13 +670,13 @@
                                             {
                                                 Id: 3,
                                                 Association: 'Notes',
-                                                Expressions:['NoteId', 'Title', 'Summary', 'href']
+                                                Expressions:['NoteId', 'Title', 'Summary', 'href', 'icon']
 
                                             },
                                             {
                                                 Id: 4,
                                                 Association: 'Files',
-                                                Expressions:['FileId', 'Title', 'Summary', 'href']
+                                                Expressions:['FileId', 'Title', 'Summary', 'href', 'icon']
 
                                             }
                                         ]
@@ -714,7 +715,7 @@
                         ElementNav: `./Note/${t.NoteId}`,
                         Title: t.Title,
                         Summary: t.Summary,
-                        icon: 'Note',
+                        icon: t.icon,
                         href: t.href,
                         ElementInfo: 0,
                         $ref: `./Note/${t.NoteId}`
@@ -731,7 +732,7 @@
                         ElementNav: `./UploadedFile/${t.FileId}`,
                         Title: t.Title,
                         Summary: t.Summary,
-                        icon: 'UploadedFile',
+                        icon: t.icon,
                         href: t.href,
                         ElementInfo: 0,
                         $ref: `./UploadedFile/${t.FileId}`
@@ -843,25 +844,19 @@
         }
     }
 let list_properties = {
-        Title: "Title",
-        Summary: "Summary",
-        icon: "icon",
         element:{
             icon: "icon",
-            href: "href",
             Title: "Title",
-            Summary: "Summary"
-        },
-        context:{
-            Folder:{
-                Summary: "Summary",
-
-            },
-            FolderFolder:{
-                Summary: "Summary",
-                head_right: "ModificationDate"
-            }
+            Summary: "Summary",
+            readonly: true,
+            onOpen: onOpen
         }
+    }
+
+    let isMultiselectionEnabled = listElement?.isMultiselectionEnabled
+    function toggleMultiselection()
+    {
+        isMultiselectionEnabled = listElement.toggleMultiselection()
     }
 </script>
 
@@ -884,18 +879,31 @@ let list_properties = {
         <h3 class = "flex-none">
             <div class=" w-full flex flex-row justify-between">
                 <div class="py-1.5  flex flex-row justify-between">
-                    <button class="mr-4 w-6
-                                hover:bg-stone-300 hover:dark:bg-stone-700
-                                hover:outline hover:outline-8
-                                hover:outline-stone-300 hover:dark:outline-stone-700"
-                        ><Ricon icon = 'arrow-up' />
-                    </button>
-                    <button class="mr-4 w-6
-                                hover:bg-stone-300 hover:dark:bg-stone-700
-                                hover:outline hover:outline-8
-                                hover:outline-stone-300 hover:dark:outline-stone-700">
-                        <Ricon icon = 'check-check' />
-                    </button>
+                    {#if levelUpHRef}
+                        <button class="mr-4 w-6
+                                    hover:bg-stone-300 hover:dark:bg-stone-700
+                                    hover:outline hover:outline-8
+                                    hover:outline-stone-300 hover:dark:outline-stone-700"
+                                    on:click={goUp}
+                            ><Ricon icon = 'arrow-up' />
+                        </button>
+                    {:else}
+                        <div class="mr-4 w-6"></div>
+                    {/if}
+
+                    {#if canSelectElements}
+                        {@const activeClass = isMultiselectionEnabled ? "bg-stone-300 dark:bg-stone-700 outline outline-8 outline-stone-300 dark:outline-stone-700" : ""}
+                        <button class="mr-4 w-6
+                                    {activeClass}
+                                    hover:bg-stone-300 hover:dark:bg-stone-700
+                                    hover:outline hover:outline-8
+                                    hover:outline-stone-300 hover:dark:outline-stone-700"
+                                    on:click={toggleMultiselection}>
+                            <Ricon icon = 'check-check' />
+                        </button>
+                    {:else}
+                        <div class="mr-4 w-6"></div>
+                    {/if}
                 </div>
                 <div class="grow ">
                     <span class="px-2 text-left">{ext(currentLevelTitle)}
@@ -905,7 +913,8 @@ let list_properties = {
                     <button class="ml-4 w-6
                                 hover:bg-stone-300 hover:dark:bg-stone-700
                                 hover:outline hover:outline-8
-                                hover:outline-stone-300 hover:dark:outline-stone-700">
+                                hover:outline-stone-300 hover:dark:outline-stone-700"
+                                on:click={onHide}>
                         <Ricon icon = 'x' />
                     </button>
                 </div>
@@ -914,11 +923,10 @@ let list_properties = {
         <!-------------------------------------------------------------------->
         <!-- POPUP CONTENT---------------------------------------------------->
         <!-------------------------------------------------------------------->
-        <div class="grow  max-h-40 overflow-y-auto overscroll-contain">
+        <div class="grow max-h-[45dvh] sm:max-h-[75dvh] overflow-y-auto overscroll-contain">
             <List   objects={elements}
                     orderAttrib='Order'
                     {list_properties}
-                    multiselect={canSelectElements}
                     selectionKey='handy'
                     bind:this={listElement}
                     >
@@ -937,9 +945,7 @@ let list_properties = {
                         outline-stone-200 dark:outline-stone-500
                         hover:bg-stone-300 hover:dark:bg-stone-700
                         "
-
-                        disabled={!selectedElementsNo || !canSelectElements}
-                        on:click={() => attachTo()}>
+                        on:click={onHide}>
                      _; Cancel; Pegar; Anuluj
                 </button>
                 <button class="px-4 mx-2

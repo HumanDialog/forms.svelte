@@ -408,6 +408,7 @@
                 clearActiveItem(selectionKey)
         }
 
+        return multiselect;
 
     }
 

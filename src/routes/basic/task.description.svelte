@@ -224,7 +224,8 @@
     async function runPopupExplorer4Editor(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            onAttach: (clipboard, elements) => makeLinkToElement(elements)
+            onAttach: (clipboard, elements) => makeLinkToElement(elements),
+            ownCloseButton: true
         })
     }
 
@@ -886,7 +887,8 @@
             canSelectRootElements: true,
             onAttach: async (tmp, references) => {
                 await reef.post(`${noteLink.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
-            }
+            },
+            ownCloseButton: true
         })
     }
 

@@ -538,7 +538,8 @@
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
             destinationContainer: noteRef,
-            onRefreshView: async (f) => await reloadWithAttachements()
+            onRefreshView: async (f) => await reloadWithAttachements(),
+            ownCloseButton: true
         })
     }
 
@@ -550,7 +551,8 @@
                 await reef.post(`${element.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
                 await reloadData();
                 connectedToComponent?.reload(note, connectedToComponent.CLEAR_SELECTION);
-            }
+            },
+            ownCloseButton: true
         })
     }
 
@@ -898,7 +900,8 @@
     async function runPopupExplorer4Editor(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            onAttach: (clipboard, elements) => makeLinkToElement(elements)
+            onAttach: (clipboard, elements) => makeLinkToElement(elements),
+            ownCloseButton: true
         })
     }
 

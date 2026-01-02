@@ -60,7 +60,7 @@
 
     $: selected_class = is_row_selected ? "!border-blue-300 dark:!border-blue-300/50" : "";
     $: focused_class = is_row_active ? "bg-stone-200 dark:bg-stone-700" : "";
-    $: download = is_row_active && (definition.downloadable || (definition.downloadableFunc ? definition.downloadableFunc(item) : false))
+   // $: download = is_row_active && (definition.downloadable || (definition.downloadableFunc ? definition.downloadableFunc(item) : false))
     $: is_link_like = is_row_active && (!!definition.title_href || !!definition.title_href_func || download)
 
     $: demo_element_class = is_row_active ?  "pl-8 bg-stone-700" : "pl-8"
@@ -90,25 +90,31 @@
     */
 
 
-    element_title = list_properties?.context[item.$type]?.Title;
-    if(!element_title)
-        element_title = list_properties?.element?.Title;
+    element_title = read_from_def('Title')
+    summary = read_from_def('Summary');
+    
+    let href = read_from_def('href')
+    let element_href = href ? item[href] : ''
+    
+    let element_open_handler = read_from_def('onOpen')
 
-    summary = list_properties?.context[item.$type]?.Summary;
-    if(!summary)
-        summary = list_properties?.element?.Summary;
+    let element_readonly = read_from_def('readonly')
+    let title_readonly = read_from_def('readonlyTitle') ?? element_readonly
+    let summary_readonly = read_from_def('readonlySummary') ?? element_readonly
 
-    let element_href = item[list_properties.element.href];
+    let download
+    const downloadableFunc = read_from_def('downloadableFunc')
+    if(downloadableFunc)
+        download = downloadableFunc(item)
+    else    
+        download = read_from_def('downloadable')
 
-
+    
     let element_icon     :string = get_element_icon(list_properties, item);
 
     function get_element_icon(properties, item)
     {
-        let element_icon = ""
-        element_icon = list_properties?.context[item.$type]?.icon;
-        if(!element_icon)
-            element_icon = list_properties?.element?.icon;
+        let element_icon = read_from_def('icon')
 
         if(element_icon)
         {
@@ -124,6 +130,25 @@
     }
 
 
+    function read_from_def(propName: string)
+    {
+        if(!list_properties)
+            return undefined;
+
+        if(list_properties.context)
+        {
+            const contextProps = list_properties.context[item.$type]
+            if(contextProps && contextProps.hasOwnProperty(propName))
+                return contextProps[propName]
+        }
+
+
+        const elementProps = list_properties.element
+        if(elementProps && elementProps.hasOwnProperty(propName))
+            return elementProps[propName]
+
+        return undefined
+    }
 
     function calculate_active(...args)
     {
@@ -382,7 +407,7 @@
     </figcaption>
     -------------------------------->
     <!--@el------------------------->
-    <h4 class="-indent-8">
+    <h4 class="-indent-8 sm:hover:cursor-default">
         <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
                 text-stone-700 dark:text-stone-400 ">
                 <Ricon icon = {element_icon}/>
@@ -432,7 +457,7 @@
     </figcaption>
     -------------------------------->
     <!--@el------------------------->
-    <h4 class="-indent-16 "
+    <h4 class="-indent-16 sm:hover:cursor-default"
         >
         <div class="inline-block w-4 h-4 ml-1 mr-1 py-0.5 align-baseline
                 text-stone-700 dark:text-stone-400 ">
@@ -447,7 +472,7 @@
                 <!--Ricon icon={ClipboardMinus}/-->
                 <Ricon icon = {element_icon} />
         </div>{translated_element_title}
-        <div class="inline-block  w-4 h-4 ml-1 mr-1 py-0.5 align-baseline"> <Circle size = "s"/></div>
+        <!--div class="inline-block  w-4 h-4 ml-1 mr-1 py-0.5 align-baseline"> <Circle size = "s"/></div-->
     </h4>
     <!-- comming soon - middle info --
     <figcaption>
@@ -510,26 +535,77 @@
     </figcaption> #active
     -------------------------------->
     <!--@el------------------------->
-    {#if !download}
-    <a  class="sm:hover:cursor-pointer"
-        href={element_href} use:link>
+    {#if download}
+        <!--a  class="sm:hover:cursor-pointer"
+            href={element_href} use:link>
 
-    <h4 class="-indent-8 "
-        id="__or_list_ctrl_{getItemKey(item)}_Title"
-        use:editable={{
-            action: (text) => {change_property(element_title, text)},
-            active: false,
-            readonly: definition.title_readonly,
-            onSoftEnter: (text) => {change_name(text); editProperty('Summary')}
-        }}>
-        <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
-                text-stone-700 dark:text-stone-400 ">
-                <Ricon icon={element_icon} />
-        </div>{translated_element_title}
-    </h4>
-    </a>
+        <h4 class="-indent-8 "
+            id="__or_list_ctrl_{getItemKey(item)}_Title"
+            use:editable={{
+                action: (text) => {change_property(element_title, text)},
+                active: false,
+                readonly: title_readonly,
+                onSoftEnter: (text) => {change_name(text); editProperty('Summary')}
+            }}>
+            <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
+                    text-stone-700 dark:text-stone-400 ">
+                    <Ricon icon={element_icon} />
+            </div>{translated_element_title}
+        </h4>
+        </a-->
+    {:else if element_href}
+        <a  class="sm:hover:cursor-pointer"
+            href={element_href} use:link>
+
+            <h4 class="-indent-8 "
+                id="__or_list_ctrl_{getItemKey(item)}_Title"
+                use:editable={{
+                    action: (text) => {change_property(element_title, text)},
+                    active: false,
+                    readonly: title_readonly,
+                    onSoftEnter: (text) => {change_name(text); editProperty('Summary')}
+                }}>
+                <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
+                        text-stone-700 dark:text-stone-400 ">
+                        <Ricon icon={element_icon} />
+                </div>{translated_element_title}
+            </h4>
+        </a>
+    {:else if element_open_handler}
+        <a  class="sm:hover:cursor-pointer"
+            href="/#"
+            on:click|preventDefault={() => element_open_handler(item)}>
+
+            <h4 class="-indent-8"
+                id="__or_list_ctrl_{getItemKey(item)}_Title"
+                use:editable={{
+                    action: (text) => {change_property(element_title, text)},
+                    active: false,
+                    readonly: title_readonly,
+                    onSoftEnter: (text) => {change_name(text); editProperty('Summary')}
+                }}>
+                <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
+                        text-stone-700 dark:text-stone-400 ">
+                        <Ricon icon={element_icon} />
+                </div>{translated_element_title}
+            </h4>
+        </a>
     {:else}
+        <h4 class="-indent-8 "
+            id="__or_list_ctrl_{getItemKey(item)}_Title"
+            use:editable={{
+                action: (text) => {change_property(element_title, text)},
+                active: false,
+                readonly: title_readonly,
+                onSoftEnter: (text) => {change_name(text); editProperty('Summary')}
+            }}>
+            <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
+                    text-stone-700 dark:text-stone-400 ">
+                    <Ricon icon={element_icon} />
+            </div>{translated_element_title}
+        </h4>
     {/if}
+    
     <!-- comming soon - middle info --
     <figcaption>
         <div class="grid gap-4 grid-cols-3 grid-rows-1">
@@ -543,7 +619,7 @@
     {#if summary && (item[summary])}
         <figcaption id="__or_list_ctrl_{getItemKey(item)}_Summary" use:editable={{
                     action: (text) => {change_property(summary, text)},
-                    readonly: definition.summary_readonly,
+                    readonly: summary_readonly,
                     onFinish: (d) => {placeholder='';},
                     active: true
                 }}>{item[summary]}
@@ -553,7 +629,7 @@
         <figcaption id="__or_list_ctrl_{getItemKey(item)}_Summary"
                     use:editable={{
                     action: (text) => {change_property(summary, text)},
-                    readonly: definition.summary_readonly,
+                    readonly: summary_readonly,
                     onFinish: (d) => {placeholder='';},
                     active: true
                 }}>&nbsp;

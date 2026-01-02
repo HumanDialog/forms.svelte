@@ -386,7 +386,8 @@
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
             destinationContainer: listPath,
-            onRefreshView: (f) => reloadTasks(listComponent.KEEP_SELECTION)
+            onRefreshView: (f) => reloadTasks(listComponent.KEEP_SELECTION),
+            ownCloseButton: true
         })
     }
 
@@ -396,7 +397,8 @@
             canSelectRootElements: true,
             onAttach: async (tmp, references) => {
                 await reef.post(`${task.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
-            }
+            },
+            ownCloseButton: true
         })
     }
 

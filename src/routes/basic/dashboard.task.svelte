@@ -245,7 +245,8 @@
             canSelectRootElements: true,
             onAttach: async (tmp, references) => {
                 await reef.post(`${task.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
-            }
+            },
+            ownCloseButton: true
         })
     }
 

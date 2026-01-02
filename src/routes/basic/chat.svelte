@@ -500,7 +500,8 @@
     async function runPopupExplorer(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            onAttach: (basketItem, refs) => onAttachBasket(refs)
+            onAttach: (basketItem, refs) => onAttachBasket(refs),
+            ownCloseButton: true
         })
     }
 

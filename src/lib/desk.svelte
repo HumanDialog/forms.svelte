@@ -85,7 +85,7 @@
             {
                 main_side_panel_visibility = "hidden"
                 lg_content_area_horizontal_dim = ""
-                lg_content_area_horizontal_tools_dim = ""
+                lg_content_area_horizontal_tools_dim = `lg:left-[60px] lg:w-[calc(100vw-80px)]`
             }
             else
             {
@@ -380,7 +380,7 @@
     {#key $wholeAppReloader}
 
         <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <div    id="__hd_svelte_layout_root" class="{$dark_mode_store}"
+        <div    id="__hd_svelte_layout_root" class="{$dark_mode_store} thin-scrollbar"
                 on:click={handleSelect}
                 on:contextmenu={handleSelect}>
 
@@ -551,57 +551,7 @@
 
 <style lang="scss">
 
-    #__hd_svelte_layout_root {
-        /* width */
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        /* Track */
-        ::-webkit-scrollbar-track {
-        background: #FAFAF9;
-        }
-
-        /* Handle */
-        ::-webkit-scrollbar-thumb {
-        background: #E7E5E4;
-        }
-
-        /* Handle on hover */
-        ::-webkit-scrollbar-thumb:hover {
-        background: #D6D3D1;
-        }
-
-        --tw-bg-opacity: 1;
-        background-color: rgb(255 255 255 / var(--tw-bg-opacity));
-    }
-
-    #__hd_svelte_layout_root.dark {
-
-        /* width */
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        /* Track */
-        ::-webkit-scrollbar-track {
-        background: #292524;
-        }
-
-        /* Handle */
-        ::-webkit-scrollbar-thumb {
-        background: #44403c;
-        }
-
-        /* Handle on hover */
-        ::-webkit-scrollbar-thumb:hover {
-        background: #57534e;
-        }
-
-        --tw-bg-opacity: 1;
-        background-color: rgb(28 25 23 / var(--tw-bg-opacity));
-    }
-
+   
     /* bg-white */
     :global(body)
     {
