@@ -618,14 +618,6 @@
         const canAddTasks = !(isRootPinned || isClipboard)
         const canAddFiles = !(isRootPinned || isClipboard)
 
-        const newFile = {
-            caption: '_; Add file; Añadir archivo; Dodaj plik',
-            icon: FaFile,
-            mricon: 'file-archive',
-            action: (f) => { newElementKind='UploadedFile';  runFileAttacher(afterElement) },
-            tbr: 'A',
-            fab: 'M04'
-        }
 
         const newFolder = {
             caption: '_; New folder; Nueva carpeta; Nowy folder',
@@ -633,7 +625,7 @@
             mricon: 'folder',
             action: (f) => { newElementKind='Folder';  listComponent.addRowAfter(afterElement) },
             tbr: 'A',
-            fab: 'M03'
+            fab: 'M04'
         }
 
         const newNote = {
@@ -642,7 +634,7 @@
             mricon:'file-text',
             action: (f) => { newElementKind='Note';  listComponent.addRowAfter(afterElement) },
             tbr: 'A',
-            fab: 'M02'
+            fab: 'M03'
         }
 
         const newTask = {
@@ -651,8 +643,18 @@
             mricon:'square-pen',
             action: (f) => { newElementKind='Task';  listComponent.addRowAfter(afterElement) },
             tbr: 'A',
+            fab: 'M02'
+        }
+
+        const newFile = {
+            caption: '_; Add file; Añadir archivo; Dodaj plik',
+            icon: FaFile,
+            mricon: 'file-archive',
+            action: (f) => { newElementKind='UploadedFile';  runFileAttacher(afterElement) },
+            tbr: 'A',
             fab: 'M01'
         }
+
 
         let result = {
             caption: '_; File; Archivo; Plik',
