@@ -2,6 +2,7 @@
     import {reef, session} from '@humandialog/auth.svelte'
 	import  {
             Page,
+            Ricon,
             activateItem,
 			onErrorShowAlert,
             reloadVisibleTags,
@@ -613,14 +614,10 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex-->
-<Page   self={channel}
-            toolbarOperations={getPageOperations()}
-            clearsContext=''
-            title={channel.Title}>
-    <Paper >
-    <section class="w-full flex justify-center">
-        <article class="w-full prose prose-base prose-zinc dark:prose-invert mx-2 prose-img:rounded-xl ">
-            <!--section class="w-full flex flex-row justify-between">
+<Page self={channel} toolbarOperations={getPageOperations()} clearsContext='' title={channel.Title}>
+    <Paper>
+
+        <!--section class="w-full flex flex-row justify-between">
                     <p class="">
                         {channel.Index}
                     </p>
@@ -633,11 +630,11 @@
                     </div>
             </section-->
 
-            <h1>
-                {channel.Title}
-            </h1>
+        <h1>
+            {channel.Title}
+        </h1>
 
-            {#if channel.Summary}
+        {#if channel.Summary}
                 <p  class="lead">
                     {channel.Summary}
                 </p>
@@ -660,7 +657,7 @@
                         {/if}
                         <!--    border-bottom: 1px solid #000; -->
                         <h4 id={messageElementId}>
-                            <a href={message.Author.href} use:link>
+                            <a href={message.Author.href} use:link class="font-semibold">
                                 {message.Author.Name}
                             </a>
                             <span class="ml-2 text-xs font-normal opacity-70">
@@ -670,45 +667,49 @@
 
                         <p class="break-words">
                             {@html message.Text}
+                        </p>
                             {#if notesNo>0 || tasksNo>0}
-                            <br>
-                            <span class="text-xs whitespace-normal">
+                        <p class="bg-stone-100 dark:bg-stone-700">
+                            <span class="whitespace-normal ">
 
 
-                                        {#if notesNo>0}
-                                            {#each message.Notes as att}
-                                                <a      class="mr-2 font-normal whitespace-nowrap"
-                                                        href={att.href}
-                                                        use:link
-                                                        >
-                                                    <span class="inline-block w-3 h-3">
-                                                        <FaRegFile/>
-                                                    </span>
-                                                    {att.Title}
-                                                </a>
-                                            {/each}
-                                        {/if}
+                                {#if notesNo>0}
+                                    {#each message.Notes as att}
+                                        <a      class="mr-4 font-normal  whitespace-nowrap"
+                                                href={att.href}
+                                                use:link
+                                                >
+                                            <span class="inline-block w-4 h-4 mr-2">
+                                                <Ricon icon = 'file-text'/>
+                                            </span>
+                                            <span class="text-stone-800 dark:text-stone-200">
+                                                {att.Title}
+                                            </span>
 
-                                        {#if tasksNo > 0}
-                                            {#each message.Tasks as att}
-                                                <a      class="mr-2  font-normal whitespace-nowrap"
-                                                        href={att.href}
-                                                        use:link
-                                                        >
-                                                    <span class="inline-block w-3 h-3">
-                                                        <FaRegCalendar/>
-                                                    </span>
-                                                    {att.Title}
-                                                </a>
-                                            {/each}
-                                        {/if}
+                                        </a>
+                                    {/each}
+                                {/if}
+
+                                {#if tasksNo > 0}
+                                    {#each message.Tasks as att}
+                                        <a      class="mr-2  font-normal whitespace-nowrap"
+                                                href={att.href}
+                                                use:link
+                                                >
+                                            <span class="inline-block w-4 h-4 mr-2">
+                                                <Ricon icon = 'square-pen'/>
+                                            </span>
+                                            {att.Title}
+                                        </a>
+                                    {/each}
+                                {/if}
 
 
 
                             </span>
-
-                            {/if}
                         </p>
+                            {/if}
+
 
                     <!---/section-->
                 {/each}
@@ -796,11 +797,11 @@
 
             </section>
 
-        </article>
 
 
 
-    </section>
+
+
 
     </Paper>
 
@@ -808,29 +809,3 @@
 </Page>
 {/key}
 {/if}
-
-
-
-
-<style>
-    .separator {
-        display: flex;
-        align-items: center;
-        text-align: center;
-    }
-
-    .separator::before,
-    .separator::after {
-        content: '';
-        flex: 1;
-
-    }
-
-    .separator:not(:empty)::before {
-        margin-right: 1rem;
-    }
-
-    .separator:not(:empty)::after {
-        margin-left: 1rem;
-    }
-</style>

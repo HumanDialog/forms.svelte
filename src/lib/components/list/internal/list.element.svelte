@@ -447,6 +447,7 @@
                 <!--Ricon icon={ClipboardMinus}/-->
                 <Ricon icon = {element_icon} />
         </div>{translated_element_title}
+        <div class="inline-block  w-4 h-4 ml-1 mr-1 py-0.5 align-baseline"> <Circle size = "s"/></div>
     </h4>
     <!-- comming soon - middle info --
     <figcaption>

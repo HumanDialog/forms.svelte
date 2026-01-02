@@ -284,7 +284,7 @@
         </div>
     </figcaption>
     <!-------- MAIN LINE    ------------------------------------------------------>
-    <h4 class=" text-sky-300/50">
+    <h4 class="text-sky-800 dark:text-sky-300">
         {task.Title}
     </h4>
     <!-------- BOTTOM PROPERTIES ------------------------------------------------->
@@ -315,9 +315,14 @@
 <!------- keep pure layout  ----------------------------------------------------------------------->
 <!------------------------------------------------------------------------------------------------->
 
-<figure class="bg-stone-100 dark:bg-stone-900 outline outline-8 outline-stone-900 ring-1 ring-stone-700 ring-offset-8"
-        use:selectable={task}
-        on:click={activate}>
+<figure class=" bg-stone-300 dark:bg-stone-700
+                outline outline-8
+                outline-stone-300 dark:outline-stone-700
+                ring-1 ring-offset-8
+                ring-stone-300 dark:ring-stone-700"
+
+                use:selectable={task}
+                on:click={activate}>
     <!-- comming soon - top info -->
     <figcaption>
         <div class="flex flex-row justify-between">
@@ -338,8 +343,8 @@
     <!------------------------------>
     <!--@el------------------------->
 
-    <a  href={task.href} use:link >
-    <h4 class="mt-1 text-sky-500"
+    <!--a  href={task.href} use:link -->
+    <h4 class="     text-sky-500"
 
                     use:editable={{
                     action: (text) => onTitleChanged(text),
@@ -348,14 +353,16 @@
                     onSoftEnter: async (text) => { onTitleChanged(text); await editProperty('Summary') }
                     }}
                 bind:this={titleElement}>
+        <a class= "font-semibold" href={task.href} use:link >
         <!--div class="inline-block w-4 h-4 ml-1 mr-3 align-baseline
                 text-stone-700 dark:text-stone-400 ">
 
                 <Ricon icon = "turtle"/>
         </div-->
         {task.Title}
+        </a>
     </h4>
-    </a>
+    <!--/a -->
     <!-- comming soon - middle info --
     <figcaption>
         <div class="grid gap-4 grid-cols-3 grid-rows-1">

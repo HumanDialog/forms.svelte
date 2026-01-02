@@ -228,23 +228,20 @@
 <!---- ACTIVE WITH CONROLS  ----------------------------------------------------------------------->
 <!------- keep pure layout  ----------------------------------------------------------------------->
 <!------------------------------------------------------------------------------------------------->
-<div    class="bg-stone-100 dark:bg-stone-700/10 outline outline-8 outline-stone-700/10"
+<div    class="bg-stone-100 dark:bg-stone-700/10 outline outline-8 outline-stone-100 dark:outline-stone-700/10"
         >
-    {#if isCardActive}
-        <a href={list.href} use:link>
-        <h2  class="text-sky-500"
-                use:editable={{
-                action: (text) => changeListProperty(text, 'Name'),
-                active: false,
-                onFinish: (d) => {nameElement.blur()}}}
-                bind:this={nameElement}>
-            {list.Name}
-        </h2>
-        </a>
 
-    {:else}
-        <h2>{list.Name}</h2>
-    {/if}
+    <a href={list.href} use:link>
+    <h2  class="text-sky-500"
+            use:editable={{
+            action: (text) => changeListProperty(text, 'Name'),
+            active: false,
+            onFinish: (d) => {nameElement.blur()}}}
+            bind:this={nameElement}>
+        {list.Name}
+    </h2>
+    </a>
+
 
 
     {#if list.Summary || placeholder == 'Summary'}
