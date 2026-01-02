@@ -19,7 +19,7 @@
                 sm:shadow-xl sm:shadow-slate-700/10
                 sm:dark:shadow-black/80
 
-                outline outline-1 outline-stone-500
+                sm:outline sm:outline-1 sm:outline-stone-500
                 ">
     <slot/>
 </div>
