@@ -1,10 +1,12 @@
 <script>
-  export let icon = "turtle";
+  export let icon = '';
 
   export let size = "n";
 
   export let xs = false;
-  export let sm = false;
+  export let s = false;
+  export let l = false;
+  export let xl = false;
 
   import Folder from './ricons/folder.svelte'
 
@@ -15,10 +17,17 @@
   import ClipboardList from './ricons/clipboard-list.svelte'
   import ClipboardPenLine from './ricons/clipboard-pen-line.svelte'
   import ChevronDown from './ricons/chevron-down.svelte'
+  import ChevronRight from './ricons/chevron-right.svelte'
+
+  import FileText from './ricons/file-text.svelte'
+  import FileArchive from './ricons/file-archive.svelte'
+  import Upload  from './ricons/upload.svelte'
+  import Download from './ricons/download.svelte'
+
 
   import SquarePen from './ricons/square-pen.svelte'
   import SquareCheckBig from './ricons/square-check-big.svelte'
-  import FileText from './ricons/file-text.svelte'
+
   import MssagesSquare from './ricons/messages-square.svelte'
   import Mssagesquare from './ricons/message-square.svelte'
   import Package from './ricons/package.svelte'
@@ -26,8 +35,13 @@
   import Calendars from './ricons/calendars.svelte'
   import Notebook from './ricons/notebook.svelte'
   import Square from './ricons/square.svelte'
+  import ArrowUp from './ricons/arrow-up.svelte'
+  import CheckCheck from './ricons/check-check.svelte'
+  import X from './ricons/x.svelte'
 
   let ricons_box = {
+    "arrow-up": ArrowUp,
+    "check-check": CheckCheck,
     "folder": Folder,
     "square-pen": SquarePen,
     "square-check-big": SquareCheckBig,
@@ -38,14 +52,22 @@
     "clipboard-minus": ClipboardMinus,
     "clipboard-list": ClipboardList,
     "chevron-down": ChevronDown,
+    "chevron-right": ChevronRight,
+
     "file-text": FileText,
+    "file-archive": FileArchive,
+
+    "upload": Upload,
+    "download": Download,
+
     "messages-square": MssagesSquare,
     "message-square": Mssagesquare,
     "package": Package,
     "calendar": Calendar,
     "calendars": Calendars,
     "netebook": Notebook,
-    "square": Square
+    "square": Square,
+    "x":  X
   }
 
   let width = 24;
@@ -57,10 +79,20 @@
       width = 16;
       height = 16;
   }
-  else if(sm)
+  else if(s)
   {
       width = 20;
       height = 20;
+  }
+  else if(l)
+  {
+      width = 28;
+      height = 28;
+  }
+  else if(xl)
+  {
+      width = 32;
+      height = 32;
   }
 
 

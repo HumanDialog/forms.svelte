@@ -3,7 +3,6 @@
     import {
         onErrorShowAlert, Icon,
         List, ListTitle, ListSummary, Spinner, i18n,
-        Ricon,
         contextItemsStore,
         getActiveItems,
         clearActiveItem,
@@ -112,7 +111,7 @@
                 ElementNav: '',
                 Title: '_; My tasks; Mis tareas; Moje zadania',
                 Summary: '',
-                icon: 'square-pen',
+                icon: 'TaskList',
                 href: '/mytasks',
                 ElementInfo: 0,
                 $ref: 'mytasks'
@@ -123,7 +122,7 @@
                 ElementNav: '',
                 Title: '_; My lists; Mis listas; Moje listy#',
                 Summary: '',
-                icon: 'clipboard-list',
+                icon: 'TaskList',
                 href: '/mylists',
                 ElementInfo: 0,
                 $ref: 'mylists'
@@ -134,7 +133,7 @@
                 ElementNav: '',
                 Title: '_; Common lists; Listas comunes; Wspólne listy',
                 Summary: '',
-                icon: 'clipboard-list',
+                icon: 'TaskList',
                 href: '/alllists',
                 ElementInfo: 0,
                 $ref: 'alllists'
@@ -145,7 +144,7 @@
                 ElementNav: '',
                 Title: '_; My Folders; Mis carpetas; Moje foldery',
                 Summary: '',
-                icon: 'folder',
+                icon: 'Folder',
                 href: '/myfolders',
                 ElementInfo: 0,
                 $ref: 'myfolders'
@@ -156,7 +155,7 @@
                 ElementNav: '',
                 Title: '_; Common folders; Carpetas comunes; Wspólne foldery',
                 Summary: '',
-                icon: 'folder',
+                icon: 'Folder',
                 href: '/group-folders',
                 ElementInfo: 0,
                 $ref: 'groupfolders'
@@ -867,99 +866,8 @@ let list_properties = {
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
  <!--svelte-ignore a11y-no-noninteractive-element-interactions -->
-
-    <div class="
-                paper w-full sm:w-[24rem]
-                prose prose-base prose-zinc dark:prose-invert prose-a:no-underline
-                sm:max-w-3xl
-                m-0 pt-3 pb-5 px-4
-                sm:rounded
-                sm:bg-stone-100 sm:dark:bg-stone-900
-                flex flex-col
-                "
-        bind:this={rootElement} on:click={clearSelection}>
-        <!-------------------------------------------------------------------->
-        <!-- POPUP HEADER ---------------------------------------------------->
-        <!-------------------------------------------------------------------->
-        <h3 class = "flex-none">
-            <div class=" w-full flex flex-row justify-between">
-                <div class="py-1.5  flex flex-row justify-between">
-                    <button class="mr-4 w-6
-                                hover:bg-stone-300 hover:dark:bg-stone-700
-                                hover:outline hover:outline-8
-                                hover:outline-stone-300 hover:dark:outline-stone-700"
-                        ><Ricon icon = 'arrow-up' />
-                    </button>
-                    <button class="mr-4 w-6
-                                hover:bg-stone-300 hover:dark:bg-stone-700
-                                hover:outline hover:outline-8
-                                hover:outline-stone-300 hover:dark:outline-stone-700">
-                        <Ricon icon = 'check-check' />
-                    </button>
-                </div>
-                <div class="grow ">
-                    <span class="px-2 text-left">{ext(currentLevelTitle)}
-                    </span>
-                </div>
-                <div class="py-1.5  flex flex-row justify-between">
-                    <button class="ml-4 w-6
-                                hover:bg-stone-300 hover:dark:bg-stone-700
-                                hover:outline hover:outline-8
-                                hover:outline-stone-300 hover:dark:outline-stone-700">
-                        <Ricon icon = 'x' />
-                    </button>
-                </div>
-            </div>
-        </h3>
-        <!-------------------------------------------------------------------->
-        <!-- POPUP CONTENT---------------------------------------------------->
-        <!-------------------------------------------------------------------->
-        <div class="grow">
-            <List   objects={elements}
-                    orderAttrib='Order'
-                    {list_properties}
-                    multiselect={canSelectElements}
-                    selectionKey='handy'
-                    bind:this={listElement}
-                    >
-            </List>
-        </div>
-        <!-------------------------------------------------------------------->
-        <!-- POPUP FOOTER---------------------------------------------------->
-        <!-------------------------------------------------------------------->
-        <h4 class = "flex-none">
-
-            <div class="flex flex-row justify-end gap-2">
-
-                <button class="px-4 mx-2
-                        bg-stone-100 dark:bg-stone-800
-                        outline outline-offset-2 outline-2
-                        outline-stone-200 dark:outline-stone-500
-                        hover:bg-stone-300 hover:dark:bg-stone-700
-                        "
-
-                        disabled={!selectedElementsNo || !canSelectElements}
-                        on:click={() => attachTo()}>
-                     _; Cancel; Pegar; Anuluj
-                </button>
-                <button class="px-4 mx-2
-                        bg-stone-100 dark:bg-stone-700
-                        outline outline-offset-2 outline-2
-                        outline-stone-200 dark:outline-stone-500
-                        hover:bg-stone-300 hover:dark:bg-stone-700
-                        "
-                        disabled={!selectedElementsNo || !canSelectElements}
-                        on:click={() => attachTo()}>
-                     _; Paste; Pegar; Wklej
-                </button>
-            </div>
-        </h4>
-    </div>
-
-    {#if false && elements && elements.length >= 0}
-
-
-
+<menu class="" bind:this={rootElement} on:click={clearSelection}>
+    {#if elements && elements.length >= 0}
         <div class="w-full sm:w-80 h-64 sm:h-80 sm:max-w-sm overflow-y-auto overflow-x-clip overscroll-contain
                 text-stone-600 dark:text-stone-400">
 
@@ -1001,8 +909,23 @@ let list_properties = {
             </List>
         </div>
 
+        <!-- Footer -->
 
             <div class="mt-2 flex flex-row justify-end gap-2">
+                <!--button class=" py-2.5 px-5
+                                text-base sm:text-xs font-medium
+                                bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400
+                                hover:bg-stone-200 hover:dark:bg-stone-600
+                                disabled:bg-white/60 disabled:dark:bg-stone-700/60
+                                border rounded
+                                border-stone-200 dark:border-stone-600 focus:outline-none
+                                disabled:border-stone-200/60 disabled:dark:border-stone-600/60
+                                inline-flex items-center justify-center"
+                                disabled={!clipboardItem}
+                                on:click={() => editBasket()}>
+
+                    _; Go to Clipboard; Ir al Portapapeles; Przejdź do Schowka
+                </button-->
 
                 <button class=" py-2.5 px-5
                                 text-base sm:text-xs font-medium
@@ -1019,6 +942,24 @@ let list_properties = {
                     _; Paste; Pegar; Wklej
                 </button>
 
+                <!--button class=" py-2.5 px-5
+                                text-base sm:text-xs font-medium
+                                bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400
+                                hover:bg-stone-200 hover:dark:bg-stone-600
+                                disabled:bg-white/60 disabled:dark:bg-stone-700/60
+                                border rounded
+                                border-stone-200 dark:border-stone-600 focus:outline-none
+                                disabled:border-stone-200/60 disabled:dark:border-stone-600/60
+                                inline-flex items-center justify-center"
+                                disabled={!selectedElementsNo}
+                                on:click={() => attachToAndClear()}>
+
+                    _; Paste and forget; Pegar y olvidar; Wklej i zapomnij
+                </button-->
             </div>
 
+    {:else}
+        <Spinner delay={3000}/>
     {/if}
+
+</menu>

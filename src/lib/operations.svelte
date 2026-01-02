@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { showFloatingToolbar, showMenu, showGridMenu } from './components/menu.js';
+	import { showFloatingToolbar, showMenu, showGridMenu} from './components/menu.js';
     import {contextToolbarOperations, pageToolbarOperations, contextItemsStore} from './stores.js'
+    import Ricon from './components/r.icon.svelte'
     import {FaEllipsisV} from 'svelte-icons/fa'
 
     export let mobile :boolean = false
@@ -300,7 +301,7 @@
 <section class="operations-0 flex flex-row no-print h-full
 
                 overflow-x-hidden overflow-y-clip py-0 text-xs whitespace-nowrap">
-    <div    class="flex flex-row"
+    <div    class="operations-a flex flex-row"
             class:flex-row-reverse={mobile}>
 
         {#each leftOperations as operation}
@@ -312,6 +313,7 @@
                         {@const textColor= isDisabled ? 'text-stone-600 dark:text-stone-500' : 'text-stone-800 dark:text-stone-300 dark:hover:text-white '}
                         <button type="button"
                                 class="operation-1 px-1
+                                text-orange-500
                                 text-xs font-thin
                                 {textColor}
                                 hover:bg-stone-700 active:bg-stone-300 border-stone-200
@@ -323,8 +325,10 @@
                                 title={operationTooltip(operation)}
                                 on:mousedown={(e) => mousedown(e, operation)}
                                 on:click={(e) => {on_click(e, operation, isDisabled)}}>
-                            {#if operation.icon}
-                                <div class="w-4 h-4 mr-1"><svelte:component this={operation.icon}/></div>
+                            {#if operation.mricon}
+                                <div class="py-1 mr-1 w-4"><Ricon icon = {operation.mricon} s/></div>
+                            {:else if operation.icon}
+                                <div class="w-4 h-4 mr-1 text-orange-500"><svelte:component this={operation.icon}/></div>
                             {/if}
                             {#if operation.caption}
                                 <span class="ml-1">{operation.caption}</span>
@@ -344,6 +348,7 @@
 
                     <button type="button"
                             class="operation-2 px-2
+
                             text-xs font-thin
                             focus:outline-none
                             inline-flex items-center
@@ -354,8 +359,10 @@
                             title={operationTooltip(operation)}
                             on:mousedown={(e) => mousedown(e, operation)}
                             on:click={(e) => {on_click(e, operation, isDisabled)}}>
-                        {#if operation.icon}
-                            <div class="w-4 h-4 mr-1"><svelte:component this={operation.icon}/></div>
+                        {#if operation.mricon}
+                            <div class="py-1 mr-1 w-4"><Ricon icon = {operation.mricon} s/></div>
+                        {:else if operation.icon}
+                            <div class="w-4 h-4 mr-1 text-orange-500"><svelte:component this={operation.icon}/></div>
                         {/if}
                         {#if operation.caption}
                             <span class="ml-1">{operation.caption}</span>
@@ -397,9 +404,11 @@
                         title={operationTooltip(operation)}
                         on:mousedown={(e) => mousedown(e, operation)}
                         on:click={(e) => {on_click(e, operation, isDisabled)}}>
-                    {#if operation.icon}
-                        <div class="w-4 h-4 mr-1"><svelte:component this={operation.icon}/></div>
-                    {/if}
+                        {#if operation.mricon}
+                            <div class="py-1 mr-1 w-4"><Ricon icon = {operation.mricon} s/></div>
+                        {:else if operation.icon}
+                            <div class="w-4 h-4 mr-1 text-orange-500"><svelte:component this={operation.icon}/></div>
+                        {/if}
                     {#if operation.caption}
                         <span class="ml-1">{operation.caption}</span>
                     {/if}

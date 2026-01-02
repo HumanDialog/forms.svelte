@@ -306,7 +306,7 @@
                     callback: performOpen}}
                 bind:this={titleElement}>
                 {#if isLinkLike}
-                    <a class= "font-bols" href={getHRef()} use:link>
+                    <a class= "font-semibold" href={getHRef()} use:link>
                         {item[definition.titleAttrib]}
                     </a>
                 {:else}

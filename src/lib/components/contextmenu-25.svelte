@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { afterUpdate, tick} from 'svelte';
     import Icon from './icon.svelte'
-    import Ricon from './r.icon.svelte'
-
     import {contextItemsStore, pushToolsActionsOperations, popToolsActionsOperations, fabHiddenDueToPopup} from '../stores'
     import {isDeviceSmallerThan, isOnScreenKeyboardVisible} from '../utils'
     import {hideWholeContextMenu, showMenu, showFloatingToolbar, showGridMenu,
@@ -679,8 +677,7 @@
         {@const is_separator = operation.separator}
         {#if is_separator}
             {#if index>0 && index < operations.length-1}
-                <!--hr class="my-1 mx-4 border-1 border-stone-300 dark:border-stone-700"-->
-                <hr class="my-4">
+                <hr class="my-1 mx-4 border-1 border-stone-300 dark:border-stone-700">
             {/if}
         {:else}
             {@const mobile = isDeviceSmallerThan("sm")}
@@ -695,74 +692,6 @@
             {@const active = calculateBackground(isFocused || isOperationActivated(operation), false)}
             {@const has_submenu = operation.menu !== undefined && operation.menu.length > 0}
 
-            <div class="{active}"
-                id={menu_item_id}
-                bind:this={menu_items[index]}
-                on:click|stopPropagation={(e) => { execute_action(e, operation, index) } }
-                on:mouseenter = {(e) => {on_mouse_move(index)}}
-                on:keydown|stopPropagation={(e) => on_keydown(e, operation, index)}
-                on:mousedown={mousedown}
-                disabled={isOperationDisabled(operation)}
-                class:opacity-60={isOperationDisabled(operation)}>
-
-
-                        <!-------------------------------------------------------------------->
-        <!-- POPUP HEADER ---------------------------------------------------->
-        <!-------------------------------------------------------------------->
-            <h4 class = "flex-none mt-2">
-                <div class=" w-full flex flex-row justify-between">
-                    {#if operation.mricon}
-                    <div class="py-1 mr-1 w-4"><Ricon icon = {operation.mricon} s/></div>
-                    {:else if operation.icon}
-                    <div class="py-1 mr-1 w-4 text-orange-500"><Icon s="md" component={operation.icon}/></div>
-                    {:else}
-                    <div class="py-1 mr-1 w-4"></div>
-                    {/if}
-                    <div class="grow">
-                        <span class="px-2 text-left">{operation.caption}
-                        </span>
-                    </div>
-
-                    {#if has_submenu}
-                        <div class="py-1 mr-1 w-4"><Ricon icon = 'chevron-right' xs/></div>
-                        <svelte:self bind:this={submenus[index]} menu_items_id_prefix={`${menu_item_id}_`} owner_menu_item={menu_items[index]}/>
-                    {/if}
-
-                </div>
-            </h4>
-        <!-------------------------------------------------------------------->
-        <!-- POPUP CONTENT---------------------------------------------------->
-        <!-------------------------------------------------------------------->
-
-
-    <!-- comming soon - top info --
-    <figcaption>
-        <div class="grid gap-4 grid-cols-3 grid-rows-1">
-            <span>OCT-254</span>
-            <span class="text-center"></span>
-            <span class="text-right">15 listopad 25</span>
-        </div>
-    </figcaption>
-    -------------------------------->
-    <!--@el------------------------->
-    <!-- comming soon - middle info --
-    <figcaption>
-        <div class="grid gap-4 grid-cols-3 grid-rows-1">
-            <span>Andrzej</span>
-            <span class="text-center"></span>
-            <span class="text-right">Specyfikacje</span>
-        </div>
-    </figcaption>
-
-
-    {#if summary && item[summary]}
-    <figcaption>
-        {item[summary]}
-    </figcaption>
-    {/if}
-    -------------------------------->
-            </div>
-{#if false}
             <button class="block w-full pr-4 text-left flex flex-row cursor-context-menu {active} focus:outline-none items-center"
                     id={menu_item_id}
                     bind:this={menu_items[index]}
@@ -803,7 +732,6 @@
                     <svelte:self bind:this={submenus[index]} menu_items_id_prefix={`${menu_item_id}_`} owner_menu_item={menu_items[index]}/>
                 {/if}
             </button>
-{/if}
         {/if}
     {/each}
     </div>
