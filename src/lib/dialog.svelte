@@ -6,9 +6,9 @@
     import {FaTimes} from 'svelte-icons/fa'
     import {i18n} from './i18n.js'
     import {usePreventScroll} from './components/react-aria/preventScroll'
-    
+
     export let open :boolean = false;
-    
+
     let preventScrollRestorer = null
     export function show( on_close_callback :Function|undefined = undefined)
     {
@@ -16,8 +16,8 @@
         close_callback = on_close_callback;
 
         if(isDeviceSmallerThan("sm"))
-        {  
-            $fabHiddenDueToPopup = true  
+        {
+            $fabHiddenDueToPopup = true
 
           /*pushToolsActionsOperations( {
                 opver: 1,
@@ -52,7 +52,7 @@
       if(preventScrollRestorer)
       {
         preventScrollRestorer()
-        preventScrollRestorer = null    
+        preventScrollRestorer = null
       }
     }
 
@@ -77,15 +77,25 @@
 </script>
 
 {#if open}
-<div id="__hd_svelte_property_dialog_container" 
+<div id="__hd_svelte_property_dialog_container"
     visible={open}
     class="relative z-30" aria-labelledby="modal-title" role="dialog" aria-modal="true" bind:this={root}>
-    <div class="fixed w-screen h-screen inset-0 bg-stone-500 dark:bg-stone-800 bg-opacity-75 dark:bg-opacity-75 transition-opacity"></div>
-  
+    <!--div class="fixed w-screen h-screen inset-0 bg-stone-500 dark:bg-stone-800 bg-opacity-75 dark:bg-opacity-75 transition-opacity"></div-->
+
     <div class="fixed z-30 inset-0 w-screen overflow-y-auto overscroll-contain">
       <div class="flex min-h-full items-end justify-center p-1 text-center sm:items-center sm:p-0">
-        <div class=" p-2 bg-stone-100 dark:bg-stone-800 rounded-lg shadow-md shadow-stone-500 dark:shadow-black text-left shadow-xl transition-all  
-                    sm:my-8 w-full sm:max-w-lg"> <!-- transform overflow-hidden -->
+        <div class=" p-0
+                    sm:my-8 w-full sm:max-w-lg
+                    bg-stone-100 dark:bg-stone-800
+                    rounded-lg
+
+                    sm:shadow-xl sm:shadow-slate-700/70
+                    sm:dark:shadow-black/80
+                    sm:outline sm:outline-1 sm:outline-stone-500
+
+
+                    text-left transition-all
+                    "> <!-- transform overflow-hidden -->
             <slot/>
         </div>
       </div>
@@ -93,9 +103,9 @@
   </div>
   {/if}
 
-<!-- use usePreventScroll instead -->  
+<!-- use usePreventScroll instead -->
 <!--style>
-    :global(body:has(#__hd_svelte_property_dialog_container[visible="true"])) 
+    :global(body:has(#__hd_svelte_property_dialog_container[visible="true"]))
     {
         overflow: hidden;
     }
