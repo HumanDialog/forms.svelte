@@ -1,7 +1,7 @@
 import { getContext, tick } from "svelte";
 import {derived, get} from 'svelte/store'
 import { contextItemsStore, contextToolbarOperations, pageToolbarOperations, data_tick_store, main_sidebar_visible_store, show_sidebar, hide_sidebar, previously_visible_sidebar, auto_hide_sidebar} from "./stores";
-import {location, push, pop} from 'svelte-spa-router' 
+import {location, push, pop} from 'svelte-spa-router'
 
 export let icons = {symbols :null}
 
@@ -46,7 +46,7 @@ export function activateItem(context_level, itm, operations=null)
     data_context.focused = context_level;
     contextItemsStore.set( {...data_context} )
 
-    
+
     let ticket = get(data_tick_store)
     ticket++;
     data_tick_store.set(ticket)
@@ -54,7 +54,7 @@ export function activateItem(context_level, itm, operations=null)
     //chnages.just_changed_context = true;
 
     if(operations && context_level == 'props')
-    { 
+    {
         if(typeof operations === 'function')
         {
             const calculatedOps = operations([itm])
@@ -75,7 +75,7 @@ export function clearActiveItem(context_level, operations=undefined)
     data_context.sel = null
     contextItemsStore.set( {...data_context} )
 
-    
+
     let ticket = get(data_tick_store)
     ticket++;
     data_tick_store.set(ticket)
@@ -105,9 +105,9 @@ export function addActiveItem(context_level, itm, operations = null)
 {
     let data_context = get(contextItemsStore);
     data_context['sel'] = itm; //null;
-    
+
     let multi = data_context[context_level]
-    
+
     if(multi && Array.isArray(multi))
         multi = [...multi, itm]
     else if(multi instanceof Object)
@@ -119,7 +119,7 @@ export function addActiveItem(context_level, itm, operations = null)
     data_context.focused = context_level;
     contextItemsStore.set( {...data_context} )
 
-    
+
     let ticket = get(data_tick_store)
     ticket++;
     data_tick_store.set(ticket)
@@ -127,7 +127,7 @@ export function addActiveItem(context_level, itm, operations = null)
     //chnages.just_changed_context = true;
 
     if(operations && context_level == 'props')
-    { 
+    {
         if(typeof operations === 'function')
         {
             const calculatedOps = operations(multi)
@@ -174,7 +174,7 @@ export function removeActiveItem(context_level, itm, operations = null)
         else
         {
             if(operations)
-            { 
+            {
                 if(typeof operations === 'function')
                 {
                     const calculatedOps = operations(multi)
@@ -237,7 +237,7 @@ export function getActive(context_level)
         if(prop && Array.isArray(prop) && prop.length > 0)
             return prop[prop.length-1]
         else
-            return prop; 
+            return prop;
     }
     else
         return null;
@@ -254,7 +254,7 @@ export function getActiveItems(context_level)
         else if(prop)
             return [prop]
         else
-            return [] 
+            return []
     }
     else
         return [];
@@ -284,13 +284,13 @@ export function reloadPageToolbarOperations(operations)
 
 export function refreshToolbarOperations()
 {
-    
+
     let refreshed = false
 
     const contextOperations = get(contextToolbarOperations)
     if(contextOperations)
     {
-        
+
         if(Array.isArray(contextOperations))
         {
             if(contextOperations.length > 0)
@@ -308,7 +308,7 @@ export function refreshToolbarOperations()
             }
         }
     }
-    
+
     if(!refreshed)
     {
         const pageOperations = get(pageToolbarOperations);
@@ -378,10 +378,10 @@ export function editable(node, params)
         await finish_editing({cancel: cancel});
     }
 
-    const putNewLine = async (e) => 
+    const putNewLine = async (e) =>
     {
         const sel = window.getSelection()
-        
+
         let selNode = sel?.focusNode
         let selOffset = sel?.focusOffset
         let text = selNode?.textContent
@@ -389,7 +389,7 @@ export function editable(node, params)
         const right = text?.substring(selOffset)
         text = left + '\n' + right
         node.textContent = text
-        
+
         await tick()
         window.getSelection()?.setPosition(node.firstChild, selOffset+1)
     }
@@ -451,7 +451,7 @@ export function editable(node, params)
             node.removeEventListener("keydown", key_listener);
             node.removeEventListener("save", save_listener);
             node.contentEditable = "false"
-       
+
             let sel = window.getSelection();
             sel.removeAllRanges();
        }
@@ -473,16 +473,16 @@ export function editable(node, params)
                     has_changed = false;
                     await action(node.textContent)
                 }
-                    
+
             }
             else
                 await action(node.textContent)
         }
 
         const finish_event  = new CustomEvent("finish", {
-                                detail: 
-                                { 
-                                    cancel: cancel, 
+                                detail:
+                                {
+                                    cancel: cancel,
                                     incremental: incremental,
                                     softEnter: softEnter
                                 }
@@ -505,7 +505,7 @@ export function editable(node, params)
         node.contentEditable = "true"
         node.addEventListener("blur", blur_listener);
         node.addEventListener("keydown", key_listener);
-        
+
         currentEditable = node;
         node.addEventListener("save", save_listener)
 
@@ -524,7 +524,7 @@ export function editable(node, params)
         let sel = window.getSelection();
         sel.removeAllRanges();
         sel.addRange(range);
-        
+
     }
 
     const focus_listener = async (e) =>
@@ -534,9 +534,9 @@ export function editable(node, params)
         has_changed = false;
         currentEditable = node;
         node.addEventListener("save", save_listener)
-        
-        observer = new MutationObserver(() => { 
-            has_changed = true; 
+
+        observer = new MutationObserver(() => {
+            has_changed = true;
             if(onSingleChange)
                 onSingleChange(node.textContent)
         });
@@ -564,7 +564,7 @@ export function editable(node, params)
     else
     {
         node.addEventListener("edit", edit_listener);
-        
+
         return {
             destroy() {
 
@@ -578,7 +578,7 @@ export function editable(node, params)
 export function startEditing(element, finish_callback)
 {
     let editable_node = null;
-    
+
     if(element.classList.contains("editable"))
         editable_node = element;
     else
@@ -592,7 +592,7 @@ export function startEditing(element, finish_callback)
     {
         if(editable_node.contentEditable == "true")
             return;
-        
+
         if(finish_callback)
         {
             editable_node.addEventListener("finish", (e) => { finish_callback(e.detail) })
@@ -642,7 +642,7 @@ export function handleSelect(e)
     }
 
     let selection_node = null;
-    
+
     while(!!node)
     {
         if(node.hasAttribute("selectable"))
@@ -663,40 +663,40 @@ export function handleSelect(e)
 
 
 export function parseWidthDirective(c)
-{   
+{
     let cs = '';
     switch (c)
     {
         case '1':
-            cs = 'col-span-1' 
+            cs = 'col-span-1'
             break;
         case '2':
-            cs = 'col-span-2' 
+            cs = 'col-span-2'
             break;
         case '3':
-            cs = 'col-span-3' 
+            cs = 'col-span-3'
             break;
         case '4':
-            cs = 'col-span-4' 
+            cs = 'col-span-4'
             break;
         case '5':
-            cs = 'col-span-5' 
+            cs = 'col-span-5'
             break;
         case '6':
-            cs = 'col-span-6' 
+            cs = 'col-span-6'
             break;
         case '1-x3':
-            cs = 'col-span-1 xl:col-span-3'    
+            cs = 'col-span-1 xl:col-span-3'
             break;
         case '2-x3':
-            cs = 'col-span-2 xl:col-span-3'    
+            cs = 'col-span-2 xl:col-span-3'
             break;
         case '3-x9':
             cs = 'col-span-3 xl:col-span-9'
-            break;    
+            break;
         case '4-x9':
             cs = 'col-span-4 xl:col-span-9'
-            break;    
+            break;
         default:
             break;
     }
@@ -710,7 +710,7 @@ export function shouldBeComapact()
     return !!is_in_table;
 }
 
-    
+
 
 export function insertAt(array, index, element)
 {
@@ -828,25 +828,25 @@ export async function resizeImage(file, maxWidth=1024, maxHeight=1024, contentTy
             const [newWidth, newHeight] = calculateSize(img, maxWidth, maxHeight);
 
             console.log('resizeImage', img.width, '=>', newWidth, img.height, '=>', newHeight, contentType, quality)
-            
+
             const canvas = document.createElement("canvas");
             canvas.width = newWidth;
             canvas.height = newHeight;
             const ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0, newWidth, newHeight);
-    
+
             canvas.toBlob((blob) => {
                 resolve(blob);
               },
-    
+
               contentType,
               quality)
-       
+
         }
 
         img.src = URL.createObjectURL(file);
 
-    }) 
+    })
 }
 
 export function isOnScreenKeyboardVisible()
@@ -855,7 +855,7 @@ export function isOnScreenKeyboardVisible()
         return false;
 
     const sel = window.getSelection();
-    // if we have active selections then it's very possible we have onscreen keyboard visible, se we need to shrink window.innerHeight 
+    // if we have active selections then it's very possible we have onscreen keyboard visible, se we need to shrink window.innerHeight
     if(sel && sel.rangeCount>0 && sel.focusNode /*&& sel.focusNode.nodeType==sel.focusNode.TEXT_NODE*/) // TipTap fix: when cursor blinks at begining of line it's not TEXT_NODE. ProseMirror handles it as special case
     {
         const el = sel.focusNode.parentElement;
@@ -872,13 +872,13 @@ export const UI = {
     navigator: null
 }
 
-export function dec2hex (dec) 
+export function dec2hex (dec)
 {
     return dec.toString(16).padStart(2, "0")
 }
-  
 
-export function randomString(len) 
+
+export function randomString(len)
 {
     var arr = new Uint8Array((len || 16) / 2)
     window.crypto.getRandomValues(arr)
@@ -893,7 +893,7 @@ let lastNavPage = ''
 export function isOnNavigationPage(navKind)
 {
     const loc = get(location)
-    
+
     if(!navKind)
     {
         if(loc.startsWith(NAVIGATION_PAGE_PATH))
@@ -908,7 +908,7 @@ export function isOnNavigationPage(navKind)
         else
             return false;
     }
-    
+
 }
 
 
@@ -949,7 +949,9 @@ export const NAV_MODE_FULL_PAGE = 1
 
 export function navGetMode()
 {
-    return isDeviceSmallerThan("sm") ? NAV_MODE_FULL_PAGE : NAV_MODE_SIDEBAR;
+    //UI26: NAV_MODE_FULL_PAGE is obsolete experiment
+    //return isDeviceSmallerThan("sm") ? NAV_MODE_FULL_PAGE : NAV_MODE_SIDEBAR;
+    return NAV_MODE_SIDEBAR;
 }
 
 export function navIsVisible()
@@ -1068,25 +1070,25 @@ export function isValidEmail(e)
     //let pattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     //return (e.match(pattern) != null);
 
-    var at_idx = e.indexOf("@"); 
-    var dot_idx = e.lastIndexOf("."); 
-    var space_idx = e.indexOf(" "); 
+    var at_idx = e.indexOf("@");
+    var dot_idx = e.lastIndexOf(".");
+    var space_idx = e.indexOf(" ");
 
-    if ((at_idx != -1) && 
-        (at_idx != 0) && 
-        (dot_idx != -1) && 
-        (dot_idx != 0) && 
-        (dot_idx > at_idx + 1) && 
-        (e.length > dot_idx + 1) && 
-        (space_idx == -1)) 
-    { 
-        return true; 
-    } 
-    else 
-    { 
-        return false; 
-    } 
-    
+    if ((at_idx != -1) &&
+        (at_idx != 0) &&
+        (dot_idx != -1) &&
+        (dot_idx != 0) &&
+        (dot_idx > at_idx + 1) &&
+        (e.length > dot_idx + 1) &&
+        (space_idx == -1))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+
 }
 
 export function setSelectionAtEnd(element)
@@ -1106,28 +1108,28 @@ export function setSelectionAtEnd(element)
 
 export function localStorageSave(key, value)
 {
-    try 
+    try
     {
-        if (typeof localStorage === "undefined") 
+        if (typeof localStorage === "undefined")
            return;
 
         localStorage.setItem(key, value);
-    } 
-    catch 
+    }
+    catch
     {
-        
+
     }
 }
 
 export function localStorageRead(key, fallback = '')
 {
-    try 
+    try
     {
-        if (typeof localStorage === "undefined") 
+        if (typeof localStorage === "undefined")
             return fallback;
         return localStorage.getItem(key) ?? fallback;
-    } 
-    catch 
+    }
+    catch
     {
         return fallback;
     }
@@ -1135,13 +1137,13 @@ export function localStorageRead(key, fallback = '')
 
 export function hasLocalStorage(key)
 {
-    try 
+    try
     {
-        if (typeof localStorage === "undefined") 
+        if (typeof localStorage === "undefined")
             return false;
         return localStorage.getItem(key) ? true : false;
-    } 
-    catch 
+    }
+    catch
     {
         return false;
     }
@@ -1149,28 +1151,28 @@ export function hasLocalStorage(key)
 
 export function sessionStorageSave(key, value)
 {
-    try 
+    try
     {
-        if (typeof sessionStorage === "undefined") 
+        if (typeof sessionStorage === "undefined")
            return;
 
         sessionStorage.setItem(key, value);
-    } 
-    catch 
+    }
+    catch
     {
-        
+
     }
 }
 
 export function sessionStorageRead(key, fallback = '')
 {
-    try 
+    try
     {
-        if (typeof sessionStorage === "undefined") 
+        if (typeof sessionStorage === "undefined")
             return fallback;
         return sessionStorage.getItem(key) ?? fallback;
-    } 
-    catch 
+    }
+    catch
     {
         return fallback;
     }

@@ -457,7 +457,7 @@
 
 {#key currentPath}
 <div class="w-full prose prose-base prose-zinc dark:prose-invert prose-a:no-underline ">
-{#if sidebar}
+{#if true}
     {#if groupTaskLists && groupTaskLists.length > 0}
         {#if showGroupsSwitchMenu}
             <SidebarGroup>
@@ -477,7 +477,7 @@
                                 icon='calendar'
                                 active={isRoutingTo("/myday", currentPath)}
                                 selectable={myday}>
-                    _; My day; Mi día; Mój dzień
+                    _; My day; Mi día; Mój dzień S
                 </SidebarItem>
                 <SidebarItem   href="/teamday"
                                 icon='calendars'
@@ -556,7 +556,7 @@
                 <SidebarItem    href="/myday"
                                 icon={FaCalendarDay}
                                 item={myday}>
-                    _; My day; Mi día; Mój dzień
+                    _; My day; Mi día; Mój dzień M
                 </SidebarItem>
                 <SidebarItem    href="/teamday"
                                 icon={FaUserFriends}

@@ -418,7 +418,7 @@
 
 {#key currentPath}
 <PaperNav>
-{#if sidebar}
+{#if true}
     {#if groupFolders && groupFolders.length > 0}
         {#if $session.isActive}
             {#if pinnedElements && pinnedElements.length > 0}

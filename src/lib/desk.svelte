@@ -115,7 +115,7 @@
     let content_left = "left-0 sm:left-[40px]";
     let content_width = "w-screen  sm:w-[calc(100vw-40px)] ";
     let horizontal_nav_tabs_visibility = "hidden"
-                                
+
     let content_top = ""
     let content_height = ""
 
@@ -142,7 +142,7 @@
             {
                 fab_visibility_mode = FAB_VISIBLE_ALWAYS
                 tools_visibility = "hidden"
-                content_top = 'top-[50px] sm:top-[0px]'
+                content_top = 'top-[0px]' //25:'top-[50px] sm:top-[0px]'
 
                 if(bottom_bar_visible)
                     content_height = `min-h-[calc(100vh-290px)] sm:h-[calc(100vh-240px)]`
@@ -153,7 +153,7 @@
             {
                 fab_visibility_mode = FAB_VISIBLE_ON_MOBILE
                 tools_visibility = "hidden sm:block sm:fixed"
-                content_top = 'top-[50px] sm:top-[40px]'
+                content_top = 'top-[0px] sm:top-[40px]'
 
                 if(bottom_bar_visible)
                     content_height = `min-h-[calc(100vh-290px)] sm:h-[calc(100vh-280px)]`
@@ -389,32 +389,35 @@
                 <!--###########################################################-->
                 <!--##  HORIZONTAL TOP TITLE TOOLBAR (FOR PHONES)  ############-->
                 <!--###########################################################-->
-                <header class="fixed sm:hidden w-screen top-0 h-[50px] sm:h-[40px]
+                <!--header class="fixed sm:hidden w-screen top-0 h-[50px] sm:h-[40px]
                                 z-20 shadow  shadow-stone-900/5 dark:shadow-none
                                 overflow-auto" >
                         <div class=" flex flex-row justify-between  h-full  bg-stone-950   text-stone-100 ">
                             <HorizontalToolbar appConfig={layout}/>
                         <div>
-                </header>
+                </header-->
 
 
-                <!--HorizontalToolbar /-->
                 <!--#######################################################-->
                 <!--##  VERTICAL TOOLBAR                 ##################-->
                 <!--#######################################################-->
-                <div  class="{vertical_toolbar_visibility} fixed left-0 top-[50px] sm:top-0 w-[50px] sm:w-[40px] h-screen z-20 inset-0   overflow-hidden">
+                <div  class="hidden sm:block fixed left-0 top-[50px] sm:top-0 w-[50px] sm:w-[40px] h-screen z-20 inset-0   overflow-hidden">
                     <div class="sticky top-0 flex h-full w-12 sm:w-10 bg-stone-800 dark:bg-stone-950 flex-col items-center text-stone-100 shadow">
-                        <VerticalToolbar appConfig={layout} mobile={is_small}/>
+                        <VerticalToolbar appConfig={layout} mobile={false}/>
                     </div>
                 </div>
 
-                 <header class="{horizontal_nav_tabs_visibility}  fixed w-screen bottom-0 h-[50px] sm:h-[40px] z-20 shadow  shadow-stone-900/5 dark:shadow-none     overflow-auto" >
-                        <div class=" flex flex-row justify-between  h-full  bg-stone-950   text-stone-100 ">
-                            <HorizontalNavigatorTabs appConfig={layout}/>
-                        <div>
-                </header> 
+                 <header class="block sm:hidden  fixed w-screen bottom-0 h-[50px] sm:h-[40px] z-20 shadow  shadow-stone-900/5 dark:shadow-none     overflow-auto" >
+                    <div class="    flex flex-row justify-between  h-full
 
-                <!--VerticalToolbar /-->
+                                    text-stone-500 bg-stone-200/70 hover:bg-stone-200
+                                    dark:text-orange-200 dark:bg-stone-700/70 dark:hover:bg-stone-700
+                                    bg-stone-200 dark:bg-stone-800/70
+                                    border-t border-stone-500 ">
+                        <HorizontalNavigatorTabs appConfig={layout}/>
+                    <div>
+                </header>
+
 
                 <!--#######################################################-->
                 <!--##  MAIN SIDE BAR                    ##################-->
@@ -424,16 +427,17 @@
                 {@const sidebar_small_width = $sidebar_left_pos==0 ? "w-full" : "w-[calc(100vw-50px)]"}
 
                 <div  class="main-side-bar {main_side_panel_visibility}
-                                {sidebar_left}  sm:left-[40px]
-                                top-[50px]  sm:top-0
+                                left-0 top-0 sm:left-[40px]
+                                top-0
+                                w-full sm:w-[320px]
                                 h-[calc(100vh-50px)] sm:h-full {lg_main_sidebar_height}
-                                {sidebar_small_width} sm:w-[320px]
+
                                 z-20 overflow-x-hidden
 
                                 bg-stone-50 dark:bg-stone-900
                                 border-r-1 border-stone-500/30 dark:border-stone-300
-                                sm:shadow sm:shadow-slate-700/40
-                                sm:dark:shadow-blue">
+                                sm:shadow sm:shadow-stone-700/40
+                                sm:dark:shadow-stone-900/90">
 
                     <div class="    w-full h-full  overflow-y-auto overscroll-contain py-0 px-0">
 
@@ -551,7 +555,7 @@
 
 <style lang="scss">
 
-   
+
     /* bg-white */
     :global(body)
     {
@@ -564,7 +568,7 @@
     {
       --tw-bg-opacity: 1;
       background-color: rgb(12 10 9 / var(--tw-bg-opacity));
-      
+
     }
 
 </style>

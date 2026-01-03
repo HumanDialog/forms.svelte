@@ -1503,13 +1503,7 @@
             clearsContext='props sel'
             title={folderTitle}>
 
-        <Paper class="mb-64">
-
-
-
-            <!--p class="hidden sm:block mt-3 ml-3 pb-5 text-lg text-left">
-                {folderTitle}
-            </p-->
+        <Paper>
             <PaperHeader>
             <Breadcrumb  path = {contextItem.GetCanonicalPath}/>
             </PaperHeader>

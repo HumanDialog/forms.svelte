@@ -867,7 +867,8 @@ let list_properties = {
                 paper w-full sm:w-[24rem]
                 prose prose-base prose-zinc dark:prose-invert prose-a:no-underline
                 sm:max-w-3xl
-                m-0 pt-3 pb-5 px-4
+
+                m-0 pt-3 pb-5 px-2
                 sm:rounded
                 sm:bg-stone-100 sm:dark:bg-stone-900
                 flex flex-col
@@ -877,7 +878,7 @@ let list_properties = {
         <!-- POPUP HEADER ---------------------------------------------------->
         <!-------------------------------------------------------------------->
         <h3 class = "flex-none">
-            <div class=" w-full flex flex-row justify-between">
+            <div class="px-2 w-full flex flex-row justify-between">
                 <div class="py-1.5  flex flex-row justify-between">
                     {#if levelUpHRef}
                         <button class="mr-4 w-6
@@ -923,7 +924,7 @@ let list_properties = {
         <!-------------------------------------------------------------------->
         <!-- POPUP CONTENT---------------------------------------------------->
         <!-------------------------------------------------------------------->
-        <div class="grow max-h-[45dvh] sm:max-h-[75dvh] overflow-y-auto overscroll-contain">
+        <div class="px-2 grow max-h-[45dvh] sm:max-h-[75dvh] overflow-y-auto overscroll-contain">
             <List   objects={elements}
                     orderAttrib='Order'
                     {list_properties}

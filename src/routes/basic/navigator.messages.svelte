@@ -386,7 +386,7 @@
 
 {#key currentPath}
 <PaperNav>
-{#if sidebar}
+{#if true}
     {@const hasContent = (generalChannels ) || (directChannels )}
     {#if hasContent}
 

@@ -382,7 +382,7 @@
         {
             let contextItem = res.Folder
             const canonicalPath = contextItem.GetCanonicalPath
-            if(canonicalPath.length > 0)
+            if(canonicalPath != null && canonicalPath?.length > 0)
                 levelUpHRef = canonicalPath[canonicalPath.length-1].href
             else
                 levelUpHRef = '/root'
@@ -521,7 +521,7 @@
         {
             let contextItem = res.TaskList
             const canonicalPath = contextItem.GetCanonicalPath
-            if(canonicalPath.length > 0)
+            if(canonicalPath != null && canonicalPath?.length > 0)
                 levelUpHRef = canonicalPath[canonicalPath.length-1].href
             else
                 levelUpHRef = '/root'
@@ -598,7 +598,7 @@
         {
             let contextItem = res.Task
             const canonicalPath = contextItem.GetCanonicalPath
-            if(canonicalPath.length > 0)
+            if(canonicalPath != null && canonicalPath?.length > 0)
                 levelUpHRef = canonicalPath[canonicalPath.length-1].href
             else
                 levelUpHRef = '/root'
@@ -695,7 +695,7 @@
         {
             let contextItem = res.Note
             const canonicalPath = contextItem.GetCanonicalPath
-            if(canonicalPath.length > 0)
+            if(canonicalPath != null && canonicalPath?.length > 0)
                 levelUpHRef = canonicalPath[canonicalPath.length-1].href
             else
                 levelUpHRef = '/root'

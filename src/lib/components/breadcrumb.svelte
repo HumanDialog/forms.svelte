@@ -143,7 +143,7 @@
                 {/if}
             {/each}
         {:else}
-            <span>&nbsp</span>
+            <span>&nbsp./&nbsp</span>
         {/if}
     </div>
 </div>
