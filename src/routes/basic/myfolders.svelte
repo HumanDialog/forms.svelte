@@ -311,16 +311,17 @@
         title={title}>
     <Paper>
         <PaperHeader>
-            <Breadcrumb class="mt-1 mb-5" path={canonicalPath}/>
+            <!--Breadcrumb class="mt-1 mb-5" path={canonicalPath}/-->
         </PaperHeader>
 
         <h1>{title}</h1>
+        <span>&nbsp</span>
 
-        <div class="flex flex-row justify-between">
+        <!--div class="flex flex-row justify-between">
             <span></span>
             <span class="text-center"></span>
-            <!--span class="pr-5 text-right"> <Paginator {onPage} {pageNo} {allPagesNo} bind:this={paginatorTop}/></span-->
-        </div>
+            <span class="pr-5 text-right"> <Paginator {onPage} {pageNo} {allPagesNo} bind:this={paginatorTop}/></span>
+        </div-->
 
 
 

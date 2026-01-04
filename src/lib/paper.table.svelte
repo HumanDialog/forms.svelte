@@ -2,13 +2,12 @@
     let additionalClass = $$props.class ?? ''
 </script>
 
-<section class="    paper w-full
+<section class="    paper
                     prose prose-base prose-zinc dark:prose-invert prose-a:no-underline
                     sm:max-w-none sm:min-h-[32rem]
 
-                    m-0 mb-64 px-2 pt-2 pb-32
+                    m-0 mb-64 px-2 pt-2 pb-0
 
-                    m-0 mb-64 px-2 pt-2 pb-32
                     sm:mt-4 sm:px-4
                     md:px-10 md:mx-2
 

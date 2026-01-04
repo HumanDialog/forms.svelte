@@ -192,7 +192,7 @@
             toolbarOperations={pageOperations}
             clearsContext='props sel'
             title={user.Name}>
-        <Paper class="mb-64">
+        <Paper>
         <!--section class="w-full flex justify-center"-->
             <PaperHeader>
 

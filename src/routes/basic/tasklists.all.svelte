@@ -12,7 +12,7 @@
                 ListComboProperty,
 				mainContentPageReloader,
                 Modal,
-                onErrorShowAlert, Breadcrumb, Paper,
+                onErrorShowAlert, Breadcrumb, Paper, PaperHeader,
                 i18n, refreshToolbarOperations
         } from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaList, FaPen, FaArchive, FaChevronLeft, FaChevronRight} from 'svelte-icons/fa'
@@ -196,10 +196,18 @@
                     operations: [
                         {
                             icon: FaList,
+                            mricon: 'clipboard-list',
                             caption: '_; New list; Nueva lista; Nowa lista',
                             action: (focused) => { listComponent.addRowAfter(null) },
                             fab: 'M01',
                             tbr: 'A'
+                        },
+                        {
+                            mricon: 'file-archive',
+                            caption: '_; Show archived lists; Mostrar listas archivadas; Pokaż zarchiwizowane listy',
+                            //action: (focused) => { listComponent.addRowAfter(null) },
+                            fab: 'S01',
+                            tbr: 'C'
                         }
                     ]
                 }
@@ -301,6 +309,28 @@
         refreshToolbarOperations()
     }
 
+        let list_properties = {
+        Title: "Title",
+        Summary: "Summary",
+        icon: "icon",
+        element:{
+            icon: "#clipboard-list",
+            href: "href",
+            Title: "Name",
+            Summary: "Summary"
+        },
+        context:{
+            Folder:{
+                Summary: "Summary",
+
+            },
+            FolderFolder:{
+                Summary: "Summary",
+                head_right: "ModificationDate"
+            }
+        }
+    }
+
 </script>
 
 <svelte:head>
@@ -314,21 +344,22 @@
                 toolbarOperations={pageOperations}
                 clearsContext='props sel'
                 title={title}>
-                <Paper class="mb-64">
-                <section class="w-full place-self-center max-w-3xl">
+            <Paper class="mb-64">
 
-                    {#if canonicalPath}
-                        <Breadcrumb class="mt-1 mb-5" path={canonicalPath}/>
-                    {/if}
+        <PaperHeader>
+            <!--Breadcrumb class="mt-1 mb-5" path={canonicalPath}/-->
+        </PaperHeader>
 
+        <h1>{title}</h1>
+        <span>&nbsp</span>
             <List   self={group}
                     a='Lists'
                     {list_properties}
                     toolbarOperations={listOperations}
                     orderAttrib='Order'
-                     title={title}
+
                     bind:this={listComponent}>
-                <ListTitle a='Name' hrefFunc={(list) => list.href} />
+                <!--ListTitle a='Name' hrefFunc={(list) => list.href} /-->
                 <ListSummary a='Summary'/>
                 <ListInserter action={addList} icon/>
 
@@ -340,15 +371,15 @@
 
             </List>
 
-            <div class="ml-3 mt-20 mb-10">
+            <!--div class="ml-3 mt-20 mb-10">
                 <a  href={`/alllists?archived`}
                     class="hover:underline"
                     use:link>
                         _; Show archived lists; Mostrar listas archivadas; Pokaż zarchiwizowane listy
                         <div class="inline-block mt-1.5 w-3 h-3"><FaChevronRight/></div>
                 </a>
-            </div>
-            </section>
+            </div-->
+
             </Paper>
         </Page>
     {:else}

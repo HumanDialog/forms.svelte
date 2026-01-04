@@ -12,7 +12,7 @@
                 ListComboProperty,
 				mainContentPageReloader,
                 Modal,
-                onErrorShowAlert, i18n, Paper,
+                onErrorShowAlert, i18n, Paper,  PaperHeader,
                 Breadcrumb} from '$lib'
     import {querystring, location} from 'svelte-spa-router'
     import {FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegComments, FaRegClipboard, FaPen, FaArchive, FaEllipsisH} from 'svelte-icons/fa'
@@ -275,6 +275,28 @@
             return FaRegFolder
     }
 
+    let list_properties = {
+        Title: "Title",
+        Summary: "Summary",
+        icon: "icon",
+        element:{
+            icon: "icon",
+            href: "href",
+            Title: "Title",
+            Summary: "Summary"
+        },
+        context:{
+            Folder:{
+                Summary: "Summary",
+
+            },
+            FolderFolder:{
+                Summary: "Summary",
+                head_right: "ModificationDate"
+            }
+        }
+    }
+
 </script>
 
 <svelte:head>
@@ -287,17 +309,14 @@
             toolbarOperations={pageOperations}
             clearsContext='props sel'
             title={title}>
-            <Paper class="mb-64">
-            <section class="w-full place-self-center max-w-3xl">
 
-            {#if canonicalPath}
-                <Breadcrumb class="mt-1 mb-5" path={canonicalPath} />
-            {/if}
+        <Paper>
+        <PaperHeader>
 
+        </PaperHeader>
 
-            <p class="hidden sm:block mt-3 ml-3 pb-5 text-lg text-left">
-                {title}
-            </p>
+        <h1>{title}</h1>
+        <span>&nbsp</span>
 
         <List   self={group}
                 a='Folders'
@@ -305,17 +324,12 @@
                 toolbarOperations={folderOperations}
                 orderAttrib='Order'
                 bind:this={listComponent}>
-            <ListTitle a='Title' hrefFunc={(folder) => `${folder.href}`}/>
-            <ListSummary a='Summary'/>
+
             <ListInserter action={addFolder} icon/>
 
-            <span slot="left" let:element>
-                <Icon component={getFolderIcon(element)}
-                    class="h-5 w-5  text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
-            </span>
 
         </List>
-    </section>
+
 
     </Paper>
     </Page>

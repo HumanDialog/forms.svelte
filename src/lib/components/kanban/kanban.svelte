@@ -649,6 +649,7 @@
                 sm: space-x-0
                 sm:divide-x
                 divide-stone-500 dark:divide-stone-700
+                pb-20
                 "> <!--sm:justify-center -->
     {#each definition.columns as column, idx (column.id)}
         <KanbanColumn currentColumnIdx={idx}

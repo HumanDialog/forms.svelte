@@ -319,7 +319,7 @@
                 clearsContext='props sel'
                 title={folderTitle}>
 
-                    <Paper>
+        <Paper>
         <PaperHeader>
             <!--Breadcrumb class="mt-1 mb-5" path={canonicalPath}/-->
         </PaperHeader>

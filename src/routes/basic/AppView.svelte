@@ -59,7 +59,7 @@
     let layout = null
 
     $: init($session)
-    
+
     async function init(...args)
     {
         if(!$session.isActive && !$session.isUnauthorizedGuest)
@@ -280,8 +280,15 @@
                     customOperations:[
                         {
                          //   caption: '_; Profile; Perfil; Profil',
-                            captionFunc: () => '_; Profile; Perfil; Profil',
-                            icon: FaUser,
+                            captionFunc: () => '_; Profile; Perfil; Profil+',
+                            mricon: 'user',
+                            action: (f) => { push('/profile')},
+                            condition: () => $session.isActive
+                        },
+                        {
+                         //   caption: '_; Profile; Perfil; Profil',
+                            captionFunc: () => '_; Change group; Change group; Zmień grupę',
+                            mricon: 'users',
                             action: (f) => { push('/profile')},
                             condition: () => $session.isActive
                         },
@@ -541,7 +548,7 @@
                     timestamp: Date.now()
                 }
 
-                window.localStorage.setItem('lastNavigation', JSON.stringify(state))   
+                window.localStorage.setItem('lastNavigation', JSON.stringify(state))
             }
         }
     }

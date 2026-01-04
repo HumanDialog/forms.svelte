@@ -9,6 +9,7 @@
 			isSelected,
 			DatePicker,
             Ricon,
+            Editable,
             Combo, Tags, ComboSource,
             informModification, pushChanges, onErrorShowAlert, setSelectionAtEnd
         } from '$lib';
@@ -160,6 +161,8 @@
         if(field == "Title")
         {
             startEditing(titleElement);
+            titleElement.focus();
+            await tick();
         }
         else if(field == "Summary")
         {
@@ -167,7 +170,7 @@
             {
                 summaryElement.focus();
                 await tick();
-                setSelectionAtEnd(summaryElement)
+                //setSelectionAtEnd(summaryElement)
             }
             else
             {
@@ -347,20 +350,14 @@
     <!--a  href={task.href} use:link -->
     <h4 class="     text-sky-500"
 
-                    use:editable={{
-                    action: (text) => onTitleChanged(text),
-                    active: false,
-                    onFinish: (d) => {titleElement.blur()},
-                    onSoftEnter: async (text) => { onTitleChanged(text); await editProperty('Summary') }
-                    }}
-                bind:this={titleElement}>
+                >
         <a class= "font-semibold" href={task.href} use:link >
         <!--div class="inline-block w-4 h-4 ml-1 mr-3 align-baseline
                 text-stone-700 dark:text-stone-400 ">
 
                 <Ricon icon = "turtle"/>
         </div-->
-        {task.Title}
+        <Editable self={task} a='Title' bind:this={titleElement}/>
         </a>
     </h4>
     <!--/a -->

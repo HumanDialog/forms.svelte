@@ -302,6 +302,28 @@
         refreshToolbarOperations()
     }
 
+    let list_properties = {
+        Title: "Title",
+        Summary: "Summary",
+        icon: "icon",
+        element:{
+            icon: "icon",
+            href: "href",
+            Title: "Title",
+            Summary: "Summary"
+        },
+        context:{
+            Folder:{
+                Summary: "Summary",
+
+            },
+            FolderFolder:{
+                Summary: "Summary",
+                head_right: "ModificationDate"
+            }
+        }
+    }
+
 </script>
 
 <svelte:head>

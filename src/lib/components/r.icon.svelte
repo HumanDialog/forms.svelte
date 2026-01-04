@@ -24,6 +24,9 @@
   import Upload  from './ricons/upload.svelte'
   import Download from './ricons/download.svelte'
 
+  import User  from './ricons/user.svelte'
+  import Users  from './ricons/users.svelte'
+
 
   import SquarePen from './ricons/square-pen.svelte'
   import SquareCheckBig from './ricons/square-check-big.svelte'
@@ -53,6 +56,9 @@
     "clipboard-list": ClipboardList,
     "chevron-down": ChevronDown,
     "chevron-right": ChevronRight,
+
+    "user": User,
+    "users": Users,
 
     "file-text": FileText,
     "file-archive": FileArchive,

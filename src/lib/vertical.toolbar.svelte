@@ -7,9 +7,9 @@
     import Input from './components/inputbox.ltop.svelte'
     //import Menu from '$lib/components/contextmenu.svelte'
 
-    import {dark_mode_store, 
+    import {dark_mode_store,
             tools_visible_store,
-            bottom_bar_visible_store, 
+            bottom_bar_visible_store,
             right_sidebar_visible_store,
             contextItemsStore,
             context_info_store,
@@ -19,27 +19,27 @@
             showFABAlways,
             leftHandedFAB,
             navKey
-        } from "./stores.js";     
+        } from "./stores.js";
     import Icon from './components/icon.svelte';
     import {session, signInHRef, signOutHRef} from '@humandialog/auth.svelte'
 	import { pop, push } from 'svelte-spa-router';
 	import { tick } from 'svelte';
 	import { isDeviceSmallerThan, navGetKey, navHide, navIsVisible, navShow, navToggle } from './utils';
     import {setCurrentLanguage, getLanguages, i18n, getCurrentLanguage} from './i18n.js'
-    
+
 
     export let appConfig = undefined;
     export let mobile=false;
     export let clearsContext = 'sel props'
-    
+
     export let definedTabs = undefined
     export let mainToolbarConfig = undefined
-    
+
     let tabs = new Array();
     let config = null;
     let has_selection_details = false;
     let selection_detils_caption =  i18n({en: 'Properties', es: 'Propiedades', pl: 'Właściwości'});
-    
+
     let show_sign_in_out_icons = false;
     let is_logged_in = false;
     let sign_in_href = '';
@@ -52,7 +52,7 @@
         {
             config = appConfig.mainToolbar;
             has_selection_details = appConfig.selectionDetails;
-            
+
             if(has_selection_details)
             {
                 if(appConfig.selectionDetails.captionFunc)
@@ -81,8 +81,8 @@
         }
         else
         {
-            Object.keys(appConfig.sidebar).forEach( (key) =>    
-                { 
+            Object.keys(appConfig.sidebar).forEach( (key) =>
+                {
                     const ctab = appConfig.sidebar[key];
                     const can_show = (ctab.authorized && is_logged_in) || (!ctab.authorized)
                     if(can_show)
@@ -96,7 +96,7 @@
                             badgeObtainer: ctab.badgeObtainer
                         }
 
-                        tabs.push(tab); 
+                        tabs.push(tab);
                     }
                 });
 
@@ -114,8 +114,8 @@
             }
         }
 
-        
-       
+
+
         /*show_groups_switch_menu = $session.tenants.length > 1
 
         if($session.configuration.tenant)
@@ -127,15 +127,15 @@
                     can_add_new_group = true;
                 }
             }))
-            
-        } 
+
+        }
         */
-        
+
     }
 
     function on_navigator_tab_clicked(e, key)
     {
-        e.stopPropagation();    
+        e.stopPropagation();
         navToggle(key);
     }
 
@@ -170,6 +170,7 @@
                     options.push({
                                     caption: caption,
                                     icon: o.icon,
+                                    mricon: o.mricon,
                                     action: o.action
                                 })
                 }
@@ -196,7 +197,7 @@
                 }
 
                 options.push({separator: true})
-                
+
         }
 
         if(!config || config.darkMode)
@@ -270,9 +271,9 @@
                         action: (focused) => { $bottom_bar_visible_store = !$bottom_bar_visible_store }
                     });
         }
-        
+
         //let anchor = new DOMPoint(rect.right, rect.top)
-        showMenu(rect, options, SHOW_MENU_RIGHT);    
+        showMenu(rect, options, SHOW_MENU_RIGHT);
     }
 
     function show_groups(e)
@@ -294,7 +295,7 @@
                 disabled: tInfo.id == $session.tid,
                 action: (f) => {
                     $session.setCurrentTenantAPI(tInfo.url, tInfo.id)
-                    
+
                     push('/')
                     reloadWholeApp();
                 }
@@ -313,9 +314,9 @@
             })
         }
 
-        
+
         //const anchor = new DOMPoint(rect.right, rect.top)
-        showMenu(rect, options, SHOW_MENU_RIGHT);    
+        showMenu(rect, options, SHOW_MENU_RIGHT);
     }
 
     function clearSelection()
@@ -352,7 +353,7 @@
         {
             return onNewGroupCancel()
         }
-        
+
         const appInstanceId = $session.configuration.tenant
         if(!appInstanceId)
         {
@@ -378,7 +379,7 @@
             }
             else
             {
-                const result = await res.json();  
+                const result = await res.json();
                 console.error(result.error);
             }
 
@@ -411,7 +412,7 @@
     {
         tabs = [...tabs]
     }
-    
+
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -425,7 +426,7 @@
                 class:bg-orange-500={isSelected}
                 on:click={tab.onclick}
                 use:mountNavigator={tab}>
-                
+
                 <Icon s="xl" component={tab.icon}/>
 
                 {#if !isSelected}
@@ -441,9 +442,9 @@
                     {:else if tab.badgeObtainerAsync}
                         {#await tab.badgeObtainerAsync() then badge}
                             {#if badge > 0}
-                                <div class="absolute 
-                                            inline-flex items-center justify-center 
-                                            w-5 h-5 
+                                <div class="absolute
+                                            inline-flex items-center justify-center
+                                            w-5 h-5
                                             text-[10px] font-bold text-white bg-red-500 border-2 border-white rounded-full bottom-2 end-0 dark:border-gray-900">
                                     {#if badge > 9}
                                         9+
@@ -461,9 +462,9 @@
     </div>
 
     {#if !mobile}
-    
+
         <div class="mt-auto h-auto items-center w-full">
-            
+
             {#if show_groups_switch_menu}
                 <button class="h-12 px-0 flex justify-center items-center w-full text-stone-300 hover:text-stone-100"
                         on:click|stopPropagation={show_groups}>
@@ -491,9 +492,9 @@
         onCancelCallback={onNewGroupCancel}
         icon={FaUsers}
 >
-    <Input  label={i18n({en:'Group name', es:'Nombre del grupo', pl:'Nazwa grupy'})} 
-            placeholder='' 
-            self={newGroupParams} 
+    <Input  label={i18n({en:'Group name', es:'Nombre del grupo', pl:'Nazwa grupy'})}
+            placeholder=''
+            self={newGroupParams}
             a="name"
             required/>
 </Modal>

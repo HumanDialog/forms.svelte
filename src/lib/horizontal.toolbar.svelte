@@ -154,6 +154,7 @@
                     options.push({
                                 caption: caption,
                                 icon: o.icon,
+                                mricon: o.mricon,
                                 action: o.action
                             })
                 }

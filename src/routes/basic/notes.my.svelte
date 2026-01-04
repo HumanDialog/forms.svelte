@@ -287,7 +287,7 @@
                 >
             <Paper >
                 <PaperHeader>
-                    <Breadcrumb class="mt-1 mb-5" path={canonicalPath}/>
+                    <!--Breadcrumb class="mt-1 mb-5" path={canonicalPath}/-->
                 </PaperHeader>
 
                 <h1>{title}</h1>
