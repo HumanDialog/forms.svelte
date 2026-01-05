@@ -10,7 +10,7 @@
 </script>
   
 <Sidebar>
-    <SidebarBrand class="hidden sm:block" >
+    <SidebarBrand >
         Tilos <span class="font-thin">community</span>
         
     </SidebarBrand>

@@ -924,7 +924,7 @@ let list_properties = {
         <!-------------------------------------------------------------------->
         <!-- POPUP CONTENT---------------------------------------------------->
         <!-------------------------------------------------------------------->
-        <div class="px-2 grow max-h-[45dvh] sm:max-h-[75dvh] overflow-y-auto overscroll-contain">
+        <div class="px-2 flex-none h-[45dvh] overflow-y-auto overscroll-contain">
             <List   objects={elements}
                     orderAttrib='Order'
                     {list_properties}

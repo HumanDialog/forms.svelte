@@ -8,7 +8,7 @@
 </script>
 
 <Sidebar>
-    <SidebarBrand class="hidden sm:block" >
+    <SidebarBrand >
         Octopus <span class="font-thin">basic</span>
 
 

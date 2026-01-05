@@ -10,7 +10,7 @@
 </script>
 
 <Sidebar>
-    <SidebarBrand class="hidden sm:block" summary={current_group_name}>
+    <SidebarBrand summary={current_group_name}>
         Octopus <span class="font-thin">basic</span>
 
 
