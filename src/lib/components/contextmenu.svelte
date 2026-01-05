@@ -646,7 +646,8 @@
 
 <div id="__hd_svelte_contextmenu"
     class="
-            bg-stone-100 dark:bg-stone-800 rounded-lg shadow-md shadow-stone-500 dark:shadow-black z-40 fixed
+            bg-stone-100 dark:bg-stone-800 rounded-lg shadow-md shadow-stone-500
+            dark:shadow-black z-40 fixed
             sm:shadow-xl sm:shadow-slate-700/10
             sm:dark:shadow-black/80
             sm:outline sm:outline-1 sm:outline-stone-500
@@ -659,7 +660,8 @@
                 paper w-full sm:w-[24rem]
                 prose prose-base prose-zinc dark:prose-invert prose-a:no-underline
                 sm:max-w-3xl
-                m-0 pt-3 pb-5 pl-0
+
+                m-0 pt-3 pb-5 px-2
                 sm:rounded
                 sm:bg-stone-100 sm:dark:bg-stone-900
                 flex flex-col
@@ -670,8 +672,8 @@
     <!-------------------------------------------------------------------->
     {#if closeButtonPos}
     <h3 class = "flex-none">
-        <div class=" w-full flex flex-row justify-between">
-            
+        <div class="px-2 w-full flex flex-row justify-between">
+
             <div class="grow ">
                 <span class="px-2 text-left"></span>
             </div>
@@ -688,24 +690,16 @@
     </h3>
     {/if}
 
-    {#if false && closeButtonPos}
-        <button class="     fixed w-6 h-6 flex items-center justify-center
-                            focus:outline-none font-medium text-sm text-center"
-                style={closeButtonPos}
-                on:click={ hide }> <!--focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 rounded-full  text-stone-500 bg-stone-200/70 hover:bg-stone-200  dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700 -->
-            <Icon component={FaTimes} s="md"/>
-        </button>
-    {/if}
 
     <!-------------------------------------------------------------------->
     <!-- POPUP CONTENT---------------------------------------------------->
     <!-------------------------------------------------------------------->
-    <div class="grow max-h-[45dvh] sm:max-h-[75dvh] overflow-y-auto overscroll-contain">
-        
-        
-            
+    <div class="px-2 grow max-h-[45dvh] sm:max-h-[75dvh] overflow-y-auto overscroll-contain">
+
+
+
         {#each operations as operation, index}
-            
+
             {@const is_separator = operation.separator}
             {#if is_separator}
                 {#if index>0 && index < operations.length-1}
@@ -713,7 +707,7 @@
                     <hr class="my-4">
                 {/if}
             {:else}
-                
+
                 {@const mobile = isDeviceSmallerThan("sm")}
                 {@const icon_placeholder_without_desc = mobile ? 12 : 10}
                 {@const icon_placeholder_with_desc = mobile ? 14 : 12}
@@ -737,7 +731,7 @@
                     class:opacity-60={isOperationDisabled(operation)}>
 
 
-                            
+
                 <h4 class = " my-0 py-2"> <!-- test -->
                     <div class=" w-full flex flex-row justify-between">
                         {#if operation.mricon}
@@ -759,7 +753,7 @@
 
                     </div>
                 </h4>
-            
+
 
 
         <!-- comming soon - top info --
@@ -848,4 +842,3 @@
         position: fixed;
     }
 </style-->
-

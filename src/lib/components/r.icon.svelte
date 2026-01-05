@@ -89,6 +89,7 @@
   {
       width = 20;
       height = 20;
+      stroke = 1
   }
   else if(l)
   {

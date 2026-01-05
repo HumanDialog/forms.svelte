@@ -467,8 +467,8 @@
 
                         <div class="    text-stone-500 bg-stone-200/70 hover:bg-stone-200
                                         focus:outline-none font-medium rounded-full text-sm text-center
-                                        dark:text-orange-200 dark:bg-stone-700/70 dark:hover:bg-stone-700
-                                        ring-1 ring-orange-800/40 dark:ring-orange-200/60
+                                        dark:text-orange-200 dark:bg-stone-700/40 dark:hover:bg-stone-700
+                                        ring-1 ring-orange-800/40 dark:ring-orange-200/30
                                         focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800
 
                                         flex items-center justify-center
