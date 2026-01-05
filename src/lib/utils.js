@@ -1,7 +1,9 @@
 import { getContext, tick } from "svelte";
 import {derived, get} from 'svelte/store'
-import { contextItemsStore, contextToolbarOperations, pageToolbarOperations, data_tick_store, main_sidebar_visible_store, show_sidebar, hide_sidebar, previously_visible_sidebar, auto_hide_sidebar} from "./stores";
+import { contextItemsStore, contextToolbarOperations, pageToolbarOperations, data_tick_store, main_sidebar_visible_store, show_sidebar, hide_sidebar, previously_visible_sidebar, auto_hide_sidebar, reloadWholeApp} from "./stores";
 import {location, push, pop} from 'svelte-spa-router'
+import {session, reef} from '@humandialog/auth.svelte'
+import { i18n } from "./i18n";
 
 export let icons = {symbols :null}
 
@@ -1176,4 +1178,89 @@ export function sessionStorageRead(key, fallback = '')
     {
         return fallback;
     }
+}
+
+export function getCurrentGroupName(session)
+{
+    const gid = session.tid;       // current tenant id
+    const tInfo = session.tenants.find(t => t.id == gid)
+    if(tInfo)
+        return tInfo.name;
+    else 
+    {
+        return 'Current group'  // todo: handle group when local auth 
+    }
+}
+
+export async function getGroupsMenu(params)
+{
+    const session = params.session
+    const reditectTo = params.redirectAfterSwitch
+    const afterGroupCreated = params.afterGroupCreated
+
+    let showGroupsSwitchMenu = false;
+    let canAddNewGroup = false;
+
+    showGroupsSwitchMenu = session.tenants.length > 1
+    if(session.configuration.tenant)
+    {
+        const instanceInfo = await reef.getAppInstanceInfo()
+        if(instanceInfo?.is_public)
+        {
+            showGroupsSwitchMenu = true;
+            canAddNewGroup = true;
+        }
+    }
+
+    if(!showGroupsSwitchMenu)
+        return []
+
+    let options = []
+    
+    session.tenants.forEach(tInfo =>
+        options.push({
+            caption: tInfo.name,
+            disabledFunc: () => tInfo.id == session.tid,
+            action: async (f) => {
+                if(reditectTo)
+                    await push(reditectTo)  // __APP_DEFAULT_PAGE__
+
+                setTimeout(() => {
+                    session.setCurrentTenantAPI(tInfo.url, tInfo.id)
+                    reloadWholeApp()
+                }, 200)
+            }
+        })
+    )
+
+    if(canAddNewGroup)
+    {
+        options.push({
+            separator: true
+        })
+        options.push({
+            caption: i18n({en:'Add group', es:'Añadir grupo', pl: 'Dodaj grupę'}),
+            //icon: FaPlus,
+            action: (f) => launchNewGroupWizzard(afterGroupCreated)
+        })
+    }
+
+    return options;
+}
+
+import NewGroupDialog from './tenant.create.svelte'
+function launchNewGroupWizzard(afterGroupCreated=undefined)
+{
+    let app_div = document.getElementById("__hd_svelte_layout_root")
+    if(!app_div)
+        app_div = document.getElementById("app")
+
+    let dialog = new NewGroupDialog({
+        target: app_div,
+        props: {
+            afterGroupCreated: afterGroupCreated
+        }
+    });
+    
+    dialog.show()    
 }

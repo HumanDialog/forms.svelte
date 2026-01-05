@@ -151,7 +151,9 @@ export {
     localStorageRead,
     sessionStorageSave,
     sessionStorageRead,
-    hasLocalStorage
+    hasLocalStorage,
+    getCurrentGroupName,
+    getGroupsMenu
 }   from './utils'
 
 export {

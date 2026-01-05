@@ -1,6 +1,8 @@
 <script>
     import {reef, session, Authorized, NotAuthorized} from '@humandialog/auth.svelte'
-	import {Layout, onErrorShowAlert, Spinner, i18n, Console, registerKicksObserver, unregisterKicksObserver} from '$lib';
+	import {Layout, onErrorShowAlert, Spinner, i18n, Console, registerKicksObserver, unregisterKicksObserver,
+        getGroupsMenu
+    } from '$lib';
     import Sidebar from './sidebar.svelte'
 
     import SidebarFolders from './sidebar.folders.svelte'
@@ -87,11 +89,23 @@
             }
             else if($session.isActive)
             {
-                layout = defineAuthorizedLayout()
+                const groupsMenu = await getGroupsMenu({
+                    session: $session,
+                    redirectAfterSwitch: __APP_DEFAULT_PAGE__,
+                    afterGroupCreated: afterGroupCreated
+                })
+
+                layout = defineAuthorizedLayout(groupsMenu)
             }
         }
 
     }
+
+    function afterGroupCreated()
+    {
+        init($session)
+    }
+
 
     function defineModuleNavigator(module, showStaticOnly=false)
     {
@@ -222,7 +236,7 @@
         return navigators
     }
 
-    function defineAuthorizedLayout()
+    function defineAuthorizedLayout(groupsMenu)
     {
         return {
                 sidebar : defineNavigators(octopus_modules),
@@ -280,7 +294,7 @@
                     customOperations:[
                         {
                          //   caption: '_; Profile; Perfil; Profil',
-                            captionFunc: () => '_; Profile; Perfil; Profil+',
+                            captionFunc: () => '_; Profile; Perfil; Profil',
                             mricon: 'user',
                             action: (f) => { push('/profile')},
                             condition: () => $session.isActive
@@ -289,7 +303,7 @@
                          //   caption: '_; Profile; Perfil; Profil',
                             captionFunc: () => '_; Change group; Change group; Zmień grupę',
                             mricon: 'users',
-                            action: (f) => { push('/profile')},
+                            menu: groupsMenu,
                             condition: () => $session.isActive
                         },
                         {

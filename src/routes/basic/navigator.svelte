@@ -46,8 +46,6 @@
 
     async function initNavigator()
     {
-        initGroupSelector();
-
         const cachedUserLists = cache.get('listsNavigator_0')
         if(cachedUserLists)
         {
@@ -334,122 +332,6 @@
     let canAddNewGroup = false;
     let currentGroup = {}
 
-    function initGroupSelector()
-    {
-        showGroupsSwitchMenu = $session.tenants.length > 1
-        if($session.configuration.tenant)
-        {
-            reef.getAppInstanceInfo().then( (instanceInfo =>{
-                if(instanceInfo?.is_public)
-                {
-                    showGroupsSwitchMenu = true;
-                    canAddNewGroup = true;
-                }
-            }))
-        }
-
-        currentGroup = $session.tenants.find(t => t.id == $session.tid)
-
-    }
-
-    function getGroupsMenu()
-    {
-        if(!showGroupsSwitchMenu)
-            return []
-
-        let options = []
-        $session.tenants.forEach(tInfo =>
-            options.push({
-                caption: tInfo.name,
-                icon: FaUsers,
-                disabled: tInfo.id == $session.tid,
-                action: async (f) => {
-                    await push(__APP_DEFAULT_PAGE__)
-                    setTimeout(() => {
-                        $session.setCurrentTenantAPI(tInfo.url, tInfo.id)
-                        reloadWholeApp()
-                    }, 200)
-                }
-            })
-        )
-
-        if(canAddNewGroup)
-        {
-            options.push({
-                separator: true
-            })
-            options.push({
-                caption: '_; Add group; Añadir grupo; Dodaj grupę',
-                icon: FaPlus,
-                action: (f) => launchNewGroupWizzard()
-            })
-        }
-
-        return options;
-    }
-
-    let newGroupParams = {
-        name: ''
-    }
-
-    let newGroupModalVisible = false;
-    let newGroupIdempotencyToken = ''
-    function launchNewGroupWizzard()
-    {
-        newGroupParams.name = '';
-        newGroupModalVisible = true;
-        newGroupIdempotencyToken = randomString(8);
-    }
-
-    async function onNewGroupOK()
-    {
-        const appId = $session.appId
-        if(!appId)
-        {
-            return onNewGroupCancel()
-        }
-
-        const appInstanceId = $session.configuration.tenant
-        if(!appInstanceId)
-        {
-            return onNewGroupCancel()
-        }
-
-            const body = {
-                app_id: $session.appId,
-                tenant: $session.configuration.tenant,
-                org_name: newGroupParams.name,
-                idempotency_token: newGroupIdempotencyToken
-            }
-
-            const res = await reef.fetch(  "/dev/create-group-for-me",
-                                {
-                                    method: 'post',
-                                    body : JSON.stringify(body)
-                                });
-
-            if(res.ok)
-            {
-                await reef.refreshTokens()
-                //reloadWholeApp()
-            }
-            else
-            {
-                const result = await res.json();
-                console.error(result.error);
-                onErrorShowAlert(result.error)
-            }
-
-        newGroupParams.name = '';
-        newGroupModalVisible = false;
-    }
-
-    function onNewGroupCancel()
-    {
-        newGroupParams.name = '';
-        newGroupModalVisible = false;
-    }
-
     const myday = {}
     const teamday = {}
 
@@ -459,19 +341,8 @@
 <div class="w-full prose prose-base prose-zinc dark:prose-invert prose-a:no-underline ">
 {#if true}
     {#if groupTaskLists && groupTaskLists.length > 0}
-        {#if showGroupsSwitchMenu}
-            <SidebarGroup>
-                <SidebarItem    href=""
-                                icon={FaUsers}
-                                operations={(n) => getGroupsMenu()}
-                                selectable={currentGroup}>
-                    {currentGroup?.name}
-                </SidebarItem>
-            </SidebarGroup>
-        {/if}
-
+        
         {#if $session.isActive}
-            {@const border=showGroupsSwitchMenu}
             <SidebarGroup border title={i18n({en: 'Current work', es: 'Trabajo actual', pl: 'Bieżąca praca'})}>
                 <SidebarItem   href="/myday"
                                 icon='calendar'
@@ -628,16 +499,3 @@
         bind:this={archiveModal}
         /-->
 
-<Modal  bind:open={newGroupModalVisible}
-        title={i18n(['Create group', 'Crear grupo', 'Utwórz grupę'])}
-        okCaption={i18n(['Create', 'Crear', 'Utwórz'])}
-        onOkCallback={onNewGroupOK}
-        onCancelCallback={onNewGroupCancel}
-        icon={FaUsers}
->
-    <Input  label={i18n(['Group name', 'Nombre del grupo', 'Nazwa grupy'])}
-            placeholder=''
-            self={newGroupParams}
-            a="name"
-            required/>
-</Modal>

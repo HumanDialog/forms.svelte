@@ -24,7 +24,7 @@
     import {session, signInHRef, signOutHRef} from '@humandialog/auth.svelte'
 	import { pop, push } from 'svelte-spa-router';
 	import { tick } from 'svelte';
-	import { isDeviceSmallerThan, navGetKey, navHide, navIsVisible, navShow, navToggle } from './utils';
+	import { isDeviceSmallerThan, navGetKey, navHide, navIsVisible, navShow, navToggle, navAutoHide } from './utils';
     import {setCurrentLanguage, getLanguages, i18n, getCurrentLanguage} from './i18n.js'
 
 
@@ -141,6 +141,7 @@
 
     function show_options(e)
     {
+        navAutoHide()   //?
 
         let owner = e.target;
         while(owner && owner.tagName != 'BUTTON')
@@ -171,7 +172,8 @@
                                     caption: caption,
                                     icon: o.icon,
                                     mricon: o.mricon,
-                                    action: o.action
+                                    action: o.action,
+                                    menu: o.menu
                                 })
                 }
             })
@@ -276,16 +278,8 @@
         showMenu(rect, options, SHOW_MENU_RIGHT);
     }
 
-    function show_groups(e)
+    function get_groups_menu()
     {
-        let owner = e.target;
-        while(owner && owner.tagName != 'BUTTON')
-            owner = owner.parentElement
-
-        if(!owner)
-            return;
-
-        let rect = owner.getBoundingClientRect();
         let options = [];
 
         $session.tenants.forEach(tInfo =>
@@ -314,6 +308,21 @@
             })
         }
 
+        return options
+    }
+
+    function show_groups(e)
+    {
+        let owner = e.target;
+        while(owner && owner.tagName != 'BUTTON')
+            owner = owner.parentElement
+
+        if(!owner)
+            return;
+
+        let rect = owner.getBoundingClientRect();
+        
+        let options = get_groups_menu()
 
         //const anchor = new DOMPoint(rect.right, rect.top)
         showMenu(rect, options, SHOW_MENU_RIGHT);
