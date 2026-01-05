@@ -19,7 +19,11 @@
             showMenu,
             SHOW_MENU_BELOW,
             IcH1, IcH2, IcH3, IcH4,
-            selectable, isSelected, contextItemsStore, startEditing, hasModifications
+            selectable, isSelected, contextItemsStore, startEditing, hasModifications,
+            Editable,
+
+			focusEditable
+
             } from '$lib'
 	import { onMount, tick } from 'svelte';
 
@@ -51,6 +55,7 @@
     let canBeEditable = false
     const s = session;
     let noteTitleElement
+    let descriptionElementsId = ''
 
     const NR_NONE               = 0
     const NR_DESCRIPTION        = 1
@@ -74,6 +79,7 @@
 
        await reloadData();
        noteId = id
+       descriptionElementsId = `TaskDesc_${noteId}`
     }
 
     async function reloadData()
@@ -109,22 +115,7 @@
         isReadOnly = (note.$acc & 0x2) == 0
     }
 
-    async function onTitleChanged(text)
-    {
-        note.Title = text;
-        informModification(note, 'Title')
-        pushChanges(refreshToolbarOperations)
-        //await reef.post(`${noteRef}/SetTitle`, {val: text}, onErrorShowAlert)
-    }
-
-    async function onSummaryChanged(text)
-    {
-        note.Summary = text;
-        informModification(note, 'Summary')
-        pushChanges(refreshToolbarOperations)
-        //await reef.post(`${noteRef}/SetSummary`, {val: text}, onErrorShowAlert)
-
-    }
+   
 
     function onPropertySingleChange(txt, attrib)
     {
@@ -530,7 +521,7 @@
                                 grid:[
                                     {
                                         caption: '_; Title; Título; Tytuł',
-                                        action: (focused) =>  { startEditing(noteTitleElement) },
+                                        action: (focused) =>  { focusEditable(`#${descriptionElementsId}_Title`) },
                                     },
                                 /*    {
                                         caption: '_; Summary; Resumen; Podsumowanie',
@@ -897,6 +888,7 @@
 
 {#key noteId + (isReadOnly ? 100000 : 200000)}
 {#if note != null}
+    
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex-->
             <h1     class=" relative left-[-0.5rem] pl-2 pb-1 
@@ -907,13 +899,7 @@
                     bind:this={noteTitleElement}>
                 {#if isHeaderActive}
                     <a href={note.href} use:link class="not-prose underline cursor-pointer">
-                        <span use:editable={{
-                                action: (text) => onTitleChanged(text),
-                                onSingleChange: (txt) => onPropertySingleChange(txt, 'Title'),
-                                active: false,
-                                readonly: isReadOnly}}>
-                            {note.Title}
-                        </span>
+                        <Editable self={note} a='Title' id="{descriptionElementsId}_Title" focusOnClick={false} readonly={isReadOnly}/>
                     </a>
                 {:else}
                     <span>

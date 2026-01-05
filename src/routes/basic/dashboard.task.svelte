@@ -10,7 +10,7 @@
 			DatePicker,
             Ricon,
             Editable,
-            Combo, Tags, ComboSource,
+            Combo, Tags, ComboSource, focusEditable,
             informModification, pushChanges, onErrorShowAlert, setSelectionAtEnd
         } from '$lib';
     import PopupExplorer from './popup.explorer.svelte'
@@ -40,9 +40,6 @@
     $: selectedClass = isCardSelected ? "!border-blue-300 dark:!border-blue-300/50" : "";
     $: focusedClass = isCardActive ? "bg-stone-100 dark:bg-stone-700" : "";
     $: demo_element_class = isCardSelected ?  "bg-stone-700" : ""
-
-    export let layout24 = false;
-
 
     function calculate_active(...args)
     {
@@ -151,8 +148,6 @@
     }
 
 
-    let titleElement;
-    let summaryElement;
     let dueDateElement;
     let actorElement;
     let tagsElement;
@@ -160,24 +155,15 @@
     {
         if(field == "Title")
         {
-            startEditing(titleElement);
-            titleElement.focus();
-            await tick();
+            focusEditable('Title')
         }
         else if(field == "Summary")
         {
-            if(summaryElement)
-            {
-                summaryElement.focus();
-                await tick();
-                //setSelectionAtEnd(summaryElement)
-            }
-            else
+            if(!focusEditable('Summary'))
             {
                 placeholder = 'Summary';
                 await tick();
-                if(!!summaryElement)
-                    summaryElement.focus();
+                focusEditable('Summary')
             }
         }
         else if(field == 'DueDate')
@@ -218,24 +204,6 @@
         }
     }
 
-
-
-    function onTitleChanged(text)
-    {
-        task.Title = text;
-        informModification(task, 'Title');
-        pushChanges();
-    }
-
-    function onSummaryChanged(text, trim = false)
-    {
-        if(trim)
-            task.Summary = text.trim();
-        else
-            task.Summary = text;
-        informModification(task, 'Summary');
-        pushChanges();
-    }
 
     async function copyTaskToBasket()
     {
@@ -357,7 +325,7 @@
 
                 <Ricon icon = "turtle"/>
         </div-->
-        <Editable self={task} a='Title' bind:this={titleElement}/>
+        <Editable self={task} a='Title' focusOnClick={false}/>
         </a>
     </h4>
     <!--/a -->
@@ -404,23 +372,10 @@
     {/if}
 
 
-    {#if task.Summary}
-    <figcaption use:editable={{
-                            action: (text) => onSummaryChanged(text),
-                            active: true,
-                            onFinish: (d) => {placeholder = ''}}}
-                bind:this={summaryElement}>
-        {task.Summary}
-    </figcaption>
-    {:else if placeholder=='Summary'}
-    <figcaption use:editable={{
-                            action: (text) => onSummaryChanged(text, true),
-                            active: true,
-                            onFinish: (d) => {placeholder = ''}}}
-                bind:this={summaryElement}>
-            &nbsp
-    </figcaption>
-
+    {#if task.Summary || placeholder=='Summary'}
+        <figcaption>
+                <Editable self={task} a='Summary'/>
+        </figcaption>
     {/if}
 </figure>
 {/if}
@@ -436,119 +391,3 @@
 <!------------------------------------------------------------------------------------------------->
 <!------------------------------------------------------------------------------------------------->
 <!------------------------------------------------------------------------------------------------->
-{#if layout24}
-
-
-<!-- x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x- -->
-<!-- x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x- -->
-<!-- x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x- -->
-<!-- x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x- -->
-
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<!-- svelte-ignore a11y-no-noninteractive-interactions -->
-<section    class=" relative left-[-0.75rem] rounded-md border border-transparent {selectedClass} {focusedClass}
-                    not-prose mx-2 pt-2 pb-4 px-1 "
-            use:selectable={task}
-            on:click={activate}>
-
-    <!-- TOP PROPERTIES: Index, DueDate -->
-    <section class="flex flex-row justify-between">
-        {#if task.Index}
-            <p
-                class="     h-6
-                            text-sm sm:min-h-[1rem]
-                            text-base-sm min-h-[1.5rem]
-                            text-stone-600 dark:text-stone-400
-                            text-right">
-                {task.Index}
-            </p>
-        {/if}
-
-        {#if task.DueDate || placeholder=='DueDate'}
-            <DatePicker
-                        self={task}
-                        a={'DueDate'}
-                        compact={true}
-                        s="sm"
-                        inContext="props"
-                        bind:this={dueDateElement}/>
-        {/if}
-    </section>
-
-    <h4 class=" text-base font-semibold
-                sm:text-base sm:font-semibold">
-        {#if isCardActive}
-            <a  href={task.href}
-                use:link
-                class="cursor-pointer underline"
-                use:editable={{
-                    action: (text) => onTitleChanged(text),
-                    active: false,
-                    onFinish: (d) => {titleElement.blur()},
-                    onSoftEnter: async (text) => { onTitleChanged(text); await editProperty('Summary') }
-                    }}
-                bind:this={titleElement}>
-                {task.Title}
-            </a>
-        {:else}
-            <span>{task.Title}</span>
-        {/if}
-    </h4>
-
-    <!-- MIDDLE PROPERTIES: Actor -->
-    {#if task.Actor || placeholder=='Actor'}
-        <section class="flex flex-row justify-between">
-            <Combo  compact={true}
-                    inContext="props"
-                    self={task}
-                    a='Actor'
-                    isAssociation
-                    hasNone
-                    icon={false}
-                    s="sm"
-                    bind:this={actorElement}> <!-- changed={(k,n) => { /*fake assignment for component rer-ender*/ item[prop.a] = item[prop.a]; }}  -->
-                <ComboSource objects={users} key="$ref" name='Name'/>
-            </Combo>
-        </section>
-    {/if}
-
-    {#if task.Summary || placeholder=='Summary'}
-        <p class="  text-sm sm:text-sm
-                    text-stone-600 dark:text-stone-400">
-        {#if isCardActive}
-            <span use:editable={{
-                                action: (text) => onSummaryChanged(text),
-                                active: true,
-                                onFinish: (d) => {placeholder = ''}}}
-                            bind:this={summaryElement}>
-                {task.Summary}
-            </span>
-        {:else}
-            <span>
-                {task.Summary}
-            </span>
-        {/if}
-        </p>
-    {/if}
-
-    <!-- BOTTOM PROPERTIES: Tags -->
-    {#if task.Tags || placeholder=='Tags'}
-        <Tags
-                class="mt-1"
-                compact
-                inContext="props"
-                self={task}
-                a='Tags'
-                getGlobalTags={getAllTags}
-                onUpdateAllTags={onUpdateAllTags}
-                s="sm"
-                canChangeColor={true}
-                bind:this={tagsElement}/>
-    {/if}
-</section>
-
-
-
-<TaskProperties bind:this={taskPropertiesDialog} />
-
-{/if}

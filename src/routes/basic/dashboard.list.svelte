@@ -6,7 +6,13 @@
 			activateItem,
 			isActive,
 			isSelected,
-			getActive, setSelectionAtEnd
+			getActive, setSelectionAtEnd,
+
+			Editable,
+
+			focusEditable
+
+
         } from '$lib';
     import {tick} from 'svelte'
     import {link} from 'svelte-spa-router'
@@ -23,9 +29,7 @@
     export let onRefreshDashboard = undefined
 
     let placeholder = ''
-    let nameElement;
-    let summaryElement;
-
+    
     $: isCardActive = calculate_active(list, $contextItemsStore)
     $: isCardSelected = selected(list, $contextItemsStore)
 
@@ -117,43 +121,20 @@
         activateItem('props', list, operations);
     }
 
-    async function changeListProperty(value, propName)
-    {
-        list[propName] = value
-
-        switch(propName)
-        {
-        case 'Name':
-            await reef.post(`${list.$ref}/SetName`, { value: value }, onErrorShowAlert)
-            break;
-
-        case 'Summary':
-            await reef.post(`${list.$ref}/SetSummary`, { value: value }, onErrorShowAlert)
-            break;
-        }
-
-    }
-
+    
     export async function editProperty(field)
     {
         if(field == "Name")
         {
-            startEditing(nameElement);
+            focusEditable('Name')
         }
         else if(field == "Summary")
         {
-            if(summaryElement)
-            {
-                summaryElement.focus();
-                await tick();
-                setSelectionAtEnd(summaryElement)
-            }
-            else
+            if(!focusEditable('Summary'))
             {
                 placeholder = 'Summary';
                 await tick();
-                if(summaryElement)
-                    summaryElement.focus();
+                focusEditable('Summary')
             }
         }
     }
@@ -232,30 +213,17 @@
         >
 
     <a href={list.href} use:link>
-    <h2  class="text-sky-500"
-            use:editable={{
-            action: (text) => changeListProperty(text, 'Name'),
-            active: false,
-            onFinish: (d) => {nameElement.blur()}}}
-            bind:this={nameElement}>
-        {list.Name}
-    </h2>
+    <h2  class="text-sky-500">
+            <Editable self={list} a='Name' focusOnClick={false}/>
+    </h2> 
     </a>
 
 
 
     {#if list.Summary || placeholder == 'Summary'}
-            {#if isCardActive}
-                <p  use:editable={{
-                                    action: (text) => changeListProperty(text, 'Summary'),
-                                    active: true,
-                                    onFinish: (d) => {placeholder = ''}}}
-                                bind:this={summaryElement}>
-                    {list.Summary}
+                <p>
+                    <Editable self={list} a='Summary'/>
                 </p>
-            {:else}
-                <p>{list.Summary}</p>
-            {/if}
     {/if}
 
     {#each tasks as task}

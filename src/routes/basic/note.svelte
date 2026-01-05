@@ -35,7 +35,7 @@
             SHOW_MENU_BELOW,
             ext,
             List, ListTitle, ListSummary, ListInserter, Icon,
-            reloadPageToolbarOperations, Paper, PaperHeader
+            reloadPageToolbarOperations, Paper, PaperHeader, focusEditable
             } from '$lib'
 	import { onMount, tick } from 'svelte';
 
@@ -228,16 +228,6 @@
     }
 
 
-
-    async function onSummaryChanged(text)
-    {
-        note.Summary = text;
-        informModification(note, 'Summary')
-        pushChanges(refreshToolbarOperations)
-        //await reef.post(`${noteRef}/SetSummary`, {val: text}, onErrorShowAlert)
-
-    }
-
     function onPropertySingleChange(txt, attrib)
     {
         //note[attrib] = txt
@@ -261,7 +251,6 @@
     }
 
 
-    let summary_input;
     let summaryPlaceholder = false;
 
     let dueDate;
@@ -286,13 +275,11 @@
             caption: '_; Summary; Resumen; Podsumowanie',
             action: async (f) =>
                 {
-                    if(summary_input)
-                        summary_input.focus();
-                    else
+                    if(!focusEditable('Summary'))
                     {
                         summaryPlaceholder = true;
                         await tick();
-                        summary_input?.focus();
+                        focusEditable('Summary')
                     }
                 }
         },
@@ -1782,7 +1769,7 @@
         <!--h1>
             <REdit self={note} a='Title'/>
         </h1-->
-        <h1><Editable self={note} a='Title'/></h1>
+        <h1><Editable self={note} a='Title' readonly={isReadOnly}/></h1>
 
 
 
@@ -1830,7 +1817,7 @@
 
         {#if note.Summary || summaryPlaceholder}
             {#key note.Summary}
-                <p  class="lead"><Editable self={note} a='Summary' /></p>
+                <p  class="lead"><Editable self={note} a='Summary' readonly={isReadOnly}/></p>
             {/key}
 
         {/if}

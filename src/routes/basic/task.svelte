@@ -30,7 +30,7 @@
             showFloatingToolbar,
 			randomString,
 			showMenu,
-            SHOW_MENU_BELOW,
+            SHOW_MENU_BELOW, focusEditable,
             List, ListTitle, ListSummary, ListInserter, Icon, Paper, PaperTopMargin, PaperHeader
             } from '$lib'
 	import { onMount, tick, afterUpdate } from 'svelte';
@@ -261,23 +261,6 @@
             descriptionNotes = task.Notes.filter((n) => n.Role == NR_DESCRIPTION)
         else
             descriptionNotes = []
-    }
-
-    async function onTitleChanged(text)
-    {
-        task.Title = text;
-        informModification(task, 'Title')
-        pushChanges(refreshToolbarOperations)
-        //await reef.post(`${taskRef}/set`, {Title: text}, onErrorShowAlert)
-    }
-
-    async function onSummaryChanged(text)
-    {
-        task.Summary = text;
-        informModification(task, 'Summary'),
-        pushChanges(refreshToolbarOperations)
-        //await reef.post(`${taskRef}/set`, {Summary: text}, onErrorShowAlert)
-
     }
 
     function onPropertySingleChange(txt, attrib)
@@ -552,7 +535,6 @@
         attachementsComponent?.reload(task, attachementsComponent.CLEAR_SELECTION);
     }
 
-    let summary;
     let summaryPlaceholder = false;
 
     let dueDate;
@@ -578,13 +560,11 @@
             caption: '_; Summary; Resumen; Podsumowanie',
             action: async (f) =>
                 {
-                    if(summary)
-                        summary.focus();
-                    else
+                    if(!focusEditable('Summary'))
                     {
                         summaryPlaceholder = true;
                         await tick();
-                        summary?.focus();
+                        focusEditable('Summary')
                     }
                 }
         },
@@ -2010,7 +1990,7 @@
 
                 </span>
             </div>
-            <h1><Editable self={task} a='Title'/></h1>
+            <h1><Editable self={task} a='Title' readonly={isReadOnly}/></h1>
 
             <div class="w-full flex flex-row justify-between">
                 <span>
@@ -2067,7 +2047,7 @@
 
             {#if task.Summary || summaryPlaceholder}
                 {#key task.Summary}
-                    <p  class="lead"><Editable self={task} a='Summary' /></p>
+                    <p  class="lead"><Editable self={task} a='Summary' readonly={isReadOnly}/></p>
                 {/key}
 
             {/if}

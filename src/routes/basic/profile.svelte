@@ -1,6 +1,6 @@
 <script>   
 	import { reef, session, signInHRef } from '@humandialog/auth.svelte';
-    import { onErrorShowAlert, mainContentPageReloader, Spinner, Page, editable, getNiceStringDateTime, startEditing, i18n, Paper} from '$lib';
+    import { onErrorShowAlert, mainContentPageReloader, Spinner, Page, editable, getNiceStringDateTime, startEditing, i18n, Paper, Editable, focusEditable} from '$lib';
 	import { location, querystring, link, push } from 'svelte-spa-router';
     import {tick} from 'svelte'
     import {FaComments} from 'svelte-icons/fa'
@@ -77,14 +77,7 @@
 
     }
 
-    function onNameChanged(txt)
-    {
-        user.Name = txt
-        reef.post(`${userRef}/set`, {
-            Name: txt
-        }, onErrorShowAlert)
-    }
-
+    
     async function onBioChanged(text)
     {
         user.Bio = text
@@ -93,17 +86,14 @@
         }, onErrorShowAlert)
     }
 
-    let bioElement
     let bioPlaceholder = false
     async function startBioEditing()
     {
-        if(bioElement)
-            startEditing(bioElement, () => bioPlaceholder=false)
-        else
+        if(!focusEditable('Bio'))
         {
             bioPlaceholder = true;
             await tick();
-            startEditing(bioElement, () => bioPlaceholder=false)
+            focusEditable('Bio')
         }
     }
 
@@ -141,29 +131,15 @@
             <Paper class="mb-64">
         <section class="w-full flex justify-center">
             <article class="w-full prose prose-base prose-zinc dark:prose-invert mx-2  mb-64">
-                <h1 use:editable={{
-                        action: (text) => onNameChanged(text), 
-                        active: true,
-                        readonly: isReadOnly}}
-                        tabindex="0">
-                    {user.Name}
+                <h1>
+                    <Editable self={user} a='Name' readonly={isReadOnly}/>
                 </h1>
 
                 {#if !isReadOnly}
                     <p class="lead"
                         on:click={startBioEditing}>
                         {#if user.Bio || bioPlaceholder}
-                            <span   bind:this={bioElement}
-                                    use:editable={{
-                                        action: (text) => onBioChanged(text), 
-                                        active: false}}
-                                        tabindex="0">
-                                {#if user.Bio}
-                                    {user.Bio}
-                                {:else}
-                                    &ZeroWidthSpace;
-                                {/if}
-                            </span>
+                           <Editable self={user} a='Bio' focusOnClick={false}/>
                         {:else}
                             <span>_; Enter information about yourself; Introduce información sobre ti mismo; Wpisz informację o sobie</span>
                         {/if}

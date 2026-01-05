@@ -23,7 +23,7 @@
             IcH3,
             IcH4,
             reloadVisibleTags, i18n,
-            Breadcrumb
+            Breadcrumb, Editable
             } from '$lib'
 	import { afterUpdate, tick } from 'svelte';
     import {location, querystring, push, link} from 'svelte-spa-router'
@@ -204,21 +204,6 @@
             postResponses = [];
 
     }
-
-    async function onTitleChanged(text)
-    {
-        note.Title = text;
-        await reef.post(`${noteRef}/SetTitle`, {val: text}, onErrorShowAlert)
-    }
-
-    /*
-    async function onSummaryChanged(text)
-    {
-        note.Summary = text;
-        await reef.post(`${noteRef}/SetSummary`, {val: text}, onErrorShowAlert)
-
-    }
-    */
 
     async function onUpdateAllTags(newAllTags)
     {
@@ -1217,31 +1202,11 @@
                     </div>
             </section>
 
-            <h1     class=""
-                    use:editable={{
-                        action: (text) => onTitleChanged(text),
-                        active: true,
-                        readonly: isReadOnly}}
-                        tabindex="0">
-                {note.Title}
+            <h1>
+                <Editable self={note} a='Title' readonly={isReadOnly}/>
             </h1>
 
-            <!--
-            {#if note.Summary || summaryPlaceholder}
-                {#key note.Summary}
-                    <p  class="lead"
-                        use:editable={{
-                            action: (text) => onSummaryChanged(text),
-                            active: true,
-                            readonly: isReadOnly}}
-                        tabindex="0"
-                        bind:this={summary}>
-                        {note.Summary}
-                    </p>
-                {/key}
-
-           {/if}
-           -->
+            
 
             <section class="w-full flex flex-row flex-wrap justify-between">
                 <div class="grow-0">

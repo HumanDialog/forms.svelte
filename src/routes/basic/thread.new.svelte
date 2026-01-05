@@ -15,7 +15,10 @@
 			getNiceStringDateTime,
             startEditing,
             IcH1, IcH2, IcH3, IcH4,
-            addAlert, i18n
+            addAlert, i18n,
+            Editable,
+			focusEditable
+
         } from '$lib'
 	import { tick } from 'svelte';
     import {location, push, pop, replace, link} from 'svelte-spa-router'
@@ -468,24 +471,22 @@
 
    
     let titlePlaceholder = false;
-    let titleElement;
     async function startTitleEditing(e)
     {
-        if(titleElement)
-            startEditing(titleElement, () => titlePlaceholder=false)
-        else
+        if(!focusEditable('Title'))
         {
             titlePlaceholder = true;
             await tick();   // rerender with h1
-            startEditing(titleElement, () => titlePlaceholder=false)
+            focusEditable('Title')
         }
     }
 
+    /*
     async function onTitleChanged(text)
     {
         note.Title = text;
     }
-
+    */
  
     async function startDescriptionEditing(e)
     {
@@ -727,17 +728,7 @@
             
             <h1 on:click={startTitleEditing}>
                 {#if note.Title || titlePlaceholder}
-                    <span   bind:this={titleElement}
-                            use:editable={{
-                                action: (text) => onTitleChanged(text), 
-                                active: false}}
-                                tabindex="0">
-                        {#if note.Title}
-                            {note.Title}
-                        {:else}
-                            &ZeroWidthSpace;
-                        {/if}
-                    </span>
+                    <Editable self={note} a='Title' focusOnClick={false} />
                 {:else}
                     <span class="placeholder">
                         _; Title; Título; Tytuł
@@ -746,23 +737,6 @@
             </h1>
             
 
-            <!--
-            {#if note.Summary || summaryPlaceholder}
-                {#key note.Summary}
-                    <p  class="lead"
-                        use:editable={{
-                            action: (text) => onSummaryChanged(text),
-                            active: true,
-                            readonly: true}}
-                        tabindex="0"
-                        bind:this={summary}>
-                        {note.Summary}
-                    </p>
-                {/key}
-                
-           {/if}
-           -->
-            
             <section class="w-full flex flex-row flex-wrap justify-between">
                 <div class="grow-0">
                     {#if user}

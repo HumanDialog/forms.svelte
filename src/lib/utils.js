@@ -513,12 +513,12 @@ export function editable(node, params)
 
         node.focus();
 
-        await tick();
+        /*await tick();
         let range = document.createRange();
         range.selectNodeContents(node);
         let end_offset = range.endOffset;
         let end_container = range.endContainer;
-        range.setStart(end_container, end_offset)
+        range.setStart(end_container, 0)
         range.setEnd(end_container, end_offset)
         //range.setStart(node, 0)
         //range.setEnd(node, 0)
@@ -526,7 +526,7 @@ export function editable(node, params)
         let sel = window.getSelection();
         sel.removeAllRanges();
         sel.addRange(range);
-
+        */
     }
 
     const focus_listener = async (e) =>
@@ -593,7 +593,10 @@ export function startEditing(element, finish_callback)
     if(editable_node)
     {
         if(editable_node.contentEditable == "true")
+        {
+            editable_node.focus()
             return;
+        }
 
         if(finish_callback)
         {
@@ -603,6 +606,29 @@ export function startEditing(element, finish_callback)
         const edit_event = new Event("edit")
         editable_node.dispatchEvent(edit_event)
     }
+}
+
+export function makeEditableIdFromFieldName(fieldName)
+{
+    return `__or_editable_${fieldName}`
+}
+
+export function focusEditable(fieldName)
+{
+    let editableId = ''
+    if(fieldName.startsWith('#'))
+        editableId = fieldName.substring(1)
+    else
+        editableId = makeEditableIdFromFieldName(fieldName)
+
+    const editableElement = document.getElementById(editableId)
+    if(editableElement)
+    {
+        startEditing(editableElement)
+        return true;
+    }
+    else
+        return false;
 }
 
 export function saveCurrentEditable()

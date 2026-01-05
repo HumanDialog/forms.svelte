@@ -8,7 +8,13 @@
 			isSelected,
 			getActive,
             informModification, onErrorShowAlert,
-            pushChanges, setSelectionAtEnd, showFloatingToolbar
+            pushChanges, setSelectionAtEnd, showFloatingToolbar,
+
+			Editable,
+
+			focusEditable
+
+
         } from '$lib';
     import {link} from 'svelte-spa-router'
     import {FaPen, FaUpload} from 'svelte-icons/fa'
@@ -19,8 +25,6 @@
     export let note;
 
     let placeholder = ''
-    let titleElement
-    let summaryElement
     let notePropertiesDialog
 
     let full_view = true
@@ -122,40 +126,20 @@
         activateItem('props', note, operations);
     }
 
-    function onTitleChanged(text)
-    {
-        note.Title = text;
-        informModification(note, 'Title');
-        pushChanges();
-    }
-
-    function onSummaryChanged(text)
-    {
-        note.Summary = text;
-        informModification(note, 'Summary');
-        pushChanges();
-    }
-
+    
     export async function editProperty(field)
     {
         if(field == "Title")
         {
-            startEditing(titleElement);
+            focusEditable('Title')
         }
         else if(field == "Summary")
         {
-            if(summaryElement)
-            {
-                summaryElement.focus();
-                await tick();
-                setSelectionAtEnd(summaryElement)
-            }
-            else
+            if(!focusEditable('Summary'))
             {
                 placeholder = 'Summary';
                 await tick();
-                if(summaryElement)
-                    summaryElement.focus();
+                focusEditable('Summary')
             }
         }
 
@@ -233,37 +217,15 @@
             use:selectable={note}
             on:click={activate}>
         <a href={note.href} use:link>
-        <h4     use:editable={{
-                action: (text) => onTitleChanged(text),
-                active: false,
-                onFinish: (d) => {titleElement.blur()}
-                }}
-            bind:this={titleElement}>
-            {note.Title}
-
+        <h4>
+            <Editable self={note} a='Title' focusOnClick={false}/>
         </h4>
         </a>
 
-    {#if note.Summary}
+    {#if note.Summary || placeholder=='Summary'}
         <figcaption>
-                <span use:editable={{
-                                action: (text) => onSummaryChanged(text),
-                                active: true,
-                                onFinish: (d) => {placeholder = ''}}}
-                            bind:this={summaryElement}>
-                    {note.Summary}</span>
+            <Editable self={note} a='Summary'/>
         </figcaption>
-    {:else if placeholder == 'Summary'}
-        <figcaption>
-                <span use:editable={{
-                                action: (text) => onSummaryChanged(text),
-                                active: true,
-                                onFinish: (d) => {placeholder = ''}}}
-                            bind:this={summaryElement}>
-                    i</span>
-
-        </figcaption>
-
     {/if}
     </figure>
 {/if}

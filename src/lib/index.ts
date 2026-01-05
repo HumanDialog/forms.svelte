@@ -116,6 +116,7 @@ export {
     editable,
     startEditing,
     saveCurrentEditable,
+    focusEditable,
     selectable,
     handleSelect,
     isDeviceSmallerThan,
