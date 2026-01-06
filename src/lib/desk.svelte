@@ -85,13 +85,13 @@
             {
                 main_side_panel_visibility = "hidden"
                 lg_content_area_horizontal_dim = ""
-                lg_content_area_horizontal_tools_dim = `sm:left-[60px] sm:w-[calc(100vw-80px)]`
+                lg_content_area_horizontal_tools_dim = `sm:left-[44px] sm:w-[calc(100vw-48px)]`
             }
             else
             {
                 main_side_panel_visibility = "fixed lg:block"
                 lg_content_area_horizontal_dim = `lg:left-[360px] lg:w-[calc(100vw-360px)]`
-                lg_content_area_horizontal_tools_dim = `sm:left-[60px] sm:w-[calc(100vw-80px)] lg:left-[380px] lg:w-[calc(100vw-400px)]`
+                lg_content_area_horizontal_tools_dim = `sm:left-[44px] sm:w-[calc(100vw-48px)] lg:left-[380px] lg:w-[calc(100vw-400px)]`
             }
         }
         else
@@ -465,7 +465,8 @@
                                     sm:top-0
                                     {lg_content_area_horizontal_tools_dim}
                                     z-10 overflow-hidden
-                                     rounded-2xl
+                                    rounded-2xl
+
                                     bg-stone-50 dark:bg-stone-800
                                     border-b-1 border-stone-500/30 dark:border-stone-100
                                     sm:shadow sm:shadow-slate-700/40

@@ -732,7 +732,7 @@
 
 
 
-                <h4 class = " my-0 py-2"> <!-- test -->
+                <h4 class = "font-normal my-0 py-2"> <!-- test -->
                     <div class=" w-full flex flex-row justify-between">
                         {#if operation.mricon}
                         <div class="py-1 mr-1 w-4"><Ricon icon = {operation.mricon} s/></div>
