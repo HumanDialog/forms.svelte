@@ -2,7 +2,7 @@
     import {Spinner, showMenu, startEditing, Sidebar, SidebarBrand, SidebarGroup, SidebarItem} from '$lib'
     import {FaList, FaRegCheckCircle, FaCaretUp, FaCaretDown, FaTrash} from 'svelte-icons/fa'
     import { onMount, afterUpdate } from "svelte";
-    
+
     let tasklists = [];
     let user = {};
     let just_have_completed_lists = false;
@@ -10,11 +10,11 @@
     //$: checklists = $all_lists;
 
     onMount(async () => {
-        
+
         user = {
 
         }
-        
+
         tasklists = [
             {
                 Id: 1,
@@ -34,41 +34,41 @@
     });
 
     afterUpdate(() => {
-        
+
         if(just_have_completed_lists)
         {
             just_have_completed_lists = false;
         }
     });
 
-    
+
 
     async function add_list(list_name)
     {
-        
+
     }
 
     async function delete_list(list)
     {
-        
+
     }
 
     async function change_name(list, name)
     {
-        
+
             return true;
-        
+
     }
 
     async function finish_all_on_list(list)
     {
-        
+
 
     }
 
     async function finish_all_my_tasks()
     {
-       
+
 
     }
 
@@ -81,7 +81,7 @@
         [prev.Order, list.Order] = [list.Order, prev.Order];
         tasklists = tasklists.swap(prev, list);
 
-       
+
     }
 
     async function move_list_down(list)
@@ -93,13 +93,13 @@
         [next.Order, list.Order] = [list.Order, next.Order]
         tasklists = tasklists.swap(list, next);
 
-        
+
     }
-    
+
     function get_user_list_operations(dom_node, data_item)
     {
         let menuOperations = [];
-        
+
         menuOperations.push({
             caption: 'Finish all',
             icon: FaRegCheckCircle,
@@ -123,12 +123,12 @@
             },
             {
                 caption: 'Move up',
-                icon: FaCaretUp,
+                mricon: 'chevron-up',
                 action: (focused) => move_list_up(data_item)
             },
             {
                 caption: 'Move down',
-                icon: FaCaretDown,
+                mricon: 'chevron-down',
                 action: (focused) => move_list_down(data_item)
 
             },
@@ -144,17 +144,17 @@
         return menuOperations;
     }
 
-   
+
   </script>
-  
+
 <Sidebar>
     <SidebarBrand img="https://objectreef.dev/reef.svg">
         Octopus <span class="font-thin">mini</span>
     </SidebarBrand>
-        
+
         {#if tasklists && tasklists.length > 0}
             {@const isActive=false}
-        
+
         <SidebarGroup>
             <SidebarItem   href="#/mytasks"
                             icon={FaList}
@@ -178,15 +178,11 @@
                     {list.Name}
                 </SidebarItem>
             {/each }
-            
+
         </SidebarGroup>
-        
+
         {:else}
             <Spinner delay={3000}/>
         {/if}
 
     </Sidebar>
-
-
-
-    

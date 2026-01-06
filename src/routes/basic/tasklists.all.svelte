@@ -196,8 +196,8 @@
                     operations: [
                         {
                             icon: FaList,
-                            mricon: 'clipboard-list',
-                            caption: '_; New list; Nueva lista; Nowa lista',
+                            mricon: 'netebook',
+                            caption: '_; New list; Nueva lista; Nowa lista+',
                             action: (focused) => { listComponent.addRowAfter(null) },
                             fab: 'M01',
                             tbr: 'A'
@@ -224,8 +224,9 @@
                     caption: '_; View; Ver; Widok',
                     operations: [
                         {
-                            caption: '_; New list; Nueva lista; Nowa lista',
+                            caption: '_; New list; Nueva lista; Nowa lista*',
                             icon: FaList,
+                            mricon: 'netebook',
                             action: (focused) => { listComponent.addRowAfter(list) },
                             fab: 'M01',
                             tbr: 'A'
@@ -238,7 +239,7 @@
                     operations: [
                         {
                             caption: '_; Edit...; Editar...; Edytuj...',
-                            icon: FaPen,
+                            mricon: 'pencil',
                             fab: 'M20',
                             tbr: 'A',
                             grid: [
@@ -256,7 +257,7 @@
                         {
                             caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                             hideToolbarCaption: true,
-                            icon: FaCaretUp,
+                            mricon: 'chevron-up',
                             action: (f) => listComponent.moveUp(list),
                             fab: 'M05',
                             tbr: 'A'
@@ -264,7 +265,8 @@
                         {
                             caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                             hideToolbarCaption: true,
-                            icon: FaCaretDown,
+                            mricon: 'chevron-down',
+                            mricon: 'chevrons-down',
                             action: (f) => listComponent.moveDown(list),
                             fab: 'M04',
                             tbr: 'A'
@@ -312,23 +314,14 @@
         let list_properties = {
         Title: "Title",
         Summary: "Summary",
-        icon: "icon",
+
         element:{
-            icon: "#clipboard-list",
+            icon: "#netebook",
             href: "href",
             Title: "Name",
             Summary: "Summary"
         },
-        context:{
-            Folder:{
-                Summary: "Summary",
 
-            },
-            FolderFolder:{
-                Summary: "Summary",
-                head_right: "ModificationDate"
-            }
-        }
     }
 
 </script>
@@ -359,14 +352,9 @@
                     orderAttrib='Order'
 
                     bind:this={listComponent}>
-                <!--ListTitle a='Name' hrefFunc={(list) => list.href} /-->
-                <ListSummary a='Summary'/>
+
                 <ListInserter action={addList} icon/>
 
-                <span slot="left" let:element>
-                    <Icon component={FaList}
-                        class="h-5 w-5  text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
-                </span>
 
 
             </List>

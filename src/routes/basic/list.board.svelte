@@ -261,13 +261,13 @@
                     operations: [
                         {
                             caption: '_; New task; Nueva tarea; Nowe zadanie',
-                            icon: FaRegCalendar,
+                            mricon: 'square-pen',
                             action: (f) => kanban.add(KanbanColumnBottom, 0),
                             tbr: 'A',
                             fab: 'M01'
                         },
                         {
-                            icon: FaDownload,
+                            mricon: 'download',
                             caption: '_; Insert; Insertar; Wstaw',
                             hideToolbarCaption: true,
                             tbr: 'C',
@@ -517,13 +517,14 @@
                     operations:[
                         {
                             caption: '_; New task; Nueva tarea; Nowe zadanie',
-                            icon: FaRegCalendar,
+                            mricon: 'square-pen',
+
                             action: (f) => { kanban.add(task) },
                             fab: "M01",
                             tbr: 'A'
                         },
                         {
-                            icon: FaDownload,
+                            mricon: 'download',
                             caption: '_; Insert; Insertar; Wstaw',
                             hideToolbarCaption: true,
                             tbr: 'C',
@@ -573,7 +574,7 @@
                     operations: [
                         {
                             caption: '_; Edit...; Editar...; Edytuj...',
-                            icon: FaPen,
+                            mricon: 'pencil',
                             tbr: 'A',
                             fab: 'M20',
                             grid: [
@@ -606,6 +607,7 @@
                         {
                             caption: '_; Move...; Desplazar...; Przesuń...',
                             icon: FaArrowsAlt,
+                            mricon: 'chevrons-left-right',
                             toolbar: MoveOperations,
                             props: {
                                     taskStates: taskStates,
@@ -620,7 +622,7 @@
                         ... (isOutOfStates) ? [] : [
                         {
                             caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
-                            icon: FaCaretUp,
+                            mricon: 'chevron-up',
                             action: (f) => { kanban.moveUp(task); setTimeout(() => kanban.scrollViewToCard(), 0) },
                             fab: 'M05',
                             tbr: 'A',
@@ -628,7 +630,7 @@
                         },
                         {
                             caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
-                            icon: FaCaretDown,
+                            mricon: 'chevron-down',
                             action: (f) => { kanban.moveDown(task); setTimeout(() => kanban.scrollViewToCard(), 0)},
                             fab: 'M04',
                             tbr: 'A',
@@ -637,7 +639,7 @@
 
                         {
                             caption: '_; Send; Enviar; Wyślij',
-                            icon: FaUpload,
+                            mricon: 'upload',
                             tbr: 'D',
                             fab: 'S00',
                             menu: [
@@ -707,7 +709,7 @@
         return [
             {
                 caption: '_; Edit column name; Editar nombre de columna; Edytuj nazwę kolumny',
-                //icon: FaPen, //inColumnContext ? FaPen : undefined,
+                //mricon: 'pencil', //inColumnContext ? FaPen : undefined,
                 action: (f) => kanban.editColumnName(columnIdx)
             },
             /*{
@@ -758,13 +760,13 @@
                     operations: [
                         {
                             caption: '_; New Task; Nueva tarea; Nowe zadanie',
-                            icon: FaRegCalendar,
+                            mricon: 'square-pen',
                             action: (f) => kanban.add(KanbanColumnBottom, columnIdx),
                             fab: 'M01',
                             tbr: 'A'
                         },
                         {
-                            icon: FaDownload,
+                            mricon: 'download',
                             caption: '_; Insert; Insertar; Wstaw',
                             hideToolbarCaption: true,
                             tbr: 'C',

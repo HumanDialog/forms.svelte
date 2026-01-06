@@ -235,12 +235,12 @@
             },
             {
                 caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
-                icon: FaCaretUp,
+                mricon: 'chevron-up',
                 action: (f) => navGroupFolders.moveUp(dataItem)
             },
             {
                 caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
-                icon: FaCaretDown,
+                mricon: 'chevron-down',
                 action: (f) => navGroupFolders.moveDown(dataItem)
 
             },
@@ -269,12 +269,12 @@
             },
             {
                 caption: '_; Move up; Desplazar hacia arriba; Przesuń w górę',
-                icon: FaCaretUp,
+                mricon: 'chevron-up',
                 action: (f) => navPinnedElements.moveUp(dataItem)
             },
             {
                 caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
-                icon: FaCaretDown,
+                mricon: 'chevron-down',
                 action: (f) => navPinnedElements.moveDown(dataItem)
 
             },
@@ -304,12 +304,12 @@
         return [
             {
                 caption: '_; Move up; Desplazar hacia arriba; Przesuń w górę',
-                icon: FaCaretUp,
+                mricon: 'chevron-up',
                 action: (f) => navGroupFolders.moveUp(dataItem)
             },
             {
                 caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
-                icon: FaCaretDown,
+                mricon: 'chevron-down',
                 action: (f) => navGroupFolders.moveDown(dataItem)
 
             },

@@ -401,7 +401,7 @@
             let edit_operations = get_edit_operations(user)
 
             operations.push({
-                                icon: FaPen,
+                                mricon: 'pencil',
                                 caption: i18n({en: 'Change', es: 'Cambiar', pl: 'Zmień'}),
                                 menu: edit_operations,
                                 fab: 'M20',

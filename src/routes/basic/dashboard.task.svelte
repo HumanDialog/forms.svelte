@@ -67,7 +67,8 @@
                 operations: [
                     {
                             caption: '_; Edit...; Editar...; Edytuj...',
-                            icon: FaPen,
+                            mricon: 'pencil',
+                            mricon: 'pencil',
                             tbr: 'A',
                             fab: 'M20',
                             grid: [
@@ -99,7 +100,7 @@
                         },
                         {
                             caption: '_; Send; Enviar; Wyślij',
-                            icon: FaUpload,
+                            mricon: 'upload',
                             tbr: 'D',
                             fab: 'S00',
                             menu: [

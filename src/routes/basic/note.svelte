@@ -287,7 +287,7 @@
 
         {
             caption: '_; Tag; Etiqueta; Etykieta',
-        //    icon: FaTag,
+        //    mricon: 'tag',
             action: async (f) => runTagInserter()
         },
 
@@ -368,7 +368,7 @@
             operations.push(
                 {
                     caption: '_; Edit...; Editar...; Edytuj...',
-                    icon: FaPen,
+                    mricon: 'pencil',
                     grid: addOperations,
                     disabled: isReadOnly,
                     fab: 'M20',
@@ -380,7 +380,7 @@
             operations.push(
                 {
                     caption: '_; Enable editing; Activar edición; Włącz edytowanie',
-                    icon: FaPen,
+                    mricon: 'pencil',
                     action: (f) => enableEditing(),
                     fab: 'M20',
                     tbr: 'A'
@@ -390,7 +390,7 @@
         operations.push(
             {
                 caption: '_; Send; Enviar; Wyślij',
-                icon: FaUpload,
+                mricon: 'upload',
                 hideToolbarCaption: true,
                 tbr: 'D',
                 fab: 'S00',
@@ -401,7 +401,7 @@
         {
             operations.push(
                 {
-                    icon: FaDownload,
+                    mricon: 'download',
                     caption: '_; Insert; Insertar; Wstaw',
                     hideToolbarCaption: true,
                     disabled: isReadOnly,
@@ -585,7 +585,7 @@
                     operations: [
                         {
                             caption: '_; Heading 1; Título 1; Nagłówek 1',
-                            icon: IcH1,
+                            mricon: 'heading-1',
                             tbr: 'A',
                             hideToolbarCaption: true,
                             action: (f) => description.setHeading(1),
@@ -593,28 +593,28 @@
                         },
                         {
                             caption: '_; Heading 2; Título 2; Nagłówek 2',
-                            icon: IcH2,
+                            mricon: 'heading-2',
                             tbr: 'A',hideToolbarCaption: true,
                             action: (f) => description.setHeading(2),
                             activeFunc: description.isActiveH2
                         },
                         {
                             caption: '_; Heading 3; Título 3; Nagłówek 3',
-                            icon: IcH3,
+                            mricon: 'heading-3',
                             tbr: 'A',hideToolbarCaption: true,
                             action: (f) => description.setHeading(3),
                             activeFunc: description.isActiveH3
                         },
                         {
                             caption: '_; Heading 4; Título 4; Nagłówek 4',
-                            icon: IcH4,
+                            mricon: 'heading-4',
                             tbr: 'A',hideToolbarCaption: true,
                             action: (f) => description.setHeading(4),
                             activeFunc: description.isActiveH4
                         },
                         {
                             caption: '_; Normal; Normal; Normalny',
-                            icon: FaRemoveFormat,
+                            mricon: 'pilcrow',
                             tbr: 'A',
                             hideToolbarCaption: true,
                             action: (f) => description.setNormal(),
@@ -622,21 +622,21 @@
                         },
                         {
                             caption: '_; Code; Código; Kod',
-                            icon: FaCode,
+                            mricon: 'code-xml',
                             tbr: 'A',hideToolbarCaption: true,
                             action: (f) => description.setCode(),
                             activeFunc: description.isActiveCode
                         },
                         {
                             caption: '_; Quote; Cita; Cytat',
-                            icon: FaQuoteRight,
+                            mricon: 'text-quote',
                             tbr: 'A',hideToolbarCaption: true,
                             action: (f) => description.setQuote(),
                             activeFunc: description.isActiveQuote
                         },
                         {
                             caption: '_; BulletList; Lista con viñetas; Lista punktowana',
-                            icon: FaListUl,
+                            mricon: 'list',
                             tbr: 'A',hideToolbarCaption: true,
                             action: (f) => description.setBulletList(),
                             activeFunc: description.isActiveBulletList
@@ -651,7 +651,7 @@
                     operations: [
                         {
                             caption: '_; Bold; Negrita; Pogrubiony',
-                            icon: FaBold,
+                            mricon: 'bold',
                             action: (f) => description.setBold(),
                             activeFunc: description.isActiveBold,
                             tbr: 'A',
@@ -659,7 +659,7 @@
                         },
                         {
                             caption: '_; Italic; Cursiva; Kursywa',
-                            icon: FaItalic,
+                            mricon: 'italic',
                             action: (f) => description.setItalic(),
                             activeFunc: description.isActiveItalic,
                             tbr: 'A',
@@ -667,7 +667,7 @@
                         },
                         {
                             caption: '_; Underline; Subrayar; Podkreślenie',
-                            icon: FaUnderline,
+                            mricon: 'underline',
                             action: (f) => description.setUnderline(),
                             activeFunc: description.isActiveUnderline,
                             tbr: 'A',
@@ -675,7 +675,7 @@
                         },
                         {
                             caption: '_; Strikethrough; Tachado; Przekreślenie',
-                            icon: FaStrikethrough,
+                            mricon: 'strikethrough',
                             action: (f) => description.setStrikethrough(),
                             activeFunc: description.isActiveStrikethrough,
                         },
@@ -688,27 +688,27 @@
                     operations: [
                         {
                             caption: '_; Image; Imagen; Obraz',
-                            icon: FaImage,
+                            mricon: 'image',
                             action: (f) => description.setImage(),
                             activeFunc: description.isActiveImage,
                             tbr: 'A', hideToolbarCaption: true
                         },
                         {
                             caption: '_; Table; Tabla; Tabela',
-                            icon: FaTable,
+                            mricon: 'table',
                             action: (f) => description.setTable(),
                             activeFunc: description.isActiveTable
                         },
                         {
                             caption: '_; Attachement; Anexo; Załącznik',
-                            icon: FaPaperclip,
+                            mricon: 'paperclip',
                             action: (f) => runFileAttacher(),
                             tbr: 'A',
                             hideToolbarCaption: true
                         },
                         {
                             caption: '_; Tag; Etiqueta; Etykieta',
-                            icon: FaTag,
+                            mricon: 'tag',
                             action: (f) => runTagInserter()
                         }
                     ]
@@ -720,14 +720,14 @@
                     operations: [
                         {
                             caption: '_; Edit...; Editar...; Edytuj...',
-                            icon: FaPen,
+                            mricon: 'pencil',
                             grid: addOperations,
                         //    fab: 'M10',
                         //    tbr: 'A'
                         },
                         {
                             caption: '_; Send; Enviar; Wyślij',
-                            icon: FaUpload,
+                            mricon: 'upload',
                             hideToolbarCaption: true,
                             tbr: 'D',
                             fab: 'S00',
@@ -744,7 +744,7 @@
 
                         },
                         {
-                            icon: FaDownload,
+                            mricon: 'download',
                             caption: '_; Insert; Insertar; Wstaw',
                             hideToolbarCaption: true,
                             tbr: 'C',
@@ -783,6 +783,7 @@
                             caption: '_; Save; Guardar; Zapisz',
                             hideToolbarCaption: true,
                             icon: FaSave,
+                            mricon: 'save',
                             action: (f) => description?.save(),
                        //     fab: 'S00',
                             tbr: 'C',
@@ -800,13 +801,14 @@
         {
             caption: '_; Save; Guardar; Zapisz',
             icon: FaSave,
+            mricon: 'save',
             action: () => description?.save(),
         }
 
     ]
     const extraInsertPalletteCommands = [
         {
-            icon: FaDownload,
+            mricon: 'download',
             caption: '_; Insert; Insertar; Wstaw',
             //tbr: 'C',
             //fab: 'S10',
@@ -1018,12 +1020,12 @@
     const extraInsertPalletteCommandsExt = [
         {
             caption: 'Attach_; Attachement; Anexo; Załącznikement',
-            icon: FaPaperclip,
+            mricon: 'paperclip',
             action: runFileAttacher
         },
         {
             caption: '_; Tag; Etiqueta; Etykieta',
-            icon: FaTag,
+            mricon: 'tag',
             action: () => setTimeout(() => runTagInserter(), 500)
         }
     ]
@@ -1032,7 +1034,7 @@
     const extraBackPaletteCommandsExt = [
         {
             caption: '_; Send; Enviar; Wyślij',
-            icon: FaUpload,
+            mricon: 'upload',
             menu: [
                     {
                         caption: '_; Copy; Copiar; Kopiuj',
@@ -1319,7 +1321,7 @@
                         operations: [
                             {
                                 caption: '_; Edit; Editar; Edytuj',
-                                icon: FaPen,
+                                mricon: 'pencil',
                                 tbr: 'A',
                                 fab:'M20',
                                 grid:[
@@ -1336,7 +1338,7 @@
                             },
                             {
                                 caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
-                                icon: FaCaretUp,
+                                mricon: 'chevron-up',
                                 action: (f) => list.moveUp(element),
                                 fab:'M06',
                                 tbr:'A',
@@ -1344,7 +1346,7 @@
                             },
                             {
                                 caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
-                                icon: FaCaretDown,
+                                mricon: 'chevron-down',
                                 action: (f) => list.moveDown(element),
                                 fab:'M05',
                                 tbr:'A' ,
@@ -1353,7 +1355,7 @@
                             {
                                 caption: '_; Send; Enviar; Wyślij',
                                 hideToolbarCaption: true,
-                                icon: FaUpload,
+                                mricon: 'upload',
                                 tbr: 'D',
                                 fab: 'S00',
                                 menu: [

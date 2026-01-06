@@ -12,7 +12,7 @@
                 ListComboProperty,
 				mainContentPageReloader,
                 Modal,
-                onErrorShowAlert, Breadcrumb, Paper,
+                onErrorShowAlert, Breadcrumb, Paper, PaperHeader,
                 i18n, refreshToolbarOperations
             } from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaList, FaPen, FaArchive, FaChevronLeft, FaChevronRight} from 'svelte-icons/fa'
@@ -24,7 +24,7 @@
     let listComponent;
     let showArchived = false;
     let canonicalPath = []
-    const title = '_; My lists; Mis listas; Moje listy^'
+    const title = '_; My lists; Mis listas; Moje listy'
 
     $: onParamsChanged($session, $mainContentPageReloader, $querystring);
 
@@ -195,7 +195,7 @@
                     caption: '_; View; Ver; Widok',
                     operations: [
                         {
-                            icon: FaList,
+                            mricon: 'netebook',
                             caption: '_; New list; Nueva lista; Nowa lista',
                             action: (focused) => { listComponent.addRowAfter(null) },
                             fab: 'M01',
@@ -217,7 +217,7 @@
                     operations: [
                         {
                             caption: '_; New list; Nueva lista; Nowa lista',
-                            icon: FaList,
+                            mricon: 'netebook',
                             action: (focused) => { listComponent.addRowAfter(list) },
                             fab: 'M01',
                             tbr: 'A'
@@ -230,7 +230,7 @@
                     operations: [
                         {
                             caption: '_; Edit...; Editar...; Edytuj...',
-                            icon: FaPen,
+                            mricon: 'pencil',
                             fab: 'M20',
                             tbr: 'A',
                             grid: [
@@ -248,7 +248,7 @@
                         {
                             caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                             hideToolbarCaption: true,
-                            icon: FaCaretUp,
+                            mricon: 'chevron-up',
                             action: (f) => listComponent.moveUp(list),
                             fab: 'M05',
                             tbr: 'A'
@@ -256,7 +256,7 @@
                         {
                             caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                             hideToolbarCaption: true,
-                            icon: FaCaretDown,
+                            mricon: 'chevron-down',
                             action: (f) => listComponent.moveDown(list),
                             fab: 'M04',
                             tbr: 'A'
@@ -305,23 +305,14 @@
     let list_properties = {
         Title: "Title",
         Summary: "Summary",
-        icon: "icon",
-        element:{
-            icon: "icon",
-            href: "href",
-            Title: "Title",
-            Summary: "Summary"
-        },
-        context:{
-            Folder:{
-                Summary: "Summary",
 
-            },
-            FolderFolder:{
-                Summary: "Summary",
-                head_right: "ModificationDate"
-            }
+        element:{
+            icon: "#netebook",
+            href: "href",
+            Title: "Name",
+            Summary: "Summary"
         }
+
     }
 
 </script>
@@ -340,27 +331,23 @@
 
                 <Paper class="mb-64">
 
-                <section class="w-full place-self-center max-w-3xl">
+                <PaperHeader>
+            <!--Breadcrumb class="mt-1 mb-5" path={canonicalPath}/-->
+        </PaperHeader>
 
-                    {#if canonicalPath}
-                        <Breadcrumb class="mt-1 mb-5" path={canonicalPath}/>
-                    {/if}
+        <h1>{title}</h1>
+        <span>&nbsp</span>
 
             <List   self={user}
                     a='MyLists'
                     {list_properties}
                     toolbarOperations={listOperations}
                     orderAttrib='Order'
-                    title={title}
+
                     bind:this={listComponent}>
-                <ListTitle a='Name' hrefFunc={(list) => list.href} />
-                <ListSummary a='Summary'/>
+
                 <ListInserter action={addList} icon/>
 
-                <span slot="left" let:element>
-                    <Icon component={FaList}
-                        class="h-5 w-5  text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
-                </span>
 
 
             </List>
@@ -373,7 +360,7 @@
                         <div class="inline-block mt-1.5 w-3 h-3"><FaChevronRight/></div>
                 </a>
             </div-->
-            </section>
+
             </Paper>
         </Page>
     {:else}
@@ -388,14 +375,7 @@
                     {list_properties}
                     orderAttrib='Order'
                     bind:this={listComponent}>
-                <ListTitle a='Name' hrefFunc={(list) => `/tasklist/${list.Id}?archivedList`} />
-                <ListSummary a='Summary'/>
                 <!--ListInserter action={addList} icon/-->
-
-                <span slot="left" let:element>
-                    <Icon component={FaList}
-                        class="h-5 w-5  text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
-                </span>
 
 
             </List>

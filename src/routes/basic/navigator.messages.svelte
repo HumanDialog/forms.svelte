@@ -277,12 +277,12 @@
             },
             {
                 caption: '_; Move up; Desplazar hacia arriba; Przesuń w górę',
-                icon: FaCaretUp,
+                mricon: 'chevron-up',
                 action: (f) => navGeneralLists.moveUp(dataItem)
             },
             {
                 caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
-                icon: FaCaretDown,
+                mricon: 'chevron-down',
                 action: (f) => navGeneralLists.moveDown(dataItem)
 
             },
@@ -314,12 +314,12 @@
             },
             {
                 caption: '_; Move up; Desplazar hacia arriba; Przesuń w górę',
-                icon: FaCaretUp,
+                mricon: 'chevron-up',
                 action: (f) => navDirectLists.moveUp(dataItem)
             },
             {
                 caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
-                icon: FaCaretDown,
+                mricon: 'chevron-down',
                 action: (f) => navDirectLists.moveDown(dataItem)
 
             },

@@ -249,12 +249,12 @@
         */
         {
             caption: '_; Attachement; Anexo; Załącznik',
-            icon: FaPaperclip,
+            mricon: 'paperclip',
             action: (f) => runFileAttacher(ATTACH_FILE_DIRECT)
         },
         {
             caption: '_; Tag; Etiqueta; Etykieta',
-            icon: FaTag,
+            mricon: 'tag',
             action: async (f) =>
                 {
                     if(tags)
@@ -297,7 +297,7 @@
                                 fab: 'M03'
                             },
                             {
-                                icon: FaPen,
+                                mricon: 'pencil',
                                 grid: addOperations,
                                 tbr: 'A',
                                 fab: 'M03'
@@ -309,7 +309,7 @@
                             action: (f) => {} ,
                         },
                         {
-                            icon: FaUpload,
+                            mricon: 'upload',
                             caption: '_; Send; Enviar; Wyślij',
                             tbr: 'D',
                             fab: 'S00',
@@ -361,7 +361,7 @@
                     operations: [
                         {
                             caption: '_; Image; Imagen; Obraz',
-                            icon: FaImage,
+                            mricon: 'image',
                             action: (f) => questionElement.setImage(),
                             activeFunc: questionElement.isActiveImage,
                             tbr: 'A',
@@ -369,19 +369,19 @@
                         },
                         {
                             caption: '_; Table; Tabla; Tabela',
-                            icon: FaTable,
+                            mricon: 'table',
                             action: (f) => questionElement.setTable(),
                             activeFunc: questionElement.isActiveTable
                         },
                         {
                             caption: '_; Attachement; Anexo; Załącznik',
-                            icon: FaPaperclip,
+                            mricon: 'paperclip',
                             action: (f) => runFileAttacher(ATTACH_FILE_DIRECT),
                             tbr: 'A'
                         },
                         {
                             caption: '_; Tag; Etiqueta; Etykieta',
-                            icon: FaTag,
+                            mricon: 'tag',
                             action: async (f) =>
                                 {
                                     if(tags)
@@ -404,7 +404,7 @@
                     operations: [
                         {
                             caption: '_; Bold; Negrita; Pogrubiony',
-                            icon: FaBold,
+                            mricon: 'bold',
                             action: (f) => questionElement.setBold(),
                             activeFunc: questionElement.isActiveBold,
                             tbr: 'A',
@@ -412,7 +412,7 @@
                         },
                         {
                             caption: '_; Italic; Cursiva; Kursywa',
-                            icon: FaItalic,
+                            mricon: 'italic',
                             action: (f) => questionElement.setItalic(),
                             activeFunc: questionElement.isActiveItalic,
                             tbr: 'A',
@@ -420,7 +420,7 @@
                         },
                         {
                             caption: '_; Underline; Subrayar; Podkreślenie',
-                            icon: FaUnderline,
+                            mricon: 'underline',
                             action: (f) => questionElement.setUnderline(),
                             activeFunc: questionElement.isActiveUnderline,
                             tbr: 'A',
@@ -428,7 +428,7 @@
                         },
                         {
                             caption: '_; Strikethrough; Tachado; Przekreślenie',
-                            icon: FaStrikethrough,
+                            mricon: 'strikethrough',
                             action: (f) => questionElement.setStrikethrough(),
                             activeFunc: questionElement.isActiveStrikethrough,
                         }
@@ -441,37 +441,37 @@
                     operations: [
                         {
                             caption: '_; Heading 1; Título 1; Nagłówek 1',
-                            icon: IcH1,
+                            mricon: 'heading-1',
                             action: (f) => questionElement.setHeading(1),
                             activeFunc: questionElement.isActiveH1
                         },
                         {
                             caption: '_; Heading 2; Título 2; Nagłówek 2',
-                            icon: IcH2,
+                            mricon: 'heading-2',
                             action: (f) => questionElement.setHeading(2),
                             activeFunc: questionElement.isActiveH2
                         },
                         {
                             caption: '_; Heading 3; Título 3; Nagłówek 3',
-                            icon: IcH3,
+                            mricon: 'heading-3',
                             action: (f) => questionElement.setHeading(3),
                             activeFunc: questionElement.isActiveH3
                         },
                         {
                             caption: '_; Heading 4; Título 4; Nagłówek 4',
-                            icon: IcH4,
+                            mricon: 'heading-4',
                             action: (f) => questionElement.setHeading(4),
                             activeFunc: questionElement.isActiveH4
                         },
                         {
                             caption: '_; Normal; Normal; Normalny',
-                            icon: FaRemoveFormat,
+                            mricon: 'pilcrow',
                             action: (f) => questionElement.setNormal(),
                             activeFunc: questionElement.isActiveNormal,
                         },
                         {
                             caption: '_; Code; Código; Kod',
-                            icon: FaCode,
+                            mricon: 'code-xml',
                             action: (f) => questionElement.setCode(),
                             activeFunc: questionElement.isActiveCode,
                         },
@@ -483,7 +483,7 @@
                         }, */
                         {
                             caption: '_; Quote; Cita; Cytat',
-                            icon: FaQuoteRight,
+                            mricon: 'text-quote',
                             action: (f) => questionElement.setQuote(),
                             activeFunc: questionElement.isActiveQuote,
                         },
@@ -501,7 +501,7 @@
                         }, */
                         {
                             caption: '_; BulletList; Lista con viñetas; Lista punktowana',
-                            icon: FaListUl,
+                            mricon: 'list',
                             action: (f) => questionElement.setBulletList(),
                             activeFunc: questionElement.isActiveBulletList,
                             tbr: 'A'
@@ -982,7 +982,7 @@
                         operations: [
                             {
                                 caption: '_; Image; Imagen; Obraz',
-                                icon: FaImage,
+                                mricon: 'image',
                                 action: (f) => answerElement.setImage(),
                                 activeFunc: answerElement.isActiveImage,
                                 tbr: 'A',
@@ -990,13 +990,13 @@
                             },
                             {
                                 caption: '_; Table; Tabla; Tabela',
-                                icon: FaTable,
+                                mricon: 'table',
                                 action: (f) => answerElement.setTable(),
                                 activeFunc: answerElement.isActiveTable
                             },
                             {
                                 caption: '_; Attachement; Anexo; Załącznik',
-                                icon: FaPaperclip,
+                                mricon: 'paperclip',
                                 action: (f) => runFileAttacher(ATTACH_TEMPORARY_FILE),
                                 tbr: 'A',
                                 hideToolbarCaption: true
@@ -1010,7 +1010,7 @@
                     operations: [
                         {
                             caption: '_; Bold; Negrita; Pogrubiony',
-                            icon: FaBold,
+                            mricon: 'bold',
                             action: (f) => answerElement.setBold(),
                             activeFunc: answerElement.isActiveBold,
                             tbr: 'A',
@@ -1018,7 +1018,7 @@
                         },
                         {
                             caption: '_; Italic; Cursiva; Kursywa',
-                            icon: FaItalic,
+                            mricon: 'italic',
                             action: (f) => answerElement.setItalic(),
                             activeFunc: answerElement.isActiveItalic,
                             tbr: 'A',
@@ -1026,7 +1026,7 @@
                         },
                         {
                             caption: '_; Underline; Subrayar; Podkreślenie',
-                            icon: FaUnderline,
+                            mricon: 'underline',
                             action: (f) => answerElement.setUnderline(),
                             activeFunc: answerElement.isActiveUnderline,
                             tbr: 'A',
@@ -1034,7 +1034,7 @@
                         },
                         {
                             caption: '_; Strikethrough; Tachado; Przekreślenie',
-                            icon: FaStrikethrough,
+                            mricon: 'strikethrough',
                             action: (f) => answerElement.setStrikethrough(),
                             activeFunc: answerElement.isActiveStrikethrough,
                         },
@@ -1047,37 +1047,37 @@
                     operations: [
                         {
                             caption: '_; Heading 1; Título 1; Nagłówek 1',
-                            icon: IcH1,
+                            mricon: 'heading-1',
                             action: (f) => answerElement.setHeading(1),
                             activeFunc: answerElement.isActiveH1
                         },
                         {
                             caption: '_; Heading 2; Título 2; Nagłówek 2',
-                            icon: IcH2,
+                            mricon: 'heading-2',
                             action: (f) => answerElement.setHeading(2),
                             activeFunc: answerElement.isActiveH2
                         },
                         {
                             caption: '_; Heading 3; Título 3; Nagłówek 3',
-                            icon: IcH3,
+                            mricon: 'heading-3',
                             action: (f) => answerElement.setHeading(3),
                             activeFunc: answerElement.isActiveH3
                         },
                         {
                             caption: '_; Heading 4; Título 4; Nagłówek 4',
-                            icon: IcH4,
+                            mricon: 'heading-4',
                             action: (f) => answerElement.setHeading(4),
                             activeFunc: answerElement.isActiveH4
                         },
                         {
                             caption: '_; Normal; Normal; Normalny',
-                            icon: FaRemoveFormat,
+                            mricon: 'pilcrow',
                             action: (f) => answerElement.setNormal(),
                             activeFunc: answerElement.isActiveNormal,
                         },
                         {
                             caption: '_; Code; Código; Kod',
-                            icon: FaCode,
+                            mricon: 'code-xml',
                             action: (f) => answerElement.setCode(),
                             activeFunc: answerElement.isActiveCode,
                         },
@@ -1089,7 +1089,7 @@
                         }, */
                         {
                             caption: '_; Quote; Cita; Cytat',
-                            icon: FaQuoteRight,
+                            mricon: 'text-quote',
                             action: (f) => answerElement.setQuote(),
                             activeFunc: answerElement.isActiveQuote,
                         },
@@ -1107,7 +1107,7 @@
                         }, */
                         {
                             caption: '_; BulletList; Lista con viñetas; Lista punktowana',
-                            icon: FaListUl,
+                            mricon: 'list',
                             action: (f) => answerElement.setBulletList(),
                             activeFunc: answerElement.isActiveBulletList,
                             tbr: 'A',
@@ -1138,7 +1138,7 @@
     const extraInsertPaletteCommands = [
          {
             caption: '_; Attachement; Anexo; Załącznik',
-            icon: FaPaperclip,
+            mricon: 'paperclip',
             action: () => runFileAttacher(ATTACH_TEMPORARY_FILE)
         }
     ]
@@ -1206,7 +1206,7 @@
                 <Editable self={note} a='Title' readonly={isReadOnly}/>
             </h1>
 
-            
+
 
             <section class="w-full flex flex-row flex-wrap justify-between">
                 <div class="grow-0">
@@ -1388,7 +1388,7 @@
 </Page>
 {/if}
 
-<Modal  title={i18n({en: 'Preparing...', es: 'Preparación...', pl: 'Przygotowanie...'})}  
+<Modal  title={i18n({en: 'Preparing...', es: 'Preparación...', pl: 'Przygotowanie...'})}
         bind:open={pendingResizing} mode={3} icon={FaCloudUploadAlt}>
     <Spinner delay={0}/>
     <span class="ml-3">
@@ -1399,7 +1399,7 @@
     </span>
 </Modal>
 
-<Modal  title={i18n({en: 'Uploading...', es: 'Cargando...', pl: 'Przesyłanie...'})} 
+<Modal  title={i18n({en: 'Uploading...', es: 'Cargando...', pl: 'Przesyłanie...'})}
         bind:open={pendingUploading} mode={3} icon={FaCloudUploadAlt}>
     <Spinner delay={0}/>
     <span class="ml-3">
@@ -1410,7 +1410,7 @@
     </span>
 </Modal>
 
-<Modal  title={i18n({en: 'Posting...', es: 'Publicando...', pl: 'Wysyłanie...'})} 
+<Modal  title={i18n({en: 'Posting...', es: 'Publicando...', pl: 'Wysyłanie...'})}
         bind:open={pendingPosting} mode={3} icon={FaCloudUploadAlt}>
     <Spinner delay={0}/>
     <span class="ml-3">

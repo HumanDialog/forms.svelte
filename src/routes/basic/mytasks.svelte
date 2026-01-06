@@ -277,7 +277,7 @@
                     caption: '_; View; Ver; Widok',
                     operations: [
                         {
-                            icon: FaRegCalendar,
+                            mricon: 'square-pen',
                             caption: '_; New task; Nueva tarea; Nowe zadanie',
                             action: (focused) => { listComponent.addRowAfter(null) },
                             fab: 'M01',
@@ -299,7 +299,7 @@
                     operations: [
                         {
                             caption: '_; New task; Nueva tarea; Nowe zadanie',
-                            icon: FaRegCalendar,
+                            mricon: 'square-pen',
                             action: (focused) => { listComponent.addRowAfter(task) },
                             fab: 'M01',
                             tbr: 'A'
@@ -312,7 +312,7 @@
                     operations: [
                         {
                             caption: '_; Edit...; Editar...; Edytuj...',
-                            icon: FaPen,
+                            mricon: 'pencil',
                             fab: 'M20',
                             tbr: 'A',
                             grid: [
@@ -358,7 +358,7 @@
                         {
                             caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                             hideToolbarCaption: true,
-                            icon: FaCaretUp,
+                            mricon: 'chevron-up',
                             action: (f) => listComponent.moveUp(task),
                             fab: 'M05',
                             tbr: 'A'
@@ -366,7 +366,7 @@
                         {
                             caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                             hideToolbarCaption: true,
-                            icon: FaCaretDown,
+                            mricon: 'chevron-down',
                             action: (f) => listComponent.moveDown(task),
                             fab: 'M04',
                             tbr: 'A'

@@ -200,7 +200,7 @@
             const taskList = res.TaskList
             const cacheKey = `listboard/${taskList.Id}`
             cache.set(cacheKey, taskList)
-            
+
             return taskList;
         }
         else
@@ -258,13 +258,13 @@
                     operations: [
                         {
                             caption: '_; New task; Nueva tarea; Nowe zadanie',
-                            icon: FaRegCalendar,
+                            mricon: 'square-pen',
                             action: (f) => kanban.add(KanbanColumnBottom, 0),
                             tbr: 'A',
                             fab: 'M01'
                         },
                         {
-                            icon: FaDownload,
+                            mricon: 'download',
                             caption: '_; Insert; Insertar; Wstaw',
                             hideToolbarCaption: true,
                             tbr: 'C',
@@ -443,7 +443,7 @@
         await reload(newTask.Id)
 	}
 
-    
+
 
     let deleteModal;
     let taskToDelete;
@@ -514,13 +514,13 @@
                     operations:[
                         {
                             caption: '_; New task; Nueva tarea; Nowe zadanie',
-                            icon: FaRegCalendar,
+                            mricon: 'square-pen',
                             action: (f) => { kanban.add(task) },
                             fab: "M01",
                             tbr: 'A'
                         },
                         {
-                            icon: FaDownload,
+                            mricon: 'download',
                             caption: '_; Insert; Insertar; Wstaw',
                             hideToolbarCaption: true,
                             tbr: 'C',
@@ -570,7 +570,7 @@
                     operations: [
                         {
                             caption: '_; Edit...; Editar...; Edytuj...',
-                            icon: FaPen,
+                            mricon: 'pencil',
                             tbr: 'A',
                             fab: 'M20',
                             grid: [
@@ -603,6 +603,7 @@
                         {
                             caption: '_; Move...; Desplazar...; Przesuń...',
                             icon: FaArrowsAlt,
+                            mricon: 'chevrons-left-right',
                             toolbar: MoveOperations,
                             props: {
                                     taskStates: taskStates,
@@ -617,7 +618,7 @@
                         ... (isOutOfStates) ? [] : [
                         {
                             caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
-                            icon: FaCaretUp,
+                            mricon: 'chevron-up',
                             action: (f) => { kanban.moveUp(task); setTimeout(() => kanban.scrollViewToCard(), 0) },
                             fab: 'M05',
                             tbr: 'A',
@@ -625,7 +626,7 @@
                         },
                         {
                             caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
-                            icon: FaCaretDown,
+                            mricon: 'chevron-down',
                             action: (f) => { kanban.moveDown(task); setTimeout(() => kanban.scrollViewToCard(), 0)},
                             fab: 'M04',
                             tbr: 'A',
@@ -634,7 +635,7 @@
 
                         {
                             caption: '_; Send; Enviar; Wyślij',
-                            icon: FaUpload, 
+                            mricon: 'upload',
                             tbr: 'D',
                             fab: 'S00',
                             menu: [
@@ -650,10 +651,10 @@
                                         caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
                                         action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, task)
                                     }
-                                ], 
+                                ],
                             hideToolbarCaption: true
                         },
-                        
+
                         ... (task.State == STATE_FINISHED) ? [] : [
                                 {
                                     caption: '_; Finish; Finalizar; Zakończ',
@@ -679,7 +680,7 @@
                         }
                     ]
                 }
-                
+
 
             ]
 
@@ -704,7 +705,7 @@
         return [
             {
                 caption: '_; Edit column name; Editar nombre de columna; Edytuj nazwę kolumny',
-                //icon: FaPen, //inColumnContext ? FaPen : undefined,
+                //mricon: 'pencil', //inColumnContext ? FaPen : undefined,
                 action: (f) => kanban.editColumnName(columnIdx)
             },
             /*{
@@ -755,13 +756,13 @@
                     operations: [
                         {
                             caption: '_; New Task; Nueva tarea; Nowe zadanie',
-                            icon: FaRegCalendar,
+                            mricon: 'square-pen',
                             action: (f) => kanban.add(KanbanColumnBottom, columnIdx),
                             fab: 'M01',
                             tbr: 'A'
                         },
                         {
-                            icon: FaDownload,
+                            mricon: 'download',
                             caption: '_; Insert; Insertar; Wstaw',
                             hideToolbarCaption: true,
                             tbr: 'C',
@@ -812,7 +813,7 @@
         }
     }
 
-    async function pasteRecentClipboardElement(btt, aroundRect) 
+    async function pasteRecentClipboardElement(btt, aroundRect)
     {
         const clipboardElements = await fetchComposedClipboard4TaskList()
         if(clipboardElements && clipboardElements.length > 0)
@@ -824,7 +825,7 @@
         }
     }
 
-    async function runPasteBasket(btt, aroundRect) 
+    async function runPasteBasket(btt, aroundRect)
     {
         const clipboardElements = await fetchComposedClipboard4TaskList()
         showFloatingToolbar(aroundRect, BasketPreview, {
@@ -910,7 +911,7 @@
                         newName: name
                     }, onErrorShowAlert);
 
-        
+
         if(res && Array.isArray(res))
         {
             taskStates = [...res]
@@ -963,16 +964,16 @@
     async function copyTaskToBasket(task)
     {
         await reef.post(`${currentList.$ref}/CopyTaskToBasket`, {
-                task: task.$ref, 
-                flags: 0}, 
+                task: task.$ref,
+                flags: 0},
                 onErrorShowAlert)
     }
 
     async function cutTaskToBasket(task)
     {
         await reef.post(`${currentList.$ref}/CutTaskToBasket`, {
-                task: task.$ref, 
-                flags: 0}, 
+                task: task.$ref,
+                flags: 0},
                 onErrorShowAlert)
 
         reload(kanban.SELECT_NEXT);
@@ -1128,14 +1129,14 @@
         numericStateElement?.refresh();
     }
 
-    async function toggleSubscribe() 
+    async function toggleSubscribe()
     {
         if(currentList.IsSubscribed)
         {
             const res = await reef.get(`${currentList.$ref}/Unsubscribe`, onErrorShowAlert)
             if(res)
                 currentList.IsSubscribed = false
-        }   
+        }
         else
         {
             const res = await reef.get(`${currentList.$ref}/Subscribe`, onErrorShowAlert)
@@ -1143,7 +1144,7 @@
                 currentList.IsSubscribed = true
         }
 
-        refreshToolbarOperations() 
+        refreshToolbarOperations()
     }
 
     let otherCaption = '_; <Other>; <Otros>; <Inne>'
@@ -1178,7 +1179,7 @@
 
 		<Kanban class="grow-0"
                 title={ext(currentList.Name)}
-                bind:this={kanban}> 
+                bind:this={kanban}>
 
             <KanbanSource self={currentList}
                           a='Tasks'

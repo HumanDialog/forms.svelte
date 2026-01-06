@@ -22,14 +22,14 @@
         } from '$lib'
 	import { tick } from 'svelte';
     import {location, push, pop, replace, link} from 'svelte-spa-router'
-    
+
     import {    FaTimes, FaTag,  FaCloudUploadAlt, FaFont, FaBold, FaItalic, FaUnderline, FaStrikethrough,
                 FaRegStar, FaStar, FaPaperPlane, FaPaperclip, FaPlus, FaTable, FaImage,
                 FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle, FaInfo, FaListUl} from 'svelte-icons/fa/'
-	
-        
+
+
     let folderRef = ''
-    
+
     let note = null;
     let allTags = '';
 
@@ -58,7 +58,7 @@
             reef.get('user?fields=$ref,Name,Email,href', onErrorShowAlert).then((res) => {
                 if(res)
                 {
-                    user = res.User;   
+                    user = res.User;
                 }
             })
         }
@@ -82,21 +82,21 @@
             Images: '',
             AttachedFiles: '',
             Tags: ''
-            
+
         }
 
         creationDate = new Date( Date.now())
         attachedFiles = []
     }
 
-   
+
 
     /*
     async function onSummaryChanged(text)
     {
         note.Summary = text;
         await reef.post(`${noteRef}/SetSummary`, {val: text}, onErrorShowAlert)
-        
+
     }
     */
 
@@ -117,8 +117,8 @@
         note.Content = content;
         //await reef.post(`${noteRef}/SetContent`, {val: content}, onErrorShowAlert)
     }
-    
-    
+
+
     let createdBy;
     let responsiblePlaceholder = false
 
@@ -140,9 +140,9 @@
             tags?.show(undefined, () => {tagsPlaceholder = false;})
         }
     }
-    
-    
-    
+
+
+
     function getPageOperations()
     {
         return {
@@ -158,7 +158,7 @@
                             icon: FaPaperPlane,
                             action: (f) => {postQuestion()},
                             tbr: 'A'
-                        }, 
+                        },
                         {
                             caption: '_; Cancel; Cancelar; Anuluj',
                             icon: FaTimes,
@@ -172,14 +172,14 @@
                     operations: [
                          {
                             caption: '_; Attachement; Anexo; Załącznik',
-                            icon: FaPaperclip,
+                            mricon: 'paperclip',
                             action: (f) => runFileAttacher(),
                             tbr: 'A',
                             hideToolbarCaption: true
                         },
                         {
                             caption: '_; Tag; Etiqueta; Etykieta',
-                            icon: FaTag,
+                            mricon: 'tag',
                             action: (f) => runTagInserter()
                         }
                     ]
@@ -204,7 +204,7 @@
                             icon: FaPaperPlane,
                             action: (f) => {postQuestion()},
                             tbr: 'A'
-                        }, 
+                        },
                         {
                             caption: '_; Cancel; Cancelar; Anuluj',
                             icon: FaTimes,
@@ -219,7 +219,7 @@
                     operations: [
                         {
                             caption: '_; Image; Imagen; Obraz',
-                            icon: FaImage,
+                            mricon: 'image',
                             action: (f) => contentElement.setImage(),
                             activeFunc: contentElement.isActiveImage,
                             tbr: 'A',
@@ -227,20 +227,20 @@
                         },
                         {
                             caption: '_; Table; Tabla; Tabela',
-                            icon: FaTable,
+                            mricon: 'table',
                             action: (f) => contentElement.setTable(),
                             activeFunc: contentElement.isActiveTable
                         },
                         {
                             caption: '_; Attachement; Anexo; Załącznik',
-                            icon: FaPaperclip,
+                            mricon: 'paperclip',
                             action: (f) => runFileAttacher(),
                             tbr: 'A',
                             hideToolbarCaption: true
                         },
                         {
                             caption: '_; Tag; Etiqueta; Etykieta',
-                            icon: FaTag,
+                            mricon: 'tag',
                             action: (f) => runTagInserter()
                         }
                     ]
@@ -252,7 +252,7 @@
                     operations: [
                         {
                             caption: '_; Bold; Negrita; Pogrubiony',
-                            icon: FaBold,
+                            mricon: 'bold',
                             action: (f) => contentElement.setBold(),
                             activeFunc: contentElement.isActiveBold,
                             tbr: 'A',
@@ -260,7 +260,7 @@
                         },
                         {
                             caption: '_; Italic; Cursiva; Kursywa',
-                            icon: FaItalic,
+                            mricon: 'italic',
                             action: (f) => contentElement.setItalic(),
                             activeFunc: contentElement.isActiveItalic,
                             tbr: 'A',
@@ -268,7 +268,7 @@
                         },
                         {
                             caption: '_; Underline; Subrayar; Podkreślenie',
-                            icon: FaUnderline,
+                            mricon: 'underline',
                             action: (f) => contentElement.setUnderline(),
                             activeFunc: contentElement.isActiveUnderline,
                             tbr: 'A',
@@ -276,7 +276,7 @@
                         },
                         {
                             caption: '_; Strikethrough; Tachado; Przekreślenie',
-                            icon: FaStrikethrough,
+                            mricon: 'strikethrough',
                             action: (f) => contentElement.setStrikethrough(),
                             activeFunc: contentElement.isActiveStrikethrough,
                         },
@@ -289,37 +289,37 @@
                     operations: [
                         {
                             caption: '_; Heading 1; Título 1; Nagłówek 1',
-                            icon: IcH1,
+                            mricon: 'heading-1',
                             action: (f) => contentElement.setHeading(1),
                             activeFunc: contentElement.isActiveH1
                         },
                         {
                             caption: '_; Heading 2; Título 2; Nagłówek 2',
-                            icon: IcH2,
+                            mricon: 'heading-2',
                             action: (f) => contentElement.setHeading(2),
                             activeFunc: contentElement.isActiveH2
                         },
                         {
                             caption: '_; Heading 3; Título 3; Nagłówek 3',
-                            icon: IcH3,
+                            mricon: 'heading-3',
                             action: (f) => contentElement.setHeading(3),
                             activeFunc: contentElement.isActiveH3
                         },
                         {
                             caption: '_; Heading 4; Título 4; Nagłówek 4',
-                            icon: IcH4,
+                            mricon: 'heading-4',
                             action: (f) => contentElement.setHeading(4),
                             activeFunc: contentElement.isActiveH4
                         },
                         {
                             caption: '_; Normal; Normal; Normalny',
-                            icon: FaRemoveFormat,
+                            mricon: 'pilcrow',
                             action: (f) => contentElement.setNormal(),
                             activeFunc: contentElement.isActiveNormal,
                         },
                         {
                             caption: '_; Code; Código; Kod',
-                            icon: FaCode,
+                            mricon: 'code-xml',
                             action: (f) => contentElement.setCode(),
                             activeFunc: contentElement.isActiveCode,
                         },
@@ -331,7 +331,7 @@
                         }, */
                         {
                             caption: '_; Quote; Cita; Cytat',
-                            icon: FaQuoteRight,
+                            mricon: 'text-quote',
                             action: (f) => contentElement.setQuote(),
                             activeFunc: contentElement.isActiveQuote,
                         },
@@ -349,7 +349,7 @@
                         },*/
                         {
                             caption: '_; BulletList; Lista con viñetas; Lista punktowana',
-                            icon: FaListUl,
+                            mricon: 'list',
                             action: (f) => contentElement.setBulletList(),
                             activeFunc: contentElement.isActiveBulletList,
                             tbr: 'A',
@@ -357,14 +357,14 @@
                         },
                     ]
                 }
-                
+
             ]
         }
 
         return operations
-        
+
     }
-       
+
     const extraPaletteCommands = [
         {
             caption: '_; Publish; Publicar; Opublikuj',
@@ -381,12 +381,12 @@
     const extraInsertPalletteCommands = [
         {
             caption: '_; Attachement; Anexo; Załącznik',
-            icon: FaPaperclip,
+            mricon: 'paperclip',
             action: runFileAttacher
         },
         {
             caption: '_; Tag; Etiqueta; Etykieta',
-            icon: FaTag,
+            mricon: 'tag',
             action: () => setTimeout(() => runTagInserter(), 500)
         }
     ]
@@ -407,24 +407,24 @@
     let selectedAttachements = []
     let imgInput;
     let attInput;
-    
+
     function selectImage(finishEditorCb)
     {
     //    imgEditorActionAfterSuccess = editorActionAfterSuccess;
         imgInput?.click();
     }
-    
+
     async function onImageSelected()
     {
         const [file] = imgInput.files;
         if(file)
         {
-            pendingResizing = true 
+            pendingResizing = true
 
             let resizedImage = await resizeImage(file, 1024, 1024)
             if(!resizedImage)
                 resizedImage = file
-            
+
             const selectedImageInfo = {
                 image: resizedImage,
                 name: file.name,
@@ -469,7 +469,7 @@
         selectedAttachements = []
     }
 
-   
+
     let titlePlaceholder = false;
     async function startTitleEditing(e)
     {
@@ -487,7 +487,7 @@
         note.Title = text;
     }
     */
- 
+
     async function startDescriptionEditing(e)
     {
         if(contentElement)
@@ -529,7 +529,7 @@
 
         if(selectedImages.length==0 && selectedAttachements.length==0)
         {
-            const res = await reef.post(`${folderRef}/AddPost`, { 
+            const res = await reef.post(`${folderRef}/AddPost`, {
                     title: note.Title,
                     summary: '',
                     content: note.Content,
@@ -548,9 +548,9 @@
         }
         else
         {
-        
+
         //1. create note
-            
+
             const res = await reef.post(`${user.$ref}/AddWorkingPost`, { }, onErrorShowAlert)
             if(!res)
             {
@@ -564,7 +564,7 @@
             for(let i=0; i<selectedImages.length; i++)
             {
                 let imageInfo = selectedImages[i];
-                
+
                 const res = await reef.post(`${questionRef}/Images/blob?name=${imageInfo.name}&size=${imageInfo.image.size}`, {}, onErrorShowAlert)
                 if(res && res.key && res.uploadUrl)
                 {
@@ -582,14 +582,14 @@
 
                         const dataPath = `${questionRef}/Images/blob?key=${newKey}`
                         contentElement.replaceTemporaryImage(imageInfo.url, dataPath)
-                        
+
                         if(!res || !res.ok)
                         {
                             const err = await res.text()
                             console.error(err)
                             onErrorShowAlert(err)
                         }
-                            
+
                     }
                     catch(err)
                     {
@@ -614,7 +614,7 @@
                 {
                     const newKey = res.key;
                     const uploadUrl = res.uploadUrl
-                    
+
                     try
                     {
                         const res = await fetch(uploadUrl, {
@@ -629,7 +629,7 @@
                             console.error(err)
                             onErrorShowAlert(err)
                         }
-                            
+
                     }
                     catch(err)
                     {
@@ -643,9 +643,9 @@
                     // nothing to do
                 }
             }
-            
+
             note.Content = contentElement.getInnerHtml()
-            
+
             // 4. Attach post to folder
             const res2 = await reef.post(`${folderRef}/AttachPost`, {
                 note: questionRef,
@@ -672,7 +672,7 @@
         }
 
         pendingPosting = false;
-        
+
         if(newPostHRef)
         {
             // replace instead of push to not add current page to history stack
@@ -704,7 +704,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex-->
-<Page   self={note} 
+<Page   self={note}
             toolbarOperations={getPageOperations()}
             clearsContext=''
             title={note.Title}>
@@ -714,7 +714,7 @@
                     <p class="">
                         {note.Index}
                     </p>
-                    
+
                     <div>
                         {#if creationDate}
                             <p>
@@ -724,8 +724,8 @@
                     </div>
             </section>
 
-            
-            
+
+
             <h1 on:click={startTitleEditing}>
                 {#if note.Title || titlePlaceholder}
                     <Editable self={note} a='Title' focusOnClick={false} />
@@ -735,7 +735,7 @@
                     </span>
                 {/if}
             </h1>
-            
+
 
             <section class="w-full flex flex-row flex-wrap justify-between">
                 <div class="grow-0">
@@ -748,7 +748,7 @@
                 <div>
                     <!--
                     {#if availableStates && availableStates.length > 0}
-                        <Combo  compact={true} 
+                        <Combo  compact={true}
                                 inContext='data'
                                 a='State'
                                 icon
@@ -756,7 +756,7 @@
                                 hasNone={false}
                                 s='prose'>
                             <ComboSource    objects={availableStates}
-                                            key="state" 
+                                            key="state"
                                             name="name"
                                             icon="icon"/>
                         </Combo>
@@ -776,22 +776,22 @@
                     {/if}
                 </div>
             </section>
-            
+
             {#if selectedAttachements && selectedAttachements.length > 0}
                 {#each selectedAttachements as att}
                     <span class="mx-1 px-1  text-nowrap
                                     border rounded border-stone-300 dark:border-stone-600
                                     text-xs">
                         {att.name}
-                    </span>    
+                    </span>
                 {/each}
                 <button class="w-3 h-3 mt-1" on:click={clearAttachements}>
                     <FaTimes/>
                 </button>
             {/if}
-            
-                
-            <hr/>    
+
+
+            <hr/>
 
             {#if note.Content || contentPlaceholder}
                 <Editor     self={note}
@@ -809,7 +809,7 @@
                 <p class="placeholder"
                     on:click={startDescriptionEditing}>
                     {i18n(["Description. Press '/' to show commands palette", "Descripción. Presiona “/” para mostrar la paleta de comandos.", "Opis. Naciśnij „/”, aby wyświetlić paletę poleceń."])}
-                    
+
                 </p>
             {/if}
 
@@ -818,20 +818,20 @@
             {@const styleFont = disabled ? "text-stone-400 dark:text-stone-500" : "text-stone-700 dark:text-stone-300 dark:hover:text-white"}
             {@const styleBg = disabled ? "" : "hover:bg-stone-200 dark:hover:bg-stone-800"}
             <section class="mt-20 flex flex-row justify-end mr-2 ml-2 mb-1 gap-2">
-                <button type="button" 
+                <button type="button"
                         class="
-                        py-2.5 px-4 
-                        text-sm  
-                        hover:bg-stone-200 dark:hover:bg-stone-800 
+                        py-2.5 px-4
+                        text-sm
+                        hover:bg-stone-200 dark:hover:bg-stone-800
                         border border-stone-300 focus:outline-none dark:border-stone-600
                         flex items-center rounded"
                         on:click={(e) => {askLeaveQuestion()}}>
                     <span class="ml-1">_; Cancel; Cancelar; Anuluj</span>
-                    
+
                 </button>
-                <button type="button" 
+                <button type="button"
                         class="
-                        py-2.5 px-4 
+                        py-2.5 px-4
                         text-sm {styleFont} {styleBg}
                         border border-stone-300 focus:outline-none dark:border-stone-600
                         flex items-center rounded"
@@ -839,12 +839,12 @@
                         {disabled}>
                     <div class="w-5 h-5 mr-1"><FaPaperPlane/></div>
                     <span class="ml-2">_; Publish; Publicar; Opublikuj</span>
-                    
+
                 </button>
             </section>
             {/if}
         </article>
-        
+
     </section>
 
     <input hidden type="file" id="imageFile" accept="image/*" bind:this={imgInput} on:change={onImageSelected}/>
@@ -852,9 +852,9 @@
 </Page>
 {/if}
 
-<Modal  title={i18n({en: 'Preparing...', es: 'Preparación...', pl: 'Przygotowanie...'})}  
+<Modal  title={i18n({en: 'Preparing...', es: 'Preparación...', pl: 'Przygotowanie...'})}
         bind:open={pendingResizing} mode={3} icon={FaCloudUploadAlt}>
-    <Spinner delay={0}/> 
+    <Spinner delay={0}/>
     <span class="ml-3">
          _;
         Your image is preparing;

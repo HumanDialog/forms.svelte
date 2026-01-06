@@ -5,7 +5,7 @@
     import {setNavigatorTitle} from '$lib'
     import {reef, session} from '@humandialog/auth.svelte'
     import {location, push} from 'svelte-spa-router'
-    
+
     let taskLists = [];
     let user = {};
     let justHaveCompletedLists = false;
@@ -14,7 +14,7 @@
     $: currentPath = $location;
 
     onMount(async () => {
-        
+
         if(!$session.isActive)
             return;
 
@@ -44,7 +44,7 @@
     }
 
     afterUpdate(() => {
-        
+
         if(!$session.isActive)
             return;
 
@@ -66,8 +66,8 @@
 
     async function addList(listName, order)
     {
-        await reef.post("/app/AllLists/new", 
-                            { 
+        await reef.post("/app/AllLists/new",
+                            {
                                 Name: listName,
                                 Order: order
                             });
@@ -82,7 +82,7 @@
 
     async function changeName(list, name)
     {
-        let res = await reef.post(`/app/AllLists/${list.Id}/set`, 
+        let res = await reef.post(`/app/AllLists/${list.Id}/set`,
                                 {
                                     Name: name
                                 });
@@ -92,7 +92,7 @@
     async function finishAllOnList(list)
     {
         await reef.post(`/app/AllLists/${list.Id}/FinishAll`, {})
-        
+
         if(isActive(`#/tasklist/${list.Id}`, currentPath))
         {
             reloadMainContentPage();
@@ -100,9 +100,9 @@
     }
 
     async function finishAllMyTasks()
-    {       
+    {
         await reef.get(`/user/FinishTasks`)
-        
+
         if(isActive('#/mytasks', currentPath))
         {
             reloadMainContentPage();
@@ -121,7 +121,7 @@
         else
             return false;
     }
-    
+
     function getUserListOperations(dom_node, data_item)
     {
         let menu_operations = [];
@@ -150,12 +150,12 @@
             },
             {
                 caption: 'Move up',
-                icon: FaCaretUp,
+                mricon: 'chevron-up',
                 action: (f) => navLists.moveUp(data_item)
             },
             {
                 caption: 'Move down',
-                icon: FaCaretDown,
+                mricon: 'chevron-down',
                 action: (f) => navLists.moveDown(data_item)
 
             },
@@ -171,14 +171,14 @@
         return menu_operations
     }
 
-   
+
   </script>
-  
+
 <Sidebar>
     <SidebarBrand class="hidden sm:block" >
         Octopus <span class="font-thin">mini</span>
     </SidebarBrand>
-        
+
         {#if taskLists && taskLists.length > 0}
         <SidebarGroup>
             <SidebarItem   href="#/mytasks"
@@ -191,9 +191,9 @@
         </SidebarGroup>
 
         <SidebarGroup border>
-            <SidebarList    objects={taskLists} 
+            <SidebarList    objects={taskLists}
                             orderAttrib='Order'
-                            inserter={addList} 
+                            inserter={addList}
                             inserterPlaceholder='New list'
                             bind:this={navLists}>
                 <svelte:fragment let:item>
@@ -207,15 +207,11 @@
                         {item.Name}
                     </SidebarItem>
                 </svelte:fragment>
-            </SidebarList> 
+            </SidebarList>
         </SidebarGroup>
-        
+
         {:else}
             <Spinner delay={3000}/>
         {/if}
 
     </Sidebar>
-
-
-
-    

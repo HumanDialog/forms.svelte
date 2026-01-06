@@ -282,12 +282,12 @@
             },
             {
                 caption: '_; Move up; Desplazar hacia arriba; Przesuń w górę',
-                icon: FaCaretUp,
+                mricon: 'chevron-up',
                 action: (f) => navGroupLists.moveUp(dataItem)
             },
             {
                 caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
-                icon: FaCaretDown,
+                mricon: 'chevron-down',
                 action: (f) => navGroupLists.moveDown(dataItem)
 
             },
@@ -341,7 +341,7 @@
 <div class="w-full prose prose-base prose-zinc dark:prose-invert prose-a:no-underline ">
 {#if true}
     {#if groupTaskLists && groupTaskLists.length > 0}
-        
+
         {#if $session.isActive}
             <SidebarGroup border title={i18n({en: 'Current work', es: 'Trabajo actual', pl: 'Bieżąca praca'})}>
                 <SidebarItem   href="/myday"
@@ -498,4 +498,3 @@
         onOkCallback={archiveList}
         bind:this={archiveModal}
         /-->
-

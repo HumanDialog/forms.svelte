@@ -295,13 +295,13 @@
                     operations: [
                         {
                             caption: '_; New task; Nueva tarea; Nowe zadanie',
-                            icon: FaRegCalendar,
+                            mricon: 'square-pen',
                             action: (f) => { listComponent.addRowAfter(null) },
                             fab: 'M01',
                             tbr: 'A'
                         },
                         {
-                            icon: FaDownload,
+                            mricon: 'download',
                             caption: '_; Insert; Insertar; Wstaw',
                             hideToolbarCaption: true,
                             tbr: 'C',
@@ -429,13 +429,13 @@
                     operations: [
                         {
                             caption: '_; New task; Nueva tarea; Nowe zadanie',
-                            icon: FaRegCalendar,
+                            mricon: 'square-pen',
                             action: (f) => { listComponent.addRowAfter(task) },
                             fab: 'M01',
                             tbr: 'A'
                         },
                         {
-                            icon: FaDownload,
+                            mricon: 'download',
                             caption: '_; Insert; Insertar; Wstaw',
                             hideToolbarCaption: true,
                             tbr: 'C',
@@ -479,7 +479,7 @@
                     operations: [
                         {
                             caption: '_; Edit...; Editar...; Edytuj...',
-                            icon: FaPen,
+                            mricon: 'pencil',
                             fab: 'M20',
                             tbr: 'A',
                             grid: [
@@ -533,7 +533,7 @@
                         },
                         {
                             caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
-                            icon: FaCaretUp,
+                            mricon: 'chevron-up',
                             action: (f) => listComponent.moveUp(task),
                             fab: 'M05',
                             tbr: 'A',
@@ -541,7 +541,7 @@
                         },
                         {
                             caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
-                            icon: FaCaretDown,
+                            mricon: 'chevron-down',
                             action: (f) => listComponent.moveDown(task),
                             fab: 'M04',
                             tbr: 'A',
@@ -550,7 +550,7 @@
 
                         {
                             caption: '_; Send; Enviar; Wyślij',
-                            icon: FaUpload,
+                            mricon: 'upload',
                             tbr: 'D',
                             fab: 'S00',
                             menu: [

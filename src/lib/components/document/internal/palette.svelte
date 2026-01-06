@@ -7,7 +7,7 @@
     import Icon from '../../icon.svelte'
     import { isDeviceSmallerThan, UI} from '../../../utils.js'
     import {FaTimes} from 'svelte-icons/fa'
-    
+
     export let commands         :Document_command[];
 
     export let width_px        :number = 400;
@@ -27,7 +27,7 @@
     {
         current_editor_range = range;
     }
-    
+
 
     let toolboxX: number;
     let toolboxY: number;
@@ -47,7 +47,7 @@
         /*console.log('window.scrollY', window.scrollY, window.pageYOffset)
         console.log('window.screenTop, window.screenY', window.screenTop, window.screenY)
 
-        
+
         console.log('mainContentDiv.scrollTop', mainContentDiv?.scrollTop, mainContentDiv.offsetTop, mainContentDiv.clientTop)
 
         let parentElement = mainContentDiv?.parentElement
@@ -60,7 +60,7 @@
 
         //toolboxY += window.scrollY
         //css_style = `left:${toolboxX}px; top:${toolboxY}px;`;
-        
+
         toolboxY += window.scrollY /*+ mainContentDiv?.scrollTop*/;
         //css_style = `position: absolute; left:${toolboxX}px; top:${toolboxY}px;`;
         css_style = `left:${toolboxX}px; top:${toolboxY}px;`;
@@ -90,7 +90,7 @@
         () => {
 
             return () => {
-                
+
                 // i.e.
                 // when palette is visible and user clicks 'back' in browser nav
                 // palette stays visible on screen
@@ -119,7 +119,7 @@
     {
         isToolbox = false;
         css_style = `width: ${width_px}px; max-height:${max_height_px}px; left:${x}px; top:${y}px;`;
-        
+
         if(up)
             css_style += ' transform: translate(0, -100%);'
         //console.log("show:", css_style)
@@ -151,7 +151,7 @@
 
         visible = true;
         dispatch('palette_shown');
-        
+
     }
 
     export function hide()
@@ -226,16 +226,16 @@
                     filtered_commands.splice(i, 1);
                     commandsNo--;
                     i--;
-                }   
+                }
                 else
-                    lastSeparatorIdx = i;     
+                    lastSeparatorIdx = i;
             }
         }
 
         if(filtered_commands[commandsNo-1].separator == true)
             filtered_commands.splice(commandsNo-1, 1)
 
-        
+
         // jeśli poprzednio podświetlony element znalazł się w podownie nowym zestawie to zostaje dalej jako podświetlony
         // w przeciwym wypadku podświetlamy pierwszy element na liście.
         if(!current_command || filtered_commands.every( v => v != current_command))
@@ -247,7 +247,7 @@
         }
 
 
-        // jeśli poprzednio nie było juz nic do wyświetlenia i tym razem też tak wyszło, wówczas zamykamy zupełnie paletę. 
+        // jeśli poprzednio nie było juz nic do wyświetlenia i tym razem też tak wyszło, wówczas zamykamy zupełnie paletę.
         // Najwidoczniej użytkownik nie jest zainteresowany wybieraniem czegokolwiek z palety.
         if((!was_any_items_before) && (filtered_commands.length == 0))
             hide();
@@ -255,7 +255,7 @@
         return filtered_commands;
     }
 
-    
+
 
     export function get_filtered_commands() :Document_command[]
     {
@@ -266,7 +266,7 @@
     {
         let op :Document_command|null = filtered_commands[idx];
         while(op.separator && idx < filtered_commands.length-1)
-        {   
+        {
             idx++;
             op = filtered_commands[idx];
         }
@@ -326,7 +326,7 @@
                 if(op)
                     update_current_command(op);
             }
-                
+
             return;
         }
 
@@ -347,7 +347,7 @@
 
         dispatch('palette_mouse_click')
         //await tick();
-        
+
         hide();
         on_choice(current_editor_range);
     }
@@ -358,11 +358,11 @@
     }
 
     let rows    :Pallete_row[] = [];
-    
+
     function update_current_command(cmd :Document_command)
     {
         let prev_current = current_command;
-        
+
         if(prev_current)
             rows.find((r) => !!r && r.cmd == prev_current).is_highlighted = false;
 
@@ -379,7 +379,7 @@
     function buttonMousedown(e: MouseEvent)
     {
         // preventDefault on mousedown avoids focusing the button
-        // so it keeps focus (and text selection) 
+        // so it keeps focus (and text selection)
         e.preventDefault()
     }
 
@@ -406,9 +406,9 @@
                 return;
 
             const touch = e.touches.item(0);
-            
+
             const trackDelta = new DOMPoint(touch.clientX - beforeTrackingClient.x, touch.clientY - beforeTrackingClient.y);
-            
+
             toolboxX = beforeTrackingPos.x + trackDelta.x;
             //toolboxY = beforeTrackingPos.y + trackDelta.y;
 
@@ -434,12 +434,12 @@
             return false;
     }
 
-   
-    
+
+
 </script>
 
 {#if isToolbox}
-    <menu   class="  bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md 
+    <menu   class="  bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md
                     z-40
                     flex flex-row flex-nowrap fixed"
             style={css_style}
@@ -462,7 +462,7 @@
                             bind:this={rows[idx]}
                             on:click={ () => { execute_mouse_click(cmd.on_choice); }}
                             on:mousedown={buttonMousedown}>
-                    
+
                         <div class="flex items-center justify-center mt-1 sm:mt-0.5" style:width={`${icon_placeholder_size*0.25}rem`}>
                             {#if cmd.icon}
                                 {@const cc = mobile ? 7 : 6}
@@ -480,7 +480,7 @@
     <!--div hidden={!visible}-->
 
         <div    hidden={!visible}
-                class=" bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md 
+                class=" bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md
                         z-40 fixed"
                 id="__hd_FormattingPalette"
                 bind:this={paletteElement}
@@ -490,7 +490,7 @@
                 {#key closeButtonPos}
                     <button class="     text-stone-800 dark:text-stone-400
                                         fixed w-6 h-6 flex items-center justify-center
-                                        focus:outline-none font-medium  text-sm text-center" 
+                                        focus:outline-none font-medium  text-sm text-center"
                             style={closeButtonPos}
                             on:mousedown={buttonMousedown}
                             on:click={ () => hide() }>  <!-- rounded-full text-stone-500 bg-stone-200/70 hover:bg-stone-200  dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 -->
@@ -528,7 +528,6 @@
 
         </div>
     <!---/div-->
-    
-    
-{/if}
 
+
+{/if}

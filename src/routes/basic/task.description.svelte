@@ -31,7 +31,7 @@
 
     import {FaPlus,FaAlignLeft,FaCheck, FaTag,FaUser,FaCalendarAlt,FaUndo, FaSave, FaCloudUploadAlt, FaFont, FaPen, FaList, FaUpload, FaFile,
         FaImage, FaTable, FaPaperclip, FaBold, FaItalic, FaUnderline, FaStrikethrough, FaRemoveFormat, FaCode, FaComment, FaQuoteRight, FaExclamationTriangle,
-        FaInfo, FaListUl, FaLink, FaRegFolder, FaRegCalendar, FaRegCalendarCheck, FaRegFile, FaDownload, FaTrash, FaExternalLinkSquareAlt, FaCaretUp, FaCaretDown 
+        FaInfo, FaListUl, FaLink, FaRegFolder, FaRegCalendar, FaRegCalendarCheck, FaRegFile, FaDownload, FaTrash, FaExternalLinkSquareAlt, FaCaretUp, FaCaretDown
     } from 'svelte-icons/fa/'
 
 
@@ -45,11 +45,11 @@
     export let refreshParent = null
     export let runNoteInserter
     export let runFileAttacher
-  
+
     let noteRef = ''
     let note = null;
     let noteId = 0
-    
+
     let pendingUploading = false;
     let isReadOnly = false;
     let canBeEditable = false
@@ -60,8 +60,8 @@
     const NR_NONE               = 0
     const NR_DESCRIPTION        = 1
     const NR_COVER              = 2
-    
-    
+
+
     $: initCompnent()
     $: isHeaderActive = calculate_active(note, $contextItemsStore)
     $: isHeaderSelected = selected(note, $contextItemsStore)
@@ -115,7 +115,7 @@
         isReadOnly = (note.$acc & 0x2) == 0
     }
 
-   
+
 
     function onPropertySingleChange(txt, attrib)
     {
@@ -129,12 +129,12 @@
     let summaryPlaceholder = false;
 
     let description;
-    
+
     const extraPaletteCommands = []
 
     const extraInsertPalletteCommands = [
         {
-            icon: FaDownload,
+            mricon: 'download',
             caption: '_; Insert; Insertar; Wstaw',
             //tbr: 'C',
             //fab: 'S10',
@@ -183,7 +183,7 @@
     {
         const clipboardElements = await fetchComposedClipboard4Editor()
 
-        showFloatingToolbar(aroundRect, BasketPreview, 
+        showFloatingToolbar(aroundRect, BasketPreview,
             {
                 onAttach: (clipboard, elements) => makeLinkToElement(elements),
                 //onAttachAndClear: (clipboard, elements) => makeLinkToElement(elements),
@@ -192,7 +192,7 @@
         )
     }
 
-    async function pasteRecentClipboardElement4Editor(btt, aroundRect) 
+    async function pasteRecentClipboardElement4Editor(btt, aroundRect)
     {
         const clipboardElements = await fetchComposedClipboard4Editor()
         if(clipboardElements && clipboardElements.length > 0)
@@ -220,7 +220,7 @@
         })
     }
 
-    async function runNoteCreator4Editor() 
+    async function runNoteCreator4Editor()
     {
         const cursorPos = description.getCurrentCursorPos()
 
@@ -235,7 +235,7 @@
                 }])
             }, 500)
 
-            
+
         }
 
         runNoteInserter(insertNewNoteLink)
@@ -263,7 +263,7 @@
     {
         if(elements && Array.isArray(elements) && elements.length > 0)
         {
-            elements.forEach((el) => 
+            elements.forEach((el) =>
             {
                 let href;
                 if(el.href.endsWith('/blob'))
@@ -278,11 +278,11 @@
                     href = el.href
 
                 description.addLink(el.Title, href)
-            })   
+            })
         }
     }
 
-    async function downloadFileFromHRef(href, title) 
+    async function downloadFileFromHRef(href, title)
     {
         let ref;
         let name;
@@ -313,15 +313,15 @@
         {
             const blob = await res.blob()
             const blobUrl = URL.createObjectURL(blob);
-    
+
             const link = document.createElement("a"); // Or maybe get it from the current document
             link.href = blobUrl;
             link.download = name;
 
             //document.body.appendChild(link); // Or append it whereever you want
             link.click() //can add an id to be specific if multiple anchor tag, and use #id
-            
-            
+
+
             URL.revokeObjectURL(blobUrl)
         }
         else
@@ -425,8 +425,8 @@
         reef.delete(dataPath, onErrorShowAlert)
     }
 
-    
-    
+
+
     function isContentEmpty()
     {
         if(!note.Content)
@@ -471,7 +471,7 @@
         return isSelected(note)
     }
 
-   
+
 
     function descriptionOperations()
     {
@@ -503,8 +503,8 @@
             action: (f) => toggleNoteDescriptionRole(noteLink),
             active: noteLink.Role == NR_DESCRIPTION
         })
-       
-        
+
+
         return {
                 opver: 2,
                 fab: 'M00',
@@ -515,7 +515,7 @@
                         operations: [
                             {
                                 caption: '_; Edit; Editar; Edytuj',
-                                icon: FaPen,
+                                mricon: 'pencil',
                                 tbr: 'A',
                                 fab:'M20',
                                 grid:[
@@ -533,7 +533,7 @@
                             },
                             {
                                 caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
-                                icon: FaCaretUp,
+                                mricon: 'chevron-up',
                                 action: async (f) => await moveUp(),
                                 fab:'M06',
                                 tbr:'A',
@@ -541,7 +541,7 @@
                             },
                             {
                                 caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
-                                icon: FaCaretDown,
+                                mricon: 'chevron-down',
                                 action: async (f) => await moveDown(),
                                 fab:'M05',
                                 tbr:'A' ,
@@ -550,7 +550,7 @@
                             {
                                 caption: '_; Send; Enviar; Wyślij',
                                 hideToolbarCaption: true,
-                                icon: FaUpload,
+                                mricon: 'upload',
                                 tbr: 'D',
                                 fab: 'S00',
                                 menu: [
@@ -598,7 +598,7 @@
                     operations: [
                         {
                             caption: '_; Heading 1; Título 1; Nagłówek 1',
-                            icon: IcH1,
+                            mricon: 'heading-1',
                             tbr: 'A',
                             hideToolbarCaption: true,
                             action: (f) => description.setHeading(1),
@@ -606,28 +606,28 @@
                         },
                         {
                             caption: '_; Heading 2; Título 2; Nagłówek 2',
-                            icon: IcH2,
+                            mricon: 'heading-2',
                             tbr: 'A',hideToolbarCaption: true,
                             action: (f) => description.setHeading(2),
                             activeFunc: description.isActiveH2
                         },
                         {
                             caption: '_; Heading 3; Título 3; Nagłówek 3',
-                            icon: IcH3,
+                            mricon: 'heading-3',
                             tbr: 'A',hideToolbarCaption: true,
                             action: (f) => description.setHeading(3),
                             activeFunc: description.isActiveH3
                         },
                         {
                             caption: '_; Heading 4; Título 4; Nagłówek 4',
-                            icon: IcH4,
+                            mricon: 'heading-4',
                             tbr: 'A',hideToolbarCaption: true,
                             action: (f) => description.setHeading(4),
                             activeFunc: description.isActiveH4
                         },
                         {
                             caption: '_; Normal; Normal; Normalny',
-                            icon: FaRemoveFormat,
+                            mricon: 'pilcrow',
                             tbr: 'A',
                             hideToolbarCaption: true,
                             action: (f) => description.setNormal(),
@@ -635,21 +635,21 @@
                         },
                         {
                             caption: '_; Code; Código; Kod',
-                            icon: FaCode,
+                            mricon: 'code-xml',
                             tbr: 'A',hideToolbarCaption: true,
                             action: (f) => description.setCode(),
                             activeFunc: description.isActiveCode
                         },
                         {
                             caption: '_; Quote; Cita; Cytat',
-                            icon: FaQuoteRight,
+                            mricon: 'text-quote',
                             tbr: 'A',hideToolbarCaption: true,
                             action: (f) => description.setQuote(),
                             activeFunc: description.isActiveQuote
                         },
                         {
                             caption: '_; BulletList; Lista con viñetas; Lista punktowana',
-                            icon: FaListUl,
+                            mricon: 'list',
                             tbr: 'A',hideToolbarCaption: true,
                             action: (f) => description.setBulletList(),
                             activeFunc: description.isActiveBulletList
@@ -664,7 +664,7 @@
                     operations: [
                         {
                             caption: '_; Bold; Negrita; Pogrubiony',
-                            icon: FaBold,
+                            mricon: 'bold',
                             action: (f) => description.setBold(),
                             activeFunc: description.isActiveBold,
                             tbr: 'A',
@@ -672,7 +672,7 @@
                         },
                         {
                             caption: '_; Italic; Cursiva; Kursywa',
-                            icon: FaItalic,
+                            mricon: 'italic',
                             action: (f) => description.setItalic(),
                             activeFunc: description.isActiveItalic,
                             tbr: 'A',
@@ -680,7 +680,7 @@
                         },
                         {
                             caption: '_; Underline; Subrayar; Podkreślenie',
-                            icon: FaUnderline,
+                            mricon: 'underline',
                             action: (f) => description.setUnderline(),
                             activeFunc: description.isActiveUnderline,
                             tbr: 'A',
@@ -688,7 +688,7 @@
                         },
                         {
                             caption: '_; Strikethrough; Tachado; Przekreślenie',
-                            icon: FaStrikethrough,
+                            mricon: 'strikethrough',
                             action: (f) => description.setStrikethrough(),
                             activeFunc: description.isActiveStrikethrough,
                         },
@@ -701,27 +701,27 @@
                     operations: [
                         {
                             caption: '_; Image; Imagen; Obraz',
-                            icon: FaImage,
+                            mricon: 'image',
                             action: (f) => description.setImage(),
                             activeFunc: description.isActiveImage,
                             tbr: 'A', hideToolbarCaption: true
                         },
                         {
                             caption: '_; Table; Tabla; Tabela',
-                            icon: FaTable,
+                            mricon: 'table',
                             action: (f) => description.setTable(),
                             activeFunc: description.isActiveTable
                         }/*,
                         {
                             caption: '_; Attachement; Anexo; Załącznik',
-                            icon: FaPaperclip,
+                            mricon: 'paperclip',
                             action: (f) => runFileAttacher(),
                             tbr: 'A',
                             hideToolbarCaption: true
                         },
                         {
                             caption: '_; Tag; Etiqueta; Etykieta',
-                            icon: FaTag,
+                            mricon: 'tag',
                             action: (f) => runTagInserter()
                         }*/
                     ]
@@ -733,14 +733,14 @@
                     operations: [
                         /*{
                             caption: '_; Edit...; Editar...; Edytuj...',
-                            icon: FaPen,
+                            mricon: 'pencil',
                             grid: addOperations,
                         //    fab: 'M10',
                         //    tbr: 'A'
                         },*/
                         {
                             caption: '_; Send; Enviar; Wyślij',
-                            icon: FaUpload,
+                            mricon: 'upload',
                             hideToolbarCaption: true,
                             tbr: 'D',
                             fab: 'S00',
@@ -757,7 +757,7 @@
 
                         }/*,
                         {
-                            icon: FaDownload,
+                            mricon: 'download',
                             caption: '_; Insert; Insertar; Wstaw',
                             hideToolbarCaption: true,
                             tbr: 'C',
@@ -807,8 +807,8 @@
         }
 
     }
-    
-    
+
+
     async function toggleNoteDescriptionRole(noteLink)
     {
         await reef.get(`${noteLink.$ref}/ToggleDescriptionRole`, onErrorShowAlert)
@@ -833,7 +833,7 @@
     {
         await reef.post(`Task/${noteLink.TaskId}/DeletePermanentlyNote`, { noteLink: noteLink.$ref } , onErrorShowAlert);
         deleteModal.hide();
-    
+
         if(refreshParent)
             await refreshParent()
     }
@@ -841,7 +841,7 @@
     async function dettachNote()
     {
         await reef.post(`Task/${noteLink.TaskId}/DettachNote`, { noteLink: noteLink.$ref } , onErrorShowAlert);
-        
+
         if(refreshParent)
             await refreshParent()
     }
@@ -888,10 +888,10 @@
 
 {#key noteId + (isReadOnly ? 100000 : 200000)}
 {#if note != null}
-    
+
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex-->
-            <h1     class=" relative left-[-0.5rem] pl-2 pb-1 
+            <h1     class=" relative left-[-0.5rem] pl-2 pb-1
                             border border-transparent {focusedClass} {selectedClass}"
                     tabindex="0"
                     use:selectable={note}
@@ -953,7 +953,7 @@
         bind:this={deleteModal}>
     <p class="text-sm text-stone-500 dark:text-stone-300">
         <span>
-            _; 
+            _;
             Are you sure you want to delete selected element?;
             ¿Está seguro de que desea eliminar el elemento seleccionado?;
             Czy na pewno chcesz usunąć wybrany element?

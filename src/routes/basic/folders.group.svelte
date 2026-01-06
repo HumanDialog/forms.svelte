@@ -134,7 +134,7 @@
                 operations: [
                     {
                         caption: '_; New folder; Nueva carpeta; Nowy folder',
-                        icon: FaRegFolder,
+                        mricon: 'folder',
                         action: (focused) => { listComponent.addRowAfter(null) },
                         tbr: 'A',
                         fab: 'M03'
@@ -163,7 +163,7 @@
                     operations: [
                         {
                             caption: '_; New folder; Nueva carpeta; Nowy folder',
-                            icon: FaRegFolder,
+                            mricon: 'folder',
                             action: (focused) => { listComponent.addRowAfter(folder) },
                             tbr: 'A',
                             fab: 'M03'
@@ -176,7 +176,7 @@
                     operations: [
                         {
                             caption: '_; Edit; Editar; Edytuj',
-                            icon: FaPen,
+                            mricon: 'pencil',
                             tbr: 'A',
                             fab:'M20',
                             grid:[
@@ -194,7 +194,7 @@
                         {
                             caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                             hideToolbarCaption: true,
-                            icon: FaCaretUp,
+                            mricon: 'chevron-up',
                             action: (f) => listComponent.moveUp(folder),
                             fab:'M05',
                             tbr:'A',
@@ -202,7 +202,7 @@
                         {
                             caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                             hideToolbarCaption: true,
-                            icon: FaCaretDown,
+                            mricon: 'chevron-down',
                             action: (f) => listComponent.moveDown(folder),
                             fab:'M04',
                             tbr:'A'

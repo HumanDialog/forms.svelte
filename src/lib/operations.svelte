@@ -82,6 +82,7 @@
                 const allOperationsMenu = {
                     caption: operationsRoot.caption ?? '',
                     icon: operationsRoot.icon ?? FaEllipsisV,
+                    mricon: operationsRoot.icon ?? 'ellipsis-vertical',
                     menu: allFlatOperations,
                     tbr: operationsRoot.tbr,
                     preAction: operationsRoot.preAction ?? undefined,

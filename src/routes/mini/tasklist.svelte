@@ -173,18 +173,18 @@
                     action: (focused) => { listComponent.addRowAfter(task) }
                 },
                 {
-                    icon: FaPen,
+                    mricon: 'pencil',
                     caption: '',
                     grid: editOperations
                 },
                 {
                     caption: '',
-                    icon: FaCaretUp,
+                    mricon: 'chevron-up',
                     action: (focused) => listComponent.moveUp(task)
                 },
                 {
                     caption: '',
-                    icon: FaCaretDown,
+                    mricon: 'chevron-down',
                     action: (focused) => listComponent.moveDown(task)
                 },
                 {

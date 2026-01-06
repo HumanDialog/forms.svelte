@@ -112,6 +112,7 @@
 
                     mainOperation = {
                         icon: FaEllipsisV,
+                        mricon: 'ellipsis-vertical',
                         menu: flatOperations,
                         fab: main_FAB_position
                     }
@@ -147,6 +148,7 @@
                 {
                     const collapseFAB = {
                         icon: $fabCollapsed  ? FaRegDotCircle : FaDotCircle,
+                        mricon: $fabCollapsed  ? 'circle-dot-dashed' : 'circle-dashed',
                         fab: 'M10',
                         action: (f) => toggleExpandAdditionalOperations()
                     }

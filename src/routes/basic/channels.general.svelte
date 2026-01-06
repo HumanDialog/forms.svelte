@@ -161,7 +161,7 @@
                     operations: [
                         {
                             caption: '_; Edit; Editar; Edytuj',
-                            icon: FaPen,
+                            mricon: 'pencil',
                             tbr: 'A',
                             fab:'M20',
                             grid:[
@@ -179,7 +179,7 @@
                         {
                             caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                             hideToolbarCaption: true,
-                            icon: FaCaretUp,
+                            mricon: 'chevron-up',
                             action: (f) => listComponent.moveUp(channel),
                             fab:'M05',
                             tbr:'A',
@@ -187,7 +187,7 @@
                         {
                             caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                             hideToolbarCaption: true,
-                            icon: FaCaretDown,
+                            mricon: 'chevron-up',
                             action: (f) => listComponent.moveDown(channel),
                             fab:'M04',
                             tbr:'A'

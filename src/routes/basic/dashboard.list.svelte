@@ -29,7 +29,7 @@
     export let onRefreshDashboard = undefined
 
     let placeholder = ''
-    
+
     $: isCardActive = calculate_active(list, $contextItemsStore)
     $: isCardSelected = selected(list, $contextItemsStore)
 
@@ -57,7 +57,8 @@
                     operations: [
                         {
                             caption: '_; Edit...; Editar...; Edytuj...',
-                            icon: FaPen,
+                            mricon: 'pencil',
+                            mricon: 'pencil',
                             fab: 'M20',
                             tbr: 'A',
                             grid: [
@@ -75,7 +76,8 @@
                         {
                             caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                             hideToolbarCaption: true,
-                            icon: FaCaretUp,
+                            mricon: 'chevron-up',
+                            mricon: 'chevron-up',
                             action: (f) => moveUp(),
                             fab: 'M05',
                             tbr: 'A'
@@ -83,7 +85,7 @@
                         {
                             caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                             hideToolbarCaption: true,
-                            icon: FaCaretDown,
+                            mricon: 'chevron-down',
                             action: (f) => moveDown(),
                             fab: 'M04',
                             tbr: 'A'
@@ -121,7 +123,7 @@
         activateItem('props', list, operations);
     }
 
-    
+
     export async function editProperty(field)
     {
         if(field == "Name")
@@ -215,7 +217,7 @@
     <a href={list.href} use:link>
     <h2  class="text-sky-500">
             <Editable self={list} a='Name' focusOnClick={false}/>
-    </h2> 
+    </h2>
     </a>
 
 

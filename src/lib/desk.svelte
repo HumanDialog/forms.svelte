@@ -85,13 +85,13 @@
             {
                 main_side_panel_visibility = "hidden"
                 lg_content_area_horizontal_dim = ""
-                lg_content_area_horizontal_tools_dim = `lg:left-[60px] lg:w-[calc(100vw-80px)]`
+                lg_content_area_horizontal_tools_dim = `sm:left-[60px] sm:w-[calc(100vw-80px)]`
             }
             else
             {
                 main_side_panel_visibility = "fixed lg:block"
                 lg_content_area_horizontal_dim = `lg:left-[360px] lg:w-[calc(100vw-360px)]`
-                lg_content_area_horizontal_tools_dim = `lg:left-[380px] lg:w-[calc(100vw-400px)]`
+                lg_content_area_horizontal_tools_dim = `sm:left-[60px] sm:w-[calc(100vw-80px)] lg:left-[380px] lg:w-[calc(100vw-400px)]`
             }
         }
         else
@@ -401,15 +401,14 @@
                 <!--#######################################################-->
                 <!--##  VERTICAL TOOLBAR                 ##################-->
                 <!--#######################################################-->
-                <div  class="hidden sm:block fixed left-0 top-[50px] sm:top-0 w-[50px] sm:w-[40px] h-screen z-20 inset-0   overflow-hidden">
+                <div  class="hidden sm:block fixed left-0 top-[50px] sm:top-0 w-[40px] h-screen z-20 inset-0   overflow-hidden">
                     <div class="sticky top-0 flex h-full w-12 sm:w-10 bg-stone-800 dark:bg-stone-950 flex-col items-center text-stone-100 shadow">
                         <VerticalToolbar appConfig={layout} mobile={false}/>
                     </div>
                 </div>
 
-                 <header class="block sm:hidden  fixed w-screen bottom-0 h-[50px] sm:h-[40px] z-20 shadow  shadow-stone-900/5 dark:shadow-none     overflow-auto" >
+                <header class="block sm:hidden  fixed w-screen bottom-0 h-[50px] sm:h-[40px] z-20 shadow  shadow-stone-900/5 dark:shadow-none     overflow-auto" >
                     <div class="    flex flex-row justify-between  h-full
-
                                     text-stone-500 bg-stone-200/70 hover:bg-stone-200
                                     dark:text-orange-200 dark:bg-stone-700/70 dark:hover:bg-stone-700
                                     bg-stone-200 dark:bg-stone-800/70
@@ -452,7 +451,7 @@
                     behaviour is the content expand vertically, and only vertical scrollbar can be visible.
                     When content on the main page needs to be expanded horizontally (like kanban chart for example) then
                     that component should define overflow-x-* itself -->
-                <section on:click|capture={() => navAutoHide()  } class="">
+                <section class = "" on:click|capture={() => navAutoHide()  } >
 
                     <!--###########################################################-->
                     <!--##  HORIZONTAL TOOLS                 ######################-->
@@ -463,11 +462,11 @@
                                     w-full
                                     h-[40px]
                                     left-0 sm:left-[40px]
-                                    top-[40px] sm:top-0
+                                    sm:top-0
                                     {lg_content_area_horizontal_tools_dim}
                                     z-10 overflow-hidden
                                      rounded-2xl
-                                    bg-stone-50 dark:bg-stone-900
+                                    bg-stone-50 dark:bg-stone-800
                                     border-b-1 border-stone-500/30 dark:border-stone-100
                                     sm:shadow sm:shadow-slate-700/40
                                     sm:dark:shadow-black" >
@@ -488,7 +487,8 @@
                                     {content_top}
                                     {lg_content_area_horizontal_dim}
                                     z-0 overflow-x-hidden
-                                    {content_height} sm:overflow-y-auto sm:overscroll-contain"
+                                    {content_height} sm:overflow-y-auto sm:overscroll-contain
+                                    "
                                     >
                             <Configurable config={layout.mainContent} min_h_class="min-h-screen">
                                 <div slot='alt'></div>

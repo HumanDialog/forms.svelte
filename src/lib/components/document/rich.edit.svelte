@@ -23,10 +23,10 @@
     import IcH4 from './internal/h4.icon.svelte'
 	import { showMenu } from '../menu';
 
-	
+
     export let value = '';
     export let placeholder = '';
-    
+
     export let self = null;
     export let a = '';
     export let context = '';
@@ -53,21 +53,21 @@
                 action: c.on_choice
             })
         })
-        
+
         return result;
     }
 
-    
+
     let   item = null;
     let   changed_value :string;
     let   has_changed_value :boolean = false;
 
     let additional_class = $$restProps['class'] ?? '';
-    
+
     let editable_div            : HTMLDivElement = null;
     //let active_range            : Selection_range;
     let observer                : MutationObserver;
-    
+
     let palette = null;
     let is_command_palette_visible :boolean = false;
     let palette_focused_node :Node = null;
@@ -83,10 +83,10 @@
     if(compact)
         appearance_class = "";
     else
-        appearance_class = `bg-stone-50 border border-stone-300 rounded-md 
-                            dark:bg-stone-700 dark:border-stone-600 
+        appearance_class = `bg-stone-50 border border-stone-300 rounded-md
+                            dark:bg-stone-700 dark:border-stone-600
                             px-2.5`;
-    
+
     let  last_tick = -1;
 
     $:{
@@ -106,13 +106,13 @@
         if(a)
         {
             if(self)
-                item = self   
+                item = self
             else
                 item = $contextItemsStore[ctx];
-                
+
             if(!typename)
                 typename = $contextTypesStore[ctx];
-            
+
             if(item != null)
                 value = item[a]
         }
@@ -127,11 +127,11 @@
 
     }
 
-    onMount( () => 
+    onMount( () =>
     {
         if(!editable_div)
             return;
-        
+
         if(!observer)
         {
             observer = new MutationObserver(async () => { await content_changed(true); });
@@ -150,7 +150,7 @@
     });
 
 
-    onDestroy( () => 
+    onDestroy( () =>
     {
         if(!editable_div)
             return;
@@ -173,11 +173,11 @@
         else
             storedSelection = null;
         //console.log('before: ', storedSelection, storedSelection.begin.node_index, storedSelection.begin.absolute_index);
-        
+
     })
 
     afterUpdate( () => {
-        
+
         //console.log('after: ', stored_selection, stored_selection?.begin.node_index, stored_selection?.begin.absolute_index)
 
         if(storedSelection)
@@ -214,8 +214,8 @@
                 set_position(selection_offset + sel.focusNode.textContent.length);
             }
         }
-        
-    
+
+
         if(is_command_palette_visible)
         {
             if(palette_focused_node)
@@ -225,27 +225,27 @@
                 let key :string;
                 if(current_text.charAt(palette_focused_string_start) == '/')
                     palette_focused_string_start++;
-                
+
                 if(palette_focused_string_end > 0)
                     key = current_text.slice(palette_focused_string_start, -palette_focused_string_end);
                 else
                     key = current_text.substr(palette_focused_string_start);
-                
-                filter_command_palette(key);    
+
+                filter_command_palette(key);
             }
         }
 
         changed_value = editable_div.innerHTML;
         has_changed_value = true;
 
-      
-        
-        /* temporary off 
+
+
+        /* temporary off
         let sel :Selection = window.getSelection();
         if(sel.focusNode)
         {
             let text_node :Node = sel.focusNode;
-            
+
             if(text_node == null)
                 return;
 
@@ -312,7 +312,7 @@
                 event.preventDefault();
                 return;
             }
-            
+
             let range :Range = new Range;
             range.collapse(true);
             range.setStart(next_text_editable_node, 0);
@@ -399,12 +399,12 @@
                         }
                     }
                 }
-                else 
+                else
                 {
                     let hide_commands_palette :boolean = false;
                     if(is_command_palette_visible)
                         hide_commands_palette = will_slash_remove();
-                    
+
                     if(is_last_character_before_caret())
                     {
                         event.cancelBubble = true;
@@ -492,7 +492,7 @@
                 {
                     event.cancelBubble = true;
                     event.preventDefault();
-                    
+
                     if(!is_focused_paragraph_last_in_document())
                     {
                         let next_paragraph :Node;
@@ -514,7 +514,7 @@
                     else
                         ; // do nothing, it's ending of document
                 }
-                
+
                 break;
 
             case 'Esc':
@@ -526,7 +526,7 @@
                     hide_command_palette();
                 }
                 break;
-            
+
             case 'ArrowDown':
                 if(is_command_palette_visible)
                 {
@@ -545,11 +545,11 @@
                 }
                 break;
 
-            
+
         }
 
-        
-        
+
+
     }
 
     const on_mouseup = () =>
@@ -594,7 +594,7 @@
             palette_focused_node_org_text = sel.focusNode.textContent;
             palette_focused_string_start = sel.focusOffset;
             palette_focused_string_end = sel.focusNode.textContent.length - sel.focusOffset;
-            
+
             let sr :Selection_range;
             sr = get_position();
             palette_focused_selection_pos = sr.end.absolute_index;
@@ -608,8 +608,8 @@
             palette_focused_node.textContent = palette_focused_node_org_text;
             content_changed(false);
 
-            set_position(palette_focused_selection_pos);  
-            on_selection_changed();  
+            set_position(palette_focused_selection_pos);
+            on_selection_changed();
         }
     }
 
@@ -673,7 +673,7 @@
     {
         let sel :Selection;
         sel = window.getSelection();
-        
+
         if(sel.focusNode.textContent && sel.focusNode.nodeType !== sel.focusNode.COMMENT_NODE)
         {
             if(sel.focusOffset == sel.focusNode.textContent.length)
@@ -689,7 +689,7 @@
 
         let merged_text :string = sel.focusNode.textContent;
         let prev_paragraph = remove_focused_paragraph(false);
-        
+
         let text_node :Node = prev_paragraph.childNodes[0];
         let merging_text :string = text_node.textContent;
         text_node.textContent = merging_text +  merged_text;
@@ -761,7 +761,7 @@
         let first_offset ;
         let last_paragraph ;
         let last_offset ;
-        
+
         let cmp = sel.anchorNode?.compareDocumentPosition(sel.focusNode)
         switch(cmp)
         {
@@ -786,8 +786,8 @@
         default:
             return;
         }
-        
-        
+
+
 
         let in_selection :boolean = false
         let paragraphs_to_remove :Node[] = [];
@@ -813,7 +813,7 @@
                     {
                         text_node.textContent = '\u200B';   // empty paragraph
                     }
-                    
+
                     in_selection = false
                     break;
                 }
@@ -845,19 +845,19 @@
 
                 in_selection = true;
             }
-            
+
         }
 
         if(first_paragraph)
         {
             let last_node = last_paragraph.childNodes[0];
             let merged_text = last_node.textContent;
-            
+
             let text_node = first_paragraph.childNodes[0];
             let merging_text = text_node.textContent;
 
             text_node.textContent = merging_text + merged_text;
-            
+
             paragraphs_to_remove.push(last_paragraph)
 
             let pos = merging_text.length
@@ -887,7 +887,7 @@
     {
         let sel :Selection;
         sel = window.getSelection();
-        return sel.focusNode == sel.anchorNode      // what about <br> 
+        return sel.focusNode == sel.anchorNode      // what about <br>
     }
 
     function is_whole_parapraph_selected() :boolean
@@ -909,7 +909,7 @@
     {
         let sel :Selection;
         sel = window.getSelection();
-        
+
         if(sel.rangeCount == 0)
             return false;
 
@@ -977,7 +977,7 @@
             return true;
     }
 
-    function remove_focused_paragraph(return_next_sibling :boolean = false) :Node 
+    function remove_focused_paragraph(return_next_sibling :boolean = false) :Node
     {
         let text_node :Node = window.getSelection().focusNode;
         let focused_div :Node = text_node.parentNode;
@@ -1033,7 +1033,7 @@
         let n :Node = sel.focusNode;
         if(!n)
             return false;
-        
+
         if(n.nodeType !== n.TEXT_NODE)
             return false;
 
@@ -1060,7 +1060,7 @@
     {
         if(node.nodeType != node.ELEMENT_NODE)
             return false;
-        
+
         let element :HTMLElement = <HTMLElement> node;
         if(element.isContentEditable)
             return false;
@@ -1090,12 +1090,12 @@
                     if(result)
                         return result;
                 }
-                
+
             }
             else if(is_text_node(node))
                 return node;
-            
-            
+
+
             node = node.nextSibling;
         }
 
@@ -1123,7 +1123,7 @@
         let next_text_editable_node :Node = find_next_editable_node(sel.focusNode, sel.focusNode.parentNode, true);
         if(!next_text_editable_node)
             return;
-        
+
         let range :Range = new Range;
         range.collapse(true);
         range.setStart(next_text_editable_node, 0);
@@ -1135,7 +1135,7 @@
     {
         while(node && node.nodeType !== Node.ELEMENT_NODE)
             node = node.parentNode;
-        
+
         if(!node)
             return false;
 
@@ -1150,7 +1150,7 @@
             let old_element :Element = element;
             let new_element :Element = document.createElement(tag);
             new_element.innerHTML = old_element.innerHTML;
-            
+
             const attribs_no = old_element.attributes.length;
             for(let i=0; i<attribs_no; i++)
             {
@@ -1197,7 +1197,7 @@
             if(set_tag_and_class_for_paragraph(from, tag, css_class))
                 should_restore_selection = true;
             let node :Node = from;
-            
+
             do
             {
                 node = find_next_editable_node(node, node.parentNode, true);
@@ -1223,12 +1223,12 @@
             console.log("Unsupported");
             return false;
         }
-        else 
+        else
         {
             let sel :Selection;
             sel = window.getSelection();
             const focusNode: Node = sel.focusNode;
-            const wholeText: string = focusNode.textContent; 
+            const wholeText: string = focusNode.textContent;
             const carretPos = sel.focusOffset
 
             let leftPart: string = wholeText.substring(0, carretPos)
@@ -1241,7 +1241,7 @@
             range.setStart(focusNode, pos);
             range.setEnd(focusNode, pos);
             set_selection(range);
-        }   
+        }
     }
 
     function insert_new_line()
@@ -1250,12 +1250,12 @@
         const editableElem = editable_div;
         const tag = 'p';
         let inTheMiddle: boolean;
-        if (editableElem) 
+        if (editableElem)
         {
             let active_range : Selection_range = Selection_helper.get_selection(editable_div);
             const rangeNode = Selection_helper.create_cursor_range(editableElem, active_range.begin.absolute_index);
 
-            if (rangeNode) 
+            if (rangeNode)
             {
                 const activeNode = rangeNode[1]
                 inTheMiddle = true;
@@ -1267,10 +1267,10 @@
                 }
 
                 const newTag = document.createElement(tag);
-                
+
                 let new_line_cursor_pos :number;
 
-                if (!inTheMiddle) 
+                if (!inTheMiddle)
                 {
                     newTag.innerHTML = "\u200B";
                     new_line_cursor_pos = 1;
@@ -1283,10 +1283,10 @@
 
                     let current_div :HTMLElement;
                     current_div = <HTMLElement> activeNode.parentNode;
-                    
+
                     let current_text :string;
                     current_text = activeNode.textContent;
-                   
+
                     let range_start :number
                     range_start = range.startOffset;
 
@@ -1294,7 +1294,7 @@
                     range_end = range.endOffset
 
                     if(range_start === 0)
-                        current_div.innerHTML = "\u200B";  
+                        current_div.innerHTML = "\u200B";
                     else
                         current_div.innerHTML = current_text.substring(0, range_start);
 
@@ -1319,7 +1319,7 @@
     {
         const selection = window.getSelection();
         const range = selection.getRangeAt(0);
-        
+
         let rect :DOMRect;
         rect = range.getBoundingClientRect();
         return rect;
@@ -1358,7 +1358,7 @@
         let client_rect :DOMRect = get_window_box();
         let top_space = rect.y;
         let bottom_space = client_rect.height - (rect.y + rect.height);
-        
+
         palette.max_height_px = 500;
         palette.width_px = 400;
 
@@ -1397,7 +1397,7 @@
             x = rect.x + 5;
             y = rect.y - (preferred_palette_height - bottom_space)
         }
-        else 
+        else
             show_fullscreen = true;
 
         const isSmallDevice = isDeviceSmallerThan("sm")
@@ -1505,7 +1505,7 @@
                 informModification(item, a, typename);
             else
                 informModification(item, a);
-            
+
             if(pushChangesImmediately)
                 pushChanges();
 
@@ -1514,35 +1514,35 @@
         return false;
     }
 
-    
+
     let commands         :Document_command[] = [
-               {   caption: 'Normal',       description: 'This is normal text style',      tags: 'text',    icon: FaRemoveFormat,                       on_choice: () => { do_format('p', '') } } ,
-               
+               {   caption: 'Normal',       description: 'This is normal text style',      tags: 'text',    mricon: 'pilcrow',                       on_choice: () => { do_format('p', '') } } ,
+
             //   {   caption: 'Heading 1',    description: 'Big section heading',            tags: 'h1',      icon: FaHead,    icon_size: 6,      on_choice: () => { do_format('h2', '') } } ,
             //   {   caption: 'Heading 2',    description: 'Medium section heading',         tags: 'h2',      icon: FaHead,    icon_size: 5,      on_choice: () => { do_format('h3', '') } } ,
             //   {   caption: 'Heading 3',    description: 'Small section heading',          tags: 'h3',      icon: FaHead,    icon_size: 4,      on_choice: () => { do_format('h4', '') } } ,
-               {   caption: 'Heading 1',      description: 'Description heading',            tags: 'h1',      icon: IcH1,          on_choice: () => { do_format('h1', '') } } ,
-               {   caption: 'Heading 2',      description: 'Description heading',            tags: 'h2',      icon: IcH2,          on_choice: () => { do_format('h2', '') } } ,
+               {   caption: 'Heading 1',      description: 'Description heading',            tags: 'h1',      mricon: 'heading-1',          on_choice: () => { do_format('h1', '') } } ,
+               {   caption: 'Heading 2',      description: 'Description heading',            tags: 'h2',      mricon: 'heading-2',          on_choice: () => { do_format('h2', '') } } ,
             //   {   caption: 'Heading 2',      description: 'Medium description heading',     tags: 'h3',      icon: FaHead,    icon_size: 5,      on_choice: () => { do_format('h3', '') } } ,
             //   {   caption: 'Heading 3',      description: 'Small description heading',      tags: 'h4',      icon: FaHead,    icon_size: 4,      on_choice: () => { do_format('h4', '') } } ,
-               
-               {   caption: 'Code',         description: 'Source code monospace text',                      icon: FaCode,                       on_choice: () => { do_format('p', 'ml-6 text-sm font-mono break-normal text-pink-700 dark:text-pink-600') } } ,
+
+               {   caption: 'Code',         description: 'Source code monospace text',                      mricon: 'code-xml',                       on_choice: () => { do_format('p', 'ml-6 text-sm font-mono break-normal text-pink-700 dark:text-pink-600') } } ,
                {   caption: 'Comment',      description: 'With this you can comment the above paragraph',   icon: FaComments,                   on_choice: () => { do_format('p', 'ml-6 text-sm italic text-lime-700 dark:text-lime-600') } } ,
                {   caption: 'Quote',        description: 'To quote someone',                                icon: FaQuote,                      on_choice: () => { do_format('blockquote', '') } } ,
                {   caption: 'Warning',      description: 'An important warning to above paragraph',         icon: FaWarn,                       on_choice: () => { do_format('p', 'ml-6 px-3 py-1 border-l-2 rounded-md border-orange-500 bg-orange-100 dark:bg-orange-900') } } ,
-               {   caption: 'Info',         description: 'An important info about above paragraph',         icon: FaInfo,                       on_choice: () => { do_format('p', 'ml-6 px-3 py-1 border-l-2 rounded-md border-blue-500 bg-blue-100 dark:bg-blue-900') } } 
+               {   caption: 'Info',         description: 'An important info about above paragraph',         icon: FaInfo,                       on_choice: () => { do_format('p', 'ml-6 px-3 py-1 border-l-2 rounded-md border-blue-500 bg-blue-100 dark:bg-blue-900') } }
             ];
-    
-    
+
+
 
 </script>
 
-<div    contenteditable="true" 
+<div    contenteditable="true"
         bind:this={editable_div}
         on:keyup={on_keyup}
         on:keydown={on_keydown}
         on:mouseup={on_mouseup}
-        class="{cs}     {appearance_class} 
+        class="{cs}     {appearance_class}
                         prose prose-base sm:prose-base dark:prose-invert {additional_class} overflow-y-auto whitespace-pre-wrap"
         on:blur={on_blur}
         on:focus={on_focus}
@@ -1552,8 +1552,8 @@
    {@html value}
 </div>
 
-<Palette    commands={commands} 
-            bind:this={palette} 
+<Palette    commands={commands}
+            bind:this={palette}
             on:palette_shown={on_palette_shown}
             on:palette_hidden={on_palette_hidden}
             on:palette_mouse_click={on_palette_mouse_click}/>

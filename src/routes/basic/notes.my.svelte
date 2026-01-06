@@ -182,7 +182,7 @@
                     //tbr: 'B',
                     operations: [{
                             caption: '_; Edit...; Editar...; Edytuj...',
-                            icon: FaPen,
+                            mricon: 'pencil',
                             fab: 'M20',
                             tbr: 'A',
                             grid: [{
@@ -202,7 +202,7 @@
                         /*    {
                                 caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                                 hideToolbarCaption: true,
-                                icon: FaCaretUp,
+                                mricon: 'chevron-up',
                                 action: (f) => listComponent.moveUp(list),
                                 fab: 'M05',
                                 tbr: 'A'
@@ -210,7 +210,7 @@
                             {
                                 caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                                 hideToolbarCaption: true,
-                                icon: FaCaretDown,
+                                mricon: 'chevron-down',
                                 action: (f) => listComponent.moveDown(list),
                                 fab: 'M04',
                                 tbr: 'A'

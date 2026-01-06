@@ -18,12 +18,12 @@
                     },
                     {
                         caption: 'Responsible',
-                        icon: FaCaretUp,
+                        mricon: 'chevron-up',
                         action: (focused) => {}
                     },
                     {
                         caption: 'Due Date',
-                        icon: FaCaretDown,
+                        mricon: 'chevron-down',
                         action: (focused) => {}
                     },
                     {
@@ -80,12 +80,12 @@
                     },
                     {
                         caption: 'Responsible',
-                        icon: FaCaretUp,
+                        mricon: 'chevron-up',
                         action: (focused) => {}
                     },
                     {
                         caption: 'Due Date',
-                        icon: FaCaretDown,
+                        mricon: 'chevron-down',
                         action: (focused) => {}
                     },
                     {
@@ -104,12 +104,12 @@
             },
             {
                 caption: '',
-                icon: FaCaretUp,
+                mricon: 'chevron-up',
                 action: (focused) => { console.log('focused:', focused) }
             },
             {
                 caption: '',
-                icon: FaCaretDown,
+                mricon: 'chevron-down',
                 action: (focused) => { console.log('focused:', focused) }
             }
     ];
@@ -125,7 +125,7 @@
         $contextItemsStore.focused = 'props';
         $contextItemsStore = {...$contextItemsStore}
 
-        return () => 
+        return () =>
         {
             $pageToolbarOperations = []
         }

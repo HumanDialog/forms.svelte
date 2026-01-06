@@ -621,7 +621,7 @@
 
         const newFolder = {
             caption: '_; New folder; Nueva carpeta; Nowy folder',
-            icon: FaRegFolder,
+
             mricon: 'folder',
             action: (f) => { newElementKind='Folder';  listComponent.addRowAfter(afterElement) },
             tbr: 'A',
@@ -639,7 +639,7 @@
 
         const newTask = {
             caption: '_; New task; Nueva tarea; Nowe zadanie',
-            icon: FaRegCalendar,
+
             mricon:'square-pen',
             action: (f) => { newElementKind='Task';  listComponent.addRowAfter(afterElement) },
             tbr: 'A',
@@ -679,7 +679,6 @@
 
 
         result.operations.push({
-            icon: FaDownload,
             mricon: 'download',
             caption: '_; Insert; Insertar; Wstaw',
             hideToolbarCaption: true,
@@ -815,6 +814,7 @@
                         {
                             caption: '_; All; Todos; Wszystkie',
                             icon: FaRegCheckSquare,
+                            ricon: '',
                             action: () => listComponent.toggleSelectAll(),
                             ctrl: "main_list",
                             list_action: "toggle_select_all",
@@ -977,17 +977,19 @@
                         operations: [
                             {
                                 caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
-                                icon: FaCaretUp,
+                                mricon: 'chevron-up',
+                                mricon: 'chevron-up',
                                 action: (f) => list.moveUp(element),
-                                fab:'M06',
+                                fab:'M07',
                                 tbr:'A',
                                 hideToolbarCaption: true
                             },
                             {
                                 caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
-                                icon: FaCaretDown,
+                                mricon: 'chevron-down',
+                                mricon: 'chevron-down',
                                 action: (f) => list.moveDown(element),
-                                fab:'M05',
+                                fab:'M06',
                                 tbr:'A',
                                 hideToolbarCaption: true
                             },
@@ -1066,7 +1068,8 @@
                         operations: [
                             {
                                 caption: '_; Edit; Editar; Edytuj',
-                                icon: FaPen,
+                                mricon: 'pencil',
+                                mricon: 'pencil',
                                 tbr: 'A',
                                 fab:'M20',
                                 grid:[
@@ -1084,29 +1087,42 @@
 
                             },
                             {
-                                caption: '_; Move to top of list; Mover al principio de la lista; Przesuń na szczyt listy',
+                                caption: '_; Move top ; Mover al principio de la lista; Przesuń na szczyt',
+                                mricon: 'chevrons-up',
                                 action: (f) => list.moveTop(element),
+                                fab:'M09',
+                                tbr:'A',
+                                hideToolbarCaption: true
                             },
                             {
                                 caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
-                                icon: FaCaretUp,
+                                mricon: 'chevron-up',
                                 action: (f) => list.moveUp(element),
-                                fab:'M06',
+                                fab:'M08',
                                 tbr:'A',
                                 hideToolbarCaption: true
                             },
                             {
                                 caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
-                                icon: FaCaretDown,
+                                mricon: 'chevron-down',
                                 action: (f) => list.moveDown(element),
-                                fab:'M05',
+                                fab:'M07',
                                 tbr:'A' ,
                                 hideToolbarCaption: true
                             },
                             {
+                                caption: '_; Move bottom; Desplácese hacia abajo; Przesuń na dół',
+                                mricon: 'chevrons-down',
+                                action: (f) => list.moveDown(element),
+                                fab:'M06',
+                                tbr:'A' ,
+                                hideToolbarCaption: true
+                            },
+
+                            {
                                 caption: '_; Send; Enviar; Wyślij',
                                 hideToolbarCaption: true,
-                                icon: FaUpload,
+                                mricon: 'upload',
                                 mricon: 'upload',
                                 tbr: 'D',
                                 fab: 'S00',
@@ -1204,7 +1220,7 @@
                             },
                             {
                                 caption: '_; Send; Enviar; Wyślij',
-                                icon: FaUpload,
+                                mricon: 'upload',
                                 tbr: 'D',
                                 fab: 'S00',
                                 menu: [
