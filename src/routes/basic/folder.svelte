@@ -727,7 +727,8 @@
         showFloatingToolbar(aroundRect, BasketPreview, {
             destinationContainer: contextPath,
             onRefreshView: refreshViewAfterAttachingFromBasket,
-            clipboardElements: clipboardElements
+            clipboardElements: clipboardElements,
+            ownCloseButton: true
         })
     }
 
@@ -738,7 +739,8 @@
             destinationContainer: contextPath,
             onRefreshView: refreshViewAfterAttachingFromBasket,
             clipboardElements: clipboardElements,
-            browserBasedClipboard: true
+            browserBasedClipboard: true,
+            ownCloseButton: true
         })
     }
 

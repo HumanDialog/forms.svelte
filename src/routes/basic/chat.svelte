@@ -482,7 +482,8 @@
         showFloatingToolbar(aroundRect, BasketPreview, {
                         onAttach: (basketItem, refs) => onAttachBasket(refs),
                     //    onAttachAndClear: (basketItem, refs) => onAttachAndClearBasket(refs),
-                        clipboardElements: clipboardElements
+                        clipboardElements: clipboardElements,
+                        ownCloseButton: true
                     });
     }
 
@@ -493,7 +494,8 @@
         showFloatingToolbar(aroundRect, BasketPreview, {
             onAttach: (basketItem, refs) => onAttachBasket(refs),
             clipboardElements: clipboardElements,
-            browserBasedClipboard: true
+            browserBasedClipboard: true,
+            ownCloseButton: true
         })
     }
 

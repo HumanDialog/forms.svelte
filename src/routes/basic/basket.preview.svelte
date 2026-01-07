@@ -5,7 +5,7 @@
         List, ListTitle, ListSummary, Spinner, i18n,
         contextItemsStore,
         getActiveItems,
-        clearActiveItem
+        clearActiveItem, Ricon
     }   from '$lib'
     import { afterUpdate, onMount } from "svelte";
 	import { push } from "svelte-spa-router";
@@ -166,24 +166,11 @@
     })
 
     let list_properties = {
-        Title: "Title",
-        Summary: "Summary",
-        icon: "icon",
         element:{
             icon: "icon",
-            href: "href",
             Title: "Title",
-            Summary: "Summary"
-        },
-        context:{
-            Folder:{
-                Summary: "Summary",
-
-            },
-            FolderFolder:{
-                Summary: "Summary",
-                head_right: "ModificationDate"
-            }
+            Summary: "Summary",
+            readonly: true,
         }
     }
 
@@ -191,87 +178,93 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
  <!--svelte-ignore a11y-no-noninteractive-element-interactions -->
-<menu class="" bind:this={rootElement} on:click={clearSelection}>
+<div class="paper w-full sm:w-[24rem]
+                prose prose-base prose-zinc dark:prose-invert prose-a:no-underline
+                sm:max-w-3xl
+
+                m-0 pt-3 pb-5 px-2
+                sm:rounded
+                sm:bg-stone-100 sm:dark:bg-stone-900
+                flex flex-col" 
+                bind:this={rootElement} on:click={clearSelection}>
+
+     <!-------------------------------------------------------------------->
+        <!-- POPUP HEADER ---------------------------------------------------->
+        <!-------------------------------------------------------------------->
+        <h3 class = "flex-none">
+            <div class="px-2 w-full flex flex-row justify-between">
+                <div class="ml-auto py-1.5  flex flex-row justify-between">
+                    <button class="ml-4 w-6
+                                hover:bg-stone-300 hover:dark:bg-stone-700
+                                hover:outline hover:outline-8
+                                hover:outline-stone-300 hover:dark:outline-stone-700"
+                                on:click={onHide}>
+                        <Ricon icon = 'x' />
+                    </button>
+                </div>
+            </div>
+        </h3>
+
+
+    <!-------------------------------------------------------------------->
+    <!-- POPUP CONTENT---------------------------------------------------->
+    <!-------------------------------------------------------------------->
     {#if basketEntriesNo >= 0}
-        <div class="w-full sm:w-80 h-64 sm:h-80 sm:max-w-sm overflow-y-auto overflow-x-clip overscroll-contain
-                text-stone-600 dark:text-stone-400">
+        
 
             {#if basketEntriesNo==0}
                 <div class="w-full h-full flex items-center justify-center">
-                    <p class="">_; Clipboard is empty; El portapapeles está vacío; Schowek jest pusty</p>
+                    <p>_; Clipboard is empty; El portapapeles está vacío; Schowek jest pusty</p>
                 </div>
             {:else}
-                <List   self={clipboardItem}
-                        a='Elements'
-                        {list_properties}
-                        orderAttrib='Order'
-                        multiselect
-                        selectionKey='handy'
-                        bind:this={listElement}
-                        >
-                    <ListTitle a='Title' readonly/>
-                    <ListSummary a='Summary' readonly/>
-
-                    <span slot="left" let:element>
-                        <Icon component={getElementIcon(element)}
-                            class="text-stone-500 dark:text-stone-400 h-5 w-5  cursor-pointer mt-0.5  ml-2  mr-1"/>
-                    </span>
-                </List>
+                <div class="px-2 flex-none h-[45dvh] overflow-y-auto overscroll-contain">
+                    <List   self={clipboardItem}
+                            a='Elements'
+                            {list_properties}
+                            orderAttrib='Order'
+                            multiselect
+                            selectionKey='handy'
+                            bind:this={listElement}
+                            >
+                    </List>
+                </div>
             {/if}
 
-        </div>
+       
 
-        <!-- Footer -->
+        <!-------------------------------------------------------------------->
+        <!-- POPUP FOOTER----------------------------------------------------->
+        <!-------------------------------------------------------------------->
+        <h4 class = "flex-none">
 
-            <div class="mt-2 flex flex-row justify-end gap-2">
-                <!--button class=" py-2.5 px-5
-                                text-base sm:text-xs font-medium
-                                bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400
-                                hover:bg-stone-200 hover:dark:bg-stone-600
-                                disabled:bg-white/60 disabled:dark:bg-stone-700/60
-                                border rounded
-                                border-stone-200 dark:border-stone-600 focus:outline-none
-                                disabled:border-stone-200/60 disabled:dark:border-stone-600/60
-                                inline-flex items-center justify-center"
-                                disabled={!clipboardItem}
-                                on:click={() => editBasket()}>
+                <div class="flex flex-row justify-end gap-2">
 
-                    _; Go to Clipboard; Ir al Portapapeles; Przejdź do Schowka
-                </button-->
-
-                <button class=" py-2.5 px-5
-                                text-base sm:text-xs font-medium
-                                bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400
-                                hover:bg-stone-200 hover:dark:bg-stone-600
-                                disabled:bg-white/60 disabled:dark:bg-stone-700/60
-                                border rounded
-                                border-stone-200 dark:border-stone-600 focus:outline-none
-                                disabled:border-stone-200/60 disabled:dark:border-stone-600/60
-                                inline-flex items-center justify-center"
-                                disabled={!selectedElementsNo}
-                                on:click={() => attachTo()}>
-
-                    _; Paste; Pegar; Wklej
-                </button>
-
-                <!--button class=" py-2.5 px-5
-                                text-base sm:text-xs font-medium
-                                bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400
-                                hover:bg-stone-200 hover:dark:bg-stone-600
-                                disabled:bg-white/60 disabled:dark:bg-stone-700/60
-                                border rounded
-                                border-stone-200 dark:border-stone-600 focus:outline-none
-                                disabled:border-stone-200/60 disabled:dark:border-stone-600/60
-                                inline-flex items-center justify-center"
-                                disabled={!selectedElementsNo}
-                                on:click={() => attachToAndClear()}>
-
-                    _; Paste and forget; Pegar y olvidar; Wklej i zapomnij
-                </button-->
-            </div>
+                    <button class="px-4 mx-2
+                            bg-stone-100 dark:bg-stone-800
+                            outline outline-offset-2 outline-2
+                            outline-stone-200 dark:outline-stone-500
+                            hover:bg-stone-300 hover:dark:bg-stone-700
+                            "
+                            on:click={onHide}>
+                        _; Cancel; Pegar; Anuluj
+                    </button>
+                    <button class="px-4 mx-2
+                            bg-stone-100 dark:bg-stone-700
+                            outline outline-offset-2 outline-2
+                            outline-stone-200 dark:outline-stone-500
+                            hover:bg-stone-300 hover:dark:bg-stone-700
+                            "
+                            disabled={!selectedElementsNo}
+                            on:click={() => attachTo()}>
+                        _; Paste; Pegar; Wklej
+                    </button>
+                </div>
+            </h4>
+        
+            
 
     {:else}
         <Spinner delay={3000}/>
     {/if}
 
-</menu>
+</div>
