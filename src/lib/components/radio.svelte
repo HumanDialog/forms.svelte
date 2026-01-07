@@ -13,7 +13,7 @@
     export let typename = '';
 
     export let c=''
-    export let pushChangesImmediately: boolean = true;
+    export let pushChangesImmediately: boolean = false;
 
     let   item = null
     let   additional_class = $$restProps.class ?? '';

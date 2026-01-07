@@ -68,8 +68,7 @@
     export let onLinkClick :Function | undefined = undefined
 
     export let c='';
-    export let pushChangesImmediately = true;
-
+    
     export let chat :object|undefined = undefined;
     export let readOnly = false;
 
@@ -1060,8 +1059,7 @@
         else  if(item && a)
         {
             logChanges()
-            if(pushChangesImmediately)
-                pushChanges(refreshToolbarOperations);
+            pushChanges(refreshToolbarOperations);
             return true;
         }
 

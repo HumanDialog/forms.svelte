@@ -10,7 +10,7 @@ export const SHOW_MENU_ABOVE = 1
 export const SHOW_MENU_RIGHT = 2
 export const SHOW_MENU_LEFT = 3
 
-export function showMenu(around :DOMRect|DOMPoint, operations, preference :number = SHOW_MENU_BELOW)
+export function showMenu(around :DOMRect|DOMPoint, operations, preference :number = SHOW_MENU_BELOW, onHideCallback :Function|undefined = undefined)
 {
     let menu_element =  document.getElementById("__hd_svelte_contextmenu");
     if(!menu_element)
@@ -26,14 +26,14 @@ export function showMenu(around :DOMRect|DOMPoint, operations, preference :numbe
             }
         });
         
-        menu_comopnent.show(around, operations, preference);
+        menu_comopnent.show(around, operations, preference, onHideCallback);
     }
     else if(menu_comopnent)
     {
         if(menu_comopnent.isVisible())
             menu_comopnent.hide();
         else
-            menu_comopnent.show(around, operations, preference);
+            menu_comopnent.show(around, operations, preference, onHideCallback);
     }
     else
         console.error('what now?')

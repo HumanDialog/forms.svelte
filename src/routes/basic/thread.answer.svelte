@@ -116,7 +116,7 @@
                     operations: [
                         {
                             caption: '_; Save; Guardar; Zapisz',
-                            icon: FaSave,
+                            mricon: 'save',
                             action: (f) => { contentElement?.save() },
                             tbr: 'A',
                             hideToolbarCaption: true

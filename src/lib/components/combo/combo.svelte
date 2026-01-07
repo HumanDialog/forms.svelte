@@ -1,13 +1,13 @@
 <script lang="ts">
     import {data_tick_store, contextItemsStore, contextTypesStore, pushToolsActionsOperations, popToolsActionsOperations, fabHiddenDueToPopup} from '../../stores.js'
-    import {informModification, pushChanges} from '../../updates.js'
+    import {informModification, pushChanges, informModificationEx} from '../../updates.js'
     import {isDeviceSmallerThan, parseWidthDirective,shouldBeComapact} from '../../utils.js'
     import {afterUpdate, getContext, onMount, setContext} from 'svelte';
     import {rCombo_definition, rCombo_item, cached_sources} from './combo'
     import {FaChevronDown, FaTimes} from 'svelte-icons/fa'
     import Icon from '../icon.svelte'
     import { reef } from '@humandialog/auth.svelte/dist/index.js';
-	import { showMenu } from '../menu.js';
+	import { showMenu, SHOW_MENU_BELOW } from '../menu.js';
 	import { ext, i18n } from '$lib/i18n.js';
     import Ricon from  '../r.icon.svelte'
 
@@ -37,7 +37,7 @@
     export let cached :boolean = false;
     export let filtered: boolean = false;
 
-    export let pushChangesImmediately: boolean = true;
+    export let pushChangesImmediately: boolean = false;
     export let hasNone :boolean = isAssociation;
     export let readOnly: boolean = false
 
@@ -235,9 +235,11 @@
         if(!can_be_activated)
             return;
 
+        
         if(!textbox)
             return;
 
+        
         if(is_dropdown_open)
             return;
 
@@ -424,7 +426,7 @@
             })
         })
 
-        showMenu(rect, operations)
+        showMenu(rect, operations, SHOW_MENU_BELOW, hide)
     }
 
     export function hide()
@@ -435,6 +437,7 @@
         if(mutation_observer)
             mutation_observer.disconnect();
 
+        
         is_dropdown_open = false;
         //popToolsActionsOperations();
         $fabHiddenDueToPopup = false
@@ -546,7 +549,7 @@
         {
             if( isAssociation )
             {
-                if(choiceCallback)
+                /*if(choiceCallback)
                 {
                     let body = {
                         choice :  itm ? itm.Key : null
@@ -572,9 +575,9 @@
                     }
 
                 }
-                else
+                else */
                 {
-                    let path :string;
+                    /*let path :string;
                     if(item.$ref)
                         path = `/${item.$ref}/set`;
                     else if(typename && item.Id)
@@ -604,13 +607,35 @@
 
                         tick_request_internal = tick_request_internal + 1;
                     }
+                    */
+                    if(itm)
+                    {
+                        let name = definition.element_name ?? '$display'
+                        item[a] = {
+                            $ref: itm.Key,
+                            [name]: itm.Name
+                        }
+                    }
+                    else
+                    {
+                        item[a] = null
+                    }
+                    tick_request_internal = tick_request_internal + 1;
 
+                    if(item && a && typename)
+                    {
+                        //informModification(item, a, typename);
+                        informModificationEx(typename, item.Id, a, itm ? itm.Key : null)
+
+                        if(pushChangesImmediately)
+                            pushChanges();
+                    }
 
                 }
             }
             else    // or simple property
             {
-                if(choiceCallback)
+                /*if(choiceCallback)
                 {
                     let path :string;
                     if(item.$ref)
@@ -631,7 +656,7 @@
                         tick_request_internal = tick_request_internal + 1;
                     }
                 }
-                else
+                else*/
                 {
                     item[a] = itm ? (itm.Key ?? itm.Name) : null;
                     tick_request_internal = tick_request_internal + 1;
@@ -919,7 +944,6 @@
 
     function on_focus_out(e)
     {
-        //console.log(e)
         if(e.relatedTarget && root_element?.contains(e.relatedTarget))
         {
 
@@ -938,8 +962,17 @@
     {@const c = setup_view(item, a, tick_request_internal) }
 
 {#if typo}
-    <span class="inline-block relative flex flex-row  items-center">
-        <span class="mr-1">{combo_text}</span>
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <span class="inline-block relative flex flex-row  items-center
+                cursor-pointer"
+                on:focusout={on_focus_out}
+                on:click={(e) => { show(e, undefined) }}
+                bind:this={root_element}>
+        <span class="mr-1"
+            bind:this={textbox}
+            contenteditable={is_dropdown_open && filtered}
+            on:keydown={on_keydown}
+            >{combo_text}</span>
         <Ricon icon = "chevron-down" size="s"/>
     </span>
 {/if}

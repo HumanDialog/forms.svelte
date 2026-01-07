@@ -24,7 +24,7 @@
     export let typo:boolean = false;
     export let compact :boolean = false;
     export let inContext :string = 'sel'   // in compact mode
-    export let pushChangesImmediately: boolean = true;
+    export let pushChangesImmediately: boolean = false;
 
     let on_hide_callback = undefined;
     export function show(event, hide_callback)
@@ -218,7 +218,7 @@
         else
             value = new Date(rValue);
 
-        //console.log('rValue', rValue, 'value', value)
+        console.log('rValue', rValue, 'value', value)
 
         if(onSelect)
         {

@@ -10,7 +10,6 @@
             editable,
             Editable,
             REdit,
-			saveCurrentEditable,
 			activateItem,
 			isActive,
 			clearActiveItem,
@@ -415,11 +414,11 @@
                 {
                     caption: '_; Save; Guardar; Zapisz',
                     hideToolbarCaption: true,
-                    icon: FaSave,
-                    action: (f) => saveCurrentEditable(),
+                    mricon: 'save',
+                    action: (f) => pushChanges(),
                     fab: 'T02',
                     tbr: 'C',
-                    disabledFunc: () => !hasModifications()
+                    //disabledFunc: () => !hasModifications()
                 })
         }
 
@@ -782,7 +781,6 @@
                         {
                             caption: '_; Save; Guardar; Zapisz',
                             hideToolbarCaption: true,
-                            icon: FaSave,
                             mricon: 'save',
                             action: (f) => description?.save(),
                        //     fab: 'S00',
@@ -800,7 +798,6 @@
     const extraPaletteCommandsExt = [
         {
             caption: '_; Save; Guardar; Zapisz',
-            icon: FaSave,
             mricon: 'save',
             action: () => description?.save(),
         }

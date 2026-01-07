@@ -795,7 +795,7 @@
                         {
                             caption: '_; Save; Guardar; Zapisz',
                             hideToolbarCaption: true,
-                            icon: FaSave,
+                            mricon: 'save',
                             action: (f) => description?.save(),
                        //     fab: 'S00',
                             tbr: 'C',

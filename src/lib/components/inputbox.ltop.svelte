@@ -18,7 +18,7 @@
     export let val = ''
         
     export let placeholder = 'pl'
-    export let pushChangesImmediately = true;
+    export let pushChangesImmediately = false;
 
     export let required = false;
     export let readonly = false;

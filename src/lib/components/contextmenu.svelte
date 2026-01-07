@@ -29,6 +29,7 @@
     let around_preference: number = 0
     let css_position = 'display: none'
     let closeButtonPos = ''
+    let onHide: Function | undefined = undefined
 
     $: display = visible ? 'block' : 'none';
 //
@@ -241,8 +242,10 @@
     }
 
     let preventScrollRestorer = null
-    export async function show(around :DOMRect|DOMPoint, _operations, preference :number = 0)
+    export async function show(around :DOMRect|DOMPoint, _operations, preference :number = 0, onHideCallback: Function|undefined = undefined)
     {
+        onHide = onHideCallback
+
         if(around instanceof DOMRect)
         {
             switch(preference)
@@ -358,6 +361,9 @@
             preventScrollRestorer();
             preventScrollRestorer = null
         }
+
+        if(onHide)
+            onHide()
     }
 
     export function getRenderedRect() :DOMRect | undefined

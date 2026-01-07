@@ -25,7 +25,7 @@
 
     export let compact :boolean = true;
     export let inContext :string = ''   // in compact mode
-    export let pushChangesImmediately: boolean = true;
+    export let pushChangesImmediately: boolean = false;
     export let allowNewTags = true;
     export let readOnly: boolean = false
 

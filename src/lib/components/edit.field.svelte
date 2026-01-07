@@ -17,7 +17,7 @@
     export let inserter = false;
     
     export let c=''
-    export let pushChangesImmediately: boolean = true;
+    export let pushChangesImmediately: boolean = false;
 
     let is_table_component :boolean = getContext('rIs-table-component');
     

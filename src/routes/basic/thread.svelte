@@ -8,7 +8,7 @@
             DatePicker,
             Tags,
             editable,
-			saveCurrentEditable,
+			pushChanges,
 			activateItem,
 			isActive,
 			clearActiveItem,
@@ -291,8 +291,8 @@
                         },
                         ... !isReadOnly ? [
                             {
-                               icon: FaSave,
-                                action: (f) => saveCurrentEditable(),
+                                mricon: 'save',
+                                action: (f) => pushChanges(),
                                 tbr: 'A',
                                 fab: 'M03'
                             },
@@ -348,7 +348,7 @@
                     operations: [
                         {
                             caption: "_; Save; Guardar; Zapisz",
-                            icon: FaSave,
+                            mricon: 'save',
                             action: (f) => { questionElement?.save() },
                             tbr: 'A'
                         }
