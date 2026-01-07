@@ -486,9 +486,12 @@
 
     async function insert(title :string, summary: string, after :object | null)
     {
+        let title_attr = read_from_def('Title')
+        let summary_attr = read_from_def('Summary');
+
         let newElement = {
-            [definition.title]: title,
-            [definition.summary]: summary
+            [title_attr]: title,
+            [summary_attr]: summary
         }
 
         if(orderAttrib)
@@ -553,6 +556,26 @@
 
         if(e)
             e.stopPropagation()
+    }
+
+    function read_from_def(propName: string)
+    {
+        if(!list_properties)
+            return undefined;
+
+        if(list_properties.context)
+        {
+            const contextProps = list_properties.context[item.$type]
+            if(contextProps && contextProps.hasOwnProperty(propName))
+                return contextProps[propName]
+        }
+
+
+        const elementProps = list_properties.element
+        if(elementProps && elementProps.hasOwnProperty(propName))
+            return elementProps[propName]
+
+        return undefined
     }
 
 </script>

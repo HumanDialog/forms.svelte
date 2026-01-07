@@ -85,13 +85,13 @@
             {
                 main_side_panel_visibility = "hidden"
                 lg_content_area_horizontal_dim = ""
-                lg_content_area_horizontal_tools_dim = `sm:left-[44px] sm:w-[calc(100vw-48px)]`
+                lg_content_area_horizontal_tools_dim = `sm:left-[50px] sm:w-[calc(100vw-60px)]`
             }
             else
             {
                 main_side_panel_visibility = "fixed lg:block"
                 lg_content_area_horizontal_dim = `lg:left-[360px] lg:w-[calc(100vw-360px)]`
-                lg_content_area_horizontal_tools_dim = `sm:left-[44px] sm:w-[calc(100vw-48px)] lg:left-[362px] lg:w-[calc(100vw-364px)]`
+                lg_content_area_horizontal_tools_dim = `sm:left-[50px] sm:w-[calc(100vw-60px)] lg:left-[368px] lg:w-[calc(100vw-376px)]`
             }
         }
         else
@@ -470,8 +470,8 @@
 
                                     text-red-800 bg-stone-100/90
                                     rounded-full
-                                    dark:text-orange-200 dark:bg-stone-800/40 dark:hover:bg-stone-700
-                                    ring-1 ring-orange-800/40 dark:ring-orange-200/30
+                                    dark:text-orange-200 dark:bg-stone-900/90
+                                    ring-1 ring-orange-800/40 dark:ring-orange-200/10
 
                                     " >
                         <Operations bind:this={operationsComponent} />

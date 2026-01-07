@@ -239,7 +239,7 @@
                 Summary: '',
                 href: task.Actor.href,
                 $ref: task.Actor.$ref,
-                icon: 'cat',
+                icon: 'user',
                 $type: task.Actor.$type,
                 IsCanonical: 1
         })
@@ -1932,8 +1932,48 @@
 
             },
             FolderFolder:{
-                Summary: "Summary",
+                Title:      "InTitle",
+                Summary:    "InSummary",
+                icon:       "#folder",
                 head_right: "ModificationDate"
+            },
+            NoteNote:{
+                icon:'#file-text'
+            },
+            TaskNote:
+            {
+                icon:'#file-text'
+            },
+        }
+    }
+
+    let attached_to_list_properties = {
+        Title: "Title",
+        Summary: "Summary",
+
+        element:{
+            icon: "#folder",
+            href: "href",
+            Title: "Title",
+            Summary: "Summary"
+        },
+        context:{
+            FolderNote:{
+                Title:      "InTitle",
+                icon:       "#folder",
+                Summary:    "InSummary",
+                href:       "InHRef"
+
+            },
+            TaskNote:{
+
+                Summary:    "Summary",
+                icon:       "#folder",
+                head_right: "ModificationDate"
+            },
+            NoteNote:{
+                Title:      "InTitle",
+                icon: '#file-text'
             }
         }
     }
