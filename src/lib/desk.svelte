@@ -470,8 +470,8 @@
 
                                     text-red-800 bg-stone-100/90
                                     rounded-full
-                                    dark:text-orange-200 dark:bg-stone-800/40 dark:hover:bg-stone-700
-                                    ring-1 ring-orange-800/40 dark:ring-orange-200/30
+                                    dark:text-orange-200 dark:bg-stone-900/90
+                                    ring-1 ring-orange-800/40 dark:ring-orange-200/10
 
                                     " >
                         <Operations bind:this={operationsComponent} />
