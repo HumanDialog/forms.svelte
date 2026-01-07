@@ -1698,6 +1698,9 @@
             },
             NoteNote:{
                 icon:'#file-text'
+            },
+            TaskNote:{
+                icon:'#square-pen'
             }
         }
     }
@@ -1721,13 +1724,14 @@
 
             },
             TaskNote:{
-
+                Title: "InTitle",
+                icon:'#square-pen',
                 Summary: "Summary",
                 head_right: "ModificationDate"
             },
             NoteNote:{
-                Title:      "InTitle",
-                icon:'#file-text'
+                Title: "InTitle",
+                icon:  '#file-text'
             }
         }
     }
@@ -1760,7 +1764,7 @@
             <!--span>Eidt<self=note a='index'/></span-->
 
             <span>
-                {getNiceStringDate(creationDate)}
+                'getNiceStringDate(creationDate)'
             </span>
         </div>
 

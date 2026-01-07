@@ -2147,6 +2147,7 @@
             {#key descriptionNotes}
                 {#if descriptionNotes.length > 0}
                     {#each descriptionNotes as noteLink, idx (noteLink.$ref)}
+                        <hr/>
                         <TaskDescriptionNote {noteLink}
                                             refreshParent={refreshTaskAfterDescriptionChanged}
                                             bind:this={descriptionElements[idx]}
