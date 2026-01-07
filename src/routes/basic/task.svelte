@@ -155,7 +155,8 @@
                                             Id: 14,
                                             Association: 'Notes',
                                             Sort: 'Order',
-                                            Expressions:['Id', '$ref', 'Title', 'Summary', 'href', 'IsCanonical', '$type', 'TaskId', 'NoteId', 'Role', 'Order']
+                                            Expressions:['Id', '$ref', 'Title', 'Summary', 'href', 'IsCanonical', '$type', 'TaskId', 'NoteId', 'Role', 'Order'],
+
                                         },
                                         {
                                             Id: 15,
