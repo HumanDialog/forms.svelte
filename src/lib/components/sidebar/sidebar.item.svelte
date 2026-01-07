@@ -46,6 +46,7 @@
     $: context_data = $contextItemsStore;
     $: isRowActive = calculateIsRowActive($contextItemsStore)
     $: summaryText = calculateSummary(summary)
+    $: activeClass = isRowActive ? 'bg-stone-300 dark:bg-stone-700 outline outline-8 outline-stone-300 dark:outline-stone-700 ring-1 ring-offset-8 ring-stone-300 dark:ring-stone-700' : '' 
 
     $: icom = fetch_icon(item, icon, iicon);
 
@@ -267,8 +268,8 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-structure -->
 
-
-<figure class="pl-8" bind:this={root}>
+<!-- isRowActive -->
+<figure class="pl-8 {activeClass}" bind:this={root}>
     <a  on:click={on_link_clicked}
                                 href={href}
                                 use:link>
@@ -280,11 +281,8 @@
         <slot/>
     </h4>
     </a>
-    {#if summaryText || summaryPlaceholder}
-        <figcaption
-            use:selectable_if_needed={selectable}
-            use:editable_if_needed={summaryEditable}
-            bind:this={summaryElement}>
+    {#if summaryText}
+        <figcaption>
             {summaryText}
         </figcaption>
     {/if}

@@ -368,8 +368,8 @@
         e.preventDefault();
         e.stopPropagation();
 
-        if(definition.onOpen)
-            await definition.onOpen(item)
+        if(element_open_handler)
+            await element_open_handler(item)
 
         isDownloading = false
     }
@@ -536,23 +536,24 @@
     -------------------------------->
     <!--@el------------------------->
     {#if download}
-        <!--a  class="sm:hover:cursor-pointer"
-            href={element_href} use:link>
+        <a  class="sm:hover:cursor-pointer"
+            href={element_href}
+            on:click={onDownloadFile}>
 
-        <h4 class="-indent-8 "
-            id="__or_list_ctrl_{getItemKey(item)}_Title"
-            use:editable={{
-                action: (text) => {change_property(element_title, text)},
-                active: false,
-                readonly: title_readonly,
-                onSoftEnter: (text) => {change_name(text); editProperty('Summary')}
-            }}>
-            <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
-                    text-stone-700 dark:text-stone-400 ">
-                    <Ricon icon={element_icon} />
-            </div>{translated_element_title}
-        </h4>
-        </a-->
+            <h4 class="-indent-8"
+                id="__or_list_ctrl_{getItemKey(item)}_Title"
+                use:editable={{
+                    action: (text) => {change_property(element_title, text)},
+                    active: false,
+                    readonly: title_readonly,
+                    onSoftEnter: (text) => {change_name(text); editProperty('Summary')}
+                }}>
+                <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
+                        text-stone-700 dark:text-stone-400 ">
+                        <Ricon icon={isDownloading ? 'loader-circle' : element_icon} />
+                </div>{translated_element_title}
+            </h4>
+        </a>
     {:else if element_href}
         <a  class="sm:hover:cursor-pointer"
             href={element_href} use:link>

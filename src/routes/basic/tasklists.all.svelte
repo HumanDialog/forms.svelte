@@ -196,7 +196,7 @@
                     operations: [
                         {
                             icon: FaList,
-                            mricon: 'netebook',
+                            mricon: 'notebook',
                             caption: '_; New list; Nueva lista; Nowa lista+',
                             action: (focused) => { listComponent.addRowAfter(null) },
                             fab: 'M01',
@@ -226,7 +226,7 @@
                         {
                             caption: '_; New list; Nueva lista; Nowa lista*',
                             icon: FaList,
-                            mricon: 'netebook',
+                            mricon: 'notebook',
                             action: (focused) => { listComponent.addRowAfter(list) },
                             fab: 'M01',
                             tbr: 'A'
@@ -316,7 +316,7 @@
         Summary: "Summary",
 
         element:{
-            icon: "#netebook",
+            icon: "#notebook",
             href: "href",
             Title: "Name",
             Summary: "Summary"

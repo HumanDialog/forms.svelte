@@ -449,7 +449,7 @@
                                 active={isRoutingTo("/mynotes", currentPath)}
                                 summary={i18n(["Recently edited notes", "Notas editadas recientemente", "Ostatnio edytowane notatki"])}
                                 selectable={mynotes_selection}>
-                    _; My notes; Mis notas; Moje notatki %
+                    _; My notes; Mis notas; Moje notatki
                 </SidebarItem>
             </SidebarGroup>
 

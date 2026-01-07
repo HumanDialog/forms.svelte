@@ -37,35 +37,32 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 
-<li class=" mx-2 pt-2 pb-4 px-1 rounded-md border border-transparent
-            bg-stone-100 dark:bg-stone-700">
+<figure class=" bg-stone-300 dark:bg-stone-700 outline outline-8 outline-stone-300 dark:outline-stone-700 ring-1 ring-offset-8 ring-stone-300 dark:ring-stone-700">
 
     <!-- whitespace-nowrap overflow-clip  -->
-    <h3  class=" text-base font-semibold min-h-[1.75rem]
+    <h4  class=" font-semibold min-h-[1.75rem]
                  sm:min-h-[1.25rem]
-                w-full sm:flex-none "
+                "
                 use:editable={{
                     action: (text) => onInsert(text, ''),
                     active: false,
                     onSoftEnter: softEnter
                 }}
                 bind:this={titleElement}>
-    </h3>
+    </h4>
 
     {#if editSummary}
-        <p class="  text-sm min-h-[1.25rem]
-                text-stone-400
-                max-h-[75px] 
-                overflow-hidden"
+        <figcaption class="
+                max-h-[75px]"
                 use:editable={{
                     action: (text) => onSummaryChanged(text), 
                     active: false,
                     onFinish: (d) => {editSummary = false}}}
                 bind:this={summaryElement}>
             {summary}
-        </p>
+        </figcaption>
     {/if}
     
     
 
-</li>
+    </figure>

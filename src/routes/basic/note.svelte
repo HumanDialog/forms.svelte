@@ -1657,7 +1657,7 @@
         notesPlaceholder = false
         let res = await reef.post(`${noteRef}/CreateSubNote`,{
             title: newNoteAttribs.Title,
-            input: '',
+            summary: '',
             order: 0
         }, onErrorShowAlert)
 
@@ -1676,9 +1676,6 @@
         }
     }
     let list_properties = {
-        Title: "Title",
-        Summary: "Summary",
-        icon: "icon",
         element:{
             icon: "icon",
             href: "href",
@@ -1686,51 +1683,33 @@
             Summary: "Summary"
         },
         context:{
-            Folder:{
-                Summary: "Summary",
-
-            },
-            FolderFolder:{
-                Title:      "InTitle",
-                Summary:    "InSummary",
-                icon:       "#folder",
-                head_right: "ModificationDate"
-            },
             NoteNote:{
                 icon:'#file-text'
             },
-            TaskNote:{
-                icon:'#square-pen'
+            NoteFile:{
+                icon:'#package',
+                downloadable: true,
+                onOpen: async (f) => await downloadFileFromHRef(f.href, f.Title)
             }
         }
     }
 
     let attached_to_list_properties = {
-        Title: "Title",
-        Summary: "Summary",
-        icon: "icon",
         element:{
-            icon: "icon",
-            href: "href",
-            Title: "Title",
-            Summary: "Summary"
+            icon: "InIcon",
+            href: "InHRef",
+            Title: "InTitle",
+            Summary: "InSummary"
         },
         context:{
             FolderNote:{
-                Title:      "InTitle",
                 icon:       "#folder",
-                Summary:    "InSummary",
-                href:       "InHRef"
-
             },
             TaskNote:{
-                Title: "InTitle",
                 icon:'#square-pen',
-                Summary: "Summary",
                 head_right: "ModificationDate"
             },
             NoteNote:{
-                Title: "InTitle",
                 icon:  '#file-text'
             }
         }
@@ -1764,7 +1743,7 @@
             <!--span>Eidt<self=note a='index'/></span-->
 
             <span>
-                'getNiceStringDate(creationDate)'
+                {getNiceStringDate(creationDate)}
             </span>
         </div>
 
@@ -1855,19 +1834,6 @@
                             extraFrontPaletteCommands={extraPaletteCommands}
                             extraInsertPaletteCommands={extraInsertPalletteCommands}
                             extraBackPaletteCommands={extraBackPaletteCommands}/>
-                {#if  isContentEmpty() && !isEditorFocused && !isReadOnly}
-                    <p
-
-                    >
-                    _;
-                    Write the content of your note here. Press the / key to expand the formatting palette.;
-                    Escribe aquí el contenido de la nota. Pulsa la tecla / para desplegar la paleta de formato.;
-                    Pisz treść notatki tutaj. Naciśnij klawisz / by rozwinąć paletę formatującą.
-                    </p>
-                {/if}
-
-
-
             <hr/>
 
             {#if (note.Notes && note.Notes.length > 0) || (note.Files && note.Files.length > 0) || notesPlaceholder}

@@ -182,7 +182,7 @@
 <!---- INACTIVE PURE LAYOUT ----------------------------------------------------------------------->
 <!------------------------------------------------------------------------------------------------->
 <!------------------------------------------------------------------------------------------------->
-    <figure class="relative rounded-md border border-transparent"
+    <figure class="cursor-pointer"
             use:selectable={note}
             on:click={activate}>
 
@@ -214,7 +214,11 @@
 <!------- keep pure layout  ----------------------------------------------------------------------->
 <!------------------------------------------------------------------------------------------------->
 
-    <figure class="relative bg-stone-700 rounded outline outline-8 outline-stone-700 ring-1 ring-stone-700 ring-offset-8"
+    <figure class="bg-stone-300 dark:bg-stone-700
+                outline outline-8
+                outline-stone-300 dark:outline-stone-700
+                ring-1 ring-offset-8
+                ring-stone-300 dark:ring-stone-700"
             use:selectable={note}
             on:click={activate}>
         <a href={note.href} use:link>

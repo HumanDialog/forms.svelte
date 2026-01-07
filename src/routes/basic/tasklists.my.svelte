@@ -195,7 +195,7 @@
                     caption: '_; View; Ver; Widok',
                     operations: [
                         {
-                            mricon: 'netebook',
+                            mricon: 'notebook',
                             caption: '_; New list; Nueva lista; Nowa lista',
                             action: (focused) => { listComponent.addRowAfter(null) },
                             fab: 'M01',
@@ -217,7 +217,7 @@
                     operations: [
                         {
                             caption: '_; New list; Nueva lista; Nowa lista',
-                            mricon: 'netebook',
+                            mricon: 'notebook',
                             action: (focused) => { listComponent.addRowAfter(list) },
                             fab: 'M01',
                             tbr: 'A'
@@ -307,7 +307,7 @@
         Summary: "Summary",
 
         element:{
-            icon: "#netebook",
+            icon: "#notebook",
             href: "href",
             Title: "Name",
             Summary: "Summary"
