@@ -10,7 +10,8 @@
 				showFloatingToolbar,
 				informModification,
                 pushChanges,
-				startEditing} from '$lib'
+				startEditing,
+                Ricon} from '$lib'
     import {FaRegFileAlt} from 'svelte-icons/fa'
     import Properties from './kanban.props.svelte'
     import {KanbanCardTop, KanbanCardMiddle, KanbanCardBottom} from '../Kanban'
@@ -293,7 +294,7 @@
         {@const canOpen = isLinkLike || hasOpen}
         {@const showIcon = showAttachementIcon()}
             <!-- whitespace-nowrap overflow-clip  -->
-            <h4     class = "font-semibold"
+            <h4     class = "font-semibold relative"
                     use:editable={{
                     action: (text) => onTitleChanged(text),
                     active: false,
@@ -315,8 +316,8 @@
 
 
                 {#if showIcon}
-                    <span id="attachement" class="absolute top-1 right-0 w-5 h-5 sm:w-3 sm:h-3">
-                        <FaRegFileAlt/>
+                    <span id="attachement" class="absolute top-1 right-0">
+                        <Ricon icon="file-text" xs/>
                     </span>
                 {/if}
 

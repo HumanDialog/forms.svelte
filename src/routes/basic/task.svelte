@@ -733,6 +733,10 @@
                                     caption: '_; New note; Nueva nota; Nowa notatka',
                                     action: () => runNoteInserter()
                                 },
+                                 {
+                                    caption: '_; New description; Nueva nota; Nowy opis',
+                                    action: () => addDescription()
+                                },
                                 {
                                     caption: '_; Add file; Añadir archivo; Dodaj plik',
                                     action: () => runFileAttacher()
@@ -1887,6 +1891,23 @@
         {
             additionalAfterCreateAction(newNote)
         }
+    }
+
+    async function addDescription()
+    {
+        let res = await reef.post(`${taskRef}/AddDescription`,{
+            title: 'Description',
+            order: 0
+        }, onErrorShowAlert)
+
+        if(!res)
+            return null;
+
+        let newNote = res.TaskNote;
+        setBrowserRecentElement(newNote.NoteId, 'Note')
+
+        await reloadData();
+        attachementsComponent.reload(task, newNote.$ref);
     }
 
     let descriptionElements = []

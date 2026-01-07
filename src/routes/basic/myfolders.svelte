@@ -3,6 +3,7 @@
     import {    Spinner,
                 Page,
                 Icon,
+                Ricon,
                 ComboSource,
                 List,
                 ListTitle,
@@ -340,7 +341,8 @@
      </Paper>
     </Page>
 {:else}
-    <Spinner delay={3000}/>
+    <!--Spinner delay={3000}/-->
+    <Ricon icon='loader-circle'/>
 {/if}
 
 
