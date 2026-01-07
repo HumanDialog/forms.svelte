@@ -281,11 +281,8 @@
         <slot/>
     </h4>
     </a>
-    {#if summaryText || summaryPlaceholder}
-        <figcaption
-            use:selectable_if_needed={selectable}
-            use:editable_if_needed={summaryEditable}
-            bind:this={summaryElement}>
+    {#if summaryText}
+        <figcaption>
             {summaryText}
         </figcaption>
     {/if}

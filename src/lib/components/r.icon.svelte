@@ -84,6 +84,7 @@
   import ListMinus from './ricons/list-minus.svelte'
  
   import LoaderCircle from './ricons/loader-circle.svelte' 
+  import Check from './ricons/check.svelte'
 
   let ricons_box = {
     "arrow-up": ArrowUp,
@@ -125,7 +126,7 @@
     "package": Package,
     "calendar": Calendar,
     "calendars": Calendars,
-    "netebook": Notebook,
+    "notebook": Notebook,
     "square": Square,
     "x":  X,
 
@@ -159,7 +160,8 @@
     'tag': Tag,
     'minus': Minus,
 
-    'loader-circle': LoaderCircle
+    'loader-circle': LoaderCircle,
+    'check': Check
   }
 
   let width = 24;

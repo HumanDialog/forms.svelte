@@ -210,36 +210,28 @@
         if(task.InFolders)
         {
             task.InFolders.forEach((f) => {
-                    task.connectedToList.push({
-                        Title: f.InTitle,
-                        Summary: f.InSummary,
-                        href: f.InHRef,
-                        $ref: f.$ref,
-                        icon: f.InIcon,
-                        $type: f.$type,
-                        IsCanonical: f.IsCanonical
-                })
+                    task.connectedToList.push(f)
             })
         }
 
         if(task.TaskList)
             task.connectedToList.push({
-                Title: task.TaskList.Name,
-                Summary: task.TaskList.Summary,
-                href: task.TaskList.href,
+                InTitle: task.TaskList.Name,
+                InSummary: task.TaskList.Summary,
+                InHRef: task.TaskList.href,
                 $ref: task.TaskList.$ref,
-                icon: 'netebook',
+                InIcon: 'notebook',
                 $type: task.TaskList.$type,
                 IsCanonical: 1
         })
 
         if(task.Actor)
             task.connectedToList.push({
-                Title: task.Actor.Name,
-                Summary: '',
-                href: task.Actor.href,
+                InTitle: task.Actor.Name,
+                InSummary: '',
+                InHRef: task.Actor.href,
                 $ref: task.Actor.$ref,
-                icon: 'user',
+                InIcon: 'user',
                 $type: task.Actor.$type,
                 IsCanonical: 1
         })
@@ -1917,9 +1909,6 @@
     })
 
     let list_properties = {
-        Title: "Title",
-        Summary: "Summary",
-        icon: "icon",
         element:{
             icon: "icon",
             href: "href",
@@ -1927,58 +1916,30 @@
             Summary: "Summary"
         },
         context:{
-            Folder:{
-                Summary: "Summary",
-
-            },
-            FolderFolder:{
-                Title:      "InTitle",
-                Summary:    "InSummary",
-                icon:       "#folder",
-                head_right: "ModificationDate"
-            },
-            NoteNote:{
-                icon:'#file-text'
-            },
             TaskNote:
             {
                 icon:'#file-text'
             },
             TaskFile:
             {
-                icon: '#package'
+                icon: '#package',
+                downloadable: true,
+                onOpen: async (f) => await downloadFileFromHRef(f.href, f.Title)
             }
         }
     }
 
     let attached_to_list_properties = {
-        Title: "Title",
-        Summary: "Summary",
-
         element:{
-            icon: "#folder",
-            href: "href",
-            Title: "Title",
-            Summary: "Summary"
+            icon: "InIcon",
+            href: "InHRef",
+            Title: "InTitle",
+            Summary: "InSummary"
         },
         context:{
             FolderNote:{
-                Title:      "InTitle",
-                icon:       "#folder",
-                Summary:    "InSummary",
-                href:       "InHRef"
-
+                icon: "#folder",
             },
-            TaskNote:{
-
-                Summary:    "Summary",
-                icon:       "#folder",
-                head_right: "ModificationDate"
-            },
-            NoteNote:{
-                Title:      "InTitle",
-                icon: '#file-text'
-            }
         }
     }
 
@@ -2207,7 +2168,7 @@
             <section >
                 <List   self={task}
                         a='connectedToList'
-                        {list_properties}
+                        list_properties={attached_to_list_properties}
                         bind:this={connectedToComponent}
                         toolbarOperations = {(el) => connectedToOperations(el)}>
                 </List>

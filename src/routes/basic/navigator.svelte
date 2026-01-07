@@ -393,7 +393,7 @@
                 <svelte:fragment let:item let:idx>
                     {@const href = item.href}
                     <SidebarItem   {href}
-                                    icon='netebook'
+                                    icon='notebook'
                                     active={isRoutingTo(href, currentPath)}
                                     summary={ext(item.Summary)}>
                         {ext(item.Name)}

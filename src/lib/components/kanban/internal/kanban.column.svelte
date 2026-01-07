@@ -7,6 +7,7 @@
     import Inserter from './kanban.inserter.svelte'
     import {FaPlus, FaCheck} from 'svelte-icons/fa'
     import type{rKanban_definition, rKanban_column } from '../Kanban'
+	import Icon from '$lib/components/r.icon.svelte';
 
     export let currentColumnIdx :number
     export let onInsert: Function;
@@ -367,11 +368,14 @@
                 {columnDef.title}
             </span>
 
-            {#if false && columnDef.finishing}
-                <div class="inline-block text-green-600 h-3 w-3 ml-2">
-                    <FaCheck/>
+            {#if columnDef.finishing}
+                <div class="inline-block text-green-600">
+                    <Icon icon="check" s/>
                 </div>
             {/if}
+            
+            
+
             <!--button class="absolute right-2 w-4 sm:w-2.5"
                     on:click|stopPropagation={(e) => add(KanbanColumnTop)}>
                 <FaPlus/>

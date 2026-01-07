@@ -1657,7 +1657,7 @@
         notesPlaceholder = false
         let res = await reef.post(`${noteRef}/CreateSubNote`,{
             title: newNoteAttribs.Title,
-            input: '',
+            summary: '',
             order: 0
         }, onErrorShowAlert)
 
@@ -1676,9 +1676,6 @@
         }
     }
     let list_properties = {
-        Title: "Title",
-        Summary: "Summary",
-        icon: "icon",
         element:{
             icon: "icon",
             href: "href",
@@ -1686,51 +1683,33 @@
             Summary: "Summary"
         },
         context:{
-            Folder:{
-                Summary: "Summary",
-
-            },
-            FolderFolder:{
-                Title:      "InTitle",
-                Summary:    "InSummary",
-                icon:       "#folder",
-                head_right: "ModificationDate"
-            },
             NoteNote:{
                 icon:'#file-text'
             },
-            TaskNote:{
-                icon:'#square-pen'
+            NoteFile:{
+                icon:'#package',
+                downloadable: true,
+                onOpen: async (f) => await downloadFileFromHRef(f.href, f.Title)
             }
         }
     }
 
     let attached_to_list_properties = {
-        Title: "Title",
-        Summary: "Summary",
-        icon: "icon",
         element:{
-            icon: "icon",
-            href: "href",
-            Title: "Title",
-            Summary: "Summary"
+            icon: "InIcon",
+            href: "InHRef",
+            Title: "InTitle",
+            Summary: "InSummary"
         },
         context:{
             FolderNote:{
-                Title:      "InTitle",
                 icon:       "#folder",
-                Summary:    "InSummary",
-                href:       "InHRef"
-
             },
             TaskNote:{
-                Title: "InTitle",
                 icon:'#square-pen',
-                Summary: "Summary",
                 head_right: "ModificationDate"
             },
             NoteNote:{
-                Title: "InTitle",
                 icon:  '#file-text'
             }
         }
@@ -1764,7 +1743,7 @@
             <!--span>Eidt<self=note a='index'/></span-->
 
             <span>
-                'getNiceStringDate(creationDate)'
+                {getNiceStringDate(creationDate)}
             </span>
         </div>
 
