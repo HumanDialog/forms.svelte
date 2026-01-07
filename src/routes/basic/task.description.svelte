@@ -9,6 +9,7 @@
             Modal,
 			Spinner,
             resizeImage,
+            getNiceStringDate,
             informModification,
 			pushChanges,
             refreshToolbarOperations,
@@ -66,7 +67,7 @@
     $: isHeaderActive = calculate_active(note, $contextItemsStore)
     $: isHeaderSelected = selected(note, $contextItemsStore)
 
-    $: selectedClass = isHeaderSelected ? "rounded-lg !border-blue-300 dark:!border-blue-300/50" : "";
+    $: selectedClass = isHeaderSelected ? "!border-blue-300 dark:!border-blue-300/50" : "";
     $: focusedClass = isHeaderActive ? "rounded-lg bg-stone-100 dark:bg-stone-700" : "";
 
     async function initCompnent(...args)
@@ -885,28 +886,56 @@
 
 </script>
 
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<!-- svelte-ignore a11y-no-noninteractive-tabindex-->
 
 {#key noteId + (isReadOnly ? 100000 : 200000)}
 {#if note != null}
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<!-- svelte-ignore a11y-no-noninteractive-tabindex-->
-            <h1     class=" relative left-[-0.5rem] pl-2 pb-1
-                            border border-transparent {focusedClass} {selectedClass}"
+
+
+<div class="w-full flex flex-row flex-wrap justify-between">
+            <div class="grow-0">
+                {#if note.CreatedBy}
+                    {@const href = `${note.CreatedBy.href}`}
+                    <a {href} use:link> {note.CreatedBy.Name} </a>
+                {/if}
+            </div>
+
+            <div>
+            </div>
+
+            <div>
+                 <span>
+                    'getNiceStringDate(creationDate)'
+                </span>
+            </div>
+            </div>
+
+            {#if !isHeaderActive}
+            <h1     class=" "
                     tabindex="0"
                     use:selectable={note}
                     on:click={activate}
                     bind:this={noteTitleElement}>
-                {#if isHeaderActive}
-                    <a href={note.href} use:link class="not-prose underline cursor-pointer">
-                        <Editable self={note} a='Title' id="{descriptionElementsId}_Title" focusOnClick={false} readonly={isReadOnly}/>
-                    </a>
-                {:else}
                     <span>
                         {note.Title}
                     </span>
-                {/if}
             </h1>
+            {:else}
+            <a href={note.href} use:link class="cursor-pointer">
+            <h1     class=" bg-stone-300 dark:bg-stone-700
+                            outline outline-8
+                            outline-stone-300 dark:outline-stone-700"
+                    tabindex="0"
+                    use:selectable={note}
+                    on:click={activate}
+                    bind:this={noteTitleElement}>
+                    <Editable self={note} a='Title' id="{descriptionElementsId}_Title" focusOnClick={false} readonly={isReadOnly}/>
+            </h1>
+            </a>
+
+            {/if}
 
             <div class="relative">
                 <Editor     on:click={(e) => e.stopPropagation()}
