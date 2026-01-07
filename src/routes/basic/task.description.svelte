@@ -952,6 +952,13 @@
 
             {/if}
 
+            {#if note.Summary || summaryPlaceholder}
+            {#key note.Summary}
+                <p  class="lead"><Editable self={note} a='Summary' readonly={isReadOnly}/></p>
+            {/key}
+
+            {/if}
+
             <div class="relative">
                 <Editor     on:click={(e) => e.stopPropagation()}
                             class="mb-5"
