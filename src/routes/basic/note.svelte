@@ -1834,19 +1834,6 @@
                             extraFrontPaletteCommands={extraPaletteCommands}
                             extraInsertPaletteCommands={extraInsertPalletteCommands}
                             extraBackPaletteCommands={extraBackPaletteCommands}/>
-                {#if  isContentEmpty() && !isEditorFocused && !isReadOnly}
-                    <p
-
-                    >
-                    _;
-                    Write the content of your note here. Press the / key to expand the formatting palette.;
-                    Escribe aquí el contenido de la nota. Pulsa la tecla / para desplegar la paleta de formato.;
-                    Pisz treść notatki tutaj. Naciśnij klawisz / by rozwinąć paletę formatującą.
-                    </p>
-                {/if}
-
-
-
             <hr/>
 
             {#if (note.Notes && note.Notes.length > 0) || (note.Files && note.Files.length > 0) || notesPlaceholder}
