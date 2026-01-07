@@ -91,7 +91,7 @@
             {
                 main_side_panel_visibility = "fixed lg:block"
                 lg_content_area_horizontal_dim = `lg:left-[360px] lg:w-[calc(100vw-360px)]`
-                lg_content_area_horizontal_tools_dim = `sm:left-[44px] sm:w-[calc(100vw-48px)] lg:left-[380px] lg:w-[calc(100vw-400px)]`
+                lg_content_area_horizontal_tools_dim = `sm:left-[44px] sm:w-[calc(100vw-48px)] lg:left-[362px] lg:w-[calc(100vw-364px)]`
             }
         }
         else
@@ -384,7 +384,7 @@
                 on:click={handleSelect}
                 on:contextmenu={handleSelect}>
 
-            <div class="desk-root bg-stone-200 dark:bg-stone-950  dark:text-white  overflow-x-clip
+            <div class="desk-root bg-stone-200 dark:bg-red-500 sm:dark:bg-stone-950 dark:text-white  overflow-x-clip
                         sm:overflow-y-clip  min-h-screen sm:h-screen">
                 <!--###########################################################-->
                 <!--##  HORIZONTAL TOP TITLE TOOLBAR (FOR PHONES)  ############-->
@@ -434,9 +434,9 @@
                                 z-20 overflow-x-hidden
 
                                 bg-stone-50 dark:bg-stone-900
-                                border-r-1 border-stone-500/30 dark:border-stone-300
-                                sm:shadow sm:shadow-stone-700/40
-                                sm:dark:shadow-stone-900/90">
+                                sm:border-r border-stone-300 dark:border-stone-300/50
+                                sm:shadow-lg sm:shadow-stone-500
+                                sm:dark:shadow-black">
 
                     <div class="    w-full h-full  overflow-y-auto overscroll-contain py-0 px-0">
 
@@ -465,12 +465,15 @@
                                     sm:top-0
                                     {lg_content_area_horizontal_tools_dim}
                                     z-10 overflow-hidden
+
                                     rounded-2xl
 
-                                    bg-stone-50 dark:bg-stone-800
-                                    border-b-1 border-stone-500/30 dark:border-stone-100
-                                    sm:shadow sm:shadow-slate-700/40
-                                    sm:dark:shadow-black" >
+                                    text-red-800 bg-stone-100/90
+                                    rounded-full
+                                    dark:text-orange-200 dark:bg-stone-800/40 dark:hover:bg-stone-700
+                                    ring-1 ring-orange-800/40 dark:ring-orange-200/30
+
+                                    " >
                         <Operations bind:this={operationsComponent} />
 
                     </div>
@@ -488,6 +491,7 @@
                                     {content_top}
                                     {lg_content_area_horizontal_dim}
                                     z-0 overflow-x-hidden
+                                    bgx-red-500
                                     {content_height} sm:overflow-y-auto sm:overscroll-contain
                                     "
                                     >

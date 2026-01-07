@@ -311,7 +311,7 @@
                 {@const isDisabled=isOperationDisabled(operation)}
                 {#if operation.toolbox}
                     {#each operation.toolbox as operation}
-                        {@const textColor= isDisabled ? 'text-stone-600 dark:text-stone-500' : 'text-stone-800 dark:text-stone-300 dark:hover:text-white '}
+                        {@const textColor= isDisabled ? 'text-stone-600 dark:text-stone-800' : 'text-stone-800 dark:text-stone-300 dark:hover:text-white '}
                         <button type="button"
                                 class="operation-1 px-1
                                 text-orange-500
@@ -383,8 +383,8 @@
             {@const isActive=isOperationActivated(operation)}
             {@const isDisabled=isOperationDisabled(operation)}
 
-            {@const enabledLightColors ='text-stone-600 hover:text-stone-800 hover:bg-stone-200 active:bg-stone-200 border-stone-200'}
-            {@const disabledLightColors ='text-stone-400 border-stone-200'}
+            {@const enabledLightColors ='text-stone-800 hover:text-stone-800 hover:bg-stone-200 active:bg-stone-200 border-stone-200'}
+            {@const disabledLightColors ='text-stone-800 border-stone-200'}
 
             {@const enabledDarkColors ='dark:text-stone-300 dark:hover:text-white dark:hover:bg-stone-800 dark:active:bg-stone-600 dark:border-stone-600'}
             {@const disabledDarkColors ='dark:text-stone-500 dark:border-stone-600'}

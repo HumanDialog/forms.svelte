@@ -557,6 +557,13 @@
 
     let addOperations = [
         {
+            caption: '_; Title; Title; Tytuł',
+            action: async (f) =>
+                {
+                    focusEditable('Title')
+                }
+        },
+        {
             caption: '_; Summary; Resumen; Podsumowanie',
             action: async (f) =>
                 {

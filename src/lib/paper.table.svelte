@@ -4,7 +4,7 @@
 
 <section class="    paper
                     prose prose-base prose-zinc dark:prose-invert prose-a:no-underline
-                    sm:max-w-none sm:min-h-[32rem]
+                    max-w-none sm:min-h-[32rem]
 
                     m-0 mb-64 px-2 pt-2 pb-0
 
@@ -13,10 +13,14 @@
 
                     sm:rounded
 
-                    sm:bg-white sm:dark:bg-stone-800/40 sm:shadow-xl sm:shadow-slate-700/10 sm:dark:shadow-black/100
+                sm:rounded
 
-                    sm:ring-1 sm:ring-stone-900/5 sm:dark:ring-stone-950/20
-                    {additionalClass}">
+                bg-white dark:bg-stone-900
+
+                sm:shadow-xl sm:shadow-slate-700/10
+                sm:dark:shadow-black/80
+
+                sm:outline sm:outline-1 sm:outline-stone-500">
 
 
     <slot/>
