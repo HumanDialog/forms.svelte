@@ -1944,6 +1944,10 @@
             {
                 icon:'#file-text'
             },
+            TaskFile:
+            {
+                icon: '#package'
+            }
         }
     }
 

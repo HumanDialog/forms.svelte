@@ -82,6 +82,8 @@
   import ListChecks from './ricons/list-checks.svelte'
   import ListPlus from './ricons/list-plus.svelte'
   import ListMinus from './ricons/list-minus.svelte'
+ 
+  import LoaderCircle from './ricons/loader-circle.svelte' 
 
   let ricons_box = {
     "arrow-up": ArrowUp,
@@ -155,7 +157,9 @@
     'image': Image,
     'table': Table,
     'tag': Tag,
-    'minus': Minus
+    'minus': Minus,
+
+    'loader-circle': LoaderCircle
   }
 
   let width = 24;

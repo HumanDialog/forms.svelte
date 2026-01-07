@@ -348,7 +348,7 @@
                                 icon='calendar'
                                 active={isRoutingTo("/myday", currentPath)}
                                 selectable={myday}>
-                    _; My day; Mi día; Mój dzień S
+                    _; My day; Mi día; Mój dzień
                 </SidebarItem>
                 <SidebarItem   href="/teamday"
                                 icon='calendars'
@@ -364,7 +364,7 @@
                 </SidebarItem>
             </SidebarGroup>
 
-            <SidebarGroup   title={i18n({en: 'My lists', es: 'Mis listas', pl: 'Moje listy%'})}
+            <SidebarGroup   title={i18n({en: 'My lists', es: 'Mis listas', pl: 'Moje listy'})}
                             moreHref="/mylists">
 
                 <SidebarList    objects={userTaskLists}

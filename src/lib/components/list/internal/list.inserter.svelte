@@ -37,12 +37,44 @@
     
 </script>
 
-<section    class=" my-1 w-full text-base text-stone-700 dark:text-stone-400 cursor-default rounded-md border border-transparent bg-stone-200 dark:bg-stone-700">
+
+<figure class="pl-8
+            bg-stone-300 dark:bg-stone-700
+            outline outline-8
+            outline-stone-300 dark:outline-stone-700
+            ring-1 ring-offset-8
+            ring-stone-300 dark:ring-stone-700
+            ">
+        <h4 class="-indent-8">
+            <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
+                    text-stone-700 dark:text-stone-400 ">
+             </div>
+             <span 
+                bind:this={titleElement}
+                use:editable={{
+                    action: (text) => onInsert(text, ''),
+                    active: false,
+                    onSoftEnter: softEnter
+                    }} ></span>
+        </h4>
+
+        {#if editSummary}
+            <figcaption 
+                    bind:this={summaryElement}
+                    use:editable={{
+                    action: onSummaryChanged,
+                    active: false,
+                    onFinish: (d) => {editSummary=false}
+                }}
+                >{summary}</figcaption>
+        {/if}
+</figure>
+
+
+<!--section    class=" my-1 w-full text-base text-stone-700 dark:text-stone-400 cursor-default rounded-md border border-transparent bg-stone-200 dark:bg-stone-700">
     <div class="flex flex-row">
         {#if icon}
-            <!--Icon   size={3} 
-                    component={FaPlus}  
-                    class="mt-1.5 ml-2 "/-->
+            
             <div class="h-5 w-5 sm:h-4 sm:w-4 mt-2 sm:mt-1.5 ml-2"></div>
         {/if}
 
@@ -73,4 +105,4 @@
             {summary}
         </p>
     {/if}
-</section>
+</section-->
