@@ -102,10 +102,25 @@
                                                     'Title',
                                                     'Summary',
                                                     'Content',
+                                                    'CreationDate',
+                                                    'ModificationDate',
+
                                                     '$ref',
                                                     '$type',
                                                     '$acc',
-                                                    'href']
+                                                    'href'],
+                                    SubTree:[
+                                        {
+                                            Id: 11,
+                                            Association: 'CreatedBy',
+                                            Expressions:['$ref', 'Name', 'href']
+                                        },
+                                        {
+                                            Id: 12,
+                                            Association: 'ModifiedBy',
+                                            Expressions:['$ref', 'Name']
+                                        }
+                                    ]
                                 }
                             ]
                         },
@@ -907,7 +922,7 @@
 
             <div>
                  <span>
-                    'getNiceStringDate(creationDate)'
+                    {getNiceStringDate(note.CreationDate)}
                 </span>
             </div>
             </div>
@@ -925,7 +940,7 @@
             {:else}
             <a href={note.href} use:link class="cursor-pointer">
             <h1     class=" bg-stone-300 dark:bg-stone-700
-                            outline outline-8
+                            outline outline-4
                             outline-stone-300 dark:outline-stone-700"
                     tabindex="0"
                     use:selectable={note}
