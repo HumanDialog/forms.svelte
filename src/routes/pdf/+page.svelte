@@ -39,17 +39,17 @@
 
 </script>
 
-<button class="p-1 bg-stone-300" on:click={prevPage}>prev</button>
+<button class="p-1 bg-stone-200" on:click={prevPage}>prev</button>
 page {pageNo}
-<button class="p-1 bg-stone-300" on:click={nextPage}>next</button>
+<button class="p-1 bg-stone-200" on:click={nextPage}>next</button>
 
-<button class="p-1 bg-stone-300" on:click={zoomOut}>zoom out</button>
+<button class="p-1 bg-stone-200" on:click={zoomOut}>zoom out</button>
 {(100 * scale).toFixed(0)}%
-<button class="p-1 bg-stone-300" on:click={zoomIn}>zoom in</button>
+<button class="p-1 bg-stone-200" on:click={zoomIn}>zoom in</button>
 
-<button class="p-1 bg-stone-300" on:click={rotateLeft}>rotate left</button>
+<button class="p-1 bg-stone-200" on:click={rotateLeft}>rotate left</button>
 rotation {rotation}
-<button class="p-1 bg-stone-300" on:click={rotateRight}>rotate right</button>
+<button class="p-1 bg-stone-200" on:click={rotateRight}>rotate right</button>
 
 {#key pageNo + scale + rotation}
     <PDFPage {url} {pageNo} {scale} {rotation}/>

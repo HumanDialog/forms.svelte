@@ -1,7 +1,7 @@
 <script lang="ts">
     import {FaAngleUp, FaAngleDown, FaAngleDoubleUp, FaAngleDoubleDown} from 'svelte-icons/fa'
     import {KanbanColumnTop, KanbanColumnBottom, rKanban_definition} from '../Kanban'
-    
+
     export let definition :rKanban_definition;
     export let item :object;
     export let afterActionOperation : Function | undefined = undefined;
@@ -24,7 +24,7 @@
         <p class="text-xs h-4 w-[100px] truncate"></p>
         <button class=" h-8 w-full
                         text-xs font-medium text-stone-900 dark:text-stone-400 dark:hover:text-white
-                        bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 active:bg-stone-300 dark:active:bg-stone-600
+                        bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 active:bg-stone-200 dark:active:bg-stone-600
                         border rounded border-stone-200 dark:border-stone-600 focus:outline-none
                         inline-flex items-center justify-center"
                         on:click={(e) => { onMoveUp(item); replaceMenu()}}>
@@ -33,7 +33,7 @@
 
         <button class=" h-8 w-full
                         text-xs font-medium text-stone-900 dark:text-stone-400 dark:hover:text-white
-                        bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 active:bg-stone-300 dark:active:bg-stone-600
+                        bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 active:bg-stone-200 dark:active:bg-stone-600
                         border rounded border-stone-200 dark:border-stone-600 focus:outline-none
                         inline-flex items-center justify-center"
                         on:click={(e) => { onMoveDown(item); replaceMenu()}}>
@@ -47,7 +47,7 @@
             <p class="text-xs h-4 w-[100px] ml-1 truncate">{column.title}</p>
             <button class=" h-8 w-full
                             text-base font-medium text-stone-900 dark:text-stone-400 dark:hover:text-white
-                            bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 active:bg-stone-300 dark:active:bg-stone-600
+                            bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 active:bg-stone-200 dark:active:bg-stone-600
                             border rounded border-stone-200 dark:border-stone-600 focus:outline-none
                             inline-flex items-center justify-center"
                             on:click={(e) => { onReplace(item, idx, KanbanColumnTop); replaceMenu()}}>
@@ -56,7 +56,7 @@
 
             <button class=" h-8 w-full
                             text-base font-medium text-stone-900 dark:text-stone-400 dark:hover:text-white
-                            bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 active:bg-stone-300 dark:active:bg-stone-600
+                            bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 active:bg-stone-200 dark:active:bg-stone-600
                             border rounded border-stone-200 dark:border-stone-600 focus:outline-none
                             inline-flex items-center justify-center"
                             on:click={(e) => { onReplace(item, idx, KanbanColumnBottom); replaceMenu()}}>
@@ -72,13 +72,13 @@
         <p class="text-base truncate "></p>
         <div class="flex flex-row ml-auto gap-3">
             <button class=" bg-transparent
-                            w-[55px] h-[55px] 
+                            w-[55px] h-[55px]
                             m-0
                             flex items-center justify-center
                             disable-dbl-tap-zoom"
                             on:click={(e) => { onMoveUp(item); replaceMenu()}}>
                 <div class="    w-10 h-10
-                                text-white bg-zinc-500 hover:bg-zinc-500 
+                                text-white bg-zinc-500 hover:bg-zinc-500
                                 font-medium rounded-full text-sm text-center shadow-md
                                 dark:bg-zinc-500 dark:hover:bg-zinc-500
                                 flex items-center justify-center">
@@ -89,13 +89,13 @@
             </button>
 
             <button class=" bg-transparent
-                            w-[55px] h-[55px] 
+                            w-[55px] h-[55px]
                             m-0
                             flex items-center justify-center
                             disable-dbl-tap-zoom"
                             on:click={(e) => { onMoveDown(item); replaceMenu()}}>
                 <div class="    w-10 h-10
-                                text-white bg-zinc-500 hover:bg-zinc-500 
+                                text-white bg-zinc-500 hover:bg-zinc-500
                                 font-medium rounded-full text-sm text-center shadow-md
                                 dark:bg-zinc-500 dark:hover:bg-zinc-500
                                 flex items-center justify-center">
@@ -113,13 +113,13 @@
             <p class="text-base mt-4 truncate w-[120px]">{column.title}</p>
             <div class="flex flex-row ml-auto gap-3">
                 <button class=" bg-transparent
-                                w-[55px] h-[55px] 
+                                w-[55px] h-[55px]
                                 m-0
                                 flex items-center justify-center
                                 disable-dbl-tap-zoom"
                                 on:click={(e) => { onReplace(item, idx, KanbanColumnTop); replaceMenu()}}>
                     <div class="    w-10 h-10
-                                    text-white bg-zinc-500 hover:bg-zinc-500 
+                                    text-white bg-zinc-500 hover:bg-zinc-500
                                     font-medium rounded-full text-sm text-center shadow-md
                                     dark:bg-zinc-500 dark:hover:bg-zinc-500
                                     flex items-center justify-center">
@@ -130,13 +130,13 @@
                 </button>
 
                 <button class=" bg-transparent
-                                w-[55px] h-[55px] 
+                                w-[55px] h-[55px]
                                 m-0
                                 flex items-center justify-center
                                 disable-dbl-tap-zoom"
                                 on:click={(e) => { onReplace(item, idx, KanbanColumnBottom); replaceMenu()}}>
                     <div class="    w-10 h-10
-                                    text-white bg-zinc-500 hover:bg-zinc-500 
+                                    text-white bg-zinc-500 hover:bg-zinc-500
                                     font-medium rounded-full text-sm text-center shadow-md
                                     dark:bg-zinc-500 dark:hover:bg-zinc-500
                                     flex items-center justify-center">

@@ -82,7 +82,7 @@
                                 text-sm
                                 text-stone-700 dark:text-stone-300 dark:hover:text-white
                                 bg-stone-200 dark:bg-stone-700
-                                hover:bg-stone-300 dark:hover:bg-stone-800
+                                hover:bg-stone-200 dark:hover:bg-stone-800
                                 border border-stone-300 focus:outline-none dark:border-stone-600
                                 flex items-center rounded`
     const authNormalClass = 'ml-5 mt-5 text-sm'

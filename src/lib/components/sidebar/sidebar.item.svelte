@@ -46,7 +46,7 @@
     $: context_data = $contextItemsStore;
     $: isRowActive = calculateIsRowActive($contextItemsStore)
     $: summaryText = calculateSummary(summary)
-    $: activeClass = isRowActive ? 'bg-stone-300 dark:bg-stone-700 outline outline-8 outline-stone-300 dark:outline-stone-700 ring-1 ring-offset-8 ring-stone-300 dark:ring-stone-700' : '' 
+    $: activeClass = isRowActive ? 'bg-stone-200 dark:bg-stone-700 outline outline-8 outline-stone-200 dark:outline-stone-700 ring-1 ring-offset-8 ring-stone-300 dark:ring-stone-700' : ''
 
     $: icom = fetch_icon(item, icon, iicon);
 

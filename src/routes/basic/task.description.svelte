@@ -941,9 +941,9 @@
             </h1>
             {:else}
             <a href={note.href} use:link class="cursor-pointer">
-            <h1     class=" bg-stone-300 dark:bg-stone-700
+            <h1     class=" bg-stone-200 dark:bg-stone-700
                             outline outline-4
-                            outline-stone-300 dark:outline-stone-700"
+                            outline-stone-200 dark:outline-stone-700"
                     tabindex="0"
                     use:selectable={note}
                     on:click={activate}

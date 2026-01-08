@@ -337,7 +337,7 @@
                                 text-orange-500
                                 text-xs font-thin
                                 {textColor}
-                                hover:bg-stone-700 active:bg-stone-300 border-stone-200
+                                hover:bg-stone-700 active:bg-stone-200 border-stone-200
                                 dark:hover:bg-stone-800 dark:active:bg-stone-600 dark:border-stone-600
                                 focus:outline-none
                                 inline-flex items-center"
