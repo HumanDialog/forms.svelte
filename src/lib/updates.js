@@ -11,6 +11,10 @@ const modified_item_store = writable(null);
 export function setjItemProperty(item, field_name, value)
 {
     console.log('setjItemProperty ' + field_name)
+    
+    if(item[field_name] == value)
+        return
+    
     let type_name = item.$type;
     item[field_name] = value;
     informModification(item, field_name, type_name);

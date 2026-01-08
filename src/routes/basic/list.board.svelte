@@ -31,8 +31,8 @@
         showFloatingToolbar,
         refreshToolbarOperations,
         PaperTable,
-        PaperHeader
-
+        PaperHeader,
+        setjItemProperty
 	} from '$lib';
     import {FaPlus, FaList, FaPen, FaCaretLeft, FaCaretRight, FaTrash, FaArrowsAlt, FaArchive, FaCheck, FaEllipsisH, FaChevronRight,
         FaAngleDown, FaAngleUp, FaColumns, FaRandom, FaChevronLeft, FaUpload, FaRegCalendar, FaRegCalendarCheck, FaCaretUp, FaCaretDown, FaDownload
@@ -914,7 +914,7 @@
 
     async function onColumnNameChanged(columnIdx, name)
     {
-        const res = await reef.post(`${currentList.$ref}/ChangeColumnName`, {
+        /*const res = await reef.post(`${currentList.$ref}/ChangeColumnName`, {
                         pos: columnIdx,
                         newName: name
                     }, onErrorShowAlert);
@@ -925,10 +925,11 @@
             taskStates = [...res]
             await kanban.rerender();
             kanban.activateColumn(columnIdx)
-        }
+        }*/
+        
 
-        //taskStates[columnIdx].name = name;
-        //await saveTaskStates();
+        taskStates[columnIdx].name = name;
+        saveTaskStates();
     }
 
     async function onColumnMoveLeft(columnIdx)
@@ -1053,6 +1054,12 @@
                 //kanban.editColumnName(idx);
             }
         }
+    }
+
+    function saveTaskStates()
+    {
+        const statesStr = JSON.stringify(taskStates)
+        setjItemProperty(currentList, 'TaskStates', statesStr)
     }
 
     /*

@@ -264,7 +264,7 @@
         let newTask = res.Task;
         setBrowserRecentElement(newTask.Id, 'Task')
 
-        await reloadTasks(newTask.Id)
+        await reloadTasks(newTask.$ref)
     }
 
 

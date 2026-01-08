@@ -409,8 +409,8 @@
                                 overflow-auto" >
 
                     <div class="    flex flex-row justify-between  h-full
-                                    text-stone-500 bg-stone-200/70 hover:bg-stone-200
-                                    dark:text-orange-200 dark:bg-stone-700/70 dark:hover:bg-stone-700
+                                    text-stone-500 bg-stone-200/70
+                                    dark:text-orange-200 dark:bg-stone-700/70
                                     bg-stone-200 dark:bg-stone-800/70
                                     border-t border-stone-500 ">
                         <HorizontalNavigatorTabs appConfig={layout}/>

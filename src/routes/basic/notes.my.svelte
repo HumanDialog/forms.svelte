@@ -139,7 +139,7 @@
         if (!res)
             return null;
         let newList = res.TaskList;
-        await reloadNotes(newList.Id)
+        await reloadNotes(newList.$ref)
     }
     let pageOperations = {
         opver: 2,

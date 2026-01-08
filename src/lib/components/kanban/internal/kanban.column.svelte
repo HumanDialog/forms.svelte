@@ -200,7 +200,7 @@
                 activateAfterDomUpdate = lastActivatedElement;
             else
             {
-                if(detail.incremental)
+                if(false && detail.incremental)
                 {
                     let currentActive = activateAfterDomUpdate ?? getActive('props');
                     if(currentActive)

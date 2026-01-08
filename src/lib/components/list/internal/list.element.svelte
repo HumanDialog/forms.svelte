@@ -314,21 +314,6 @@
         startEditing(element_node, () => { placeholder='' });*/
     }
 
-    function setSelectionAtEnd(element: HTMLElement)
-    {
-        const textNode = element.childNodes[0]
-        const text = textNode.textContent;
-
-        let range = document.createRange();
-        let end_offset = text.length;
-        let end_container = textNode;
-        range.setStart(end_container, end_offset)
-        range.setEnd(end_container, end_offset)
-        let sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-    }
-
     let rootElement;
     export function scrollToView()
     {

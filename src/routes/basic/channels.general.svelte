@@ -107,7 +107,7 @@
             return null;
 
         let newChannel = res.MessageChannel
-        await reloadChannels(newChannel.Id)
+        await reloadChannels(newChannel.$ref)
     }
 
     let pageOperations = {

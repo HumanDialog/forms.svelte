@@ -182,7 +182,7 @@
             return null;
 
         let newList = res.TaskList;
-        await reloadLists(newList.Id)
+        await reloadLists(newList.$ref)
     }
 
 
@@ -197,7 +197,7 @@
                         {
                             icon: FaList,
                             mricon: 'notebook',
-                            caption: '_; New list; Nueva lista; Nowa lista+',
+                            caption: '_; New list; Nueva lista; Nowa lista',
                             action: (focused) => { listComponent.addRowAfter(null) },
                             fab: 'M01',
                             tbr: 'A'
@@ -224,7 +224,7 @@
                     caption: '_; View; Ver; Widok',
                     operations: [
                         {
-                            caption: '_; New list; Nueva lista; Nowa lista*',
+                            caption: '_; New list; Nueva lista; Nowa lista',
                             icon: FaList,
                             mricon: 'notebook',
                             action: (focused) => { listComponent.addRowAfter(list) },

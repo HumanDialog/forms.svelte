@@ -498,20 +498,21 @@ export function editable(node, params)
         node.contentEditable = "true"
         node.focus();
 
-        /*await tick();
+        await tick();
+
         let range = document.createRange();
         range.selectNodeContents(node);
         let end_offset = range.endOffset;
         let end_container = range.endContainer;
         range.setStart(end_container, 0)
-        range.setEnd(end_container, end_offset)
+        range.setEnd(end_container, 0)
         //range.setStart(node, 0)
         //range.setEnd(node, 0)
        // console.log('range rect: ', range.getBoundingClientRect())
         let sel = window.getSelection();
         sel.removeAllRanges();
         sel.addRange(range);
-        */
+        
     }
 
     const focus_listener = async (e) =>
