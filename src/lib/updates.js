@@ -122,6 +122,9 @@ export function pushChanges(afterPushCallback=undefined)
 {
     //console.trace()
 
+    if(!modified_items_map.size)
+        return;
+
     if(afterPushCallback)
         afterPushCallbacks.push(afterPushCallback);
 
@@ -158,9 +161,25 @@ modified_item_store.subscribe((mod_item) => {
 export const unsavedModificationsTicket = writable(0);
 
 update_request_ticket.subscribe(async (v) => {
-    if(v != last_update_ticket)
+    flushChanges(v)
+})
+
+export async function pushChangesImmediately()
+{
+    if(!modified_items_map.size)
+        return;
+
+    const ticket = get(update_request_ticket) + 1
+    update_request_ticket.set(ticket)
+
+    await flushChanges(ticket);
+}
+
+async function flushChanges(ticket)
+{
+    if(ticket != last_update_ticket)
     {
-        last_update_ticket = v;
+        last_update_ticket = ticket;
 
         if(!modified_items_map.size)
             return;
@@ -224,4 +243,4 @@ update_request_ticket.subscribe(async (v) => {
         }
 
     }
-})
+} 

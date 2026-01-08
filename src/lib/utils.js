@@ -1,9 +1,10 @@
 import { getContext, tick } from "svelte";
 import {derived, get} from 'svelte/store'
-import { contextItemsStore, contextToolbarOperations, pageToolbarOperations, data_tick_store, main_sidebar_visible_store, show_sidebar, hide_sidebar, previously_visible_sidebar, auto_hide_sidebar, reloadWholeApp} from "./stores";
+import { contextItemsStore, contextToolbarOperations, pageToolbarOperations, data_tick_store, main_sidebar_visible_store, show_sidebar, hide_sidebar, previously_visible_sidebar, auto_hide_sidebar, reloadWholeApp, onErrorShowAlert} from "./stores";
 import {location, push, pop} from 'svelte-spa-router'
 import {session, reef} from '@humandialog/auth.svelte'
 import { i18n } from "./i18n";
+import {pushChangesImmediately} from './updates'
 
 export let icons = {symbols :null}
 
@@ -1275,4 +1276,17 @@ function launchNewGroupWizzard(afterGroupCreated=undefined)
     });
     
     dialog.show()    
+}
+
+
+
+export const fetchHandlers = {
+    onBefore: [
+        (path) => { pushChangesImmediately() }
+    ],
+
+    //onAfter: [],
+    onError: [
+        (err, res) => onErrorShowAlert(err)
+    ]
 }

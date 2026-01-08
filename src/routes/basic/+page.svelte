@@ -9,7 +9,7 @@
     import NotFound from './landing/not.found.svelte'
     import AppView from './AppView.svelte';
 	import {appUsers} from './users.js'
-    import {dark_mode_store, setLanguages} from '$lib'
+    import {dark_mode_store, setLanguages, fetchHandlers} from '$lib'
 
 	const mode = __APP_MODE__
     const objectreef_io = __OBJECTREEF_IO__
@@ -41,7 +41,8 @@
                         api:    "http://127.0.0.1:1996/",
                         //api:    "http://192.168.0.103:1996/",
                         users: appUsers,
-                        apiVersion: "v001"}
+                        apiVersion: "v001"},
+                    fetchHandlers: fetchHandlers
                    });
 
     const r = /^\/listboard|tdownload|tcontact|tasklist|destlis|deslis|design|desnav|task|note|folder|mytasks|mylists|mynotes|alllists|myfolders|group-folders|general-channels|private-channels|members|chat|thread|newthread|forum|thome|profile|myday|teamday|doc|request-license-file|nav\/(.*)\/?$/i

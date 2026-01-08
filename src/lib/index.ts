@@ -152,7 +152,8 @@ export {
     sessionStorageRead,
     hasLocalStorage,
     getCurrentGroupName,
-    getGroupsMenu
+    getGroupsMenu,
+    fetchHandlers
 }   from './utils'
 
 export {
