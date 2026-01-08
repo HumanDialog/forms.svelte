@@ -5,6 +5,8 @@
     import {isDeviceSmallerThan} from '../utils.js'
 	import { tick } from 'svelte';
     import Ricon from './r.icon.svelte'
+    import {i18n} from '../i18n.js'
+    import {pushChanges, hasModifications, unsavedModificationsTicket} from '../updates.js'
 
     export let mainPageCoords = undefined
 
@@ -16,7 +18,8 @@
                                         $bottom_bar_visible_store,
                                         $main_sidebar_visible_store,
                                         $leftHandedFAB,
-                                        $fabHiddenDueToPopup);
+                                        $fabHiddenDueToPopup,
+                                        $unsavedModificationsTicket);
 
     let operations :object[] = [];
     let mainOperation :object|null = null;
@@ -93,6 +96,16 @@
         else if(opVer == 2)
         {
             const definedOperations = [...operations]
+
+            const saveOperation = {
+                caption: i18n({en: 'Save', es: 'Guardar', pl: 'Zapisz'}),
+                hideToolbarCaption: true,
+                mricon: 'save',
+                action: (f) => pushChanges(),
+                fab: 'T00',
+                disabledFunc: () => !hasModifications()
+            }
+
             // ************************* MAIN FAB MENU ******************************
             if(main_FAB_position)  // make one button for to show all operations as menu
             {
@@ -106,6 +119,9 @@
                     flatOperations = [...flatOperations, ...group.operations]
                 })
 
+                flatOperations.push({separator: true})
+                flatOperations.push(saveOperation)
+                
                 const realOps = flatOperations.filter((el) => !!el.separator == false)
                 if(realOps.length > 1)
                 {
@@ -128,6 +144,8 @@
                 else
                     operations = []
             }
+
+            operations.push(saveOperation)
 
 
             // ************************* USER DEFINED FABs *******************************

@@ -429,7 +429,7 @@
                                 }
                             ]
                         },
-                        {
+                    /*    {
                             caption: "_; Save; Guardar; Zapisz",
                             hideToolbarCaption: true,
                             mricon: 'save',
@@ -437,7 +437,7 @@
                             fab: 'T02',
                             tbr: 'C',
                             //disabledFunc: () => !hasModifications()
-                        },
+                        }, */
                     ]
                 },
                 {
@@ -746,16 +746,8 @@
                                     action: () => runFileAttacher()
                                 }
                             ]
-                        },
-                        {
-                            caption: "_; Save; Guardar; Zapisz",
-                            hideToolbarCaption: true,
-                            mricon: 'save',
-                            action: (f) => pushChanges(),
-                            fab: 'T02',
-                            tbr: 'C',
-                            //disabledFunc: () => !hasModifications()
-                        },
+                        }
+                        
                     ]
                 }
             ]
@@ -974,7 +966,7 @@
                                 }
                             ]
                         },
-                        {
+                    /*    {
                             caption: "_; Save; Guardar; Zapisz",
                             hideToolbarCaption: true,
                             mricon: 'save',
@@ -982,7 +974,7 @@
                             //fab: 'S00',
                             tbr: 'C',
                             disabledFunc: () => !hasModifications()
-                        },
+                        }, */
                     ]
                 }
 
@@ -993,12 +985,12 @@
 
     const extraPaletteCommands = []
     const extraPaletteCommandsExt = [
-        {
+    /*    {
             caption: '_; Save; Guardar; Zapisz',
             mricon: 'save',
             action: () => description?.save(),
             disabledFunc: () => !hasModifications()
-        }
+        } */
     ]
 
     const extraInsertPalletteCommands = [

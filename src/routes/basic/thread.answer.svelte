@@ -114,13 +114,13 @@
                     caption: 'Post',
                     preAction: contentElement.preventBlur,
                     operations: [
-                        {
+                    /*    {
                             caption: '_; Save; Guardar; Zapisz',
                             mricon: 'save',
                             action: (f) => { contentElement?.save() },
                             tbr: 'A',
                             hideToolbarCaption: true
-                        }
+                        } */
                     ]
                 },
                 {

@@ -1,4 +1,4 @@
-import {writable} from 'svelte/store';
+import {writable, get} from 'svelte/store';
 import {reef} from '@humandialog/auth.svelte/dist/index'
 import {onErrorShowAlert} from './stores.js'
 
@@ -147,8 +147,11 @@ modified_item_store.subscribe((mod_item) => {
         {
             modified_items_map.set(mod_item.Id, mod_item);
         }
+        unsavedModificationsTicket.set( get(unsavedModificationsTicket) + 1 )
     }
 });
+
+export const unsavedModificationsTicket = writable(0);
 
 update_request_ticket.subscribe(async (v) => {
     if(v != last_update_ticket)
@@ -187,6 +190,8 @@ update_request_ticket.subscribe(async (v) => {
             if (res.ok) {
 
                 modified_items_map.clear();
+                unsavedModificationsTicket.set( get(unsavedModificationsTicket) + 1 )
+
                 afterPushCallbacks.forEach( cb => cb())
                 afterPushCallbacks = []
             }
@@ -197,6 +202,8 @@ update_request_ticket.subscribe(async (v) => {
                 if(res.status == 400)   // basic exception like access rights
                 {
                     modified_items_map.clear();
+                    unsavedModificationsTicket.set( get(unsavedModificationsTicket) + 1 )
+                    
                     afterPushCallbacks.forEach( cb => cb())
                     afterPushCallbacks = []
                 }
