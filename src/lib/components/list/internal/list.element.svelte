@@ -287,6 +287,7 @@
         //let element_id = `__hd_list_ctrl_${getItemKey(item)}_${field}`;
         let element_id = `__or_list_ctrl_${getItemKey(item)}_${field}`;
         let element_node = document.getElementById(element_id);
+
         if(!element_node)
         {
             placeholder = field;
@@ -302,25 +303,7 @@
             return; //todo
         }
 
-        if(field == 'Title')
-        {
-            if(is_link_like)
-            {
-                startEditing(element_node, () => { placeholder='' });
-            }
-            else
-            {
-                element_node.focus();
-                //setSelectionAtEnd(element_node);
-            }
-        }
-        else
-        {
-            element_node.focus();
-            //setSelectionAtEnd(element_node);
-        }
-
-
+        startEditing(element_node, () => { placeholder='' });
     }
 
     function setSelectionAtEnd(element: HTMLElement)
