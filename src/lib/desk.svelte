@@ -430,12 +430,12 @@
                                 left-0 bottom-[50px]
                                 sm:left-[40px] sm:top-0
                                 w-full sm:w-[320px]
-                                h-[calc(100vh-100px)] sm:h-full
+                                h-[calc(100svh-50px)] sm:h-full
 
                                 z-30 overflow-x-hidden
 
                                 bg-stone-50 dark:bg-stone-900
-                                border-2 sm:border-r border-stone-300 dark:border-stone-300/50
+                                border-t sm:border-t-0 sm:border-r border-stone-300 dark:border-stone-300/50
                                 sm:shadow-lg sm:shadow-stone-500
                                 sm:dark:shadow-black">
 

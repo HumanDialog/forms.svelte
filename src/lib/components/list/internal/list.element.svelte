@@ -11,6 +11,7 @@
             startEditing,
             addActiveItem,
             removeActiveItem,
+			focusEditable,
     } from '../../../utils'
 
     import {showGridMenu, showMenu} from '../../menu'
@@ -21,13 +22,12 @@
     import CircleCheck from '../../ricons/circle-check.svelte'
     import Ricon from  '../../r.icon.svelte'
     //import {get_ricon} from  '../../ricons.js'
-    import Spinner from '../../delayed.spinner.svelte'
+    
 
     import {rList_definition, rList_property_type} from '../List'
 	import { push, link } from 'svelte-spa-router';
-    import {FaExternalLinkAlt, FaRegCircle, FaRegCheckCircle} from 'svelte-icons/fa/'
-    import Tags from '../../tags.svelte'
     import {ext} from '../../../i18n'
+    import Editable from '../../r.editable.svelte'
 
     export let item     :object;
 
@@ -285,8 +285,16 @@
     async function force_editing(field :string)
     {
         //let element_id = `__hd_list_ctrl_${getItemKey(item)}_${field}`;
-        let element_id = `__or_list_ctrl_${getItemKey(item)}_${field}`;
-        let element_node = document.getElementById(element_id);
+        let element_id = `#__or_list_ctrl_${getItemKey(item)}_${field}`;
+
+        if(!focusEditable(element_id))
+        {
+            placeholder = field;
+            await tick();
+            focusEditable(element_id)
+        }
+
+        /*let element_node = document.getElementById(element_id);
 
         if(!element_node)
         {
@@ -303,7 +311,7 @@
             return; //todo
         }
 
-        startEditing(element_node, () => { placeholder='' });
+        startEditing(element_node, () => { placeholder='' });*/
     }
 
     function setSelectionAtEnd(element: HTMLElement)
@@ -523,36 +531,30 @@
             href={element_href}
             on:click={onDownloadFile}>
 
-            <h4 class="-indent-8"
-                id="__or_list_ctrl_{getItemKey(item)}_Title"
-                use:editable={{
-                    action: (text) => {change_property(element_title, text)},
-                    active: false,
-                    readonly: title_readonly,
-                    onSoftEnter: (text) => {change_name(text); editProperty('Summary')}
-                }}>
+            <h4 class="-indent-8">
                 <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
                         text-stone-700 dark:text-stone-400 ">
                         <Ricon icon={isDownloading ? 'loader-circle' : element_icon} />
-                </div>{translated_element_title}
+                </div><Editable     self={item} 
+                                    a={element_title} 
+                                    id="__or_list_ctrl_{getItemKey(item)}_Title" 
+                                    readonly={title_readonly} 
+                                    focusOnClick={false}/>
             </h4>
         </a>
     {:else if element_href}
         <a  class="sm:hover:cursor-pointer"
             href={element_href} use:link>
 
-            <h4 class="-indent-8 "
-                id="__or_list_ctrl_{getItemKey(item)}_Title"
-                use:editable={{
-                    action: (text) => {change_property(element_title, text)},
-                    active: false,
-                    readonly: title_readonly,
-                    onSoftEnter: (text) => {change_name(text); editProperty('Summary')}
-                }}>
+            <h4 class="-indent-8 ">
                 <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
                         text-stone-700 dark:text-stone-400 ">
                         <Ricon icon={element_icon} />
-                </div>{translated_element_title}
+                </div><Editable     self={item} 
+                                    a={element_title} 
+                                    id="__or_list_ctrl_{getItemKey(item)}_Title" 
+                                    readonly={title_readonly} 
+                                    focusOnClick={false}/>
             </h4>
         </a>
     {:else if element_open_handler}
@@ -560,33 +562,26 @@
             href="/#"
             on:click|preventDefault={() => element_open_handler(item)}>
 
-            <h4 class="-indent-8"
-                id="__or_list_ctrl_{getItemKey(item)}_Title"
-                use:editable={{
-                    action: (text) => {change_property(element_title, text)},
-                    active: false,
-                    readonly: title_readonly,
-                    onSoftEnter: (text) => {change_name(text); editProperty('Summary')}
-                }}>
+            <h4 class="-indent-8">
                 <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
                         text-stone-700 dark:text-stone-400 ">
                         <Ricon icon={element_icon} />
-                </div>{translated_element_title}
+                </div><Editable     self={item} 
+                                    a={element_title} 
+                                    id="__or_list_ctrl_{getItemKey(item)}_Title" 
+                                    readonly={title_readonly} 
+                                    focusOnClick={false}/>
             </h4>
         </a>
     {:else}
-        <h4 class="-indent-8 "
-            id="__or_list_ctrl_{getItemKey(item)}_Title"
-            use:editable={{
-                action: (text) => {change_property(element_title, text)},
-                active: false,
-                readonly: title_readonly,
-                onSoftEnter: (text) => {change_name(text); editProperty('Summary')}
-            }}>
+        <h4 class="-indent-8">
             <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
                     text-stone-700 dark:text-stone-400 ">
                     <Ricon icon={element_icon} />
-            </div>{translated_element_title}
+            </div><Editable     self={item} 
+                                a={element_title} 
+                                id="__or_list_ctrl_{getItemKey(item)}_Title" 
+                                readonly={title_readonly}/>
         </h4>
     {/if}
 
@@ -600,25 +595,14 @@
     </figcaption>
     -------------------------------->
 
-    {#if summary && (item[summary])}
-        <figcaption id="__or_list_ctrl_{getItemKey(item)}_Summary" use:editable={{
-                    action: (text) => {change_property(summary, text)},
-                    readonly: summary_readonly,
-                    onFinish: (d) => {placeholder='';},
-                    active: true
-                }}>{item[summary]}
-        </figcaption>
-
-    {:else if placeholder=='Summary'}
-        <figcaption id="__or_list_ctrl_{getItemKey(item)}_Summary"
-                    use:editable={{
-                    action: (text) => {change_property(summary, text)},
-                    readonly: summary_readonly,
-                    onFinish: (d) => {placeholder='';},
-                    active: true
-                }}>&nbsp;
+    {#if (summary && (item[summary])) || (placeholder=='Summary')}
+        <figcaption><Editable   self={item} 
+                            a={summary}
+                            id="__or_list_ctrl_{getItemKey(item)}_Summary"
+                            readonly={summary_readonly} />
         </figcaption>
     {/if}
+
 </figure>
 </div>
 

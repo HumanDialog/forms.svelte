@@ -389,12 +389,7 @@
                 <ListSummary a='Summary'/>
                 <!--ListInserter action={addList} icon/-->
 
-                <span slot="left" let:element>
-                    <Icon component={FaList}
-                        class="h-5 w-5  text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
-                </span>
-
-
+            
             </List>
 
             <div class="ml-3 mt-20 mb-10">

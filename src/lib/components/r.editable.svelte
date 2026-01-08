@@ -64,9 +64,7 @@
 				}}
 				on:focus={focus}
 				on:blur={blur}
->
-	{ext(self[a])}
-</span>
+>{ext(self[a])}</span>
 
 <!--style>
 	span:empty:focus::before {

@@ -1001,10 +1001,7 @@ let list_properties = {
                 <ListTitle a='Title' readonly onOpen={onOpen}/>
                 <ListSummary a='Summary' readonly/>
 
-                <span slot="left" let:element>
-                    <Icon component={getElementIcon(element)}
-                        class="text-stone-500 dark:text-stone-400 h-5 w-5  cursor-pointer mt-0.5  ml-2  mr-1"/>
-                </span>
+              
             </List>
         </div>
 

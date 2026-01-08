@@ -613,10 +613,7 @@
                             {selectionKey}
                             bind:this={rows[i]}
                             >
-
-                <span slot="left" let:element>
-                    <slot name="left" {element}/>
-                </span>
+   
             </ListElement>
 
             {#if show_insertion_row_after_element == element}

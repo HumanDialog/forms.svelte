@@ -284,11 +284,6 @@
             <ListSummary a='Summary'/>
             <!--ListInserter action={addChannel} icon/-->
 
-            <span slot="left" let:element>
-                <Icon component={FaRegComment}
-                    class="h-5 w-5  text-stone-500 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
-            </span>
-
         </List>
     </section>
 

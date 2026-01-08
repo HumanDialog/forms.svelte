@@ -11,11 +11,12 @@
 				informModification,
                 pushChanges,
 				startEditing,
-                Ricon} from '$lib'
+                Ricon,
+				focusEditable} from '$lib'
     import {FaRegFileAlt} from 'svelte-icons/fa'
     import Properties from './kanban.props.svelte'
     import {KanbanCardTop, KanbanCardMiddle, KanbanCardBottom} from '../Kanban'
-    //import { Tooltip } from 'flowbite-svelte';
+    import Editable from '../../r.editable.svelte'
 
     export let item: object;
    // export let showMoveOperationsForItem: Function | undefined = undefined;
@@ -152,44 +153,24 @@
     let topProps :any;
     let middleProps :any;
     let bottomProps :any;
-    let titleElement: any;
-    let summaryElement: any;
     let summaryPlaceholder: boolean = false;
     export async function editProperty(field: string)
     {
         if(field == "Title")
         {
-            if(isLinkLike)
-            {
-                startEditing(titleElement);
-            }
-            else
-            {
-                titleElement.focus();
-                await tick();
-                setSelectionAtEnd(titleElement)
-            }
-
+            focusEditable("#__or_kanban_ctrl_Title")
         }
         else if(field == "Summary")
         {
-            if(!!summaryElement)
-            {
-                summaryElement.focus();
-                await tick();
-                setSelectionAtEnd(summaryElement)
-            }
-            else
+            if(!focusEditable("#__or_kanban_ctrl_Summary"))
             {
                 summaryPlaceholder = true;
                 await tick();
-                if(!!summaryElement)
-                    summaryElement.focus();
+                focusEditable("#__or_kanban_ctrl_Summary")
             }
         }
         else
         {
-
             const property = definition.properties.find(p => p.name == field)
             if(!property)
                 return;
@@ -295,23 +276,22 @@
         {@const showIcon = showAttachementIcon()}
             <!-- whitespace-nowrap overflow-clip  -->
             <h4     class = "font-semibold relative"
-                    use:editable={{
-                    action: (text) => onTitleChanged(text),
-                    active: false,
-                    readonly: definition.titleReadOnly,
-                    onFinish: (d) => {titleElement.blur()},
-                    onSoftEnter: async (text) => { onTitleChanged(text); await editProperty('Summary') }
-                    }}
                 use:conditionalClick={{
                     condition: hasOpen,
-                    callback: performOpen}}
-                bind:this={titleElement}>
+                    callback: performOpen}}>
                 {#if isLinkLike}
                     <a class= "font-semibold" href={getHRef()} use:link>
-                        {item[definition.titleAttrib]}
+                        <Editable   self={item} 
+                                    a={definition.titleAttrib} 
+                                    readonly={definition.titleReadOnly}
+                                    focusOnClick={false}
+                                    id="__or_kanban_ctrl_Title"/>
                     </a>
                 {:else}
-                    {item[definition.titleAttrib]}
+                    <Editable   self={item} 
+                                a={definition.titleAttrib} 
+                                readonly={definition.titleReadOnly}
+                                id="__or_kanban_ctrl_Title"/>
                 {/if}
 
 
@@ -344,13 +324,9 @@
     {#if item[definition.summaryAttrib] || summaryPlaceholder}
         {#key item[definition.summaryAttrib]}
             {#if isCardActive}
-                <figcaption use:editable={{
-                                action: (text) => onSummaryChanged(text),
-                                active: true,
-                                readonly: definition.summaryReadOnly,
-                                onFinish: (d) => {summaryPlaceholder = false}}}
-                            bind:this={summaryElement}>
-                    {item[definition.summaryAttrib]}
+                <figcaption><Editable   self={item} 
+                                        a={definition.summaryAttrib} 
+                                        id="__or_kanban_ctrl_Summary"/>
                 </figcaption>
             {:else}
                 <figcaption>

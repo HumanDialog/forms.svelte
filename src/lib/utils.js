@@ -366,8 +366,8 @@ export function editable(node, params)
 
     let observer = null;
     let has_changed = false;
+    let org_text = '';
 
-    const org_text = node.textContent;
     const blur_listener = async (e) =>
     {
         if(currentEditable == node)
@@ -403,13 +403,9 @@ export function editable(node, params)
         {
         case 'Esc':
         case 'Escape':
-            if(!active)
-            {
-                e.stopPropagation();
-                e.preventDefault();
-
-                await finish_editing({ cancel: true });
-            }
+            e.stopPropagation();
+            e.preventDefault();
+            await finish_editing({ cancel: true });
             break;
 
         case 'Enter':
@@ -447,16 +443,17 @@ export function editable(node, params)
         const cancel = params.cancel ?? false;
         const incremental = params.incremental ?? false;
 
-       if(!active)
-       {
-            node.removeEventListener("blur", blur_listener);
-            node.removeEventListener("keydown", key_listener);
-            node.removeEventListener("save", save_listener);
-            node.contentEditable = "false"
+        node.removeEventListener("blur", blur_listener);
+        node.removeEventListener("keydown", key_listener);
+        node.removeEventListener("save", save_listener);
 
-            let sel = window.getSelection();
-            sel.removeAllRanges();
-       }
+       if(!active)
+            node.contentEditable = "false"
+       else
+            node.blur()
+
+        let sel = window.getSelection();
+        sel.removeAllRanges();
 
         if(cancel)
         {
@@ -468,17 +465,11 @@ export function editable(node, params)
         }
         else if(action)
         {
-            if(active)
+            if(has_changed)
             {
-                if(has_changed)
-                {
-                    has_changed = false;
-                    await action(node.textContent)
-                }
-
-            }
-            else
+                has_changed = false;
                 await action(node.textContent)
+            }
         }
 
         const finish_event  = new CustomEvent("finish", {
@@ -505,12 +496,6 @@ export function editable(node, params)
     const edit_listener = async (e) =>
     {
         node.contentEditable = "true"
-        node.addEventListener("blur", blur_listener);
-        node.addEventListener("keydown", key_listener);
-
-        currentEditable = node;
-        node.addEventListener("save", save_listener)
-
         node.focus();
 
         /*await tick();
@@ -543,6 +528,8 @@ export function editable(node, params)
                 onSingleChange(node.textContent)
         });
 
+        org_text = node.textContent;
+
         observer.observe(   node,  {
                                 childList: true,
                                 attributes: true,
@@ -553,28 +540,26 @@ export function editable(node, params)
     node.classList.add("editable")
     node.classList.add("focus:outline-none")
 
+    node.addEventListener('focus', focus_listener);
+    node.addEventListener("edit", edit_listener);
+
+    if(onFinish)
+        node.addEventListener("finish", (e) => { onFinish(e.detail) })
+    
     if(active)
-    {
         node.contentEditable = "true"
-        node.addEventListener('focus', focus_listener);
+    
+    return {
+        destroy() {
 
-        if(onFinish)
-        {
-            node.addEventListener("finish", (e) => { onFinish(e.detail) })
-        }
-    }
-    else
-    {
-        node.addEventListener("edit", edit_listener);
+            node.removeEventListener("edit", edit_listener)
+            node.removeEventListener('focus', focus_listener);
+            if(onFinish)
+                node.removeEventListener("finish", (e) => { onFinish(e.detail) })
 
-        return {
-            destroy() {
-
-                node.removeEventListener("edit", edit_listener)
-                node.classList.remove("editable")
-                node.contentEditable = "false"
-            }};
-    }
+            node.classList.remove("editable")
+            
+        }};
 }
 
 export function startEditing(element, finish_callback)

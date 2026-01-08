@@ -203,7 +203,7 @@ update_request_ticket.subscribe(async (v) => {
                 {
                     modified_items_map.clear();
                     unsavedModificationsTicket.set( get(unsavedModificationsTicket) + 1 )
-                    
+
                     afterPushCallbacks.forEach( cb => cb())
                     afterPushCallbacks = []
                 }
