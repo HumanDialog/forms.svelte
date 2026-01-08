@@ -395,7 +395,7 @@
                     <SidebarItem   {href}
                                     icon='notebook'
                                     active={isRoutingTo(href, currentPath)}
-                                    summary={ext(item.Summary)}>
+                                    >
                         {ext(item.Name)}
                     </SidebarItem>
                 </svelte:fragment>
