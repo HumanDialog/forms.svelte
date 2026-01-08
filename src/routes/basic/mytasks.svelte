@@ -65,7 +65,7 @@
         if(allElementsNo % pageElementsNo)
             allPagesNo += 1
 
-        allPagesNo = 10
+
 
         pageNo = Math.max(0, Math.min(pageNo, allPagesNo-1))
 
@@ -349,7 +349,7 @@
                         ] : [
                             {
                                 caption: '_; Finish; Finalizar; Zakończ',
-                                icon: FaCheck,
+                                mricon: 'check',
                                 action: (f) => finishTask(undefined, task),
                                 fab: 'M03',
                                 tbr: 'A'
@@ -442,20 +442,17 @@
 
 {#if user}
     <Page self={user} toolbarOperations={pageOperations} clearsContext='props sel' title={title}>
+    <Paper>
+        <PaperHeader>
+            <!--Breadcrumb class="mt-1 mb-5" path={canonicalPath}/-->
+        </PaperHeader>
 
-       <Paper>
-            <PaperHeader>
-                <!--Breadcrumb class="mt-1 mb-5" path={canconicalPath}/-->
-            </PaperHeader>
-
-
+        <figure>
         <h1>{title}</h1>
+        <figcaption>{i18n(["All my tasks", "@@All my tasks", "Moje wszystkie zadania"])}</figcaption>
+        </figure>
 
-        <div class="flex flex-row justify-between">
-            <span></span>
-            <span class="text-center"></span>
-            <span class="pr-5 text-right"> <Paginator {onPage} {pageNo} {allPagesNo} bind:this={paginatorTop}/></span>
-        </div>
+
 
 
         <List   self={user}
@@ -468,11 +465,13 @@
 
         </List>
 
-        <div class="flex sm:hidden flex-row mt-10 mb-20">
-            <section class="ml-auto mr-2">
-                <Paginator {onPage} {pageNo} {allPagesNo} bind:this={paginatorBtt}/>
-            </section>
+        <div class="flex flex-row justify-between">
+            <span></span>
+            <span class="text-center"><Paginator {onPage} {pageNo} {allPagesNo} bind:this={paginatorTop}/></span>
+            <span class="pr-5 text-right"> </span>
         </div>
+
+
 
        </Paper>
 

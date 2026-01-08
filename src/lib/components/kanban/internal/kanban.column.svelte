@@ -357,7 +357,15 @@
         on:click={activate}
         on:dblclick={dblclick}>
     <figure bind:this={headerElement}>
-        <figcaption class = "text-right">S304</figcaption>
+        <figcaption class = "text-right">
+            <div class="w-full flex flex-row justify-between">
+                <span></span>
+                <span></span>
+                <div class="flex flex-row text-orange-800 dark:text-orange-200"><span><Icon icon="barcode" s/></span><span>4.32</span></div>
+
+            </div>
+        </figcaption>
+
         <h3 class=" text-center whitespace-nowrap relative">
             <span
                 use:editable={{
@@ -373,8 +381,8 @@
                     <Icon icon="check" s/>
                 </div>
             {/if}
-            
-            
+
+
 
             <!--button class="absolute right-2 w-4 sm:w-2.5"
                     on:click|stopPropagation={(e) => add(KanbanColumnTop)}>

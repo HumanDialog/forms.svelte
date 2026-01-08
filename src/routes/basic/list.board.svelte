@@ -172,7 +172,7 @@
                                     {
                                         Id: 1,
                                         Association: '',
-                                        Expressions:['$ref','Id','Name', 'Kind', 'GetTaskStates','href', 'GetCanonicalPath', '$type', 'IsSubscribed'],
+                                        Expressions:['$ref','Id','Name', 'Summary', 'Kind', 'GetTaskStates','href', 'GetCanonicalPath', '$type', 'IsSubscribed'],
                                         SubTree:
                                         [
                                             {
@@ -662,7 +662,7 @@
                         ... (task.State == STATE_FINISHED) ? [] : [
                                 {
                                     caption: '_; Finish; Finalizar; Zakończ',
-                                    //icon: FaCheck,
+                                    //mricon: 'check',
                                     action: (f) => finishTask(task),
                                     //fab: 'S20',
                                     //tbr: 'A', hideToolbarCaption: true
@@ -1186,7 +1186,9 @@
         <!--/section-->
 
 		<Kanban class="grow-0"
-                title={ext(currentList.Name)}
+                self = {currentList}
+                title = 'Name'
+                summary = 'Summary'
                 bind:this={kanban}>
 
             <KanbanSource self={currentList}

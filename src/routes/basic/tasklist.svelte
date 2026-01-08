@@ -3,6 +3,7 @@
     import {    Spinner,
                 Page,
                 Icon,
+                Editable,
                 ComboSource,
                 List,
                 ListTitle,
@@ -13,7 +14,7 @@
 				mainContentPageReloader,
                 Modal,
                 onErrorShowAlert, showMenu,
-				UI, i18n, Breadcrumb, showFloatingToolbar, Paper,
+				UI, i18n, Breadcrumb, showFloatingToolbar, Paper, PaperHeader,
 				ext, refreshToolbarOperations
             } from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaList,
@@ -152,7 +153,7 @@
                                     {
                                         Id: 1,
                                         Association: '',
-                                        Expressions:['Id','Name', 'href', 'GetCanonicalPath', 'IsSubscribed'],
+                                        Expressions:['Id','Name', 'Summary', 'href', 'GetCanonicalPath', 'IsSubscribed', '$type'],
                                         SubTree:
                                         [
                                             {
@@ -160,6 +161,7 @@
                                                 Association: assocName,
                                                 Filter: assocFilter,
                                                 Sort: 'ListOrder',
+                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'ListOrder', 'State', 'href', 'icon',  'icon', '$type'],
                                                 SubTree:[
                                                     {
                                                         Id: 3,
@@ -516,7 +518,7 @@
                         ] : [
                             {
                                 caption: '_; Finish; Finalizar; Zakończ',
-                                icon: FaCheck,
+                                mricon: 'check',
                                 action: (f) => finishTask(undefined, task),
                                 disabled: task.State == STATE_FINISHED
                                 fab: 'M03',
@@ -525,7 +527,7 @@
                         ], */
                          {
                             caption: '_; Finish; Finalizar; Zakończ',
-                            icon: FaCheck,
+                            mricon: 'check',
                             action: (f) => finishTask(undefined, task),
                             disabled: task.State == STATE_FINISHED,
                             fab: 'M03',
@@ -749,27 +751,36 @@
 {#if currentList}
     {#key listPath + isArchivedTasks} <!-- to force new page operations -->
     <Page   self={currentList}
-            toolbarOperations={ getPageOperations() }
-            clearsContext='props sel'
-            title={listTitle}>
+        toolbarOperations={ getPageOperations() }
+        clearsContext='props sel'
+        title={listTitle}>
 
-            <Paper class="mb-64">
+        <Paper>
 
-            <section class="w-full place-self-center max-w-3xl">
+        <PaperHeader>
+        <Breadcrumb  path = {currentList.GetCanonicalPath}/>
+        </PaperHeader>
 
-                {#if currentList.GetCanonicalPath}
-                    <Breadcrumb class="mt-1 mb-5" path={currentList.GetCanonicalPath}/>
-                {/if}
+        <!--div class="w-full flex flex-row justify-between">
+            <span>Index 23</span>
+        </div-->
+
+
+        <h1><Editable self={currentList} a='Name'/></h1>
+
+        {#if currentList.Summary}
+        <p class="lead"> <Editable self={currentList} a='Summary'/></p>
+        {/if}
+
 
         <List   self={currentList}
                 a={assocName}
                 {list_properties}
-                title={listTitle}
+
                 toolbarOperations={taskOperations}
                 orderAttrib='ListOrder'
                 bind:this={listComponent}>
-            <ListTitle a='Title' hrefFunc={(task) => `/task/${task.Id}`}/>
-            <ListSummary a='Summary'/>
+
             <ListInserter action={addTask} icon/>
 
             <ListComboProperty  name="Actor" association hasNone>
@@ -778,18 +789,6 @@
 
             <ListDateProperty name="DueDate"/>
 
-            <span slot="left" let:element>
-                {#if element.State == STATE_FINISHED}
-                    <Icon component={FaRegCalendarCheck}
-                    class="h-5 w-5  text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
-
-                {:else}
-                    <Icon component={FaRegCalendar}
-                        on:click={(e) => finishTask(e, element)}
-                        class="h-5 w-5  text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
-
-                {/if}
-            </span>
 
 
         </List>
@@ -814,7 +813,7 @@
 
             </div>
         {/if}
-        </section>
+
         </Paper>
     </Page>
     {/key}

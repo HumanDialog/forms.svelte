@@ -187,6 +187,7 @@
                     options.push({
                         caption: i18n( { en: 'Sign in', es: 'Iniciar sesión', pl: 'Zaloguj'}),
                         icon: FaSignInAlt,
+                        mricon: 'log-in',
                         action: (focused) => { push(sign_in_href) }
                     });
                 }
@@ -195,6 +196,7 @@
                     options.push({
                         caption: i18n({en: 'Sign out', es: 'Cerrar sesión', pl: 'Wyloguj' }) ,
                         icon: FaSignOutAlt,
+                        mricon: 'log-out',
                         action: (focused) => { push(sign_out_href) }
                     });
                 }
@@ -211,6 +213,7 @@
                 options.push( {
                         caption: capt,
                         icon: FaToggleOff,
+                        mricon: 'sun-moon',
                         action: (focused) => { $dark_mode_store = 'dark'; }
                     });
             }
@@ -219,6 +222,7 @@
                 options.push( {
                         caption: capt,
                         icon: FaToggleOn,
+                        mricon: 'sun-moon',
                         action: (focused) => { $dark_mode_store = ''; }
                     });
             }
@@ -237,6 +241,7 @@
             options.push( {
                 caption: i18n({en: 'Language', es:'Idioma', pl:'Język'}),
                 menu: langMenu,
+                mricon: 'languages',
                 icon: FaLanguage
             })
         }

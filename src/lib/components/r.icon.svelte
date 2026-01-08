@@ -46,6 +46,7 @@
   import Calendar from './ricons/calendar.svelte'
   import Calendars from './ricons/calendars.svelte'
   import Notebook from './ricons/notebook.svelte'
+  import NotebookTabs from './ricons/notebook-tabs.svelte'
   import Square from './ricons/square.svelte'
   import ArrowUp from './ricons/arrow-up.svelte'
   import CheckCheck from './ricons/check-check.svelte'
@@ -71,6 +72,11 @@
   import Tag from './ricons/tag.svelte'
   import Minus from './ricons/minus.svelte'
   import Save from './ricons/save.svelte'
+  import LogIn from './ricons/log-in.svelte'
+  import LogOut from './ricons/log-out.svelte'
+  import SunMoon from './ricons/sun-moon.svelte'
+  import Languages from './ricons/languages.svelte'
+  import Barcode from './ricons/barcode.svelte'
 
   import Heading1 from './ricons/heading-1.svelte'
   import Heading2 from './ricons/heading-2.svelte'
@@ -82,8 +88,8 @@
   import ListChecks from './ricons/list-checks.svelte'
   import ListPlus from './ricons/list-plus.svelte'
   import ListMinus from './ricons/list-minus.svelte'
- 
-  import LoaderCircle from './ricons/loader-circle.svelte' 
+
+  import LoaderCircle from './ricons/loader-circle.svelte'
   import Check from './ricons/check.svelte'
 
   let ricons_box = {
@@ -127,6 +133,7 @@
     "calendar": Calendar,
     "calendars": Calendars,
     "notebook": Notebook,
+    "notebook-tabs": NotebookTabs,
     "square": Square,
     "x":  X,
 
@@ -146,6 +153,11 @@
     'text-quote': TextQuote,
 
     'save': Save,
+    'log-in': LogIn,
+    'log-out': LogOut,
+    'sun-moon': SunMoon,
+    'languages': Languages,
+    'barcode': Barcode,
 
     'heading-1': Heading1,
     'heading-2': Heading2,

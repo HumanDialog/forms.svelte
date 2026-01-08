@@ -331,12 +331,16 @@
 
                 <Paper class="mb-64">
 
-                <PaperHeader>
+        <PaperHeader>
             <!--Breadcrumb class="mt-1 mb-5" path={canonicalPath}/-->
         </PaperHeader>
 
+        <figure>
         <h1>{title}</h1>
-        <span>&nbsp</span>
+        <figcaption>{i18n(["Private task list visible only to me", "Lista de tareas privada visible solo para mí", "Prywatne list zadań widoczne jedynie dla mnie"])}</figcaption>
+        </figure>
+
+
 
             <List   self={user}
                     a='MyLists'

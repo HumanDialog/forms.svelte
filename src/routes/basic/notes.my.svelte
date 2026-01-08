@@ -147,15 +147,7 @@
         tbr: 'D',
         operations: [{
             caption: '_; View; Ver; Widok',
-            operations: [{
-                icon: FaList,
-                caption: '_; New list; Nueva lista; Nowa lista',
-                action: (focused) => {
-                    listComponent.addRowAfter(null)
-                },
-                fab: 'M01',
-                tbr: 'A'
-            }]
+            operations: []
         }]
     }
     let listOperations = (list) => {
@@ -286,17 +278,17 @@
                 title={title}
                 >
             <Paper >
-                <PaperHeader>
-                    <!--Breadcrumb class="mt-1 mb-5" path={canonicalPath}/-->
-                </PaperHeader>
 
-                <h1>{title}</h1>
+            <PaperHeader>
+                <!--Breadcrumb class="mt-1 mb-5" path={canonicalPath}/-->
+            </PaperHeader>
 
-                <div class="flex flex-row justify-between">
-                    <span></span>
-                    <span class="text-center"></span>
-                    <span class="pr-5 text-right"> <Paginator {onPage} {pageNo} {allPagesNo} bind:this={paginatorTop}/></span>
-                </div>
+            <figure>
+            <h1>{title}</h1>
+            <figcaption>{i18n(["Recently edited notes", "Notas editadas recientemente", "Ostatnio edytowane notatki"])}</figcaption>
+            </figure>
+
+
 
             <List   self={user}
                     a='ModifiedNotes'
@@ -316,6 +308,12 @@
 
 
             </List>
+
+            <div class="flex flex-row justify-between">
+                <span></span>
+                <span class="text-center"><Paginator {onPage} {pageNo} {allPagesNo} bind:this={paginatorTop}/></span>
+                <span class="pr-5 text-right"> </span>
+            </div>
 
             <div class="flex sm:hidden flex-row mt-10 mb-20">
                 <section class="ml-auto mr-2">

@@ -384,7 +384,7 @@
                 on:click={handleSelect}
                 on:contextmenu={handleSelect}>
 
-            <div class="desk-root bg-stone-200 dark:bg-red-500 sm:dark:bg-stone-950 dark:text-white  overflow-x-clip
+            <div class="desk-root bg-white sm:bg-stone-200 dark:bg-stone-900  sm:dark:bg-stone-950 dark:text-white  overflow-x-clip
                         sm:overflow-y-clip  min-h-screen sm:h-screen">
                 <!--###########################################################-->
                 <!--##  HORIZONTAL TOP TITLE TOOLBAR (FOR PHONES)  ############-->

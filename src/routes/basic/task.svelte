@@ -349,7 +349,7 @@
             checkOperation =
                 {
                     caption: '_; Done; Hecho; Zrobione',
-                    icon: FaCheck,
+                    mricon: 'check',
                     action: async (f) =>
                     {
                         await setStepDone( true, step)
@@ -621,7 +621,7 @@
         },
         {
             caption: '_; Step; Paso; Krok',
-        //    icon: FaCheck,
+        //    mricon: 'check',
             action: async (f) =>
                 {
                     if(steps)

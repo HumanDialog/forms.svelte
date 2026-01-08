@@ -2,13 +2,13 @@
   import {editable, makeEditableIdFromFieldName} from '../utils'
   import {setjItemProperty} from '../updates.js'
 	import { afterUpdate } from 'svelte';
-  
+
   export let self
   export let a
   export let id = undefined
 	export let readonly = false
 	export let focusOnClick = true
-  
+
   //https://developer.chrome.com/docs/web-platform/page-lifecycle-api#the-unload-event
   //https://developer.mozilla.org/en-US/docs/Web/API/Document/visibilitychange_event
 
@@ -21,6 +21,10 @@
 
 	const zeroWidthSpace = '\u200B'
 
+	//if(!self[a])
+	//		self[a] = "."
+
+
 	function onChange(text)
 	{
 		if(text.startsWith(zeroWidthSpace))
@@ -28,7 +32,7 @@
 
 		if(text.endsWith(zeroWidthSpace))
 			text = text.substring(0, text.length-1)
-		
+
 		text.trim()
 
 		setjItemProperty(self, a, text)
@@ -45,7 +49,7 @@
 
 	}
 
-	
+
 
 </script>
 

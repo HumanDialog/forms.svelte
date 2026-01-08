@@ -9,7 +9,7 @@
                 max-w-3xl
                 sm:min-h-[32rem]
 
-                mx-0 mb-64 px-3 pt-2 pb-32
+                mx-0 mb-64 px-3 pt-2 pb-10
                 sm:mt-4 sm:px-10
 
                 md:px-16 md:mx-auto

@@ -443,21 +443,18 @@
                 </SidebarGroup>
             {/if}
 
-            <SidebarGroup border>
+            <SidebarGroup title={i18n({en: 'Personal', es: 'Personales', pl: 'Osobiste'})}>
                 <SidebarItem   href="/mynotes"
                                 icon = 'file-text'
                                 active={isRoutingTo("/mynotes", currentPath)}
-                                summary={i18n(["Recently edited notes", "Notas editadas recientemente", "Ostatnio edytowane notatki"])}
+
                                 selectable={mynotes_selection}>
                     _; My notes; Mis notas; Moje notatki
                 </SidebarItem>
-            </SidebarGroup>
-
-            <SidebarGroup title={i18n({en: 'Personal', es: 'Personales', pl: 'Osobiste'})}>
                 <SidebarItem   href="/myfolders"
                                 icon = 'folder'
                                 active={isRoutingTo("/myfolders", currentPath)}
-                                summary={i18n(["Personal folders", "Carpetas personales", "Foldery osobiste"])}>
+                                >
                     _; My Folders; Mis carpetas; Moje Foldery
                 </SidebarItem>
             </SidebarGroup>
@@ -475,7 +472,7 @@
                                     icon = {item.icon}
                                     bind:this={navGroupItems[idx]}
                                     active={isRoutingTo(href, currentPath)}
-                                    summary={ext(item.Summary)}>
+                                    >
                         {ext(item.Title)}
                     </SidebarItem>
                 </svelte:fragment>

@@ -658,7 +658,7 @@
                         ... (task.State == STATE_FINISHED) ? [] : [
                                 {
                                     caption: '_; Finish; Finalizar; Zakończ',
-                                    //icon: FaCheck,
+                                    //mricon: 'check',
                                     action: (f) => finishTask(task),
                                     //fab: 'S20',
                                     //tbr: 'A', hideToolbarCaption: true

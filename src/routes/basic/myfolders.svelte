@@ -315,8 +315,10 @@
             <!--Breadcrumb class="mt-1 mb-5" path={canonicalPath}/-->
         </PaperHeader>
 
+        <figure>
         <h1>{title}</h1>
-        <span>&nbsp</span>
+        <figcaption>{i18n(["Personal folders", "Carpetas personales", "Foldery osobiste"])}</figcaption>
+        </figure>
 
         <!--div class="flex flex-row justify-between">
             <span></span>

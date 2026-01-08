@@ -4,6 +4,7 @@
                 Page,
                 Icon,
                 ComboSource,
+                Editable,
                 List,
                 ListTitle,
                 ListSummary,
@@ -1495,19 +1496,29 @@
             <Breadcrumb  path = {contextItem.GetCanonicalPath}/>
             </PaperHeader>
 
-            <div class="w-full flex flex-row justify-between">
+            <!--div class="w-full flex flex-row justify-between">
                 <span>Index 23</span>
-            </div>
+                summary=
+            </div-->
 
+            {#if true}
+                <h1><Editable self={contextItem} a='Title'/></h1>
 
-            <h1 >
-                {folderTitle}
-            </h1>
-            {#if contextItem.Summary}
-            <p class="lead">
-                {contextItem.Summary}
-            </p>
+                    <p class="lead">
+                        <Editable self={contextItem} a='Summary'/>
+                    </p>
+
+            {:else}
+                <h1>
+                    {ext(contextItem.Title)}
+                </h1>
+                {#if contextItem.Summary}
+                    <p class="lead">
+                        {ext(contextItem.Summary)}
+                    </p>
+                {/if}
             {/if}
+
 
             <List    self={contextItem}
                     a='allElements'

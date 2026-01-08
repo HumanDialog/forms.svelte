@@ -339,12 +339,15 @@
                 title={title}>
             <Paper class="mb-64">
 
-        <PaperHeader>
-            <!--Breadcrumb class="mt-1 mb-5" path={canonicalPath}/-->
-        </PaperHeader>
+            <PaperHeader>
+                <!--Breadcrumb class="mt-1 mb-5" path={canonicalPath}/-->
+            </PaperHeader>
 
-        <h1>{title}</h1>
-        <span>&nbsp</span>
+            <figure>
+            <h1>{title}</h1>
+            <figcaption>{i18n(["Task lists visible to all group members.", "Listas de tareas visibles para todos los miembros del grupo.", "Listy zadań widoczne dla wszystkich członków grupy."])}</figcaption>
+            </figure>
+
             <List   self={group}
                     a='Lists'
                     {list_properties}

@@ -5,8 +5,10 @@
     import {contextItemsStore, contextTypesStore, data_tick_store } from '../../stores'
     import KanbanColumn from './internal/kanban.column.svelte'
 	import { informModification, pushChanges } from '$lib/updates';
-
+    import {Editable} from '$lib'
+    export let self                 = null;
     export let title:               string = ''
+    export let summary:             string = ''
     export let c = '';
 
     // reload selection parameter
@@ -638,10 +640,12 @@
 {#key renderToken}
 <slot/> <!-- Launch definition settings -->
 
-{#if title}
-    <h1 class="px-4">{title}</h1>
+    <figure class="px-4">
+    <h1><Editable self={self} a={title}/></h1>
+    <figcaption><Editable self={self} a={summary}/></figcaption>
+    </figure>
+
     <!--hr class="hidden sm:block w-full"-->
-{/if}
 
 <section    id="__hd_svelte_kanban_columns_container"
             class="h-full flex flex-row no-wrap

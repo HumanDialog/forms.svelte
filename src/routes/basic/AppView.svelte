@@ -309,6 +309,7 @@
                         {
                         //    caption: '_; Members; Miembros; Członkowie',
                             captionFunc: () => '_; Members; Miembros; Członkowie',
+                            mricon: 'users',
                             icon: FaUsersCog,
                             action: (f) => { push(`/members`) },
                             condition: () => $session.authAccessGroup() != 0
