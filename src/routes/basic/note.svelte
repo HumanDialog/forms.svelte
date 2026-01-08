@@ -410,7 +410,7 @@
                 })
 
 
-            operations.push(
+        /*    operations.push(
                 {
                     caption: '_; Save; Guardar; Zapisz',
                     hideToolbarCaption: true,
@@ -420,6 +420,7 @@
                     tbr: 'C',
                     //disabledFunc: () => !hasModifications()
                 })
+                    */
         }
 
         if(operations.length > 0)
@@ -780,7 +781,7 @@
                                 }
                             ]
                         },
-                        {
+                    /*    {
                             caption: '_; Save; Guardar; Zapisz',
                             hideToolbarCaption: true,
                             mricon: 'save',
@@ -788,7 +789,7 @@
                        //     fab: 'S00',
                             tbr: 'C',
                             disabledFunc: () => !hasModifications()
-                        },
+                        }, */
                     ]
                 }
             ]
@@ -798,12 +799,12 @@
     const extraPaletteCommands = []
 
     const extraPaletteCommandsExt = [
-        {
+     /*   {
             caption: '_; Save; Guardar; Zapisz',
             mricon: 'save',
             action: () => description?.save(),
         }
-
+        */
     ]
     const extraInsertPalletteCommands = [
         {

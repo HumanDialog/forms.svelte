@@ -290,12 +290,12 @@
 
                         },
                         ... !isReadOnly ? [
-                            {
+                        /*    {
                                 mricon: 'save',
                                 action: (f) => pushChanges(),
                                 tbr: 'A',
                                 fab: 'M03'
-                            },
+                            }, */
                             {
                                 mricon: 'pencil',
                                 grid: addOperations,
@@ -346,12 +346,12 @@
                     caption: '_; Thread; Hilo; Wątek',
                     preAction: questionElement.preventBlur,
                     operations: [
-                        {
+                    /*    {
                             caption: "_; Save; Guardar; Zapisz",
                             mricon: 'save',
                             action: (f) => { questionElement?.save() },
                             tbr: 'A'
-                        }
+                        } */
                     ]
                 },
                 {

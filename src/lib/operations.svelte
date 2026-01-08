@@ -3,10 +3,12 @@
     import {contextToolbarOperations, pageToolbarOperations, contextItemsStore} from './stores.js'
     import Ricon from './components/r.icon.svelte'
     import {FaEllipsisV} from 'svelte-icons/fa'
+	import { i18n } from './i18n.js';
+    import {pushChanges, hasModifications, unsavedModificationsTicket} from './updates.js'
 
     export let mobile :boolean = false
 
-    $: update($pageToolbarOperations, $contextToolbarOperations);
+    $: update($pageToolbarOperations, $contextToolbarOperations, $unsavedModificationsTicket);
 
     let operations = [];
     let leftOperations = []
@@ -67,6 +69,16 @@
         else if(opVer == 2)
         {
 
+            const saveOperation = {
+                    caption: i18n({en: 'Save', es: 'Guardar', pl: 'Zapisz'}),
+                    hideToolbarCaption: true,
+                    mricon: 'save',
+                    action: (f) => pushChanges(),
+                    //fab: 'T02',
+                    tbr: operationsRoot.tbr,
+                    disabledFunc: () => !hasModifications()
+                }
+
             if(operationsRoot && operationsRoot.tbr)
             {
                 let allFlatOperations = []
@@ -79,6 +91,9 @@
                     ]
                 )
 
+                allFlatOperations.push({separator: true})
+                allFlatOperations.push(saveOperation)
+
                 const allOperationsMenu = {
                     caption: operationsRoot.caption ?? '',
                     icon: operationsRoot.icon ?? FaEllipsisV,
@@ -89,22 +104,27 @@
                     disabled: operationsRoot.disabled
                 }
 
+                const toolbarSave = {...saveOperation}
+                if(toolbarSave.hideToolbarCaption)
+                    toolbarSave.caption = ''
+                const systemOperations = [allOperationsMenu, toolbarSave]
+
                 switch(operationsRoot.tbr)
                 {
                 case 'A':
-                    AOperations.push(allOperationsMenu)
+                    AOperations.push(...systemOperations)
                     break;
 
                 case 'B':
-                    BOperations.push(allOperationsMenu)
+                    BOperations.push(...systemOperations)
                     break;
 
                 case 'C':
-                    COperations.push(allOperationsMenu)
+                    COperations.push(...systemOperations)
                     break;
 
                 case 'D':
-                    DOperations.push(allOperationsMenu)
+                    DOperations.push(...systemOperations)
                     break;
                 }
             }

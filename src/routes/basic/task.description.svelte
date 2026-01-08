@@ -810,7 +810,7 @@
                                 }
                             ]
                         }*/,
-                        {
+                   /*     {
                             caption: '_; Save; Guardar; Zapisz',
                             hideToolbarCaption: true,
                             mricon: 'save',
@@ -818,7 +818,7 @@
                        //     fab: 'S00',
                             tbr: 'C',
                             disabledFunc: () => !hasModifications()
-                        },
+                        }, */
                     ]
                 }
             ]
