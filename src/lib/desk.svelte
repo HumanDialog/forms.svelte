@@ -79,29 +79,19 @@
 
     $: { visible_sidebar = $main_sidebar_visible_store
         const navMode = navGetMode()
-        if(navMode == NAV_MODE_SIDEBAR)
-        {
-            if(visible_sidebar == "*")
-            {
-                main_side_panel_visibility = "hidden"
-                lg_content_area_horizontal_dim = ""
-                lg_content_area_horizontal_tools_dim = `sm:left-[50px] sm:w-[calc(100vw-60px)]`
-            }
-            else
-            {
-                main_side_panel_visibility = "fixed lg:block"
-                lg_content_area_horizontal_dim = `lg:left-[360px] lg:w-[calc(100vw-360px)]`
-                lg_content_area_horizontal_tools_dim = `sm:left-[50px] sm:w-[calc(100vw-60px)] lg:left-[368px] lg:w-[calc(100vw-376px)]`
-            }
-        }
-        else
+        if(visible_sidebar == "*")
         {
             main_side_panel_visibility = "hidden"
             lg_content_area_horizontal_dim = ""
+            lg_content_area_horizontal_tools_dim = `sm:left-[50px] sm:w-[calc(100vw-60px)]`
         }
-
-        //console.log('main_side_panel_visibility', main_side_panel_visibility)
-    }
+        else
+        {
+            main_side_panel_visibility = "fixed block"
+            lg_content_area_horizontal_dim = `lg:left-[360px] lg:w-[calc(100vw-360px)]`
+            lg_content_area_horizontal_tools_dim = `sm:left-[50px] sm:w-[calc(100vw-60px)] lg:left-[368px] lg:w-[calc(100vw-376px)]`
+        }
+        }
 
     let tools_visibility = "hidden"
     let tools_visible = false
@@ -399,15 +389,25 @@
 
 
                 <!--#######################################################-->
-                <!--##  VERTICAL TOOLBAR                 ##################-->
+                <!--##  VERTICAL DESKTOP MAIN TOOLBAR    ##################-->
                 <!--#######################################################-->
-                <div  class="hidden sm:block fixed left-0 top-[50px] sm:top-0 w-[40px] h-screen z-20 inset-0   overflow-hidden">
+                <div    class="hidden sm:block
+                        fixed left-0 top-0 w-[40px] h-screen z-20
+                        inset-0   overflow-hidden">
+
                     <div class="sticky top-0 flex h-full w-12 sm:w-10 bg-stone-800 dark:bg-stone-950 flex-col items-center text-stone-100 shadow">
                         <VerticalToolbar appConfig={layout} mobile={false}/>
                     </div>
                 </div>
+                <!--#######################################################-->
+                <!--##  VERTICAL MOBILE MAIN TOOLBAR     ##################-->
+                <!--#######################################################-->
 
-                <header class="block sm:hidden  fixed w-screen bottom-0 h-[50px] sm:h-[40px] z-20 shadow  shadow-stone-900/5 dark:shadow-none     overflow-auto" >
+                <header class=" mobile-main-toolbar block sm:hidden
+                                fixed w-screen bottom-0 h-[50px] z-20
+                                shadow  shadow-stone-900/5 dark:shadow-none
+                                overflow-auto" >
+
                     <div class="    flex flex-row justify-between  h-full
                                     text-stone-500 bg-stone-200/70 hover:bg-stone-200
                                     dark:text-orange-200 dark:bg-stone-700/70 dark:hover:bg-stone-700
@@ -426,15 +426,16 @@
                 {@const sidebar_small_width = $sidebar_left_pos==0 ? "w-full" : "w-[calc(100vw-50px)]"}
 
                 <div  class="main-side-bar {main_side_panel_visibility}
-                                left-0 top-0 sm:left-[40px]
-                                top-0
-                                w-full sm:w-[320px]
-                                h-[calc(100vh-50px)] sm:h-full {lg_main_sidebar_height}
 
-                                z-20 overflow-x-hidden
+                                left-0 bottom-[50px]
+                                sm:left-[40px] sm:top-0
+                                w-full sm:w-[320px]
+                                h-[calc(100vh-100px)] sm:h-full
+
+                                z-30 overflow-x-hidden
 
                                 bg-stone-50 dark:bg-stone-900
-                                sm:border-r border-stone-300 dark:border-stone-300/50
+                                border-2 sm:border-r border-stone-300 dark:border-stone-300/50
                                 sm:shadow-lg sm:shadow-stone-500
                                 sm:dark:shadow-black">
 

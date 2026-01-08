@@ -640,7 +640,7 @@
 {#key renderToken}
 <slot/> <!-- Launch definition settings -->
 
-    <figure class="px-4">
+    <figure class="px-0 sm:px-4">
     <h1><Editable self={self} a={title}/></h1>
     <figcaption><Editable self={self} a={summary}/></figcaption>
     </figure>
