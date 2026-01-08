@@ -203,7 +203,8 @@
             {
                 onAttach: (clipboard, elements) => makeLinkToElement(elements),
                 //onAttachAndClear: (clipboard, elements) => makeLinkToElement(elements),
-                clipboardElements: clipboardElements
+                clipboardElements: clipboardElements,
+                ownCloseButton: true
             }
         )
     }
@@ -224,7 +225,8 @@
         showFloatingToolbar(aroundRect, BasketPreview, {
             onAttach: (clipboard, elements) => makeLinkToElement(elements),
             clipboardElements: clipboardElements,
-            browserBasedClipboard: true
+            browserBasedClipboard: true,
+            ownCloseButton: true
         })
     }
 

@@ -464,12 +464,14 @@
     async function runPasteBasket4Task(btt, aroundRect)
     {
         const clipboardElements = await fetchComposedClipboard4Task()
+        
 
         showFloatingToolbar(aroundRect, BasketPreview,
             {
                 destinationContainer: taskRef,
                 onRefreshView: async (f) => await reloadWithAttachements(),
-                clipboardElements: clipboardElements
+                clipboardElements: clipboardElements,
+                ownCloseButton: true
             }
         )
     }
@@ -490,11 +492,13 @@
     async function runPasteBrowserRecent4Task(btt, aroundRect)
     {
         const clipboardElements = getBrowserRecentElements()
+        
         showFloatingToolbar(aroundRect, BasketPreview, {
             destinationContainer: taskRef,
             onRefreshView: async (f) => await reloadWithAttachements(),
             clipboardElements: clipboardElements,
-            browserBasedClipboard: true
+            browserBasedClipboard: true,
+            ownCloseButton: true
         })
     }
 
@@ -1052,7 +1056,8 @@
             {
                 onAttach: (clipboard, elements) => makeLinkToElement(elements),
                 //onAttachAndClear: (clipboard, elements) => makeLinkToElement(elements),
-                clipboardElements: clipboardElements
+                clipboardElements: clipboardElements,
+                ownCloseButton: true
             }
         )
     }
@@ -1073,7 +1078,8 @@
         showFloatingToolbar(aroundRect, BasketPreview, {
             onAttach: (clipboard, elements) => makeLinkToElement(elements),
             clipboardElements: clipboardElements,
-            browserBasedClipboard: true
+            browserBasedClipboard: true,
+            ownCloseButton: true
         })
     }
 
@@ -1944,7 +1950,7 @@
             },
             TaskFile:
             {
-                icon: '#package',
+                icon: '#file-archive',
                 downloadable: true,
                 onOpen: async (f) => await downloadFileFromHRef(f.href, f.Title)
             }

@@ -56,7 +56,7 @@
             icon = item[iicon];
 
         if(!icon)
-            icon = 'package'
+            icon = 'file-archive'
     }
 
     function calculateSummary(...args)

@@ -835,7 +835,8 @@
         showFloatingToolbar(aroundRect, BasketPreview, {
             destinationContainer: listPath,
             onRefreshView: (f) => reload(kanban.KEEP_SELECTION),
-            clipboardElements: clipboardElements
+            clipboardElements: clipboardElements,
+            ownCloseButton: true
         })
     }
 
@@ -846,7 +847,8 @@
             destinationContainer: listPath,
             onRefreshView: (f) => reload(kanban.KEEP_SELECTION),
             clipboardElements: clipboardElements,
-            browserBasedClipboard: true
+            browserBasedClipboard: true,
+            ownCloseButton: true
         })
     }
 

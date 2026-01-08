@@ -96,7 +96,7 @@
        noteId = id
 
        if(note)
-            pushBrowserRecentElements( note.Id, note.$type, note.$ref, note.Title, note.Summary, "Note", note.href)
+            pushBrowserRecentElements( note.Id, note.$type, note.$ref, note.Title, note.Summary, "file-text", note.href)
     }
 
     async function reloadData()
@@ -491,7 +491,8 @@
             {
                 destinationContainer: noteRef,
                 onRefreshView: async (f) => await reloadWithAttachements(),
-                clipboardElements: clipboardElements
+                clipboardElements: clipboardElements,
+                ownCloseButton: true
             }
         )
     }
@@ -516,7 +517,8 @@
             destinationContainer: noteRef,
             onRefreshView: async (f) => await reloadWithAttachements(),
             clipboardElements: clipboardElements,
-            browserBasedClipboard: true
+            browserBasedClipboard: true,
+            ownCloseButton: true
         })
     }
 
@@ -858,7 +860,8 @@
             {
                 onAttach: (clipboard, elements) => makeLinkToElement(elements),
                 //onAttachAndClear: (clipboard, elements) => makeLinkToElement(elements),
-                clipboardElements: clipboardElements
+                clipboardElements: clipboardElements,
+                ownCloseButton: true
             }
         )
     }
@@ -879,7 +882,8 @@
         showFloatingToolbar(aroundRect, BasketPreview, {
             onAttach: (clipboard, elements) => makeLinkToElement(elements),
             clipboardElements: clipboardElements,
-            browserBasedClipboard: true
+            browserBasedClipboard: true,
+            ownCloseButton: true
         })
     }
 
@@ -1687,7 +1691,7 @@
                 icon:'#file-text'
             },
             NoteFile:{
-                icon:'#package',
+                icon:'#file-archive',
                 downloadable: true,
                 onOpen: async (f) => await downloadFileFromHRef(f.href, f.Title)
             }
