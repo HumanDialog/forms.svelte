@@ -1,9 +1,9 @@
 <script>
     import {reef,  AuthorizedView} from '@humandialog/auth.svelte'
-	
+
     import Router from 'svelte-spa-router'
     import {wrap} from 'svelte-spa-router/wrap'
-    
+
     import Cookies from './cookies.svelte';
     import Main from './main.svelte'
     import NotFound from './landing/not.found.svelte'
@@ -13,8 +13,8 @@
 
     import { GoogleAnalytics } from '@beyonk/svelte-google-analytics'
     import {cookies_allow_analytics} from './landing/cookie.preferences'
-    
-    
+
+
 	const mode = __APP_MODE__
     const objectreef_io = __OBJECTREEF_IO__
     const appId = __APP_ID__
@@ -68,7 +68,7 @@
     const routes = new Map()
     routes.set('/',                     Main)
     routes.set('/contact',              wrap({ asyncComponent: () => import('./landing/contact.svelte')}))
-    routes.set('/privacy-policy',       wrap({ asyncComponent: () => import('./landing/privacy.policy.svelte')})) 
+    routes.set('/privacy-policy',       wrap({ asyncComponent: () => import('./landing/privacy.policy.svelte')}))
     routes.set('/terms-and-conditions', wrap({ asyncComponent: () => import('./landing/terms.and.conditions.svelte')}))
     routes.set('/doc/*',                wrap({ asyncComponent: () => import('./tilos/static.doc.svelte')}))
     routes.set('/blog',                 wrap({ asyncComponent: () => import('./landing/blog/blog.svelte')}))
@@ -100,7 +100,7 @@
                                 text-sm
                                 text-stone-700 dark:text-stone-300 dark:hover:text-white
                                 bg-stone-200 dark:bg-stone-700
-                                hover:bg-stone-300 dark:hover:bg-stone-800
+                                hover:bg-stone-200 dark:hover:bg-stone-800
                                 border border-stone-300 focus:outline-none dark:border-stone-600
                                 flex items-center rounded`
     const authNormalClass = 'ml-5 mt-5 text-sm'
@@ -112,7 +112,7 @@
     <link rel="icon" type="image/png" href={__APP_ICON__} />
 </svelte:head>
 
-<GoogleAnalytics 
+<GoogleAnalytics
     bind:this={google_analytics}
     properties={[ google_analytics_identifier ]}
     enabled={enable_google_analytics}/>
@@ -126,4 +126,3 @@
     <Router {routes} />
     <Cookies/>
 </AuthorizedView>
-

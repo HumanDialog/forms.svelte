@@ -274,15 +274,15 @@
             <div class="w-full flex flex-row justify-between">
                 <!--div class="py-1.5  flex flex-row justify-between">
                     <button class="mr-4 w-6
-                                hover:bg-stone-300 hover:dark:bg-stone-700
+                                hover:bg-stone-200 hover:dark:bg-stone-700
                                 hover:outline hover:outline-8
-                                hover:outline-stone-300 hover:dark:outline-stone-700"
+                                hover:outline-stone-200 hover:dark:outline-stone-700"
                         ><Ricon icon = 'arrow-up' />
                     </button>
                     <button class="mr-4 w-6
-                                hover:bg-stone-300 hover:dark:bg-stone-700
+                                hover:bg-stone-200 hover:dark:bg-stone-700
                                 hover:outline hover:outline-8
-                                hover:outline-stone-300 hover:dark:outline-stone-700">
+                                hover:outline-stone-200 hover:dark:outline-stone-700">
                         <Ricon icon = 'check-check' />
                     </button>
                 </div-->
@@ -291,9 +291,9 @@
                 </div>
                 <div class="py-1.5  flex flex-row justify-between">
                     <button class="ml-4 w-6
-                                hover:bg-stone-300 hover:dark:bg-stone-700
+                                hover:bg-stone-200 hover:dark:bg-stone-700
                                 hover:outline hover:outline-8
-                                hover:outline-stone-300 hover:dark:outline-stone-700"
+                                hover:outline-stone-200 hover:dark:outline-stone-700"
                                 on:click={ closeDialog }>
                         <Ricon icon = 'x' />
                     </button>
@@ -428,7 +428,7 @@
                         bg-stone-100 dark:bg-stone-700
                         outline outline-offset-2 outline-2
                         outline-stone-200 dark:outline-stone-500
-                        hover:bg-stone-300 hover:dark:bg-stone-700
+                        hover:bg-stone-200 hover:dark:bg-stone-700
                         "
 
                         on:click={ closeDialog }> Ok

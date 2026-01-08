@@ -37,7 +37,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 
-<figure class=" bg-stone-300 dark:bg-stone-700 outline outline-8 outline-stone-300 dark:outline-stone-700 ring-1 ring-offset-8 ring-stone-300 dark:ring-stone-700">
+<figure class=" bg-stone-200 dark:bg-stone-700 outline outline-8 outline-stone-200 dark:outline-stone-700 ring-1 ring-offset-8 ring-stone-300 dark:ring-stone-700">
 
     <!-- whitespace-nowrap overflow-clip  -->
     <h4  class=" font-semibold min-h-[1.75rem]
@@ -55,14 +55,14 @@
         <figcaption class="
                 max-h-[75px]"
                 use:editable={{
-                    action: (text) => onSummaryChanged(text), 
+                    action: (text) => onSummaryChanged(text),
                     active: false,
                     onFinish: (d) => {editSummary = false}}}
                 bind:this={summaryElement}>
             {summary}
         </figcaption>
     {/if}
-    
-    
+
+
 
     </figure>

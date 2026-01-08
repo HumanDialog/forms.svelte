@@ -882,9 +882,9 @@ let list_properties = {
                 <div class="py-1.5  flex flex-row justify-between">
                     {#if levelUpHRef}
                         <button class="mr-4 w-6
-                                    hover:bg-stone-300 hover:dark:bg-stone-700
+                                    hover:bg-stone-200 hover:dark:bg-stone-700
                                     hover:outline hover:outline-8
-                                    hover:outline-stone-300 hover:dark:outline-stone-700"
+                                    hover:outline-stone-200 hover:dark:outline-stone-700"
                                     on:click={goUp}
                             ><Ricon icon = 'arrow-up' />
                         </button>
@@ -893,12 +893,12 @@ let list_properties = {
                     {/if}
 
                     {#if canSelectElements}
-                        {@const activeClass = isMultiselectionEnabled ? "bg-stone-300 dark:bg-stone-700 outline outline-8 outline-stone-300 dark:outline-stone-700" : ""}
+                        {@const activeClass = isMultiselectionEnabled ? "bg-stone-200 dark:bg-stone-700 outline outline-8 outline-stone-200 dark:outline-stone-700" : ""}
                         <button class="mr-4 w-6
                                     {activeClass}
-                                    hover:bg-stone-300 hover:dark:bg-stone-700
+                                    hover:bg-stone-200 hover:dark:bg-stone-700
                                     hover:outline hover:outline-8
-                                    hover:outline-stone-300 hover:dark:outline-stone-700"
+                                    hover:outline-stone-200 hover:dark:outline-stone-700"
                                     on:click={toggleMultiselection}>
                             <Ricon icon = 'check-check' />
                         </button>
@@ -912,9 +912,9 @@ let list_properties = {
                 </div>
                 <div class="py-1.5  flex flex-row justify-between">
                     <button class="ml-4 w-6
-                                hover:bg-stone-300 hover:dark:bg-stone-700
+                                hover:bg-stone-200 hover:dark:bg-stone-700
                                 hover:outline hover:outline-8
-                                hover:outline-stone-300 hover:dark:outline-stone-700"
+                                hover:outline-stone-200 hover:dark:outline-stone-700"
                                 on:click={onHide}>
                         <Ricon icon = 'x' />
                     </button>
@@ -944,7 +944,7 @@ let list_properties = {
                         bg-stone-100 dark:bg-stone-800
                         outline outline-offset-2 outline-2
                         outline-stone-200 dark:outline-stone-500
-                        hover:bg-stone-300 hover:dark:bg-stone-700
+                        hover:bg-stone-200 hover:dark:bg-stone-700
                         "
                         on:click={onHide}>
                      _; Cancel; Pegar; Anuluj
@@ -953,7 +953,7 @@ let list_properties = {
                         bg-stone-100 dark:bg-stone-700
                         outline outline-offset-2 outline-2
                         outline-stone-200 dark:outline-stone-500
-                        hover:bg-stone-300 hover:dark:bg-stone-700
+                        hover:bg-stone-200 hover:dark:bg-stone-700
                         "
                         disabled={!selectedElementsNo || !canSelectElements}
                         on:click={() => attachTo()}>
@@ -977,7 +977,7 @@ let list_properties = {
                     <button type="button"
                             class="ml-2 mt-1.5 mr-3 w-4 h-4
                             {textColor}
-                            hover:bg-stone-700 active:bg-stone-300 border-stone-200
+                            hover:bg-stone-700 active:bg-stone-200 border-stone-200
                             dark:hover:bg-stone-800 dark:active:bg-stone-600 dark:border-stone-600"
                             on:click={()=>goUp()}
                             disabled={isDisabled}>

@@ -185,7 +185,7 @@
                 m-0 pt-3 pb-5 px-2
                 sm:rounded
                 sm:bg-stone-100 sm:dark:bg-stone-900
-                flex flex-col" 
+                flex flex-col"
                 bind:this={rootElement} on:click={clearSelection}>
 
      <!-------------------------------------------------------------------->
@@ -195,9 +195,9 @@
             <div class="px-2 w-full flex flex-row justify-between">
                 <div class="ml-auto py-1.5  flex flex-row justify-between">
                     <button class="ml-4 w-6
-                                hover:bg-stone-300 hover:dark:bg-stone-700
+                                hover:bg-stone-200 hover:dark:bg-stone-700
                                 hover:outline hover:outline-8
-                                hover:outline-stone-300 hover:dark:outline-stone-700"
+                                hover:outline-stone-200 hover:dark:outline-stone-700"
                                 on:click={onHide}>
                         <Ricon icon = 'x' />
                     </button>
@@ -210,7 +210,7 @@
     <!-- POPUP CONTENT---------------------------------------------------->
     <!-------------------------------------------------------------------->
     {#if basketEntriesNo >= 0}
-        
+
 
             {#if basketEntriesNo==0}
                 <div class="w-full h-full flex items-center justify-center">
@@ -230,7 +230,7 @@
                 </div>
             {/if}
 
-       
+
 
         <!-------------------------------------------------------------------->
         <!-- POPUP FOOTER----------------------------------------------------->
@@ -243,7 +243,7 @@
                             bg-stone-100 dark:bg-stone-800
                             outline outline-offset-2 outline-2
                             outline-stone-200 dark:outline-stone-500
-                            hover:bg-stone-300 hover:dark:bg-stone-700
+                            hover:bg-stone-200 hover:dark:bg-stone-700
                             "
                             on:click={onHide}>
                         _; Cancel; Pegar; Anuluj
@@ -252,7 +252,7 @@
                             bg-stone-100 dark:bg-stone-700
                             outline outline-offset-2 outline-2
                             outline-stone-200 dark:outline-stone-500
-                            hover:bg-stone-300 hover:dark:bg-stone-700
+                            hover:bg-stone-200 hover:dark:bg-stone-700
                             "
                             disabled={!selectedElementsNo}
                             on:click={() => attachTo()}>
@@ -260,8 +260,8 @@
                     </button>
                 </div>
             </h4>
-        
-            
+
+
 
     {:else}
         <Spinner delay={3000}/>

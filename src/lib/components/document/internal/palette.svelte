@@ -457,7 +457,7 @@
                     {@const active=isRowActive(cmd)}
                     <button class="font-medium m-0 py-2 mr-4 text-lg sm:text-sm w-full text-left flex flex-row cursor-context-menu focus:outline-none"
                             class:dark:bg-stone-700={active}
-                            class:bg-stone-300={active}
+                            class:bg-stone-200={active}
                             {id}
                             bind:this={rows[idx]}
                             on:click={ () => { execute_mouse_click(cmd.on_choice); }}

@@ -92,10 +92,10 @@
 
     element_title = read_from_def('Title')
     summary = read_from_def('Summary');
-    
+
     let href = read_from_def('href')
     let element_href = href ? item[href] : ''
-    
+
     let element_open_handler = read_from_def('onOpen')
 
     let element_readonly = read_from_def('readonly')
@@ -106,10 +106,10 @@
     const downloadableFunc = read_from_def('downloadableFunc')
     if(downloadableFunc)
         download = downloadableFunc(item)
-    else    
+    else
         download = read_from_def('downloadable')
 
-    
+
     let element_icon     :string = get_element_icon(list_properties, item);
 
     function get_element_icon(properties, item)
@@ -514,9 +514,9 @@
 
 <figure class="pl-8
 
-        bg-stone-300 dark:bg-stone-700
+        bg-stone-200 dark:bg-stone-700
         outline outline-8
-        outline-stone-300 dark:outline-stone-700
+        outline-stone-200 dark:outline-stone-700
         ring-1 ring-offset-8
         ring-stone-300 dark:ring-stone-700
         "
@@ -606,7 +606,7 @@
             </div>{translated_element_title}
         </h4>
     {/if}
-    
+
     <!-- comming soon - middle info --
     <figcaption>
         <div class="grid gap-4 grid-cols-3 grid-rows-1">
