@@ -132,7 +132,7 @@
 
     function fetchGeneralChannels()
     {
-        return reef.get("/group/MessageChannels?sort=Order&fields=$ref,Id,Title,Summary,Order,href,$type,GetUnreadMessagesNo,IsSubscribed", onErrorShowAlert).then((res) =>
+        return reef.get("/group/MessageChannels?sort=Order&fields=$ref,Id,Title,Summary,Order,href,icon,$type,GetUnreadMessagesNo,IsSubscribed", onErrorShowAlert).then((res) =>
         {
             if(res != null)
                 generalChannels = res.MessageChannel;
@@ -143,7 +143,7 @@
 
     function fetchDirectChannels()
     {
-        return reef.get("/user/MessageChannels?sort=Order&fields=$ref,Id,Title,Summary,Order,href,$type,UnreadMessagesNo,MessageChannelId", onErrorShowAlert).then((res) =>
+        return reef.get("/user/MessageChannels?sort=Order&fields=$ref,Id,Title,Summary,Order,href,icon,$type,UnreadMessagesNo,MessageChannelId", onErrorShowAlert).then((res) =>
         {
             if(res != null)
                 directChannels = res.MessageChannelUser;
@@ -399,10 +399,10 @@
                     <svelte:fragment let:item let:idx>
                         {@const href = item.href}
                         <SidebarItem   {href}
-                                        icon={FaHashtag}
+                                        icon={item.icon}
                                         bind:this={navGeneralItems[idx]}
                                         active={isRoutingTo(href, currentPath)}
-                                        summary={ext(item.Summary)}>
+                                        >
                             <span class="relative">
                                  {#if item.GetUnreadMessagesNo}
                                     <div class="absolute
@@ -434,10 +434,10 @@
                     <svelte:fragment let:item let:idx>
                         {@const href = item.href}
                         <SidebarItem   {href}
-                                        icon={FaRegComment}
+                                        icon={item.icon}
                                         bind:this={navDirectItems[idx]}
                                         active={isRoutingTo(href, currentPath)}
-                                        summary={ ext(item.Summary)}>
+                                        >
                             <span class="relative">
                                 {ext(item.Title)}
                                 {#if item.UnreadMessagesNo}

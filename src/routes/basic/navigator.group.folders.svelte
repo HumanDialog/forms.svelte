@@ -435,7 +435,7 @@
                                             icon = 'file-text'
                                             bind:this={navPinnedItems[idx]}
                                             active={isRoutingTo(href, currentPath)}
-                                            summary={ext(item.Summary)}>
+                                            >
                                 {ext(item.Title)}
                             </SidebarItem>
                         </svelte:fragment>

@@ -1126,7 +1126,6 @@
                                 caption: '_; Send; Enviar; Wyślij',
                                 hideToolbarCaption: true,
                                 mricon: 'upload',
-                                mricon: 'upload',
                                 tbr: 'D',
                                 fab: 'S00',
                                 menu: [

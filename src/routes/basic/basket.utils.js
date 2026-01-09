@@ -251,12 +251,12 @@ function pushRecentBrowserElements(selectedElements)
 
 export function setBrowserRecentElement(elementId, elementType)
 {
-    reef.get(`${elementType}/${elementId}?fields=Id,Title,Summary,href,$ref`, onErrorShowAlert).then( res => {
+    reef.get(`${elementType}/${elementId}?fields=Id,Title,Summary,icon,href,$ref`, onErrorShowAlert).then( res => {
         if(res)
         {
             const el = res[elementType]
             if(el)
-                pushBrowserRecentElements( el.Id, elementType, el.$ref, el.Title, el.Summary, elementType, el.href)
+                pushBrowserRecentElements( el.Id, elementType, el.$ref, el.Title, el.Summary, el.icon, el.href)
         }
     })
 }

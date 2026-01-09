@@ -8,7 +8,7 @@
                 ListSummary,
                 ListInserter,
 				mainContentPageReloader,
-                Modal, showMenu, Paper,
+                Modal, showMenu, Paper, PaperHeader,
                 onErrorShowAlert, i18n} from '$lib'
     import {querystring, location} from 'svelte-spa-router'
     import {FaRegFolder, FaRegComment, FaCaretUp, FaCaretDown, FaTrash, FaRegComments, FaRegClipboard, FaPen, FaArchive, FaEllipsisH} from 'svelte-icons/fa'
@@ -52,7 +52,7 @@
                                                 {
                                                     Id: 2,
                                                     Association: 'MessageChannels',
-                                                    Expressions:['Id','Title', 'Summary', 'href', 'Order', '$ref', 'UnreadMessagesNo', 'MessageChannelId'],
+                                                    Expressions:['Id','Title', 'Summary', 'href', 'Order', 'icon', '$ref', 'UnreadMessagesNo', 'MessageChannelId'],
                                                     Sort: "Order",
                                                 }
                                             ]
@@ -106,7 +106,7 @@
                 operations: [
                     {
                         caption: '_; New channel; Nuevo canal; Nowy kanał',
-                        icon: FaRegComment,
+                        mricon: 'messages-square',
                         action: onNewDMChannel,
                         tbr: 'A',
                         fab: 'M03'
@@ -135,7 +135,7 @@
                     operations: [
                         {
                             caption: '_; New channel; Nuevo canal; Nowy kanał',
-                            icon: FaRegComment,
+                            mricon: 'messages-square',
                             action: onNewDMChannel,
                             tbr: 'A',
                             fab: 'M03'
@@ -174,7 +174,7 @@
                         {
                             caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                             hideToolbarCaption: true,
-                            mricon: 'chevron-up',
+                            mricon: 'chevron-down',
                             action: (f) => listComponent.moveDown(channel),
                             fab:'M04',
                             tbr:'A'
@@ -234,24 +234,11 @@
     }
 
     let list_properties = {
-        Title: "Title",
-        Summary: "Summary",
-        icon: "icon",
         element:{
             icon: "icon",
             href: "href",
             Title: "Title",
             Summary: "Summary"
-        },
-        context:{
-            Folder:{
-                Summary: "Summary",
-
-            },
-            FolderFolder:{
-                Summary: "Summary",
-                head_right: "ModificationDate"
-            }
         }
     }
 
@@ -268,11 +255,11 @@
             clearsContext='props sel'
             title={title}>
             <Paper class="mb-64">
-            <section class="w-full place-self-center max-w-3xl">
+            <PaperHeader>
 
-            <p class="hidden sm:block mt-3 ml-3 pb-5 text-lg text-left">
-                {title}
-            </p>
+            </PaperHeader>
+
+            <h1>{title}</h1>
 
         <List   self={user}
                 a='MessageChannels'
@@ -280,13 +267,10 @@
                 toolbarOperations={channelOperations}
                 orderAttrib='Order'
                 bind:this={listComponent}>
-            <ListTitle a='Title' hrefFunc={(channel) => `${channel.href}`}/>
-            <ListSummary a='Summary'/>
-            <!--ListInserter action={addChannel} icon/-->
+            <!--ListInserter action={addChannel} icon-->
 
         </List>
-    </section>
-
+    
        </Paper>
 
     </Page>

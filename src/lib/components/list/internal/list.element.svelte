@@ -462,7 +462,7 @@
 
     {#if summary && (item[summary] || placeholder=='Summary')}
     <figcaption>
-        {item[summary]}
+        {ext(item[summary])}
     </figcaption>
     {/if}
 </figure>

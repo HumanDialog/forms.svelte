@@ -122,9 +122,9 @@
                 ElementId: 0,
                 ElementType: '',
                 ElementNav: '',
-                Title: '_; My lists; Mis listas; Moje listy#',
+                Title: '_; My lists; Mis listas; Moje listy',
                 Summary: '',
-                icon: 'clipboard-list',
+                icon: 'notebook',
                 href: '/mylists',
                 ElementInfo: 0,
                 $ref: 'mylists'
@@ -135,7 +135,7 @@
                 ElementNav: '',
                 Title: '_; Common lists; Listas comunes; Wspólne listy',
                 Summary: '',
-                icon: 'clipboard-list',
+                icon: 'notebook',
                 href: '/alllists',
                 ElementInfo: 0,
                 $ref: 'alllists'
@@ -217,7 +217,7 @@
                     ElementNav: t.$ref,
                     Title: t.Name,
                     Summary: t.Summary,
-                    icon: 'clipboard-list',
+                    icon: 'notebook',
                     href: t.href,
                     ElementInfo: 0,
                     $ref: t.$ref
@@ -248,7 +248,7 @@
                     ElementNav: t.$ref,
                     Title: t.Name,
                     Summary: t.Summary,
-                    icon: 'clipboard-list',
+                    icon: 'notebook',
                     href: t.href,
                     ElementInfo: 0,
                     $ref: t.$ref
@@ -954,6 +954,7 @@ let list_properties = {
                         outline outline-offset-2 outline-2
                         outline-stone-200 dark:outline-stone-500
                         hover:bg-stone-200 hover:dark:bg-stone-700
+                        disabled:bg-stone-100/40 dark:disabled:bg-stone-700/40
                         "
                         disabled={!selectedElementsNo || !canSelectElements}
                         on:click={() => attachTo()}>
@@ -1012,10 +1013,10 @@ let list_properties = {
                                 text-base sm:text-xs font-medium
                                 bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400
                                 hover:bg-stone-200 hover:dark:bg-stone-600
-                                disabled:bg-white/60 disabled:dark:bg-stone-700/60
+                                disabled:bg-white/60 dark:disabled:bg-stone-700/60
                                 border rounded
                                 border-stone-200 dark:border-stone-600 focus:outline-none
-                                disabled:border-stone-200/60 disabled:dark:border-stone-600/60
+                                disabled:border-stone-200/60 dark:disabled:border-stone-500/60
                                 inline-flex items-center justify-center"
                                 disabled={!selectedElementsNo || !canSelectElements}
                                 on:click={() => attachTo()}>
