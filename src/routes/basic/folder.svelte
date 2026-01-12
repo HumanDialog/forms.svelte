@@ -1462,6 +1462,7 @@
     let folder_properties = {
         element:{
             icon: "icon",
+
             href: "href",
             Title: "Title",
             Summary: "Summary"
@@ -1474,6 +1475,36 @@
         }
 
     }
+
+    let next_folder_properties = {
+        element:{
+            Title: "Title",
+            icon: "icon",
+            micon: "#link",
+            shaow_micon: 'IsShortcut',
+            href: "href",
+
+            Summary: "Summary"
+        },
+        context:{
+            FolderFile:{
+                downloadable: true,
+                onOpen: downloadFile
+            },
+            FolderTask:{
+                properties: {
+                    t:{l: ['ListName','#barcode', 'StateCode', 'StateLabel'],
+                       c: [],
+                       r: ['DueDate']},
+                    m:{},
+                    b:{}
+                }
+
+            }
+        }
+
+    }
+
 
 </script>
 
