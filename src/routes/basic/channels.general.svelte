@@ -52,7 +52,7 @@
                                                 {
                                                     Id: 2,
                                                     Association: 'MessageChannels',
-                                                    Expressions:['Id','Title', 'Summary', 'href', 'Order', '$ref', 'GetUnreadMessagesNo', 'IsSubscribed'],
+                                                    Expressions:['Id','Title', 'Summary', 'href', 'Order', 'icon','$ref', 'GetUnreadMessagesNo', 'IsSubscribed'],
                                                     Sort: "Order",
                                                 }
                                             ]
@@ -107,7 +107,7 @@
             return null;
 
         let newChannel = res.MessageChannel
-        await reloadChannels(newChannel.Id)
+        await reloadChannels(newChannel.$ref)
     }
 
     let pageOperations = {
@@ -119,7 +119,7 @@
                 operations: [
                     {
                         caption: '_; New channel; Nuevo canal; Nowy kanał',
-                        icon: FaHashtag,
+                        mricon: 'messages-square',
                         action: (focused) => { listComponent.addRowAfter(null) },
                         tbr: 'A',
                         fab: 'M03'
@@ -148,7 +148,7 @@
                     operations: [
                         {
                             caption: '_; New channel; Nuevo canal; Nowy kanał',
-                            icon: FaHashtag,
+                            mricon: 'messages-square',
                             action: (focused) => { listComponent.addRowAfter(channel) },
                             tbr: 'A',
                             fab: 'M03'
@@ -187,7 +187,7 @@
                         {
                             caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                             hideToolbarCaption: true,
-                            mricon: 'chevron-up',
+                            mricon: 'chevron-down',
                             action: (f) => listComponent.moveDown(channel),
                             fab:'M04',
                             tbr:'A'
@@ -208,24 +208,11 @@
     }
 
     let list_properties = {
-        Title: "Title",
-        Summary: "Summary",
-        icon: "icon",
         element:{
             icon: "icon",
             href: "href",
             Title: "Title",
             Summary: "Summary"
-        },
-        context:{
-            Folder:{
-                Summary: "Summary",
-
-            },
-            FolderFolder:{
-                Summary: "Summary",
-                head_right: "ModificationDate"
-            }
         }
     }
 

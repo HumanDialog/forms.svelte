@@ -139,7 +139,7 @@
         if (!res)
             return null;
         let newList = res.TaskList;
-        await reloadNotes(newList.Id)
+        await reloadNotes(newList.$ref)
     }
     let pageOperations = {
         opver: 2,
@@ -301,11 +301,7 @@
 
                 <ListDateProperty name='ModificationDate' detailed editable={false}/>
 
-                <span slot="left" let:element>
-                    <Icon component={getElementIcon(element)}
-                        class="h-5 w-5  text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5 ml-2 mr-1 "/>
-                </span>
-
+               
 
             </List>
 

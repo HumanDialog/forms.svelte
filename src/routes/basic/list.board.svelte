@@ -31,8 +31,8 @@
         showFloatingToolbar,
         refreshToolbarOperations,
         PaperTable,
-        PaperHeader
-
+        PaperHeader,
+        setjItemProperty, KanbanColumnTop
 	} from '$lib';
     import {FaPlus, FaList, FaPen, FaCaretLeft, FaCaretRight, FaTrash, FaArrowsAlt, FaArchive, FaCheck, FaEllipsisH, FaChevronRight,
         FaAngleDown, FaAngleUp, FaColumns, FaRandom, FaChevronLeft, FaUpload, FaRegCalendar, FaRegCalendarCheck, FaCaretUp, FaCaretDown, FaDownload
@@ -606,16 +606,16 @@
                         },
                         {
                             caption: '_; Move...; Desplazar...; Przesuń...',
-                            icon: FaArrowsAlt,
                             mricon: 'chevrons-left-right',
-                            toolbar: MoveOperations,
+                            action: (btt) => moveTaskToColumn(task, btt),
+                            /*toolbar: MoveOperations,
                             props: {
                                     taskStates: taskStates,
                                     item: task,
                                     afterActionOperation: kanban.scrollViewToCard,
                                  //   onMoveUp: isOutOfStates ? undefined : kanban.moveUp,
                                  //   onMoveDown: isOutOfStates ? undefined : kanban.moveDown,
-                                    onReplace: kanban.replace},
+                                    onReplace: kanban.replace},*/
                             fab: 'M03',
                             tbr: 'A'
                         },
@@ -690,6 +690,33 @@
 
         }
 
+    }
+
+    function moveTaskToColumn(task, btt)
+    {
+        let operations = []
+        
+        for(let idx=0; idx<taskStates.length; idx++)
+        {
+            const column = taskStates[idx]
+            
+            let order = KanbanColumnTop
+            if(column.state >= task.State )
+                order = KanbanColumnBottom;
+
+            console.log(order, column)
+            
+            const operation = {
+                caption: ext(column.name),
+                disabled: task.State == column.state,
+                action: (f) => { kanban.replace(task, idx, order); kanban.scrollViewToCard(task) }
+            }
+
+            operations.push(operation)
+        }
+
+        const rect = btt.getBoundingClientRect()
+        showMenu(rect, operations)
     }
 
     let taskPropertiesDialog;
@@ -914,7 +941,7 @@
 
     async function onColumnNameChanged(columnIdx, name)
     {
-        const res = await reef.post(`${currentList.$ref}/ChangeColumnName`, {
+        /*const res = await reef.post(`${currentList.$ref}/ChangeColumnName`, {
                         pos: columnIdx,
                         newName: name
                     }, onErrorShowAlert);
@@ -925,10 +952,11 @@
             taskStates = [...res]
             await kanban.rerender();
             kanban.activateColumn(columnIdx)
-        }
+        }*/
+        
 
-        //taskStates[columnIdx].name = name;
-        //await saveTaskStates();
+        taskStates[columnIdx].name = name;
+        saveTaskStates();
     }
 
     async function onColumnMoveLeft(columnIdx)
@@ -1053,6 +1081,12 @@
                 //kanban.editColumnName(idx);
             }
         }
+    }
+
+    function saveTaskStates()
+    {
+        const statesStr = JSON.stringify(taskStates)
+        setjItemProperty(currentList, 'TaskStates', statesStr)
     }
 
     /*

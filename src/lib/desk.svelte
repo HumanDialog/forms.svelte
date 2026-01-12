@@ -409,8 +409,8 @@
                                 overflow-auto" >
 
                     <div class="    flex flex-row justify-between  h-full
-                                    text-stone-500 bg-stone-200/70 hover:bg-stone-200
-                                    dark:text-orange-200 dark:bg-stone-700/70 dark:hover:bg-stone-700
+                                    text-stone-500 bg-stone-200/70
+                                    dark:text-orange-200 dark:bg-stone-700/70
                                     bg-stone-200 dark:bg-stone-800/70
                                     border-t border-stone-500 ">
                         <HorizontalNavigatorTabs appConfig={layout}/>
@@ -430,12 +430,12 @@
                                 left-0 bottom-[50px]
                                 sm:left-[40px] sm:top-0
                                 w-full sm:w-[320px]
-                                h-[calc(100vh-100px)] sm:h-full
+                                h-[calc(100svh-50px)] sm:h-full
 
                                 z-30 overflow-x-hidden
 
                                 bg-stone-50 dark:bg-stone-900
-                                border-2 sm:border-r border-stone-300 dark:border-stone-300/50
+                                border-t sm:border-t-0 sm:border-r border-stone-300 dark:border-stone-300/50
                                 sm:shadow-lg sm:shadow-stone-500
                                 sm:dark:shadow-black">
 

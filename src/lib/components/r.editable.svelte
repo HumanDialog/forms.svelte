@@ -2,6 +2,7 @@
   import {editable, makeEditableIdFromFieldName} from '../utils'
   import {setjItemProperty} from '../updates.js'
 	import { afterUpdate } from 'svelte';
+	import {ext} from '../i18n'
 
   export let self
   export let a
@@ -63,9 +64,7 @@
 				}}
 				on:focus={focus}
 				on:blur={blur}
->
-	{self[a]}
-</span>
+>{ext(self[a])}</span>
 
 <!--style>
 	span:empty:focus::before {

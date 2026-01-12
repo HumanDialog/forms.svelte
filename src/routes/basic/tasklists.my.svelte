@@ -182,7 +182,7 @@
             return null;
 
         let newList = res.TaskList;
-        await reloadLists(newList.Id)
+        await reloadLists(newList.$ref)
     }
 
 

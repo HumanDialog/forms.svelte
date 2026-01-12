@@ -9,7 +9,7 @@
     import NotFound from './landing/not.found.svelte'
     import AppView from './AppView.svelte';
 	import {appUsers} from './users.js'
-    import {dark_mode_store,  setLanguages} from '$lib'
+    import {dark_mode_store,  setLanguages, fetchHandlers} from '$lib'
 
     import { GoogleAnalytics } from '@beyonk/svelte-google-analytics'
     import {cookies_allow_analytics} from './landing/cookie.preferences'
@@ -44,7 +44,8 @@
                         api:    "http://127.0.0.1:1996/",
                         //api:    "http://192.168.0.103:1996/",
                         users: appUsers,
-                        apiVersion: "v001"}
+                        apiVersion: "v001"},
+                    fetchHandlers: fetchHandlers
                    });
 
     let google_analytics;

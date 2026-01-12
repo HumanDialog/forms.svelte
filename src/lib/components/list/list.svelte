@@ -323,11 +323,12 @@
                 activate_after_dom_update = last_activated_element;
             else
             {
-                if(detail.incremental && definition.insert_incremental)
+                if(false && detail.incremental && definition.insert_incremental)
                 {
                     let current_active = getActive(selectionKey);
                     await addRowAfter(current_active);
                 }
+                
             }
         } );
     }
@@ -613,10 +614,7 @@
                             {selectionKey}
                             bind:this={rows[i]}
                             >
-
-                <span slot="left" let:element>
-                    <slot name="left" {element}/>
-                </span>
+   
             </ListElement>
 
             {#if show_insertion_row_after_element == element}

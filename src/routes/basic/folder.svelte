@@ -442,7 +442,7 @@
         setBrowserRecentElement(newTask.TaskId, 'Task')
 
         await fetchData();
-        listComponent.reload(contextItem, newTask.Id);
+        listComponent.reload(contextItem, newTask.$ref);
     }
 
     async function addNote(newNoteAttribs)
@@ -455,7 +455,7 @@
         setBrowserRecentElement(newNote.NoteId, 'Note')
 
         await fetchData();
-        listComponent.reload(contextItem, newNote.Id);
+        listComponent.reload(contextItem, newNote.$ref);
     }
 
     async function addFile(newFileAttribs)
@@ -467,7 +467,7 @@
         let newFile = res.FolderFile;
 
         await fetchData();
-        listComponent.reload(contextItem, newFile.Id);
+        listComponent.reload(contextItem, newFile.$ref);
     }
 
     async function addFolder(newFolderAttribs)
@@ -484,7 +484,7 @@
         let newFolder = res.FolderFolder;
 
         await fetchData();
-        listComponent.reload(contextItem, newFolder.Id);
+        listComponent.reload(contextItem, newFolder.$ref);
     }
 
     async function toggleFolderPinned(folder)
@@ -1126,7 +1126,6 @@
                                 caption: '_; Send; Enviar; Wyślij',
                                 hideToolbarCaption: true,
                                 mricon: 'upload',
-                                mricon: 'upload',
                                 tbr: 'D',
                                 fab: 'S00',
                                 menu: [
@@ -1395,7 +1394,7 @@
             pendingUploading = false;
 
             await fetchData();
-            listComponent.reload(contextItem, fileLink.Id);
+            listComponent.reload(contextItem, fileLink.$ref);
         }
     }
 

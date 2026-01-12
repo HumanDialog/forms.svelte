@@ -126,7 +126,7 @@
             return null;
 
         let newFolder = res.Folder;
-        await reloadFolders(newFolder.Id)
+        await reloadFolders(newFolder.$ref)
     }
 
     let pageOperations = {
@@ -338,7 +338,7 @@
 
         </List>
 
-
+    <!--input hidden type="file" id="attachementFile" accept="*/*"/-->
 
      </Paper>
     </Page>

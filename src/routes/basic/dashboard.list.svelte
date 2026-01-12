@@ -212,7 +212,8 @@
 <!------- keep pure layout  ----------------------------------------------------------------------->
 <!------------------------------------------------------------------------------------------------->
 <div    class="bg-stone-100 dark:bg-stone-700/10 outline outline-8 outline-stone-100 dark:outline-stone-700/10"
-        >
+        use:selectable={list}
+        on:click={activate}>
 
     <a href={list.href} use:link>
     <h2  class="text-sky-500">

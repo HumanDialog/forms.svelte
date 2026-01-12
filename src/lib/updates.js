@@ -11,6 +11,10 @@ const modified_item_store = writable(null);
 export function setjItemProperty(item, field_name, value)
 {
     console.log('setjItemProperty ' + field_name)
+    
+    if(item[field_name] == value)
+        return
+    
     let type_name = item.$type;
     item[field_name] = value;
     informModification(item, field_name, type_name);
@@ -118,6 +122,9 @@ export function pushChanges(afterPushCallback=undefined)
 {
     //console.trace()
 
+    if(!modified_items_map.size)
+        return;
+
     if(afterPushCallback)
         afterPushCallbacks.push(afterPushCallback);
 
@@ -154,9 +161,25 @@ modified_item_store.subscribe((mod_item) => {
 export const unsavedModificationsTicket = writable(0);
 
 update_request_ticket.subscribe(async (v) => {
-    if(v != last_update_ticket)
+    flushChanges(v)
+})
+
+export async function pushChangesImmediately()
+{
+    if(!modified_items_map.size)
+        return;
+
+    const ticket = get(update_request_ticket) + 1
+    update_request_ticket.set(ticket)
+
+    await flushChanges(ticket);
+}
+
+async function flushChanges(ticket)
+{
+    if(ticket != last_update_ticket)
     {
-        last_update_ticket = v;
+        last_update_ticket = ticket;
 
         if(!modified_items_map.size)
             return;
@@ -203,7 +226,7 @@ update_request_ticket.subscribe(async (v) => {
                 {
                     modified_items_map.clear();
                     unsavedModificationsTicket.set( get(unsavedModificationsTicket) + 1 )
-                    
+
                     afterPushCallbacks.forEach( cb => cb())
                     afterPushCallbacks = []
                 }
@@ -220,4 +243,4 @@ update_request_ticket.subscribe(async (v) => {
         }
 
     }
-})
+} 
