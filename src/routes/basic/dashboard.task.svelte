@@ -10,7 +10,7 @@
 			DatePicker,
             Ricon,
             Editable,
-            Combo, Tags, ComboSource, focusEditable,
+            Combo, Tags, ComboSource, focusEditable, openInNewTab, copyAddress,
             informModification, pushChanges, onErrorShowAlert, setSelectionAtEnd
         } from '$lib';
     import PopupExplorer from './popup.explorer.svelte'
@@ -109,8 +109,17 @@
                                         action: (f) => copyTaskToBasket()
                                     },
                                     {
-                                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                        action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect)
+                                        caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
+                                        action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect)
+                                    },
+                                    { separator: true},
+                                    {
+                                        caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                                        action: () => openInNewTab(task.href)
+                                    },
+                                    {
+                                        caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                                        action: () => copyAddress(task.href)
                                     }
                                 ],
                             hideToolbarCaption: true
@@ -211,10 +220,23 @@
         await reef.post(`${task.$ref}/CopyToBasket`, {flags: 0}, onErrorShowAlert)
     }
 
-    async function runPopupExplorerToPlaceElement(btt, aroundRect)
+    async function runPopupExplorer4CopyToFolder(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            canSelectRootElements: true,
+            attachToContainer: true,
+            rootFilter: 'FOLDERS',
+            onAttach: async (tmp, references) => {
+                await reef.post(`${task.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
+            },
+            ownCloseButton: true
+        })
+    }
+
+    async function runPopupExplorer4SelectTaskList(btt, aroundRect)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            attachToContainer: true,
+            rootFilter: 'TASKLISTS',
             onAttach: async (tmp, references) => {
                 await reef.post(`${task.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
             },

@@ -28,7 +28,7 @@
             showFloatingToolbar,
 			randomString,
 			showMenu,
-            SHOW_MENU_BELOW, focusEditable,
+            SHOW_MENU_BELOW, focusEditable, openInNewTab, copyAddress,
             List, ListTitle, ListSummary, ListInserter, Icon, Paper, PaperTopMargin, PaperHeader
             } from '$lib'
 	import { onMount, tick, afterUpdate } from 'svelte';
@@ -387,8 +387,21 @@
                                     action: (f) => copyTaskToBasket(),
                                 },
                                 {
-                                    caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                    action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, task)
+                                    caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
+                                    action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect, task)
+                                },
+                                {
+                                    caption: '_; Select a task list; Selecciona la lista de tareas; Wybierz listę zadań',
+                                    action: (btt, rect) => runPopupExplorer4SelectTaskList(btt, rect, task)
+                                },
+                                { separator: true},
+                                {
+                                    caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                                    action: () => openInNewTab(task.href)
+                                },
+                                {
+                                    caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                                    action: () => copyAddress(task.href)
                                 }
                             ]
 
@@ -505,7 +518,8 @@
     async function runAttachementPopupExplorer4SelectFromFolders(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            mode: 'FOLDERS',
+            rootFilter: 'FOLDERS',
+            leafFilter: ['Note', 'File'],
             destinationContainer: taskRef,
             onRefreshView: async (f) => await reloadWithAttachements(),
             ownCloseButton: true
@@ -513,10 +527,11 @@
     }
 
     
-    async function runPopupExplorerToPlaceElement(btt, aroundRect, element)
+    async function runPopupExplorer4CopyToFolder(btt, aroundRect, element)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            canSelectRootElements: true,
+            attachToContainer: true,
+            rootFilter: 'FOLDERS',
             onAttach: async (tmp, references) => {
                 await reef.post(`${element.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
                 await reloadData();
@@ -525,6 +540,23 @@
             ownCloseButton: true
         })
     }
+
+    async function runPopupExplorer4SelectTaskList(btt, aroundRect, element)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            attachToContainer: true,
+            rootFilter: 'TASKLISTS',
+            onAttach: async (tmp, references) => {
+                await reef.post(`${element.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
+                await reloadData();
+                connectedToComponent?.reload(task, connectedToComponent.CLEAR_SELECTION);
+            },
+            ownCloseButton: true
+        })
+    }
+
+    
+    
 
     async function reloadWithAttachements()
     {
@@ -703,8 +735,21 @@
                                     action: (f) => copyTaskToBasket(),
                                 },
                                 {
-                                    caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                    action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, task)
+                                    caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
+                                    action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect, task)
+                                },
+                                {
+                                    caption: '_; Select a task list; Selecciona la lista de tareas; Wybierz listę zadań',
+                                    action: (btt, rect) => runPopupExplorer4SelectTaskList(btt, rect, task)
+                                },
+                                { separator: true},
+                                {
+                                    caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                                    action: () => openInNewTab(task.href)
+                                },
+                                {
+                                    caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                                    action: () => copyAddress(task.href)
                                 }
                             ]
 
@@ -926,8 +971,21 @@
                                     action: (f) => copyTaskToBasket(),
                                 },
                                 {
-                                    caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                    action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, task)
+                                    caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
+                                    action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect, task)
+                                },
+                                {
+                                    caption: '_; Select a task list; Selecciona la lista de tareas; Wybierz listę zadań',
+                                    action: (btt, rect) => runPopupExplorer4SelectTaskList(btt, rect, task)
+                                },
+                                { separator: true},
+                                {
+                                    caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                                    action: () => openInNewTab(task.href)
+                                },
+                                {
+                                    caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                                    action: () => copyAddress(task.href)
                                 }
                             ]
 
@@ -1084,7 +1142,7 @@
     async function runEditorPopupExplorer4SelectFromFolders(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            mode: 'FOLDERS',
+            rootFilter: 'FOLDERS',
             onAttach: (clipboard, elements) => makeLinkToElement(elements),
             ownCloseButton: true
         })
@@ -1093,7 +1151,7 @@
     async function runEditorPopupExplorer4SelectFromTaskLists(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            mode: 'TASKLISTS',
+            rootFilter: 'TASKLISTS',
             onAttach: (clipboard, elements) => makeLinkToElement(elements),
             ownCloseButton: true
         })
@@ -1246,8 +1304,21 @@
                     action: () => copyTaskToBasket(),
                 },
                 {
-                    caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                    action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, task)
+                    caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
+                    action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect, task)
+                },
+                {
+                    caption: '_; Select a task list; Selecciona la lista de tareas; Wybierz listę zadań',
+                    action: (btt, rect) => runPopupExplorer4SelectTaskList(btt, rect, task)
+                },
+                { separator: true},
+                {
+                    caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                    action: () => openInNewTab(task.href)
+                },
+                {
+                    caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                    action: () => copyAddress(task.href)
                 }
             ],
         }
@@ -1576,8 +1647,17 @@
                                         action: (f) => cutAttachementToBasket(element, kind)
                                     },
                                     {
-                                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                        action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, element, kind)
+                                        caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
+                                        action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect, element)
+                                    },
+                                    { separator: true},
+                                    {
+                                        caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                                        action: () => openInNewTab(element.href)
+                                    },
+                                    {
+                                        caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                                        action: () => copyAddress(element.href)
                                     }
                                 ]
                             },

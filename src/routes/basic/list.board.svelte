@@ -32,7 +32,7 @@
         refreshToolbarOperations,
         PaperTable,
         PaperHeader,
-        setjItemProperty, KanbanColumnTop
+        setjItemProperty, KanbanColumnTop, openInNewTab, copyAddress
 	} from '$lib';
     import {FaPlus, FaList, FaPen, FaCaretLeft, FaCaretRight, FaTrash, FaArrowsAlt, FaArchive, FaCheck, FaEllipsisH, FaChevronRight,
         FaAngleDown, FaAngleUp, FaColumns, FaRandom, FaChevronLeft, FaUpload, FaRegCalendar, FaRegCalendarCheck, FaCaretUp, FaCaretDown, FaDownload
@@ -660,8 +660,21 @@
                                         action: (f) => cutTaskToBasket(task)
                                     },
                                     {
-                                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                        action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, task)
+                                        caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
+                                        action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect, task)
+                                    },
+                                    {
+                                        caption: '_; Select a task list; Selecciona la lista de tareas; Wybierz listę zadań',
+                                        action: (btt, rect) => runPopupExplorer4SelectTaskList(btt, rect, task)
+                                    },
+                                    { separator: true},
+                                    {
+                                        caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                                        action: () => openInNewTab(`/task/${task.Id}`)
+                                    },
+                                    {
+                                        caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                                        action: () => copyAddress(`/task/${task.Id}`)
                                     }
                                 ],
                             hideToolbarCaption: true
@@ -894,7 +907,8 @@
     async function runPopupExplorer4SelectFromFolders(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            mode: 'FOLDERS',
+            rootFilter: 'FOLDERS',
+            leafFilter: ['Task'],
             destinationContainer: listPath,
             onRefreshView: (f) => reload(kanban.KEEP_SELECTION),
             ownCloseButton: true
@@ -904,19 +918,33 @@
     async function runPopupExplorer4SelectFromTaskLists(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            mode: 'TASKLISTS',
+            rootFilter: 'TASKLISTS',
             destinationContainer: listPath,
             onRefreshView: (f) => reload(kanban.KEEP_SELECTION),
             ownCloseButton: true
         })
     }
 
-    async function runPopupExplorerToPlaceElement(btt, aroundRect, task)
+    async function runPopupExplorer4CopyToFolder(btt, aroundRect, task)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            canSelectRootElements: true,
+            attachToContainer: true,
+            rootFilter: 'FOLDERS',
             onAttach: async (tmp, references) => {
                 await reef.post(`${task.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
+            },
+            ownCloseButton: true
+        })
+    }
+
+    async function runPopupExplorer4SelectTaskList(btt, aroundRect, task)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            attachToContainer: true,
+            rootFilter: 'TASKLISTS',
+            onAttach: async (tmp, references) => {
+                await reef.post(`${task.$ref}/AttachMeTo`, { references: references })
+                reload(kanban.KEEP_SELECTION)
             },
             ownCloseButton: true
         })

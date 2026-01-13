@@ -506,7 +506,7 @@
     async function runPopupExplorer4SelectFromFolders(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            mode: 'FOLDERS',
+            rootFilter: 'FOLDERS',
             onAttach: (basketItem, refs) => onAttachBasket(refs),
             ownCloseButton: true
         })
@@ -515,7 +515,7 @@
     async function runPopupExplorer4SelectFromTaskLists(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            mode: 'TASKLISTS',
+            rootFilter: 'TASKLISTS',
             onAttach: (basketItem, refs) => onAttachBasket(refs),
             ownCloseButton: true
         })

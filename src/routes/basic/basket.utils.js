@@ -260,3 +260,4 @@ export function setBrowserRecentElement(elementId, elementType)
         }
     })
 }
+

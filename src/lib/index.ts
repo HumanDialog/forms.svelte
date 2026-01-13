@@ -153,7 +153,9 @@ export {
     hasLocalStorage,
     getCurrentGroupName,
     getGroupsMenu,
-    fetchHandlers
+    fetchHandlers,
+    openInNewTab,
+    copyAddress
 }   from './utils'
 
 export {

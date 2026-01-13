@@ -34,7 +34,7 @@
             SHOW_MENU_BELOW,
             ext,
             List, ListTitle, ListSummary, ListInserter, Icon,
-            reloadPageToolbarOperations, Paper, PaperHeader, focusEditable
+            reloadPageToolbarOperations, Paper, PaperHeader, focusEditable, openInNewTab, copyAddress
             } from '$lib'
 	import { onMount, tick } from 'svelte';
 
@@ -355,8 +355,17 @@
                     action: (f) => copyTaskToBasket(),
                 },
                 {
-                    caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                    action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, note)
+                    caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
+                    action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect, note)
+                },
+                { separator: true},
+                {
+                    caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                    action: () => openInNewTab(note.href)
+                },
+                {
+                    caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                    action: () => copyAddress(note.href)
                 }
         ]
 
@@ -526,7 +535,8 @@
     async function runAttachementPopupExplorer4SelectFromFolders(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            mode: 'FOLDERS',
+            rootFilter: 'FOLDERS',
+            leafFilter: ['Note', 'File'],
             destinationContainer: noteRef,
             onRefreshView: async (f) => await reloadWithAttachements(),
             ownCloseButton: true
@@ -534,10 +544,11 @@
     }
 
     
-    async function runPopupExplorerToPlaceElement(btt, aroundRect, element)
+    async function runPopupExplorer4CopyToFolder(btt, aroundRect, element)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            canSelectRootElements: true,
+            attachToContainer: true,
+            rootFilter: 'FOLDERS',
             onAttach: async (tmp, references) => {
                 await reef.post(`${element.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
                 await reloadData();
@@ -741,8 +752,17 @@
                                         action: (f) => copyTaskToBasket(),
                                     },
                                     {
-                                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                        action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, note)
+                                        caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
+                                        action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect, note)
+                                    },
+                                    { separator: true},
+                                    {
+                                        caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                                        action: () => openInNewTab(note.href)
+                                    },
+                                    {
+                                        caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                                        action: () => copyAddress(note.href)
                                     }
                                 ]
 
@@ -897,7 +917,7 @@
     async function runEditorPopupExplorer4SelectFromFolders(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            mode: 'FOLDERS',
+            rootFilter: 'FOLDERS',
             onAttach: (clipboard, elements) => makeLinkToElement(elements),
             ownCloseButton: true
         })
@@ -906,7 +926,7 @@
     async function runEditorPopupExplorer4SelectFromTaskLists(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            mode: 'TASKLISTS',
+            rootFilter: 'TASKLISTS',
             onAttach: (clipboard, elements) => makeLinkToElement(elements),
             ownCloseButton: true
         })
@@ -1059,8 +1079,17 @@
                         action: () => copyTaskToBasket(),
                     },
                     {
-                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                        action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, note)
+                        caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
+                        action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect, note)
+                    },
+                    { separator: true},
+                    {
+                        caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                        action: () => openInNewTab(note.href)
+                    },
+                    {
+                        caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                        action: () => copyAddress(note.href)
                     }
                 ],
         }
@@ -1386,8 +1415,17 @@
                                         action: (f) => cutAttachementToBasket(element, kind)
                                     },
                                     {
-                                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                        action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, element)
+                                        caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
+                                        action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect, element)
+                                    },
+                                    { separator: true},
+                                    {
+                                        caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                                        action: () => openInNewTab(element.href)
+                                    },
+                                    {
+                                        caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                                        action: () => copyAddress(element.href)
                                     }
                                 ]
                             },

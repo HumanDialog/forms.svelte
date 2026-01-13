@@ -19,7 +19,7 @@
                 Breadcrumb,
                 refreshToolbarOperations,
 				showFloatingToolbar,
-                reloadPageToolbarOperations, Paper, PaperHeader} from '$lib'
+                reloadPageToolbarOperations, Paper, PaperHeader, openInNewTab, copyAddress} from '$lib'
     import {FaRegFile, FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaSync,
         FaList, FaEllipsisH, FaChevronRight, FaChevronLeft, FaUpload, FaLink, FaUnlink, FaRegStar, FaStar, FaCut, FaRegComments, FaRegClipboard,
         FaRegCheckSquare, FaFileUpload, FaFile, FaCloudUploadAlt, FaDownload, FaCheckDouble, FaExternalLinkSquareAlt
@@ -752,7 +752,7 @@
     async function runPopupExplorer4SelectFromFolders(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            mode: 'FOLDERS',
+            rootFilter: 'FOLDERS',
             destinationContainer: contextPath,
             onRefreshView: refreshViewAfterAttachingFromBasket,
             ownCloseButton: true
@@ -762,23 +762,52 @@
     async function runPopupExplorer4SelectFromTaskLists(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            mode: 'TASKLISTS',
+            rootFilter: 'TASKLISTS',
             destinationContainer: contextPath,
             onRefreshView: refreshViewAfterAttachingFromBasket,
             ownCloseButton: true
         })
     }
 
-    async function runPopupExplorerToPlaceElement(btt, aroundRect, element, kind)
+    async function runPopupExplorer4CopyToFolder(btt, aroundRect, element, kind)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            canSelectRootElements: true,
+            rootFilter: 'FOLDERS',
+            attachToContainer: true,
+            canAttachAsRootFolder: kind=='FolderFolder' ? true : false,
             onAttach: async (tmp, references) => {
                 await reef.post(`${element.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
             },
             ownCloseButton: true
         })
     }
+
+    // todo
+    async function runPopupExplorer4MoveToFolder(btt, aroundRect, element, kind)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            rootFilter: 'FOLDERS',
+            attachToContainer: true,
+            canAttachAsRootFolder: kind=='FolderFolder' ? true : false,
+            onAttach: async (tmp, references) => {
+                await reef.post(`${element.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
+            },
+            ownCloseButton: true
+        })
+    }
+    
+    async function runPopupExplorer4SelectTaskList(btt, aroundRect, element, kind)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            rootFilter: 'TASKLISTS',
+            attachToContainer: true,
+            onAttach: async (tmp, references) => {
+                await reef.post(`${element.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
+            },
+            ownCloseButton: true
+        })
+    }
+    
 
     function  folderPageOperations()
     {
@@ -1153,9 +1182,31 @@
                                         action: (f) => cutElementToBasket(element, kind)
                                     },
                                     {
-                                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                        action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, element, kind)
+                                        caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
+                                        action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect, element, kind)
+                                    },
+                                    {
+                                        caption: '_; Move to folder; Mover a la carpeta; Przenieś do folderu',
+                                        action: (btt, rect) => runPopupExplorer4MoveToFolder(btt, rect, element, kind),
+                                        disabled: true // temporary
+                                    },
+                                    ... (kind != 'FolderTask') ? [] : 
+                                    [
+                                        {
+                                            caption: '_; Select a task list; Selecciona la lista de tareas; Wybierz listę zadań',
+                                            action: (btt, rect) => runPopupExplorer4SelectTaskList(btt, rect, element, kind)
+                                        }
+                                    ],
+                                    { separator: true},
+                                    {
+                                        caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                                        action: () => openInNewTab(element.href)
+                                    },
+                                    {
+                                        caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                                        action: () => copyAddress(element.href)
                                     }
+                                    
                                 ]
                             },
                             {

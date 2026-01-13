@@ -11,7 +11,7 @@
             pushChanges, setSelectionAtEnd, showFloatingToolbar,
 
 			Editable,
-
+            openInNewTab, copyAddress,
 			focusEditable
 
 
@@ -88,8 +88,17 @@
                                         action: (f) => copyNoteToBasket()
                                     },
                                     {
-                                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                        action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect)
+                                        caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
+                                        action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect)
+                                    },
+                                    { separator: true},
+                                    {
+                                        caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                                        action: () => openInNewTab(note.href)
+                                    },
+                                    {
+                                        caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                                        action: () => copyAddress(note.href)
                                     }
                                 ],
                             hideToolbarCaption: true
@@ -151,10 +160,11 @@
         await reef.post(`${note.$ref}/CopyToBasket`, {flags: 0}, onErrorShowAlert)
     }
 
-    async function runPopupExplorerToPlaceElement(btt, aroundRect)
+    async function runPopupExplorer4CopyToFolder(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            canSelectRootElements: true,
+            attachToContainer: true,
+            rootFilter: 'FOLDERS',
             onAttach: async (tmp, references) => {
                 await reef.post(`${note.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
             },

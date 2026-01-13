@@ -22,7 +22,7 @@
             IcH1, IcH2, IcH3, IcH4,
             selectable, isSelected, contextItemsStore, startEditing, hasModifications,
             Editable,
-
+            openInNewTab, copyAddress,
 			focusEditable
 
             } from '$lib'
@@ -238,7 +238,7 @@
     async function runEditorPopupExplorer4SelectFromFolders(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            mode: 'FOLDERS',
+            rootFilter: 'FOLDERS',
             onAttach: (clipboard, elements) => makeLinkToElement(elements),
             ownCloseButton: true
         })
@@ -247,7 +247,7 @@
     async function runEditorPopupExplorer4SelectFromTaskLists(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            mode: 'TASKLISTS',
+            rootFilter: 'TASKLISTS',
             onAttach: (clipboard, elements) => makeLinkToElement(elements),
             ownCloseButton: true
         })
@@ -598,8 +598,17 @@
                                         action: (f) => cutNoteToBasket()
                                     },
                                     {
-                                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                        action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect)
+                                        caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
+                                        action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect)
+                                    },
+                                    { separator: true},
+                                    {
+                                        caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                                        action: () => openInNewTab(note.href)
+                                    },
+                                    {
+                                        caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                                        action: () => copyAddress(note.href)
                                     }
                                 ]
                             },
@@ -785,8 +794,17 @@
                                         action: (f) => copyNoteToBasket(),
                                     },
                                     {
-                                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                        action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect)
+                                        caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
+                                        action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect)
+                                    },
+                                    { separator: true},
+                                    {
+                                        caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                                        action: () => openInNewTab(note.href)
+                                    },
+                                    {
+                                        caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                                        action: () => copyAddress(note.href)
                                     }
                                 ]
 
@@ -907,10 +925,11 @@
             await refreshParent()
     }
 
-    async function runPopupExplorerToPlaceElement(btt, aroundRect)
+    async function runPopupExplorer4CopyToFolder(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            canSelectRootElements: true,
+            attachToContainer: true,
+            rootFilter: 'FOLDERS',
             onAttach: async (tmp, references) => {
                 await reef.post(`${noteLink.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
             },
