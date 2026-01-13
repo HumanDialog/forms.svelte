@@ -127,7 +127,7 @@
                         Association: 'Tasks',
                         //Filter: 'State <> STATE_FINISHED',
                         //Sort: 'Order',
-                        Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'href', 'icon', 'IsInBasket', 'IsCanonical', 'icon', 'TaskId', '$type']
+                        Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'ListName', 'DueDate', 'href', 'icon', 'IsInBasket', 'IsCanonical', 'icon', 'TaskId', '$type']
 
                     },
                     {
@@ -1458,7 +1458,7 @@
         }
     }
 
-    let folder_properties = {
+    let prev_folder_properties = {
         element:{
             icon: "icon",
 
@@ -1475,7 +1475,7 @@
 
     }
 
-    let next_folder_properties = {
+    let folder_properties = {
         element:{
             Title: "Title",
             icon: "icon",
@@ -1491,10 +1491,10 @@
                 onOpen: downloadFile
             },
             FolderTask:{
-                properties: {
-                    t:{l: ['ListName','#barcode', 'StateCode', 'StateLabel'],
+                $properties: {
+                    t:{l: ['ListName','#barcode', '&State'],
                        c: [],
-                       r: ['DueDate']},
+                       r: [':DueDate']},
                     m:{},
                     b:{}
                 }
@@ -1502,6 +1502,33 @@
             }
         }
 
+    }
+
+    let folder_properties_f = {
+        element:{
+            Title: "Title",
+            icon: "icon",
+            micon: "#link",
+            shaow_micon: 'IsShortcut',
+            href: "href",
+
+            Summary: "Summary"
+        },
+        context:{
+            FolderFile:{
+                downloadable: true,
+                onOpen: downloadFile
+            },
+            FolderTask:{
+                $properties: {
+                    t:[['ListName','#barcode', '&State'],
+                       [],
+                       ['DueDate']],
+                    m:{},
+                    b:{}
+                }
+            }
+        }
     }
 
 

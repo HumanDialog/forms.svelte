@@ -362,7 +362,7 @@
                 <span></span>
                 <span></span>
                 <div class="flex flex-row text-orange-800 dark:text-orange-200">
-                    {#if columnDef.state >= 0}
+                    {#if columnDef.state >= 1000}
                         <span><Icon icon="barcode" s/></span>
                         <span>{Number(columnDef.state/1000)}</span>
                     {/if}

@@ -14,15 +14,17 @@
 			focusEditable,
     } from '../../../utils'
 
+
     import {showGridMenu, showMenu} from '../../menu'
     import {pushChanges, informModification} from '../../../updates'
 
     import { isDeviceSmallerThan } from '../../../utils'
+    import ListElementProperties from './list.element.properties.svelte'
     import Circle from '../../ricons/circle.svelte'
     import CircleCheck from '../../ricons/circle-check.svelte'
     import Ricon from  '../../r.icon.svelte'
     //import {get_ricon} from  '../../ricons.js'
-    
+
 
     import {rList_definition, rList_property_type} from '../List'
 	import { push, link } from 'svelte-spa-router';
@@ -92,6 +94,8 @@
 
     element_title = read_from_def('Title')
     summary = read_from_def('Summary');
+    let element_properties = read_from_def('$properties')
+
 
     let href = read_from_def('href')
     let element_href = href ? item[href] : ''
@@ -373,15 +377,11 @@
         bind:this={rootElement}
         use:selectable={item}
         on:click={(e) => {activate_row(e, item)}}>
-    <!-- comming soon - top info --
+    <!-- comming soon - top info -->
     <figcaption>
-        <div class="grid gap-4 grid-cols-3 grid-rows-1">
-            <span>OCT-254</span>
-            <span class="text-center"></span>
-            <span class="text-right">15 listopad 25</span>
-        </div>
+        <ListElementProperties self = {item} properties = {element_properties?.t}/>
     </figcaption>
-    -------------------------------->
+    <!-------------------------------->
     <!--@el------------------------->
     <h4 class="-indent-8 sm:hover:cursor-default">
         <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
@@ -520,10 +520,10 @@
                 <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
                         text-stone-700 dark:text-stone-400 ">
                         <Ricon icon={isDownloading ? 'loader-circle' : element_icon} />
-                </div><Editable     self={item} 
-                                    a={element_title} 
-                                    id="__or_list_ctrl_{getItemKey(item)}_Title" 
-                                    readonly={title_readonly} 
+                </div><Editable     self={item}
+                                    a={element_title}
+                                    id="__or_list_ctrl_{getItemKey(item)}_Title"
+                                    readonly={title_readonly}
                                     focusOnClick={false}/>
             </h4>
         </a>
@@ -535,10 +535,10 @@
                 <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
                         text-stone-700 dark:text-stone-400 ">
                         <Ricon icon={element_icon} />
-                </div><Editable     self={item} 
-                                    a={element_title} 
-                                    id="__or_list_ctrl_{getItemKey(item)}_Title" 
-                                    readonly={title_readonly} 
+                </div><Editable     self={item}
+                                    a={element_title}
+                                    id="__or_list_ctrl_{getItemKey(item)}_Title"
+                                    readonly={title_readonly}
                                     focusOnClick={false}/>
             </h4>
         </a>
@@ -551,10 +551,10 @@
                 <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
                         text-stone-700 dark:text-stone-400 ">
                         <Ricon icon={element_icon} />
-                </div><Editable     self={item} 
-                                    a={element_title} 
-                                    id="__or_list_ctrl_{getItemKey(item)}_Title" 
-                                    readonly={title_readonly} 
+                </div><Editable     self={item}
+                                    a={element_title}
+                                    id="__or_list_ctrl_{getItemKey(item)}_Title"
+                                    readonly={title_readonly}
                                     focusOnClick={false}/>
             </h4>
         </a>
@@ -563,9 +563,9 @@
             <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
                     text-stone-700 dark:text-stone-400 ">
                     <Ricon icon={element_icon} />
-            </div><Editable     self={item} 
-                                a={element_title} 
-                                id="__or_list_ctrl_{getItemKey(item)}_Title" 
+            </div><Editable     self={item}
+                                a={element_title}
+                                id="__or_list_ctrl_{getItemKey(item)}_Title"
                                 readonly={title_readonly}/>
         </h4>
     {/if}
@@ -581,7 +581,7 @@
     -------------------------------->
 
     {#if (summary && (item[summary])) || (placeholder=='Summary')}
-        <figcaption><Editable   self={item} 
+        <figcaption><Editable   self={item}
                             a={summary}
                             id="__or_list_ctrl_{getItemKey(item)}_Summary"
                             readonly={summary_readonly} />
