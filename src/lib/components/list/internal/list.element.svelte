@@ -423,15 +423,11 @@
             use:selectable={item}
             on:click={onToggleMultiSelect}>
 <figure class={multiselect_class} bind:this={rootElement}>
-    <!-- comming soon - top info --
+    <!-- comming soon - top info -->
     <figcaption>
-        <div class="grid gap-4 grid-cols-3 grid-rows-1">
-            <span>OCT-254</span>
-            <span class="text-center"></span>
-            <span class="text-right">15 listopad 25</span>
-        </div>
+        <ListElementProperties self = {item} properties = {element_properties?.t}/>
     </figcaption>
-    -------------------------------->
+    <!-------------------------------->
     <!--@el------------------------->
     <h4 class="-indent-16 sm:hover:cursor-default"
         >
@@ -501,15 +497,11 @@
         use:selectable={item}
         on:click={(e) => {activate_row(e, item)}}
         >
-    <!-- comming soon - top info --
+    <!-- comming soon - top info -->
     <figcaption>
-        <div class="grid gap-4 grid-cols-3 grid-rows-1">
-            <span>OCT-254</span>
-            <span class="text-center"></span>
-            <span class="text-right">15 listopad 25</span>
-        </div>
-    </figcaption> #active
-    -------------------------------->
+        <ListElementProperties self = {item} properties = {element_properties?.t}/>
+    </figcaption>
+    <!-------------------------------->
     <!--@el------------------------->
     {#if download}
         <a  class="sm:hover:cursor-pointer"

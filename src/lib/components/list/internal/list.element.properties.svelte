@@ -1,7 +1,7 @@
 
 <script lang="ts">
     import RIcon from '$lib/components/r.icon.svelte';
-    //import getNiceStringDate from
+    import {getNiceStringDate} from '../../date_utils'
 
     export let self;
     export let properties:  object | undefined = undefined;
@@ -14,8 +14,13 @@
         if(!group)
             return false;
         if(group.length > 0)
-            if(self[group[0]])
-                return true;
+        {
+            let prop = group[0]
+            if(prop[0]=='#' || prop[0] == '&' || prop[0] == ':')
+                prop = prop.substr(1)
+            if(self[prop])
+                return true
+        }
         return false;
     }
 
@@ -35,7 +40,7 @@
 
     function prop_is_text(prop)
     {
-        if(prop[0]!='#' && prop[0] != '&')
+        if(prop[0]!='#' && prop[0] != '&' && prop[0] != ':')
             return true;
         return false;
     }
@@ -50,6 +55,13 @@
     function prop_is_tnumber(prop)
     {
         if(prop[0]=='&' )
+            return true;
+        return false;
+    }
+
+    function prop_is_date(prop)
+    {
+        if(prop[0]==':' )
             return true;
         return false;
     }
@@ -71,6 +83,8 @@
                 <span><RIcon icon={prop.substr(1)} size = {icons_size}/></span>
             {:else if prop_is_tnumber(prop)}
                 <span>{ Number(self[prop.substr(1)]/1000) }</span>
+            {:else if prop_is_date(prop)}
+                <span>{getNiceStringDate(self[prop.substr(1)])}</span>
             {:else}
                 <span>{prop}</span>
             {/if}
@@ -89,6 +103,8 @@
                 <span><RIcon icon={prop.substr(1)} size = {icons_size}/></span>
             {:else if prop_is_tnumber(prop)}
                 <span>{ Number(self[prop.substr(1)]/1000) }</span>
+            {:else if prop_is_date(prop)}
+                <span>{getNiceStringDate(self[prop.substr(1)])}</span>
             {:else}
                 <span>{prop}</span>
             {/if}
@@ -107,6 +123,8 @@
                 <span><RIcon icon={prop.substr(1)} size = {icons_size}/></span>
             {:else if prop_is_tnumber(prop)}
                 <span>{ Number(self[prop.substr(1)]/1000) }</span>
+            {:else if prop_is_date(prop)}
+                <span>{getNiceStringDate(self[prop.substr(1)])}</span>
             {:else}
                 <span>{prop}</span>
             {/if}
