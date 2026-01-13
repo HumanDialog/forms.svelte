@@ -99,7 +99,7 @@
                                     {
                                         Id: 122,
                                         Association: 'Notes',
-                                        Expressions:['Id','$ref', 'Title', 'href', 'Summary', 'Order', '$type'],
+                                        Expressions:['Id','$ref', 'Title', 'href', 'Summary', 'Order', 'icon', '$type'],
                                     },
                                     {
                                         Id: 123,
@@ -432,7 +432,7 @@
                         <svelte:fragment let:item let:idx>
                             {@const href = item.href}
                             <SidebarItem   {href}
-                                            icon = 'file-text'
+                                            icon = {item.icon}
                                             bind:this={navPinnedItems[idx]}
                                             active={isRoutingTo(href, currentPath)}
                                             >

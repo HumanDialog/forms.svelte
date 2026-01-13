@@ -414,7 +414,7 @@
                                 },
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                                    action: runPopupExplorer4Task
+                                    action: runAttachementPopupExplorer4SelectFromFolders
                                 },
                                 {
                                     separator: true
@@ -502,15 +502,17 @@
         })
     }
 
-    async function runPopupExplorer4Task(btt, aroundRect)
+    async function runAttachementPopupExplorer4SelectFromFolders(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
+            mode: 'FOLDERS',
             destinationContainer: taskRef,
             onRefreshView: async (f) => await reloadWithAttachements(),
             ownCloseButton: true
         })
     }
 
+    
     async function runPopupExplorerToPlaceElement(btt, aroundRect, element)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
@@ -728,7 +730,7 @@
                                 },
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                                    action: runPopupExplorer4Task
+                                    action: runAttachementPopupExplorer4SelectFromFolders
                                 },
                                 {
                                     separator: true
@@ -951,7 +953,7 @@
                                 },
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                                    action: runPopupExplorer4Task
+                                    action: runAttachementPopupExplorer4SelectFromFolders
                                 },
                                 {
                                     separator: true
@@ -1013,7 +1015,11 @@
                     },
                     {
                         caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                        action: runPopupExplorer4Editor
+                        action: runEditorPopupExplorer4SelectFromFolders
+                    },
+                    {
+                        caption: '_; Select from task lists; Seleccionar de listas de tareas; Wybierz z listy zadań',
+                        action: runEditorPopupExplorer4SelectFromTaskLists
                     },
                     {
                         separator: true
@@ -1075,9 +1081,19 @@
         })
     }
 
-    async function runPopupExplorer4Editor(btt, aroundRect)
+    async function runEditorPopupExplorer4SelectFromFolders(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
+            mode: 'FOLDERS',
+            onAttach: (clipboard, elements) => makeLinkToElement(elements),
+            ownCloseButton: true
+        })
+    }
+
+    async function runEditorPopupExplorer4SelectFromTaskLists(btt, aroundRect)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            mode: 'TASKLISTS',
             onAttach: (clipboard, elements) => makeLinkToElement(elements),
             ownCloseButton: true
         })

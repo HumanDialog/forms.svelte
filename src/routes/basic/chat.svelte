@@ -458,7 +458,11 @@
             },
             {
                 caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                action: runPopupExplorer
+                action: runPopupExplorer4SelectFromFolders
+            },
+            {
+                caption: '_; Select from task lists; Seleccionar de listas de tareas; Wybierz z listy zadań',
+                action: runPopupExplorer4SelectFromTaskLists
             }
         ]
 
@@ -499,9 +503,19 @@
         })
     }
 
-    async function runPopupExplorer(btt, aroundRect)
+    async function runPopupExplorer4SelectFromFolders(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
+            mode: 'FOLDERS',
+            onAttach: (basketItem, refs) => onAttachBasket(refs),
+            ownCloseButton: true
+        })
+    }
+
+    async function runPopupExplorer4SelectFromTaskLists(btt, aroundRect)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            mode: 'TASKLISTS',
             onAttach: (basketItem, refs) => onAttachBasket(refs),
             ownCloseButton: true
         })

@@ -170,8 +170,13 @@
                     },
                     {
                         caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                        action: runPopupExplorer4Editor
-                    }/* temporary off, refreshing issues,
+                        action: runEditorPopupExplorer4SelectFromFolders
+                    },
+                    {
+                        caption: '_; Select from task lists; Seleccionar de listas de tareas; Wybierz z listy zadań',
+                        action: runEditorPopupExplorer4SelectFromTaskLists
+                    }
+                    /* temporary off, refreshing issues,
                     {
                         separator: true
                     },
@@ -230,13 +235,25 @@
         })
     }
 
-    async function runPopupExplorer4Editor(btt, aroundRect)
+    async function runEditorPopupExplorer4SelectFromFolders(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
+            mode: 'FOLDERS',
             onAttach: (clipboard, elements) => makeLinkToElement(elements),
             ownCloseButton: true
         })
     }
+
+    async function runEditorPopupExplorer4SelectFromTaskLists(btt, aroundRect)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            mode: 'TASKLISTS',
+            onAttach: (clipboard, elements) => makeLinkToElement(elements),
+            ownCloseButton: true
+        })
+    }
+
+    
 
     async function runNoteCreator4Editor()
     {

@@ -22,6 +22,7 @@
     export let onRefreshView = undefined
     export let onAttach = undefined
     export let canSelectRootElements = false
+    export let mode = 'ALL' // 'FOLDERS' | 'TASKLISTS'
 
     export let whatToShow = undefined
 
@@ -32,6 +33,7 @@
 
     let reloadTicket = -1
     let lastReloadTicket = 0
+    let lastLocationKey = `lastPopupExplorerLocation_${mode}`
 
     const EIF_ITEM              =  0x00000000
     const EIF_CUT               =  0x00000001
@@ -52,8 +54,8 @@
 
         if(whatToShow == undefined)
         {
-            if(localStorage.lastPopupExplorerLocation)
-                whatToShow = localStorage.lastPopupExplorerLocation
+            if(localStorage[lastLocationKey])
+                whatToShow = localStorage[lastLocationKey]
             else
                 whatToShow = '/root'
         }
@@ -74,6 +76,10 @@
 
         case '/alllists':
             elements = await generateGroupListsReferences()
+            break;
+
+        case '/pinned':
+            elements = await generatePinnedElementsReferences()
             break;
 
         case '/myfolders':
@@ -106,18 +112,19 @@
         levelUpHRef = ''
         currentLevelTitle = __APP_TITLE__
 
-        let references = [
-            {
-                ElementId: 0,
-                ElementType: '',
-                ElementNav: '',
-                Title: '_; My tasks; Mis tareas; Moje zadania',
-                Summary: '',
-                icon: 'square-pen',
-                href: '/mytasks',
-                ElementInfo: 0,
-                $ref: 'mytasks'
-            },
+        const my_tasks = {
+            ElementId: 0,
+            ElementType: '',
+            ElementNav: '',
+            Title: '_; My tasks; Mis tareas; Moje zadania',
+            Summary: '',
+            icon: 'square-pen',
+            href: '/mytasks',
+            ElementInfo: 0,
+            $ref: 'mytasks'
+        }
+
+        const root_tasklists = [
             {
                 ElementId: 0,
                 ElementType: '',
@@ -139,6 +146,20 @@
                 href: '/alllists',
                 ElementInfo: 0,
                 $ref: 'alllists'
+            }
+        ]
+
+        const root_folders = [
+            {
+                ElementId: 0,
+                ElementType: '',
+                ElementNav: '',
+                Title: '_; Pinned; Fijado; Przypięte',
+                Summary: '',
+                icon: 'folder',
+                href: '/pinned',
+                ElementInfo: 0,
+                $ref: 'pinned'
             },
             {
                 ElementId: 0,
@@ -164,7 +185,29 @@
             }
         ]
 
-        return references;
+        if(mode == 'ALL')
+        {
+            return [ 
+                my_tasks,
+                ...root_tasklists,
+                ...root_folders
+            ]
+        }
+        else if(mode == 'FOLDERS')
+        {
+            return [
+                ...root_folders
+            ]
+        }
+        else if(mode == 'TASKLISTS')
+        {
+            return [
+                ...root_tasklists
+            ]
+        }
+        else
+            return []
+        
     }
 
     async function generateMyTasksReferences()
@@ -188,7 +231,7 @@
                     Title: t.Title,
                     Summary: t.Summary,
                     icon: t.icon,
-                    href: t.href,
+                    //href: t.href,
                     ElementInfo: 0,
                     $ref: t.$ref
                 })
@@ -250,6 +293,146 @@
                     Summary: t.Summary,
                     icon: 'notebook',
                     href: t.href,
+                    ElementInfo: 0,
+                    $ref: t.$ref
+                })
+            })
+
+            return references
+        }
+    }
+
+    async function generatePinnedElementsReferences()
+    {
+        canSelectElements = canSelectRootElements
+        levelUpHRef = '/root'
+        currentLevelTitle = '_; Pinned; Fijado; Przypięte'
+
+        let res = await reef.post('/user/PinnedFolders/query', 
+            {
+                Id: 1,
+                                Name: "collector",
+                                ExpandLevel: 3,
+                                Tree:
+                                [
+                                    {
+                                        Id: 1,
+                                        Association: '',
+                                        Expressions:['Title'],
+                                        SubTree:
+                                        [
+                                            {
+                                                Id: 2,
+                                                Association: 'Folders',
+                                                Expressions:['FolderId','$ref', 'Title', 'Summary', 'Order', 'href', 'icon', '$type']
+
+                                            },
+                                            {
+                                                Id: 3,
+                                                Association: 'Notes',
+                                                Expressions:['NoteId', '$ref', 'Title', 'Summary', 'Order', 'href', 'icon',  '$type']
+
+                                            },
+                                            {
+                                                Id: 4,
+                                                Association: 'Tasks',
+                                                Expressions:['TaskId', '$ref', 'Title', 'Summary', 'Order', 'href', 'icon', '$type']
+
+                                            },
+                                            {
+                                                Id: 5,
+                                                Association: 'Files',
+                                                Expressions:['FileId', '$ref', 'Title', 'Summary', 'Order', 'href', 'icon', '$type']
+
+                                            }
+                                        ]
+                                    }
+                                ]
+            }
+        );
+        if(!res)
+            return [  ]
+        else
+        {
+            let references = [ ]
+
+            let contextItem = res.Folder
+            let allElements = []
+            if(contextItem.Folders && contextItem.Folders.length > 0)
+            {
+                contextItem.Folders.forEach((f) => {
+                    allElements.push({
+                        Id: f.FolderId,
+                        $type: 'Folder',
+                        Title: f.Title,
+                        Summary: f.Summary,
+                        icon: f.icon,
+                        href: f.href,
+                        Order: f.Order,
+                        $ref: `./Folder/${f.FolderId}`
+                    })
+                })
+            }
+
+            if(contextItem.Notes && contextItem.Notes.length > 0)
+            {
+                contextItem.Notes.forEach((f) => {
+                    allElements.push({
+                        Id: f.NoteId,
+                        $type: 'Note',
+                        Title: f.Title,
+                        Summary: f.Summary,
+                        icon: f.icon,
+                        //href: f.href,
+                        Order: f.Order,
+                        $ref: `./Note/${f.NoteId}`
+                    })
+                })
+            }
+
+            if(contextItem.Tasks && contextItem.Tasks.length > 0)
+            {
+                contextItem.Tasks.forEach((f) => {
+                    allElements.push({
+                        Id: f.TaskId,
+                        $type: 'Task',
+                        Title: f.Title,
+                        Summary: f.Summary,
+                        icon: f.icon,
+                        //href: f.href,
+                        Order: f.Order,
+                        $ref: `./Task/${f.TaskId}`
+                    })
+                })
+            }
+
+            if(contextItem.Files && contextItem.Files.length > 0)
+            {
+                contextItem.Files.forEach((f) => {
+                    allElements.push({
+                        Id: f.FileId,
+                        $type: 'UploadedFile',
+                        Title: f.Title,
+                        Summary: f.Summary,
+                        icon: f.icon,
+                        //href: f.href,
+                        Order: f.Order,
+                        $ref: `./UploadedFile/${f.FileId}`
+                    })
+                })
+            }
+
+            allElements.sort((a,b) => a.Order - b.Order)
+
+            allElements.forEach(t => {
+                references.push({
+                    ElementId: t.Id,
+                    ElementType: t.$type,
+                    ElementNav: t.$ref,
+                    Title: t.Title,
+                    Summary: t.Summary,
+                    icon: t.icon,
+                    href: t.href ?? undefined,
                     ElementInfo: 0,
                     $ref: t.$ref
                 })
@@ -419,7 +602,7 @@
                         Title: f.Title,
                         Summary: f.Summary,
                         icon: f.icon,
-                        href: f.href,
+                        //href: f.href,
                         Order: f.Order,
                         $ref: `./Note/${f.NoteId}`
                     })
@@ -435,7 +618,7 @@
                         Title: f.Title,
                         Summary: f.Summary,
                         icon: f.icon,
-                        href: f.href,
+                        //href: f.href,
                         Order: f.Order,
                         $ref: `./Task/${f.TaskId}`
                     })
@@ -451,7 +634,7 @@
                         Title: f.Title,
                         Summary: f.Summary,
                         icon: f.icon,
-                        href: f.href,
+                        //href: f.href,
                         Order: f.Order,
                         $ref: `./UploadedFile/${f.FileId}`
                     })
@@ -468,7 +651,7 @@
                     Title: t.Title,
                     Summary: t.Summary,
                     icon: t.icon,
-                    href: t.href,
+                    href: t.href ?? undefined,
                     ElementInfo: 0,
                     $ref: t.$ref
                 })
@@ -540,7 +723,7 @@
                     Title: t.Title,
                     Summary: t.Summary,
                     icon: t.icon,
-                    href: t.href,
+                    //href: t.href,
                     ElementInfo: 0,
                     $ref: t.$ref
                 })
@@ -636,7 +819,7 @@
                         Title: t.Title,
                         Summary: t.Summary,
                         icon: t.icon,
-                        href: t.href,
+                        //href: t.href,
                         ElementInfo: 0,
                         $ref: `./UploadedFile/${t.FileId}`
                     })
@@ -733,7 +916,7 @@
                         Title: t.Title,
                         Summary: t.Summary,
                         icon: t.icon,
-                        href: t.href,
+                        //href: t.href,
                         ElementInfo: 0,
                         $ref: `./UploadedFile/${t.FileId}`
                     })
@@ -824,7 +1007,7 @@
     function onOpen(item)
     {
         whatToShow = item.href
-        localStorage.lastPopupExplorerLocation = whatToShow
+        localStorage[lastLocationKey] = whatToShow
 
         clearActiveItem('handy')
         selectedElements = getSelectedItems($contextItemsStore)
@@ -837,7 +1020,7 @@
         if(levelUpHRef)
         {
             whatToShow = levelUpHRef
-            localStorage.lastPopupExplorerLocation = whatToShow
+            localStorage[lastLocationKey] = whatToShow
 
             clearActiveItem('handy')
             reload();
