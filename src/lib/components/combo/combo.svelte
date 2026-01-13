@@ -519,7 +519,6 @@
 
     async function on_choose(itm :rCombo_item|null)
     {
-        //console.log('on_choose')
         hide();
 
         let success: boolean = true;
@@ -549,6 +548,7 @@
         {
             if( isAssociation )
             {
+            
                 /*if(choiceCallback)
                 {
                     let body = {
@@ -608,6 +608,9 @@
                         tick_request_internal = tick_request_internal + 1;
                     }
                     */
+
+                    //console.log('on_choose', itm, itm.Key, item, a, typename, name)
+
                     if(itm)
                     {
                         let name = definition.element_name ?? '$display'
@@ -635,6 +638,7 @@
             }
             else    // or simple property
             {
+                
                 /*if(choiceCallback)
                 {
                     let path :string;
@@ -973,7 +977,11 @@
             contenteditable={is_dropdown_open && filtered}
             on:keydown={on_keydown}
             >{combo_text}</span>
-        <Ricon icon = "chevron-down" size="s"/>
+        {#if can_be_activated}
+            <Ricon icon = "chevron-down" size="xs"/>
+        {:else}
+            <span class="w-[16px]"/>    <!-- Ricon xs space -->
+        {/if}
     </span>
 {/if}
 

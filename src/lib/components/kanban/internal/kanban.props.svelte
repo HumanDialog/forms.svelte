@@ -91,7 +91,7 @@
             await tick();
             combo = propElements[propIdx];
             if(!!combo)
-                combo.show(undefined, () => {placeholder = ''});
+                combo.show(undefined, () => {placeholder = ''; });
         }
     }
 
@@ -109,7 +109,7 @@
             await tick();
             combo = propElements[propIdx];
             if(!!combo)
-                combo.show(undefined, () => {placeholder = ''});
+                combo.show(undefined, () => {placeholder = ''; });
         }
     }
 
@@ -124,7 +124,7 @@
             await tick();
             tags = propElements[propIdx];
             if(!!tags)
-                tags.show(undefined, () => {placeholder = ''});
+                tags.show(undefined, () => {placeholder = ''; });
         }
     }
 
@@ -134,7 +134,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-structure -->
-{#if properties && properties_no > 0}
+{#if properties && (properties_no > 0 || placeholder != '')}
 <figcaption class = "kanban-prooperties">
 <div class="flex flex-row justify-between">
     {#each properties as prop, idx}
@@ -162,7 +162,7 @@
                         icon={false}
                         definition={prop.combo_definition}
                         s="sm"
-                        changed={(k,n) => { /*fake assignment for component rer-ender*/ item[prop.a] = item[prop.a]; }}
+                        changed={(k,n) => { /*fake assignment for component rer-ender*/ item[prop.a] = item[prop.a]; properties_no = count_properties() }}
                         bind:this={propElements[idx]}/>
             {:else if prop.type == rList_property_type.Static}
                 <span
