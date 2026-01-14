@@ -108,11 +108,40 @@
         await reloadFolders(listComponent.SELECT_NEXT)
     }
 
+    const FK_FOLDER = 0
+    const FK_DISCUSSION = 2
+    let insertKind = FK_FOLDER
+    
+    async function addElement(newFolderAttribs)
+    {
+        switch(insertKind)
+        {
+        case FK_FOLDER:
+            return await addFolder(newFolderAttribs)
+
+        case FK_DISCUSSION:
+            return await addForum(newFolderAttribs)
+        }
+    }
 
     async function addFolder(newFolderAttribs)
     {
-        //let res = await reef.post("/group/Folders/new", newFolderAttribs, onErrorShowAlert);
         let res = await reef.post("/group/CreateFolder", {
+            title: newFolderAttribs.Title,
+            order: newFolderAttribs.Order ?? 0,
+            summary: newFolderAttribs.Summary ?? '',
+        }, onErrorShowAlert)
+
+        if(!res)
+            return null;
+
+        let newFolder = res.Folder;
+        await reloadFolders(newFolder.$ref)
+    }
+
+    async function addForum(newFolderAttribs) 
+    {
+        let res = await reef.post("/group/CreateForum", {
             title: newFolderAttribs.Title,
             order: newFolderAttribs.Order ?? 0,
             summary: newFolderAttribs.Summary ?? ''
@@ -135,9 +164,16 @@
                     {
                         caption: '_; New folder; Nueva carpeta; Nowy folder',
                         mricon: 'folder',
-                        action: (focused) => { listComponent.addRowAfter(null) },
+                        action: (focused) => { insertKind=FK_FOLDER; listComponent.addRowAfter(null) },
                         tbr: 'A',
                         fab: 'M03'
+                    },
+                    {
+                        caption: '_; New forum; Nuevo foro; Nowe forum',
+                        mricon: 'messages-square',
+                        action: (focused) => { insertKind=FK_DISCUSSION; listComponent.addRowAfter(null) },
+                        tbr: 'A',
+                        fab: 'M04'
                     }
                 ]
             }
@@ -164,9 +200,16 @@
                         {
                             caption: '_; New folder; Nueva carpeta; Nowy folder',
                             mricon: 'folder',
-                            action: (focused) => { listComponent.addRowAfter(folder) },
+                            action: () => { insertKind=FK_FOLDER;  listComponent.addRowAfter(folder) },
                             tbr: 'A',
                             fab: 'M03'
+                        },
+                        {
+                            caption: '_; New forum; Nuevo foro; Nowe forum',
+                            mricon: 'messages-square',
+                            action: () => { insertKind=FK_DISCUSSION; listComponent.addRowAfter(null) },
+                            tbr: 'A',
+                            fab: 'M04'
                         }
                     ]
                 },
@@ -325,7 +368,7 @@
                 orderAttrib='Order'
                 bind:this={listComponent}>
 
-            <ListInserter action={addFolder} icon/>
+            <ListInserter action={addElement} icon/>
 
 
         </List>

@@ -72,9 +72,9 @@
     export let chat :object|undefined = undefined;
     export let readOnly = false;
 
-    export let extraFrontPaletteCommands = []
-    export let extraBackPaletteCommands = []
-    export let extraInsertPaletteCommands = []
+    export let extraFrontPaletteCommands :Array<object>|Function|undefined = undefined
+    export let extraBackPaletteCommands :Array<object>|Function|undefined = undefined
+    export let extraInsertPaletteCommands :Array<object>|Function|undefined = undefined
 
     let onFinishEditing = undefined;
     export function run(onStop=undefined)
@@ -175,9 +175,22 @@
     {
         let operations = []
 
-        if(extraInsertPaletteCommands && extraInsertPaletteCommands.length > 0)
+        let additionalCommands = []
+        if(extraInsertPaletteCommands)
         {
-            extraInsertPaletteCommands.forEach(exc => {
+            if(typeof extraInsertPaletteCommands === 'function')   
+            {
+                additionalCommands = extraInsertPaletteCommands()
+            }
+            else if(Array.isArray(extraInsertPaletteCommands) && (extraInsertPaletteCommands.length > 0))
+            {
+                additionalCommands = extraInsertPaletteCommands
+            }
+        }
+
+        if(additionalCommands && additionalCommands.length > 0)
+        {
+            additionalCommands.forEach(exc => {
                 operations = [...operations, exc]
             })
         }
@@ -1596,7 +1609,7 @@
     ]
 
     const paletteStylesCommands = () => [
-        {   caption: i18n({en: 'Heading 1', es: 'Título 1', pl: 'Nagłówek 1#'}),      description: 'Description heading',           tags: 'h1,head',      mricon: 'heading-1',                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 1}).run(); else editor.chain().focus().setHeading({ level: 1 }).run() },   is_active: () => editor?.isActive('heading', {level: 1})  } ,
+        {   caption: i18n({en: 'Heading 1', es: 'Título 1', pl: 'Nagłówek 1'}),      description: 'Description heading',           tags: 'h1,head',      mricon: 'heading-1',                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 1}).run(); else editor.chain().focus().setHeading({ level: 1 }).run() },   is_active: () => editor?.isActive('heading', {level: 1})  } ,
         {   caption: i18n({en: 'Heading 2', es: 'Título 2', pl: 'Nagłówek 2'}),      description: 'Secondary heading',             tags: 'h2,head',      mricon: 'heading-2',                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 2}).run(); else editor.chain().focus().setHeading({ level: 2 }).run() },   is_active: () => editor?.isActive('heading', {level: 2}) } ,
         {   caption: i18n({en: 'Heading 3', es: 'Título 3', pl: 'Nagłówek 3'}),      description: 'Secondary heading',             tags: 'h3,head',      mricon: 'heading-3',                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 3}).run(); else editor.chain().focus().setHeading({ level: 3 }).run() },   is_active: () => editor?.isActive('heading', {level: 3}) } ,
         {   caption: i18n({en: 'Heading 4', es: 'Título 4', pl: 'Nagłówek 4'}),      description: 'Secondary heading',             tags: 'h4,head',      mricon: 'heading-4',                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 4}).run(); else editor.chain().focus().setHeading({ level: 4 }).run() },   is_active: () => editor?.isActive('heading', {level: 4}) } ,
@@ -1683,9 +1696,22 @@
     function getPaletteCommands()
     {
         let commands = [];
-        if(extraFrontPaletteCommands && extraFrontPaletteCommands.length > 0)
+        let additionalCommands = []
+        if(extraFrontPaletteCommands)
         {
-            extraFrontPaletteCommands.forEach(exc => {
+            if(typeof extraFrontPaletteCommands === 'function')   
+            {
+                additionalCommands = extraFrontPaletteCommands()
+            }
+            else if(Array.isArray(extraFrontPaletteCommands) && (extraFrontPaletteCommands.length > 0))
+            {
+                additionalCommands = extraFrontPaletteCommands
+            }
+        }
+
+        if(additionalCommands && additionalCommands.length > 0)
+        {
+            additionalCommands.forEach(exc => {
                 commands.push({
                     caption: exc.caption,
                     description: exc.description,
@@ -1723,9 +1749,23 @@
 
 
         commands = [...commands, {   caption: i18n({en: 'Insert', es: 'Insertar', pl: 'Wstaw'}),  separator: true }]
-        if(extraInsertPaletteCommands && extraInsertPaletteCommands.length > 0)
+
+        additionalCommands = []
+        if(extraInsertPaletteCommands)
         {
-            extraInsertPaletteCommands.forEach(exc => {
+            if(typeof extraInsertPaletteCommands === 'function')   
+            {
+                additionalCommands = extraInsertPaletteCommands()
+            }
+            else if(Array.isArray(extraInsertPaletteCommands) && (extraInsertPaletteCommands.length > 0))
+            {
+                additionalCommands = extraInsertPaletteCommands
+            }
+        }
+
+        if(additionalCommands && additionalCommands.length > 0)
+        {
+            additionalCommands.forEach(exc => {
                 commands.push({
                     caption: exc.caption,
                     description: exc.description,
@@ -1755,11 +1795,24 @@
 
         commands = [...commands, ...paletteInsertCommands()]
 
-        if(extraBackPaletteCommands && extraBackPaletteCommands.length > 0)
+        additionalCommands = []
+        if(extraBackPaletteCommands)
+        {
+            if(typeof extraBackPaletteCommands === 'function')   
+            {
+                additionalCommands = extraBackPaletteCommands()
+            }
+            else if(Array.isArray(extraBackPaletteCommands) && (extraBackPaletteCommands.length > 0))
+            {
+                additionalCommands = extraBackPaletteCommands
+            }
+        }
+
+        if(additionalCommands && additionalCommands.length > 0)
         {
             commands.push({ separator: true})
 
-            extraBackPaletteCommands.forEach(exc => {
+            additionalCommands.forEach(exc => {
                 commands.push({
                     caption: exc.caption,
                     description: exc.description,

@@ -489,8 +489,7 @@
         bg-stone-200 dark:bg-stone-700
         outline outline-8
         outline-stone-200 dark:outline-stone-700
-        ring-1 ring-offset-8
-        ring-stone-300 dark:ring-stone-700
+        
         "
 
         bind:this={rootElement}
@@ -508,7 +507,7 @@
             href={element_href}
             on:click={onDownloadFile}>
 
-            <h4 class="-indent-8">
+            <h4 class="-indent-8 mt-0">
                 <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
                         text-stone-700 dark:text-stone-400 ">
                         <Ricon icon={isDownloading ? 'loader-circle' : element_icon} />
@@ -523,7 +522,7 @@
         <a  class="sm:hover:cursor-pointer"
             href={element_href} use:link>
 
-            <h4 class="-indent-8 ">
+            <h4 class="-indent-8 mt-0">
                 <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
                         text-stone-700 dark:text-stone-400 ">
                         <Ricon icon={element_icon} />
@@ -539,7 +538,7 @@
             href="/#"
             on:click|preventDefault={() => element_open_handler(item)}>
 
-            <h4 class="-indent-8">
+            <h4 class="-indent-8 mt-0">
                 <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
                         text-stone-700 dark:text-stone-400 ">
                         <Ricon icon={element_icon} />

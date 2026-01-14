@@ -5,7 +5,7 @@
     import {contextItemsStore, contextTypesStore, data_tick_store } from '../../stores'
     import KanbanColumn from './internal/kanban.column.svelte'
 	import { informModification, pushChanges } from '$lib/updates';
-    import {Editable} from '$lib'
+    import {Editable, focusEditable} from '$lib'
     export let self                 = null;
     export let title:               string = ''
     export let summary:             string = ''
@@ -202,6 +202,16 @@
             if(card)
                 card.editProperty(field)
         }
+    }
+
+    export function editTitle()
+    {
+        focusEditable(title)
+    }
+
+    export function editSummary()
+    {
+        focusEditable(summary)
     }
 
     let columns = []

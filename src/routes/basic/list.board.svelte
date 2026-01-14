@@ -266,6 +266,23 @@
                             tbr: 'A',
                             fab: 'M01'
                         },
+                        {separator: true, tbr: 'A'},
+                        {
+                            caption: '_; Edit; Editar; Edytuj',
+                            mricon: 'pencil',
+                            tbr: 'A',
+                            fab:'M20',
+                            grid:[
+                                {
+                                    caption: '_; Title; Título; Tytuł',
+                                    action: () =>  { kanban.editTitle() },
+                                },
+                                {
+                                    caption: '_; Summary; Resumen; Podsumowanie',
+                                    action: () =>  { kanban.editSummary() }
+                                }
+                            ]
+                        },
                         {
                             mricon: 'download',
                             caption: '_; Insert; Insertar; Wstaw',
@@ -298,11 +315,7 @@
                         {
                             separator: true
                         },
-                        {
-                            caption: '_; Follow; Seguir; Obserwuj',
-                            action: (f) => toggleSubscribe(),
-                            activeFunc: () => currentList.IsSubscribed
-                        },
+                        ... (currentList.IsSubscribed ? [unfollowOperation] : [followOperation]),
                         {
                             //icon: FaRandom,
                             caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
@@ -559,11 +572,7 @@
                         {
                             separator: true
                         },
-                        {
-                            caption: '_; Follow; Seguir; Obserwuj',
-                            action: (f) => toggleSubscribe(),
-                            activeFunc: () => currentList.IsSubscribed
-                        },
+                        ... (currentList.IsSubscribed ? [unfollowOperation] : [followOperation]),
                         {
                             caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
                             action: changeListKind,
@@ -792,10 +801,28 @@
         ];
     }
 
+    const unfollowOperation = {
+        caption: '_; Unfollow; Dejar de seguir; Przestań obserwować',
+        mricon: 'heart-off',
+        tbr: 'C',
+        fab: 'S20',
+        hideToolbarCaption: true,
+        action: (f) => toggleSubscribe()
+    }
 
+    const followOperation = {
+        caption: '_; Follow; Seguir; Obserwuj',
+        mricon: 'heart',
+        tbr: 'C',
+        fab: 'S20',
+        hideToolbarCaption: true,
+        action: (f) => toggleSubscribe()
+    }
 
     function getColumnOperations(columnIdx, taskState)
     {
+        
+
         const mobile = isDeviceSmallerThan("sm")
         return {
             opver: 2,
@@ -812,6 +839,23 @@
                             action: (f) => kanban.add(KanbanColumnBottom, columnIdx),
                             fab: 'M01',
                             tbr: 'A'
+                        },
+                        {separator: true, tbr: 'A'},
+                        {
+                            caption: '_; Edit; Editar; Edytuj',
+                            mricon: 'pencil',
+                            tbr: 'A',
+                            fab:'M20',
+                            grid:[
+                                {
+                                    caption: '_; Title; Título; Tytuł',
+                                    action: () =>  { kanban.editTitle() },
+                                },
+                                {
+                                    caption: '_; Summary; Resumen; Podsumowanie',
+                                    action: () =>  { kanban.editSummary() }
+                                }
+                            ]
                         },
                         {
                             mricon: 'download',
@@ -845,11 +889,7 @@
                         {
                             separator: true
                         },
-                        {
-                            caption: '_; Follow; Seguir; Obserwuj',
-                            action: (f) => toggleSubscribe(),
-                            activeFunc: () => currentList.IsSubscribed
-                        },
+                        ... (currentList.IsSubscribed ? [unfollowOperation] : [followOperation]),
                         {
                             //icon: FaRandom,
                             caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',

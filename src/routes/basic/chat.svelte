@@ -13,7 +13,7 @@
             unregisterKicksObserver,
             forceKicksChecking,
             i18n, ext,
-			showMenu,
+			showMenu, Editable, focusEditable,
             SHOW_MENU_ABOVE, Paper
             } from '$lib'
 	import { afterUpdate, tick, onMount } from 'svelte';
@@ -229,19 +229,51 @@
         {
             toggleSubscribe = {
                 caption: '_; Unfollow; Dejar de seguir; Przestań obserwować',
-                icon: FaStar,
+                mricon: 'heart-off',
                 action: (f) => unsubscribeChannel(),
-                tbr: 'C'
+                tbr: 'C',
+                hideToolbarCaption: true
             }
         }
         else
         {
             toggleSubscribe = {
                 caption: '_; Follow; Seguir; Obserwuj',
-                icon: FaRegStar,
+                mricon: 'heart',
                 action: (f) => subscribeChannel(),
-                tbr: 'C'
+                tbr: 'C',
+                hideToolbarCaption: true
             }
+        }
+
+        return {
+            opver: 2,
+            fab: 'M00',
+            tbr: 'D',
+            operations: [
+                {
+                    caption: '_; Channel; Canal; Kanał',
+                    operations: [
+                        {
+                            caption: '_; Edit; Editar; Edytuj',
+                            mricon: 'pencil',
+                            tbr: 'A',
+                            fab:'M20',
+                            grid:[
+                                {
+                                    caption: '_; Title; Título; Tytuł',
+                                    action: () =>  { focusEditable('Title') },
+                                },
+                                {
+                                    caption: '_; Summary; Resumen; Podsumowanie',
+                                    action: () =>  { focusEditable('Summary') }
+                                }
+                            ]
+                        },
+                        ... channel.Status == 1 ? [toggleSubscribe] : []
+                    ]
+                }
+            ]
         }
 
         return {
@@ -647,16 +679,9 @@
                     </div>
             </section-->
 
-        <h1>
-            {channel.Title}
-        </h1>
-
-        {#if channel.Summary}
-                <p  class="lead">
-                    {channel.Summary}
-                </p>
-           {/if}
-
+        <h1><Editable self={channel} a='Title'/></h1>
+        <p  class="lead"><Editable self={channel} a='Summary'/></p>
+        
             {#if channel.Messages && channel.Messages.length > 0}
                 {#each channel.Messages as message, idx}
                     {@const dt = new Date(message.Date)}

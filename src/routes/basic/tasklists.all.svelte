@@ -214,6 +214,31 @@
             ]
         }
 
+    function unfollowOperation(list) 
+    {
+        return {
+            caption: '_; Unfollow; Dejar de seguir; Przestań obserwować',
+            mricon: 'heart-off',
+            tbr: 'C',
+            fab: 'S20',
+            hideToolbarCaption: true,
+            action: async (f) => await toggleSubscribe(list)
+        }
+    }
+    
+
+    function followOperation(list) 
+    {
+        return {
+            caption: '_; Follow; Seguir; Obserwuj',
+            mricon: 'heart',
+            tbr: 'C',
+            fab: 'S20',
+            hideToolbarCaption: true,
+            action: async (f) => await toggleSubscribe(list)
+        }
+    }
+
     let listOperations = (list) => {
         return {
             opver: 2,
@@ -271,12 +296,7 @@
                             fab: 'M04',
                             tbr: 'A'
                         },
-                        {
-                            //caption: list.IsSubscribed ? '_; Unfollow; Dejar de seguir; Przestań obserwować' : '_; Follow; Seguir; Obserwuj',
-                            caption: '_; Follow; Seguir; Obserwuj',
-                            action: (f) => toggleSubscribe(list),
-                            activeFunc: () => list.IsSubscribed
-                        },
+                        ... list.IsSubscribed? [unfollowOperation(list)] : [followOperation(list)],
                         {
                             caption: '_; Archive; Archivar; Zarchiwizuj',
                             action: (f) => askToArchive(list)

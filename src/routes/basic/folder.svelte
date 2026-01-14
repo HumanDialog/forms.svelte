@@ -19,24 +19,16 @@
                 Breadcrumb,
                 refreshToolbarOperations,
 				showFloatingToolbar,
-                reloadPageToolbarOperations, Paper, PaperHeader, openInNewTab, copyAddress} from '$lib'
-    import {FaRegFile, FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaSync,
-        FaList, FaEllipsisH, FaChevronRight, FaChevronLeft, FaUpload, FaLink, FaUnlink, FaRegStar, FaStar, FaCut, FaRegComments, FaRegClipboard,
-        FaRegCheckSquare, FaFileUpload, FaFile, FaCloudUploadAlt, FaDownload, FaCheckDouble, FaExternalLinkSquareAlt
-        } from 'svelte-icons/fa'
+                reloadPageToolbarOperations, Paper, PaperHeader, openInNewTab, copyAddress,
+				focusEditable} from '$lib'
+    import {FaTrash, FaCloudUploadAlt} from 'svelte-icons/fa'
 
-        import {FaEdit} from 'svelte-icons/fa'
-        import FaHighlighter from 'svelte-icons/fa/FaHighlighter.svelte'
-
-        import MdContentCopy from 'svelte-icons/md/MdContentCopy.svelte'
-        import MdContentCut from 'svelte-icons/md/MdContentCut.svelte'
 
     import {onMount} from 'svelte'
     import {location, pop, push, querystring} from 'svelte-spa-router'
     import BasketPreview from './basket.preview.svelte'
     import PopupExplorer from './popup.explorer.svelte'
     import {fetchComposedClipboard4Folder, transformClipboardToJSONReferences, getBrowserRecentElements, setBrowserRecentElement, recentClipboardElements} from './basket.utils'
-    import FaBasketTrash from './icons/basket.trash.svelte'
     import {cache} from './cache.js'
     import {getElementIcon} from './icons'
 	import FolderProperties from './properties.folder.svelte'
@@ -56,6 +48,12 @@
     let users = [];
 
     const STATE_FINISHED = 7000;
+
+    const FK_FOLDER             = 0
+    const FK_BASKET             = 1
+    const FK_DISCUSSION         = 2
+    const FK_TABLE              = 3
+    const FK_DOCUMENT           = 4
 
     $: onParamsChanged($location, $querystring, $mainContentPageReloader, $session);
 
@@ -115,11 +113,12 @@
             Tree:
             [
             {   Id: 1, Association: '',
-                Expressions:['Id', '$ref', 'icon', 'Title','Summary', 'ModificationDate', 'CreatedBy', 'IsPinned', 'IsBasket', 'IsRootPinned', 'GetCanonicalPath'],
+                Expressions:['Id', '$ref', 'icon', 'Title','Summary', 'Kind', 'ModificationDate', 'CreatedBy', 'IsPinned', 'IsBasket', 'IsRootPinned', 'GetCanonicalPath'],
                 SubTree:[
                     {   Id: 2, Association: 'Folders',
                         Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'icon', 'IsInBasket' , 'IsCanonical',  'icon', 'FolderId', '$type']
-                    },{ Id: 3, Association: 'Notes',
+                    },
+                    { Id: 3, Association: 'Notes',
                         Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href', 'icon', 'IsInBasket', 'IsCanonical', 'NoteId', '$type']
                     },
                     {
@@ -429,6 +428,12 @@
         case 'UploadedFile':
         case 'FolderFile':
             return await addFile(newElementAttribs)
+
+        case 'Forum':
+            return await addForum(newElementAttribs)
+
+        case 'Thread':
+            return await addThread(newElementAttribs)
         }
     }
 
@@ -485,6 +490,40 @@
 
         await fetchData();
         listComponent.reload(contextItem, newFolder.$ref);
+    }
+
+    async function addForum(newFolderAttribs)
+    {
+        let res = await reef.post(`${contextPath}/CreateSubForum`,{
+            title: newFolderAttribs.Title,
+            summary:  newFolderAttribs.Summary,
+            order: newFolderAttribs.Order,
+            kind: 0
+        }, onErrorShowAlert)
+        if(!res)
+            return null;
+
+        let newFolder = res.FolderFolder;
+
+        await fetchData();
+        listComponent.reload(contextItem, newFolder.$ref);
+    }
+
+    async function addThread(newNoteAttribs)
+    {
+        let res = await reef.post(`${contextPath}/CreateThread`,{ 
+            title: newNoteAttribs.Title,
+            summary:  newNoteAttribs.Summary,
+            order: newNoteAttribs.Order})
+
+        if(!res)
+            return null;
+
+        let newNote = res.FolderNote;
+        setBrowserRecentElement(newNote.NoteId, 'Note')
+
+        await fetchData();
+        listComponent.reload(contextItem, newNote.$ref);
     }
 
     async function toggleFolderPinned(folder)
@@ -571,58 +610,23 @@
         return pinOperation;
     }
 
-    function basketPageOperations()
-    {
-        return {
-            opver: 2,
-            fab: 'M00',
-            tbr: 'D',
-            operations: [
-                {
-                    caption: '_; View; Ver; Widok',
-                    operations: [
-                        {
-                            caption: '_; Clear Clipboard; Borrar portapapeles; Wyczyść schowek',
-                        //    icon: FaBasketTrash, //FaTrash,
-                            action: async (f) => await dettachAllMyContent(),
-                        //      fab: 'M30',
-                        //    tbr: 'A'
-                        },
-                        {
-                            separator: true
-                        },
-                        {
-                            caption: '_; Select; Seleccionar; Zaznacz',
-                            mricon: 'check-check',
-                            hideToolbarCaption: true,
-                            tbr: 'C',
-                            fab: 'S20',
-                            action: (f) => { listComponent.toggleMultiselection(); reloadPageToolbarOperations(multiselectPageOperations()) }
-                        },
-                        {
-                            caption: '_; Refresh; Actualizar; Odśwież',
-                            action: async (f) => await refreshView(),
-                        }
-                    ]
-                }
-            ]
-        }
-    }
-
     function newElementOperations(afterElement)
     {
         const isClipboard = contextItem.IsBasket
         const isRootPinned = contextItem.IsRootPinned
+        const isForum = contextItem.Kind == FK_DISCUSSION
 
-        const canAddFolders = !(isRootPinned || isClipboard)
-        const canAddNotes = !(isRootPinned || isClipboard)
-        const canAddTasks = !(isRootPinned || isClipboard)
-        const canAddFiles = !(isRootPinned || isClipboard)
+        const canAddFolders = !(isRootPinned || isClipboard || isForum)
+        const canAddNotes = !(isRootPinned || isClipboard || isForum)
+        const canAddTasks = !(isRootPinned || isClipboard || isForum)
+        const canAddFiles = !(isRootPinned || isClipboard || isForum)
+        const canAddForum = !(isRootPinned || isClipboard)
+        const canAddThread = isForum
 
 
         const newFolder = {
             caption: '_; New folder; Nueva carpeta; Nowy folder',
-
+            hideToolbarCaption: true,
             mricon: 'folder',
             action: (f) => { newElementKind='Folder';  listComponent.addRowAfter(afterElement) },
             tbr: 'A',
@@ -631,7 +635,7 @@
 
         const newNote = {
             caption: '_; New note; Nueva nota; Nowa notatka',
-            icon: FaRegFile,
+            hideToolbarCaption: true,
             mricon:'file-text',
             action: (f) => { newElementKind='Note';  listComponent.addRowAfter(afterElement) },
             tbr: 'A',
@@ -640,7 +644,7 @@
 
         const newTask = {
             caption: '_; New task; Nueva tarea; Nowe zadanie',
-
+            hideToolbarCaption: true,
             mricon:'square-pen',
             action: (f) => { newElementKind='Task';  listComponent.addRowAfter(afterElement) },
             tbr: 'A',
@@ -649,11 +653,29 @@
 
         const newFile = {
             caption: '_; Add file; Añadir archivo; Dodaj plik',
-            icon: FaFile,
+            hideToolbarCaption: true,
             mricon: 'file-archive',
             action: (f) => { newElementKind='UploadedFile';  runFileAttacher(afterElement) },
             tbr: 'A',
             fab: 'M01'
+        }
+
+        const newForum = {
+            caption: '_; New forum; Nuevo foro; Nowe forum',
+            //hideToolbarCaption: true,
+            mricon: 'messages-square',
+            action: (f) => { newElementKind='Forum';  listComponent.addRowAfter(afterElement) },
+            tbr: 'A',
+            fab: 'M04'
+        }
+
+        const newThread = {
+            caption: '_; New thread; Nuevo hilo; Nowy wątek',
+            //hideToolbarCaption: true,
+            mricon: 'message-square',
+            action: (f) => { newElementKind='Thread';  listComponent.addRowAfter(afterElement) },
+            tbr: 'A',
+            fab: 'M03'
         }
 
 
@@ -674,6 +696,12 @@
 
         if(canAddFiles)
             result.operations.push(newFile)
+
+        if(canAddForum)
+            result.operations.push(newForum)
+
+        if(canAddThread)
+            result.operations.push(newThread)
 
         if(result.operations.length > 0)
             result.operations.push({separator: true})
@@ -782,7 +810,6 @@
         })
     }
 
-    // todo
     async function runPopupExplorer4MoveToFolder(btt, aroundRect, element, kind)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
@@ -790,7 +817,9 @@
             attachToContainer: true,
             canAttachAsRootFolder: kind=='FolderFolder' ? true : false,
             onAttach: async (tmp, references) => {
-                await reef.post(`${element.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
+                await reef.post(`${element.$ref}/MoveMeTo`, { references: references })
+                await fetchData();
+                listComponent.reload(contextItem, listComponent.CLEAR_SELECTION)
             },
             ownCloseButton: true
         })
@@ -824,6 +853,23 @@
                 {
                     caption: '_; View; Ver; Widok',
                     operations: [
+                        {
+                            caption: '_; Edit; Editar; Edytuj',
+                            hideToolbarCaption: true,
+                            mricon: 'pencil',
+                            tbr: 'A',
+                            fab:'M20',
+                            grid:[
+                                {
+                                    caption: '_; Title; Título; Tytuł',
+                                    action: () =>  { focusEditable('Title') },
+                                },
+                                {
+                                    caption: '_; Summary; Resumen; Podsumowanie',
+                                    action: () =>  { focusEditable('Summary') }
+                                }
+                            ]
+                        },
                         ... !canPin ? [] : [pinOp()],
                         {
                             caption: '_; Select; Seleccionar; Zaznacz',
@@ -860,7 +906,6 @@
                     operations: [
                         {
                             caption: '_; All; Todos; Wszystkie',
-                            icon: FaRegCheckSquare,
                             ricon: '',
                             action: () => listComponent.toggleSelectAll(),
                             ctrl: "main_list",
@@ -893,13 +938,7 @@
         if(!contextItem)
             return [];
 
-        if(contextItem.IsBasket)
-            return basketPageOperations();
-        else
-        {
-            return folderPageOperations();
-        }
-
+        return folderPageOperations();
     }
 
     async function refreshViewAfterAttachingFromBasket(f)
@@ -1011,64 +1050,7 @@
         listComponent.reload(contextItem, listComponent.SELECT_NEXT);
     }
 
-    function basketElementOperations(element, kind)
-    {
-        let list = listComponent;
-        return {
-                opver: 2,
-                fab: 'M00',
-                tbr: 'D',
-                operations: [
-                    {
-                        caption: '_; Element; Elemento; Element',
-                        operations: [
-                            {
-                                caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
-                                mricon: 'chevron-up',
-                                mricon: 'chevron-up',
-                                action: (f) => list.moveUp(element),
-                                fab:'M07',
-                                tbr:'A',
-                                hideToolbarCaption: true
-                            },
-                            {
-                                caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
-                                mricon: 'chevron-down',
-                                mricon: 'chevron-down',
-                                action: (f) => list.moveDown(element),
-                                fab:'M06',
-                                tbr:'A',
-                                hideToolbarCaption: true
-                            },
-                            {
-                                separator: true
-                            },
-                            {
-                                caption: '_; Remove from Clipboard; Eliminar del portapapeles; Usuń ze schowka',
-                                action: (f) => dettachElement(element, kind),
-                            }
-                        ]
-                    },
-                    {
-                        caption: '_; View; Ver; Widok',
-                        operations: [
-                         {
-                            caption: '_; Select; Seleccionar; Zaznacz',
-                            mricon: 'check-check',
-                            hideToolbarCaption: true,
-                            tbr: 'C',
-                            fab: 'S20',
-                            action: (f) => { listComponent.toggleMultiselection(); reloadPageToolbarOperations(multiselectPageOperations()) }
-                        },
-                        {
-                            caption: '_; Refresh; Actualizar; Odśwież',
-                            action: async (f) => await refreshView(),
-                        }
-                        ]
-                    }
-                ]
-            }
-    }
+    
 
     function folderElementOperations(element, kind)
     {
@@ -1076,6 +1058,7 @@
         const isRootPinned = contextItem.IsRootPinned
         const canPin = !(isRootPinned || isClipboard)
         const isCanonical = element.IsCanonical
+        const isForum = contextItem.Kind == FK_DISCUSSION
 
         let list = listComponent;
 
@@ -1115,7 +1098,7 @@
                         operations: [
                             {
                                 caption: '_; Edit; Editar; Edytuj',
-                                mricon: 'pencil',
+                                hideToolbarCaption: true,
                                 mricon: 'pencil',
                                 tbr: 'A',
                                 fab:'M20',
@@ -1188,7 +1171,7 @@
                                     {
                                         caption: '_; Move to folder; Mover a la carpeta; Przenieś do folderu',
                                         action: (btt, rect) => runPopupExplorer4MoveToFolder(btt, rect, element, kind),
-                                        disabled: true // temporary
+                                        
                                     },
                                     ... (kind != 'FolderTask') ? [] : 
                                     [
@@ -1244,16 +1227,7 @@
 
 
     let elementOperations = (element, kind) => {
-
-
-        if(contextItem.IsBasket)
-        {
-            return basketElementOperations(element, kind)
-        }
-        else
-        {
-            return folderElementOperations(element, kind)
-        }
+        return folderElementOperations(element, kind)        
     }
 
     function multiselectOperations(items)
@@ -1281,7 +1255,6 @@
                         operations: [
                             {
                                 caption: '_; All; Todos; Wszystkie',
-                                icon: FaRegCheckSquare,
                                 action: () => listComponent.toggleSelectAll(),
                                 //fab: 'M30',
                                 tbr: 'A',

@@ -77,7 +77,6 @@
                             caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                             hideToolbarCaption: true,
                             mricon: 'chevron-up',
-                            mricon: 'chevron-up',
                             action: (f) => moveUp(),
                             fab: 'M05',
                             tbr: 'A'
@@ -91,9 +90,12 @@
                             tbr: 'A'
                         },
                         {
-                            caption: '_; Follow; Seguir; Obserwuj',
+                            caption: '_; Unfollow; Dejar de seguir; Przestań obserwować',
                             action: (f) => UnSubscribe(),
-                            active: true
+                            mricon: 'heart-off',
+                            tbr: 'C',
+                            fab: 'S20',
+                            hideToolbarCaption: true
                         },
                     /*    {
                             caption: '_; Archive; Archivar; Zarchiwizuj',
