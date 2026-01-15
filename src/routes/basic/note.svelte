@@ -33,8 +33,11 @@
             showMenu,
             SHOW_MENU_BELOW,
             ext,
-            List, ListTitle, ListSummary, ListInserter, Icon,
-            reloadPageToolbarOperations, Paper, PaperHeader, focusEditable
+            List, ListTitle, ListSummary, ListInserter, Icon, Ricon,
+            reloadPageToolbarOperations, Paper, PaperHeader, focusEditable, openInNewTab, copyAddress,
+
+			getNiceStringDateTime
+
             } from '$lib'
 	import { onMount, tick } from 'svelte';
 
@@ -55,9 +58,13 @@
 
     import FileProperties from './properties.file.svelte'
 	import NoteProperties from './properties.note.svelte'
+	import { icons } from '$lib/utils';
 
     let noteRef = ''
+    let activeNoteRef = ''
     let note = null;
+    let activeNote = null
+
     let noteId = 0
     let allTags = '';
 
@@ -69,6 +76,11 @@
     let creationDate = null
     let modificationDate = null
     let attachedFiles = []
+
+    const NK_DOCUMENT          = 0
+    const NK_THREAD            = 1
+    const NK_POST              = 2
+    let isThread = false
 
 
     $: onParamsChanged($location)
@@ -108,7 +120,7 @@
                         {
                             Id: 1,
                             Name: "collector",
-                            ExpandLevel: 3,
+                            ExpandLevel: 6,
                             Tree:
                             [
                                 {
@@ -163,13 +175,20 @@
                                             Id: 16,
                                             Association: 'Notes',
                                             Sort: 'Order',
-                                            Expressions:['Id', '$ref', 'Title', 'Summary', 'href', 'IsCanonical', '$type', 'NoteId', 'Order']
+                                            Expressions:['Id', '$ref', 'Title', 'Summary', 'href', 'icon', 'IsCanonical', '$type', 'NoteId', 'Order'],
+                                            SubTree: [
+                                                {
+                                                    Id: 161,
+                                                    Association: 'Note',
+                                                    Recursive: 1
+                                                }
+                                            ]
                                         },
                                         {
                                             Id: 17,
                                             Association: 'Files',
                                             Sort: 'Order',
-                                            Expressions:['Id', '$ref', 'Title', 'Summary', 'href', 'IsCanonical', '$type', 'FileId', 'Order']
+                                            Expressions:['Id', '$ref', 'Title', 'Summary', 'href', 'icon', 'IsCanonical', '$type', 'FileId', 'Order']
                                         }
                                     ]
                                 }
@@ -192,18 +211,19 @@
         isReadOnly = (note.$acc & 0x2) == 0
         canBeEditable = (note.$acc & 0x2) > 0
 
+        isThread = note.Kind == NK_THREAD
 
-        if(note.AttachedFiles)
+        activeNote = note
+        if(note && note.Notes && note.Notes.length > 0)
         {
-            attachedFiles = []
-            const names = note.AttachedFiles.split(';');
-            names.forEach(n => {
-                attachedFiles.push({
-                    name: n,
-                    downloading: false
-                })
-            })
+            for(let idx=0; idx<note.Notes.length; idx++)
+                prepareAttachementsList(note.Notes[idx].Note)
+
+            activeNote = note.Notes[note.Notes.length-1].Note
         }
+
+        activeNoteRef = activeNote.$ref
+
 
         note.connectedToList = []
         if(note.InFolders)
@@ -215,23 +235,29 @@
         if(note.InNotes)
             note.InNotes.forEach((f) => note.connectedToList.push(f))
 
-        note.attachements = []
-        if(note.Notes && note.Notes.length > 0)
-            note.Notes.forEach((n) => note.attachements.push(n))
-
-        if(note.Files && note.Files.length > 0)
-            note.Files.forEach((n) => note.attachements.push(n))
-
-        if(note.attachements && note.attachements.length > 0)
-            note.attachements.sort((a,b) => a.Order-b.Order)
+        prepareAttachementsList(activeNote)
     }
 
+    function prepareAttachementsList(noteElement)
+    {
+        noteElement.attachements = []
+        if(noteElement.Notes && noteElement.Notes.length > 0)
+            noteElement.Notes.forEach((n) => noteElement.attachements.push(n))
+
+        if(noteElement.Files && noteElement.Files.length > 0)
+            noteElement.Files.forEach((n) => noteElement.attachements.push(n))
+
+        if(noteElement.attachements && noteElement.attachements.length > 0)
+            noteElement.attachements.sort((a,b) => a.Order-b.Order)
+
+        console.log('attachements', noteElement.$ref, noteElement.attachements)
+    }
 
     function onPropertySingleChange(txt, attrib)
     {
         //note[attrib] = txt
         //informModification(note, attrib)
-        informModificationEx(note.$type, note.Id, attrib, txt)
+        informModificationEx(activeNote.$type, activeNote.Id, attrib, txt)
         refreshToolbarOperations()
     }
 
@@ -243,8 +269,8 @@
 
     async function onTagsChanged(tags)
     {
-        note.Tags = tags;
-        informModification(note, 'Tags')
+        activeNote.Tags = tags;
+        informModification(activeNote, 'Tags')
         pushChanges(refreshToolbarOperations)
         //await reef.post(`${noteRef}/SetTags`, {val: tags}, onErrorShowAlert)
     }
@@ -265,6 +291,7 @@
 
 
     let description;
+    let threadResponses = [];
     let descriptionPlaceholder = false;
 
 
@@ -293,78 +320,89 @@
         {
             separator: true
         },
-    /*    {
-            caption: '_; Attachement; Anexo; Załącznik',
-       //     icon: FaFile,
-            action: async (f) => runFileAttacher()
-        },
-    */
-   /*    {
-            caption: '_; Content; Contenido; Treść',
-        //    icon: FaAlignLeft,
-            action: async (f) =>
-                {
-                    if(description)
-                        description.run();
-                    else
-                    {
-                        descriptionPlaceholder = true;
-                        await tick();
-                        description?.run(() => {descriptionPlaceholder = false})
-                    }
-                }
-        }
-    */
+    
     ];
+
+    function getInsertOperations()
+    {
+        return [
+            {
+                mricon: 'download',
+                caption: '_; Insert; Insertar; Wstaw',
+                hideToolbarCaption: true,
+                tbr: 'C',
+                fab: 'S10',
+                menu: [
+                    {
+                        caption: '_; Paste; Pegar; Wklej',
+                        action: pasteRecentClipboardElement4Note
+                    },
+                    {
+                        caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
+                        action: runPasteBasket4Note
+                    },
+                    {
+                        caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
+                        action: runPasteBrowserRecent4Note
+                    },
+                    {
+                        caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
+                        action: runAttachementPopupExplorer4SelectFromFolders
+                    },
+                    {
+                        separator: true
+                    },
+                    {
+                        caption: '_; New note; Nueva nota; Nowa notatka',
+                        action: () => runNoteInserter()
+                    },
+                    {
+                        caption: '_; Add file; Añadir archivo; Dodaj plik',
+                        action: () => runFileAttacher()
+                    }
+                ]
+            }
+        ]
+    }
 
     function getPageOperations()
     {
-        const insertOperations = [
-                {
-                    caption: '_; Paste; Pegar; Wklej',
-                    action: pasteRecentClipboardElement4Note
-                },
-                {
-                    caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
-                    action: runPasteBasket4Note
-                },
-                {
-                    caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
-                    action: runPasteBrowserRecent4Note
-                },
-                {
-                    caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                    action: runPopupExplorer4Note
-                },
-                {
-                    separator: true
-                },
-                {
-                    caption: '_; New note; Nueva nota; Nowa notatka',
-                    action: () => runNoteInserter()
-                },
-                {
-                    caption: '_; Add file; Añadir archivo; Dodaj plik',
-                    action: () => runFileAttacher()
-                }
-        ]
-
         const sendOperations = [
                 {
                     caption: '_; Copy; Copiar; Kopiuj',
                     action: (f) => copyTaskToBasket(),
                 },
                 {
-                    caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                    action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, note)
+                    caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
+                    action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect, note)
+                },
+                { separator: true},
+                {
+                    caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                    action: () => openInNewTab(note.href)
+                },
+                {
+                    caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                    action: () => copyAddress(note.href)
                 }
         ]
 
         let operations = []
 
-        if(!isReadOnly)
+        if(isThread)
         {
-            operations.push(
+            operations.push({
+                caption: '_; New response; Nueva respuesta; Nowa odpowiedź',
+                mricon: 'message-square',
+                tbr: 'A',
+                fab: 'M01',
+                action: () => addThreadResponse()
+            })
+
+            operations.push({separator: true, tbr: 'A'})
+        }
+
+        operations.push(
                 {
                     caption: '_; Edit...; Editar...; Edytuj...',
                     mricon: 'pencil',
@@ -373,18 +411,8 @@
                     fab: 'M20',
                     tbr: 'A'
                 })
-        }
-        else if(canBeEditable)
-        {
-            operations.push(
-                {
-                    caption: '_; Enable editing; Activar edición; Włącz edytowanie',
-                    mricon: 'pencil',
-                    action: (f) => enableEditing(),
-                    fab: 'M20',
-                    tbr: 'A'
-                })
-        }
+        
+        operations.push(...getInsertOperations())
 
         operations.push(
             {
@@ -395,33 +423,6 @@
                 fab: 'S00',
                 menu: sendOperations
             })
-
-        if(!isReadOnly)
-        {
-            operations.push(
-                {
-                    mricon: 'download',
-                    caption: '_; Insert; Insertar; Wstaw',
-                    hideToolbarCaption: true,
-                    disabled: isReadOnly,
-                    tbr: 'C',
-                    fab: 'S10',
-                    menu: insertOperations
-                })
-
-
-        /*    operations.push(
-                {
-                    caption: '_; Save; Guardar; Zapisz',
-                    hideToolbarCaption: true,
-                    mricon: 'save',
-                    action: (f) => pushChanges(),
-                    fab: 'T02',
-                    tbr: 'C',
-                    //disabledFunc: () => !hasModifications()
-                })
-                    */
-        }
 
         if(operations.length > 0)
             operations.push({separator: true})
@@ -490,7 +491,7 @@
 
         showFloatingToolbar(aroundRect, BasketPreview,
             {
-                destinationContainer: noteRef,
+                destinationContainer: activeNoteRef,
                 onRefreshView: async (f) => await reloadWithAttachements(),
                 clipboardElements: clipboardElements,
                 ownCloseButton: true
@@ -504,7 +505,7 @@
         if(clipboardElements && clipboardElements.length > 0)
         {
             const references = transformClipboardToJSONReferences([clipboardElements[0]])
-            const res = await reef.post(`${noteRef}/AttachClipboard`, { references: references }, onErrorShowAlert)
+            const res = await reef.post(`${activeNoteRef}/AttachClipboard`, { references: references }, onErrorShowAlert)
             if(res)
                 await reloadWithAttachements();
 
@@ -515,7 +516,7 @@
     {
         const clipboardElements = getBrowserRecentElements()
         showFloatingToolbar(aroundRect, BasketPreview, {
-            destinationContainer: noteRef,
+            destinationContainer: activeNoteRef,
             onRefreshView: async (f) => await reloadWithAttachements(),
             clipboardElements: clipboardElements,
             browserBasedClipboard: true,
@@ -523,19 +524,23 @@
         })
     }
 
-    async function runPopupExplorer4Note(btt, aroundRect)
+    async function runAttachementPopupExplorer4SelectFromFolders(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            destinationContainer: noteRef,
+            rootFilter: 'FOLDERS',
+            leafFilter: ['Note', 'File'],
+            destinationContainer: activeNoteRef,
             onRefreshView: async (f) => await reloadWithAttachements(),
             ownCloseButton: true
         })
     }
 
-    async function runPopupExplorerToPlaceElement(btt, aroundRect, element)
+    
+    async function runPopupExplorer4CopyToFolder(btt, aroundRect, element)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            canSelectRootElements: true,
+            attachToContainer: true,
+            rootFilter: 'FOLDERS',
             onAttach: async (tmp, references) => {
                 await reef.post(`${element.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
                 await reloadData();
@@ -548,7 +553,7 @@
     async function reloadWithAttachements()
     {
         await reloadData();
-        attachementsComponent?.reload(note, attachementsComponent.CLEAR_SELECTION);
+        attachementsComponent?.reload(activeNote, attachementsComponent.CLEAR_SELECTION);
         //attachementsFilesComponent?.reload(note, attachementsFilesComponent.CLEAR_SELECTION);
     }
 
@@ -572,76 +577,80 @@
 
 
 
-    function getPageOperationsWithFormattingTools()
+    function getPageOperationsWithFormattingTools(editorElement)
     {
+        const headings = [
+            {
+                    caption: '_; Heading 1; Título 1; Nagłówek 1',
+                    mricon: 'heading-1',
+                    tbr: 'A',
+                    hideToolbarCaption: true,
+                    action: (f) => editorElement.setHeading(1),
+                    activeFunc: editorElement.isActiveH1
+                },
+                {
+                    caption: '_; Heading 2; Título 2; Nagłówek 2',
+                    mricon: 'heading-2',
+                    tbr: 'A',hideToolbarCaption: true,
+                    action: (f) => editorElement.setHeading(2),
+                    activeFunc: editorElement.isActiveH2
+                },
+                {
+                    caption: '_; Heading 3; Título 3; Nagłówek 3',
+                    mricon: 'heading-3',
+                    tbr: 'A',hideToolbarCaption: true,
+                    action: (f) => editorElement.setHeading(3),
+                    activeFunc: editorElement.isActiveH3
+                },
+                {
+                    caption: '_; Heading 4; Título 4; Nagłówek 4',
+                    mricon: 'heading-4',
+                    tbr: 'A',hideToolbarCaption: true,
+                    action: (f) => editorElement.setHeading(4),
+                    activeFunc: editorElement.isActiveH4
+                }
+        ]
+
         return {
             opver: 2,
             fab: 'M00',
             tbr: 'D',
-            preAction: description.preventBlur,
+            preAction: editorElement.preventBlur,
             operations: [
                 {
                     caption: '_; Styles; Estilos; Style',
                     //tbr: 'B',
-                    preAction: description.preventBlur,
+                    preAction: editorElement.preventBlur,
                     operations: [
-                        {
-                            caption: '_; Heading 1; Título 1; Nagłówek 1',
-                            mricon: 'heading-1',
-                            tbr: 'A',
-                            hideToolbarCaption: true,
-                            action: (f) => description.setHeading(1),
-                            activeFunc: description.isActiveH1
-                        },
-                        {
-                            caption: '_; Heading 2; Título 2; Nagłówek 2',
-                            mricon: 'heading-2',
-                            tbr: 'A',hideToolbarCaption: true,
-                            action: (f) => description.setHeading(2),
-                            activeFunc: description.isActiveH2
-                        },
-                        {
-                            caption: '_; Heading 3; Título 3; Nagłówek 3',
-                            mricon: 'heading-3',
-                            tbr: 'A',hideToolbarCaption: true,
-                            action: (f) => description.setHeading(3),
-                            activeFunc: description.isActiveH3
-                        },
-                        {
-                            caption: '_; Heading 4; Título 4; Nagłówek 4',
-                            mricon: 'heading-4',
-                            tbr: 'A',hideToolbarCaption: true,
-                            action: (f) => description.setHeading(4),
-                            activeFunc: description.isActiveH4
-                        },
+                        ... (isThread ? [] : headings),
                         {
                             caption: '_; Normal; Normal; Normalny',
                             mricon: 'pilcrow',
                             tbr: 'A',
                             hideToolbarCaption: true,
-                            action: (f) => description.setNormal(),
-                            activeFunc: description.isActiveNormal,
+                            action: (f) => editorElement.setNormal(),
+                            activeFunc: editorElement.isActiveNormal,
                         },
                         {
                             caption: '_; Code; Código; Kod',
                             mricon: 'code-xml',
                             tbr: 'A',hideToolbarCaption: true,
-                            action: (f) => description.setCode(),
-                            activeFunc: description.isActiveCode
+                            action: (f) => editorElement.setCode(),
+                            activeFunc: editorElement.isActiveCode
                         },
                         {
                             caption: '_; Quote; Cita; Cytat',
                             mricon: 'text-quote',
                             tbr: 'A',hideToolbarCaption: true,
-                            action: (f) => description.setQuote(),
-                            activeFunc: description.isActiveQuote
+                            action: (f) => editorElement.setQuote(),
+                            activeFunc: editorElement.isActiveQuote
                         },
                         {
                             caption: '_; BulletList; Lista con viñetas; Lista punktowana',
                             mricon: 'list',
                             tbr: 'A',hideToolbarCaption: true,
-                            action: (f) => description.setBulletList(),
-                            activeFunc: description.isActiveBulletList
+                            action: (f) => editorElement.setBulletList(),
+                            activeFunc: editorElement.isActiveBulletList
 
                         },
                     ]
@@ -649,57 +658,57 @@
                 {
                     caption: '_; Text; Texto; Tekst',
                     //tbr: 'B',
-                    preAction: description.preventBlur,
+                    preAction: editorElement.preventBlur,
                     operations: [
                         {
                             caption: '_; Bold; Negrita; Pogrubiony',
                             mricon: 'bold',
-                            action: (f) => description.setBold(),
-                            activeFunc: description.isActiveBold,
+                            action: (f) => editorElement.setBold(),
+                            activeFunc: editorElement.isActiveBold,
                             tbr: 'A',
                             hideToolbarCaption: true
                         },
                         {
                             caption: '_; Italic; Cursiva; Kursywa',
                             mricon: 'italic',
-                            action: (f) => description.setItalic(),
-                            activeFunc: description.isActiveItalic,
+                            action: (f) => editorElement.setItalic(),
+                            activeFunc: editorElement.isActiveItalic,
                             tbr: 'A',
                             hideToolbarCaption: true
                         },
                         {
                             caption: '_; Underline; Subrayar; Podkreślenie',
                             mricon: 'underline',
-                            action: (f) => description.setUnderline(),
-                            activeFunc: description.isActiveUnderline,
+                            action: (f) => editorElement.setUnderline(),
+                            activeFunc: editorElement.isActiveUnderline,
                             tbr: 'A',
                             hideToolbarCaption: true
                         },
                         {
                             caption: '_; Strikethrough; Tachado; Przekreślenie',
                             mricon: 'strikethrough',
-                            action: (f) => description.setStrikethrough(),
-                            activeFunc: description.isActiveStrikethrough,
+                            action: (f) => editorElement.setStrikethrough(),
+                            activeFunc: editorElement.isActiveStrikethrough,
                         },
                     ]
                 },
                 {
                     caption: '_; Insert; Insertar; Wstaw',
                     //tbr: 'B',
-                    preAction: description.preventBlur,
+                    preAction: editorElement.preventBlur,
                     operations: [
                         {
                             caption: '_; Image; Imagen; Obraz',
                             mricon: 'image',
-                            action: (f) => description.setImage(),
-                            activeFunc: description.isActiveImage,
+                            action: (f) => editorElement.setImage(),
+                            activeFunc: editorElement.isActiveImage,
                             tbr: 'A', hideToolbarCaption: true
                         },
                         {
                             caption: '_; Table; Tabla; Tabela',
                             mricon: 'table',
-                            action: (f) => description.setTable(),
-                            activeFunc: description.isActiveTable
+                            action: (f) => editorElement.setTable(),
+                            activeFunc: editorElement.isActiveTable
                         },
                         {
                             caption: '_; Attachement; Anexo; Załącznik',
@@ -718,7 +727,7 @@
                 {
                     caption: '_; Note; Nota; Notatka',
                     //tbr: 'B',
-                    preAction: description.preventBlur,
+                    preAction: editorElement.preventBlur,
                     operations: [
                         {
                             caption: '_; Edit...; Editar...; Edytuj...',
@@ -727,6 +736,7 @@
                         //    fab: 'M10',
                         //    tbr: 'A'
                         },
+                        ...getInsertOperations(),
                         {
                             caption: '_; Send; Enviar; Wyślij',
                             mricon: 'upload',
@@ -739,172 +749,144 @@
                                         action: (f) => copyTaskToBasket(),
                                     },
                                     {
-                                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                        action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, note)
+                                        caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
+                                        action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect, note)
+                                    },
+                                    { separator: true},
+                                    {
+                                        caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                                        action: () => openInNewTab(note.href)
+                                    },
+                                    {
+                                        caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                                        action: () => copyAddress(note.href)
                                     }
                                 ]
 
-                        },
-                        {
-                            mricon: 'download',
-                            caption: '_; Insert; Insertar; Wstaw',
-                            hideToolbarCaption: true,
-                            tbr: 'C',
-                            fab: 'S10',
-                            menu: [
-                                {
-                                    caption: '_; Paste; Pegar; Wklej',
-                                    action: pasteRecentClipboardElement4Note
-                                },
-                                {
-                                    caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
-                                    action: runPasteBasket4Note
-                                },
-                                {
-                                    caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
-                                    action: runPasteBrowserRecent4Note
-                                },
-                                {
-                                    caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                                    action: runPopupExplorer4Note
-                                },
-                                {
-                                    separator: true
-                                },
-                                {
-                                    caption: '_; New note; Nueva nota; Nowa notatka',
-                                    action: () => runNoteInserter()
-                                },
-                                {
-                                    caption: '_; Add file; Añadir archivo; Dodaj plik',
-                                    action: () => runFileAttacher()
-                                }
-                            ]
-                        },
-                    /*    {
-                            caption: '_; Save; Guardar; Zapisz',
-                            hideToolbarCaption: true,
-                            mricon: 'save',
-                            action: (f) => description?.save(),
-                       //     fab: 'S00',
-                            tbr: 'C',
-                            disabledFunc: () => !hasModifications()
-                        }, */
+                        }
                     ]
                 }
             ]
         }
 
     }
-    const extraPaletteCommands = []
+    
+    function extraInsertPalletteCommands(editorElement) 
+    {
+        return [
+            {
+                mricon: 'download',
+                caption: '_; Insert; Insertar; Wstaw',
+                //tbr: 'C',
+                //fab: 'S10',
+                action: () => {
+                    const operations = [
+                        {
+                            caption: '_; Paste; Pegar; Wklej',
+                            action: (btt, aroundRect) => pasteRecentClipboardElement4Editor(btt, aroundRect, editorElement)
+                        },
+                        {
+                            caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
+                            action: (btt, aroundRect) => runPasteBasket4Editor(btt, aroundRect, editorElement)
+                        },
+                        {
+                            caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
+                            action: (btt, aroundRect) => runPasteBrowserRecent4Editor(btt, aroundRect, editorElement)
+                        },
+                        {
+                            caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
+                            action: (btt, aroundRect) => runEditorPopupExplorer4SelectFromFolders(btt, aroundRect, editorElement)
+                        },
+                        {
+                            caption: '_; Select from task lists; Seleccionar de listas de tareas; Wybierz z listy zadań',
+                            action: (btt, aroundRect) => runEditorPopupExplorer4SelectFromTaskLists(btt, aroundRect, editorElement)
+                        },
+                        {
+                            separator: true
+                        },
+                        {
+                            caption: '_; New note; Nueva nota; Nowa notatka',
+                            action: () => runNoteCreator4Editor(editorElement)
+                        },
+                        {
+                            caption: '_; Add file; Añadir archivo; Dodaj plik',
+                            action: () => runFileAttacher4Editor(editorElement)
+                        }
+                    ]
 
-    const extraPaletteCommandsExt = [
-     /*   {
-            caption: '_; Save; Guardar; Zapisz',
-            mricon: 'save',
-            action: () => description?.save(),
-        }
-        */
-    ]
-    const extraInsertPalletteCommands = [
-        {
-            mricon: 'download',
-            caption: '_; Insert; Insertar; Wstaw',
-            //tbr: 'C',
-            //fab: 'S10',
-            action: () => {
-                const operations = [
-                    {
-                        caption: '_; Paste; Pegar; Wklej',
-                        action: pasteRecentClipboardElement4Editor
-                    },
-                    {
-                        caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
-                        action: runPasteBasket4Editor
-                    },
-                    {
-                        caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
-                        action: runPasteBrowserRecent4Editor
-                    },
-                    {
-                        caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                        action: runPopupExplorer4Editor
-                    },
-                    {
-                        separator: true
-                    },
-                    {
-                        caption: '_; New note; Nueva nota; Nowa notatka',
-                        action: () => runNoteCreator4Editor()
-                    },
-                    {
-                        caption: '_; Add file; Añadir archivo; Dodaj plik',
-                        action: () => runFileAttacher4Editor()
-                    }
-                ]
+                    const selection = window.getSelection();
+                    const range = selection.getRangeAt(0);
+                    const aroundRect = range.getBoundingClientRect();
 
-                const selection = window.getSelection();
-                const range = selection.getRangeAt(0);
-                const aroundRect = range.getBoundingClientRect();
-
-                showMenu(aroundRect, operations, SHOW_MENU_BELOW)
-                return false;   // do not focus editor again
+                    showMenu(aroundRect, operations, SHOW_MENU_BELOW)
+                    return false;   // do not focus editor again
+                }
             }
-        }
-    ]
+        ]
+    }
 
-    async function runPasteBasket4Editor(btt, aroundRect)
+    async function runPasteBasket4Editor(btt, aroundRect, editorElement)
     {
         const clipboardElements = await fetchComposedClipboard4Editor()
 
         showFloatingToolbar(aroundRect, BasketPreview,
             {
-                onAttach: (clipboard, elements) => makeLinkToElement(elements),
-                //onAttachAndClear: (clipboard, elements) => makeLinkToElement(elements),
+                onAttach: (clipboard, elements) => makeLinkToElement(editorElement, elements),
                 clipboardElements: clipboardElements,
                 ownCloseButton: true
             }
         )
     }
 
-    async function pasteRecentClipboardElement4Editor(btt, aroundRect)
+    async function pasteRecentClipboardElement4Editor(btt, aroundRect, editorElement)
     {
         const clipboardElements = await fetchComposedClipboard4Editor()
         if(clipboardElements && clipboardElements.length > 0)
         {
             const references = transformClipboardToJSONReferences([clipboardElements[0]])
-            makeLinkToElement(references)
+            makeLinkToElement(editorElement, references)
         }
     }
 
-    async function runPasteBrowserRecent4Editor(btt, aroundRect)
+    async function runPasteBrowserRecent4Editor(btt, aroundRect, editorElement)
     {
         const clipboardElements = getBrowserRecentElements()
         showFloatingToolbar(aroundRect, BasketPreview, {
-            onAttach: (clipboard, elements) => makeLinkToElement(elements),
+            onAttach: (clipboard, elements) => makeLinkToElement(editorElement, elements),
             clipboardElements: clipboardElements,
             browserBasedClipboard: true,
             ownCloseButton: true
         })
     }
 
-    async function runPopupExplorer4Editor(btt, aroundRect)
+    async function runEditorPopupExplorer4SelectFromFolders(btt, aroundRect, editorElement)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            onAttach: (clipboard, elements) => makeLinkToElement(elements),
+            rootFilter: 'FOLDERS',
+            onAttach: (clipboard, elements) => makeLinkToElement(editorElement, elements),
             ownCloseButton: true
         })
     }
 
-    async function runNoteCreator4Editor()
+    async function runEditorPopupExplorer4SelectFromTaskLists(btt, aroundRect, editorElement)
     {
-        const cursorPos = description.getCurrentCursorPos()
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            rootFilter: 'TASKLISTS',
+            onAttach: (clipboard, elements) => makeLinkToElement(editorElement, elements),
+            ownCloseButton: true
+        })
+    }
+
+    async function runNoteCreator4Editor(editorElement)
+    {
+        const cursorPos = editorElement.getCurrentCursorPos()
 
         const insertNewNoteLink = async (newNote) => {
             const res = await reef.get(`${newNote.$ref}?fields=Title,href`, onErrorShowAlert)
             const note = res.NoteNote
-            description.setCursorPos(cursorPos)
-            makeLinkToElement([{
+            editorElement.setCursorPos(cursorPos)
+            makeLinkToElement(editorElement,
+            [{
                 Title: note.Title,
                 href: note.href
             }])
@@ -913,16 +895,17 @@
         runNoteInserter(insertNewNoteLink)
     }
 
-    async function runFileAttacher4Editor()
+    async function runFileAttacher4Editor(editorElement)
     {
-        const cursorPos = description.getCurrentCursorPos()
+        const cursorPos = editorElement.getCurrentCursorPos()
 
         const insertNewFileLink = async (newFile) => {
             const res = await reef.get(`${newFile.$ref}?fields=Title,href`, onErrorShowAlert)
             const file = res.NoteFile
-            description.setCursorPos(cursorPos)
+            editorElement.setCursorPos(cursorPos)
 
-            makeLinkToElement([{
+            makeLinkToElement(editorElement,
+            [{
                 Title: file.Title,
                 href: file.href
             }])
@@ -931,7 +914,7 @@
         runFileAttacher(insertNewFileLink)
     }
 
-    function makeLinkToElement(elements)
+    function makeLinkToElement(editorElement, elements)
     {
         if(elements && Array.isArray(elements) && elements.length > 0)
         {
@@ -949,7 +932,7 @@
                 else
                     href = el.href
 
-                description.addLink(el.Title, href)
+                editorElement.addLink(el.Title, href)
             })
         }
     }
@@ -1019,6 +1002,22 @@
         await downloadFileFromHRef(href, title);
     }
 
+    function onStaticAttachementClick(e, att)
+    {
+        if(att.$type == 'NoteFile')
+        {
+            e.preventDefault()
+            e.stopPropagation()
+            downloadFileFromHRef(att.href, att.Title);
+        }
+        else
+        {
+            e.preventDefault()
+            e.stopPropagation()
+            push(att.href)
+        }
+    }
+
     const extraInsertPalletteCommandsExt = [
         {
             caption: 'Attach_; Attachement; Anexo; Załącznikement',
@@ -1032,34 +1031,16 @@
         }
     ]
 
-    const extraBackPaletteCommands = []
-    const extraBackPaletteCommandsExt = [
-        {
-            caption: '_; Send; Enviar; Wyślij',
-            mricon: 'upload',
-            menu: [
-                    {
-                        caption: '_; Copy; Copiar; Kopiuj',
-                        action: () => copyTaskToBasket(),
-                    },
-                    {
-                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                        action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, note)
-                    }
-                ],
-        }
-    ]
-
     const descriptionActive = { }
     let isEditorFocused = false;
 
-    function activateFormattingTools()
+    function activateFormattingTools(editorElement)
     {
         isEditorFocused = true;
-        activateItem('props', descriptionActive, getPageOperationsWithFormattingTools())
+        activateItem('props', descriptionActive, getPageOperationsWithFormattingTools(editorElement))
     }
 
-    function deactivateFormattingToolsIfNeeded()
+    function deactivateFormattingToolsIfNeeded(editorElement)
     {
         isEditorFocused = false;
         if(isActive('props', descriptionActive))
@@ -1085,7 +1066,7 @@
             if(!resizedImage)
                 resizedImage = file
 
-            const res = await reef.post(`${noteRef}/Images/blob?name=${file.name}&size=${resizedImage.size}`, {}, onErrorShowAlert)
+            const res = await reef.post(`${activeNoteRef}/Images/blob?name=${file.name}&size=${resizedImage.size}`, {}, onErrorShowAlert)
             if(res && res.key && res.uploadUrl)
             {
                 const newKey = res.key;
@@ -1103,7 +1084,7 @@
                     if(res.ok)
                     {
                         // todo: editor path imgPath
-                        const dataPath = `${noteRef}/Images/blob?key=${newKey}`
+                        const dataPath = `${activeNoteRef}/Images/blob?key=${newKey}`
 
                         //console.log('upload success for ', dataPath)
                         if(imgEditorActionAfterSuccess)
@@ -1162,7 +1143,7 @@
             pendingUploading = true
 
 
-            let fileLink = await reef.post(`${noteRef}/CreateFile`,
+            let fileLink = await reef.post(`${activeNoteRef}/CreateFile`,
                                     {
                                         title: file.name,
                                         mimeType: file.type,
@@ -1209,62 +1190,14 @@
             pendingUploading = false;
 
             await reloadData();
-            attachementsComponent.reload(note, fileLink.$ref);
+            attachementsComponent.reload(activeNote, fileLink.$ref);
 
             if(additionalAfterCreateAction)
                 additionalAfterCreateAction(fileLink)
         }
     }
 
-    /*async function onAttachementSelected()
-    {
-        const [file] = attInput.files;
-        if(file)
-        {
-            pendingUploading = true
-
-            const res = await reef.post(`${noteRef}/AttachedFiles/blob?name=${file.name}&size=${file.size}`, {}, onErrorShowAlert)
-            if(res && res.key && res.uploadUrl)
-            {
-                const newKey = res.key;
-                const uploadUrl = res.uploadUrl
-
-                try
-                {
-                    //const res = await new Promise(r => setTimeout(r, 10000));
-                    const res = await fetch(uploadUrl, {
-                                                method: 'PUT',
-                                                headers: new Headers({
-                                                    'Content-Type': file.type
-                                                }),
-                                                body: file})
-                    if(res.ok)
-                    {
-                        // todo: editor path imgPath
-
-                    }
-                    else
-                    {
-                        const err = await res.text()
-                        console.error(err)
-                        onErrorShowAlert(err)
-                    }
-
-                }
-                catch(err)
-                {
-                    console.error(err)
-                    onErrorShowAlert(err)
-                }
-            }
-
-            pendingUploading = false;
-
-            await reloadData();
-        }
-    }
-    */
-
+    
     function isContentEmpty()
     {
         if(!note.Content)
@@ -1305,10 +1238,6 @@
                     caption: '_; Detach; Desconectar; Odłącz',
                     action: (f) => dettachAttachement(element, kind)
                 }
-            /*    {
-                    caption: '_; Set as primary location; Establecer como ubicación principal; Ustaw jako główną lokalizację',
-                    action: (f) => setAttachementLocationAsCanonical(element, kind)
-                }*/
              ]
         }
 
@@ -1370,8 +1299,17 @@
                                         action: (f) => cutAttachementToBasket(element, kind)
                                     },
                                     {
-                                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                        action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, element)
+                                        caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
+                                        action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect, element)
+                                    },
+                                    { separator: true},
+                                    {
+                                        caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                                        action: () => openInNewTab(element.href)
+                                    },
+                                    {
+                                        caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                                        action: () => copyAddress(element.href)
                                     }
                                 ]
                             },
@@ -1452,30 +1390,30 @@
 
     async function copyNoteToBasket(forNote)
     {
-        await reef.post(`${noteRef}/CopyNoteToBasket`, { noteLink: forNote.$ref } , onErrorShowAlert);
+        await reef.post(`${activeNoteRef}/CopyNoteToBasket`, { noteLink: forNote.$ref } , onErrorShowAlert);
     }
 
     async function cutNoteToBasket(forNote)
     {
-        await reef.post(`${noteRef}/CutNoteToBasket`, { noteLink: forNote.$ref } , onErrorShowAlert);
+        await reef.post(`${activeNoteRef}/CutNoteToBasket`, { noteLink: forNote.$ref } , onErrorShowAlert);
         await reloadData();
         if(attachementsComponent)
-            attachementsComponent.reload(note, attachementsComponent.SELECT_NEXT);
+            attachementsComponent.reload(activeNote, attachementsComponent.SELECT_NEXT);
         else
             clearActiveItem('props')
     }
 
     async function copyFileToBasket(file)
     {
-        await reef.post(`${noteRef}/CopyFileToBasket`, { fileLink: file.$ref } , onErrorShowAlert);
+        await reef.post(`${activeNoteRef}/CopyFileToBasket`, { fileLink: file.$ref } , onErrorShowAlert);
     }
 
     async function cutFileToBasket(file)
     {
-        await reef.post(`${noteRef}/CutFileToBasket`, { fileLink: file.$ref } , onErrorShowAlert);
+        await reef.post(`${activeNoteRef}/CutFileToBasket`, { fileLink: file.$ref } , onErrorShowAlert);
         await reloadData();
         if(attachementsComponent)
-            attachementsComponent.reload(note, attachementsComponent.SELECT_NEXT);
+            attachementsComponent.reload(activeNote, attachementsComponent.SELECT_NEXT);
         else
             clearActiveItem('props')
     }
@@ -1495,38 +1433,22 @@
 
     async function dettachNote(forNote)
     {
-        await reef.post(`${noteRef}/DettachNote`, { noteLink: forNote.$ref } , onErrorShowAlert);
+        await reef.post(`${activeNoteRef}/DettachNote`, { noteLink: forNote.$ref } , onErrorShowAlert);
         await reloadData();
         if(attachementsComponent)
-            attachementsComponent.reload(note, attachementsComponent.SELECT_NEXT);
+            attachementsComponent.reload(activeNote, attachementsComponent.SELECT_NEXT);
         else
             clearActiveItem('props')
     }
 
     async function dettachFile(file)
     {
-        await reef.post(`${noteRef}/DettachFile`, { fileLink: file.$ref } , onErrorShowAlert);
+        await reef.post(`${activeNoteRef}/DettachFile`, { fileLink: file.$ref } , onErrorShowAlert);
         await reloadData();
         if(attachementsComponent)
-            attachementsComponent.reload(note, attachementsComponent.SELECT_NEXT);
+            attachementsComponent.reload(activeNote, attachementsComponent.SELECT_NEXT);
         else
             clearActiveItem('props')
-    }
-
-    async function setAttachementLocationAsCanonical(element, kind)
-    {
-        await reef.get(`${element.$ref}/SetLocationAsCanonical`, onErrorShowAlert)
-        await reloadData();
-
-        switch(kind)
-        {
-        case 'Note':
-        case 'NoteNote':
-            attachementsComponent.reload(note, attachementsComponent.KEEP_SELECTION);
-        case 'UploadedFile':
-        case 'NoteFile':
-            attachementsComponent.reload(note, attachementsComponent.KEEP_SELECTION);
-        }
     }
 
     let deleteModal;
@@ -1549,22 +1471,22 @@
         {
         case 'Note':
         case 'NoteNote':
-            await reef.post(`${noteRef}/DeletePermanentlyNote`, { noteLink: objectToDelete.$ref } , onErrorShowAlert);
+            await reef.post(`${activeNoteRef}/DeletePermanentlyNote`, { noteLink: objectToDelete.$ref } , onErrorShowAlert);
             deleteModal.hide();
             await reloadData();
             if(attachementsComponent)
-                attachementsComponent.reload(note, attachementsComponent.SELECT_NEXT);
+                attachementsComponent.reload(activeNote, attachementsComponent.SELECT_NEXT);
             else
                 clearActiveItem('props')
             break;
 
         case 'UploadedFile':
         case 'NoteFile':
-            await reef.post(`${noteRef}/DeletePermanentlyFile`, { fileLink: objectToDelete.$ref } , onErrorShowAlert);
+            await reef.post(`${activeNoteRef}/DeletePermanentlyFile`, { fileLink: objectToDelete.$ref } , onErrorShowAlert);
             deleteModal.hide();
             await reloadData();
             if(attachementsComponent)
-                attachementsComponent.reload(note, attachementsComponent.SELECT_NEXT);
+                attachementsComponent.reload(activeNote, attachementsComponent.SELECT_NEXT);
             else
                 clearActiveItem('props')
             break;
@@ -1660,7 +1582,7 @@
     async function addEmptyNote(newNoteAttribs)
     {
         notesPlaceholder = false
-        let res = await reef.post(`${noteRef}/CreateSubNote`,{
+        let res = await reef.post(`${activeNoteRef}/CreateSubNote`,{
             title: newNoteAttribs.Title,
             summary: '',
             order: 0
@@ -1673,13 +1595,27 @@
         setBrowserRecentElement(newNote.NoteId, 'Note')
 
         await reloadData();
-        attachementsComponent.reload(note, newNote.$ref);
+        attachementsComponent.reload(activeNote, newNote.$ref);
 
         if(additionalAfterCreateAction)
         {
             additionalAfterCreateAction(newNote)
         }
     }
+
+    async function addThreadResponse() 
+    {
+        let res = await reef.post(`${noteRef}/AddPost`,{
+            content: ''})
+
+        if(!res)
+            return null;
+
+        let newNote = res.NoteNote;
+
+        await reloadData();
+    }
+
     let list_properties = {
         element:{
             icon: "icon",
@@ -1810,16 +1746,6 @@
         {/if}
 
 
-
-            {#if attachedFiles && attachedFiles.length > 0}
-            <!--p>
-                {#each attachedFiles as fileInfo (fileInfo.name)}
-                    <AttachedFile self={note} a='AttachedFiles' {fileInfo}/>
-                {/each}
-            </p-->
-            {/if}
-
-
             <!--{#if note.Content || descriptionPlaceholder}
                              -->
             <hr/>
@@ -1830,22 +1756,110 @@
                             a='Content'
                             compact={true}
                             bind:this={description}
-                            readOnly={isReadOnly}
-                            onFocusCb={() => activateFormattingTools()}
-                            onBlurCb={() => deactivateFormattingToolsIfNeeded()}
+                            readOnly={isReadOnly || (noteRef!=activeNoteRef)}
+                            onFocusCb={() => activateFormattingTools(description)}
+                            onBlurCb={() => deactivateFormattingToolsIfNeeded(description)}
                             onAddImage={uploadImage}
                             onRemoveImage={removeImage}
                             onLinkClick={editorLinkClicked}
-                            extraFrontPaletteCommands={extraPaletteCommands}
-                            extraInsertPaletteCommands={extraInsertPalletteCommands}
-                            extraBackPaletteCommands={extraBackPaletteCommands}/>
-            <hr/>
+                            extraInsertPaletteCommands={() => extraInsertPalletteCommands(description)}/>
 
-            {#if (note.Notes && note.Notes.length > 0) || (note.Files && note.Files.length > 0) || notesPlaceholder}
+            {#if isThread && (noteRef != activeNoteRef) && note.attachements && note.attachements.length > 0}
+                {#each note.attachements as att}
+                    <p class="bg-stone-100 dark:bg-stone-700">
+                    <span class="whitespace-normal">
+                        {#if att.$type == "NoteFile"}
+                            <a      class="mr-4 font-normal  whitespace-nowrap"
+                                    href={att.href}
+                                    on:click={(e) => downloadAttachedFile(e, att.href, att.Title)}>
+                                <span class="inline-block w-4 h-4 mr-2">
+                                    <Ricon icon = {att.icon}/>
+                                </span>
+                                <span class="text-stone-800 dark:text-stone-200">
+                                    {att.Title}
+                                </span>
+                            </a>
+                        {:else}
+                            <a      class="mr-4 font-normal  whitespace-nowrap"
+                                    href={att.href}
+                                    use:link>
+                                <span class="inline-block w-4 h-4 mr-2">
+                                    <Ricon icon = {att.icon}/>
+                                </span>
+                                <span class="text-stone-800 dark:text-stone-200">
+                                    {att.Title}
+                                </span>
+                            </a>
+                        {/if}
+                        
+                    </span>
+                </p>
+                {/each}
+            {/if}
+            
+
+            <!-- ============================================================================== -->
+
+            {#if isThread && note.Notes && note.Notes.length > 0}
+                {#each note.Notes as subNoteLink, subNoteIdx}
+                    {@const subNote = subNoteLink.Note}
+                    <hr/>
+                    <h4>{subNote.CreatedBy.Name} {getNiceStringDateTime(subNote.CreationDate)}</h4>
+                    <Editor     on:click={(e) => e.stopPropagation()}
+                                a='Content'
+                                self={subNote}
+                                compact={true}
+                                bind:this={threadResponses[subNoteIdx]}
+                                readOnly={subNote.$ref!=activeNoteRef}
+                                onFocusCb={() => activateFormattingTools(threadResponses[subNoteIdx])}
+                                onBlurCb={() => deactivateFormattingToolsIfNeeded(threadResponses[subNoteIdx])}
+                                onAddImage={uploadImage}
+                                onRemoveImage={removeImage}
+                                onLinkClick={editorLinkClicked}
+                                extraInsertPaletteCommands={() => extraInsertPalletteCommands(threadResponses[subNoteIdx])}/>
+
+                    {#if subNote.$ref!=activeNoteRef && subNote.attachements && subNote.attachements.length > 0}
+                        {#each subNote.attachements as att}
+                            <p class="bg-stone-100 dark:bg-stone-700">
+                            <span class="whitespace-normal">
+                                {#if att.$type == "NoteFile"}
+                                    <a      class="mr-4 font-normal  whitespace-nowrap"
+                                            href={att.href}
+                                            on:click={(e) => downloadAttachedFile(e, att.href, att.Title)}>
+                                        <span class="inline-block w-4 h-4 mr-2">
+                                            <Ricon icon = {att.icon}/>
+                                        </span>
+                                        <span class="text-stone-800 dark:text-stone-200">
+                                            {att.Title}
+                                        </span>
+                                    </a>
+                                {:else}
+                                    <a      class="mr-4 font-normal  whitespace-nowrap"
+                                            href={att.href}
+                                            use:link>
+                                        <span class="inline-block w-4 h-4 mr-2">
+                                            <Ricon icon = {att.icon}/>
+                                        </span>
+                                        <span class="text-stone-800 dark:text-stone-200">
+                                            {att.Title}
+                                        </span>
+                                    </a>
+                                {/if}
+                                
+                            </span>
+                        </p>
+                        {/each}
+                    {/if}
+
+                {/each}
+            {/if}
+
+            <!-- ============================================================================== -->
+
+            {#if (activeNote.attachements && activeNote.attachements.length > 0) || notesPlaceholder}
                 <h2>_;Attachments; Anexos; Załączniki</h2>
                 <section>
-                    {#if (note.attachements && note.attachements.length > 0) || notesPlaceholder}
-                        <List   self={note}
+                        <List   self={activeNote}
                                 a='attachements'
                                 {list_properties}
                                 bind:this={attachementsComponent}
@@ -1855,34 +1869,6 @@
                             <ListInserter   action={addEmptyNote} icon incremental={false}/>
 
                         </List>
-                    {/if}
-
-                    {#if note.Files && note.Files.length > 0}
-                        <!--List   self={note}
-                                a='Files'
-                                bind:this={attachementsFilesComponent}
-                                toolbarOperations={(el) => attachementOperations(el, 'NoteFile')}>
-
-                            <ListTitle      a='Title'
-                                            hrefFunc={(el) => `${el.href}`}
-                                            downloadable
-                                            onOpen={async (f) => await downloadFileFromHRef(f.href, f.Title)}
-                                            onChange={changeAttachementProperty}/>
-
-                            <ListSummary    a='Summary'
-                                            onChange={changeAttachementProperty}/>
-
-                            <span slot="left" let:element class="relative">
-                                <Icon component={getElementIcon('File')}
-                                    class="h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-2  mr-1"/>
-                                {#if element.IsCanonical == 0}
-                                    <Icon component={FaExternalLinkSquareAlt}
-                                        class="absolute left-1 top-1/2 w-1/2 h-1/2
-                                                text-stone-500 dark:text-stone-300 " />
-                                {/if}
-                            </span>
-                        </List-->
-                    {/if}
                 </section>
             {/if}
 
@@ -1898,7 +1884,7 @@
 
 
 
-
+            
 
     </Paper>
 

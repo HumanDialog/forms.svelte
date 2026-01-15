@@ -7,7 +7,10 @@
         contextItemsStore,
         getActiveItems,
         clearActiveItem,
-        ext
+        ext,
+
+		Title
+
     }   from '$lib'
     import {FaRegFolder, FaRegFile, FaRegCalendarCheck, FaRegCalendar, FaFile, FaList, FaRegComments, FaRegClipboard, FaClipboardList, FaLevelUpAlt} from 'svelte-icons/fa'
     import { afterUpdate, onMount } from "svelte";
@@ -22,16 +25,23 @@
     export let onRefreshView = undefined
     export let onAttach = undefined
     export let canSelectRootElements = false
+    export let rootFilter = 'ALL' // 'FOLDERS' | 'TASKLISTS'
+    export let leafFilter = []
+    export let attachToContainer = false
+    export let canAttachAsRootFolder = false
 
     export let whatToShow = undefined
 
     let elements = []
+    let containerRef = null
+    let canAttachToCurrentContainer = false
     let canSelectElements = false
     let levelUpHRef = ''
     let currentLevelTitle = __APP_TITLE__
 
     let reloadTicket = -1
     let lastReloadTicket = 0
+    let lastLocationKey = `lastPopupExplorerLocation_${rootFilter}`
 
     const EIF_ITEM              =  0x00000000
     const EIF_CUT               =  0x00000001
@@ -52,8 +62,8 @@
 
         if(whatToShow == undefined)
         {
-            if(localStorage.lastPopupExplorerLocation)
-                whatToShow = localStorage.lastPopupExplorerLocation
+            if(localStorage[lastLocationKey])
+                whatToShow = localStorage[lastLocationKey]
             else
                 whatToShow = '/root'
         }
@@ -74,6 +84,10 @@
 
         case '/alllists':
             elements = await generateGroupListsReferences()
+            break;
+
+        case '/pinned':
+            elements = await generatePinnedElementsReferences()
             break;
 
         case '/myfolders':
@@ -105,19 +119,22 @@
         canSelectElements = false
         levelUpHRef = ''
         currentLevelTitle = __APP_TITLE__
+        containerRef = null
+        canAttachToCurrentContainer = false
 
-        let references = [
-            {
-                ElementId: 0,
-                ElementType: '',
-                ElementNav: '',
-                Title: '_; My tasks; Mis tareas; Moje zadania',
-                Summary: '',
-                icon: 'square-pen',
-                href: '/mytasks',
-                ElementInfo: 0,
-                $ref: 'mytasks'
-            },
+        const my_tasks = {
+            ElementId: 0,
+            ElementType: '',
+            ElementNav: '',
+            Title: '_; My tasks; Mis tareas; Moje zadania',
+            Summary: '',
+            icon: 'square-pen',
+            href: '/mytasks',
+            ElementInfo: 0,
+            $ref: 'mytasks'
+        }
+
+        const root_tasklists = [
             {
                 ElementId: 0,
                 ElementType: '',
@@ -139,6 +156,20 @@
                 href: '/alllists',
                 ElementInfo: 0,
                 $ref: 'alllists'
+            }
+        ]
+
+        const root_folders = [
+            {
+                ElementId: 0,
+                ElementType: '',
+                ElementNav: '',
+                Title: '_; Pinned; Fijado; Przypięte',
+                Summary: '',
+                icon: 'folder',
+                href: '/pinned',
+                ElementInfo: 0,
+                $ref: 'pinned'
             },
             {
                 ElementId: 0,
@@ -164,20 +195,50 @@
             }
         ]
 
-        return references;
+        if(rootFilter == 'ALL')
+        {
+            return [ 
+                my_tasks,
+                ...root_tasklists,
+                ...root_folders
+            ]
+        }
+        else if(rootFilter == 'FOLDERS')
+        {
+            return [
+                ...root_folders
+            ]
+        }
+        else if(rootFilter == 'TASKLISTS')
+        {
+            return [
+                ...root_tasklists
+            ]
+        }
+        else
+            return []
+        
     }
 
     async function generateMyTasksReferences()
     {
-        canSelectElements = true
+        canSelectElements = !attachToContainer
         levelUpHRef = '/root'
         currentLevelTitle = '_; My tasks; Mis tareas; Moje zadania'
+        canAttachToCurrentContainer = true
+
+        
+        if(!canShow('Task'))
+            return []
 
         let res = await reef.get(`/user/MyTasks?State<>STATE_FINISHED&fields=Id,$type,$ref,Title,Summary,href,icon&sort=UserOrder`, onErrorShowAlert);
         if(!res)
             return [  ]
         else
         {
+            if(attachToContainer)
+                setUserAsContainerRef()
+
             let references = [ ]
 
             res.Task.forEach(t => {
@@ -188,7 +249,7 @@
                     Title: t.Title,
                     Summary: t.Summary,
                     icon: t.icon,
-                    href: t.href,
+                    //href: t.href,
                     ElementInfo: 0,
                     $ref: t.$ref
                 })
@@ -200,14 +261,20 @@
 
     async function generateMyListsReferences()
     {
-        canSelectElements = canSelectRootElements
+        canSelectElements = false
         levelUpHRef = '/root'
         currentLevelTitle = '_; My lists; Mis listas; Moje listy! '
+        canAttachToCurrentContainer = false
+
         let res = await reef.get(`/user/MyLists?Status<>TLS_GROUP_ARCHVIVED_LIST&fields=Id,$type,$ref,Name,Summary,href&sort=Order`, onErrorShowAlert);
         if(!res)
             return [  ]
         else
         {
+            //if(attachToContainer)
+            //    setUserAsContainerRef()
+            containerRef = null
+            
             let references = [ ]
 
             res.TaskList.forEach(t => {
@@ -230,15 +297,20 @@
 
     async function generateGroupListsReferences()
     {
-        canSelectElements = canSelectRootElements
+        canSelectElements = false
         levelUpHRef = '/root'
         currentLevelTitle = '_; Common lists; Listas comunes; Wspólne listy'
+        canAttachToCurrentContainer = false
 
         let res = await reef.get(`/group/Lists?fields=Id,$type,$ref,Name,Summary,href&sort=Order`, onErrorShowAlert);
         if(!res)
             return [  ]
         else
         {
+            //if(attachToContainer)
+            //    setGroupAsContainerRef()
+            containerRef = null
+
             let references = [ ]
 
             res.TaskList.forEach(t => {
@@ -259,17 +331,177 @@
         }
     }
 
+    async function generatePinnedElementsReferences()
+    {
+        canSelectElements = !attachToContainer
+        levelUpHRef = '/root'
+        currentLevelTitle = '_; Pinned; Fijado; Przypięte'
+        canAttachToCurrentContainer = true
+
+        let res = await reef.post('/user/PinnedFolders/query', 
+            {
+                Id: 1,
+                                Name: "collector",
+                                ExpandLevel: 3,
+                                Tree:
+                                [
+                                    {
+                                        Id: 1,
+                                        Association: '',
+                                        Expressions:['Id', 'Title','icon', '$ref', '$type'],
+                                        SubTree:
+                                        [
+                                            {
+                                                Id: 2,
+                                                Association: 'Folders',
+                                                Expressions:['FolderId','$ref', 'Title', 'Summary', 'Order', 'href', 'icon', '$type']
+
+                                            },
+                                            {
+                                                Id: 3,
+                                                Association: 'Notes',
+                                                Expressions:['NoteId', '$ref', 'Title', 'Summary', 'Order', 'href', 'icon',  '$type']
+
+                                            },
+                                            {
+                                                Id: 4,
+                                                Association: 'Tasks',
+                                                Expressions:['TaskId', '$ref', 'Title', 'Summary', 'Order', 'href', 'icon', '$type']
+
+                                            },
+                                            {
+                                                Id: 5,
+                                                Association: 'Files',
+                                                Expressions:['FileId', '$ref', 'Title', 'Summary', 'Order', 'href', 'icon', '$type']
+
+                                            }
+                                        ]
+                                    }
+                                ]
+            }
+        );
+        if(!res)
+            return [  ]
+        else
+        {
+            let references = [ ]
+
+            let contextItem = res.Folder
+
+            if(attachToContainer && contextItem)
+            {
+                containerRef = {
+                    ElementId: contextItem.Id,
+                    ElementType: contextItem.$type,
+                    ElementNav: contextItem.$ref,
+                    Title: contextItem.Title,
+                    Summary: '',
+                    icon: contextItem.icon,
+                    ElementInfo: 0,
+                    $ref: contextItem.$ref
+                }        
+            }
+
+            let allElements = []
+            if(contextItem.Folders && contextItem.Folders.length > 0)
+            {
+                contextItem.Folders.forEach((f) => {
+                    allElements.push({
+                        Id: f.FolderId,
+                        $type: 'Folder',
+                        Title: f.Title,
+                        Summary: f.Summary,
+                        icon: f.icon,
+                        href: f.href,
+                        Order: f.Order,
+                        $ref: `./Folder/${f.FolderId}`
+                    })
+                })
+            }
+
+            if(contextItem.Notes && (contextItem.Notes.length > 0) && canShow('Note'))
+            {
+                contextItem.Notes.forEach((f) => {
+                    allElements.push({
+                        Id: f.NoteId,
+                        $type: 'Note',
+                        Title: f.Title,
+                        Summary: f.Summary,
+                        icon: f.icon,
+                        //href: f.href,
+                        Order: f.Order,
+                        $ref: `./Note/${f.NoteId}`
+                    })
+                })
+            }
+
+            if(contextItem.Tasks && (contextItem.Tasks.length > 0) && canShow('Task'))
+            {
+                contextItem.Tasks.forEach((f) => {
+                    allElements.push({
+                        Id: f.TaskId,
+                        $type: 'Task',
+                        Title: f.Title,
+                        Summary: f.Summary,
+                        icon: f.icon,
+                        //href: f.href,
+                        Order: f.Order,
+                        $ref: `./Task/${f.TaskId}`
+                    })
+                })
+            }
+
+            if(contextItem.Files && (contextItem.Files.length > 0) && canShow('File'))
+            {
+                contextItem.Files.forEach((f) => {
+                    allElements.push({
+                        Id: f.FileId,
+                        $type: 'UploadedFile',
+                        Title: f.Title,
+                        Summary: f.Summary,
+                        icon: f.icon,
+                        //href: f.href,
+                        Order: f.Order,
+                        $ref: `./UploadedFile/${f.FileId}`
+                    })
+                })
+            }
+
+            allElements.sort((a,b) => a.Order - b.Order)
+
+            allElements.forEach(t => {
+                references.push({
+                    ElementId: t.Id,
+                    ElementType: t.$type,
+                    ElementNav: t.$ref,
+                    Title: t.Title,
+                    Summary: t.Summary,
+                    icon: t.icon,
+                    href: t.href ?? undefined,
+                    ElementInfo: 0,
+                    $ref: t.$ref
+                })
+            })
+
+            return references
+        }
+    }
+
     async function generateMyFoldersReferences()
     {
-        canSelectElements = canSelectRootElements
+        canSelectElements = false
         levelUpHRef = '/root'
         currentLevelTitle = '_; My Folders; Mis carpetas; Moje foldery'
+        canAttachToCurrentContainer = canAttachAsRootFolder
 
         let res = await reef.get(`/user/Folders?fields=Id,$type,$ref,Title,Summary,href,icon&sort=Order`, onErrorShowAlert);
         if(!res)
             return [  ]
         else
         {
+            if(attachToContainer)
+                setUserAsContainerRef()
+
             let references = [ ]
 
             res.Folder.forEach(t => {
@@ -292,15 +524,19 @@
 
     async function generateGroupFoldersReferences()
     {
-        canSelectElements = canSelectRootElements
+        canSelectElements = false
         levelUpHRef = '/root'
         currentLevelTitle = '_; Common folders; Carpetas comunes; Wspólne foldery'
+        canAttachToCurrentContainer = canAttachAsRootFolder
 
         let res = await reef.get(`/group/Folders?fields=Id,$type,$ref,Title,Summary,href,icon&sort=Order`, onErrorShowAlert);
         if(!res)
             return [  ]
         else
         {
+            if(attachToContainer)
+                setGroupAsContainerRef()
+
             let references = [ ]
 
             res.Folder.forEach(t => {
@@ -327,7 +563,9 @@
         const segments = whatToShow.split('/')
         const folderId = parseInt(segments[2])
 
-        canSelectElements = true
+        canAttachToCurrentContainer = true
+
+        canSelectElements = !attachToContainer
 
         let res = await reef.post(`/Folder/${folderId}/query`,
                             {
@@ -339,7 +577,7 @@
                                     {
                                         Id: 1,
                                         Association: '',
-                                        Expressions:['Title','GetCanonicalPath'],
+                                        Expressions:['Title','GetCanonicalPath', 'Id', '$ref', '$type', 'icon'],
                                         SubTree:
                                         [
                                             {
@@ -389,6 +627,20 @@
             else
                 levelUpHRef = '/root'
 
+             if(attachToContainer && contextItem)
+            {
+                containerRef = {
+                    ElementId: contextItem.Id,
+                    ElementType: contextItem.$type,
+                    ElementNav: contextItem.$ref,
+                    Title: contextItem.Title,
+                    Summary: '',
+                    icon: contextItem.icon,
+                    ElementInfo: 0,
+                    $ref: contextItem.$ref
+                }        
+            }
+
            currentLevelTitle = contextItem.Title
 
             let references = [  ]
@@ -410,7 +662,7 @@
                 })
             }
 
-            if(contextItem.Notes && contextItem.Notes.length > 0)
+            if(contextItem.Notes && (contextItem.Notes.length > 0) && canShow('Note'))
             {
                 contextItem.Notes.forEach((f) => {
                     allElements.push({
@@ -419,14 +671,14 @@
                         Title: f.Title,
                         Summary: f.Summary,
                         icon: f.icon,
-                        href: f.href,
+                        //href: f.href,
                         Order: f.Order,
                         $ref: `./Note/${f.NoteId}`
                     })
                 })
             }
 
-            if(contextItem.Tasks && contextItem.Tasks.length > 0)
+            if(contextItem.Tasks && (contextItem.Tasks.length > 0) && canShow('Task'))
             {
                 contextItem.Tasks.forEach((f) => {
                     allElements.push({
@@ -435,14 +687,14 @@
                         Title: f.Title,
                         Summary: f.Summary,
                         icon: f.icon,
-                        href: f.href,
+                        //href: f.href,
                         Order: f.Order,
                         $ref: `./Task/${f.TaskId}`
                     })
                 })
             }
 
-            if(contextItem.Files && contextItem.Files.length > 0)
+            if(contextItem.Files && (contextItem.Files.length > 0) && canShow('File'))
             {
                 contextItem.Files.forEach((f) => {
                     allElements.push({
@@ -451,7 +703,7 @@
                         Title: f.Title,
                         Summary: f.Summary,
                         icon: f.icon,
-                        href: f.href,
+                        //href: f.href,
                         Order: f.Order,
                         $ref: `./UploadedFile/${f.FileId}`
                     })
@@ -468,7 +720,7 @@
                     Title: t.Title,
                     Summary: t.Summary,
                     icon: t.icon,
-                    href: t.href,
+                    href: t.href ?? undefined,
                     ElementInfo: 0,
                     $ref: t.$ref
                 })
@@ -483,7 +735,9 @@
         const segments = whatToShow.split('/')
         const listId = parseInt(segments[2])
 
-        canSelectElements = true
+        canAttachToCurrentContainer = true  // for Tasks
+
+        canSelectElements = !attachToContainer
 
         let res = await reef.post(`/TaskList/${listId}/query`,
                             {
@@ -495,7 +749,7 @@
                                     {
                                         Id: 2,
                                         Association: '',
-                                        Expressions:['Name','GetCanonicalPath'],
+                                        Expressions:['Name','GetCanonicalPath', 'Id', '$ref', '$type'],
                                         SubTree:
                                         [
                                             {
@@ -528,9 +782,26 @@
             else
                 levelUpHRef = '/root'
 
+             if(attachToContainer && contextItem)
+            {
+                containerRef = {
+                    ElementId: contextItem.Id,
+                    ElementType: contextItem.$type,
+                    ElementNav: contextItem.$ref,
+                    Title: contextItem.Title,
+                    Summary: '',
+                    icon: '',
+                    ElementInfo: 0,
+                    $ref: contextItem.$ref
+                }        
+            }
+
             currentLevelTitle = contextItem.Name
 
             let references = [ ]
+
+            if(!canShow('Task'))
+                return references;
 
             contextItem.Tasks.forEach(t => {
                 references.push({
@@ -540,7 +811,7 @@
                     Title: t.Title,
                     Summary: t.Summary,
                     icon: t.icon,
-                    href: t.href,
+                    //href: t.href,
                     ElementInfo: 0,
                     $ref: t.$ref
                 })
@@ -555,7 +826,9 @@
         const segments = whatToShow.split('/')
         const taskId = parseInt(segments[2])
 
-        canSelectElements = true
+        canAttachToCurrentContainer = true  // for Notes and Files only
+
+        canSelectElements = !attachToContainer
 
         let res = await reef.post(`/Task/${taskId}/query`,
                             {
@@ -567,7 +840,7 @@
                                     {
                                         Id: 2,
                                         Association: '',
-                                        Expressions:['Title','GetCanonicalPath'],
+                                        Expressions:['Title','GetCanonicalPath', 'Id', '$ref', '$type', 'icon'],
                                         SubTree:
                                         [
                                             {
@@ -605,6 +878,20 @@
             else
                 levelUpHRef = '/root'
 
+             if(attachToContainer && contextItem)
+            {
+                containerRef = {
+                    ElementId: contextItem.Id,
+                    ElementType: contextItem.$type,
+                    ElementNav: contextItem.$ref,
+                    Title: contextItem.Title,
+                    Summary: '',
+                    icon: contextItem.icon,
+                    ElementInfo: 0,
+                    $ref: contextItem.$ref
+                }        
+            }
+
             currentLevelTitle = contextItem.Title
 
             let references = [ ]
@@ -636,7 +923,7 @@
                         Title: t.Title,
                         Summary: t.Summary,
                         icon: t.icon,
-                        href: t.href,
+                        //href: t.href,
                         ElementInfo: 0,
                         $ref: `./UploadedFile/${t.FileId}`
                     })
@@ -652,7 +939,9 @@
         const segments = whatToShow.split('/')
         const noteId = parseInt(segments[2])
 
-        canSelectElements = true
+        canAttachToCurrentContainer = true  // for Notes and Files only
+
+        canSelectElements = !attachToContainer
 
         let res = await reef.post(`/Note/${noteId}/query`,
                             {
@@ -664,7 +953,7 @@
                                     {
                                         Id: 2,
                                         Association: '',
-                                        Expressions:['Title','GetCanonicalPath'],
+                                        Expressions:['Title','GetCanonicalPath', 'Id', '$ref', '$type', 'icon'],
                                         SubTree:
                                         [
                                             {
@@ -702,6 +991,20 @@
             else
                 levelUpHRef = '/root'
 
+             if(attachToContainer && contextItem)
+            {
+                containerRef = {
+                    ElementId: contextItem.Id,
+                    ElementType: contextItem.$type,
+                    ElementNav: contextItem.$ref,
+                    Title: contextItem.Title,
+                    Summary: '',
+                    icon: contextItem.icon,
+                    ElementInfo: 0,
+                    $ref: contextItem.$ref
+                }        
+            }
+
             currentLevelTitle = contextItem.Title
 
             let references = []
@@ -733,7 +1036,7 @@
                         Title: t.Title,
                         Summary: t.Summary,
                         icon: t.icon,
-                        href: t.href,
+                        //href: t.href,
                         ElementInfo: 0,
                         $ref: `./UploadedFile/${t.FileId}`
                     })
@@ -744,7 +1047,60 @@
         }
     }
 
+    function setUserAsContainerRef()
+    {
+        reef.get('user?fields=Id,$ref,$type,Name').then( (res) => {
+            if( res && res.User)
+            {
+                const parent = res.User
+                containerRef = {
+                    ElementId: parent.Id,
+                    ElementType: parent.$type,
+                    ElementNav: parent.$ref,
+                    Title: parent.Name,
+                    Summary: '',
+                    icon: '',
+                    ElementInfo: 0,
+                    $ref: parent.$ref
+                }        
+            }
+        })
+    }
 
+    function setGroupAsContainerRef()
+    {
+        reef.get('group?fields=Id,$ref,$type,Name').then( (res) => {
+            if( res && res.Group)
+            {
+                const parent = res.Group
+                containerRef = {
+                    ElementId: parent.Id,
+                    ElementType: parent.$type,
+                    ElementNav: parent.$ref,
+                    Title: parent.Name,
+                    Summary: '',
+                    icon: '',
+                    ElementInfo: 0,
+                    $ref: parent.$ref
+                    }        
+                }
+            })
+    }
+
+
+    function canShow(elementKind)
+    {
+        if(!leafFilter)
+            return true
+
+        if(!leafFilter.length)
+            return true
+
+        const idx = leafFilter.findIndex((e) => e == elementKind)
+        if(idx < 0)
+            return false
+        return true
+    }
 
     function getSelectedItems(...args)
     {
@@ -804,9 +1160,36 @@
             }
         }
 
-        //todo: setBrowserRecentElement
-        //recentClipboardElements(selectedReferences, browserBasedClipboard)
+    }
 
+    async function onAttachToContainer()
+    {
+        if(!containerRef)
+            return
+
+        if(onHide)
+            onHide();
+
+        
+        const selectedReferences = [containerRef]
+        const references = transformClipboardToJSONReferences(selectedReferences)
+
+        if(!destinationContainer)
+        {
+            if(onAttach)
+            {
+                onAttach(null, references)
+            }
+        }
+        else
+        {
+            const res = await reef.post(`${destinationContainer}/AttachClipboard`, { references: references }, onErrorShowAlert)
+            if(res)
+            {
+                if(onRefreshView)
+                    onRefreshView(res);
+            }
+        }
     }
 
 
@@ -824,7 +1207,7 @@
     function onOpen(item)
     {
         whatToShow = item.href
-        localStorage.lastPopupExplorerLocation = whatToShow
+        localStorage[lastLocationKey] = whatToShow
 
         clearActiveItem('handy')
         selectedElements = getSelectedItems($contextItemsStore)
@@ -837,7 +1220,7 @@
         if(levelUpHRef)
         {
             whatToShow = levelUpHRef
-            localStorage.lastPopupExplorerLocation = whatToShow
+            localStorage[lastLocationKey] = whatToShow
 
             clearActiveItem('handy')
             reload();
@@ -949,17 +1332,32 @@ let list_properties = {
                         on:click={onHide}>
                      _; Cancel; Pegar; Anuluj
                 </button>
-                <button class="px-4 mx-2
-                        bg-stone-100 dark:bg-stone-700
-                        outline outline-offset-2 outline-2
-                        outline-stone-200 dark:outline-stone-500
-                        hover:bg-stone-200 hover:dark:bg-stone-700
-                        disabled:bg-stone-100/40 dark:disabled:bg-stone-700/40
-                        "
-                        disabled={!selectedElementsNo || !canSelectElements}
-                        on:click={() => attachTo()}>
-                     _; Paste; Pegar; Wklej
-                </button>
+
+                {#if attachToContainer}
+                    <button class="px-4 mx-2
+                            bg-stone-100 dark:bg-stone-700
+                            outline outline-offset-2 outline-2
+                            outline-stone-200 dark:outline-stone-500
+                            hover:bg-stone-200 hover:dark:bg-stone-700
+                            disabled:bg-stone-100/40 dark:disabled:bg-stone-700/40
+                            "
+                            disabled={!canAttachToCurrentContainer}
+                            on:click={() => onAttachToContainer()}>
+                        _; Paste here; Pegar aquí; Wklej tutaj
+                    </button>
+                {:else}
+                    <button class="px-4 mx-2
+                            bg-stone-100 dark:bg-stone-700
+                            outline outline-offset-2 outline-2
+                            outline-stone-200 dark:outline-stone-500
+                            hover:bg-stone-200 hover:dark:bg-stone-700
+                            disabled:bg-stone-100/40 dark:disabled:bg-stone-700/40
+                            "
+                            disabled={!selectedElementsNo || !canSelectElements}
+                            on:click={() => attachTo()}>
+                        _; Paste; Pegar; Wklej
+                    </button>
+                {/if}
             </div>
         </h4>
     </div>
@@ -1009,20 +1407,36 @@ let list_properties = {
 
             <div class="mt-2 flex flex-row justify-end gap-2">
 
-                <button class=" py-2.5 px-5
-                                text-base sm:text-xs font-medium
-                                bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400
-                                hover:bg-stone-200 hover:dark:bg-stone-600
-                                disabled:bg-white/60 dark:disabled:bg-stone-700/60
-                                border rounded
-                                border-stone-200 dark:border-stone-600 focus:outline-none
-                                disabled:border-stone-200/60 dark:disabled:border-stone-500/60
-                                inline-flex items-center justify-center"
-                                disabled={!selectedElementsNo || !canSelectElements}
-                                on:click={() => attachTo()}>
-
-                    _; Paste; Pegar; Wklej
-                </button>
+                {#if attachToContainer}
+                    <button class=" py-2.5 px-5
+                                    text-base sm:text-xs font-medium
+                                    bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400
+                                    hover:bg-stone-200 hover:dark:bg-stone-600
+                                    disabled:bg-white/60 dark:disabled:bg-stone-700/60
+                                    border rounded
+                                    border-stone-200 dark:border-stone-600 focus:outline-none
+                                    disabled:border-stone-200/60 dark:disabled:border-stone-500/60
+                                    inline-flex items-center justify-center"
+                                    disabled={!containerRef}
+                                    on:click={() => onAttachToContainer()}>
+                        _; Paste here; Pegar aquí; Wklej tutaj
+                    </button>
+                {:else}
+                    <button class=" py-2.5 px-5
+                                    text-base sm:text-xs font-medium
+                                    bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400
+                                    hover:bg-stone-200 hover:dark:bg-stone-600
+                                    disabled:bg-white/60 dark:disabled:bg-stone-700/60
+                                    border rounded
+                                    border-stone-200 dark:border-stone-600 focus:outline-none
+                                    disabled:border-stone-200/60 dark:disabled:border-stone-500/60
+                                    inline-flex items-center justify-center"
+                                    disabled={!selectedElementsNo || !canSelectElements}
+                                    on:click={() => attachTo()}>
+                        _; Paste; Pegar; Wklej
+                    </button>
+                {/if}
+                
 
             </div>
 

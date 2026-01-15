@@ -218,8 +218,6 @@
         else
             value = new Date(rValue);
 
-        console.log('rValue', rValue, 'value', value)
-
         if(onSelect)
         {
             await onSelect(value)
@@ -256,7 +254,12 @@
 {#if typo}
     <div class="inline-block relative flex flex-row  items-center">
         <span class="mr-1">{pretty_value}</span>
-        <Ricon icon = "chevron-down" size="xs"/>
+
+        {#if can_be_activated}
+            <Ricon icon = "chevron-down" size="xs"/>
+        {:else}
+            <span class="w-[16px]"></span>  <!-- Ricon xs space -->
+        {/if}
 
         {#if can_be_activated}
             {#if type == "datetime-local"}

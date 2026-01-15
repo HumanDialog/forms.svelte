@@ -423,15 +423,11 @@
             use:selectable={item}
             on:click={onToggleMultiSelect}>
 <figure class={multiselect_class} bind:this={rootElement}>
-    <!-- comming soon - top info --
+    <!-- comming soon - top info -->
     <figcaption>
-        <div class="grid gap-4 grid-cols-3 grid-rows-1">
-            <span>OCT-254</span>
-            <span class="text-center"></span>
-            <span class="text-right">15 listopad 25</span>
-        </div>
+        <ListElementProperties self = {item} properties = {element_properties?.t}/>
     </figcaption>
-    -------------------------------->
+    <!-------------------------------->
     <!--@el------------------------->
     <h4 class="-indent-16 sm:hover:cursor-default"
         >
@@ -493,30 +489,25 @@
         bg-stone-200 dark:bg-stone-700
         outline outline-8
         outline-stone-200 dark:outline-stone-700
-        ring-1 ring-offset-8
-        ring-stone-300 dark:ring-stone-700
+        
         "
 
         bind:this={rootElement}
         use:selectable={item}
         on:click={(e) => {activate_row(e, item)}}
         >
-    <!-- comming soon - top info --
+    <!-- comming soon - top info -->
     <figcaption>
-        <div class="grid gap-4 grid-cols-3 grid-rows-1">
-            <span>OCT-254</span>
-            <span class="text-center"></span>
-            <span class="text-right">15 listopad 25</span>
-        </div>
-    </figcaption> #active
-    -------------------------------->
+        <ListElementProperties self = {item} properties = {element_properties?.t}/>
+    </figcaption>
+    <!-------------------------------->
     <!--@el------------------------->
     {#if download}
         <a  class="sm:hover:cursor-pointer"
             href={element_href}
             on:click={onDownloadFile}>
 
-            <h4 class="-indent-8">
+            <h4 class="-indent-8 mt-0">
                 <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
                         text-stone-700 dark:text-stone-400 ">
                         <Ricon icon={isDownloading ? 'loader-circle' : element_icon} />
@@ -531,7 +522,7 @@
         <a  class="sm:hover:cursor-pointer"
             href={element_href} use:link>
 
-            <h4 class="-indent-8 ">
+            <h4 class="-indent-8 mt-0">
                 <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
                         text-stone-700 dark:text-stone-400 ">
                         <Ricon icon={element_icon} />
@@ -547,7 +538,7 @@
             href="/#"
             on:click|preventDefault={() => element_open_handler(item)}>
 
-            <h4 class="-indent-8">
+            <h4 class="-indent-8 mt-0">
                 <div class="inline-block w-4 h-4 ml-0 mr-4 align-baseline
                         text-stone-700 dark:text-stone-400 ">
                         <Ricon icon={element_icon} />

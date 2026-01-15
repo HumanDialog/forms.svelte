@@ -1290,3 +1290,15 @@ export const fetchHandlers = {
         (err, res) => onErrorShowAlert(err)
     ]
 }
+
+export function openInNewTab(href)
+{
+    const full_address = window.location.origin + window.location.pathname + "#" + href
+    window.open(full_address, "_blank");
+}
+
+export function copyAddress(href)
+{
+    const full_address = window.location.origin + window.location.pathname + "#" + href
+    navigator.clipboard.writeText(full_address)
+}

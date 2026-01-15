@@ -12,10 +12,10 @@
                 ListDateProperty,
                 ListComboProperty,
 				mainContentPageReloader,
-                Modal,
+                Modal, focusEditable,
                 onErrorShowAlert, showMenu,
 				UI, i18n, Breadcrumb, showFloatingToolbar, Paper, PaperHeader,
-				ext, refreshToolbarOperations
+				ext, refreshToolbarOperations, openInNewTab, copyAddress
             } from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCalendarCheck, FaRegCalendar, FaPen, FaColumns, FaArchive, FaList,
         FaEllipsisH, FaChevronRight, FaChevronLeft, FaRandom, FaCheck, FaUpload, FaUndo, FaDownload
@@ -278,6 +278,24 @@
         await reloadTasks(newTask.$ref)
     }
 
+    const unfollowOperation = {
+        caption: '_; Unfollow; Dejar de seguir; Przestań obserwować',
+        mricon: 'heart-off',
+        tbr: 'C',
+        fab: 'S20',
+        hideToolbarCaption: true,
+        action: (f) => toggleSubscribe()
+    }
+
+    const followOperation = {
+        caption: '_; Follow; Seguir; Obserwuj',
+        mricon: 'heart',
+        tbr: 'C',
+        fab: 'S20',
+        hideToolbarCaption: true,
+        action: (f) => toggleSubscribe()
+    }
+
     function getPageOperations()
     {
         if(isArchivedList)
@@ -302,6 +320,23 @@
                             fab: 'M01',
                             tbr: 'A'
                         },
+                        { separator: true, tbr: 'A'},
+                        {
+                            caption: '_; Edit; Editar; Edytuj',
+                            mricon: 'pencil',
+                            tbr: 'A',
+                            fab:'M20',
+                            grid:[
+                                {
+                                    caption: '_; Title; Título; Tytuł',
+                                    action: () =>  { focusEditable('Name') },
+                                },
+                                {
+                                    caption: '_; Summary; Resumen; Podsumowanie',
+                                    action: () =>  { focusEditable('Summary') }
+                                }
+                            ]
+                        },
                         {
                             mricon: 'download',
                             caption: '_; Insert; Insertar; Wstaw',
@@ -323,18 +358,18 @@
                                 },
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                                    action: runPopupExplorer
+                                    action: runPopupExplorer4SelectFromFolders
+                                },
+                                {
+                                    caption: '_; Select from task lists; Seleccionar de listas de tareas; Wybierz z listy zadań',
+                                    action: runPopupExplorer4SelectFromTaskLists
                                 }
                             ]
                         },
                         {
                             separator: true
                         },
-                        {
-                            caption: '_; Follow; Seguir; Obserwuj',
-                            action: (f) => toggleSubscribe(),
-                            activeFunc: () => currentList.IsSubscribed
-                        },
+                        ... currentList.IsSubscribed? [unfollowOperation] : [followOperation],
                         {
                             //icon: FaRandom,
                             caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
@@ -386,21 +421,47 @@
         })
     }
 
-    async function runPopupExplorer(btt, aroundRect)
+    async function runPopupExplorer4SelectFromFolders(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
+            rootFilter: 'FOLDERS',
+            leafFilter: ['Task'],
             destinationContainer: listPath,
             onRefreshView: (f) => reloadTasks(listComponent.KEEP_SELECTION),
             ownCloseButton: true
         })
     }
 
-    async function runPopupExplorerToPlaceElement(btt, aroundRect, task)
+    async function runPopupExplorer4SelectFromTaskLists(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            canSelectRootElements: true,
+            rootFilter: 'TASKLISTS',
+            destinationContainer: listPath,
+            onRefreshView: (f) => reloadTasks(listComponent.KEEP_SELECTION),
+            ownCloseButton: true
+        })
+    }
+
+    async function runPopupExplorer4CopyToFolder(btt, aroundRect, task)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            attachToContainer: true,
+            rootFilter: 'FOLDERS',
             onAttach: async (tmp, references) => {
                 await reef.post(`${task.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
+            },
+            ownCloseButton: true
+        })
+    }
+
+    async function runPopupExplorer4SelectTaskList(btt, aroundRect, task)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            attachToContainer: true,
+            rootFilter: 'TASKLISTS',
+            onAttach: async (tmp, references) => {
+                await reef.post(`${task.$ref}/AttachMeTo`, { references: references })
+                reloadTasks(listComponent.KEEP_SELECTION)
             },
             ownCloseButton: true
         })
@@ -459,18 +520,18 @@
                                 },
                                 {
                                     caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                                    action: runPopupExplorer
+                                    action: runPopupExplorer4SelectFromFolders
+                                },
+                                {
+                                    caption: '_; Select from task lists; Seleccionar de listas de tareas; Wybierz z listy zadań',
+                                    action: runPopupExplorer4SelectFromTaskLists
                                 }
                             ]
                         },
                         {
                             separator: true
                         },
-                        {
-                            caption: '_; Follow; Seguir; Obserwuj',
-                            action: (f) => toggleSubscribe(),
-                            activeFunc: () => currentList.IsSubscribed
-                        },
+                        ... currentList.IsSubscribed? [unfollowOperation] : [followOperation],
                         {
                             caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
                             action: changeListKind,
@@ -567,8 +628,21 @@
                                     action: (f) => cutTaskToBasket(task)
                                 },
                                 {
-                                    caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                    action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect, task)
+                                    caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
+                                    action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect, task)
+                                },
+                                {
+                                    caption: '_; Select a task list; Selecciona la lista de tareas; Wybierz listę zadań',
+                                    action: (btt, rect) => runPopupExplorer4SelectTaskList(btt, rect, task)
+                                },
+                                { separator: true},
+                                {
+                                    caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                                    action: () => openInNewTab(task.href)
+                                },
+                                {
+                                    caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                                    action: () => copyAddress(task.href)
                                 }
                             ],
                             hideToolbarCaption: true
@@ -769,11 +843,8 @@
 
 
         <h1><Editable self={currentList} a='Name'/></h1>
-
-        {#if currentList.Summary}
         <p class="lead"> <Editable self={currentList} a='Summary'/></p>
-        {/if}
-
+        
 
         <List   self={currentList}
                 a={assocName}

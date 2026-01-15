@@ -22,7 +22,7 @@
             IcH1, IcH2, IcH3, IcH4,
             selectable, isSelected, contextItemsStore, startEditing, hasModifications,
             Editable,
-
+            openInNewTab, copyAddress,
 			focusEditable
 
             } from '$lib'
@@ -170,8 +170,13 @@
                     },
                     {
                         caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                        action: runPopupExplorer4Editor
-                    }/* temporary off, refreshing issues,
+                        action: runEditorPopupExplorer4SelectFromFolders
+                    },
+                    {
+                        caption: '_; Select from task lists; Seleccionar de listas de tareas; Wybierz z listy zadań',
+                        action: runEditorPopupExplorer4SelectFromTaskLists
+                    }
+                    /* temporary off, refreshing issues,
                     {
                         separator: true
                     },
@@ -230,13 +235,25 @@
         })
     }
 
-    async function runPopupExplorer4Editor(btt, aroundRect)
+    async function runEditorPopupExplorer4SelectFromFolders(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
+            rootFilter: 'FOLDERS',
             onAttach: (clipboard, elements) => makeLinkToElement(elements),
             ownCloseButton: true
         })
     }
+
+    async function runEditorPopupExplorer4SelectFromTaskLists(btt, aroundRect)
+    {
+        showFloatingToolbar(aroundRect, PopupExplorer, {
+            rootFilter: 'TASKLISTS',
+            onAttach: (clipboard, elements) => makeLinkToElement(elements),
+            ownCloseButton: true
+        })
+    }
+
+    
 
     async function runNoteCreator4Editor()
     {
@@ -581,8 +598,17 @@
                                         action: (f) => cutNoteToBasket()
                                     },
                                     {
-                                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                        action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect)
+                                        caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
+                                        action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect)
+                                    },
+                                    { separator: true},
+                                    {
+                                        caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                                        action: () => openInNewTab(note.href)
+                                    },
+                                    {
+                                        caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                                        action: () => copyAddress(note.href)
                                     }
                                 ]
                             },
@@ -768,8 +794,17 @@
                                         action: (f) => copyNoteToBasket(),
                                     },
                                     {
-                                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                        action: (btt, rect) => runPopupExplorerToPlaceElement(btt, rect)
+                                        caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
+                                        action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect)
+                                    },
+                                    { separator: true},
+                                    {
+                                        caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                                        action: () => openInNewTab(note.href)
+                                    },
+                                    {
+                                        caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                                        action: () => copyAddress(note.href)
                                     }
                                 ]
 
@@ -890,10 +925,11 @@
             await refreshParent()
     }
 
-    async function runPopupExplorerToPlaceElement(btt, aroundRect)
+    async function runPopupExplorer4CopyToFolder(btt, aroundRect)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
-            canSelectRootElements: true,
+            attachToContainer: true,
+            rootFilter: 'FOLDERS',
             onAttach: async (tmp, references) => {
                 await reef.post(`${noteLink.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
             },

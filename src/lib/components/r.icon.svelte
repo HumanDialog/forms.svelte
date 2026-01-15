@@ -91,6 +91,10 @@
 
   import LoaderCircle from './ricons/loader-circle.svelte'
   import Check from './ricons/check.svelte'
+  import Star from './ricons/star.svelte'
+  import StarOff from './ricons/star-off.svelte'
+  import Heart from './ricons/heart.svelte'
+  import HeartOff from './ricons/heart-off.svelte'
 
   let ricons_box = {
     "arrow-up": ArrowUp,
@@ -173,7 +177,11 @@
     'minus': Minus,
 
     'loader-circle': LoaderCircle,
-    'check': Check
+    'check': Check,
+    'star': Star,
+    'star-off': StarOff,
+    'heart': Heart,
+    'heart-off': HeartOff
   }
 
   let width = 24;
