@@ -2,7 +2,7 @@
     let additionalClass = $$props.class ?? ''
 </script>
 
-<section class="    paper
+<section class="    paper-table-acd
                     prose prose-base prose-zinc dark:prose-invert prose-a:no-underline
 
                     max-w-none sm:min-h-[32rem]

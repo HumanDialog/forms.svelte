@@ -20,8 +20,7 @@
 	export let typename = '';
 	export let focused_only = false;
 	export let inContext = '';
-	export let cl =
-		'w-full overflow-x-hidden py-0 sm:px-3 border-0'; // border-green-500
+	export let cl =	'w-full overflow-x-hidden py-0 sm:px-3 border-0';
 	export let c = '';
 
 	export let toolbarOperations = undefined;
@@ -37,6 +36,9 @@
 		case 'main-d':
 			cl =
 				'bg-stone-800 w-full h-full flex flex-col dark:bg-stone-800  overflow-y-hidden  overflow-x-hidden py-0 px-0 border-0';
+			break;
+		case 'xy-scroll':
+			cl =	'py-0 sm:px-3 border-0 bg-lime-700';
 			break;
 		default:
 		//NOP
@@ -140,7 +142,7 @@
 	}
 </script>
 
-<div class="page  bgx-blue-500 {visibilty} {cl} {heightClass}" on:click={clear_selection}>
+<div class="page  {visibilty} {cl} {heightClass}" on:click={clear_selection}>
 	{#if visibilty == ''}
 		<slot />
 	{/if}

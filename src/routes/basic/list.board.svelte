@@ -821,7 +821,7 @@
 
     function getColumnOperations(columnIdx, taskState)
     {
-        
+
 
         const mobile = isDeviceSmallerThan("sm")
         return {
@@ -1301,7 +1301,7 @@
 		title={ext(currentList.Name)}
         c = 'xy-scroll'
 	>
-
+    <div class = "w-[80rem] h-[10rem] border bg-lime-950"></div>
     <PaperTable>
         <!--section class="w-full place-self-center max-w-3xl"-->
         <PaperHeader>

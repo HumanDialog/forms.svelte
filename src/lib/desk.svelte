@@ -143,12 +143,13 @@
             {
                 fab_visibility_mode = FAB_VISIBLE_ON_MOBILE
                 tools_visibility = "hidden sm:block sm:fixed"
-                content_top = 'top-[0px] sm:top-[40px]'
-
+                //content_top = 'top-[0px] sm:top-[40px]'
+                content_top = 'top-[0px]'
                 if(bottom_bar_visible)
                     content_height = `min-h-[calc(100vh-290px)] sm:h-[calc(100vh-280px)]`
                 else
-                    content_height = `min-h-[calc(100vh-50px)] sm:h-[calc(100vh-40px)]`
+                    content_height = `min-h-[calc(100vh-50px)] sm:h-[calc(100vh-0px)]`
+                    //content_height = `min-h-[calc(100vh-50px)] sm:h-[calc(100vh-40px)]`
             }
         }
         else
@@ -157,11 +158,14 @@
             //fab_base_visibility = "hidden"
             fab_visibility_mode = FAB_HIDDEN
 
-            content_top = `top-[50px] sm:top-0`
+            //content_top = `top-[50px] sm:top-0`
+            content_top = `top-0`
             if(bottom_bar_visible)
-                content_height = `min-h-[calc(100vh-290px)] sm:h-[calc(100vh-240px)]`
+                content_height = `h-[calc(100vh-240px)]`
+                //content_height = `min-h-[calc(100vh-290px)] sm:h-[calc(100vh-240px)]`
             else
-                content_height = `min-h-[calc(100vh-50px)] sm:h-screen`
+                content_height = `h-screen`
+                //content_height = `min-h-[calc(100vh-50px)] sm:h-screen`
         }
 
 
@@ -490,10 +494,12 @@
                                     {content_left}
                                     {content_width}
                                     {content_top}
+                                    {content_height}
                                     {lg_content_area_horizontal_dim}
-                                    z-0 overflow-x-hidden
-                                    bgx-red-500
-                                    {content_height} sm:overflow-y-auto sm:overscroll-contain
+                                    z-0
+                                    overflow-x-visible
+                                    bg-lime-300
+                                    sm:overflow-y-auto  sm:overscroll-contain
                                     "
                                     >
                             <Configurable config={layout.mainContent} min_h_class="min-h-screen">
