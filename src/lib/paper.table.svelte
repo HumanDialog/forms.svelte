@@ -4,6 +4,7 @@
 
 <section class="    paper
                     prose prose-base prose-zinc dark:prose-invert prose-a:no-underline
+
                     max-w-none sm:min-h-[32rem]
 
                     m-0 mb-64 px-2 pt-2 pb-0

@@ -695,17 +695,17 @@
     function moveTaskToColumn(task, btt)
     {
         let operations = []
-        
+
         for(let idx=0; idx<taskStates.length; idx++)
         {
             const column = taskStates[idx]
-            
+
             let order = KanbanColumnTop
             if(column.state >= task.State )
                 order = KanbanColumnBottom;
 
             console.log(order, column)
-            
+
             const operation = {
                 caption: ext(column.name),
                 disabled: task.State == column.state,
@@ -953,7 +953,7 @@
             await kanban.rerender();
             kanban.activateColumn(columnIdx)
         }*/
-        
+
 
         taskStates[columnIdx].name = name;
         saveTaskStates();
@@ -1208,6 +1208,7 @@
 		toolbarOperations={getPageOperations()}
 		clearsContext="props sel"
 		title={ext(currentList.Name)}
+        c = 'xy-scroll'
 	>
 
     <PaperTable>
