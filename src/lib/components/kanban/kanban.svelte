@@ -659,7 +659,8 @@
 
 <section    id="__hd_svelte_kanban_columns_container"
             class="h-full flex flex-row no-wrap
-
+                overflow-x-scroll sm:overflow-x-visible
+                snap-x snap-mandatory
                 xbg-lime-500
                 sm: space-x-0
                 sm:divide-x
