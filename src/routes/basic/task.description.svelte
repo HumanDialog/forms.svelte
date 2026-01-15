@@ -567,6 +567,14 @@
 
                             },
                             {
+                                caption: '_; Move to top ; Mover al principio de la lista; Przesuń na szczyt',
+                                mricon: 'chevrons-up',
+                                action: async (f) => await moveTop(),
+                                fab:'M07',
+                                tbr:'A',
+                                hideToolbarCaption: true
+                            },
+                            {
                                 caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                                 mricon: 'chevron-up',
                                 action: async (f) => await moveUp(),
@@ -897,6 +905,13 @@
 
         if(refreshParent)
             await refreshParent()
+    }
+
+    async function moveTop()
+    {
+        await reef.get(`${noteLink.$ref}/MoveTop`, onErrorShowAlert)
+        if(refreshParent)
+            await refreshParent(noteLink.$ref)
     }
 
     async function moveUp()

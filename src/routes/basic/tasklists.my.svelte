@@ -289,6 +289,14 @@
 
                         },
                         {
+                            caption: '_; Move to top ; Mover al principio de la lista; Przesuń na szczyt',
+                            hideToolbarCaption: true,
+                            mricon: 'chevrons-up',
+                            action: (f) => listComponent.moveTop(list),
+                            fab: 'M06',
+                            tbr: 'A'
+                        },
+                        {
                             caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                             hideToolbarCaption: true,
                             mricon: 'chevron-up',

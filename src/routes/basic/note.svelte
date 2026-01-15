@@ -1278,6 +1278,14 @@
 
                             },
                             {
+                                caption: '_; Move to top ; Mover al principio de la lista; Przesuń na szczyt',
+                                mricon: 'chevrons-up',
+                                action: (f) => list.moveTop(element),
+                                fab:'M07',
+                                tbr:'A',
+                                hideToolbarCaption: true
+                            },
+                            {
                                 caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                                 mricon: 'chevron-up',
                                 action: (f) => list.moveUp(element),

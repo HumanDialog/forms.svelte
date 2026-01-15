@@ -265,7 +265,7 @@
             tbr: 'D',
             operations: [
                  {
-                    caption: '_; View; Ver; Widok',
+                    caption: '_; File; Archivo; Plik',
                     operations: [
                         {
                             caption: '_; New list; Nueva lista; Nowa lista',
@@ -299,6 +299,14 @@
 
                         },
                         {
+                            caption: '_; Move to top ; Mover al principio de la lista; Przesuń na szczyt',
+                            hideToolbarCaption: true,
+                            mricon: 'chevrons-up',
+                            action: (f) => listComponent.moveTop(list),
+                            fab: 'M06',
+                            tbr: 'A'
+                        },
+                        {
                             caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                             hideToolbarCaption: true,
                             mricon: 'chevron-up',
@@ -325,6 +333,18 @@
                             action: (f) => askToDelete(list)
                         }
 
+                    ]
+                },
+                {
+                    caption: '_; View; Ver; Widok',
+                    operations: [
+                        {
+                            mricon: 'file-archive',
+                            caption: '_; Show archived lists; Mostrar listas archivadas; Pokaż zarchiwizowane listy',
+                            //action: (focused) => { listComponent.addRowAfter(null) },
+                            fab: 'S01',
+                            tbr: 'C'
+                        }
                     ]
                 }
 

@@ -703,43 +703,43 @@
         if(canAddThread)
             result.operations.push(newThread)
 
-        if(result.operations.length > 0)
-            result.operations.push({separator: true})
+        //if(result.operations.length > 0)
+        //    result.operations.push({separator: true})
 
-
-        result.operations.push({
-            mricon: 'download',
-            caption: '_; Insert; Insertar; Wstaw',
-            hideToolbarCaption: true,
-            tbr: 'C',
-            fab: 'S10',
-            menu: [
-                {
-                    caption: '_; Paste; Pegar; Wklej',
-                    action: pasteRecentClipboardElement
-                },
-                {
-                    caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
-                    action: runPasteBasket
-                },
-                {
-                    caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
-                    action: runPasteBrowserRecent
-                },
-                {
-                    caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                    action: runPopupExplorer4SelectFromFolders
-                },
-                {
-                    caption: '_; Select from task lists; Seleccionar de listas de tareas; Wybierz z listy zadań',
-                    action: runPopupExplorer4SelectFromTaskLists
-                }
-            ]
-
-            //fab: 'M01',
-            //tbr: 'A'
-        })
         return result
+    }
+
+    const insertOperation = {
+        mricon: 'download',
+        caption: '_; Insert; Insertar; Wstaw',
+        hideToolbarCaption: true,
+        tbr: 'C',
+        fab: 'S10',
+        menu: [
+            {
+                caption: '_; Paste; Pegar; Wklej',
+                action: pasteRecentClipboardElement
+            },
+            {
+                caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
+                action: runPasteBasket
+            },
+            {
+                caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
+                action: runPasteBrowserRecent
+            },
+            {
+                caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
+                action: runPopupExplorer4SelectFromFolders
+            },
+            {
+                caption: '_; Select from task lists; Seleccionar de listas de tareas; Wybierz z listy zadań',
+                action: runPopupExplorer4SelectFromTaskLists
+            }
+        ]
+
+        //fab: 'M01',
+        //tbr: 'A'
     }
 
     async function pasteRecentClipboardElement(btt, aroundRect)
@@ -870,6 +870,7 @@
                                 }
                             ]
                         },
+                        insertOperation,
                         ... !canPin ? [] : [pinOp()],
                         {
                             caption: '_; Select; Seleccionar; Zaznacz',
@@ -1117,7 +1118,7 @@
 
                             },
                             {
-                                caption: '_; Move top ; Mover al principio de la lista; Przesuń na szczyt',
+                                caption: '_; Move to top ; Mover al principio de la lista; Przesuń na szczyt',
                                 mricon: 'chevrons-up',
                                 action: (f) => list.moveTop(element),
                                 fab:'M09',
@@ -1140,15 +1141,6 @@
                                 tbr:'A' ,
                                 hideToolbarCaption: true
                             },
-                            {
-                                caption: '_; Move bottom; Desplácese hacia abajo; Przesuń na dół',
-                                mricon: 'chevrons-down',
-                                action: (f) => list.moveDown(element),
-                                fab:'M06',
-                                tbr:'A' ,
-                                hideToolbarCaption: true
-                            },
-
                             {
                                 caption: '_; Send; Enviar; Wyślij',
                                 hideToolbarCaption: true,
@@ -1205,7 +1197,8 @@
                     {
                         caption: '_; View; Ver; Widok',
                         operations: [
-                            ... !canPin ? [] : [pinOp()],
+                        insertOperation,
+                        ... !canPin ? [] : [pinOp()],
                          {
                             caption: '_; Select; Seleccionar; Zaznacz',
                             mricon: 'check-check',

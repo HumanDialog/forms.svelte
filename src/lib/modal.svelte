@@ -71,6 +71,21 @@
       }
     }
 
+    export function setTitle(t: string)
+    {
+      title = t
+    }
+
+    export function setOkCaption(cap: string)
+    {
+      okCaption = cap
+    }
+
+    export function setCancelCaption(cap: string)
+    {
+      cancelCaption = cap
+    }
+
     let root;
     afterUpdate(
       async () =>

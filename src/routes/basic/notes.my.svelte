@@ -191,27 +191,6 @@
                                 }
                             ]
                         },
-                        /*    {
-                                caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
-                                hideToolbarCaption: true,
-                                mricon: 'chevron-up',
-                                action: (f) => listComponent.moveUp(list),
-                                fab: 'M05',
-                                tbr: 'A'
-                            },
-                            {
-                                caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
-                                hideToolbarCaption: true,
-                                mricon: 'chevron-down',
-                                action: (f) => listComponent.moveDown(list),
-                                fab: 'M04',
-                                tbr: 'A'
-                            },
-                        */
-                        /*    {
-                                caption: '_; Archive; Archivar; Zarchiwizuj',
-                                action: (f) => askToArchive(list)
-                            },*/
                         {
                             caption: '_; Delete; Eliminar; Usuń',
                             action: (f) => askToDelete(list)

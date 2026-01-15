@@ -360,22 +360,6 @@
                         },
                         { separator: true, tbr: 'A'},
                         {
-                            caption: '_; Edit; Editar; Edytuj',
-                            mricon: 'pencil',
-                            tbr: 'A',
-                            fab:'M20',
-                            grid:[
-                                {
-                                    caption: '_; Title; Título; Tytuł',
-                                    action: () =>  { focusEditable('Name') },
-                                },
-                                {
-                                    caption: '_; Summary; Resumen; Podsumowanie',
-                                    action: () =>  { focusEditable('Summary') }
-                                }
-                            ]
-                        },
-                        {
                             mricon: 'download',
                             caption: '_; Insert; Insertar; Wstaw',
                             hideToolbarCaption: true,
@@ -405,7 +389,20 @@
                             ]
                         },
                         {
-                            separator: true
+                            caption: '_; Edit; Editar; Edytuj',
+                            mricon: 'pencil',
+                            tbr: 'A',
+                            fab:'M20',
+                            grid:[
+                                {
+                                    caption: '_; Title; Título; Tytuł',
+                                    action: () =>  { focusEditable('Name') },
+                                },
+                                {
+                                    caption: '_; Summary; Resumen; Podsumowanie',
+                                    action: () =>  { focusEditable('Summary') }
+                                }
+                            ]
                         },
                         ... currentList.IsSubscribed? [unfollowOperation(reloadThisOperations, false)] : [followOperation(reloadThisOperations, false)],
                         {
@@ -529,7 +526,7 @@
             tbr: 'D',
             operations: [
                 {
-                    caption: '_; View; Ver; Widok',
+                    caption: '_; File; Archivo; Plik',
                     //tbr: 'B',
                     operations: [
                         {
@@ -538,43 +535,6 @@
                             action: (f) => { listComponent.addRowAfter(task) },
                             fab: 'M01',
                             tbr: 'A'
-                        },
-                        {
-                            mricon: 'download',
-                            caption: '_; Insert; Insertar; Wstaw',
-                            hideToolbarCaption: true,
-                            tbr: 'C',
-                            fab: 'S10',
-                            menu: [
-                                {
-                                    caption: '_; Paste; Pegar; Wklej',
-                                    action: pasteRecentClipboardElement
-                                },
-                                {
-                                    caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
-                                    action: runPasteBasket
-                                },
-                                {
-                                    caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
-                                    action: runPasteBrowserRecent
-                                },
-                                {
-                                    caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                                    action: runPopupExplorer4SelectFromFolders
-                                },
-                                {
-                                    caption: '_; Select from task lists; Seleccionar de listas de tareas; Wybierz z listy zadań',
-                                    action: runPopupExplorer4SelectFromTaskLists
-                                }
-                            ]
-                        },
-                        {
-                            separator: true
-                        },
-                        ... currentList.IsSubscribed? [unfollowOperation(reloadThisOperations, true)] : [followOperation(reloadThisOperations, true)],
-                        {
-                            caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
-                            action: changeListKind,
                         }
                     ]
                 },
@@ -635,6 +595,14 @@
                             disabled: task.State == STATE_FINISHED,
                             fab: 'M03',
                             tbr: 'A'
+                        },
+                        {
+                            caption: '_; Move to top ; Mover al principio de la lista; Przesuń na szczyt',
+                            mricon: 'chevrons-up',
+                            action: (f) => listComponent.moveTop(task),
+                            fab: 'M06',
+                            tbr: 'A',
+                            hideToolbarCaption: true
                         },
                         {
                             caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
@@ -704,6 +672,45 @@
                         {
                             caption: '_; Properties; Propiedades; Właściwości',
                             action: (btt, rect)=> runElementProperties(btt, rect, task, 'Task')
+                        }
+                    ]
+                },
+                {
+                    caption: '_; View; Ver; Widok',
+                    operations: [
+                        {
+                            caption: '_; Insert; Insertar; Wstaw',
+                            mricon: 'download',
+                            hideToolbarCaption: true,
+                            tbr: 'C',
+                            fab: 'S10',
+                            menu: [
+                                {
+                                    caption: '_; Paste; Pegar; Wklej',
+                                    action: pasteRecentClipboardElement
+                                },
+                                {
+                                    caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
+                                    action: runPasteBasket
+                                },
+                                {
+                                    caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
+                                    action: runPasteBrowserRecent
+                                },
+                                {
+                                    caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
+                                    action: runPopupExplorer4SelectFromFolders
+                                },
+                                {
+                                    caption: '_; Select from task lists; Seleccionar de listas de tareas; Wybierz z listy zadań',
+                                    action: runPopupExplorer4SelectFromTaskLists
+                                }
+                            ]
+                        },
+                        ... currentList.IsSubscribed? [unfollowOperation(reloadThisOperations, true)] : [followOperation(reloadThisOperations, true)],
+                        {
+                            caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
+                            action: changeListKind,
                         }
                     ]
                 }
