@@ -660,7 +660,7 @@
 <section    id="__hd_svelte_kanban_columns_container"
             class="h-full flex flex-row no-wrap
                 snap-x snap-mandatory
-                bg-red-500
+                xbg-lime-500
                 sm: space-x-0
                 sm:divide-x
                 divide-stone-500 dark:divide-stone-700

@@ -38,7 +38,7 @@
 				'bg-stone-800 w-full h-full flex flex-col dark:bg-stone-800  overflow-y-hidden  overflow-x-hidden py-0 px-0 border-0';
 			break;
 		case 'xy-scroll':
-			cl =	'py-0 sm:px-3 border-0 bg-lime-700';
+			cl =	'py-0 sm:px-3 xborder-0 xbg-lime-700';
 			break;
 		default:
 		//NOP

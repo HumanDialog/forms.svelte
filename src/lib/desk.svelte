@@ -498,7 +498,7 @@
                                     {lg_content_area_horizontal_dim}
                                     z-0
                                     overflow-x-visible
-                                    bg-lime-300
+                                    xbg-lime-300
                                     sm:overflow-y-auto  sm:overscroll-contain
                                     "
                                     >

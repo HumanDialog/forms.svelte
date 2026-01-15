@@ -1301,7 +1301,7 @@
 		title={ext(currentList.Name)}
         c = 'xy-scroll'
 	>
-    <div class = "w-[80rem] h-[10rem] border bg-lime-950"></div>
+    <!--div class = "w-[80rem] h-[10rem] border xbg-lime-950"></div--bg-->
     <PaperTable>
         <!--section class="w-full place-self-center max-w-3xl"-->
         <PaperHeader>
