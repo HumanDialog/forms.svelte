@@ -1294,6 +1294,7 @@
 
 {#key definitionChangedTicket}
 {#if currentList}
+<div class = "xbg-lime-500">
 	<Page
 		self={currentList}
 		toolbarOperations={getPageOperations()}
@@ -1375,7 +1376,7 @@
 
         </PaperTable>
 	</Page>
-
+</div>
 {:else}
 	<Spinner delay={3000} />
 {/if}

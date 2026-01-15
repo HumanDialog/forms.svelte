@@ -492,13 +492,13 @@
                     <div    id="__hd_svelte_main_content_container"
                             class="relative
                                     {content_left}
-                                    {content_width}
+
                                     {content_top}
                                     {content_height}
                                     {lg_content_area_horizontal_dim}
                                     z-0
-                                    overflow-x-visible
-                                    xbg-lime-300
+                                    sm:overflow-x-auto
+                                    xbg-lime-950
                                     sm:overflow-y-auto  sm:overscroll-contain
                                     "
                                     >
