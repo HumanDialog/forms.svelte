@@ -31,7 +31,7 @@
         showFloatingToolbar,
         refreshToolbarOperations,
         PaperTable,
-        PaperHeader,
+        PaperHeader, reloadPageToolbarOperations,
         setjItemProperty, KanbanColumnTop, openInNewTab, copyAddress
 	} from '$lib';
     import {FaPlus, FaList, FaPen, FaCaretLeft, FaCaretRight, FaTrash, FaArrowsAlt, FaArchive, FaCheck, FaEllipsisH, FaChevronRight,
@@ -201,6 +201,8 @@
         if(res)
         {
             const taskList = res.TaskList
+            taskList.AllTasks = taskList.Tasks
+
             const cacheKey = `listboard/${taskList.Id}`
             cache.set(cacheKey, taskList)
 
@@ -226,6 +228,9 @@
         {
             taskStates = [];
         }
+
+        
+        filterTasks()
     }
 
     async function reload(selectRecommendations)
@@ -234,6 +239,14 @@
         kanban.reload(currentList, selectRecommendations);
     }
 
+    function filterTasks()
+    {
+        if(hideFinishedTasks)
+            currentList.Tasks = currentList.AllTasks.filter((t) => t.State < STATE_FINISHED)
+        else
+            currentList.Tasks = currentList.AllTasks
+        
+    }
 
     /*const switchToListOperation = () => {
         if(!currentList)
@@ -253,8 +266,87 @@
             return { }
     }
     */
+
+    function showFinishedTasksOperation(operationsFunc, areContextOperations)
+    {
+        return {
+            caption: '_; Show finished tasks; Mostrar tareas completadas; Pokaż zakończone zadania',
+            action: () => toggleFinishedTasksVisibility(operationsFunc, areContextOperations)
+        }
+    }
+
+    function hideFinishedTasksOperation(operationsFunc, areContextOperations) 
+    {
+        return {
+            caption: '_; Hide finished tasks; Ocultar tareas completadas; Ukryj zakończone zadania',
+            action: () => toggleFinishedTasksVisibility(operationsFunc, areContextOperations)
+        }
+    }
+
+    let hideFinishedTasks = false
+    function toggleFinishedTasksVisibility(operationsFunc, areContextOperations)
+    {
+        hideFinishedTasks = !hideFinishedTasks
+
+        filterTasks()
+        kanban.reload(currentList, kanban.KEEP_SELECTION);
+
+        if(operationsFunc)
+        {
+            const newOperations = operationsFunc()
+            reloadPageToolbarOperations(newOperations, areContextOperations)   
+        }
+    }
+
+    function unfollowOperation(operationsFunc, areContextOperations)
+    {
+        return {
+            caption: '_; Unfollow; Dejar de seguir; Przestań obserwować',
+            mricon: 'heart-off',
+            tbr: 'C',
+            fab: 'S20',
+            hideToolbarCaption: true,
+            action: (f) => toggleSubscribe(operationsFunc, areContextOperations)
+        }
+    }
+
+    function followOperation(operationsFunc, areContextOperations)
+    {
+        return {
+            caption: '_; Follow; Seguir; Obserwuj',
+            mricon: 'heart',
+            tbr: 'C',
+            fab: 'S20',
+            hideToolbarCaption: true,
+            action: (f) => toggleSubscribe(operationsFunc, areContextOperations)
+        }
+    }
+
+    async function toggleSubscribe(operationsFunc, areContextOperations)
+    {
+        if(currentList.IsSubscribed)
+        {
+            const res = await reef.get(`${currentList.$ref}/Unsubscribe`, onErrorShowAlert)
+            if(res)
+                currentList.IsSubscribed = false
+        }
+        else
+        {
+            const res = await reef.get(`${currentList.$ref}/Subscribe`, onErrorShowAlert)
+            if(res)
+                currentList.IsSubscribed = true
+        }
+
+        if(operationsFunc)
+        {
+            const newOperations = operationsFunc()
+            reloadPageToolbarOperations(newOperations, areContextOperations)   
+        }
+    }
+
     function getViewOperationsP()
     {
+        const reloadThisOperations = () => getPageOperations()
         return {
                     caption: '_; View; Ver; Widok',
 
@@ -312,10 +404,11 @@
                                 }
                             ]
                         },
+                        ... (currentList.IsSubscribed ? [unfollowOperation(reloadThisOperations, false)] : [followOperation(reloadThisOperations, false)]),
+                        ... (hideFinishedTasks ? [showFinishedTasksOperation( reloadThisOperations, false )] : [hideFinishedTasksOperation( reloadThisOperations, false )]),
                         {
                             separator: true
                         },
-                        ... (currentList.IsSubscribed ? [unfollowOperation] : [followOperation]),
                         {
                             //icon: FaRandom,
                             caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
@@ -523,6 +616,8 @@
         const isOutOfStates = columnIdx < 0
         const mobile = isDeviceSmallerThan("sm")
 
+        const reloadThisOperations = () => getCardOperations(task)
+
         return {
             opver: 2,
             fab: 'M00',
@@ -572,7 +667,8 @@
                         {
                             separator: true
                         },
-                        ... (currentList.IsSubscribed ? [unfollowOperation] : [followOperation]),
+                        ... (currentList.IsSubscribed ? [unfollowOperation(reloadThisOperations, true)] : [followOperation(reloadThisOperations, true)]),
+                        ... (hideFinishedTasks ? [showFinishedTasksOperation( reloadThisOperations, true )] : [hideFinishedTasksOperation( reloadThisOperations, true )]),
                         {
                             caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
                             action: changeListKind,
@@ -699,6 +795,10 @@
                                 }
                         ],
                         {
+                            caption: '_; Detach; Desconectar; Odłącz',
+                            action: async () => await dettachTask(task)
+                        },
+                        /*{
                             caption: '_; Archive; Archivar; Zarchiwizuj',
                             //icon: FaArchive,
                             action: (f) => askToArchive(task)
@@ -707,7 +807,7 @@
                             caption: '_; Delete; Eliminar; Usuń',
                             //icon: FaTrash,
                             action: (f) => askToDelete(task)
-                        },
+                        },*/
                         {
                             caption: '_; Properties; Propiedades; Właściwości',
                             action: (btt, rect)=> runElementProperties(btt, rect, task, 'Task')
@@ -720,6 +820,12 @@
 
         }
 
+    }
+
+    async function dettachTask(task)
+    {
+        await reef.post(`${task.$ref}/MoveToList`, {list: null, order: 0})
+        await reload(kanban.SELECT_NEXT)
     }
 
     function moveTaskToColumn(task, btt)
@@ -801,27 +907,9 @@
         ];
     }
 
-    const unfollowOperation = {
-        caption: '_; Unfollow; Dejar de seguir; Przestań obserwować',
-        mricon: 'heart-off',
-        tbr: 'C',
-        fab: 'S20',
-        hideToolbarCaption: true,
-        action: (f) => toggleSubscribe()
-    }
-
-    const followOperation = {
-        caption: '_; Follow; Seguir; Obserwuj',
-        mricon: 'heart',
-        tbr: 'C',
-        fab: 'S20',
-        hideToolbarCaption: true,
-        action: (f) => toggleSubscribe()
-    }
-
     function getColumnOperations(columnIdx, taskState)
     {
-
+        const reloadThisOperations = () => getColumnOperations(columnIdx, taskState)
 
         const mobile = isDeviceSmallerThan("sm")
         return {
@@ -889,7 +977,8 @@
                         {
                             separator: true
                         },
-                        ... (currentList.IsSubscribed ? [unfollowOperation] : [followOperation]),
+                        ... (currentList.IsSubscribed ? [unfollowOperation(reloadThisOperations, true)] : [followOperation(reloadThisOperations, true)]),
+                        ... (hideFinishedTasks ? [showFinishedTasksOperation( reloadThisOperations, true )] : [hideFinishedTasksOperation( reloadThisOperations, true )]),
                         {
                             //icon: FaRandom,
                             caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
@@ -1262,23 +1351,7 @@
         numericStateElement?.refresh();
     }
 
-    async function toggleSubscribe()
-    {
-        if(currentList.IsSubscribed)
-        {
-            const res = await reef.get(`${currentList.$ref}/Unsubscribe`, onErrorShowAlert)
-            if(res)
-                currentList.IsSubscribed = false
-        }
-        else
-        {
-            const res = await reef.get(`${currentList.$ref}/Subscribe`, onErrorShowAlert)
-            if(res)
-                currentList.IsSubscribed = true
-        }
-
-        refreshToolbarOperations()
-    }
+    
 
     let otherCaption = '_; <Other>; <Otros>; <Inne>'
 

@@ -13,7 +13,7 @@
                 ListComboProperty,
 				mainContentPageReloader,
                 Modal, focusEditable,
-                onErrorShowAlert, showMenu,
+                onErrorShowAlert, showMenu, reloadPageToolbarOperations,
 				UI, i18n, Breadcrumb, showFloatingToolbar, Paper, PaperHeader,
 				ext, refreshToolbarOperations, openInNewTab, copyAddress
             } from '$lib'
@@ -228,6 +228,12 @@
         await reloadTasks(listComponent.SELECT_NEXT)
     }
 
+    async function dettachTask(task)
+    {
+        await reef.post(`${task.$ref}/MoveToList`, {list: null, order: 0})
+        await reloadTasks(listComponent.SELECT_NEXT)
+    }
+
     let archiveModal;
     let taskToArchive;
     function askToArchive(task)
@@ -278,22 +284,52 @@
         await reloadTasks(newTask.$ref)
     }
 
-    const unfollowOperation = {
-        caption: '_; Unfollow; Dejar de seguir; Przestań obserwować',
-        mricon: 'heart-off',
-        tbr: 'C',
-        fab: 'S20',
-        hideToolbarCaption: true,
-        action: (f) => toggleSubscribe()
+    
+
+    function unfollowOperation(operationsFunc, areContextOperations)
+    {
+        return {
+            caption: '_; Unfollow; Dejar de seguir; Przestań obserwować',
+            mricon: 'heart-off',
+            tbr: 'C',
+            fab: 'S20',
+            hideToolbarCaption: true,
+            action: (f) => toggleSubscribe(operationsFunc, areContextOperations)
+        }
+    }
+    
+    function followOperation(operationsFunc, areContextOperations)
+    {
+        return {
+            caption: '_; Follow; Seguir; Obserwuj',
+            mricon: 'heart',
+            tbr: 'C',
+            fab: 'S20',
+            hideToolbarCaption: true,
+            action: (f) => toggleSubscribe(operationsFunc, areContextOperations)
+        }
     }
 
-    const followOperation = {
-        caption: '_; Follow; Seguir; Obserwuj',
-        mricon: 'heart',
-        tbr: 'C',
-        fab: 'S20',
-        hideToolbarCaption: true,
-        action: (f) => toggleSubscribe()
+    async function toggleSubscribe(operationsFunc, areContextOperations)
+    {
+        if(currentList.IsSubscribed)
+        {
+            const res = await reef.get(`${listPath}/Unsubscribe`, onErrorShowAlert)
+            if(res)
+                currentList.IsSubscribed = false
+        }
+        else
+        {
+            const res = await reef.get(`${listPath}/Subscribe`, onErrorShowAlert)
+            if(res)
+                currentList.IsSubscribed = true
+        }
+
+        if(operationsFunc)
+        {
+            const newOperations = operationsFunc()
+            reloadPageToolbarOperations(newOperations, areContextOperations)   
+        }
     }
 
     function getPageOperations()
@@ -303,6 +339,8 @@
 
         if(isArchivedTasks)
             return [];
+
+        const reloadThisOperations = () => getPageOperations()
 
         return {
             opver: 2,
@@ -369,7 +407,7 @@
                         {
                             separator: true
                         },
-                        ... currentList.IsSubscribed? [unfollowOperation] : [followOperation],
+                        ... currentList.IsSubscribed? [unfollowOperation(reloadThisOperations, false)] : [followOperation(reloadThisOperations, false)],
                         {
                             //icon: FaRandom,
                             caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
@@ -483,6 +521,8 @@
         if(isArchivedTasks)
             return []
 
+        const reloadThisOperations = () => taskOperations(task)
+
         return {
             opver: 2,
             fab: 'M00',
@@ -531,7 +571,7 @@
                         {
                             separator: true
                         },
-                        ... currentList.IsSubscribed? [unfollowOperation] : [followOperation],
+                        ... currentList.IsSubscribed? [unfollowOperation(reloadThisOperations, true)] : [followOperation(reloadThisOperations, true)],
                         {
                             caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
                             action: changeListKind,
@@ -647,8 +687,11 @@
                             ],
                             hideToolbarCaption: true
                         },
-
                         {
+                            caption: '_; Detach; Desconectar; Odłącz',
+                            action: async () => await dettachTask(task)
+                        },
+                        /*{
                             //icon: FaArchive,
                             caption: '_; Archive; Archivar; Zarchiwizuj',
                             action: (f) => askToArchive(task)
@@ -657,7 +700,7 @@
                             //icon: FaTrash,
                             caption: '_; Delete; Eliminar; Usuń',
                             action: (f) => askToDelete(task)
-                        },
+                        },*/
                         {
                             caption: '_; Properties; Propiedades; Właściwości',
                             action: (btt, rect)=> runElementProperties(btt, rect, task, 'Task')
@@ -776,23 +819,7 @@
         reloadTasks(listComponent.SELECT_NEXT);
     }
 
-    async function toggleSubscribe()
-    {
-        if(currentList.IsSubscribed)
-        {
-            const res = await reef.get(`${listPath}/Unsubscribe`, onErrorShowAlert)
-            if(res)
-                currentList.IsSubscribed = false
-        }
-        else
-        {
-            const res = await reef.get(`${listPath}/Subscribe`, onErrorShowAlert)
-            if(res)
-                currentList.IsSubscribed = true
-        }
-
-        refreshToolbarOperations()
-    }
+    
     let list_properties = {
         Title: "Title",
         Summary: "Summary",

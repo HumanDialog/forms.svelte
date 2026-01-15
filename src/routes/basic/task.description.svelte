@@ -586,7 +586,7 @@
                                 caption: '_; Send; Enviar; Wyślij',
                                 hideToolbarCaption: true,
                                 mricon: 'upload',
-                                tbr: 'D',
+                                tbr: 'C',
                                 fab: 'S00',
                                 menu: [
                                     {
@@ -786,7 +786,7 @@
                             caption: '_; Send; Enviar; Wyślij',
                             mricon: 'upload',
                             hideToolbarCaption: true,
-                            tbr: 'D',
+                            tbr: 'C',
                             fab: 'S00',
                             menu: [
                                     {

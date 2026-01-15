@@ -421,17 +421,19 @@
                     tbr: 'A'
                 })
         
-        operations.push(...getInsertOperations())
+       
 
         operations.push(
             {
                 caption: '_; Send; Enviar; Wyślij',
                 mricon: 'upload',
                 hideToolbarCaption: true,
-                tbr: 'D',
+                tbr: 'C',
                 fab: 'S00',
                 menu: sendOperations
             })
+
+         operations.push(...getInsertOperations())
 
         if(operations.length > 0)
             operations.push({separator: true})
@@ -745,12 +747,11 @@
                         //    fab: 'M10',
                         //    tbr: 'A'
                         },
-                        ...getInsertOperations(),
                         {
                             caption: '_; Send; Enviar; Wyślij',
                             mricon: 'upload',
                             hideToolbarCaption: true,
-                            tbr: 'D',
+                            tbr: 'C',
                             fab: 'S00',
                             menu: [
                                     {
@@ -772,7 +773,8 @@
                                     }
                                 ]
 
-                        }
+                        },
+                        ...getInsertOperations(),
                     ]
                 }
             ]
@@ -1295,7 +1297,7 @@
                                 caption: '_; Send; Enviar; Wyślij',
                                 hideToolbarCaption: true,
                                 mricon: 'upload',
-                                tbr: 'D',
+                                tbr: 'C',
                                 fab: 'S00',
                                 menu: [
                                     {

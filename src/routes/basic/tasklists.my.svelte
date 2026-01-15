@@ -13,7 +13,7 @@
 				mainContentPageReloader,
                 Modal,
                 onErrorShowAlert, Breadcrumb, Paper, PaperHeader,
-                i18n, refreshToolbarOperations
+                i18n, reloadPageToolbarOperations
             } from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaList, FaPen, FaArchive, FaChevronLeft, FaChevronRight} from 'svelte-icons/fa'
     import {querystring, pop, link} from 'svelte-spa-router'
@@ -230,6 +230,25 @@
         }    
     }
 
+    async function toggleSubscribe(list)
+    {
+        if(list.IsSubscribed)
+        {
+            const res = await reef.get(`${list.$ref}/Unsubscribe`, onErrorShowAlert)
+            if(res)
+                list.IsSubscribed = false
+        }
+        else
+        {
+            const res = await reef.get(`${list.$ref}/Subscribe`, onErrorShowAlert)
+            if(res)
+                list.IsSubscribed = true
+        }
+
+        const newOperations = listOperations(list)
+        reloadPageToolbarOperations(newOperations, true)
+    }
+
     let listOperations = (list) => {
         return {
             opver: 2,
@@ -303,23 +322,7 @@
         }
     }
 
-    async function toggleSubscribe(list)
-    {
-        if(list.IsSubscribed)
-        {
-            const res = await reef.get(`${list.$ref}/Unsubscribe`, onErrorShowAlert)
-            if(res)
-                list.IsSubscribed = false
-        }
-        else
-        {
-            const res = await reef.get(`${list.$ref}/Subscribe`, onErrorShowAlert)
-            if(res)
-                list.IsSubscribed = true
-        }
-
-        refreshToolbarOperations()
-    }
+    
 
     let list_properties = {
         Title: "Title",
