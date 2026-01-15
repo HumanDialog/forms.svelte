@@ -2,15 +2,15 @@
     let additionalClass = $$props.class ?? ''
 </script>
 
-<section class="    kanban-paper sm:table
+<section class="    kanban-paper sm:xtable
                     prose prose-base prose-zinc dark:prose-invert prose-a:no-underline
 
-                    max-w-none sm:min-h-[32rem]
+                    !max-w-none sm:min-h-[32rem]
 
                     m-0 mb-64 px-2 pt-2 pb-0
 
-                    sm:mt-4 sm:px-4
-                    md:px-10 md:mx-2
+                    sm:mt-4 sm:xpx-4
+                    md:xpx-10 md:mx-2
 
                     sm:rounded
 

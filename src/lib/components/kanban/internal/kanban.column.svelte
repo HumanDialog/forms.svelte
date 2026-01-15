@@ -340,14 +340,15 @@
                 sm:snap-start
 
                 w-full
-                sm:px-4
+
+                flex-none
                 sm:w-1/2
                 md:w-1/3
                 xl:w-1/4
-                sm:min-w-[300px]
+                sm:px-4
 
-                flex-none
-                sm:flex-1
+
+
 
                 {selected_class} {focused_class}"
 
