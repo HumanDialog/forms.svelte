@@ -56,7 +56,7 @@
         if(users.length == 0)
         {
             //let res = await reef.get('/app/Users')
-            reef.post('group/query',
+            const promise = reef.post('group/query',
                             {
                                 Id: 1,
                                 Name: 'Users',
@@ -73,6 +73,8 @@
                                 users = res.User;
                                 usersComboSource?.updateObjects(users);
                         })
+
+            await promise;
         }
 
 
@@ -161,7 +163,7 @@
                                                 Association: assocName,
                                                 Filter: assocFilter,
                                                 Sort: 'ListOrder',
-                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'ListOrder', 'State', 'href', 'icon',  'icon', '$type'],
+                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'ListOrder', 'State', 'href', 'icon',  'DueDate', '$type'],
                                                 SubTree:[
                                                     {
                                                         Id: 3,
@@ -181,7 +183,14 @@
                             },
                             onErrorShowAlert);
         if(res)
-            return res.TaskList;
+        {
+            const taskList = res.TaskList;
+
+            // tmp
+            taskList.Tasks.forEach((t) => t.users = users);
+
+            return taskList;
+        }
         else
             return null
     }
@@ -828,23 +837,13 @@
 
     
     let list_properties = {
-        Title: "Title",
-        Summary: "Summary",
-        icon: "icon",
         element:{
             icon: "icon",
             href: "href",
             Title: "Title",
-            Summary: "Summary"
-        },
-        context:{
-            Folder:{
-                Summary: "Summary",
-
-            },
-            FolderFolder:{
-                Summary: "Summary",
-                head_right: "ModificationDate"
+            Summary: "Summary",
+            $properties: {
+                m: { l: [':DueDate', '^Actor;users']}
             }
         }
     }

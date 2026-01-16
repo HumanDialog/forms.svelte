@@ -11,6 +11,7 @@
 
     export let currentColumnIdx :number
     export let onInsert: Function;
+    export let definition: rKanban_definition
 
     let column_element: HTMLElement;
     export function getHeight()
@@ -53,7 +54,7 @@
         }
     }
 
-    let definition :rKanban_definition = getContext("rKanban-definition");
+    //let definition :rKanban_definition = getContext("rKanban-definition");
     let columnDef: rKanban_column = definition.columns[currentColumnIdx];
 
     let     column_items :object[] | undefined = undefined;
@@ -64,11 +65,16 @@
     $: is_row_selected = selected($contextItemsStore)
     $: selected_class = is_row_selected ? "!border-blue-300 dark:!border-blue-300/50" : "";
     $: focused_class = is_row_active ? "bg-stone-50 dark:bg-stone-800" : "";
+    
 
     $: force_rerender($data_tick_store, $contextItemsStore)
 
+    let is_visible = false
+
     export function reload()
     {
+        columnDef = definition.columns[currentColumnIdx]
+
         let allItems = definition.getItems();
         if(definition.stateAttrib)
         {
@@ -91,6 +97,8 @@
             else
                 column_items = allItems.filter( e => e[definition.stateAttrib] == columnDef.state)
         }
+
+        is_visible = isVisible() 
     }
 
     export function isVisible()
@@ -103,7 +111,7 @@
                 return false;
         }
         else
-            return true;
+            return !columnDef.notVisible;
 
     }
 
@@ -334,7 +342,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 
-{#if (columnDef.state >=0) || ((column_items && column_items.length > 0))}
+{#if is_visible}
 
 <div class="    snap-center
                 xsm:snap-start

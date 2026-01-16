@@ -768,6 +768,7 @@
             column.width = c.width ?? '';
             column.state = c.state;
             column.finishing = c.finishing ?? false;
+            column.notVisible = c.notVisible ?? false;
             column.operations = c.operations ?? undefined;
             column.onTitleChanged = c.onTitleChanged ?? undefined;
             definition.columns.push(column)
@@ -798,24 +799,26 @@
                 xbg-lime-800
                 "> <!--sm:justify-center -->
     {#each definition.columns as column, idx (column.title + column.state)}
-        <KanbanColumn currentColumnIdx={idx}
-                {onInsert}
-                bind:this={columns[idx]}>
+            <KanbanColumn currentColumnIdx={idx}
+                    {onInsert}
+                    {definition}
+                    bind:this={columns[idx]}>
 
 
-            <svelte:fragment slot="kanbanCardTopProps" let:element>
-                <slot name="kanbanCardTopProps" {element}/>
-            </svelte:fragment>
+                <svelte:fragment slot="kanbanCardTopProps" let:element>
+                    <slot name="kanbanCardTopProps" {element}/>
+                </svelte:fragment>
 
-            <svelte:fragment slot="kanbanCardMiddleProps" let:element>
-                <slot name="kanbanCardMiddleProps" {element}/>
-            </svelte:fragment>
+                <svelte:fragment slot="kanbanCardMiddleProps" let:element>
+                    <slot name="kanbanCardMiddleProps" {element}/>
+                </svelte:fragment>
 
-            <svelte:fragment slot="kanbanCardBottomProps" let:element>
-                <slot name="kanbanCardBottomProps" {element}/>
-            </svelte:fragment>
+                <svelte:fragment slot="kanbanCardBottomProps" let:element>
+                    <slot name="kanbanCardBottomProps" {element}/>
+                </svelte:fragment>
 
-        </KanbanColumn>
+            </KanbanColumn>
+        
     {/each}
 </div>
 {/key}

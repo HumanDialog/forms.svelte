@@ -8,6 +8,7 @@
     export let finishing:  boolean = false;
     export let operations: object[]|undefined = undefined;
     export let onTitleChanged: Function|undefined = undefined;
+    export let notVisible:     boolean = false
 
     let definition :rKanban_definition = getContext("rKanban-definition");
 
@@ -19,6 +20,7 @@
     column.finishing = finishing;
     column.operations = operations;
     column.onTitleChanged = onTitleChanged;
+    column.notVisible = notVisible
     
     definition.columns.push(column)
 
