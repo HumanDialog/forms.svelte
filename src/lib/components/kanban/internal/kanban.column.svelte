@@ -337,17 +337,17 @@
 {#if (columnDef.state >=0) || ((column_items && column_items.length > 0))}
 
 <div class="    snap-center
-                sm:snap-start
+                xsm:snap-start
+                flex-none
 
                 w-full
-
-                flex-none
                 sm:w-1/2
                 md:w-1/3
                 xl:w-1/4
+
                 sm:px-4
 
-
+                xbg-stone-900
 
 
                 {selected_class} {focused_class}"

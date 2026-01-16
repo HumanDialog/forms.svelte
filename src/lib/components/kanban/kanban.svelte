@@ -657,15 +657,16 @@
 
     <!--hr class="hidden sm:block w-full"-->
 
-<section    id="__hd_svelte_kanban_columns_container"
+<div    id="__hd_svelte_kanban_columns_container"
             class="h-full flex flex-row no-wrap
-                overflow-x-scroll sm:overflow-x-visible
+                overflow-x-scroll grow sm:overflow-x-visible
                 snap-x snap-mandatory
                 xbg-lime-500
                 sm: space-x-0
                 sm:divide-x
                 divide-stone-500 dark:divide-stone-700
                 pb-20
+                xbg-lime-800
                 "> <!--sm:justify-center -->
     {#each definition.columns as column, idx (column.id)}
         <KanbanColumn currentColumnIdx={idx}
@@ -687,5 +688,5 @@
 
         </KanbanColumn>
     {/each}
-</section>
+</div>
 {/key}

@@ -20,7 +20,7 @@
 	export let typename = '';
 	export let focused_only = false;
 	export let inContext = '';
-	export let cl =	'w-full overflow-x-hidden py-0 sm:px-3 border-0';
+	export let cl =	'w-full overflow-x-hidden py-0 sm:px-3 border-0' ;
 	export let c = '';
 
 	export let toolbarOperations = undefined;
