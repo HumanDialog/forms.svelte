@@ -280,10 +280,15 @@ export function getActiveCount(context_level)
         return 1
 }
 
-export function reloadPageToolbarOperations(operations)
+export function reloadPageToolbarOperations(operations, reloadContextOperations=false)
 {
-    pageToolbarOperations.set(operations)
+    if(reloadContextOperations)
+        contextToolbarOperations.set(operations)
+    else
+        pageToolbarOperations.set(operations)
 }
+
+
 
 export function refreshToolbarOperations()
 {

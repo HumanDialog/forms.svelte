@@ -31,7 +31,7 @@
         showFloatingToolbar,
         refreshToolbarOperations,
         PaperTable,
-        PaperHeader,
+        PaperHeader, reloadPageToolbarOperations,
         setjItemProperty, KanbanColumnTop, openInNewTab, copyAddress
 	} from '$lib';
     import {FaPlus, FaList, FaPen, FaCaretLeft, FaCaretRight, FaTrash, FaArrowsAlt, FaArchive, FaCheck, FaEllipsisH, FaChevronRight,
@@ -201,6 +201,8 @@
         if(res)
         {
             const taskList = res.TaskList
+            taskList.AllTasks = taskList.Tasks
+
             const cacheKey = `listboard/${taskList.Id}`
             cache.set(cacheKey, taskList)
 
@@ -226,6 +228,9 @@
         {
             taskStates = [];
         }
+
+        
+        filterTasks()
     }
 
     async function reload(selectRecommendations)
@@ -234,6 +239,14 @@
         kanban.reload(currentList, selectRecommendations);
     }
 
+    function filterTasks()
+    {
+        if(hideFinishedTasks)
+            currentList.Tasks = currentList.AllTasks.filter((t) => t.State < STATE_FINISHED)
+        else
+            currentList.Tasks = currentList.AllTasks
+        
+    }
 
     /*const switchToListOperation = () => {
         if(!currentList)
@@ -253,8 +266,87 @@
             return { }
     }
     */
+
+    function showFinishedTasksOperation(operationsFunc, areContextOperations)
+    {
+        return {
+            caption: '_; Show finished tasks; Mostrar tareas completadas; Pokaż zakończone zadania',
+            action: () => toggleFinishedTasksVisibility(operationsFunc, areContextOperations)
+        }
+    }
+
+    function hideFinishedTasksOperation(operationsFunc, areContextOperations) 
+    {
+        return {
+            caption: '_; Hide finished tasks; Ocultar tareas completadas; Ukryj zakończone zadania',
+            action: () => toggleFinishedTasksVisibility(operationsFunc, areContextOperations)
+        }
+    }
+
+    let hideFinishedTasks = false
+    function toggleFinishedTasksVisibility(operationsFunc, areContextOperations)
+    {
+        hideFinishedTasks = !hideFinishedTasks
+
+        filterTasks()
+        kanban.reload(currentList, kanban.KEEP_SELECTION);
+
+        if(operationsFunc)
+        {
+            const newOperations = operationsFunc()
+            reloadPageToolbarOperations(newOperations, areContextOperations)   
+        }
+    }
+
+    function unfollowOperation(operationsFunc, areContextOperations)
+    {
+        return {
+            caption: '_; Unfollow; Dejar de seguir; Przestań obserwować',
+            mricon: 'heart-off',
+            tbr: 'C',
+            fab: 'S20',
+            hideToolbarCaption: true,
+            action: (f) => toggleSubscribe(operationsFunc, areContextOperations)
+        }
+    }
+
+    function followOperation(operationsFunc, areContextOperations)
+    {
+        return {
+            caption: '_; Follow; Seguir; Obserwuj',
+            mricon: 'heart',
+            tbr: 'C',
+            fab: 'S20',
+            hideToolbarCaption: true,
+            action: (f) => toggleSubscribe(operationsFunc, areContextOperations)
+        }
+    }
+
+    async function toggleSubscribe(operationsFunc, areContextOperations)
+    {
+        if(currentList.IsSubscribed)
+        {
+            const res = await reef.get(`${currentList.$ref}/Unsubscribe`, onErrorShowAlert)
+            if(res)
+                currentList.IsSubscribed = false
+        }
+        else
+        {
+            const res = await reef.get(`${currentList.$ref}/Subscribe`, onErrorShowAlert)
+            if(res)
+                currentList.IsSubscribed = true
+        }
+
+        if(operationsFunc)
+        {
+            const newOperations = operationsFunc()
+            reloadPageToolbarOperations(newOperations, areContextOperations)   
+        }
+    }
+
     function getViewOperationsP()
     {
+        const reloadThisOperations = () => getPageOperations()
         return {
                     caption: '_; View; Ver; Widok',
 
@@ -312,10 +404,8 @@
                                 }
                             ]
                         },
-                        {
-                            separator: true
-                        },
-                        ... (currentList.IsSubscribed ? [unfollowOperation] : [followOperation]),
+                        ... (currentList.IsSubscribed ? [unfollowOperation(reloadThisOperations, false)] : [followOperation(reloadThisOperations, false)]),
+                        ... (hideFinishedTasks ? [showFinishedTasksOperation( reloadThisOperations, false )] : [hideFinishedTasksOperation( reloadThisOperations, false )]),
                         {
                             //icon: FaRandom,
                             caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
@@ -523,15 +613,16 @@
         const isOutOfStates = columnIdx < 0
         const mobile = isDeviceSmallerThan("sm")
 
+        const reloadThisOperations = () => getCardOperations(task)
+
         return {
             opver: 2,
             fab: 'M00',
             tbr: 'D',
             operations: [
                 {
-                    caption: '_; View; Ver; Widok',
-                    //tbr: 'B',
-                    operations:[
+                    caption: '_; File; Archivo; Plik',
+                    operations: [
                         {
                             caption: '_; New task; Nueva tarea; Nowe zadanie',
                             mricon: 'square-pen',
@@ -539,52 +630,9 @@
                             action: (f) => { kanban.add(task) },
                             fab: "M01",
                             tbr: 'A'
-                        },
-                        {
-                            mricon: 'download',
-                            caption: '_; Insert; Insertar; Wstaw',
-                            hideToolbarCaption: true,
-                            tbr: 'C',
-                            fab: 'S10',
-                            menu: [
-                                {
-                                    caption: '_; Paste; Pegar; Wklej',
-                                    action: pasteRecentClipboardElement
-                                },
-                                {
-                                    caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
-                                    action: runPasteBasket
-                                },
-                                {
-                                    caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
-                                    action: runPasteBrowserRecent
-                                },
-                                {
-                                    caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                                    action: runPopupExplorer4SelectFromFolders
-                                },
-                                {
-                                    caption: '_; Select from task lists; Seleccionar de listas de tareas; Wybierz z listy zadań',
-                                    action: runPopupExplorer4SelectFromTaskLists
-                                }
-                            ]
-                        },
-                        {
-                            separator: true
-                        },
-                        ... (currentList.IsSubscribed ? [unfollowOperation] : [followOperation]),
-                        {
-                            caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
-                            action: changeListKind,
-                        },
+                        }
                     ]
                 },
-                ... isOutOfStates ? [] : [
-                {
-                    caption: '_; Column; Columna; Kolumna',
-                    //tbr: 'B',
-                    operations: getColumnContextMenu(columnIdx, undefined, !mobile)
-                }],
                 {
                     caption: '_; Task; Tarea; Zadanie',
                     //tbr: 'B',
@@ -638,10 +686,18 @@
                         },
                         ... (isOutOfStates) ? [] : [
                         {
+                            caption: '_; Move to top ; Mover al principio de la lista; Przesuń na szczyt',
+                            mricon: 'chevrons-up',
+                            action: (f) => { kanban.moveTop(task); setTimeout(() => kanban.scrollViewToCard(), 0) },
+                            fab: 'M07',
+                            tbr: 'A',
+                            hideToolbarCaption: true
+                        },
+                        {
                             caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                             mricon: 'chevron-up',
                             action: (f) => { kanban.moveUp(task); setTimeout(() => kanban.scrollViewToCard(), 0) },
-                            fab: 'M05',
+                            fab: 'M06',
                             tbr: 'A',
                             hideToolbarCaption: true
                         },
@@ -649,6 +705,14 @@
                             caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                             mricon: 'chevron-down',
                             action: (f) => { kanban.moveDown(task); setTimeout(() => kanban.scrollViewToCard(), 0)},
+                            fab: 'M05',
+                            tbr: 'A',
+                            hideToolbarCaption: true
+                        },
+                        {
+                            caption: '_; Move to the bottom; Mover a la parte inferior; Przesuń na sam dół',
+                            mricon: 'chevrons-down',
+                            action: (f) => { kanban.moveBottom(task); setTimeout(() => kanban.scrollViewToCard(), 0)},
                             fab: 'M04',
                             tbr: 'A',
                             hideToolbarCaption: true
@@ -699,6 +763,10 @@
                                 }
                         ],
                         {
+                            caption: '_; Detach; Desconectar; Odłącz',
+                            action: async () => await dettachTask(task)
+                        },
+                        /*{
                             caption: '_; Archive; Archivar; Zarchiwizuj',
                             //icon: FaArchive,
                             action: (f) => askToArchive(task)
@@ -707,19 +775,72 @@
                             caption: '_; Delete; Eliminar; Usuń',
                             //icon: FaTrash,
                             action: (f) => askToDelete(task)
-                        },
+                        },*/
                         {
                             caption: '_; Properties; Propiedades; Właściwości',
                             action: (btt, rect)=> runElementProperties(btt, rect, task, 'Task')
                         }
                     ]
+                },
+                ... isOutOfStates ? [] : [
+                {
+                    caption: '_; Column; Columna; Kolumna',
+                    //tbr: 'B',
+                    operations: getColumnContextMenu(columnIdx, undefined, !mobile)
+                }],
+                {
+                    caption: '_; View; Ver; Widok',
+                    //tbr: 'B',
+                    operations:[
+                        
+                        {
+                            mricon: 'download',
+                            caption: '_; Insert; Insertar; Wstaw',
+                            hideToolbarCaption: true,
+                            tbr: 'C',
+                            fab: 'S10',
+                            menu: [
+                                {
+                                    caption: '_; Paste; Pegar; Wklej',
+                                    action: pasteRecentClipboardElement
+                                },
+                                {
+                                    caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
+                                    action: runPasteBasket
+                                },
+                                {
+                                    caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
+                                    action: runPasteBrowserRecent
+                                },
+                                {
+                                    caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
+                                    action: runPopupExplorer4SelectFromFolders
+                                },
+                                {
+                                    caption: '_; Select from task lists; Seleccionar de listas de tareas; Wybierz z listy zadań',
+                                    action: runPopupExplorer4SelectFromTaskLists
+                                }
+                            ]
+                        },
+                        ... (currentList.IsSubscribed ? [unfollowOperation(reloadThisOperations, true)] : [followOperation(reloadThisOperations, true)]),
+                        ... (hideFinishedTasks ? [showFinishedTasksOperation( reloadThisOperations, true )] : [hideFinishedTasksOperation( reloadThisOperations, true )]),
+                        {
+                            caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
+                            action: changeListKind,
+                        },
+                    ]
                 }
-
-
+                
             ]
 
         }
 
+    }
+
+    async function dettachTask(task)
+    {
+        await reef.post(`${task.$ref}/MoveToList`, {list: null, order: 0})
+        await reload(kanban.SELECT_NEXT)
     }
 
     function moveTaskToColumn(task, btt)
@@ -765,9 +886,9 @@
     {
         return [
             {
-                caption: '_; Edit column name; Editar nombre de columna; Edytuj nazwę kolumny',
+                caption: '_; Edit column; Editar columna; Edytuj kolumnę',
                 //mricon: 'pencil', //inColumnContext ? FaPen : undefined,
-                action: (f) => kanban.editColumnName(columnIdx)
+                action: (f) => runColumnEditDialog(columnIdx)
             },
             /*{
                 caption: inColumnContext ? 'Set as finished' : 'Set column as finished',
@@ -801,27 +922,9 @@
         ];
     }
 
-    const unfollowOperation = {
-        caption: '_; Unfollow; Dejar de seguir; Przestań obserwować',
-        mricon: 'heart-off',
-        tbr: 'C',
-        fab: 'S20',
-        hideToolbarCaption: true,
-        action: (f) => toggleSubscribe()
-    }
-
-    const followOperation = {
-        caption: '_; Follow; Seguir; Obserwuj',
-        mricon: 'heart',
-        tbr: 'C',
-        fab: 'S20',
-        hideToolbarCaption: true,
-        action: (f) => toggleSubscribe()
-    }
-
     function getColumnOperations(columnIdx, taskState)
     {
-
+        const reloadThisOperations = () => getColumnOperations(columnIdx, taskState)
 
         const mobile = isDeviceSmallerThan("sm")
         return {
@@ -830,8 +933,7 @@
             tbr: 'D',
             operations: [
                 {
-                    caption: '_; View; Ver; Widok',
-                    //tbr: 'B',
+                    caption: '_; File; Archivo; Plik',
                     operations: [
                         {
                             caption: '_; New Task; Nueva tarea; Nowe zadanie',
@@ -839,8 +941,19 @@
                             action: (f) => kanban.add(KanbanColumnBottom, columnIdx),
                             fab: 'M01',
                             tbr: 'A'
-                        },
-                        {separator: true, tbr: 'A'},
+                        }
+                    ]
+                },
+                {
+                    caption: 'Column',
+                    //tbr: 'B',
+                    operations: getColumnContextMenu(columnIdx, taskState, !mobile)
+                },
+                {
+                    caption: '_; View; Ver; Widok',
+                    //tbr: 'B',
+                    operations: [
+                        
                         {
                             caption: '_; Edit; Editar; Edytuj',
                             mricon: 'pencil',
@@ -886,10 +999,8 @@
                                 }
                             ]
                         },
-                        {
-                            separator: true
-                        },
-                        ... (currentList.IsSubscribed ? [unfollowOperation] : [followOperation]),
+                        ... (currentList.IsSubscribed ? [unfollowOperation(reloadThisOperations, true)] : [followOperation(reloadThisOperations, true)]),
+                        ... (hideFinishedTasks ? [showFinishedTasksOperation( reloadThisOperations, true )] : [hideFinishedTasksOperation( reloadThisOperations, true )]),
                         {
                             //icon: FaRandom,
                             caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
@@ -899,12 +1010,8 @@
                         },
                         //switchToListOperation()
                     ]
-                },
-                {
-                    caption: 'Column',
-                    //tbr: 'B',
-                    operations: getColumnContextMenu(columnIdx, taskState, !mobile)
                 }
+                
             ]
         }
     }
@@ -1194,47 +1301,69 @@
     */
 
 
-    let addColumnDialog;
-    let newColumnProps = {
-        name: '_; New column; Nueva columna; Nowa kolumna',
+    let editColumnDialog;
+    let editingColumnProps = {
+        name: '',
         state: 0
     }
-    let newColumnStates = []
+    let processStates = []
     let newColumnPos = 0
+    let editingColumnPos = 0
     let numericStateElement;
-    let stateValueVisible = false;
+    let stateValueVisible = true;
+    const ADD_COLUMN = 1
+    const EDIT_COLUMN = 2
+    let columnEditorMode = 0 
 
     async function addProcessColumn(pos)
     {
         newColumnPos = pos;
-        if(!newColumnStates.length)
+        if(!processStates.length)
         {
-            newColumnStates = await reef.get(`group/GetPredefinedTaskStates`, onErrorShowAlert)
+            processStates = await reef.get(`group/GetPredefinedTaskStates`, onErrorShowAlert)
             await tick();
         }
 
-        addColumnDialog.show();
+        editingColumnProps.name = '_; New column; Nueva columna; Nowa kolumna'
+        editingColumnProps.state = 0
 
+        columnEditorMode = ADD_COLUMN
+
+        editColumnDialog.setTitle('_; Add column; Añadir columna; Dodaj kolumnę')
+        editColumnDialog.setOkCaption('_; Add; Añadir; Dodaj')
+        editColumnDialog.show();
+
+    }
+
+    async function onColumnEditorOK()
+    {
+        switch(columnEditorMode)
+        {
+        case ADD_COLUMN:
+            await onNewProcessColumnRequested()
+            break;
+
+        case EDIT_COLUMN:
+            await onEditColumnRequested()
+            break;
+        }
     }
 
     async function onNewProcessColumnRequested()
     {
-        addColumnDialog.hide();
+        editColumnDialog.hide();
 
         let newState
-        if (typeof newColumnProps.state === 'string' || newColumnProps.state instanceof String)
-            newState = parseInt(newColumnProps.state)
+        if (typeof editingColumnProps.state === 'string' || editingColumnProps.state instanceof String)
+            newState = parseInt(editingColumnProps.state)
         else
-            newState = newColumnProps.state
+            newState = editingColumnProps.state
 
         const res = await reef.post(`${currentList.$ref}/AddColumn`, {
                             pos: newColumnPos,
                             state: newState,
-                            name: newColumnProps.name
+                            name: editingColumnProps.name
                         }, onErrorShowAlert);
-
-        newColumnProps.name = '_; New column; Nueva columna; Nowa kolumna'
-        newColumnProps.state = 0
 
         if(res && Array.isArray(res))
         {
@@ -1250,11 +1379,9 @@
         }
     }
 
-    function onNewProcessColumnCanceled()
+    function cancelColumnEditor()
     {
-        addColumnDialog.hide();
-        newColumnProps.name = '_; New column; Nueva columna; Nowa kolumna'
-        newColumnProps.state = 0
+        editColumnDialog.hide();
     }
 
     function onNewColumnStateSelected(state, name)
@@ -1262,22 +1389,72 @@
         numericStateElement?.refresh();
     }
 
-    async function toggleSubscribe()
+    async function runColumnEditDialog(pos)
     {
-        if(currentList.IsSubscribed)
+        editingColumnPos = pos;
+        if(!processStates.length)
         {
-            const res = await reef.get(`${currentList.$ref}/Unsubscribe`, onErrorShowAlert)
-            if(res)
-                currentList.IsSubscribed = false
-        }
-        else
-        {
-            const res = await reef.get(`${currentList.$ref}/Subscribe`, onErrorShowAlert)
-            if(res)
-                currentList.IsSubscribed = true
+            processStates = await reef.get(`group/GetPredefinedTaskStates`, onErrorShowAlert)
+            await tick();
         }
 
-        refreshToolbarOperations()
+        const column = taskStates[editingColumnPos]
+        editingColumnProps.name = ext(column.name)
+        editingColumnProps.state = column.state
+
+        columnEditorMode = EDIT_COLUMN
+
+        editColumnDialog.setTitle('_; Edit column; Editar columna; Edytuj kolumnę')
+        editColumnDialog.setOkCaption('OK')
+        editColumnDialog.show();
+    }
+
+    async function onEditColumnRequested()
+    {
+        editColumnDialog.hide();
+
+        let newState
+        if (typeof editingColumnProps.state === 'string' || editingColumnProps.state instanceof String)
+            newState = parseInt(editingColumnProps.state)
+        else
+            newState = editingColumnProps.state
+
+        const prevState = taskStates[editingColumnPos].state
+
+        if(prevState != newState)
+        {
+            taskStates[editingColumnPos].state = newState;
+
+            const tasks = currentList.Tasks.filter(t => t.State == prevState)
+            kanban.setCardsState(tasks, newState)
+        }
+
+        const prevName = taskStates[editingColumnPos].name
+        const newName = editingColumnProps.name.trim()
+        if(prevName != newName)
+            taskStates[editingColumnPos].name = newName;
+
+        if((prevState != newState) || (prevName != newName))
+        {
+            saveTaskStates();
+
+            await fetchData()
+            const newColumns = []
+            for(let idx=0; idx<taskStates.length; idx++)
+            {
+                const column = taskStates[idx];   
+                newColumns.push({
+                    title: ext(column.name),
+                    state: column.state,
+                    finishing: column.state == STATE_FINISHED,
+                    operations: getColumnOperations(idx, column)
+                })
+            }
+
+            kanban.setColumns(newColumns)
+            await kanban.reload(currentList, kanban.CLEAR_SELECTION);
+            kanban.activateColumn(editingColumnPos)
+        }
     }
 
     let otherCaption = '_; <Other>; <Otros>; <Inne>'
@@ -1330,7 +1507,6 @@
                     <KanbanColumn   title={ext(taskState.name)}
                                     state={taskState.state}
                                     operations={getColumnOperations(columnIdx, taskState)}
-                                    onTitleChanged={(title) => onColumnNameChanged(columnIdx, title)}
                                     finishing={taskState.state == STATE_FINISHED}/>
                 {/each}
 
@@ -1404,26 +1580,24 @@
         bind:this={changeKindModal}
         />
 
-{#key newColumnStates}
-<Modal  title={i18n(['Add column', 'Añadir columna', 'Dodaj kolumnę'])}
-        okCaption={i18n(['Add', 'Añadir', 'Dodaj'])}
-        onOkCallback={onNewProcessColumnRequested}
-        onCancelCallback={onNewProcessColumnCanceled}
+{#key processStates}
+<Modal  onOkCallback={onColumnEditorOK}
+        onCancelCallback={cancelColumnEditor}
         icon={FaColumns}
-        bind:this={addColumnDialog}>
+        bind:this={editColumnDialog}>
 
     <Input  label={i18n(['Name', 'Nombre', 'Nazwa'])}
         placeholder=''
-        self={newColumnProps}
+        self={editingColumnProps}
         a="name"/>
 
     <section class="mt-2 grid grid-cols-2 gap-2">
         <Combo label={i18n(['State', 'Estado', 'Stan'])}
-                self={newColumnProps}
+                self={editingColumnProps}
                 a='state'
                 changed={onNewColumnStateSelected}>
 
-            {#each newColumnStates as column}
+            {#each processStates as column}
                 <ComboItem key={column.state} name={ext(column.name)}/>
             {/each}
         </Combo>
@@ -1442,7 +1616,7 @@
                 <Input class="inline-block"
                     label={i18n(['State value', 'Valor del estado', 'Wartość stanu'])}
                     placeholder=''
-                    self={newColumnProps}
+                    self={editingColumnProps}
                     a="state"
                     bind:this={numericStateElement}/>
             {/if}

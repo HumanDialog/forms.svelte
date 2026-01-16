@@ -13,7 +13,7 @@
                 ListComboProperty,
 				mainContentPageReloader,
                 Modal, focusEditable,
-                onErrorShowAlert, showMenu,
+                onErrorShowAlert, showMenu, reloadPageToolbarOperations,
 				UI, i18n, Breadcrumb, showFloatingToolbar, Paper, PaperHeader,
 				ext, refreshToolbarOperations, openInNewTab, copyAddress
             } from '$lib'
@@ -228,6 +228,12 @@
         await reloadTasks(listComponent.SELECT_NEXT)
     }
 
+    async function dettachTask(task)
+    {
+        await reef.post(`${task.$ref}/MoveToList`, {list: null, order: 0})
+        await reloadTasks(listComponent.SELECT_NEXT)
+    }
+
     let archiveModal;
     let taskToArchive;
     function askToArchive(task)
@@ -278,22 +284,52 @@
         await reloadTasks(newTask.$ref)
     }
 
-    const unfollowOperation = {
-        caption: '_; Unfollow; Dejar de seguir; Przestań obserwować',
-        mricon: 'heart-off',
-        tbr: 'C',
-        fab: 'S20',
-        hideToolbarCaption: true,
-        action: (f) => toggleSubscribe()
+    
+
+    function unfollowOperation(operationsFunc, areContextOperations)
+    {
+        return {
+            caption: '_; Unfollow; Dejar de seguir; Przestań obserwować',
+            mricon: 'heart-off',
+            tbr: 'C',
+            fab: 'S20',
+            hideToolbarCaption: true,
+            action: (f) => toggleSubscribe(operationsFunc, areContextOperations)
+        }
+    }
+    
+    function followOperation(operationsFunc, areContextOperations)
+    {
+        return {
+            caption: '_; Follow; Seguir; Obserwuj',
+            mricon: 'heart',
+            tbr: 'C',
+            fab: 'S20',
+            hideToolbarCaption: true,
+            action: (f) => toggleSubscribe(operationsFunc, areContextOperations)
+        }
     }
 
-    const followOperation = {
-        caption: '_; Follow; Seguir; Obserwuj',
-        mricon: 'heart',
-        tbr: 'C',
-        fab: 'S20',
-        hideToolbarCaption: true,
-        action: (f) => toggleSubscribe()
+    async function toggleSubscribe(operationsFunc, areContextOperations)
+    {
+        if(currentList.IsSubscribed)
+        {
+            const res = await reef.get(`${listPath}/Unsubscribe`, onErrorShowAlert)
+            if(res)
+                currentList.IsSubscribed = false
+        }
+        else
+        {
+            const res = await reef.get(`${listPath}/Subscribe`, onErrorShowAlert)
+            if(res)
+                currentList.IsSubscribed = true
+        }
+
+        if(operationsFunc)
+        {
+            const newOperations = operationsFunc()
+            reloadPageToolbarOperations(newOperations, areContextOperations)   
+        }
     }
 
     function getPageOperations()
@@ -303,6 +339,8 @@
 
         if(isArchivedTasks)
             return [];
+
+        const reloadThisOperations = () => getPageOperations()
 
         return {
             opver: 2,
@@ -321,22 +359,6 @@
                             tbr: 'A'
                         },
                         { separator: true, tbr: 'A'},
-                        {
-                            caption: '_; Edit; Editar; Edytuj',
-                            mricon: 'pencil',
-                            tbr: 'A',
-                            fab:'M20',
-                            grid:[
-                                {
-                                    caption: '_; Title; Título; Tytuł',
-                                    action: () =>  { focusEditable('Name') },
-                                },
-                                {
-                                    caption: '_; Summary; Resumen; Podsumowanie',
-                                    action: () =>  { focusEditable('Summary') }
-                                }
-                            ]
-                        },
                         {
                             mricon: 'download',
                             caption: '_; Insert; Insertar; Wstaw',
@@ -367,9 +389,22 @@
                             ]
                         },
                         {
-                            separator: true
+                            caption: '_; Edit; Editar; Edytuj',
+                            mricon: 'pencil',
+                            tbr: 'A',
+                            fab:'M20',
+                            grid:[
+                                {
+                                    caption: '_; Title; Título; Tytuł',
+                                    action: () =>  { focusEditable('Name') },
+                                },
+                                {
+                                    caption: '_; Summary; Resumen; Podsumowanie',
+                                    action: () =>  { focusEditable('Summary') }
+                                }
+                            ]
                         },
-                        ... currentList.IsSubscribed? [unfollowOperation] : [followOperation],
+                        ... currentList.IsSubscribed? [unfollowOperation(reloadThisOperations, false)] : [followOperation(reloadThisOperations, false)],
                         {
                             //icon: FaRandom,
                             caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
@@ -483,13 +518,15 @@
         if(isArchivedTasks)
             return []
 
+        const reloadThisOperations = () => taskOperations(task)
+
         return {
             opver: 2,
             fab: 'M00',
             tbr: 'D',
             operations: [
                 {
-                    caption: '_; View; Ver; Widok',
+                    caption: '_; File; Archivo; Plik',
                     //tbr: 'B',
                     operations: [
                         {
@@ -498,43 +535,6 @@
                             action: (f) => { listComponent.addRowAfter(task) },
                             fab: 'M01',
                             tbr: 'A'
-                        },
-                        {
-                            mricon: 'download',
-                            caption: '_; Insert; Insertar; Wstaw',
-                            hideToolbarCaption: true,
-                            tbr: 'C',
-                            fab: 'S10',
-                            menu: [
-                                {
-                                    caption: '_; Paste; Pegar; Wklej',
-                                    action: pasteRecentClipboardElement
-                                },
-                                {
-                                    caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
-                                    action: runPasteBasket
-                                },
-                                {
-                                    caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
-                                    action: runPasteBrowserRecent
-                                },
-                                {
-                                    caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                                    action: runPopupExplorer4SelectFromFolders
-                                },
-                                {
-                                    caption: '_; Select from task lists; Seleccionar de listas de tareas; Wybierz z listy zadań',
-                                    action: runPopupExplorer4SelectFromTaskLists
-                                }
-                            ]
-                        },
-                        {
-                            separator: true
-                        },
-                        ... currentList.IsSubscribed? [unfollowOperation] : [followOperation],
-                        {
-                            caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
-                            action: changeListKind,
                         }
                     ]
                 },
@@ -597,6 +597,14 @@
                             tbr: 'A'
                         },
                         {
+                            caption: '_; Move to top ; Mover al principio de la lista; Przesuń na szczyt',
+                            mricon: 'chevrons-up',
+                            action: (f) => listComponent.moveTop(task),
+                            fab: 'M06',
+                            tbr: 'A',
+                            hideToolbarCaption: true
+                        },
+                        {
                             caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                             mricon: 'chevron-up',
                             action: (f) => listComponent.moveUp(task),
@@ -647,8 +655,11 @@
                             ],
                             hideToolbarCaption: true
                         },
-
                         {
+                            caption: '_; Detach; Desconectar; Odłącz',
+                            action: async () => await dettachTask(task)
+                        },
+                        /*{
                             //icon: FaArchive,
                             caption: '_; Archive; Archivar; Zarchiwizuj',
                             action: (f) => askToArchive(task)
@@ -657,10 +668,49 @@
                             //icon: FaTrash,
                             caption: '_; Delete; Eliminar; Usuń',
                             action: (f) => askToDelete(task)
-                        },
+                        },*/
                         {
                             caption: '_; Properties; Propiedades; Właściwości',
                             action: (btt, rect)=> runElementProperties(btt, rect, task, 'Task')
+                        }
+                    ]
+                },
+                {
+                    caption: '_; View; Ver; Widok',
+                    operations: [
+                        {
+                            caption: '_; Insert; Insertar; Wstaw',
+                            mricon: 'download',
+                            hideToolbarCaption: true,
+                            tbr: 'C',
+                            fab: 'S10',
+                            menu: [
+                                {
+                                    caption: '_; Paste; Pegar; Wklej',
+                                    action: pasteRecentClipboardElement
+                                },
+                                {
+                                    caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
+                                    action: runPasteBasket
+                                },
+                                {
+                                    caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
+                                    action: runPasteBrowserRecent
+                                },
+                                {
+                                    caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
+                                    action: runPopupExplorer4SelectFromFolders
+                                },
+                                {
+                                    caption: '_; Select from task lists; Seleccionar de listas de tareas; Wybierz z listy zadań',
+                                    action: runPopupExplorer4SelectFromTaskLists
+                                }
+                            ]
+                        },
+                        ... currentList.IsSubscribed? [unfollowOperation(reloadThisOperations, true)] : [followOperation(reloadThisOperations, true)],
+                        {
+                            caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
+                            action: changeListKind,
                         }
                     ]
                 }
@@ -776,23 +826,7 @@
         reloadTasks(listComponent.SELECT_NEXT);
     }
 
-    async function toggleSubscribe()
-    {
-        if(currentList.IsSubscribed)
-        {
-            const res = await reef.get(`${listPath}/Unsubscribe`, onErrorShowAlert)
-            if(res)
-                currentList.IsSubscribed = false
-        }
-        else
-        {
-            const res = await reef.get(`${listPath}/Subscribe`, onErrorShowAlert)
-            if(res)
-                currentList.IsSubscribed = true
-        }
-
-        refreshToolbarOperations()
-    }
+    
     let list_properties = {
         Title: "Title",
         Summary: "Summary",

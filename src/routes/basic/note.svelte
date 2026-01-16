@@ -58,7 +58,6 @@
 
     import FileProperties from './properties.file.svelte'
 	import NoteProperties from './properties.note.svelte'
-	import { icons } from '$lib/utils';
 
     let noteRef = ''
     let activeNoteRef = ''
@@ -87,7 +86,6 @@
 
     async function onParamsChanged(...args)
     {
-        //console.log('note: ', $location)
         const segments = $location.split('/');
         const foundIdx = segments.findIndex( s => s == 'note');
         if(foundIdx < 0)
@@ -168,7 +166,7 @@
                                         {
                                             Id: 15,
                                             Association: 'InNotes',
-                                            Expressions:['$ref', 'InTitle', 'InSummary', 'InHRef', 'IsCanonical', '$type']
+                                            Expressions:['$ref', 'InTitle', 'InSummary', 'InHRef', 'InIcon', 'IsCanonical', '$type']
                                         },
 
                                         {
@@ -217,9 +215,14 @@
         if(note && note.Notes && note.Notes.length > 0)
         {
             for(let idx=0; idx<note.Notes.length; idx++)
-                prepareAttachementsList(note.Notes[idx].Note)
-
-            activeNote = note.Notes[note.Notes.length-1].Note
+            {
+                const subNote = note.Notes[idx].Note
+                if(subNote.Kind == NK_POST)
+                {
+                    prepareAttachementsList(subNote)
+                    activeNote = subNote
+                }
+            }
         }
 
         activeNoteRef = activeNote.$ref
@@ -235,22 +238,28 @@
         if(note.InNotes)
             note.InNotes.forEach((f) => note.connectedToList.push(f))
 
-        prepareAttachementsList(activeNote)
+        prepareAttachementsList(note)
+
     }
 
     function prepareAttachementsList(noteElement)
     {
         noteElement.attachements = []
         if(noteElement.Notes && noteElement.Notes.length > 0)
-            noteElement.Notes.forEach((n) => noteElement.attachements.push(n))
+        {
+            noteElement.Notes.forEach((n) => {
+                if(n.Note.Kind != NK_POST)
+                {
+                    noteElement.attachements.push(n)
+                }
+            })
+        }
 
         if(noteElement.Files && noteElement.Files.length > 0)
             noteElement.Files.forEach((n) => noteElement.attachements.push(n))
 
         if(noteElement.attachements && noteElement.attachements.length > 0)
-            noteElement.attachements.sort((a,b) => a.Order-b.Order)
-
-        console.log('attachements', noteElement.$ref, noteElement.attachements)
+            noteElement.attachements.sort((a,b) => a.Order-b.Order) 
     }
 
     function onPropertySingleChange(txt, attrib)
@@ -412,17 +421,19 @@
                     tbr: 'A'
                 })
         
-        operations.push(...getInsertOperations())
+       
 
         operations.push(
             {
                 caption: '_; Send; Enviar; Wyślij',
                 mricon: 'upload',
                 hideToolbarCaption: true,
-                tbr: 'D',
+                tbr: 'C',
                 fab: 'S00',
                 menu: sendOperations
             })
+
+         operations.push(...getInsertOperations())
 
         if(operations.length > 0)
             operations.push({separator: true})
@@ -736,12 +747,11 @@
                         //    fab: 'M10',
                         //    tbr: 'A'
                         },
-                        ...getInsertOperations(),
                         {
                             caption: '_; Send; Enviar; Wyślij',
                             mricon: 'upload',
                             hideToolbarCaption: true,
-                            tbr: 'D',
+                            tbr: 'C',
                             fab: 'S00',
                             menu: [
                                     {
@@ -763,7 +773,8 @@
                                     }
                                 ]
 
-                        }
+                        },
+                        ...getInsertOperations(),
                     ]
                 }
             ]
@@ -1086,7 +1097,6 @@
                         // todo: editor path imgPath
                         const dataPath = `${activeNoteRef}/Images/blob?key=${newKey}`
 
-                        //console.log('upload success for ', dataPath)
                         if(imgEditorActionAfterSuccess)
                             imgEditorActionAfterSuccess(dataPath)
                     }
@@ -1268,6 +1278,14 @@
 
                             },
                             {
+                                caption: '_; Move to top ; Mover al principio de la lista; Przesuń na szczyt',
+                                mricon: 'chevrons-up',
+                                action: (f) => list.moveTop(element),
+                                fab:'M07',
+                                tbr:'A',
+                                hideToolbarCaption: true
+                            },
+                            {
                                 caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                                 mricon: 'chevron-up',
                                 action: (f) => list.moveUp(element),
@@ -1287,7 +1305,7 @@
                                 caption: '_; Send; Enviar; Wyślij',
                                 hideToolbarCaption: true,
                                 mricon: 'upload',
-                                tbr: 'D',
+                                tbr: 'C',
                                 fab: 'S00',
                                 menu: [
                                     {
@@ -1614,6 +1632,14 @@
         let newNote = res.NoteNote;
 
         await reloadData();
+        await tick();
+
+        if(threadResponses && threadResponses.length > 0)
+        {
+            const activeEditor = threadResponses[threadResponses.length-1]
+            activeEditor.run();
+            activeEditor.scrollIntoView({ block: "end" })
+        }
     }
 
     let list_properties = {
@@ -1643,15 +1669,8 @@
             Summary: "InSummary"
         },
         context:{
-            FolderNote:{
-                icon:       "#folder",
-            },
             TaskNote:{
-                icon:'#square-pen',
                 head_right: "ModificationDate"
-            },
-            NoteNote:{
-                icon:  '#file-text'
             }
         }
     }
@@ -1667,7 +1686,7 @@
 </svelte:head>
 
 
-{#key noteId + (isReadOnly ? 100000 : 200000)}
+{#key `${activeNoteRef}_${isReadOnly}` }
 {#if note != null}
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex-->
@@ -1757,6 +1776,7 @@
                             compact={true}
                             bind:this={description}
                             readOnly={isReadOnly || (noteRef!=activeNoteRef)}
+                            disableHeadings={isThread}
                             onFocusCb={() => activateFormattingTools(description)}
                             onBlurCb={() => deactivateFormattingToolsIfNeeded(description)}
                             onAddImage={uploadImage}
@@ -1803,54 +1823,56 @@
             {#if isThread && note.Notes && note.Notes.length > 0}
                 {#each note.Notes as subNoteLink, subNoteIdx}
                     {@const subNote = subNoteLink.Note}
-                    <hr/>
-                    <h4>{subNote.CreatedBy.Name} {getNiceStringDateTime(subNote.CreationDate)}</h4>
-                    <Editor     on:click={(e) => e.stopPropagation()}
-                                a='Content'
-                                self={subNote}
-                                compact={true}
-                                bind:this={threadResponses[subNoteIdx]}
-                                readOnly={subNote.$ref!=activeNoteRef}
-                                onFocusCb={() => activateFormattingTools(threadResponses[subNoteIdx])}
-                                onBlurCb={() => deactivateFormattingToolsIfNeeded(threadResponses[subNoteIdx])}
-                                onAddImage={uploadImage}
-                                onRemoveImage={removeImage}
-                                onLinkClick={editorLinkClicked}
-                                extraInsertPaletteCommands={() => extraInsertPalletteCommands(threadResponses[subNoteIdx])}/>
+                    {#if subNote.Kind == NK_POST}
+                        <hr/>
+                        <h4>{subNote.CreatedBy.Name} {getNiceStringDateTime(subNote.CreationDate)}</h4>
+                        <Editor     on:click={(e) => e.stopPropagation()}
+                                    a='Content'
+                                    self={subNote}
+                                    compact={true}
+                                    bind:this={threadResponses[subNoteIdx]}
+                                    readOnly={subNote.$ref!=activeNoteRef}
+                                    disableHeadings={isThread}
+                                    onFocusCb={() => activateFormattingTools(threadResponses[subNoteIdx])}
+                                    onBlurCb={() => deactivateFormattingToolsIfNeeded(threadResponses[subNoteIdx])}
+                                    onAddImage={uploadImage}
+                                    onRemoveImage={removeImage}
+                                    onLinkClick={editorLinkClicked}
+                                    extraInsertPaletteCommands={() => extraInsertPalletteCommands(threadResponses[subNoteIdx])}/>
 
-                    {#if subNote.$ref!=activeNoteRef && subNote.attachements && subNote.attachements.length > 0}
-                        {#each subNote.attachements as att}
-                            <p class="bg-stone-100 dark:bg-stone-700">
-                            <span class="whitespace-normal">
-                                {#if att.$type == "NoteFile"}
-                                    <a      class="mr-4 font-normal  whitespace-nowrap"
-                                            href={att.href}
-                                            on:click={(e) => downloadAttachedFile(e, att.href, att.Title)}>
-                                        <span class="inline-block w-4 h-4 mr-2">
-                                            <Ricon icon = {att.icon}/>
-                                        </span>
-                                        <span class="text-stone-800 dark:text-stone-200">
-                                            {att.Title}
-                                        </span>
-                                    </a>
-                                {:else}
-                                    <a      class="mr-4 font-normal  whitespace-nowrap"
-                                            href={att.href}
-                                            use:link>
-                                        <span class="inline-block w-4 h-4 mr-2">
-                                            <Ricon icon = {att.icon}/>
-                                        </span>
-                                        <span class="text-stone-800 dark:text-stone-200">
-                                            {att.Title}
-                                        </span>
-                                    </a>
-                                {/if}
-                                
-                            </span>
-                        </p>
-                        {/each}
+                        {#if subNote.$ref!=activeNoteRef && subNote.attachements && subNote.attachements.length > 0}
+                            {#each subNote.attachements as att}
+                                <p class="bg-stone-100 dark:bg-stone-700">
+                                <span class="whitespace-normal">
+                                    {#if att.$type == "NoteFile"}
+                                        <a      class="mr-4 font-normal  whitespace-nowrap"
+                                                href={att.href}
+                                                on:click={(e) => downloadAttachedFile(e, att.href, att.Title)}>
+                                            <span class="inline-block w-4 h-4 mr-2">
+                                                <Ricon icon = {att.icon}/>
+                                            </span>
+                                            <span class="text-stone-800 dark:text-stone-200">
+                                                {att.Title}
+                                            </span>
+                                        </a>
+                                    {:else}
+                                        <a      class="mr-4 font-normal  whitespace-nowrap"
+                                                href={att.href}
+                                                use:link>
+                                            <span class="inline-block w-4 h-4 mr-2">
+                                                <Ricon icon = {att.icon}/>
+                                            </span>
+                                            <span class="text-stone-800 dark:text-stone-200">
+                                                {att.Title}
+                                            </span>
+                                        </a>
+                                    {/if}
+                                    
+                                </span>
+                            </p>
+                            {/each}
+                        {/if}
                     {/if}
-
                 {/each}
             {/if}
 

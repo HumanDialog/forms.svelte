@@ -13,7 +13,7 @@
 				mainContentPageReloader,
                 Modal,
                 onErrorShowAlert, Breadcrumb, Paper, PaperHeader,
-                i18n, refreshToolbarOperations
+                i18n, reloadPageToolbarOperations
         } from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaList, FaPen, FaArchive, FaChevronLeft, FaChevronRight} from 'svelte-icons/fa'
     import {querystring, pop, link} from 'svelte-spa-router'
@@ -239,6 +239,25 @@
         }
     }
 
+    async function toggleSubscribe(list)
+    {
+        if(list.IsSubscribed)
+        {
+            const res = await reef.get(`${list.$ref}/Unsubscribe`, onErrorShowAlert)
+            if(res)
+                list.IsSubscribed = false
+        }
+        else
+        {
+            const res = await reef.get(`${list.$ref}/Subscribe`, onErrorShowAlert)
+            if(res)
+                list.IsSubscribed = true
+        }
+
+        const newOperations = listOperations(list)
+        reloadPageToolbarOperations(newOperations, true)
+    }
+
     let listOperations = (list) => {
         return {
             opver: 2,
@@ -246,7 +265,7 @@
             tbr: 'D',
             operations: [
                  {
-                    caption: '_; View; Ver; Widok',
+                    caption: '_; File; Archivo; Plik',
                     operations: [
                         {
                             caption: '_; New list; Nueva lista; Nowa lista',
@@ -280,6 +299,14 @@
 
                         },
                         {
+                            caption: '_; Move to top ; Mover al principio de la lista; Przesuń na szczyt',
+                            hideToolbarCaption: true,
+                            mricon: 'chevrons-up',
+                            action: (f) => listComponent.moveTop(list),
+                            fab: 'M06',
+                            tbr: 'A'
+                        },
+                        {
                             caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                             hideToolbarCaption: true,
                             mricon: 'chevron-up',
@@ -307,29 +334,25 @@
                         }
 
                     ]
+                },
+                {
+                    caption: '_; View; Ver; Widok',
+                    operations: [
+                        {
+                            mricon: 'file-archive',
+                            caption: '_; Show archived lists; Mostrar listas archivadas; Pokaż zarchiwizowane listy',
+                            //action: (focused) => { listComponent.addRowAfter(null) },
+                            fab: 'S01',
+                            tbr: 'C'
+                        }
+                    ]
                 }
 
             ]
         }
     }
 
-    async function toggleSubscribe(list)
-    {
-        if(list.IsSubscribed)
-        {
-            const res = await reef.get(`${list.$ref}/Unsubscribe`, onErrorShowAlert)
-            if(res)
-                list.IsSubscribed = false
-        }
-        else
-        {
-            const res = await reef.get(`${list.$ref}/Subscribe`, onErrorShowAlert)
-            if(res)
-                list.IsSubscribed = true
-        }
-
-        refreshToolbarOperations()
-    }
+    
 
         let list_properties = {
         Title: "Title",

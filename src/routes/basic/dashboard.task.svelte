@@ -101,7 +101,7 @@
                         {
                             caption: '_; Send; Enviar; Wyślij',
                             mricon: 'upload',
-                            tbr: 'D',
+                            tbr: 'C',
                             fab: 'S00',
                             menu: [
                                     {

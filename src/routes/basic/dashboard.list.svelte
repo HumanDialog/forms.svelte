@@ -74,6 +74,14 @@
 
                         },
                         {
+                            caption: '_; Move to top ; Mover al principio de la lista; Przesuń na szczyt',
+                            hideToolbarCaption: true,
+                            mricon: 'chevrons-up',
+                            action: (f) => moveTop(),
+                            fab: 'M06',
+                            tbr: 'A'
+                        },
+                        {
                             caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                             hideToolbarCaption: true,
                             mricon: 'chevron-up',
@@ -148,6 +156,13 @@
         const res = await reef.get(`${list.$ref}/List/Unsubscribe`, onErrorShowAlert)
         if(onRefreshDashboard)
             onRefreshDashboard()
+    }
+
+    async function moveTop()
+    {
+        await reef.get(`${list.$ref}/MoveTop`, onErrorShowAlert)
+        if(onRefreshDashboard)
+            onRefreshDashboard(list.$ref)
     }
 
     async function moveUp()

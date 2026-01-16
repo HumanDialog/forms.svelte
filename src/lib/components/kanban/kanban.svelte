@@ -1,6 +1,6 @@
 <script lang="ts">
     import {setContext, getContext, afterUpdate, tick} from 'svelte'
-    import {KanbanColumnBottom, KanbanColumnTop, rKanban_definition} from './Kanban'
+    import {KanbanColumnBottom, KanbanColumnTop, rKanban_definition, rKanban_column} from './Kanban'
     import {parseWidthDirective, clearActiveItem, getPrev, getNext, remove, insertAt, insertAfter, swapElements, getActive} from '../../utils'
     import {contextItemsStore, contextTypesStore, data_tick_store } from '../../stores'
     import KanbanColumn from './internal/kanban.column.svelte'
@@ -141,7 +141,7 @@
             definition.self = data;
 
         definition.items = null;
-        columns.forEach( c => c.reload())
+        columns?.forEach( c => c?.reload())
 
         // ====================================================
 
@@ -273,6 +273,118 @@
 
         column.reload();
     }
+
+    export function moveTop(item: object)
+    {
+        let allItems = definition.getItems();
+
+        const oa = definition.orderAttrib
+        const sa = definition.stateAttrib
+        const columnIdx = getColumnIdx(item)
+        const columnState = definition.columns[columnIdx].state
+
+        const toListTop = allItems.find(e => e[sa] == columnState)
+        const toListBottom = allItems.findLast(e => e[sa] == columnState)
+
+        if(item == toListTop)
+            return;
+
+        const columnElement = columns[columnIdx]
+
+        const prevItem = getPrev(allItems, toListTop)
+        if(!prevItem)
+        {
+            //item[sa] = toColumnState;
+            //informModification(item, sa);
+
+            item[oa] = toListTop[oa] - ORDER_STEP;
+            informModification(item, oa);
+            
+            remove(allItems, item);
+            insertAt(allItems, 0, item);
+        }
+        else
+        {
+            let prevOrder = prevItem[oa];
+            let nextOrder = toListTop[oa];
+            let orderSpace = nextOrder - prevOrder;
+            if(orderSpace < 2)
+            {
+                reorderElements(allItems, prevItem, false)
+                prevOrder = prevItem[oa];
+                nextOrder = toListTop[oa];
+                orderSpace = nextOrder - prevOrder;
+            }
+
+            //item[sa] = toColumnState;
+            //informModification(item, sa);
+
+            item[oa] = prevOrder + Math.floor(orderSpace / 2);
+            informModification(item, oa);
+            
+            remove(allItems, item)
+            insertAfter(allItems, prevItem, item);
+        }
+
+        columnElement.reload()
+    }
+
+    export function moveBottom(item: object)
+    {
+        let allItems = definition.getItems();
+
+        const oa = definition.orderAttrib
+        const sa = definition.stateAttrib
+        const columnIdx = getColumnIdx(item)
+        const columnState = definition.columns[columnIdx].state
+
+        const toListTop = allItems.find(e => e[sa] == columnState)
+        const toListBottom = allItems.findLast(e => e[sa] == columnState)
+
+        if(item == toListBottom)
+            return;
+
+        const columnElement = columns[columnIdx]
+
+    
+        const nextItem = getNext(allItems, toListBottom)
+        if(!nextItem)
+        {
+            //item[sa] = toColumnState;
+            //informModification(item, sa);
+
+            item[oa] = toListBottom[oa] + ORDER_STEP;
+            informModification(item, oa);
+
+            remove(allItems, item);
+            insertAfter(allItems, toListBottom, item)
+        }
+        else
+        {
+            let nextOrder = nextItem[oa];
+            let prevOrder = toListBottom[oa];
+            let orderSpace = nextOrder - prevOrder;
+            if(orderSpace < 2)
+            {
+                reorderElements(allItems, toListBottom, false)
+                prevOrder = toListBottom[oa];
+                nextOrder = nextItem[oa];
+                orderSpace = nextOrder - prevOrder;
+            }
+
+            //item[sa] = toColumnState;
+            //informModification(item, sa);
+
+            item[oa] = prevOrder + Math.floor(orderSpace / 2);
+            informModification(item, oa);
+
+            remove(allItems, item)
+            insertAfter(allItems, toListBottom, item)
+        }
+    
+        columnElement.reload()
+    }
+
 
     const ORDER_STEP = 64;
     const MIN_ORDER = 0;
@@ -635,7 +747,7 @@
                 informModification(item, sa)
             })
 
-        pushChanges();
+        
     }
 
     export function add(item: object|number, columnIdx: number = -1)
@@ -643,6 +755,23 @@
         if(columnIdx < 0)
             columnIdx = getColumnIdx(item)
         columns[columnIdx].add(item)
+    }
+
+    export function setColumns(columnsDefinition)
+    {
+        definition.columns = []
+        columnsDefinition.forEach((c) => {
+
+            let column :rKanban_column = new rKanban_column;
+            column.id = definition.columns.length + 1
+            column.title = c.title;
+            column.width = c.width ?? '';
+            column.state = c.state;
+            column.finishing = c.finishing ?? false;
+            column.operations = c.operations ?? undefined;
+            column.onTitleChanged = c.onTitleChanged ?? undefined;
+            definition.columns.push(column)
+        })
     }
 
 </script>
@@ -668,7 +797,7 @@
                 pb-20
                 xbg-lime-800
                 "> <!--sm:justify-center -->
-    {#each definition.columns as column, idx (column.id)}
+    {#each definition.columns as column, idx (column.title + column.state)}
         <KanbanColumn currentColumnIdx={idx}
                 {onInsert}
                 bind:this={columns[idx]}>

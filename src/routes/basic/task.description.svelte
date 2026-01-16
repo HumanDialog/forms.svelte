@@ -567,6 +567,14 @@
 
                             },
                             {
+                                caption: '_; Move to top ; Mover al principio de la lista; Przesuń na szczyt',
+                                mricon: 'chevrons-up',
+                                action: async (f) => await moveTop(),
+                                fab:'M07',
+                                tbr:'A',
+                                hideToolbarCaption: true
+                            },
+                            {
                                 caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                                 mricon: 'chevron-up',
                                 action: async (f) => await moveUp(),
@@ -586,7 +594,7 @@
                                 caption: '_; Send; Enviar; Wyślij',
                                 hideToolbarCaption: true,
                                 mricon: 'upload',
-                                tbr: 'D',
+                                tbr: 'C',
                                 fab: 'S00',
                                 menu: [
                                     {
@@ -786,7 +794,7 @@
                             caption: '_; Send; Enviar; Wyślij',
                             mricon: 'upload',
                             hideToolbarCaption: true,
-                            tbr: 'D',
+                            tbr: 'C',
                             fab: 'S00',
                             menu: [
                                     {
@@ -897,6 +905,13 @@
 
         if(refreshParent)
             await refreshParent()
+    }
+
+    async function moveTop()
+    {
+        await reef.get(`${noteLink.$ref}/MoveTop`, onErrorShowAlert)
+        if(refreshParent)
+            await refreshParent(noteLink.$ref)
     }
 
     async function moveUp()

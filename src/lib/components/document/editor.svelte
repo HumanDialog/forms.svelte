@@ -71,6 +71,7 @@
     
     export let chat :object|undefined = undefined;
     export let readOnly = false;
+    export let disableHeadings = false
 
     export let extraFrontPaletteCommands :Array<object>|Function|undefined = undefined
     export let extraBackPaletteCommands :Array<object>|Function|undefined = undefined
@@ -1608,12 +1609,15 @@
         {    caption: i18n({en: 'Strikethrough', es: 'Tachado', pl: 'Przekreślenie'}),  description: 'Marks text as strikethrough',     tags: 'strike', mricon: 'strikethrough',              on_choice: makeStrikethrough,   is_active: () => editor?.isActive('strike')},
     ]
 
-    const paletteStylesCommands = () => [
+    const headingsCommands = () => [
         {   caption: i18n({en: 'Heading 1', es: 'Título 1', pl: 'Nagłówek 1'}),      description: 'Description heading',           tags: 'h1,head',      mricon: 'heading-1',                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 1}).run(); else editor.chain().focus().setHeading({ level: 1 }).run() },   is_active: () => editor?.isActive('heading', {level: 1})  } ,
         {   caption: i18n({en: 'Heading 2', es: 'Título 2', pl: 'Nagłówek 2'}),      description: 'Secondary heading',             tags: 'h2,head',      mricon: 'heading-2',                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 2}).run(); else editor.chain().focus().setHeading({ level: 2 }).run() },   is_active: () => editor?.isActive('heading', {level: 2}) } ,
         {   caption: i18n({en: 'Heading 3', es: 'Título 3', pl: 'Nagłówek 3'}),      description: 'Secondary heading',             tags: 'h3,head',      mricon: 'heading-3',                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 3}).run(); else editor.chain().focus().setHeading({ level: 3 }).run() },   is_active: () => editor?.isActive('heading', {level: 3}) } ,
-        {   caption: i18n({en: 'Heading 4', es: 'Título 4', pl: 'Nagłówek 4'}),      description: 'Secondary heading',             tags: 'h4,head',      mricon: 'heading-4',                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 4}).run(); else editor.chain().focus().setHeading({ level: 4 }).run() },   is_active: () => editor?.isActive('heading', {level: 4}) } ,
+        {   caption: i18n({en: 'Heading 4', es: 'Título 4', pl: 'Nagłówek 4'}),      description: 'Secondary heading',             tags: 'h4,head',      mricon: 'heading-4',                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setHeading({level: 4}).run(); else editor.chain().focus().setHeading({ level: 4 }).run() },   is_active: () => editor?.isActive('heading', {level: 4}) }
+    ]
 
+    const paletteStylesCommands = () => [
+        ... (disableHeadings ? [] : headingsCommands()),
         {   caption: i18n({en: 'Normal', es: 'Normal', pl: 'Normalny'}),             description: 'This is normal text style',      tags: 'paragraph,text,normal',    mricon: 'pilcrow',               on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setParagraph().run(); else editor.chain().focus().setParagraph().run() },  is_active: () => editor?.isActive('paragraph')  } ,
 
         {   caption: i18n({en: 'Code', es: 'Código', pl: 'Kod'}),         description: 'Source code monospace text',               tags: 'code',       mricon: 'code-xml',                       on_choice: (range) => { if(range) editor.chain().focus().deleteRange(range).setCodeBlock().run(); else editor.chain().focus().setCodeBlock().run() }, is_active: () => editor?.isActive('CodeBlock') },
