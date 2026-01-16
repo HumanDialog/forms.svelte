@@ -8,6 +8,7 @@
             dark_mode_store, reloadWholeApp
         } from "./stores.js";
     import Icon from './components/icon.svelte';
+    import Ricon from './components/r.icon.svelte'
     import {session, signInHRef, signOutHRef} from '@humandialog/auth.svelte'
     import {push } from 'svelte-spa-router';
 	import { navGetKey, navHide, navIsVisible, navShow, navToggle, isDeviceSmallerThan } from './utils';
@@ -72,6 +73,7 @@
                     {
                         const tab = {
                             key: key,
+                            mricon: ctab.mricon,
                             icon: ctab.icon,
                             onclick: (e) => on_navigator_tab_clicked(e, key),
                             mountObserver: ctab.mountObserver,
@@ -241,8 +243,7 @@
             options.push( {
                 caption: i18n({en: 'Language', es:'Idioma', pl:'Język'}),
                 menu: langMenu,
-                mricon: 'languages',
-                icon: FaLanguage
+                mricon: 'languages'
             })
         }
 
@@ -250,7 +251,7 @@
         {
             options.push( {
                     caption: i18n({en:'Toolbar', es:'Barra de herramientas', pl:'Pasek narzędzi'}),
-                    icon: $tools_visible_store ? FaToggleOn : FaToggleOff,
+                    toggle: $tools_visible_store,
                     action: (focused) => { $tools_visible_store = !$tools_visible_store; }
                 });
         }
@@ -259,13 +260,13 @@
         {
             options.push({
                 caption: i18n({en: 'Floating buttons', es: 'Botones flotantes', pl: 'Pływające przyciski'}),
-                icon: $showFABAlways ? FaToggleOn : FaToggleOff,
+                toggle: $showFABAlways,
                 action: (f) => { $showFABAlways = !$showFABAlways; }
             })
 
             options.push({
                 caption: i18n({en: 'Left-handed mode', es: 'Modo para zurdos', pl: 'Tryb dla leworęcznych'}),
-                icon: $leftHandedFAB ? FaToggleOn : FaToggleOff,
+                toggle: $leftHandedFAB,
                 disabled: !$showFABAlways,
                 action: (f) => { $leftHandedFAB = !$leftHandedFAB; }
             })
@@ -275,7 +276,7 @@
         {
             options.push( {
                         caption: selection_detils_caption,
-                        icon: $bottom_bar_visible_store ? FaToggleOn : FaToggleOff,
+                        toggle: $bottom_bar_visible_store,
                         action: (focused) => { $bottom_bar_visible_store = !$bottom_bar_visible_store }
                     });
         }
@@ -299,7 +300,11 @@
                 on:click={tab.onclick}
                 use:mountNavigator={tab}>
 
-                <Icon s="xl" component={tab.icon}/>
+                {#if tab.mricon}
+                    <Ricon icon={tab.mricon} />
+                {:else}
+                    <Icon s="xl" component={tab.icon}/>
+                {/if}
 
                 {#if !isSelected}
                     {#if tab.badgeObtainer}
@@ -335,7 +340,7 @@
          <button
             class="w-16 h-full flex justify-center items-center"
                 on:click|stopPropagation={show_options}>
-                <Icon s="xl" component={FaCog} />
+                <Ricon icon='settings' />
         </button>
 
     </div>

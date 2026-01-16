@@ -54,6 +54,8 @@
 
         //lastReloadTicket = reloadTicket
 
+        console.log(element)
+
         // todo
         if(element)
         {
@@ -260,6 +262,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
  <!--svelte-ignore a11y-no-noninteractive-element-interactions -->
+ 
 <Dialog bind:this={rootDialog}>
         <div class="
                 paper w-full
@@ -292,7 +295,7 @@
                     </button>
                 </div-->
                 <div class="grow ">
-                    <span>{ext(folder.Title)} - </span><span class="text-left">_;Folder properties; Propiedades de la carpeta; Właściwości folderu</span>
+                    <span>{ext(folder?.Title)} - </span><span class="text-left">_;Folder properties; Propiedades de la carpeta; Właściwości folderu</span>
                 </div>
                 <div class="py-1.5  flex flex-row justify-between">
                     <button class="ml-4 w-6
@@ -320,7 +323,7 @@
             <p class="flex flex-row">
                 {#each allKinds as kind}
                     {@const isActive = kind == folder.Kind}
-                    <span class=" px-2 mx-1
+                    <span class=" px-2 mx-1 cursor-pointer
                                 text-stone-700 dark:text-stone-300 dark:hover:text-white
                                 hover:bg-stone-200 dark:hover:bg-stone-700
                                 border border-stone-300 focus:outline-none dark:border-stone-600

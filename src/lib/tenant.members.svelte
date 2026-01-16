@@ -8,6 +8,8 @@
                 FaInfo, FaLink} from 'svelte-icons/fa'
 
     import Page from './page.svelte'
+    import Paper from './paper.svelte'
+    import PaperHeader from './paper.header.svelte'
     import List from './components/list/list.svelte'
     import ListTitle from './components/list/list.title.svelte'
     import ListSummary from './components/list/list.summary.svelte'
@@ -105,6 +107,7 @@
                         [nameAttrib]: u[nameAttrib],
                         [emailAttrib]: u[emailAttrib],
                         [refAttrib]: u[refAttrib],
+                        $type: u.$type,
                         auth_group: 0,
                         files_group :0,
                         acc_role: "",
@@ -199,19 +202,7 @@
     //let name_input;
     //let email_input;
 
-    async function on_name_changed(user, name, property)
-    {
-        user[property] = name;
-
-        let user_path = user[refAttrib];
-        if(!user_path)
-            return;
-
-        await reef.post(`${user_path}/set`,
-                    {
-                        [nameAttrib]: name
-                    });
-    }
+    
 
     async function on_change_privileges(user, flags, name)
     {
@@ -766,49 +757,51 @@
    }
 
    let list_properties = {
-        Title: "Title",
-        Summary: "Summary",
-        icon: "icon",
         element:{
-            icon: "icon",
-            href: "href",
-            Title: "Title",
-            Summary: "Summary"
-        },
-        context:{
-            Folder:{
-                Summary: "Summary",
-
-            },
-            FolderFolder:{
-                Summary: "Summary",
-                head_right: "ModificationDate"
+            icon: "#user",
+            Title: nameAttrib,
+            Summary: emailAttrib,
+            readonlySummary: true,
+            $properties: {
+                t: { l: ['auth_group_name', 'acc_role_name'],
+                     c: [],
+                     r: ['membership_tag']},
+                m: {},
+                b: {}
             }
         }
     }
 
+     const title = i18n({en: 'Members', es: 'Miembros', pl: 'Członkowie'});
 </script>
 
+
+{#if reef_users && reef_users.length > 0}
 <Page   self={data_item}
-        cl="!bg-white dark:!bg-stone-900 w-full flex flex-col overflow-x-hidden py-1 px-1 border-0"
         toolbarOperations={page_operations}
-        clearsContext='props sel'>
-    <!--a href="/" class="underline text-sm font-semibold ml-3"> &lt; Back to root</a-->
+        clearsContext='props sel'
+        title={title}>
+    
+    <Paper class="mb-64">
+        <PaperHeader>
+            <!--Breadcrumb class="mt-1 mb-5" path={canonicalPath}/-->
+        </PaperHeader>
+
+        <figure>
+            <h1>{title}</h1>
+            <!--figcaption>{i18n(["Private task list visible only to me", "Lista de tareas privada visible solo para mí", "Prywatne list zadań widoczne jedynie dla mnie"])}</figcaption-->
+        </figure>
+    
 
 
 
-
-
-    {#if reef_users && reef_users.length > 0}
+    
     <List       objects={reef_users}
-                title='Members'
-                properties = list_properties
+                {list_properties}
                 toolbarOperations={user_operations}
                 bind:this={list}>
             <!-- hrefFunc={getHRefFunc()}-->
-            <ListTitle a={nameAttrib} onChange={on_name_changed} />
-            <ListSummary a={emailAttrib} readonly/>
-
+            
             <ListStaticProperty name="Membership" a="membership_tag"/>
 
             <ListComboProperty name='Privileges' a='auth_group' onSelect={on_change_privileges}>
@@ -833,10 +826,12 @@
 
 
     </List>
-    {/if}
 
-
+    </Paper>
+    
 </Page>
+
+{/if}
 
 <!--Modal  bind:open={create_new_user_enabled}
         title={i18n({en: 'Invite someone', es: 'Invitar a alguien', pl: 'Zaproś kogoś'})}

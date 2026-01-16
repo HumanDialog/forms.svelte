@@ -47,6 +47,7 @@
     import {fetchComposedClipboard4Editor, fetchComposedClipboard4Task, transformClipboardToJSONReferences, pushBrowserRecentElements, setBrowserRecentElement, getBrowserRecentElements} from './basket.utils'
     import FileProperties from './properties.file.svelte'
 	import NoteProperties from './properties.note.svelte'
+    import TaskProperties from './properties.task.svelte'
     import TaskDescriptionNote from './task.description.svelte'
 
     let taskRef = ''
@@ -793,6 +794,10 @@
                                     action: () => runFileAttacher()
                                 }
                             ]
+                        },
+                        {
+                            caption: '_; Properties; Propiedades; Właściwości',
+                            action: (btt, rect)=> runElementProperties(btt, rect, task, 'Task')
                         }
                         
                     ]
@@ -1691,12 +1696,17 @@
         attachementsComponent?.reload(task, attachementsComponent.KEEP_SELECTION)
     }
 
+    let taskPropertiesDialog;
     let filePropertiesDialog;
     let notePropertiesDialog;
     function runElementProperties(btt, aroundRect, element, kind)
     {
         switch(kind)
         {
+        case 'Task':
+            taskPropertiesDialog.show(element)
+            break;
+
         case 'Note':
         case 'TaskNote':
             notePropertiesDialog.show(element)
@@ -2332,5 +2342,6 @@
     </p>
 </Modal>
 
+<TaskProperties bind:this={taskPropertiesDialog} />
 <FileProperties bind:this={filePropertiesDialog} />
 <NoteProperties bind:this={notePropertiesDialog} />

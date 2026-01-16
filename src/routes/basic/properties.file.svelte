@@ -340,13 +340,14 @@
 
                             <span class="flex flex-row items-center">
                                 <span class="relative">
-                                    <Icon component={getElementIcon(inLink)}
-                                        class="block-inline h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-1  mr-1"/>
-                                    <Icon component={FaExternalLinkSquareAlt}
+                                    <Ricon icon={inLink.InIcon} s/>
+                                    <!--Icon component={getElementIcon(inLink)}
+                                        class="block-inline h-5 w-5 text-stone-700 dark:text-stone-400 cursor-pointer mt-0.5  ml-1  mr-1"/-->
+                                    <!--Icon component={FaExternalLinkSquareAlt}
                                         class="absolute left-0 top-1/2 w-1/2 h-1/2
-                                                text-stone-500 dark:text-stone-300 " />
+                                                text-stone-500 dark:text-stone-300 " /-->
                                 </span>
-                                <a  class="font-normal text-zinc-700 dark:text-zinc-300 "
+                                <a  class="font-normal text-zinc-700 dark:text-zinc-300 ml-1"
                                     href={inLink.InHRef} use:link>
                                         {ext(inLink.InTitle)}
 

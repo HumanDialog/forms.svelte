@@ -113,7 +113,7 @@
             Tree:
             [
             {   Id: 1, Association: '',
-                Expressions:['Id', '$ref', 'icon', 'Title','Summary', 'Kind', 'ModificationDate', 'CreatedBy', 'IsPinned', 'IsBasket', 'IsRootPinned', 'GetCanonicalPath'],
+                Expressions:['Id', '$ref', '$type', 'icon', 'Title','Summary', 'Kind', 'ModificationDate', 'CreatedBy', 'IsPinned', 'IsBasket', 'IsRootPinned', 'GetCanonicalPath'],
                 SubTree:[
                     {   Id: 2, Association: 'Folders',
                         Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'icon', 'IsInBasket' , 'IsCanonical',  'icon', 'FolderId', '$type']
@@ -662,7 +662,7 @@
 
         const newForum = {
             caption: '_; New forum; Nuevo foro; Nowe forum',
-            //hideToolbarCaption: true,
+            hideToolbarCaption: !isForum,
             mricon: 'messages-square',
             action: (f) => { newElementKind='Forum';  listComponent.addRowAfter(afterElement) },
             tbr: 'A',
@@ -883,6 +883,10 @@
                         {
                             caption: '_; Refresh; Actualizar; Odśwież',
                             action: async (f) => await refreshView(),
+                        },
+                        {
+                            caption: '_; Properties; Propiedades; Właściwości',
+                            action: (btt, rect)=> runElementProperties(btt, rect, contextItem, 'Folder')
                         }
                     ]
                 }
