@@ -259,7 +259,7 @@
             noteElement.Files.forEach((n) => noteElement.attachements.push(n))
 
         if(noteElement.attachements && noteElement.attachements.length > 0)
-            noteElement.attachements.sort((a,b) => a.Order-b.Order) 
+            noteElement.attachements.sort((a,b) => a.Order-b.Order)
     }
 
     function onPropertySingleChange(txt, attrib)
@@ -329,7 +329,7 @@
         {
             separator: true
         },
-    
+
     ];
 
     function getInsertOperations()
@@ -420,8 +420,8 @@
                     fab: 'M20',
                     tbr: 'A'
                 })
-        
-       
+
+
 
         operations.push(
             {
@@ -550,7 +550,7 @@
         })
     }
 
-    
+
     async function runPopupExplorer4CopyToFolder(btt, aroundRect, element)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
@@ -785,8 +785,8 @@
         }
 
     }
-    
-    function extraInsertPalletteCommands(editorElement) 
+
+    function extraInsertPalletteCommands(editorElement)
     {
         return [
             {
@@ -1211,7 +1211,7 @@
         }
     }
 
-    
+
     function isContentEmpty()
     {
         if(!note.Content)
@@ -1625,7 +1625,7 @@
         }
     }
 
-    async function addThreadResponse() 
+    async function addThreadResponse()
     {
         let res = await reef.post(`${noteRef}/AddPost`,{
             content: ''})
@@ -1790,7 +1790,7 @@
 
             {#if isThread && (noteRef != activeNoteRef) && note.attachements && note.attachements.length > 0}
                 {#each note.attachements as att}
-                    <p class="bg-stone-100 dark:bg-stone-700">
+                    <p class="bg-stone-100 dark:bg-stone-800">
                     <span class="whitespace-normal">
                         {#if att.$type == "NoteFile"}
                             <a      class="mr-4 font-normal  whitespace-nowrap"
@@ -1799,7 +1799,7 @@
                                 <span class="inline-block w-4 h-4 mr-2">
                                     <Ricon icon = {att.icon}/>
                                 </span>
-                                <span class="text-stone-800 dark:text-stone-200">
+                                <span class="text-sky-800 dark:text-sky-200">
                                     {att.Title}
                                 </span>
                             </a>
@@ -1810,17 +1810,17 @@
                                 <span class="inline-block w-4 h-4 mr-2">
                                     <Ricon icon = {att.icon}/>
                                 </span>
-                                <span class="text-stone-800 dark:text-stone-200">
+                                <span class="text-sky-800 dark:text-sky-200">
                                     {att.Title}
                                 </span>
                             </a>
                         {/if}
-                        
+
                     </span>
                 </p>
                 {/each}
             {/if}
-            
+
 
             <!-- ============================================================================== -->
 
@@ -1871,7 +1871,7 @@
                                             </span>
                                         </a>
                                     {/if}
-                                    
+
                                 </span>
                             </p>
                             {/each}
@@ -1910,7 +1910,7 @@
 
 
 
-            
+
 
     </Paper>
 

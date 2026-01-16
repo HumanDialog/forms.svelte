@@ -511,7 +511,7 @@
 
     async function addThread(newNoteAttribs)
     {
-        let res = await reef.post(`${contextPath}/CreateThread`,{ 
+        let res = await reef.post(`${contextPath}/CreateThread`,{
             title: newNoteAttribs.Title,
             summary:  newNoteAttribs.Summary,
             order: newNoteAttribs.Order})
@@ -620,7 +620,7 @@
         const canAddNotes = !(isRootPinned || isClipboard || isForum)
         const canAddTasks = !(isRootPinned || isClipboard || isForum)
         const canAddFiles = !(isRootPinned || isClipboard || isForum)
-        const canAddForum = !(isRootPinned || isClipboard)
+        const canAddForum = isForum//!(isRootPinned || isClipboard)
         const canAddThread = isForum
 
 
@@ -824,7 +824,7 @@
             ownCloseButton: true
         })
     }
-    
+
     async function runPopupExplorer4SelectTaskList(btt, aroundRect, element, kind)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
@@ -836,7 +836,7 @@
             ownCloseButton: true
         })
     }
-    
+
 
     function  folderPageOperations()
     {
@@ -1055,7 +1055,7 @@
         listComponent.reload(contextItem, listComponent.SELECT_NEXT);
     }
 
-    
+
 
     function folderElementOperations(element, kind)
     {
@@ -1125,7 +1125,7 @@
                                 caption: '_; Move to top ; Mover al principio de la lista; Przesuń na szczyt',
                                 mricon: 'chevrons-up',
                                 action: (f) => list.moveTop(element),
-                                fab:'M09',
+                                fab:'M07',
                                 tbr:'A',
                                 hideToolbarCaption: true
                             },
@@ -1133,7 +1133,7 @@
                                 caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
                                 mricon: 'chevron-up',
                                 action: (f) => list.moveUp(element),
-                                fab:'M08',
+                                fab:'M06',
                                 tbr:'A',
                                 hideToolbarCaption: true
                             },
@@ -1141,7 +1141,7 @@
                                 caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                                 mricon: 'chevron-down',
                                 action: (f) => list.moveDown(element),
-                                fab:'M07',
+                                fab:'M05',
                                 tbr:'A' ,
                                 hideToolbarCaption: true
                             },
@@ -1167,9 +1167,9 @@
                                     {
                                         caption: '_; Move to folder; Mover a la carpeta; Przenieś do folderu',
                                         action: (btt, rect) => runPopupExplorer4MoveToFolder(btt, rect, element, kind),
-                                        
+
                                     },
-                                    ... (kind != 'FolderTask') ? [] : 
+                                    ... (kind != 'FolderTask') ? [] :
                                     [
                                         {
                                             caption: '_; Select a task list; Selecciona la lista de tareas; Wybierz listę zadań',
@@ -1185,7 +1185,7 @@
                                         caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
                                         action: () => copyAddress(element.href)
                                     }
-                                    
+
                                 ]
                             },
                             {
@@ -1224,7 +1224,7 @@
 
 
     let elementOperations = (element, kind) => {
-        return folderElementOperations(element, kind)        
+        return folderElementOperations(element, kind)
     }
 
     function multiselectOperations(items)

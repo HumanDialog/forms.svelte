@@ -241,7 +241,7 @@
             currentList.Tasks = currentList.AllTasks.filter((t) => t.State < STATE_FINISHED)
         else
             currentList.Tasks = currentList.AllTasks
-        
+
     }
 
     /*const switchToListOperation = () => {
@@ -271,7 +271,7 @@
         }
     }
 
-    function hideFinishedTasksOperation(operationsFunc, areContextOperations) 
+    function hideFinishedTasksOperation(operationsFunc, areContextOperations)
     {
         return {
             caption: '_; Hide finished tasks; Ocultar tareas completadas; Ukryj zakończone zadania',
@@ -316,7 +316,7 @@
         if(operationsFunc)
         {
             const newOperations = operationsFunc()
-            reloadPageToolbarOperations(newOperations, areContextOperations)   
+            reloadPageToolbarOperations(newOperations, areContextOperations)
         }
     }
 
@@ -362,7 +362,7 @@
         if(operationsFunc)
         {
             const newOperations = operationsFunc()
-            reloadPageToolbarOperations(newOperations, areContextOperations)   
+            reloadPageToolbarOperations(newOperations, areContextOperations)
         }
     }
 
@@ -814,7 +814,7 @@
                     caption: '_; View; Ver; Widok',
                     //tbr: 'B',
                     operations:[
-                        
+
                         {
                             mricon: 'download',
                             caption: '_; Insert; Insertar; Wstaw',
@@ -852,7 +852,7 @@
                         },
                     ]
                 }
-                
+
             ]
 
         }
@@ -906,11 +906,6 @@
     function getColumnContextMenu(columnIdx, taskState, inColumnContext=true)
     {
         return [
-            {
-                caption: '_; Edit column; Editar columna; Edytuj kolumnę',
-                //mricon: 'pencil', //inColumnContext ? FaPen : undefined,
-                action: (f) => runColumnEditDialog(columnIdx)
-            },
             /*{
                 caption: inColumnContext ? 'Set as finished' : 'Set column as finished',
                 icon: inColumnContext ? FaCheck : undefined,
@@ -927,18 +922,23 @@
                 action: (f) => onColumnMoveRight(columnIdx)
             },
             {
-                caption:  '_; Delete column; Eliminar columna; Usuń kolumnę',
-                //icon: FaTrash, //inColumnContext ? FaTrash : undefined,
-               // menu: getColumnDeleteOptions(columnIdx, taskState)
-               action: (f) => deleteColumnAndSetCardsState(columnIdx, 0)
+                caption: '_; Column properties; Editar columna; Właściwości kolumny',
+                //mricon: 'pencil', //inColumnContext ? FaPen : undefined,
+                action: (f) => runColumnEditDialog(columnIdx)
             },
             {
                 separator: true
             },
-            {
+                        {
                 caption: '_; Add column; Añadir columna; Dodaj kolumnę',
                 //icon: FaPlus, //inColumnContext ? FaPlus : undefined,
                 action: (f) => addColumn("", columnIdx+1)
+            },
+            {
+                caption:  '_; Delete column; Eliminar columna; Usuń kolumnę',
+                //icon: FaTrash, //inColumnContext ? FaTrash : undefined,
+               // menu: getColumnDeleteOptions(columnIdx, taskState)
+               action: (f) => deleteColumnAndSetCardsState(columnIdx, 0)
             }
         ];
     }
@@ -974,7 +974,7 @@
                     caption: '_; View; Ver; Widok',
                     //tbr: 'B',
                     operations: [
-                        
+
                         {
                             caption: '_; Edit; Editar; Edytuj',
                             mricon: 'pencil',
@@ -1032,7 +1032,7 @@
                         //switchToListOperation()
                     ]
                 }
-                
+
             ]
         }
     }
@@ -1435,7 +1435,7 @@
 
         columnEditorMode = EDIT_COLUMN
 
-        editColumnDialog.setTitle('_; Edit column; Editar columna; Edytuj kolumnę')
+        editColumnDialog.setTitle('_; Column properties; Editar columna; Właściwości kolumny')
         editColumnDialog.setOkCaption('OK')
         editingColumnMessage = ''
         editColumnDialog.show();
@@ -1662,7 +1662,7 @@
 
             {#if stateValueVisible}
                 <Input class="inline-block"
-                    label={i18n(['State value', 'Valor del estado', 'Wartość stanu'])}
+                    label={i18n(['State value', 'Valor del estado', 'Wartość stanu$'])}
                     placeholder=''
                     self={editingColumnProps}
                     a="state"
