@@ -95,6 +95,10 @@
   import StarOff from './ricons/star-off.svelte'
   import Heart from './ricons/heart.svelte'
   import HeartOff from './ricons/heart-off.svelte'
+  import ExternalLink from './ricons/external-link.svelte'
+  import ToggleLeft from './ricons/toggle-left.svelte'
+  import ToggleRight from './ricons/toggle-right.svelte'
+  import Settings from './ricons/settings.svelte'
 
   let ricons_box = {
     "arrow-up": ArrowUp,
@@ -181,7 +185,11 @@
     'star': Star,
     'star-off': StarOff,
     'heart': Heart,
-    'heart-off': HeartOff
+    'heart-off': HeartOff,
+    'external-link': ExternalLink,
+    'toggle-left': ToggleLeft,
+    'toggle-right': ToggleRight,
+    'settings': Settings
   }
 
   let width = 24;

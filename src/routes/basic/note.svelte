@@ -439,6 +439,10 @@
             operations.push({separator: true})
 
         operations.push(pinOp())
+        operations.push({
+            caption: '_; Properties; Propiedades; Właściwości',
+            action: (btt, rect)=> runElementProperties(btt, rect, note, 'Note')
+        })
 
         return {
             opver: 2,

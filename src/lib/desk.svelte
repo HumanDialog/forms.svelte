@@ -407,19 +407,21 @@
                 <!--##  VERTICAL MOBILE MAIN TOOLBAR     ##################-->
                 <!--#######################################################-->
 
-                <header class=" mobile-main-toolbar block sm:hidden
-                                fixed w-screen bottom-0 h-[50px] z-20
-                                shadow  shadow-stone-900/5 dark:shadow-none
-                                overflow-auto" >
+                {#if is_fab_visible}
+                    <header class=" mobile-main-toolbar block sm:hidden
+                                    fixed w-screen bottom-0 h-[50px] z-20
+                                    shadow  shadow-stone-900/5 dark:shadow-none
+                                    overflow-auto" >
 
-                    <div class="    flex flex-row justify-between  h-full
-                                    text-stone-500 bg-stone-200/70
-                                    dark:text-orange-200 dark:bg-stone-700/70
-                                    bg-stone-200 dark:bg-stone-800/70
-                                    border-t border-stone-500 ">
-                        <HorizontalNavigatorTabs appConfig={layout}/>
-                    <div>
-                </header>
+                        <div class="    flex flex-row justify-between  h-full
+                                        text-stone-500 bg-stone-200/70
+                                        dark:text-orange-200 dark:bg-stone-700/70
+                                        bg-stone-200 dark:bg-stone-800/70
+                                        border-t border-stone-500 ">
+                            <HorizontalNavigatorTabs appConfig={layout}/>
+                        <div>
+                    </header>
+                {/if}
 
 
                 <!--#######################################################-->

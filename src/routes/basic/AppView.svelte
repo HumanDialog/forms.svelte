@@ -117,6 +117,7 @@
                 return {
                     'TOC':{
                         icon: FaList,
+                        mricon: 'notebook',
                         component: Sidebar
                     }
                 }
@@ -125,6 +126,7 @@
                 return {
                     'Folders': {
                         icon: FaFolder,
+                        mricon: 'folder',
                         component: SidebarFolders
                     }
                 }
@@ -133,6 +135,7 @@
                 return {
                     'Messages': {
                             icon: FaComments,
+                            mricon: 'messages-square',
                             component: SidebarMessages,
                             mountObserver: mountMessagesObserver,
                             badgeObtainerAsync: async () => await getUnreadMessages()

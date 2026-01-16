@@ -739,9 +739,16 @@
 
 
                 <h4 class = "font-normal my-0 py-2"> <!-- test -->
-                    <div class=" w-full flex flex-row justify-between">
+                    <div class=" w-full flex flex-row justify-between">                    
                         {#if operation.mricon}
-                        <div class="py-1 mr-1 w-4"><Ricon icon = {operation.mricon} s/></div>
+                            {@const color=operation.color ?? ''}
+                        <div class="py-1 mr-1 w-4 {color}"><Ricon icon = {operation.mricon} s/></div>
+                        {:else if operation.toggle !== undefined}
+                            {#if operation.toggle}
+                                <div class="py-1 mr-1 w-4 text-orange-800 dark:text-orange-200"><Ricon icon='toggle-right' s/></div>
+                            {:else}
+                                <div class="py-1 mr-1 w-4"><Ricon icon='toggle-left' s/></div>
+                            {/if}
                         {:else if operation.icon}
                         <div class="py-1 mr-1 w-4 text-orange-500"><Icon s="md" component={operation.icon}/></div>
                         {:else}
