@@ -6,9 +6,11 @@
                     prose prose-base prose-zinc dark:prose-invert prose-a:no-underline
 
                     !max-w-none sm:min-h-[32rem]
-                    
-                    sm:pt-8 sm:xpx-4
-                    md:xpx-10 md:mx-2
+
+                    sm:pt-8
+                    px-4
+
+                    md:px-8 md:mx-2
                 ">
 
 

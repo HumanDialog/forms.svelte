@@ -82,7 +82,7 @@
         if(visible_sidebar == "*")
         {
             main_side_panel_visibility = "hidden"
-            lg_content_area_horizontal_dim = ""
+            lg_content_area_horizontal_dim = "sm:left-[40px] sm:w-[calc(100vw-40px)]"
             lg_content_area_horizontal_tools_dim = `sm:left-[50px] sm:w-[calc(100vw-60px)]`
         }
         else
@@ -102,7 +102,6 @@
     //let fab_visibility = fab_base_visibility;
     //let fab_bottom = "bottom-0"
     let vertical_toolbar_visibility = "hidden sm:block"
-    let content_left = "left-0 sm:left-[40px]";
     let content_width = "w-screen  sm:w-[calc(100vw-40px)] ";
     let horizontal_nav_tabs_visibility = "hidden"
 
@@ -196,7 +195,6 @@
         if(navMode == NAV_MODE_SIDEBAR)
         {
             vertical_toolbar_visibility = "hidden sm:block"
-            content_left = "left-0 sm:left-[40px]";
             content_width = "w-screen  sm:w-[calc(100vw-40px)]";
 
             horizontal_nav_tabs_visibility = "hidden"
@@ -212,14 +210,12 @@
             //if(navIsVisible())
             //{
             //    vertical_toolbar_visibility = "block"
-            //    content_left = "left-[50px]";
             //    content_width = "w-[calc(100vw-50px)] ";
             //    return true;
             //}
             //else
             {
                 vertical_toolbar_visibility = "hidden sm:block"
-                content_left = "left-0 sm:left-[40px]";
                 content_width = "w-screen  sm:w-[calc(100vw-40px)] ";
                 return false;
             }
@@ -475,9 +471,9 @@
 
                                     rounded-2xl
 
-                                    text-red-800 bg-stone-100/90
+                                    text-red-800 bg-stone-100/70
                                     rounded-full
-                                    dark:text-orange-200 dark:bg-stone-900/90
+                                    dark:text-orange-200 dark:bg-stone-900/70
                                     ring-1 ring-orange-800/40 dark:ring-orange-200/10
 
                                     " >
@@ -490,18 +486,19 @@
                     <!--#######################################################-->
                     <!--##  CONTENT                          ##################-->
                     <!--#######################################################-->
-                    <!-- fixed => relative, content-height => min content height -- -->
+                    <!-- fixed => relative, content-height => min content height ---->
                     <div    id="__hd_svelte_main_content_container"
                             class="relative
-                                    {content_left}
-
                                     {content_top}
                                     {content_height}
                                     {lg_content_area_horizontal_dim}
+
                                     z-0
                                     sm:overflow-x-auto
-                                    xbg-lime-950
-                                    sm:overflow-y-auto  sm:overscroll-contain
+                                    sm:overflow-y-auto
+                                    sm:overscroll-contain
+
+                                    bg-stone-50 dark:bg-stone-900
                                     "
                                     >
                             <Configurable config={layout.mainContent} min_h_class="min-h-screen">
