@@ -107,7 +107,7 @@
                                             Id: 20,
                                             Association: 'ModifiedNotes',
                                             Sort: '-ModificationDate, Id',
-                                            Limit: 3,
+                                            Limit: 20,
                                             Expressions: ['Id', 'Title', 'Summary', 'href', 'ModificationDate', '$ref', '$type']
                                         }
                                     ]

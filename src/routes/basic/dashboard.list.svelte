@@ -100,9 +100,9 @@
                         {
                             caption: '_; Unfollow; Dejar de seguir; Przestań obserwować',
                             action: (f) => UnSubscribe(),
-                            mricon: 'heart-off',
+                            mricon: 'eye-off',
                             tbr: 'C',
-                            fab: 'S20',
+                            fab: 'M09',
                             hideToolbarCaption: true
                         },
                     /*    {

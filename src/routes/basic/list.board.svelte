@@ -302,9 +302,9 @@
     {
         return {
             caption: '_; Unfollow; Dejar de seguir; Przestań obserwować',
-            mricon: 'heart-off',
+            mricon: 'eye-off',
             tbr: 'C',
-            fab: 'S20',
+            fab: 'M09',
             hideToolbarCaption: true,
             action: (f) => toggleSubscribe(operationsFunc, areContextOperations)
         }
@@ -314,9 +314,9 @@
     {
         return {
             caption: '_; Follow; Seguir; Obserwuj',
-            mricon: 'heart',
+            mricon: 'eye',
             tbr: 'C',
-            fab: 'S20',
+            fab: 'MO9',
             hideToolbarCaption: true,
             action: (f) => toggleSubscribe(operationsFunc, areContextOperations)
         }

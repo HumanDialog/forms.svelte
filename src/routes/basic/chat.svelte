@@ -228,8 +228,8 @@
         if(channel.IsSubscribed > 0)
         {
             toggleSubscribe = {
-                caption: '_; Unfollow; Dejar de seguir; Przestań obserwować',
-                mricon: 'heart-off',
+                caption: '_; Unsubscribe; Dejar de seguir; Przestań subskrybowań',
+                mricon: 'bell-off',
                 action: (f) => unsubscribeChannel(),
                 tbr: 'C',
                 hideToolbarCaption: true
@@ -238,8 +238,8 @@
         else
         {
             toggleSubscribe = {
-                caption: '_; Follow; Seguir; Obserwuj',
-                mricon: 'heart',
+                caption: '_; Subscribe; Seguir; Subskrybuj',
+                mricon: 'bell',
                 action: (f) => subscribeChannel(),
                 tbr: 'C',
                 hideToolbarCaption: true
@@ -681,7 +681,7 @@
 
         <h1><Editable self={channel} a='Title'/></h1>
         <p  class="lead"><Editable self={channel} a='Summary'/></p>
-        
+
             {#if channel.Messages && channel.Messages.length > 0}
                 {#each channel.Messages as message, idx}
                     {@const dt = new Date(message.Date)}

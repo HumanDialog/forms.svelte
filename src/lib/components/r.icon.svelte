@@ -91,10 +91,16 @@
 
   import LoaderCircle from './ricons/loader-circle.svelte'
   import Check from './ricons/check.svelte'
+
   import Star from './ricons/star.svelte'
   import StarOff from './ricons/star-off.svelte'
   import Heart from './ricons/heart.svelte'
   import HeartOff from './ricons/heart-off.svelte'
+  import Bell from './ricons/bell.svelte'
+  import BellOff from './ricons/bell-off.svelte'
+  import Eye from './ricons/eye.svelte'
+  import EyeOff from './ricons/eye-off.svelte'
+
   import ExternalLink from './ricons/external-link.svelte'
   import ToggleLeft from './ricons/toggle-left.svelte'
   import ToggleRight from './ricons/toggle-right.svelte'
@@ -186,6 +192,11 @@
     'star-off': StarOff,
     'heart': Heart,
     'heart-off': HeartOff,
+    'bell': Bell,
+    'bell-off': BellOff,
+    'eye': Eye,
+    'eye-off': EyeOff,
+
     'external-link': ExternalLink,
     'toggle-left': ToggleLeft,
     'toggle-right': ToggleRight,
