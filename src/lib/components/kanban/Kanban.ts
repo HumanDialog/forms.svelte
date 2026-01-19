@@ -13,6 +13,7 @@ export class rKanban_column
     public  finishing:  boolean = false
     public  operations: object[]|undefined = undefined;
     public  onTitleChanged: Function|undefined = undefined;
+    public  notVisible: boolean = false
 
 }
 

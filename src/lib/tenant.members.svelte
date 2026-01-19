@@ -29,6 +29,7 @@
     import {randomString} from './utils'
 
     import InviteUser from './tenant.members.invite.svelte'
+    import UserProperties from './tenant.user.props.svelte'
 
 
     // ==============================================================================
@@ -55,7 +56,9 @@
     let reef_users = [];
     let new_reef_user_id = 1;
     let access_roles = [];
+
     let invitationDialog;
+    let userProperiesDialog;
 
     let fake_users;
 
@@ -177,6 +180,9 @@
             user.membership_tag = i18n({en: 'Invited', es: 'Invitado', pl: 'Zaproszono'});
         else
             user.membership_tag = "";
+
+        user.all_auth_accesses = authAccessKinds()
+        user.all_roles = access_roles
 
         user.Id = new_reef_user_id++;
     }
@@ -314,6 +320,7 @@
                 operations: [
                     {
                         icon: FaUserPlus,
+                        mricon: 'user',
                         caption: i18n({en: 'Add user', es: 'Añadir usuario', pl: 'Dodaj użytkownika'}),
                         action: (focused) => { create_new_user(); },
                     //    fab: 'M10',
@@ -340,11 +347,17 @@
                 action: (focused) =>  { list.edit(user, nameAttrib) }
             },
             {
+                caption: i18n({en: 'Permissions', es: 'Permisos', pl: 'Uprawnienia'}),
+                action: () => userProperiesDialog.show(user, access_roles, authAccessKinds())
+            },
+  /*          {
                 caption: i18n({en: 'Users management', es: 'Gestión de usuarios', pl: 'Zarządzanie użytkownikami'}),
                 action: (focused) => { list.edit(user, 'Privileges') }
-            }];
+            }
+    */            
+            ];
 
-        if(showAccessRoles)
+    /*    if(showAccessRoles)
         {
             operations.push({
                 caption: i18n({en: 'Role in the application', es: 'Papel en la aplicación', pl: 'Rola w aplikacji'}),
@@ -359,20 +372,21 @@
                 action: (focused) => { list.edit(user, 'Files') }
             });
         }
-
+    */
         return operations;
     }
 
     let user_operations = (user) => {
 
         let operations = [
-            {
+            
+          /*  {
                 caption: i18n({en: 'Fetch info', es: 'Obtener información', pl: 'Pobierz informacje'}),
                 icon: FaInfo,
                 action: (f) => fetch_user_details(user),
                 tbr: 'A',
                 fab: 'S00'
-            }
+            } */
         ];
 
         if(user.removed)
@@ -763,11 +777,7 @@
             Summary: emailAttrib,
             readonlySummary: true,
             $properties: {
-                t: { l: ['auth_group_name', 'acc_role_name'],
-                     c: [],
-                     r: ['membership_tag']},
-                m: {},
-                b: {}
+                t: { l: [ '^auth_group;all_auth_accesses;name;key', '^acc_role;all_roles;summary;name', 'membership_tag']},
             }
         }
     }
@@ -823,8 +833,6 @@
                 {/each}
             </ListComboProperty>
             {/if}
-
-
     </List>
 
     </Paper>
@@ -995,3 +1003,5 @@
 <InviteUser bind:this={invitationDialog}
     {nameAttrib} {emailAttrib} {refAttrib} {hrefAttrib}
     {onNewUserAdded}/>
+
+<UserProperties bind:this={userProperiesDialog} />

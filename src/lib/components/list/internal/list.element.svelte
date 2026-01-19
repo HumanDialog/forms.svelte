@@ -377,10 +377,11 @@
         bind:this={rootElement}
         use:selectable={item}
         on:click={(e) => {activate_row(e, item)}}>
-    <!-- comming soon - top info -->
+    <!-- top info -->
     <figcaption>
         <ListElementProperties self = {item} properties = {element_properties?.t}/>
     </figcaption>
+    
     <!-------------------------------->
     <!--@el------------------------->
     <h4 class="-indent-8 sm:hover:cursor-default">
@@ -389,21 +390,25 @@
                 <Ricon icon = {element_icon}/>
         </div>{translated_element_title}
     </h4>
-    <!-- comming soon - middle info --
+
+    <!-- middle info -->
     <figcaption>
-        <div class="grid gap-4 grid-cols-3 grid-rows-1">
-            <span>Andrzej</span>
-            <span class="text-center"></span>
-            <span class="text-right">Specyfikacje</span>
-        </div>
+        <ListElementProperties self = {item} properties = {element_properties?.m}/>
     </figcaption>
-    -------------------------------->
+    <!-------------------------------->
 
     {#if summary && item[summary]}
     <figcaption>
         {item[summary]}
     </figcaption>
     {/if}
+
+    <!-- bottom info -->
+    <figcaption>
+        <ListElementProperties self = {item} properties = {element_properties?.b}/>
+    </figcaption>
+    <!-------------------------------->
+
 </figure>
 
 <!------------------------------------------------------------------------------------------------->
@@ -423,7 +428,7 @@
             use:selectable={item}
             on:click={onToggleMultiSelect}>
 <figure class={multiselect_class} bind:this={rootElement}>
-    <!-- comming soon - top info -->
+    <!-- top info -->
     <figcaption>
         <ListElementProperties self = {item} properties = {element_properties?.t}/>
     </figcaption>
@@ -446,21 +451,24 @@
         </div>{translated_element_title}
         <!--div class="inline-block  w-4 h-4 ml-1 mr-1 py-0.5 align-baseline"> <Circle size = "s"/></div-->
     </h4>
-    <!-- comming soon - middle info --
+    <!-- comming soon - middle info -->
     <figcaption>
-        <div class="grid gap-4 grid-cols-3 grid-rows-1">
-            <span>Andrzej</span>
-            <span class="text-center"></span>
-            <span class="text-right">Specyfikacje</span>
-        </div>
+        <ListElementProperties self = {item} properties = {element_properties?.m}/>
     </figcaption>
-    -------------------------------->
+    <!-------------------------------->
 
     {#if summary && (item[summary] || placeholder=='Summary')}
     <figcaption>
         {ext(item[summary])}
     </figcaption>
     {/if}
+
+    <!-- bottom info -->
+    <figcaption>
+        <ListElementProperties self = {item} properties = {element_properties?.b}/>
+    </figcaption>
+    <!-------------------------------->
+
 </figure>
 </div>
 <!------------------------------------------------------------------------------------------------->
@@ -496,7 +504,7 @@
         use:selectable={item}
         on:click={(e) => {activate_row(e, item)}}
         >
-    <!-- comming soon - top info -->
+    <!-- top info -->
     <figcaption>
         <ListElementProperties self = {item} properties = {element_properties?.t}/>
     </figcaption>
@@ -561,15 +569,12 @@
         </h4>
     {/if}
 
-    <!-- comming soon - middle info --
+    <!-- middle info -->
     <figcaption>
-        <div class="grid gap-4 grid-cols-3 grid-rows-1">
-            <span>Andrzej</span>
-            <span class="text-center"></span>
-            <span class="text-right">Specyfikacje</span>
-        </div>
+        <ListElementProperties self = {item} properties = {element_properties?.m}/>
     </figcaption>
-    -------------------------------->
+    
+    <!-------------------------------->
 
     {#if (summary && (item[summary])) || (placeholder=='Summary')}
         <figcaption><Editable   self={item}
@@ -578,6 +583,12 @@
                             readonly={summary_readonly} />
         </figcaption>
     {/if}
+
+    <!-- bottom info -->
+    <figcaption>
+        <ListElementProperties self = {item} properties = {element_properties?.b}/>
+    </figcaption>
+    <!-------------------------------->
 
 </figure>
 </div>

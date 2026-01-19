@@ -221,15 +221,11 @@
             return;
 
         if(currentList.GetTaskStates && Array.isArray( currentList.GetTaskStates))
-        {
             taskStates = currentList.GetTaskStates
-        }
         else
-        {
             taskStates = [];
-        }
-
-
+        
+        
         filterTasks()
     }
 
@@ -284,12 +280,38 @@
     }
 
     let hideFinishedTasks = false
-    function toggleFinishedTasksVisibility(operationsFunc, areContextOperations)
+    async function toggleFinishedTasksVisibility(operationsFunc, areContextOperations)
     {
         hideFinishedTasks = !hideFinishedTasks
 
         filterTasks()
-        kanban.reload(currentList, kanban.KEEP_SELECTION);
+        
+        //////
+
+        const newColumns = []
+        for(let idx=0; idx<taskStates.length; idx++)
+        {
+            const column = taskStates[idx];
+            const isFinishing = column.state == STATE_FINISHED
+            
+            newColumns.push({
+                    title: ext(column.name),
+                    state: column.state,
+                    finishing: isFinishing,
+                    notVisible: isFinishing && hideFinishedTasks,
+                    operations: getColumnOperations(idx, column)
+                })
+        }
+
+        newColumns.push({
+            title: otherCaption,
+            state: -1
+        })
+
+        kanban.setColumns(newColumns)
+        
+        await kanban.reload(currentList, kanban.KEEP_SELECTION);
+        //await reload(kanban.KEEP_SELECTION)
 
         if(operationsFunc)
         {
@@ -855,8 +877,7 @@
             if(column.state >= task.State )
                 order = KanbanColumnBottom;
 
-            console.log(order, column)
-
+            
             const operation = {
                 caption: ext(column.name),
                 disabled: task.State == column.state,
@@ -1313,7 +1334,8 @@
     let stateValueVisible = true;
     const ADD_COLUMN = 1
     const EDIT_COLUMN = 2
-    let columnEditorMode = 0
+    let columnEditorMode = 0 
+    let editingColumnMessage = ''
 
     async function addProcessColumn(pos)
     {
@@ -1331,6 +1353,7 @@
 
         editColumnDialog.setTitle('_; Add column; Añadir columna; Dodaj kolumnę')
         editColumnDialog.setOkCaption('_; Add; Añadir; Dodaj')
+        editingColumnMessage = ''
         editColumnDialog.show();
 
     }
@@ -1351,13 +1374,21 @@
 
     async function onNewProcessColumnRequested()
     {
-        editColumnDialog.hide();
-
         let newState
         if (typeof editingColumnProps.state === 'string' || editingColumnProps.state instanceof String)
             newState = parseInt(editingColumnProps.state)
         else
             newState = editingColumnProps.state
+
+        editingColumnMessage = ''
+        const sameStateColumnIdx = taskStates.findIndex((c) => c.state == newState)
+        if(sameStateColumnIdx >= 0)
+        {
+            editingColumnMessage = '_; Another column has the same state; Otra columna tiene el mismo estado; Inna kolumna ma ten sam stan'
+            return
+        }
+
+        editColumnDialog.hide();
 
         const res = await reef.post(`${currentList.$ref}/AddColumn`, {
                             pos: newColumnPos,
@@ -1370,7 +1401,7 @@
             taskStates = [...res]
             await kanban.rerender();
 
-            kanban.activateColumn(idx)
+            kanban.activateColumn(newColumnPos)
             //kanban.editColumnName(idx);
         }
         else
@@ -1406,23 +1437,30 @@
 
         editColumnDialog.setTitle('_; Column properties; Editar columna; Właściwości kolumny')
         editColumnDialog.setOkCaption('OK')
+        editingColumnMessage = ''
         editColumnDialog.show();
     }
 
     async function onEditColumnRequested()
     {
-        editColumnDialog.hide();
-
         let newState
         if (typeof editingColumnProps.state === 'string' || editingColumnProps.state instanceof String)
             newState = parseInt(editingColumnProps.state)
         else
             newState = editingColumnProps.state
 
+        editingColumnMessage = ''
         const prevState = taskStates[editingColumnPos].state
 
         if(prevState != newState)
         {
+            const sameStateColumnIdx = taskStates.findIndex((c) => c.state == newState)
+            if(sameStateColumnIdx >= 0)
+            {
+                editingColumnMessage = '_; Another column has the same state; Otra columna tiene el mismo estado; Inna kolumna ma ten sam stan'
+                return
+            }
+
             taskStates[editingColumnPos].state = newState;
 
             const tasks = currentList.Tasks.filter(t => t.State == prevState)
@@ -1434,6 +1472,8 @@
         if(prevName != newName)
             taskStates[editingColumnPos].name = newName;
 
+        editColumnDialog.hide();
+
         if((prevState != newState) || (prevName != newName))
         {
             saveTaskStates();
@@ -1442,14 +1482,20 @@
             const newColumns = []
             for(let idx=0; idx<taskStates.length; idx++)
             {
-                const column = taskStates[idx];
+                const column = taskStates[idx];   
+                const isFinishing = column.state == STATE_FINISHED
                 newColumns.push({
                     title: ext(column.name),
                     state: column.state,
-                    finishing: column.state == STATE_FINISHED,
+                    finishing: isFinishing,
+                    notVisible: isFinishing && hideFinishedTasks,
                     operations: getColumnOperations(idx, column)
                 })
             }
+
+            newColumns.push({
+                title: otherCaption,
+                state: -1})
 
             kanban.setColumns(newColumns)
             await kanban.reload(currentList, kanban.CLEAR_SELECTION);
@@ -1504,10 +1550,12 @@
 
 
                 {#each taskStates as taskState, columnIdx (taskState.name+taskState.state)}
+                    {@const isFinishing = taskState.state == STATE_FINISHED}
                     <KanbanColumn   title={ext(taskState.name)}
                                     state={taskState.state}
                                     operations={getColumnOperations(columnIdx, taskState)}
-                                    finishing={taskState.state == STATE_FINISHED}/>
+                                    finishing={isFinishing}
+                                    notVisible={isFinishing && hideFinishedTasks}/>
                 {/each}
 
 
@@ -1621,8 +1669,15 @@
                     bind:this={numericStateElement}/>
             {/if}
         </div>
-
     </section>
+
+    <p class="mt-1 text-sm text-right text-red-700 dark:text-red-300">
+        {#if editingColumnMessage}
+            {editingColumnMessage}
+        {:else}
+            {"\u200B"}
+        {/if}
+    </p>
 
 </Modal>
 {/key}
