@@ -294,7 +294,7 @@
         if(is_root_menu)
         {
             hide_window_indicator = 0;
-            window.addEventListener('click', on_before_window_click, true)
+            //window.addEventListener('click', on_before_window_click, true)
 
             if(isDeviceSmallerThan('sm'))
                 preventScrollRestorer = usePreventScroll();
@@ -327,7 +327,7 @@
         css_position = calculatePosition(x, y, true, false);
 
         if(is_root_menu)
-            menu_root.addEventListener('click', on_before_container_click, true)
+            ;//menu_root.addEventListener('click', on_before_container_click, true)
 
 
         if(menu_items.length && !isDeviceSmallerThan("sm"))
@@ -354,8 +354,8 @@
         visible = false;
         css_position = calculatePosition(x, y, false, false);
 
-        window.removeEventListener('click', on_before_window_click, true);
-        menu_root?.removeEventListener('click', on_before_container_click, true);
+        //window.removeEventListener('click', on_before_window_click, true);
+        //menu_root?.removeEventListener('click', on_before_container_click, true);
         if(preventScrollRestorer)
         {
             preventScrollRestorer();
@@ -647,158 +647,85 @@
             return operation.disabled ?? false;
     }
 
+    
+
 </script>
 
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 
-<div id="__hd_svelte_contextmenu"
-    class="
-            bg-stone-100 dark:bg-stone-800 rounded-lg shadow-md shadow-stone-500
+<div class="bg-stone-100 dark:bg-stone-800 rounded-lg shadow-md shadow-stone-500
             dark:shadow-black z-40 fixed
             sm:shadow-xl sm:shadow-slate-700/10
             sm:dark:shadow-black/80
             sm:outline sm:outline-1 sm:outline-stone-500
-            z-40 fixed min-w-60 max-h-screen "
+            fixed min-w-60 max-h-screen "
+            style={css_position}
+                bind:this={menu_root}>
+        <div class="
+                    paper w-full sm:w-[24rem]
+                    prose prose-base prose-zinc dark:prose-invert prose-a:no-underline
+                    sm:max-w-3xl
 
-    style={css_position}
-    visible={visible}
-    bind:this={menu_root}>
-    <div class="
-                paper w-full sm:w-[24rem]
-                prose prose-base prose-zinc dark:prose-invert prose-a:no-underline
-                sm:max-w-3xl
+                    m-0 pt-3 pb-5 px-2
+                    sm:rounded
+                    sm:bg-stone-100 sm:dark:bg-stone-900
+                    flex flex-col
+                    ">
 
-                m-0 pt-3 pb-5 px-2
-                sm:rounded
-                sm:bg-stone-100 sm:dark:bg-stone-900
-                flex flex-col
-                ">
+        <!-------------------------------------------------------------------->
+        <!-- POPUP HEADER ---------------------------------------------------->
+        <!-------------------------------------------------------------------->
+        {#if closeButtonPos}
+        <h3 class = "flex-none">
+            <div class="px-2 w-full flex flex-row justify-between">
 
-    <!-------------------------------------------------------------------->
-    <!-- POPUP HEADER ---------------------------------------------------->
-    <!-------------------------------------------------------------------->
-    {#if closeButtonPos}
-    <h3 class = "flex-none">
-        <div class="px-2 w-full flex flex-row justify-between">
-
-            <div class="grow ">
-                <span class="px-2 text-left"></span>
+                <div class="grow ">
+                    <span class="px-2 text-left"></span>
+                </div>
+                <div class="py-1.5  flex flex-row justify-between">
+                    <button class="ml-4 w-6
+                                hover:bg-stone-200 hover:dark:bg-stone-700
+                                hover:outline hover:outline-8
+                                hover:outline-stone-200 hover:dark:outline-stone-700"
+                                on:click={hide}>
+                        <Ricon icon = 'x' />
+                    </button>
+                </div>
             </div>
-            <div class="py-1.5  flex flex-row justify-between">
-                <button class="ml-4 w-6
-                            hover:bg-stone-200 hover:dark:bg-stone-700
-                            hover:outline hover:outline-8
-                            hover:outline-stone-200 hover:dark:outline-stone-700"
-                            on:click={hide}>
-                    <Ricon icon = 'x' />
-                </button>
-            </div>
-        </div>
-    </h3>
-    {/if}
-
-
-    <!-------------------------------------------------------------------->
-    <!-- POPUP CONTENT---------------------------------------------------->
-    <!-------------------------------------------------------------------->
-    <div class="px-2 grow max-h-[45dvh] sm:max-h-[75dvh] overflow-y-auto overscroll-contain">
-
-
-
-        {#each operations as operation, index}
-
-            {@const is_separator = operation.separator}
-            {#if is_separator}
-                {#if index>0 && index < operations.length-1}
-                    <!--hr class="my-1 mx-4 border-1 border-stone-300 dark:border-stone-700"-->
-                    <hr class="my-4">
-                {/if}
-            {:else}
-
-                {@const mobile = isDeviceSmallerThan("sm")}
-                {@const icon_placeholder_without_desc = mobile ? 12 : 10}
-                {@const icon_placeholder_with_desc = mobile ? 14 : 12}
-                {@const icon_placeholder_size = operation.description ? icon_placeholder_with_desc : icon_placeholder_without_desc}
-                {@const menu_item_id = menu_items_id_prefix + index}
-                {@const isTop = index==0}
-                {@const isBottom = index == operations.length-1}
-                {@const isFocused = index == focused_index}
-                {@const clipFocusedBorder = isFocused ? (isTop ? 'rounded-t-lg' : (isBottom ? 'rounded-b-lg' : '')) : ''}
-                {@const active = calculateBackground(isFocused || isOperationActivated(operation), false)}
-                {@const has_submenu = operation.menu !== undefined && operation.menu.length > 0}
-                <!--div-->
-                <div class="pl-4 cursor-pointer {active}"
-                    id={menu_item_id}
-                    bind:this={menu_items[index]}
-                    on:click|stopPropagation={(e) => { execute_action(e, operation, index) } }
-                    on:mouseenter = {(e) => {on_mouse_move(index)}}
-                    on:keydown|stopPropagation={(e) => on_keydown(e, operation, index)}
-                    on:mousedown={mousedown}
-                    disabled={isOperationDisabled(operation)}
-                    class:opacity-60={isOperationDisabled(operation)}>
-
-
-
-                <h4 class = "font-normal my-0 py-2"> <!-- test -->
-                    <div class=" w-full flex flex-row justify-between">                    
-                        {#if operation.mricon}
-                            {@const color=operation.color ?? ''}
-                        <div class="py-1 mr-1 w-4 {color}"><Ricon icon = {operation.mricon} s/></div>
-                        {:else if operation.toggle !== undefined}
-                            {#if operation.toggle}
-                                <div class="py-1 mr-1 w-4 text-orange-800 dark:text-orange-200"><Ricon icon='toggle-right' s/></div>
-                            {:else}
-                                <div class="py-1 mr-1 w-4"><Ricon icon='toggle-left' s/></div>
-                            {/if}
-                        {:else if operation.icon}
-                        <div class="py-1 mr-1 w-4 text-orange-500"><Icon s="md" component={operation.icon}/></div>
-                        {:else}
-                        <div class="py-1 mr-1 w-4"></div>
-                        {/if}
-                        <div class="grow">
-                            <span class="px-2 text-left">{operation.caption}
-                            </span>
-                        </div>
-
-                        {#if has_submenu}
-                            <div class="py-1 mr-1 w-4"><Ricon icon = 'chevron-right' xs/></div>
-                            <svelte:self bind:this={submenus[index]} menu_items_id_prefix={`${menu_item_id}_`} owner_menu_item={menu_items[index]}/>
-                        {/if}
-
-                    </div>
-                </h4>
-
-
-
-        <!-- comming soon - top info --
-        <figcaption>
-            <div class="grid gap-4 grid-cols-3 grid-rows-1">
-                <span>OCT-254</span>
-                <span class="text-center"></span>
-                <span class="text-right">15 listopad 25</span>
-            </div>
-        </figcaption>
-        -------------------------------->
-        <!--@el------------------------->
-        <!-- comming soon - middle info --
-        <figcaption>
-            <div class="grid gap-4 grid-cols-3 grid-rows-1">
-                <span>Andrzej</span>
-                <span class="text-center"></span>
-                <span class="text-right">Specyfikacje</span>
-            </div>
-        </figcaption>
-
-
-        {#if summary && item[summary]}
-        <figcaption>
-            {item[summary]}
-        </figcaption>
+        </h3>
         {/if}
-        -------------------------------->
-            </div>
-        <!--/div-->
-    {#if false}
-                <button class="block w-full pr-4 text-left flex flex-row cursor-context-menu {active} focus:outline-none items-center"
+
+
+        <!-------------------------------------------------------------------->
+        <!-- POPUP CONTENT---------------------------------------------------->
+        <!-------------------------------------------------------------------->
+        <div class="px-2 grow max-h-[45dvh] sm:max-h-[75dvh] overflow-y-auto overscroll-contain">
+
+
+
+            {#each operations as operation, index}
+
+                {@const is_separator = operation.separator}
+                {#if is_separator}
+                    {#if index>0 && index < operations.length-1}
+                        <!--hr class="my-1 mx-4 border-1 border-stone-300 dark:border-stone-700"-->
+                        <hr class="my-4">
+                    {/if}
+                {:else}
+
+                    {@const mobile = isDeviceSmallerThan("sm")}
+                    {@const icon_placeholder_without_desc = mobile ? 12 : 10}
+                    {@const icon_placeholder_with_desc = mobile ? 14 : 12}
+                    {@const icon_placeholder_size = operation.description ? icon_placeholder_with_desc : icon_placeholder_without_desc}
+                    {@const menu_item_id = menu_items_id_prefix + index}
+                    {@const isTop = index==0}
+                    {@const isBottom = index == operations.length-1}
+                    {@const isFocused = index == focused_index}
+                    {@const clipFocusedBorder = isFocused ? (isTop ? 'rounded-t-lg' : (isBottom ? 'rounded-b-lg' : '')) : ''}
+                    {@const active = calculateBackground(isFocused || isOperationActivated(operation), false)}
+                    {@const has_submenu = operation.menu !== undefined && operation.menu.length > 0}
+                    <!--div-->
+                    <div class="pl-4 cursor-pointer {active}"
                         id={menu_item_id}
                         bind:this={menu_items[index]}
                         on:click|stopPropagation={(e) => { execute_action(e, operation, index) } }
@@ -808,44 +735,76 @@
                         disabled={isOperationDisabled(operation)}
                         class:opacity-60={isOperationDisabled(operation)}>
 
-                    <div class="flex  justify-center space-x-10 px-4 py-2 ml-12 sm:ml-0" >
-                        {#if operation.icon}
-                            {@const cc = mobile ? 7 : 6}
-                            {@const icon_size = icon_placeholder_size - cc}
-                            <Icon s="md" component={operation.icon}/>
-                        {:else if operation.img}
-                            {@const cc = mobile ? 7 : 6}
-                            {@const icon_size = icon_placeholder_size - cc}
-                            <div class="w-4 h-4">
-                                <img src={operation.img} alt=""/>
-                            </div>
-                        {:else}
-                            {@const cc = mobile ? 7 : 6}
-                            {@const icon_size = icon_placeholder_size - cc}
-                            <div class="w-4 h-4"></div>
-                        {/if}
-                    </div>
-                    <div class="">
-                            <p class=""> {operation.caption}</p>
-                        {#if operation.description}
-                            <p  class="truncate inline-block text-xs">
-                                {operation.description}
-                            </p>
-                        {/if}
-                    </div>
-                    {#if has_submenu}
-                        <p class="ms-auto pr-1 text-sm font-mono text-stone-500">&rarr;</p>
-                        <svelte:self bind:this={submenus[index]} menu_items_id_prefix={`${menu_item_id}_`} owner_menu_item={menu_items[index]}/>
-                    {/if}
-                </button>
-    {/if}
-            {/if}
-        {/each}
-    </div>
-    <!--/div-->
 
-    </div>
-    </div>
+
+                    <h4 class = "font-normal my-0 py-2"> <!-- test -->
+                        <div class=" w-full flex flex-row justify-between">                    
+                            {#if operation.mricon}
+                                {@const color=operation.color ?? ''}
+                            <div class="py-1 mr-1 w-4 {color}"><Ricon icon = {operation.mricon} s/></div>
+                            {:else if operation.toggle !== undefined}
+                                {#if operation.toggle}
+                                    <div class="py-1 mr-1 w-4 text-orange-800 dark:text-orange-200"><Ricon icon='toggle-right' s/></div>
+                                {:else}
+                                    <div class="py-1 mr-1 w-4"><Ricon icon='toggle-left' s/></div>
+                                {/if}
+                            {:else if operation.icon}
+                            <div class="py-1 mr-1 w-4 text-orange-500"><Icon s="md" component={operation.icon}/></div>
+                            {:else}
+                            <div class="py-1 mr-1 w-4"></div>
+                            {/if}
+                            <div class="grow">
+                                <span class="px-2 text-left">{operation.caption}
+                                </span>
+                            </div>
+
+                            {#if has_submenu}
+                                <div class="py-1 mr-1 w-4"><Ricon icon = 'chevron-right' xs/></div>
+                                <svelte:self bind:this={submenus[index]} menu_items_id_prefix={`${menu_item_id}_`} owner_menu_item={menu_items[index]}/>
+                            {/if}
+
+                        </div>
+                    </h4>
+
+
+
+            <!-- comming soon - top info --
+            <figcaption>
+                <div class="grid gap-4 grid-cols-3 grid-rows-1">
+                    <span>OCT-254</span>
+                    <span class="text-center"></span>
+                    <span class="text-right">15 listopad 25</span>
+                </div>
+            </figcaption>
+            -------------------------------->
+            <!--@el------------------------->
+            <!-- comming soon - middle info --
+            <figcaption>
+                <div class="grid gap-4 grid-cols-3 grid-rows-1">
+                    <span>Andrzej</span>
+                    <span class="text-center"></span>
+                    <span class="text-right">Specyfikacje</span>
+                </div>
+            </figcaption>
+
+
+            {#if summary && item[summary]}
+            <figcaption>
+                {item[summary]}
+            </figcaption>
+            {/if}
+            -------------------------------->
+                </div>
+            <!--/div-->
+        
+                {/if}
+            {/each}
+        </div>
+        <!--/div-->
+
+        </div>
+</div>
+
 
 <!-- use usePreventScroll instead -->
 <!--style>

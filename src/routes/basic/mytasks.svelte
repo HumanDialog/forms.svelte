@@ -254,7 +254,7 @@
         listComponent.rereder()
     }
 
-    async function addTask(newTaskAttribs)
+    /*async function addTask(newTaskAttribs)
     {
         let res = await reef.post('/user/CreateMyTask', newTaskAttribs, onErrorShowAlert)
         //let res = await reef.post(`/user/MyTasks/new`, newTaskAttribs, onErrorShowAlert)
@@ -266,7 +266,7 @@
 
         await reloadTasks(newTask.$ref)
     }
-
+    */
 
     let pageOperations = {
             opver: 2,
@@ -457,7 +457,7 @@
 
         <figure>
         <h1>{title}</h1>
-        <figcaption>{i18n(["All my tasks", "@@All my tasks", "Moje wszystkie zadania"])}</figcaption>
+        <figcaption>{i18n(["All my tasks", "Todas mis tareas", "Moje wszystkie zadania"])}</figcaption>
         </figure>
 
 
@@ -469,7 +469,7 @@
                 toolbarOperations={taskOperations}
                 orderAttrib='UserOrder'
                 bind:this={listComponent}>
-            <ListInserter action={addTask} icon/>
+            <!--ListInserter action={addTask} icon/-->
 
         </List>
 

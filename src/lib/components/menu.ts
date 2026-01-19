@@ -1,4 +1,4 @@
-import Menu from './contextmenu.svelte'
+import Menu from './contextmenu.container.svelte'
 import Floating_container from './Floating_container.svelte'
 import Grid from './Grid.menu.svelte'
 

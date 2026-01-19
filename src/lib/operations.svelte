@@ -271,7 +271,7 @@
             return;
 
         let rect = owner.getBoundingClientRect()
-
+        
 
         if(operation.menu)
             showMenu(rect, operation.menu)

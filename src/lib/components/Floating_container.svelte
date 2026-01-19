@@ -61,7 +61,7 @@
         props.onSizeChanged = () => onSizeChanged();
 
         hide_window_indicator = 0;
-        window.addEventListener('click', on_before_window_click, true);
+        //window.addEventListener('click', on_before_window_click, true);
 
         if(isDeviceSmallerThan('sm'))
             preventScrollRestorer = usePreventScroll();
@@ -89,8 +89,8 @@
 
         await tick();
 
-        if(!was_visible)
-            rootElement.addEventListener('click', on_before_container_click, true);
+        //if(!was_visible)
+        //    rootElement.addEventListener('click', on_before_container_click, true);
 
         cssPosition = calculatePosition(x, y, around_rect, true, false);
     }
@@ -112,8 +112,8 @@
         toolbar = null;
         cssPosition = calculatePosition(x, y, around_rect, false, false);
 
-        window.removeEventListener('click', on_before_window_click, true);
-        rootElement?.removeEventListener('click', on_before_container_click, true);
+        //window.removeEventListener('click', on_before_window_click, true);
+        //rootElement?.removeEventListener('click', on_before_container_click, true);
         if(preventScrollRestorer)
         {
             preventScrollRestorer()
@@ -137,8 +137,9 @@
     }
 
     let hide_window_indicator :number = 0;
-    function on_before_window_click()
+    function on_before_window_click(e)
     {
+        
         hide_window_indicator++;
 		setTimeout( ()=> {
             if(hide_window_indicator != 0)
@@ -273,31 +274,48 @@
         return result;
     }
 
+    
+    function on_window_click(e)
+    {
+        const clickedElement = e.target
+        if(clickedElement.id == '__hd_svelte_floating_container')
+        {
+            hide()   
+        }
+    }
+
+    
 
 </script>
 
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <div    id="__hd_svelte_floating_container"
         class=" Floating_container
-                bg-stone-100 dark:bg-stone-800 rounded-lg shadow-md shadow-stone-500 dark:shadow-black z-40 fixed
+                z-40
+                fixed inset-0 w-screen overflow-y-auto overscroll-contain
+                "
+        hidden={!visible}
+        on:click={on_window_click}>
+    <div class="bg-stone-100 dark:bg-stone-800 rounded-lg shadow-md shadow-stone-500 dark:shadow-black
                 sm:shadow-xl sm:shadow-slate-700/10
                 sm:dark:shadow-black/80
-                sm:outline sm:outline-1 sm:outline-stone-500"
-        style={cssPosition}
-        visible={visible}
-        bind:this={rootElement}>
-        {#if closeButtonPos}
-    <button class="     text-stone-800 dark:text-stone-400
-                        fixed w-6 h-6 flex items-center justify-center
-                        focus:outline-none font-medium  text-sm text-center"
-            style={closeButtonPos}
-            on:click={ hide }>  <!--rounded-full focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 text-stone-500 bg-stone-200/70 hover:bg-stone-200 dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700  -->
-            <Icon component={FaTimes} s="md"/>
-        </button>
-    {/if}
+                sm:outline sm:outline-1 sm:outline-stone-500 fixed"
+                style={cssPosition}
+                bind:this={rootElement}>
+            {#if closeButtonPos}
+        <button class="     text-stone-800 dark:text-stone-400
+                            fixed w-6 h-6 flex items-center justify-center
+                            focus:outline-none font-medium  text-sm text-center"
+                style={closeButtonPos}
+                on:click={ hide }>  <!--rounded-full focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 text-stone-500 bg-stone-200/70 hover:bg-stone-200 dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700  -->
+                <Icon component={FaTimes} s="md"/>
+            </button>
+        {/if}
 
-    {#if toolbar}
-        <svelte:component this={toolbar} {...props} {maxHeight} bind:this={internalElement} />
-    {/if}
+        {#if toolbar}
+            <svelte:component this={toolbar} {...props} {maxHeight} bind:this={internalElement} />
+        {/if}
+    </div>
 </div>
 
 <!-- use usePreventScroll instead -->

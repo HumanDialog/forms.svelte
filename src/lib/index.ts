@@ -49,7 +49,6 @@ export { default as RichEdit} from './components/document/rich.edit.svelte'
 export { default as Editor} from './components/document/editor.svelte'
 
 export { default as Spinner} from './components/delayed.spinner.svelte'
-//export { default as Menu } from './components/contextmenu.svelte'
 export { showMenu, showGridMenu, showFloatingToolbar, SHOW_MENU_BELOW, SHOW_MENU_ABOVE, SHOW_MENU_RIGHT, SHOW_MENU_LEFT} from './components/menu'
 
 export { default as Fab } from './components/Fab.svelte'

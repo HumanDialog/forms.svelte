@@ -432,20 +432,25 @@
                                 left-0 bottom-[50px]
                                 sm:left-[40px] sm:top-0
                                 w-full sm:w-[320px]
-                                h-[calc(100svh-50px)] sm:h-full
+                                h-[calc(100lvh-50px)] sm:h-full
 
                                 z-30 overflow-x-hidden
-
+                                bg-stone-50/90 dark:bg-stone-900/90
+                                ">
+                    
+                    <div class="absolute bottom-0 h-[calc(100svh-50px)] sm:h-full w-full
                                 bg-stone-50 dark:bg-stone-900
                                 border-t sm:border-t-0 sm:border-r border-stone-300 dark:border-stone-300/50
                                 sm:shadow-lg sm:shadow-stone-500
-                                sm:dark:shadow-black">
+                                sm:dark:shadow-black
+                                ">
 
-                    <div class="    w-full h-full  overflow-y-auto overscroll-contain py-0 px-0">
+                        <div class="h-full  w-full   overflow-y-auto overscroll-contain py-0 px-0">
 
-                        <Configurable config={layout.sidebar[visible_sidebar]}>
-                            <div slot='alt'></div>
-                        </Configurable>
+                            <Configurable config={layout.sidebar[visible_sidebar]}>
+                                <div slot='alt'></div>
+                            </Configurable>
+                        </div>
                     </div>
                 </div>
                 {/if}
@@ -516,8 +521,9 @@
                     <!--##  BOTTOM SIDEBAR          ###############################-->
                     <!--###########################################################-->
 
-                    <div  class="{bottom_bar_visibility} left-0 bottom-0 w-screen h-[240px] z-20 overflow-y-hidden overflow-x-auto
-                                sm:left-[40px] sm:w-[100vw-40px] " >
+                    <div  class="{bottom_bar_visibility} left-0 bottom-0 w-screen h-[280px] z-20 overflow-y-hidden overflow-x-auto
+                                sm:left-[40px] sm:w-[100vw-40px] 
+                                {lg_content_area_horizontal_dim}" >
                             <Configurable config={layout.selectionDetails} >
                                 <div slot="alt"></div>
                             </Configurable>

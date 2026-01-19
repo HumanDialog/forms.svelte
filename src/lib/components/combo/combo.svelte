@@ -163,15 +163,20 @@
             can_be_activated = false
         else if(is_compact)
         {
-            can_be_activated = false;
-
-
-            let contexts = inContext.split(' ');
-            contexts.forEach(ctx =>
+            if(inContext)
             {
-                if($contextItemsStore[ctx] == item)
-                    can_be_activated = true;
-            } )
+                can_be_activated = false;
+
+
+                let contexts = inContext.split(' ');
+                contexts.forEach(ctx =>
+                {
+                    if($contextItemsStore[ctx] == item)
+                        can_be_activated = true;
+                } )
+            }
+            else
+                can_be_activated =  true;
         }
         else
             can_be_activated =  true;
@@ -235,14 +240,12 @@
         if(!can_be_activated)
             return;
 
-        
         if(!textbox)
             return;
 
         
         if(is_dropdown_open)
             return;
-
 
         if(event)
         {

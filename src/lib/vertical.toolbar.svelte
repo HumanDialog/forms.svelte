@@ -5,7 +5,6 @@
     import {reef} from '@humandialog/auth.svelte'
     import Modal from './modal.svelte'
     import Input from './components/inputbox.ltop.svelte'
-    //import Menu from '$lib/components/contextmenu.svelte'
 
     import {dark_mode_store,
             tools_visible_store,

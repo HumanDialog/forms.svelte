@@ -64,7 +64,7 @@
     $: is_row_active = calculate_active($contextItemsStore)
     $: is_row_selected = selected($contextItemsStore)
     $: selected_class = is_row_selected ? "!border-blue-300 dark:!border-blue-300/50" : "";
-    $: focused_class = is_row_active ? "bg-stone-50 dark:bg-stone-800" : "";
+    $: focused_class = is_row_active ? "bg-stone-100 dark:bg-stone-800" : "";
     
 
     $: force_rerender($data_tick_store, $contextItemsStore)
@@ -74,7 +74,12 @@
     export function reload()
     {
         columnDef = definition.columns[currentColumnIdx]
-
+        if(!columnDef)
+        {   
+            is_visible = false
+            return
+        }
+        
         let allItems = definition.getItems();
         if(definition.stateAttrib)
         {
@@ -277,6 +282,9 @@
     {
         if(e)
             e.stopPropagation();
+
+        if(!columnDef)
+            return;
 
         if(!columnDef.operations)
             return;

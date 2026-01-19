@@ -44,6 +44,7 @@
     import {fetchComposedClipboard4TaskList, transformClipboardToJSONReferences, setBrowserRecentElement, getBrowserRecentElements} from './basket.utils'
     import {cache} from './cache.js'
     import TaskProperties from './properties.task.svelte'
+    import ColumnProperties from './list.board.column.properties.svelte'
 
     export let params = {}
 
@@ -1322,78 +1323,20 @@
     */
 
 
-    let editColumnDialog;
-    let editingColumnProps = {
-        name: '',
-        state: 0
-    }
-    let processStates = []
-    let newColumnPos = 0
-    let editingColumnPos = 0
-    let numericStateElement;
-    let stateValueVisible = true;
-    const ADD_COLUMN = 1
-    const EDIT_COLUMN = 2
-    let columnEditorMode = 0 
-    let editingColumnMessage = ''
+    let columnPropertiesDialog;
+    
 
     async function addProcessColumn(pos)
     {
-        newColumnPos = pos;
-        if(!processStates.length)
-        {
-            processStates = await reef.get(`group/GetPredefinedTaskStates`, onErrorShowAlert)
-            await tick();
-        }
-
-        editingColumnProps.name = '_; New column; Nueva columna; Nowa kolumna'
-        editingColumnProps.state = 0
-
-        columnEditorMode = ADD_COLUMN
-
-        editColumnDialog.setTitle('_; Add column; Añadir columna; Dodaj kolumnę')
-        editColumnDialog.setOkCaption('_; Add; Añadir; Dodaj')
-        editingColumnMessage = ''
-        editColumnDialog.show();
-
+        await columnPropertiesDialog.addColumn(pos, taskStates, applyAddColumn)
     }
 
-    async function onColumnEditorOK()
+    async function applyAddColumn(newColumnPos, newState, newName)
     {
-        switch(columnEditorMode)
-        {
-        case ADD_COLUMN:
-            await onNewProcessColumnRequested()
-            break;
-
-        case EDIT_COLUMN:
-            await onEditColumnRequested()
-            break;
-        }
-    }
-
-    async function onNewProcessColumnRequested()
-    {
-        let newState
-        if (typeof editingColumnProps.state === 'string' || editingColumnProps.state instanceof String)
-            newState = parseInt(editingColumnProps.state)
-        else
-            newState = editingColumnProps.state
-
-        editingColumnMessage = ''
-        const sameStateColumnIdx = taskStates.findIndex((c) => c.state == newState)
-        if(sameStateColumnIdx >= 0)
-        {
-            editingColumnMessage = '_; Another column has the same state; Otra columna tiene el mismo estado; Inna kolumna ma ten sam stan'
-            return
-        }
-
-        editColumnDialog.hide();
-
         const res = await reef.post(`${currentList.$ref}/AddColumn`, {
                             pos: newColumnPos,
                             state: newState,
-                            name: editingColumnProps.name
+                            name: newName
                         }, onErrorShowAlert);
 
         if(res && Array.isArray(res))
@@ -1410,96 +1353,31 @@
         }
     }
 
-    function cancelColumnEditor()
-    {
-        editColumnDialog.hide();
-    }
-
-    function onNewColumnStateSelected(state, name)
-    {
-        numericStateElement?.refresh();
-    }
-
     async function runColumnEditDialog(pos)
     {
-        editingColumnPos = pos;
-        if(!processStates.length)
-        {
-            processStates = await reef.get(`group/GetPredefinedTaskStates`, onErrorShowAlert)
-            await tick();
-        }
-
-        const column = taskStates[editingColumnPos]
-        editingColumnProps.name = ext(column.name)
-        editingColumnProps.state = column.state
-
-        columnEditorMode = EDIT_COLUMN
-
-        editColumnDialog.setTitle('_; Column properties; Editar columna; Właściwości kolumny')
-        editColumnDialog.setOkCaption('OK')
-        editingColumnMessage = ''
-        editColumnDialog.show();
+        await columnPropertiesDialog.editColumn(pos, taskStates, applyColumnProperties)
     }
 
-    async function onEditColumnRequested()
+    async function applyColumnProperties(editingColumnPos, newState, newName)
     {
-        let newState
-        if (typeof editingColumnProps.state === 'string' || editingColumnProps.state instanceof String)
-            newState = parseInt(editingColumnProps.state)
-        else
-            newState = editingColumnProps.state
-
-        editingColumnMessage = ''
-        const prevState = taskStates[editingColumnPos].state
-
-        if(prevState != newState)
+        if(newState !== undefined)
         {
-            const sameStateColumnIdx = taskStates.findIndex((c) => c.state == newState)
-            if(sameStateColumnIdx >= 0)
-            {
-                editingColumnMessage = '_; Another column has the same state; Otra columna tiene el mismo estado; Inna kolumna ma ten sam stan'
-                return
-            }
-
+            const prevState = taskStates[editingColumnPos].state
             taskStates[editingColumnPos].state = newState;
 
             const tasks = currentList.Tasks.filter(t => t.State == prevState)
             kanban.setCardsState(tasks, newState)
         }
 
-        const prevName = taskStates[editingColumnPos].name
-        const newName = editingColumnProps.name.trim()
-        if(prevName != newName)
+        if(newName !== undefined)
             taskStates[editingColumnPos].name = newName;
 
-        editColumnDialog.hide();
-
-        if((prevState != newState) || (prevName != newName))
+        if((newState !== undefined) || (newName !== undefined))
         {
             saveTaskStates();
-
             await fetchData()
-            const newColumns = []
-            for(let idx=0; idx<taskStates.length; idx++)
-            {
-                const column = taskStates[idx];   
-                const isFinishing = column.state == STATE_FINISHED
-                newColumns.push({
-                    title: ext(column.name),
-                    state: column.state,
-                    finishing: isFinishing,
-                    notVisible: isFinishing && hideFinishedTasks,
-                    operations: getColumnOperations(idx, column)
-                })
-            }
-
-            newColumns.push({
-                title: otherCaption,
-                state: -1})
-
-            kanban.setColumns(newColumns)
-            await kanban.reload(currentList, kanban.CLEAR_SELECTION);
-            kanban.activateColumn(editingColumnPos)
+            await kanban.rerender(editingColumnPos)
+            
         }
     }
 
@@ -1628,58 +1506,6 @@
         bind:this={changeKindModal}
         />
 
-{#key processStates}
-<Modal  onOkCallback={onColumnEditorOK}
-        onCancelCallback={cancelColumnEditor}
-        icon={FaColumns}
-        bind:this={editColumnDialog}>
-
-    <Input  label={i18n(['Name', 'Nombre', 'Nazwa'])}
-        placeholder=''
-        self={editingColumnProps}
-        a="name"/>
-
-    <section class="mt-2 grid grid-cols-2 gap-2">
-        <Combo label={i18n(['State', 'Estado', 'Stan'])}
-                self={editingColumnProps}
-                a='state'
-                changed={onNewColumnStateSelected}>
-
-            {#each processStates as column}
-                <ComboItem key={column.state} name={ext(column.name)}/>
-            {/each}
-        </Combo>
-
-        <div class="col-span-1 flex flex-row">
-            <button class="mt-6 w-3 h-3 mr-2" on:click={() => stateValueVisible = !stateValueVisible}>
-                {#if stateValueVisible}
-                    <FaChevronLeft/>
-                {:else}
-                    <FaChevronRight/>
-                {/if}
-
-            </button>
-
-            {#if stateValueVisible}
-                <Input class="inline-block"
-                    label={i18n(['State value', 'Valor del estado', 'Wartość stanu$'])}
-                    placeholder=''
-                    self={editingColumnProps}
-                    a="state"
-                    bind:this={numericStateElement}/>
-            {/if}
-        </div>
-    </section>
-
-    <p class="mt-1 text-sm text-right text-red-700 dark:text-red-300">
-        {#if editingColumnMessage}
-            {editingColumnMessage}
-        {:else}
-            {"\u200B"}
-        {/if}
-    </p>
-
-</Modal>
-{/key}
+<ColumnProperties bind:this={columnPropertiesDialog}/>
 
 <TaskProperties bind:this={taskPropertiesDialog} />

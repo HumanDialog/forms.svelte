@@ -4,11 +4,12 @@
 	import { afterUpdate } from 'svelte';
 	import {ext} from '../i18n'
 
-  export let self
-  export let a
-  export let id = undefined
+	export let self
+	export let a
+	export let id = undefined
 	export let readonly = false
 	export let focusOnClick = true
+	export let local = false
 
   //https://developer.chrome.com/docs/web-platform/page-lifecycle-api#the-unload-event
   //https://developer.mozilla.org/en-US/docs/Web/API/Document/visibilitychange_event
@@ -36,7 +37,12 @@
 
 		text.trim()
 
-		setjItemProperty(self, a, text)
+		if(!local)
+			setjItemProperty(self, a, text)
+		else
+		{
+			self[a] = text	
+		}
 	}
 
 	function focus(e)

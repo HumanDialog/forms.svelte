@@ -565,7 +565,7 @@
                                     caption: '_; Summary; Resumen; Podsumowanie',
                                     action: (focused) =>  { listComponent.edit(task, 'Summary') }
                                 },
-                                {
+                            /*    {
                                     separator: true
                                 },
                                 {
@@ -576,7 +576,7 @@
                                     caption: '_; Due Date; Fecha; Termin',
                                     action: (focused) => { listComponent.edit(task, 'DueDate') }
                                 }
-
+                            */
                             ]
                         },
                        /* ... (task.State == STATE_FINISHED) ? [
@@ -843,7 +843,8 @@
             Title: "Title",
             Summary: "Summary",
             $properties: {
-                m: { l: [':DueDate', '^Actor;users']}
+                //m: { l: [':DueDate', '^Actor;users']}
+                m: { l: [':DueDate']}
             }
         }
     }
