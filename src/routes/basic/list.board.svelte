@@ -41,7 +41,7 @@
 	import { tick, onMount } from 'svelte';
     import BasketPreview from './basket.preview.svelte'
     import PopupExplorer from './popup.explorer.svelte'
-    import {fetchComposedClipboard4TaskList, transformClipboardToJSONReferences, setBrowserRecentElement, getBrowserRecentElements} from './basket.utils'
+    import {fetchComposedClipboard4TaskList, transformClipboardToJSONReferences, setBrowserRecentElement, getBrowserRecentElements4TaskList} from './basket.utils'
     import {cache} from './cache.js'
     import TaskProperties from './properties.task.svelte'
     import ColumnProperties from './list.board.column.properties.svelte'
@@ -1063,7 +1063,7 @@
 
     async function runPasteBrowserRecent(btt, aroundRect)
     {
-        const clipboardElements = getBrowserRecentElements()
+        const clipboardElements = getBrowserRecentElements4TaskList()
         showFloatingToolbar(aroundRect, BasketPreview, {
             destinationContainer: listPath,
             onRefreshView: (f) => reload(kanban.KEEP_SELECTION),

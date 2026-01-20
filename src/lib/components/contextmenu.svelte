@@ -394,8 +394,6 @@
 
     function on_keydown(e, operation, index)
     {
-        //console.log(e);
-
         switch(e.key)
         {
         case 'Esc':
@@ -725,7 +723,7 @@
                     {@const active = calculateBackground(isFocused || isOperationActivated(operation), false)}
                     {@const has_submenu = operation.menu !== undefined && operation.menu.length > 0}
                     <!--div-->
-                    <div class="pl-4 cursor-pointer {active}"
+                    <div class="pl-4 cursor-pointer {active} focus:outline-0"
                         id={menu_item_id}
                         bind:this={menu_items[index]}
                         on:click|stopPropagation={(e) => { execute_action(e, operation, index) } }
@@ -733,7 +731,8 @@
                         on:keydown|stopPropagation={(e) => on_keydown(e, operation, index)}
                         on:mousedown={mousedown}
                         disabled={isOperationDisabled(operation)}
-                        class:opacity-60={isOperationDisabled(operation)}>
+                        class:opacity-60={isOperationDisabled(operation)}
+                        tabindex="-1">
 
 
 

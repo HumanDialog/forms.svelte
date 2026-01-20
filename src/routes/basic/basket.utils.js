@@ -121,10 +121,17 @@ export async function fetchComposedClipboard(allowedTypes)
 
 function collectElement(composedElements, element, allowedTypes)
 {
-    if((allowedTypes.length > 0) && (allowedTypes.findIndex((allowed) => allowed == element.ElementType) < 0))
-        element.ElementInfo |= EIF_NOT_ALLOWED
+    const hasFilterDefined = allowedTypes && (allowedTypes.length>0)
+    if(!hasFilterDefined)
+        composedElements.push(element)
+    else
+    {
+        const isInFilter = allowedTypes.findIndex((allowed) => allowed == element.ElementType) >= 0
+        if(isInFilter)
+            composedElements.push(element)
+    }    
 
-    composedElements.push(element)
+    //element.ElementInfo |= EIF_NOT_ALLOWED
 }
 
 export function recentClipboardElements(selectedElements, browserBasedClipboard)
@@ -181,17 +188,43 @@ export function transformClipboardToJSONReferences(selectedReferences)
 }
 
 
-export function getBrowserRecentElements()
+export function getBrowserRecentElements(allowedTypes=undefined)
 {
     const recentElementsStore = localStorage.browserRecentElements
     if(!recentElementsStore)
         return []
 
     const recentElements = JSON.parse(recentElementsStore)
-    return recentElements;
+
+    let filteredElements = []
+    recentElements.forEach((el) => collectElement(filteredElements, el, allowedTypes))
+    return filteredElements;
 } 
 
+export function getBrowserRecentElements4TaskList()
+{
+    return getBrowserRecentElements(['Task'])
+}
 
+export function getBrowserRecentElements4Task()
+{
+    return getBrowserRecentElements(['Note', 'UploadedFile'])
+}
+
+export function getBrowserRecentElements4Note()
+{
+    return getBrowserRecentElements(['Note', 'UploadedFile'])
+}
+
+export function getBrowserRecentElements4Chat()
+{
+    return getBrowserRecentElements(['Note', 'Task', 'UploadedFile'])
+}
+
+export function getBrowserRecentElements4Folder()
+{
+    return getBrowserRecentElements(['Folder', 'Note', 'Task', 'UploadedFile'])
+}
 
 export function pushBrowserRecentElements(elementId, elementType, elementNav, title, summary, icon, href, flags=0)
 {

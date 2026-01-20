@@ -28,7 +28,7 @@
     import {location, pop, push, querystring} from 'svelte-spa-router'
     import BasketPreview from './basket.preview.svelte'
     import PopupExplorer from './popup.explorer.svelte'
-    import {fetchComposedClipboard4Folder, transformClipboardToJSONReferences, getBrowserRecentElements, setBrowserRecentElement, recentClipboardElements} from './basket.utils'
+    import {fetchComposedClipboard4Folder, transformClipboardToJSONReferences, getBrowserRecentElements4Folder, setBrowserRecentElement, recentClipboardElements} from './basket.utils'
     import {cache} from './cache.js'
     import {getElementIcon} from './icons'
 	import FolderProperties from './properties.folder.svelte'
@@ -767,7 +767,7 @@
 
     async function runPasteBrowserRecent(btt, aroundRect)
     {
-        const clipboardElements = getBrowserRecentElements()
+        const clipboardElements = getBrowserRecentElements4Folder()
         showFloatingToolbar(aroundRect, BasketPreview, {
             destinationContainer: contextPath,
             onRefreshView: refreshViewAfterAttachingFromBasket,

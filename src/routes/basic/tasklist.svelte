@@ -24,7 +24,7 @@
     import {cache} from './cache.js'
     import BasketPreview from './basket.preview.svelte'
     import PopupExplorer from './popup.explorer.svelte'
-	import { fetchComposedClipboard4TaskList, transformClipboardToJSONReferences, setBrowserRecentElement, getBrowserRecentElements } from './basket.utils.js';
+	import { fetchComposedClipboard4TaskList, transformClipboardToJSONReferences, setBrowserRecentElement, getBrowserRecentElements4TaskList } from './basket.utils.js';
     import TaskProperties from './properties.task.svelte'
 
     export let params = {}
@@ -455,7 +455,7 @@
 
     async function runPasteBrowserRecent(btt, aroundRect)
     {
-        const clipboardElements = getBrowserRecentElements()
+        const clipboardElements = getBrowserRecentElements4TaskList()
         showFloatingToolbar(aroundRect, BasketPreview, {
             destinationContainer: listPath,
             onRefreshView: (f) => reloadTasks(listComponent.KEEP_SELECTION),

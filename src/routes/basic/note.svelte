@@ -53,7 +53,7 @@
     import AttachedFile from './attached.file.svelte'
     import BasketPreview from './basket.preview.svelte'
     import PopupExplorer from './popup.explorer.svelte'
-    import {fetchComposedClipboard4Editor, fetchComposedClipboard4Note, transformClipboardToJSONReferences, pushBrowserRecentElements, setBrowserRecentElement, getBrowserRecentElements} from './basket.utils'
+    import {fetchComposedClipboard4Editor, fetchComposedClipboard4Note, transformClipboardToJSONReferences, pushBrowserRecentElements, setBrowserRecentElement, getBrowserRecentElements, getBrowserRecentElements4Note} from './basket.utils'
     import {getElementIcon} from './icons'
 
     import FileProperties from './properties.file.svelte'
@@ -529,7 +529,7 @@
 
     async function runPasteBrowserRecent4Note(btt, aroundRect)
     {
-        const clipboardElements = getBrowserRecentElements()
+        const clipboardElements = getBrowserRecentElements4Note()
         showFloatingToolbar(aroundRect, BasketPreview, {
             destinationContainer: activeNoteRef,
             onRefreshView: async (f) => await reloadWithAttachements(),
@@ -786,8 +786,15 @@
 
     }
 
-    function extraInsertPalletteCommands(editorElement)
+    function extraInsertPalletteCommands(editorIdx)
     {
+        const editorElement = (idx) => {
+            if(idx < 0)
+                return description;
+            else
+                return threadResponses[idx]
+        }
+
         return [
             {
                 mricon: 'download',
@@ -798,34 +805,34 @@
                     const operations = [
                         {
                             caption: '_; Paste; Pegar; Wklej',
-                            action: (btt, aroundRect) => pasteRecentClipboardElement4Editor(btt, aroundRect, editorElement)
+                            action: (btt, aroundRect) => pasteRecentClipboardElement4Editor(btt, aroundRect, editorElement(editorIdx))
                         },
                         {
                             caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
-                            action: (btt, aroundRect) => runPasteBasket4Editor(btt, aroundRect, editorElement)
+                            action: (btt, aroundRect) => runPasteBasket4Editor(btt, aroundRect, editorElement(editorIdx))
                         },
                         {
                             caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
-                            action: (btt, aroundRect) => runPasteBrowserRecent4Editor(btt, aroundRect, editorElement)
+                            action: (btt, aroundRect) => runPasteBrowserRecent4Editor(btt, aroundRect, editorElement(editorIdx))
                         },
                         {
                             caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                            action: (btt, aroundRect) => runEditorPopupExplorer4SelectFromFolders(btt, aroundRect, editorElement)
+                            action: (btt, aroundRect) => runEditorPopupExplorer4SelectFromFolders(btt, aroundRect, editorElement(editorIdx))
                         },
                         {
                             caption: '_; Select from task lists; Seleccionar de listas de tareas; Wybierz z listy zadań',
-                            action: (btt, aroundRect) => runEditorPopupExplorer4SelectFromTaskLists(btt, aroundRect, editorElement)
+                            action: (btt, aroundRect) => runEditorPopupExplorer4SelectFromTaskLists(btt, aroundRect, editorElement(editorIdx))
                         },
                         {
                             separator: true
                         },
                         {
                             caption: '_; New note; Nueva nota; Nowa notatka',
-                            action: () => runNoteCreator4Editor(editorElement)
+                            action: () => runNoteCreator4Editor(editorElement(editorIdx))
                         },
                         {
                             caption: '_; Add file; Añadir archivo; Dodaj plik',
-                            action: () => runFileAttacher4Editor(editorElement)
+                            action: () => runFileAttacher4Editor(editorElement(editorIdx))
                         }
                     ]
 
@@ -1786,7 +1793,7 @@
                             onAddImage={uploadImage}
                             onRemoveImage={removeImage}
                             onLinkClick={editorLinkClicked}
-                            extraInsertPaletteCommands={() => extraInsertPalletteCommands(description)}/>
+                            extraInsertPaletteCommands={() => extraInsertPalletteCommands(-1)}/>
 
             {#if isThread && (noteRef != activeNoteRef) && note.attachements && note.attachements.length > 0}
                 {#each note.attachements as att}
@@ -1842,7 +1849,7 @@
                                     onAddImage={uploadImage}
                                     onRemoveImage={removeImage}
                                     onLinkClick={editorLinkClicked}
-                                    extraInsertPaletteCommands={() => extraInsertPalletteCommands(threadResponses[subNoteIdx])}/>
+                                    extraInsertPaletteCommands={() => extraInsertPalletteCommands(subNoteIdx)}/>
 
                         {#if subNote.$ref!=activeNoteRef && subNote.attachements && subNote.attachements.length > 0}
                             {#each subNote.attachements as att}

@@ -22,7 +22,7 @@
     import {FaDownload, FaArrowCircleRight, FaTimes, FaRegFile, FaRegCalendar, FaRegCalendarCheck, FaPaperPlane, FaRegStar, FaStar} from 'svelte-icons/fa/'
     import BasketPreview from './basket.preview.svelte'
     import PopupExplorer from './popup.explorer.svelte'
-    import {fetchComposedClipboard4Message, transformClipboardToJSONReferences, getBrowserRecentElements} from './basket.utils'
+    import {fetchComposedClipboard4Message, transformClipboardToJSONReferences, getBrowserRecentElements4Chat} from './basket.utils'
 
     let channelRef = ''
     let channel = null;
@@ -526,7 +526,7 @@
 
     async function runPasteBrowserRecent(btt, aroundRect)
     {
-        const clipboardElements = getBrowserRecentElements()
+        const clipboardElements = getBrowserRecentElements4Chat()
         showFloatingToolbar(aroundRect, BasketPreview, {
             onAttach: (basketItem, refs) => onAttachBasket(refs),
             clipboardElements: clipboardElements,

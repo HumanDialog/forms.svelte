@@ -82,21 +82,7 @@
 
 
     let navigator;
-    const addOperation = {
-        opver: 1,
-        operations: [
-            {
-                caption: '_; View; Ver; Widok',
-                operations: [
-                    {
-                        icon: FaPlus,
-                        action: (f) => navigator?.requestAdd(),
-                        fab: 'M00'
-                    }
-                ]
-            }
-        ]
-    }
+    
     
 
     function getNavigator(name)

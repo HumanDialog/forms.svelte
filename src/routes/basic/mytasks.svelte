@@ -61,18 +61,15 @@
         await fetchData()
 
         const allElementsNo = user.AssignedTasksCount
-        allPagesNo = Math.floor(allElementsNo / pageElementsNo)
-        if(allElementsNo % pageElementsNo)
-            allPagesNo += 1
-
-
-
+        allPagesNo = Math.ceil(allElementsNo / pageElementsNo)
+        
         pageNo = Math.max(0, Math.min(pageNo, allPagesNo-1))
 
         paginatorTop?.updatePageNo(pageNo)
         paginatorTop?.updateAllPagesNo(allPagesNo)
         paginatorBtt?.updatePageNo(pageNo)
         paginatorBtt?.updateAllPagesNo(allPagesNo)
+        listComponent?.reload(user, listComponent.KEEP_SELECTION);
     }
 
     async function fetchData()
@@ -99,9 +96,10 @@
                                                 {
                                                     Id: 2,
                                                     Association: 'MyTasks',
-                                                    Expressions:['Id','Title', 'href', 'Summary', 'icon'],
+                                                    Expressions:['Id','Title', 'href', 'Summary', 'icon', 'CreationDate', '$type', '$ref', 'TaskList/Name', 'State', 'DueDate'],
                                                     Filter: 'State <> STATE_FINISHED',
-                                                    Sort: "UserOrder",
+                                                    //Sort: "UserOrder",
+                                                    Sort: "-CreationDate, Id",
                                                     SubTree:[
                                                         {
                                                             Id: 3,
@@ -165,7 +163,7 @@
         await reloadTasks(listComponent.SELECT_NEXT)
     }
 
-    let archiveModal;
+    /*let archiveModal;
     let taskToArchive;
     function askToArchive(task)
     {
@@ -183,6 +181,7 @@
 
         await reloadTasks(listComponent.SELECT_NEXT)
     }
+    */
 
     let finishRequested = []
     let finishTimer = 0
@@ -275,15 +274,7 @@
             operations: [
                 {
                     caption: '_; View; Ver; Widok',
-                    operations: [
-                        {
-                            mricon: 'square-pen',
-                            caption: '_; New task; Nueva tarea; Nowe zadanie',
-                            action: (focused) => { listComponent.addRowAfter(null) },
-                            fab: 'M01',
-                            tbr: 'A'
-                        }
-                    ]
+                    operations: []
                 }
             ]
         }
@@ -294,7 +285,7 @@
             fab: 'M00',
             tbr: 'D',
             operations: [
-                {
+               /* {
                     caption: '_; View; Ver; Widok',
                     operations: [
                         {
@@ -305,7 +296,7 @@
                             tbr: 'A'
                         }
                     ]
-                },
+                },*/
                 {
                     caption: '_; Task; Tarea; Zadanie',
                     //tbr: 'B',
@@ -324,7 +315,7 @@
                                         caption: '_; Summary; Resumen; Podsumowanie',
                                         action: (focused) =>  { listComponent.edit(task, 'Summary') }
                                     },
-                                    {
+                                /*    {
                                         separator: true
                                     },
                                     {
@@ -334,7 +325,7 @@
                                     {
                                         caption: '_; Due Date; Fecha; Termin',
                                         action: (focused) => { listComponent.edit(task, 'DueDate') }
-                                    }
+                                    }*/
                             ]
 
                         },
@@ -355,7 +346,7 @@
                                 tbr: 'A'
                             }
                         ],
-                        {
+                    /*    {
                             caption: '_; Move to top ; Mover al principio de la lista; Przesuń na szczyt',
                             hideToolbarCaption: true,
                             mricon: 'chevrons-up',
@@ -383,7 +374,7 @@
                          {
                             caption: '_; Archive; Archivar; Zarchiwizuj',
                             action: (f) => askToArchive(task)
-                        },
+                        }, */
                         {
                             caption: '_; Delete; Eliminar; Usuń',
                             action: (f) => askToDelete(task)
@@ -422,24 +413,14 @@
         }
     }
     let list_properties = {
-        Title: "Title",
-        Summary: "Summary",
-        icon: "icon",
         element:{
             icon: "icon",
             href: "href",
             Title: "Title",
-            Summary: "Summary"
-        },
-        context:{
-            Folder:{
-                Summary: "Summary",
-
-            },
-            FolderFolder:{
-                Summary: "Summary",
-                head_right: "ModificationDate"
-            }
+            Summary: "Summary",
+            $properties: {
+                    t:{l: ['TaskList/Name','#barcode', '&State'],
+                       r: [':DueDate']} }
         }
     }
 </script>
@@ -496,11 +477,11 @@
         bind:this={deleteModal}
         />
 
-<Modal  title={i18n(['Archive', 'Archivar', 'Zarchiwizuj'])}
+<!--Modal  title={i18n(['Archive', 'Archivar', 'Zarchiwizuj'])}
         content={i18n(["Are you sure you want to archive selected task?", "¿Está seguro de que desea archivar la tarea seleccionada?", "Czy na pewno chcesz zarchiwizować wybrane zadanie?"])}
         icon={FaArchive}
         onOkCallback={archiveTask}
         bind:this={archiveModal}
-        />
+        /-->
 
 <TaskProperties bind:this={taskPropertiesDialog} />

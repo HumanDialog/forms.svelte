@@ -31,7 +31,7 @@
     export let selectionKey = 'props'
     export let multiselect: boolean = false
 
-    export let component_id: string
+    export let component_id: string = ''
 
     // reload selection parameter
     export const CLEAR_SELECTION = 0;

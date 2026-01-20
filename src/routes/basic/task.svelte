@@ -44,7 +44,7 @@
     import BasketPreview from './basket.preview.svelte'
     import PopupExplorer from './popup.explorer.svelte'
     import {getElementIcon} from './icons'
-    import {fetchComposedClipboard4Editor, fetchComposedClipboard4Task, transformClipboardToJSONReferences, pushBrowserRecentElements, setBrowserRecentElement, getBrowserRecentElements} from './basket.utils'
+    import {fetchComposedClipboard4Editor, fetchComposedClipboard4Task, transformClipboardToJSONReferences, pushBrowserRecentElements, setBrowserRecentElement, getBrowserRecentElements, getBrowserRecentElements4Task} from './basket.utils'
     import FileProperties from './properties.file.svelte'
 	import NoteProperties from './properties.note.svelte'
     import TaskProperties from './properties.task.svelte'
@@ -505,7 +505,7 @@
 
     async function runPasteBrowserRecent4Task(btt, aroundRect)
     {
-        const clipboardElements = getBrowserRecentElements()
+        const clipboardElements = getBrowserRecentElements4Task()
         
         showFloatingToolbar(aroundRect, BasketPreview, {
             destinationContainer: taskRef,
