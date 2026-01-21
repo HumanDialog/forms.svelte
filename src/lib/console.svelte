@@ -1,7 +1,8 @@
 <script>
 	import { reef, session } from "@humandialog/auth.svelte";
 	import { afterUpdate } from "svelte";
-    import { contextTypesStore, contextItemsStore} from './stores.js'
+    import { contextTypesStore, contextItemsStore, bottom_bar_visible_store} from './stores.js'
+    import Ricon from './components/r.icon.svelte'
 
 	let prevLines = [];
     let prompt = '>'
@@ -169,15 +170,24 @@
         }
     }
 
+    function closeConsole()
+    {
+        $bottom_bar_visible_store = false
+    }
+
 </script>
 
 <div class="h-full overflow-y-auto overscroll-contain">
-    <button class="fixed right-0 m-2 w-6 h-6 text-stone-200 {protoButtonBorderClass}" on:click={protoChange}>
+    <!--button class="fixed right-0 m-2 w-6 h-6 text-stone-200 {protoButtonBorderClass}" on:click={protoChange}>
         <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M16 4C14 4 11 5 11 9C11 13 11 15 11 18C11 21 6 23 6 23C6 23 11 25 11 28C11 31 11 35 11 39C11 43 14 44 16 44"/>
             <path d="M32 4C34 4 37 5 37 9C37 13 37 15 37 18C37 21 42 23 42 23C42 23 37 25 37 28C37 31 37 35 37 39C37 43 34 44 32 44"/>
         </svg>
+    </button-->
+    <button class="fixed right-0 m-2 w-6 h-6 text-stone-200 {protoButtonBorderClass}" on:click={closeConsole}>
+        <Ricon icon='x' />
     </button>
+    
 
     <div class="p-2 w-full min-h-full  
                 bg-stone-800 border-l border-t border-black font-mono text-stone-200">

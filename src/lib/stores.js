@@ -1,7 +1,7 @@
 
 import {writable, get, derived} from 'svelte/store';
 import {SCREEN_SIZES, randomString} from './utils.js'
-import {navGetKey, localStorageSave, localStorageRead, hasLocalStorage} from './utils.js'
+import {navGetKey, localStorageSave, localStorageRead, hasLocalStorage, sessionStorageSave, sessionStorageRead} from './utils.js'
 import { location } from 'svelte-spa-router';
 
 export const data_tick_store = writable(1);
@@ -146,8 +146,8 @@ export function set_default_tools_visible(value, force)
         tools_visible_store.set(value)
 }
 
-export const bottom_bar_visible_store = writable( localStorageRead('bottom_bar_visible_store') == 'true');
-bottom_bar_visible_store.subscribe( (value) => { localStorageSave('bottom_bar_visible_store', (value ? 'true' : '')) } );
+export const bottom_bar_visible_store = writable( sessionStorageRead('bottom_bar_visible_store') == 'true');
+bottom_bar_visible_store.subscribe( (value) => { sessionStorageSave('bottom_bar_visible_store', (value ? 'true' : '')) } );
 
 export const right_sidebar_visible_store = writable(false)
 export const visible_property_tab_store = writable('');
