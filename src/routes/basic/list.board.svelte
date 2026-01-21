@@ -173,7 +173,7 @@
                                     {
                                         Id: 1,
                                         Association: '',
-                                        Expressions:['$ref','Id','Name', 'Summary', 'Kind', 'GetTaskStates','href', 'GetCanonicalPath', '$type', 'IsSubscribed'],
+                                        Expressions:['$ref','Id','Name', 'Summary', 'Kind', 'GetTaskStates','href', 'GetCanonicalPath', '$type', 'IsSubscribed', 'AreFinishedTasksHidden'],
                                         SubTree:
                                         [
                                             {
@@ -238,7 +238,7 @@
 
     function filterTasks()
     {
-        if(hideFinishedTasks)
+        if(currentList.AreFinishedTasksHidden)
             currentList.Tasks = currentList.AllTasks.filter((t) => t.State < STATE_FINISHED)
         else
             currentList.Tasks = currentList.AllTasks
@@ -280,10 +280,13 @@
         }
     }
 
-    let hideFinishedTasks = false
     async function toggleFinishedTasksVisibility(operationsFunc, areContextOperations)
     {
-        hideFinishedTasks = !hideFinishedTasks
+        let finishedTasksHidden = currentList.AreFinishedTasksHidden > 0
+
+        await reef.post(`${currentList.$ref}/SetFinishedTasksHidden`, {val: !finishedTasksHidden})
+
+        currentList.AreFinishedTasksHidden = !finishedTasksHidden
 
         filterTasks()
         
@@ -299,7 +302,7 @@
                     title: ext(column.name),
                     state: column.state,
                     finishing: isFinishing,
-                    notVisible: isFinishing && hideFinishedTasks,
+                    notVisible: isFinishing && currentList.AreFinishedTasksHidden,
                     operations: getColumnOperations(idx, column)
                 })
         }
@@ -428,7 +431,7 @@
                             ]
                         },
                         ... (currentList.IsSubscribed ? [unfollowOperation(reloadThisOperations, false)] : [followOperation(reloadThisOperations, false)]),
-                        ... (hideFinishedTasks ? [showFinishedTasksOperation( reloadThisOperations, false )] : [hideFinishedTasksOperation( reloadThisOperations, false )]),
+                        ... (currentList.AreFinishedTasksHidden ? [showFinishedTasksOperation( reloadThisOperations, false )] : [hideFinishedTasksOperation( reloadThisOperations, false )]),
                         {
                             //icon: FaRandom,
                             caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
@@ -846,7 +849,7 @@
                             ]
                         },
                         ... (currentList.IsSubscribed ? [unfollowOperation(reloadThisOperations, true)] : [followOperation(reloadThisOperations, true)]),
-                        ... (hideFinishedTasks ? [showFinishedTasksOperation( reloadThisOperations, true )] : [hideFinishedTasksOperation( reloadThisOperations, true )]),
+                        ... (currentList.AreFinishedTasksHidden ? [showFinishedTasksOperation( reloadThisOperations, true )] : [hideFinishedTasksOperation( reloadThisOperations, true )]),
                         {
                             caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
                             action: changeListKind,
@@ -1022,7 +1025,7 @@
                             ]
                         },
                         ... (currentList.IsSubscribed ? [unfollowOperation(reloadThisOperations, true)] : [followOperation(reloadThisOperations, true)]),
-                        ... (hideFinishedTasks ? [showFinishedTasksOperation( reloadThisOperations, true )] : [hideFinishedTasksOperation( reloadThisOperations, true )]),
+                        ... (currentList.AreFinishedTasksHidden ? [showFinishedTasksOperation( reloadThisOperations, true )] : [hideFinishedTasksOperation( reloadThisOperations, true )]),
                         {
                             //icon: FaRandom,
                             caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
@@ -1433,7 +1436,7 @@
                                     state={taskState.state}
                                     operations={getColumnOperations(columnIdx, taskState)}
                                     finishing={isFinishing}
-                                    notVisible={isFinishing && hideFinishedTasks}/>
+                                    notVisible={isFinishing && currentList.AreFinishedTasksHidden}/>
                 {/each}
 
 
