@@ -113,6 +113,24 @@
         {
             switch(module)
             {
+            case 'mypages':
+                return {
+                    'TOC':{
+                        icon: FaList,
+                        mricon: 'user',
+                        component: Sidebar
+                    }
+                }
+
+            case 'teampages':
+                return {
+                    'TOC':{
+                        icon: FaList,
+                        mricon: 'calendar',
+                        component: Sidebar
+                    }
+                }
+
             case 'tasklists':
                 return {
                     'TOC':{
