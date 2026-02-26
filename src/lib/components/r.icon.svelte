@@ -104,9 +104,17 @@
   import ExternalLink from './ricons/external-link.svelte'
   import ToggleLeft from './ricons/toggle-left.svelte'
   import ToggleRight from './ricons/toggle-right.svelte'
+
   import Settings from './ricons/settings.svelte'
 
+  import Archive from './ricons/archive.svelte'
+
+  import Trash from './ricons/trash.svelte'
+
+
   let ricons_box = {
+    "archive": Archive,
+    "trash": Trash,
     "arrow-up": ArrowUp,
     "check-check": CheckCheck,
     "folder": Folder,

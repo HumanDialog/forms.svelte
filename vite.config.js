@@ -23,7 +23,7 @@ export default defineConfig( ({command, mode}) => {
 			__GA_IDENTIFIER__: '\'\'',
 
 			__OCTOPUS601_MODULES__:'\'tasklists,folders,messages\'',
-			__OCTOPUS_MODULES__:'\'mypages,teampages,folders,messages\'',
+			__OCTOPUS_MODULES__:'\'mypages,grouppages,folders,messages\'',
 			__APP_TITLE__: '\'Octopus Basic\'',
 			__APP_ICON__:'\'/ico/objectreeficon.png\'',
 			__APP_DEFAULT_PAGE__: '\'/myday\'',

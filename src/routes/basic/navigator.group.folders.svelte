@@ -9,7 +9,7 @@
     import {reef, session} from '@humandialog/auth.svelte'
 	import { onMount } from 'svelte';
     import { cache} from './cache.js'
-    
+
     export let sidebar = true;
 
     let groupFolders = [];
@@ -178,8 +178,8 @@
             return false;
     }
 
-   
-    const mynotes_selection = {}
+
+
 
 </script>
 
@@ -210,21 +210,7 @@
                 </SidebarGroup>
             {/if}
 
-            <SidebarGroup title={i18n({en: 'Personal', es: 'Personales', pl: 'Osobiste'})}>
-                <SidebarItem   href="/mynotes"
-                                icon = 'file-text'
-                                active={isRoutingTo("/mynotes", currentPath)}
 
-                                selectable={mynotes_selection}>
-                    _; My notes; Mis notas; Moje notatki
-                </SidebarItem>
-                <SidebarItem   href="/myfolders"
-                                icon = 'folder'
-                                active={isRoutingTo("/myfolders", currentPath)}
-                                >
-                    _; My Folders; Mis carpetas; Moje Foldery
-                </SidebarItem>
-            </SidebarGroup>
         {/if}
 
         <SidebarGroup  title={i18n({en: 'Common', es: 'Comunes', pl: 'Wspólne'})}
@@ -246,6 +232,24 @@
             </SidebarList>
         </SidebarGroup>
 
+        <SidebarGroup   title={i18n({en: 'Others', es: 'Otros', pl: 'Inne'})}
+                    >
+
+            <SidebarItem   href="/myday"
+                            icon='archive'
+                            active={isRoutingTo("/myday", currentPath)}
+                            selectable={true}>
+                _; Archive; Día; Archiwum *
+            </SidebarItem>
+            <SidebarItem   href="/folder/trash"
+                            icon='trash'
+                            active={isRoutingTo("/teamday", currentPath)}
+                            selectable={true}>
+                _; Trash; Trabajo común; Kosz *
+            </SidebarItem>
+        </SidebarGroup>
+
+
         <!--SidebarGroup border>
             {@const href = `/folder/${basket.Id}`}
             <SidebarItem   {href}
@@ -266,5 +270,3 @@
 
 </PaperNav>
 {/key}
-
-

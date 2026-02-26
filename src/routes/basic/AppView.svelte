@@ -5,6 +5,9 @@
     } from '$lib';
     import Sidebar from './sidebar.svelte'
 
+    import SidebarMyPages from './sidebar.my.pages.svelte'
+    import SidebarGroupPages from './sidebar.group.pages.svelte'
+
     import SidebarFolders from './sidebar.folders.svelte'
     import SidebarMessages from './sidebar.messages.svelte'
     import SidebarTilos from './sidebar.tilos.svelte'
@@ -42,6 +45,7 @@
     import Unauthorized from './tilos/unauthorized.access.svelte';
     import AllTaskLists from './tasklists.all.svelte'
     import MyTaskLists from './tasklists.my.svelte'
+    import TaskListsTemplates from './tasklists.templates.svelte'
     import GroupFolders from './folders.group.svelte'
     import GeneralChannels from './channels.general.svelte'
     import PrivateChannels from './channels.private.svelte'
@@ -115,19 +119,19 @@
             {
             case 'mypages':
                 return {
-                    'TOC':{
+                    'MY':{
                         icon: FaList,
                         mricon: 'user',
-                        component: Sidebar
+                        component: SidebarMyPages
                     }
                 }
 
-            case 'teampages':
+            case 'grouppages':
                 return {
-                    'TOC':{
+                    'GROUP':{
                         icon: FaList,
-                        mricon: 'calendar',
-                        component: Sidebar
+                        mricon: 'users',
+                        component: SidebarGroupPages
                     }
                 }
 
@@ -302,6 +306,7 @@
                         '/tcontact':    {component: TilosContact},
                         '/alllists':    {component: AllTaskLists},
                         '/mylists':     {component: MyTaskLists},
+                        '/listtemplates':{component: TaskListsTemplates},
                         '/mynotes':     {component: MyNotes},
                         '/group-folders': {component: GroupFolders},
                         '/general-channels': {component: GeneralChannels},

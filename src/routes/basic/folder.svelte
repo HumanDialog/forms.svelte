@@ -39,8 +39,11 @@
     export let params = {}
 
     let contextItem = null;
+    let contextNavigation;
+    let contextItemSelector;
     let contextPath;
     let contextItemId;
+
     let listComponent;
     let folderTitle = ''
     let pendingUploading = false;
@@ -65,12 +68,31 @@
             return;
 
         if(!segments.length)
-            contextItemId = 1
+            contextItemSelector = 'default'
         else
-            contextItemId = parseInt(segments[segments.length-1])
+            contextItemSelector = segments[segments.length - 1]
+
+        switch (contextItemSelector)
+        {
+        case 'default':
+            contextNavigation = "/user/Folders/first";
+            break;
+        case 'trash':
+            contextNavigation = "/group/TrashFolder";
+            break;
+        case 'archive':
+            contextNavigation = "/group/ArchiveFolder";
+            break;
+        default:
+
+
+        }
+        contextItemId = parseInt()
 
 
         contextItem = null
+
+
         contextPath = `/Folder/${contextItemId}`
 
 
@@ -83,7 +105,7 @@
 
             listComponent?.reload(contextItem, listComponent.KEEP_SELECTION)
         }
-
+        //---------------------------------------------------
         const readItem = await readContextItem(contextItemId)
 
         // dodatkowe zabezpiecznie dla przypadku kiedy pokazalismy folder, ale jego wersje z cache'a
