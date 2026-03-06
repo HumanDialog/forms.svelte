@@ -187,7 +187,8 @@
             const taskList = res.TaskList;
 
             // tmp
-            taskList.Tasks.forEach((t) => t.users = users);
+            if(taskList.Tasks)
+                taskList.Tasks.forEach((t) => t.users = users);
 
             return taskList;
         }

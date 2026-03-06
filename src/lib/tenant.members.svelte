@@ -106,7 +106,7 @@
             {
                 reef_users.push(
                     {
-                        Id: new_reef_user_id++,
+                        Id: u.Id,
                         [nameAttrib]: u[nameAttrib],
                         [emailAttrib]: u[emailAttrib],
                         [refAttrib]: u[refAttrib],
@@ -184,7 +184,7 @@
         user.all_auth_accesses = authAccessKinds()
         user.all_roles = access_roles
 
-        user.Id = new_reef_user_id++;
+        //user.Id = new_reef_user_id++;
     }
 
     /*onMount(
@@ -749,7 +749,8 @@
         let new_reef_user = {
             [nameAttrib]: created_user[nameAttrib],
             [emailAttrib]: created_user[emailAttrib],
-            [refAttrib]: created_user[refAttrib]
+            [refAttrib]: created_user[refAttrib],
+            Id: created_user.Id
         }
 
         let details = await reef.get(`/sys/user_details?email=${new_reef_user[emailAttrib]}`)

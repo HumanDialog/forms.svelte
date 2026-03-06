@@ -32,7 +32,7 @@
         refreshToolbarOperations,
         PaperTable,
         PaperHeader, reloadPageToolbarOperations,
-        setjItemProperty, KanbanColumnTop, openInNewTab, copyAddress
+        setjItemProperty, KanbanColumnTop, openInNewTab, copyAddress, pushChangesImmediately
 	} from '$lib';
     import {FaPlus, FaList, FaPen, FaCaretLeft, FaCaretRight, FaTrash, FaArrowsAlt, FaArchive, FaCheck, FaEllipsisH, FaChevronRight,
         FaAngleDown, FaAngleUp, FaColumns, FaRandom, FaChevronLeft, FaUpload, FaRegCalendar, FaRegCalendarCheck, FaCaretUp, FaCaretDown, FaDownload
@@ -292,6 +292,21 @@
         
         //////
 
+        const newColumns = getKanbanColumnsDefinition()
+        kanban.setColumns(newColumns)
+        
+        await kanban.reload(currentList, kanban.KEEP_SELECTION);
+        //await reload(kanban.KEEP_SELECTION)
+
+        if(operationsFunc)
+        {
+            const newOperations = operationsFunc()
+            reloadPageToolbarOperations(newOperations, areContextOperations)
+        }
+    }
+
+    function getKanbanColumnsDefinition()
+    {
         const newColumns = []
         for(let idx=0; idx<taskStates.length; idx++)
         {
@@ -312,16 +327,7 @@
             state: -1
         })
 
-        kanban.setColumns(newColumns)
-        
-        await kanban.reload(currentList, kanban.KEEP_SELECTION);
-        //await reload(kanban.KEEP_SELECTION)
-
-        if(operationsFunc)
-        {
-            const newOperations = operationsFunc()
-            reloadPageToolbarOperations(newOperations, areContextOperations)
-        }
+        return newColumns;
     }
 
     function unfollowOperation(operationsFunc, areContextOperations)
@@ -1146,40 +1152,9 @@
         if(res && Array.isArray(res))
         {
             taskStates = [...res]
-            await kanban.rerender();
+            kanban.setColumns(getKanbanColumnsDefinition())
+            await kanban.reload(currentList, kanban.KEEP_SELECTION);
         }
-
-        //const columnState = taskStates[columnIdx].state;
-        //const toColumnIdx = taskStates.findIndex(s => s.state == newState)
-        //const tasks = currentList.Tasks.filter(t => t.State == columnState)
-        //kanban.moveCardsTo(tasks, toColumnIdx);
-
-        //taskStates.splice(columnIdx, 1);
-        //await saveTaskStates();
-
-        //taskStates = [...taskStates]
-        //await kanban.rerender();
-
-    }
-
-    async function onColumnNameChanged(columnIdx, name)
-    {
-        /*const res = await reef.post(`${currentList.$ref}/ChangeColumnName`, {
-                        pos: columnIdx,
-                        newName: name
-                    }, onErrorShowAlert);
-
-
-        if(res && Array.isArray(res))
-        {
-            taskStates = [...res]
-            await kanban.rerender();
-            kanban.activateColumn(columnIdx)
-        }*/
-
-
-        taskStates[columnIdx].name = name;
-        saveTaskStates();
     }
 
     async function onColumnMoveLeft(columnIdx)
@@ -1196,7 +1171,9 @@
 
         if(res && Array.isArray(res))
         {
-            await kanban.rerender();
+            //await kanban.rerender();
+            kanban.setColumns(getKanbanColumnsDefinition())
+            await kanban.reload(currentList);
             kanban.activateColumn(columnIdx-1)
         }
     }
@@ -1215,7 +1192,9 @@
 
         if(res && Array.isArray(res))
         {
-            await kanban.rerender();
+            //await kanban.rerender();
+            kanban.setColumns(getKanbanColumnsDefinition())
+            await kanban.reload(currentList);
             kanban.activateColumn(columnIdx+1)
         }
     }
@@ -1239,42 +1218,6 @@
     }
 
     const STATE_FINISHED = 7000
-    /*async function setColumnAsFinishing(columnIdx)
-    {
-        for(let i=0; i<taskStates.length; i++)
-        {
-            let taskState = taskStates[i];
-            if(taskState.state == STATE_FINISHED)
-            {
-                if(i == columnIdx)
-                    return;
-                else
-                {
-                    let maxStateValue=0;
-                    for(let j=0; j<taskStates.length; j++)
-                    {
-                        const taskState = taskStates[j];
-                        if(taskState.state > maxStateValue)
-                            maxStateValue = taskState.state;
-                    }
-
-                    const newState = maxStateValue + 1;
-                    const tasks = currentList.Tasks.filter(t => t.State == taskState.state)
-                    kanban.setCardsState(tasks, newState)
-                    taskState.state = newState
-                }
-            }
-        }
-
-        const taskState = taskStates[columnIdx]
-        const tasks = currentList.Tasks.filter(t => t.State == taskState.state)
-        kanban.setCardsState(tasks, STATE_FINISHED)
-        taskState.state = STATE_FINISHED
-
-        await saveTaskStates();
-        taskStates = [...taskStates]
-        await kanban.rerender(columnIdx);
-    }*/
 
     async function addColumn(name, idx=-1)
     {
@@ -1298,8 +1241,11 @@
             if(res && Array.isArray(res))
             {
                 taskStates = [...res]
-                await kanban.rerender();
-
+                
+                const columnDef = getKanbanColumnsDefinition()
+                kanban.setColumns(columnDef)
+                
+                await kanban.reload(currentList, kanban.CLEAR_SELECTION);
                 kanban.activateColumn(idx)
                 //kanban.editColumnName(idx);
             }
@@ -1345,7 +1291,9 @@
         if(res && Array.isArray(res))
         {
             taskStates = [...res]
-            await kanban.rerender();
+            //await kanban.rerender();
+            kanban.setColumns(getKanbanColumnsDefinition())
+            await kanban.reload(currentList);
 
             kanban.activateColumn(newColumnPos)
             //kanban.editColumnName(idx);
@@ -1368,8 +1316,11 @@
             const prevState = taskStates[editingColumnPos].state
             taskStates[editingColumnPos].state = newState;
 
-            const tasks = currentList.Tasks.filter(t => t.State == prevState)
-            kanban.setCardsState(tasks, newState)
+            if(currentList.Tasks && currentList.Tasks.length > 0)
+            {
+                const tasks = currentList.Tasks.filter(t => t.State == prevState)
+                kanban.setCardsState(tasks, newState)
+            }
         }
 
         if(newName !== undefined)
@@ -1379,7 +1330,11 @@
         {
             saveTaskStates();
             await fetchData()
-            await kanban.rerender(editingColumnPos)
+            
+            const newColumns = getKanbanColumnsDefinition()
+            kanban.setColumns(newColumns)
+            await kanban.reload(currentList, kanban.KEEP_SELECTION);
+            //await kanban.rerender(editingColumnPos)
             
         }
     }
@@ -1422,7 +1377,8 @@
                 self = {currentList}
                 title = 'Name'
                 summary = 'Summary'
-                bind:this={kanban}>
+                bind:this={kanban}
+                columnsDef={getKanbanColumnsDefinition()}>
 
             <KanbanSource self={currentList}
                           a='Tasks'
@@ -1430,7 +1386,8 @@
                           orderAttrib='ListOrder'/>
 
 
-                {#each taskStates as taskState, columnIdx (taskState.name+taskState.state)}
+            <!--
+                {#each taskStates as taskState, columnIdx (taskState.state)}
                     {@const isFinishing = taskState.state == STATE_FINISHED}
                     <KanbanColumn   title={ext(taskState.name)}
                                     state={taskState.state}
@@ -1442,7 +1399,7 @@
 
             <KanbanColumn   title={otherCaption}
                             state={-1} />
-
+            -->
 
 			<KanbanCallbacks {onAdd} {getCardOperations} {onReplace}/>
 

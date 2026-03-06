@@ -16,7 +16,7 @@
                                     {
                                         Id: 1,
                                         Association: 'Members/User',
-                                        Expressions: ['Name', 'login', '$ref', 'href', '$acc']
+                                        Expressions: ['Id', 'Name', 'login', '$ref', 'href', '$acc']
                                     }
                                 ]                    
                             },

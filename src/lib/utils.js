@@ -1287,7 +1287,7 @@ function launchNewGroupWizzard(afterGroupCreated=undefined)
 
 export const fetchHandlers = {
     onBefore: [
-        (path) => { pushChangesImmediately() }
+        async (path) => { await pushChangesImmediately() }
     ],
 
     //onAfter: [],

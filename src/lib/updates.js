@@ -170,9 +170,9 @@ export async function pushChangesImmediately()
         return;
 
     const ticket = get(update_request_ticket) + 1
-    update_request_ticket.set(ticket)
-
     await flushChanges(ticket);
+
+    update_request_ticket.set(ticket)
 }
 
 async function flushChanges(ticket)

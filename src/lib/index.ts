@@ -185,7 +185,7 @@ export {    data_tick_store,    // tmp
             setNavigatorTitle } from "./stores";
 
 export { contextToolbarOperations, pageToolbarOperations, contextItemsStore, contextTypesStore } from './stores'   // tmp
-export { informModification, setjItemProperty, informModificationEx, informItem, pushChanges, hasModifications } from './updates'   // tmp
+export { informModification, setjItemProperty, informModificationEx, informItem, pushChanges, hasModifications, pushChangesImmediately } from './updates'   // tmp
 
 
 
