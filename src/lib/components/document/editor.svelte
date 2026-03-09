@@ -1181,6 +1181,7 @@
         let show_above = true;
 
         palette.show(x, y, show_above);
+        palette.focus()
     }
 
     function show_big_command_palette(cursor_rect, client_rect)

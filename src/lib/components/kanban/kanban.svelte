@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {setContext, getContext, afterUpdate, tick} from 'svelte'
+    import {setContext, getContext, afterUpdate, tick, onMount} from 'svelte'
     import {KanbanColumnBottom, KanbanColumnTop, rKanban_definition, rKanban_column} from './Kanban'
     import {parseWidthDirective, clearActiveItem, getPrev, getNext, remove, insertAt, insertAfter, swapElements, getActive} from '../../utils'
     import {contextItemsStore, contextTypesStore, data_tick_store } from '../../stores'

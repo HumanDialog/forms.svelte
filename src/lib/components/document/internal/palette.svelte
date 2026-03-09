@@ -69,10 +69,12 @@
     }
 
     let paletteElement;
+    let focusAfterUpdate = false
+
     afterUpdate(
       async () =>
       {
-        // OCT-273: not only for toolbox case. Z order problems are also for large screen, full palette case
+         // OCT-273: not only for toolbox case. Z order problems are also for large screen, full palette case
           if(/*isToolbox && */visible && paletteElement)
           {
               const layoutRoot = getLayoutElement()
@@ -82,9 +84,21 @@
                 await tick();
                 layoutRoot.appendChild(paletteElement)
               }
+
+
+            if(focusAfterUpdate)
+            {
+                focusAfterUpdate = false;
+                paletteElement.focus()
+            }
           }
       }
     )
+ 
+    export function focus()
+    {
+        focusAfterUpdate = true;
+    }
 
     onMount(
         () => {
@@ -435,6 +449,33 @@
     }
 
 
+    function onKeyDown(e)
+    {
+        e.stopPropagation();
+        e.preventDefault();
+
+        switch(e.key)
+        {
+        case 'ArrowUp':
+            navigate_up()
+            break;
+
+        case 'ArrowDown':
+            navigate_down()
+            break;
+
+        case 'Escape':
+        case 'Esc':
+            hide()
+            break;
+
+        case 'Enter':
+            execute_selected_command()
+            break;
+        }
+    }
+
+   
 
 </script>
 
@@ -481,10 +522,12 @@
 
         <div    hidden={!visible}
                 class=" bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-700 shadow-md
-                        z-40 fixed"
+                        z-40 fixed focus:outline-none"
                 id="__hd_FormattingPalette"
                 bind:this={paletteElement}
-                style={css_style} >
+                style={css_style}
+                tabindex="-1"
+                on:keydown={onKeyDown} >
 
              {#if visible &&  closeButtonPos}
                 {#key closeButtonPos}

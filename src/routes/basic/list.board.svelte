@@ -32,13 +32,15 @@
         refreshToolbarOperations,
         PaperTable,
         PaperHeader, reloadPageToolbarOperations,
-        setjItemProperty, KanbanColumnTop, openInNewTab, copyAddress, pushChangesImmediately
+        setjItemProperty, KanbanColumnTop, openInNewTab, copyAddress, pushChangesImmediately,
+		saveScrollPosition, restoreScrollPosition
+
 	} from '$lib';
     import {FaPlus, FaList, FaPen, FaCaretLeft, FaCaretRight, FaTrash, FaArrowsAlt, FaArchive, FaCheck, FaEllipsisH, FaChevronRight,
         FaAngleDown, FaAngleUp, FaColumns, FaRandom, FaChevronLeft, FaUpload, FaRegCalendar, FaRegCalendarCheck, FaCaretUp, FaCaretDown, FaDownload
     } from 'svelte-icons/fa'
     import MoveOperations from './list.board.move.svelte'
-	import { tick, onMount } from 'svelte';
+	import { tick, onMount, afterUpdate } from 'svelte';
     import BasketPreview from './basket.preview.svelte'
     import PopupExplorer from './popup.explorer.svelte'
     import {fetchComposedClipboard4TaskList, transformClipboardToJSONReferences, setBrowserRecentElement, getBrowserRecentElements4TaskList} from './basket.utils'
@@ -59,6 +61,8 @@
     let kanban;
     let definitionChangedTicket = 1
     let usersComboSource;
+    let prevLocation = '';
+    let restoreScrollAfterUpdate = false
 
     const TLK_KANBAN_CHECKLIST = 0
     const TLK_KANBAN_PROCESS = 1
@@ -111,8 +115,13 @@
         if(isNaN(listId))
             listId = 1
 
-        let prevDef = currentList?.$ref
+        if(prevLocation && $location != prevLocation)
+            saveScrollPosition(prevLocation)
 
+        restoreScrollAfterUpdate = true;
+        prevLocation = $location
+        
+        let prevDef = currentList?.$ref
         const cacheKey = `listboard/${listId}`
         const cachedValue = cache.get(cacheKey)
         prevDef = showCachedDataFirst(cachedValue, prevDef);
@@ -140,6 +149,18 @@
             kanban?.reload(currentList, kanban.KEEP_SELECTION);
         }
     }
+
+    onMount( () => {
+        return () => saveScrollPosition(prevLocation)
+    })
+
+    afterUpdate(() => {
+        if(restoreScrollAfterUpdate)
+        {
+            restoreScrollAfterUpdate = false;
+            restoreScrollPosition($location)   
+        }
+    })
 
     function showCachedDataFirst(cachedValue, prevDef)
     {

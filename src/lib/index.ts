@@ -154,7 +154,9 @@ export {
     getGroupsMenu,
     fetchHandlers,
     openInNewTab,
-    copyAddress
+    copyAddress,
+    saveScrollPosition,
+    restoreScrollPosition
 }   from './utils'
 
 export {
