@@ -162,7 +162,7 @@
                 paper w-full
                 prose prose-base prose-zinc dark:prose-invert prose-a:no-underline
 
-                m-0 pt-5 pb-5 px-8
+                m-0 pt-5 pb-5 sm:px-8
                 sm:rounded
                 bg-stone-200 dark:bg-stone-900
                 flex flex-col

@@ -109,7 +109,12 @@
                 elements = await generateTaskReferences(whatToShow)
             else if(whatToShow.startsWith('/note/'))
                 elements = await generateNoteReferences(whatToShow)
+            else
+                elements = await generateRootReferences()
         }
+
+        if(!elements)
+            elements = await generateRootReferences()
 
         listElement?.reload(elements);
     }
@@ -131,7 +136,8 @@
             icon: 'square-pen',
             href: '/mytasks',
             ElementInfo: 0,
-            $ref: 'mytasks'
+            $ref: 'mytasks',
+            $type: 'Container'
         }
 
         const root_tasklists = [
@@ -144,7 +150,8 @@
                 icon: 'notebook',
                 href: '/mylists',
                 ElementInfo: 0,
-                $ref: 'mylists'
+                $ref: 'mylists',
+                $type: 'Container'
             },
             {
                 ElementId: 0,
@@ -155,7 +162,8 @@
                 icon: 'notebook',
                 href: '/alllists',
                 ElementInfo: 0,
-                $ref: 'alllists'
+                $ref: 'alllists',
+                $type: 'Container'
             }
         ]
 
@@ -169,7 +177,8 @@
                 icon: 'folder',
                 href: '/pinned',
                 ElementInfo: 0,
-                $ref: 'pinned'
+                $ref: 'pinned',
+                $type: 'Container'
             },
             {
                 ElementId: 0,
@@ -180,7 +189,8 @@
                 icon: 'folder',
                 href: '/myfolders',
                 ElementInfo: 0,
-                $ref: 'myfolders'
+                $ref: 'myfolders',
+                $type: 'Container'
             },
             {
                 ElementId: 0,
@@ -191,7 +201,8 @@
                 icon: 'folder',
                 href: '/group-folders',
                 ElementInfo: 0,
-                $ref: 'groupfolders'
+                $ref: 'groupfolders',
+                $type: 'Container'
             }
         ]
 
@@ -233,7 +244,7 @@
 
         let res = await reef.get(`/user/MyTasks?State<>STATE_FINISHED&fields=Id,$type,$ref,Title,Summary,href,icon&sort=UserOrder`, onErrorShowAlert);
         if(!res)
-            return [  ]
+            return null
         else
         {
             if(attachToContainer)
@@ -249,9 +260,10 @@
                     Title: t.Title,
                     Summary: t.Summary,
                     icon: t.icon,
-                    //href: t.href,
+                    href: t.href,
                     ElementInfo: 0,
-                    $ref: t.$ref
+                    $ref: t.$ref,
+                    $type: 'Leaf'
                 })
             })
 
@@ -268,7 +280,7 @@
 
         let res = await reef.get(`/user/MyLists?Status<>TLS_GROUP_ARCHVIVED_LIST&fields=Id,$type,$ref,Name,Summary,href&sort=Order`, onErrorShowAlert);
         if(!res)
-            return [  ]
+            return null
         else
         {
             //if(attachToContainer)
@@ -287,7 +299,8 @@
                     icon: 'notebook',
                     href: t.href,
                     ElementInfo: 0,
-                    $ref: t.$ref
+                    $ref: t.$ref,
+                    $type: 'Container'
                 })
             })
 
@@ -304,7 +317,7 @@
 
         let res = await reef.get(`/group/Lists?fields=Id,$type,$ref,Name,Summary,href&sort=Order`, onErrorShowAlert);
         if(!res)
-            return [  ]
+            return null
         else
         {
             //if(attachToContainer)
@@ -323,7 +336,8 @@
                     icon: 'notebook',
                     href: t.href,
                     ElementInfo: 0,
-                    $ref: t.$ref
+                    $ref: t.$ref,
+                    $type: 'Container'
                 })
             })
 
@@ -381,7 +395,7 @@
             }
         );
         if(!res)
-            return [  ]
+            return null
         else
         {
             let references = [ ]
@@ -398,7 +412,8 @@
                     Summary: '',
                     icon: contextItem.icon,
                     ElementInfo: 0,
-                    $ref: contextItem.$ref
+                    $ref: contextItem.$ref,
+                    $type: 'Container'
                 }        
             }
 
@@ -414,7 +429,7 @@
                         icon: f.icon,
                         href: f.href,
                         Order: f.Order,
-                        $ref: `./Folder/${f.FolderId}`
+                        $ref: `./Folder/${f.FolderId}`,
                     })
                 })
             }
@@ -428,9 +443,9 @@
                         Title: f.Title,
                         Summary: f.Summary,
                         icon: f.icon,
-                        //href: f.href,
+                        href: f.href,
                         Order: f.Order,
-                        $ref: `./Note/${f.NoteId}`
+                        $ref: `./Note/${f.NoteId}`,
                     })
                 })
             }
@@ -444,7 +459,7 @@
                         Title: f.Title,
                         Summary: f.Summary,
                         icon: f.icon,
-                        //href: f.href,
+                        href: f.href,
                         Order: f.Order,
                         $ref: `./Task/${f.TaskId}`
                     })
@@ -460,7 +475,7 @@
                         Title: f.Title,
                         Summary: f.Summary,
                         icon: f.icon,
-                        //href: f.href,
+                        href: f.href,
                         Order: f.Order,
                         $ref: `./UploadedFile/${f.FileId}`
                     })
@@ -479,7 +494,8 @@
                     icon: t.icon,
                     href: t.href ?? undefined,
                     ElementInfo: 0,
-                    $ref: t.$ref
+                    $ref: t.$ref,
+                    $type: t.$type=='Folder' ? 'Container' : 'Leaf'
                 })
             })
 
@@ -496,7 +512,7 @@
 
         let res = await reef.get(`/user/Folders?fields=Id,$type,$ref,Title,Summary,href,icon&sort=Order`, onErrorShowAlert);
         if(!res)
-            return [  ]
+            return null
         else
         {
             if(attachToContainer)
@@ -514,7 +530,8 @@
                     icon: t.icon,
                     href: t.href,
                     ElementInfo: 0,
-                    $ref: t.$ref
+                    $ref: t.$ref,
+                    $type: 'Container'
                 })
             })
 
@@ -531,7 +548,7 @@
 
         let res = await reef.get(`/group/Folders?fields=Id,$type,$ref,Title,Summary,href,icon&sort=Order`, onErrorShowAlert);
         if(!res)
-            return [  ]
+            return null
         else
         {
             if(attachToContainer)
@@ -549,7 +566,8 @@
                     icon: t.icon,
                     href: t.href,
                     ElementInfo: 0,
-                    $ref: t.$ref
+                    $ref: t.$ref,
+                    $type: 'Container'
                 })
             })
 
@@ -616,7 +634,7 @@
         {
             levelUpHRef = '/root'
             currentLevelTitle = ''
-            return [  ]
+            return null
         }
         else
         {
@@ -671,7 +689,7 @@
                         Title: f.Title,
                         Summary: f.Summary,
                         icon: f.icon,
-                        //href: f.href,
+                        href: f.href,
                         Order: f.Order,
                         $ref: `./Note/${f.NoteId}`
                     })
@@ -687,7 +705,7 @@
                         Title: f.Title,
                         Summary: f.Summary,
                         icon: f.icon,
-                        //href: f.href,
+                        href: f.href,
                         Order: f.Order,
                         $ref: `./Task/${f.TaskId}`
                     })
@@ -703,7 +721,7 @@
                         Title: f.Title,
                         Summary: f.Summary,
                         icon: f.icon,
-                        //href: f.href,
+                        href: f.href,
                         Order: f.Order,
                         $ref: `./UploadedFile/${f.FileId}`
                     })
@@ -722,7 +740,8 @@
                     icon: t.icon,
                     href: t.href ?? undefined,
                     ElementInfo: 0,
-                    $ref: t.$ref
+                    $ref: t.$ref,
+                    $type: t.$type == 'Folder' ? 'Container' : 'Leaf'
                 })
             })
 
@@ -771,7 +790,7 @@
         {
             levelUpHRef = '/root'
             currentLevelTitle = ''
-            return [  ]
+            return null
         }
         else
         {
@@ -792,7 +811,7 @@
                     Summary: '',
                     icon: '',
                     ElementInfo: 0,
-                    $ref: contextItem.$ref
+                    $ref: contextItem.$ref,
                 }        
             }
 
@@ -811,9 +830,10 @@
                     Title: t.Title,
                     Summary: t.Summary,
                     icon: t.icon,
-                    //href: t.href,
+                    href: t.href,
                     ElementInfo: 0,
-                    $ref: t.$ref
+                    $ref: t.$ref,
+                    $type: 'Leaf'
                 })
             })
 
@@ -867,7 +887,7 @@
         {
             levelUpHRef = '/root'
             currentLevelTitle = ''
-            return [  ]
+            return null
         }
         else
         {
@@ -980,7 +1000,7 @@
         {
             levelUpHRef = '/root'
             currentLevelTitle = ''
-            return [  ]
+            return null
         }
         else
         {
@@ -1232,7 +1252,12 @@ let list_properties = {
             Title: "Title",
             Summary: "Summary",
             readonly: true,
-            onOpen: onOpen
+        },
+
+        context: {
+            Container: {
+                onOpen: onOpen
+            }
         }
     }
 
