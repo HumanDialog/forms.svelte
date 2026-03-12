@@ -518,7 +518,7 @@ export function editable(node, params)
         let sel = window.getSelection();
         sel.removeAllRanges();
         sel.addRange(range);
-        
+
     }
 
     const focus_listener = async (e) =>
@@ -552,10 +552,10 @@ export function editable(node, params)
 
     if(onFinish)
         node.addEventListener("finish", (e) => { onFinish(e.detail) })
-    
+
     if(active)
         node.contentEditable = "true"
-    
+
     return {
         destroy() {
 
@@ -565,7 +565,7 @@ export function editable(node, params)
                 node.removeEventListener("finish", (e) => { onFinish(e.detail) })
 
             node.classList.remove("editable")
-            
+
         }};
 }
 
@@ -1204,9 +1204,9 @@ export function getCurrentGroupName(session)
     const tInfo = session.tenants.find(t => t.id == gid)
     if(tInfo)
         return tInfo.name;
-    else 
+    else
     {
-        return 'Current group'  // todo: handle group when local auth 
+        return 'Current group'  // todo: handle group when local auth
     }
 }
 
@@ -1234,7 +1234,7 @@ export async function getGroupsMenu(params)
         return []
 
     let options = []
-    
+
     session.tenants.forEach(tInfo =>
         options.push({
             caption: tInfo.name,
@@ -1279,8 +1279,8 @@ function launchNewGroupWizzard(afterGroupCreated=undefined)
             afterGroupCreated: afterGroupCreated
         }
     });
-    
-    dialog.show()    
+
+    dialog.show()
 }
 
 

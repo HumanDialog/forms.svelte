@@ -12,119 +12,204 @@
                 ListComboProperty,
 				mainContentPageReloader,
                 Modal,
+                Editable,
+                focusEditable,
                 onErrorShowAlert, Breadcrumb, Paper, PaperHeader,
-                i18n, reloadPageToolbarOperations
+                i18n, ext, reloadPageToolbarOperations,
+                query_item_collection
         } from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaList, FaPen, FaArchive, FaChevronLeft, FaChevronRight} from 'svelte-icons/fa'
-    import {querystring, pop, link} from 'svelte-spa-router'
+    import {location, pop, push, querystring, link} from 'svelte-spa-router'
 
     export let params = {}
 
-    let group = null;
+    let self = null;
+    let context = null;
     let listComponent;
+
     let showArchived = false;
+    let contextItemSelector;
+    let self_ref;
+    let collection_ref;
+
+    let cacheKey;
+    let contextPath;
+    let contextItemId;
     let canonicalPath = []
-    const title = '_; Common lists; Listas comunes; Wspólne listy'
 
-    $: onParamsChanged($session, $mainContentPageReloader, $querystring);
+    let query_selector = "";
+    let query_id = 0;
 
-    async function onParamsChanged(...args)
+    let title = "";
+
+    $: onParamsChanged($location, $session, $mainContentPageReloader, $querystring);
+
+    const group_expressions = ['Id', '$type', 'Name'];
+    const project_expressions = ['Id','$type','Title'];
+    const task_list_expressions = ['Id', '$type', 'Name', 'Summary', 'Order', 'href', '$ref', 'IsSubscribed'];
+
+    const query_params = {
+        contexts: {
+            default:{
+                title: '_; Common lists; Listas comunes; Wspólne listy',
+                summary: "__;en: Task lists visible to all group members;es: Listas de tareas visibles para todos los miembros del grupo.;pl: Listy zadań widoczne dla wszystkich członków grupy.",
+                self: "group",
+                self_type: 'Group',
+                self_expressions: group_expressions,
+                collection: "Lists",
+                element_expressions: task_list_expressions
+            },
+            alllists: {
+                title: '_; Common lists; Listas comunes; Wspólne listy',
+                summary: "__;en: Task lists visible to all group members;es: Listas de tareas visibles para todos los miembros del grupo.;pl: Listy zadań widoczne dla wszystkich członków grupy.",
+                self: "group",
+                self_type: 'Group',
+                self_expressions: group_expressions,
+                collection: "Lists",
+                element_expressions: task_list_expressions
+            },
+            archivedlists:{
+                title: '_; Archived lists; Listas comunes; Zarchiwizowane listy',
+                summary: "__;en: Archived lists visible to all group members;es: Listas comunes de tareas visibles para todos los miembros del grupo.;pl: Zarchiwizowane listy zadań widoczne dla wszystkich członków grupy.",
+                self: "group",
+                self_type: 'Group',
+                self_expressions: group_expressions,
+                collection: "ArchivedLists",
+                element_expressions: task_list_expressions
+            },
+            listtemplates:{
+                title: '_; Archived lists; Listas comunes; Zarchiwizowane listy',
+                self: "group",
+                self_type: 'Group',
+                self_expressions: group_expressions,
+                collection: "TemplateLists",
+                element_expressions: task_list_expressions
+            },
+            project:{
+                stitle: 'Title',
+                ssummary: 'Summary',
+                self: "Project", use_id: true,
+                self_type: 'Project',
+                self_expressions: project_expressions,
+                collection: "Lists",
+                element_expressions: task_list_expressions
+            }
+        }
+    }
+
+    let query_root = "";
+    let query_key = "";
+
+
+    let query_body = {}
+
+    function select_context()
     {
-        if(!$session.isActive)
+        const segments = $location.split('/');
+
+        if(!segments.length)
+            query_selector = 'default'
+        else
+            query_selector = segments[1];
+
+        context = query_params.contexts[query_selector];
+        if(!context)
         {
-            group = null;
+            query_selector = 'default'
+            context = query_params.contexts[query_selector];
             return;
         }
 
-        const params = new URLSearchParams($querystring);
-        showArchived = params.has('archived')
+        if(!context.use_id)
+            return;
 
-        await fetchData()
+        if(segments.length > 2)
+            query_id = parseInt(segments[2]);
+
+        if(query_id <= 0)
+        {
+            query_selector = 'default'
+            context = query_params.contexts[query_selector];
+        }
     }
 
-    async function fetchData()
+    function adjust_query_root()
     {
-        console.log('tasklists.all fetchData')
-        if(!showArchived)
-        {
-            let res = await reef.post(`/group/query`,
-                                    {
-                                        Id: 1,
-                                        Name: "collector",
-                                        ExpandLevel: 3,
-                                        Tree:
-                                        [
-                                            {
-                                                Id: 1,
-                                                Association: '',
-                                                Expressions:['Id','Name'],
-                                                SubTree:
-                                                [
-                                                    {
-                                                        Id: 2,
-                                                        Association: 'Lists',
-                                                        //Filter: 'State <> STATE_FINISHED',
-                                                        Sort: "Order",
-                                                        Expressions: ['Id', 'Name', 'Summary', 'Order', 'href', '$ref', 'IsSubscribed']
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    },
-                                    onErrorShowAlert);
-            if(res)
-                group = res.Group;
-            else
-                group = null
-        }
-        else
-        {
-            let res = await reef.post(`/group/query`,
-                                    {
-                                        Id: 1,
-                                        Name: "collector",
-                                        ExpandLevel: 3,
-                                        Tree:
-                                        [
-                                            {
-                                                Id: 1,
-                                                Association: '',
-                                                Expressions:['Id','Name'],
-                                                SubTree:
-                                                [
-                                                    {
-                                                        Id: 2,
-                                                        Association: 'AllLists',
-                                                        Filter: 'Status=TLS_GROUP_ARCHVIVED_LIST',
-                                                        Sort: "-Id",
-                                                        Expressions: ['Id', 'Name', 'Summary', 'Order', 'href', '$ref']
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    },
-                                    onErrorShowAlert);
-            if(res)
-                group = res.Group;
-            else
-                group = null
-        }
+        console.log('adjust_query_root [a]: ' + query_selector)
+        let self = context.self;
 
-        /*canonicalPath = [
-            {
-                Name: group.Name
-            },
-            {
-                Name: title
-            }
-        ]*/
+        if(!context.use_id)
+            query_root = "/" + context.self + "/query";
+        else
+            query_root = "/" + context.self + "/" + query_id + "/query";
+
+        console.log('adjust_query_root [b]: ' + query_selector + " - " + query_root)
+    }
+
+    function adjust_query_body()
+    {
+
+        query_body = query_item_collection( context.self_expressions,
+                                                context.collection,
+                                                context.element_expressions);
+
+        console.log('query body: ', query_body);
+    }
+
+    function adjust_query_key()
+    {
+        query_key = context.self + "/" + context.collection;
+    }
+
+    function adjust_other_params()
+    {
+        title = context.title;
+    }
+
+
+    async function onParamsChanged(...args)
+    {
+        console.log('onParamsChanged')
+        select_context()
+
+        adjust_query_root();
+        adjust_query_body();
+        adjust_query_key();
+        adjust_other_params();
+
+
+
+
+        //const cachedValue = cache.get(query_key)
+        //if(cachedValue)
+        //{
+        //    contextItem = cachedValue;
+        //    folderTitle = ext(contextItem.Title);
+        //    contextItemId = cachedValue.Id;
+        //    listComponent?.reload(contextItem, listComponent.KEEP_SELECTION)
+        // }
+        //---------------------------------------------------
+        //const readItem = await readContextItem(self_ref, cacheKey)
+
+        await fetch_items()
+    }
+
+    async function fetch_items()
+    {
+        let res = await reef.post(query_root,
+                                query_body,
+                                onErrorShowAlert);
+        if(res)
+            self = res[context.self_type];
+        else
+            self = null
 
     }
 
     async function reloadLists(selectRecommendation)
     {
-        await fetchData();
-        listComponent.reload(group, selectRecommendation);
+        await fetch_items();
+        listComponent.reload(self, selectRecommendation);
     }
 
 
@@ -207,6 +292,7 @@
                             mricon: 'file-archive',
                             caption: '_; Show archived lists; Mostrar listas archivadas; Pokaż zarchiwizowane listy',
                             //action: (focused) => { listComponent.addRowAfter(null) },
+                            action: (focused) => push('/archivedlists'),
                             fab: 'S01',
                             tbr: 'C'
                         }
@@ -371,13 +457,13 @@
 </script>
 
 <svelte:head>
-    <title>{title} | {__APP_TITLE__}</title>
+    <title>{ext(title)} | {__APP_TITLE__}</title>
 </svelte:head>
 
-{#if group}
-    {#key group}
-    {#if !showArchived}
-        <Page   self={group}
+{#if self}
+    {#key self}
+
+        <Page   self={self}
                 toolbarOperations={pageOperations}
                 clearsContext='props sel'
                 title={title}>
@@ -386,13 +472,41 @@
             <PaperHeader>
                 <!--Breadcrumb class="mt-1 mb-5" path={canonicalPath}/-->
             </PaperHeader>
+            <!--
+            {#if true}
+                <h1><Editable self={contextItem} a='Title'/></h1>
+
+                <p class="lead">
+                    <Editable self={contextItem} a='Summary'/>
+                </p>
+
+            {:else}
+                <h1>
+                    {ext(contextItem.Title)}
+                </h1>
+                {#if contextItem.Summary}
+                    <p class="lead">
+                        {ext(contextItem.Summary)}
+                    </p>
+                {/if}
+            {/if}-->
 
             <figure>
-            <h1>{title}</h1>
-            <figcaption>{i18n(["Task lists visible to all group members.", "Listas de tareas visibles para todos los miembros del grupo.", "Listy zadań widoczne dla wszystkich członków grupy."])}</figcaption>
+                    {#if context.title}
+            <h1>{ext(context.title)}</h1>
+                    {:else if context.stitle}
+            <h1><Editable self={self} a={context.stitle}/></h1>
+                    {/if}
+
+                    {#if context.summary}
+            <figcaption>{ext(context.summary)}</figcaption>
+                    {:else if context.ssummary}
+            <figcaption><Editable self={self} a={context.ssummary}/></figcaption>
+                    {/if}
+
             </figure>
 
-            <List   self={group}
+            <List   self={self}
                     a='Lists'
                     {list_properties}
                     toolbarOperations={listOperations}
@@ -417,36 +531,6 @@
 
             </Paper>
         </Page>
-    {:else}
-        <Page   self={group}
-                toolbarOperations={[]}
-                clearsContext='props sel'
-                title={title}>
-                <Paper class="mb-64">
-                <section class="w-full place-self-center max-w-3xl">
-            <List   self={group}
-                    a='AllLists'
-                    {list_properties}
-                    orderAttrib='Order'
-                    bind:this={listComponent}>
-                <ListTitle a='Name' hrefFunc={(list) => `/tasklist/${list.Id}?archivedList`} />
-                <ListSummary a='Summary'/>
-                <!--ListInserter action={addList} icon/-->
-
-
-            </List>
-
-            <div class="ml-3 mt-20 mb-10">
-                <button on:click={(e) => pop() }>
-                    <div class="inline-block mt-1.5 w-3 h-3"><FaChevronLeft/></div>
-                    _; Back; Volver; Wróć
-                </button>
-            </div>
-        </section>
-        </Paper>
-
-        </Page>
-    {/if}
     {/key}
 {:else}
     <Spinner delay={3000}/>

@@ -43,6 +43,8 @@
     import TilosDownload from './tilos/download.svelte'
     import TilosContact from './tilos/contact.svelte'
     import Unauthorized from './tilos/unauthorized.access.svelte';
+    import TaskLists from './tasklists.svelte'
+    import Projects from './projects.svelte'
     import AllTaskLists from './tasklists.all.svelte'
     import MyTaskLists from './tasklists.my.svelte'
     import TaskListsTemplates from './tasklists.templates.svelte'
@@ -304,10 +306,16 @@
                         '/profile':     {component: Profile},
                         '/tdownload':   {component: TilosDownload},
                         '/tcontact':    {component: TilosContact},
-                        '/alllists':    {component: AllTaskLists},
+                        '/alllists':    {component: TaskLists},
+                        '/alllists/*':    {component: TaskLists},
+                        '/project':     {component: TaskLists},
+                        '/project/*':     {component: TaskLists},
+                        '/archivedlists':    {component: TaskLists},
+                        '/allprojects': {component: Projects},
                         '/mylists':     {component: MyTaskLists},
                         '/listtemplates':{component: TaskListsTemplates},
                         '/mynotes':     {component: MyNotes},
+
                         '/group-folders': {component: GroupFolders},
                         '/general-channels': {component: GeneralChannels},
                         '/private-channels':{component: PrivateChannels},

@@ -12,11 +12,14 @@
 
     export let sidebar = true;
 
-    let userTaskLists = [];
+
     let groupTaskLists = [];
+    let groupProjects = [];
+
     let user = {};
     let navUserLists;
     let navGroupLists;
+    let navGroupProjects;
 
     $: currentPath = $location;
 
@@ -40,11 +43,12 @@
 
     async function initNavigator()
     {
-        const cachedUserLists = cache.get('listsNavigator_0')
-        if(cachedUserLists)
+
+        const cachedGroupProjects = cache.get('projectsNavigator')
+        if(cachedGroupProjects)
         {
-            userTaskLists = cachedUserLists;
-            navUserLists?.reload(userTaskLists)
+            groupProjects = cachedGroupLists;
+            navGroupProjects?.reload(groupProjects)
         }
 
         const cachedGroupLists = cache.get('listsNavigator_1')
@@ -57,9 +61,10 @@
         await fetchData()
 
         navGroupLists?.reload(groupTaskLists)
-        navUserLists?.reload(userTaskLists)
 
-        cache.set('listsNavigator_0', userTaskLists);
+        navGroupProjects?.reload()
+
+
         cache.set('listsNavigator_1', groupTaskLists);
     }
 
@@ -67,32 +72,29 @@
     {
         const limit = isDeviceSmallerThan("sm") ? 7 : 12
 
-        const userTasklistsPromise = reef.post('user/query', {
-            Id: 1,
-            Name: 'user tasklists',
-            Limit: limit,
+
+        const groupProjectsPromise  = reef.post('group/query', {
+            Id: 2,
+            Name: "group tasklists",
+            ExpandLevel: 1,
+            Limit: 3,
             Tree: [
                 {
-                    Id: 11,
-                    Association: '',
-                    Expressions: ['Id', '$ref', 'href', 'Name'],
-                    SubTree: [
-                        {
-                            Id: 110,
-                            Association: 'MyLists',
-                            Sort: 'Order',
-                            Expressions: ['Id', 'Name', 'Summary', 'Order', 'href', '$ref', '$type']
-                        }
-                    ]
+                    Id: 20,
+                    Association: 'Projects',
+                    Sort: "Order",
+                    Expressions: ['Id', 'Title', 'Order', 'href', '$ref', '$type']
                 }
             ]
         }, onErrorShowAlert)
+
+
 
         const groupTasklistsPromise = reef.post('group/query', {
             Id: 2,
             Name: "group tasklists",
             ExpandLevel: 1,
-            Limit: limit,
+            Limit: 20,
             Tree: [
                 {
                     Id: 21,
@@ -103,30 +105,28 @@
             ]
         }, onErrorShowAlert)
 
-        const results = await Promise.all([userTasklistsPromise, groupTasklistsPromise])
+        const results = await Promise.all([groupProjectsPromise, groupTasklistsPromise])
+
 
         if(results[0])
-        {
-            user = results[0].User;
-            userTaskLists = user.MyLists
-        }
+            groupProjects = results[1].Project;
         else
-        {
-            user = null
-            userTaskLists = []
-        }
+            groupProjects = []
+
 
         if(results[1])
-            groupTaskLists = results[1].TaskList;
+            groupTaskLists = results[2].TaskList;
         else
             groupTaskLists = []
+
+
     }
 
     async function reload()
     {
         await fetchData();
         navGroupLists.reload(groupTaskLists)
-        navUserLists.reload(userTaskLists)
+        navGroupProjects.reloat(groupProjects)
     }
 
     function isRoutingTo(href, currentPath)
@@ -158,18 +158,18 @@
 
         {#if $session.isActive}
             <SidebarGroup   title={i18n({en: 'Projects', es: 'Mis Proyectos', pl: 'Projekty'})}
-                            moreHref="/mylists">
+                            moreHref="/allprojects">
 
-                <SidebarList    objects={userTaskLists}
+                <SidebarList    objects={groupProjects}
                                 orderAttrib='Order'
-                                bind:this={navUserLists}>
+                                bind:this={navGroupProjects}>
                     <svelte:fragment let:item let:idx>
                         {@const href = item.href}
                         <SidebarItem   {href}
-                                        icon='notebook'
+                                        icon='building'
                                         active={isRoutingTo(href, currentPath)}
                                         >
-                            {ext(item.Name)}
+                            {item.Title}
                         </SidebarItem>
                     </svelte:fragment>
                 </SidebarList>

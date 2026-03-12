@@ -16,114 +16,162 @@
                 i18n, reloadPageToolbarOperations
         } from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaList, FaPen, FaArchive, FaChevronLeft, FaChevronRight} from 'svelte-icons/fa'
-    import {querystring, pop, link} from 'svelte-spa-router'
+    import {location, pop, push, querystring, link} from 'svelte-spa-router'
 
     export let params = {}
 
     let group = null;
     let listComponent;
+
     let showArchived = false;
+    let contextItemSelector;
+    let self_ref;
+    let collection_ref;
+
+    let cacheKey;
+    let contextPath;
+    let contextItemId;
     let canonicalPath = []
-    const title = '_; Common lists; Listas comunes; Wspólne listy'
 
-    $: onParamsChanged($session, $mainContentPageReloader, $querystring);
+    let query_selector = "";
 
-    async function onParamsChanged(...args)
+    let title = "";
+
+    $: onParamsChanged($location, $session, $mainContentPageReloader, $querystring);
+
+    const query_params = {
+        contexts: {
+            default:{
+                title: '_; Common lists; Listas comunes; Wspólne listy',
+                self: "group",
+                collection: "Lists"
+            },
+            allprojects: {
+                title: '_; Active projects; Proyectos activos; Aktywne projekty',
+                self: "group",
+                collection: "Projects"
+            },
+            archivedprojects:{
+                title: '_; Archived projects; Proyectos archivados; Zarchiwizowane projekty',
+                self: "group",
+                collection: "ArchivedProjects"
+            }
+        }
+    }
+
+    let query_root = "";
+    let query_key = "";
+
+    let query_body = {  Id: 1,
+                        Name: "collector",
+                        ExpandLevel: 3,
+                        Tree:
+                        [
+                            {
+                                Id: 1,
+                                Association: '',
+                                Expressions:['Id','Name'],
+                                SubTree:
+                                [
+                                    {
+                                        Id: 2,
+                                        Association: 'Projects',
+                                        //Filter: 'State <> STATE_FINISHED',
+                                        Sort: "Order",
+                                        Expressions: ['Id', 'Title', 'Summary', 'Order', 'href', '$ref' ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+
+
+    function adjust_query_root()
     {
-        if(!$session.isActive)
+        console.log('adjust_query_root [a]: ' + query_selector)
+        let self = query_params.contexts[query_selector]?.self;
+
+
+
+        if(!self)
         {
-            group = null;
+            query_selector = ''
             return;
         }
 
-        const params = new URLSearchParams($querystring);
-        showArchived = params.has('archived')
+        query_root = "/" + self + "/query";
+        console.log('adjust_query_root [b]: ' + query_selector + " - " + query_root)
 
-        await fetchData()
     }
 
-    async function fetchData()
+    function adjust_query_body()
     {
-        console.log('tasklists.all fetchData')
-        if(!showArchived)
-        {
-            let res = await reef.post(`/group/query`,
-                                    {
-                                        Id: 1,
-                                        Name: "collector",
-                                        ExpandLevel: 3,
-                                        Tree:
-                                        [
-                                            {
-                                                Id: 1,
-                                                Association: '',
-                                                Expressions:['Id','Name'],
-                                                SubTree:
-                                                [
-                                                    {
-                                                        Id: 2,
-                                                        Association: 'Lists',
-                                                        //Filter: 'State <> STATE_FINISHED',
-                                                        Sort: "Order",
-                                                        Expressions: ['Id', 'Name', 'Summary', 'Order', 'href', '$ref', 'IsSubscribed']
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    },
-                                    onErrorShowAlert);
-            if(res)
-                group = res.Group;
-            else
-                group = null
-        }
-        else
-        {
-            let res = await reef.post(`/group/query`,
-                                    {
-                                        Id: 1,
-                                        Name: "collector",
-                                        ExpandLevel: 3,
-                                        Tree:
-                                        [
-                                            {
-                                                Id: 1,
-                                                Association: '',
-                                                Expressions:['Id','Name'],
-                                                SubTree:
-                                                [
-                                                    {
-                                                        Id: 2,
-                                                        Association: 'AllLists',
-                                                        Filter: 'Status=TLS_GROUP_ARCHVIVED_LIST',
-                                                        Sort: "-Id",
-                                                        Expressions: ['Id', 'Name', 'Summary', 'Order', 'href', '$ref']
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    },
-                                    onErrorShowAlert);
-            if(res)
-                group = res.Group;
-            else
-                group = null
-        }
+        query_body.Tree[0].SubTree[0].Association = query_params.contexts[query_selector]?.collection;
+    }
 
-        /*canonicalPath = [
-            {
-                Name: group.Name
-            },
-            {
-                Name: title
-            }
-        ]*/
+    function adjust_query_key()
+    {
+        query_key = query_params.contexts[query_selector]?.self + "/" + query_params.contexts[query_selector]?.collection;
+    }
+
+    function adjust_other_params()
+    {
+        title = query_params.contexts[query_selector]?.title;
+    }
+
+
+    async function onParamsChanged(...args)
+    {
+        const segments = $location.split('/');
+        console.log('onParamsChanged', segments)
+
+        if(!segments.length)
+            query_selector = 'default'
+        else
+            query_selector = segments[segments.length - 1]
+
+        adjust_query_root();
+        if(!query_selector)
+            return;
+        adjust_query_body();
+        adjust_query_key();
+        adjust_other_params();
+
+
+
+
+        //const cachedValue = cache.get(query_key)
+        //if(cachedValue)
+        //{
+        //    contextItem = cachedValue;
+        //    folderTitle = ext(contextItem.Title);
+        //    contextItemId = cachedValue.Id;
+        //    listComponent?.reload(contextItem, listComponent.KEEP_SELECTION)
+        // }
+        //---------------------------------------------------
+        //const readItem = await readContextItem(self_ref, cacheKey)
+
+        await fetch_items()
+    }
+
+    async function fetch_items()
+    {
+
+        console.log('projects.svelte fetch_items', query_body)
+        console.trace()
+        let res = await reef.post(query_root,
+                                query_body,
+                                onErrorShowAlert);
+        if(res)
+            group = res.Group;
+        else
+            group = null
 
     }
 
     async function reloadLists(selectRecommendation)
     {
-        await fetchData();
+        await fetch_items();
         listComponent.reload(group, selectRecommendation);
     }
 
@@ -207,6 +255,7 @@
                             mricon: 'file-archive',
                             caption: '_; Show archived lists; Mostrar listas archivadas; Pokaż zarchiwizowane listy',
                             //action: (focused) => { listComponent.addRowAfter(null) },
+                            action: (focused) => push('/archivedlists'),
                             fab: 'S01',
                             tbr: 'C'
                         }
@@ -240,24 +289,6 @@
         }
     }
 
-    async function toggleSubscribe(list)
-    {
-        if(list.IsSubscribed)
-        {
-            const res = await reef.get(`${list.$ref}/Unsubscribe`, onErrorShowAlert)
-            if(res)
-                list.IsSubscribed = false
-        }
-        else
-        {
-            const res = await reef.get(`${list.$ref}/Subscribe`, onErrorShowAlert)
-            if(res)
-                list.IsSubscribed = true
-        }
-
-        const newOperations = listOperations(list)
-        reloadPageToolbarOperations(newOperations, true)
-    }
 
     let listOperations = (list) => {
         return {
@@ -324,7 +355,6 @@
                             fab: 'M04',
                             tbr: 'A'
                         },
-                        ... list.IsSubscribed? [unfollowOperation(list)] : [followOperation(list)],
                         {
                             caption: '_; Archive; Archivar; Zarchiwizuj',
                             action: (f) => askToArchive(list)
@@ -355,14 +385,14 @@
 
 
 
-        let list_properties = {
+    let list_properties = {
         Title: "Title",
         Summary: "Summary",
 
         element:{
-            icon: "#notebook",
+            icon: "#building",
             href: "href",
-            Title: "Name",
+            Title: "Title",
             Summary: "Summary"
         },
 
@@ -376,7 +406,7 @@
 
 {#if group}
     {#key group}
-    {#if !showArchived}
+
         <Page   self={group}
                 toolbarOperations={pageOperations}
                 clearsContext='props sel'
@@ -393,7 +423,7 @@
             </figure>
 
             <List   self={group}
-                    a='Lists'
+                    a='Projects'
                     {list_properties}
                     toolbarOperations={listOperations}
                     orderAttrib='Order'
@@ -417,36 +447,6 @@
 
             </Paper>
         </Page>
-    {:else}
-        <Page   self={group}
-                toolbarOperations={[]}
-                clearsContext='props sel'
-                title={title}>
-                <Paper class="mb-64">
-                <section class="w-full place-self-center max-w-3xl">
-            <List   self={group}
-                    a='AllLists'
-                    {list_properties}
-                    orderAttrib='Order'
-                    bind:this={listComponent}>
-                <ListTitle a='Name' hrefFunc={(list) => `/tasklist/${list.Id}?archivedList`} />
-                <ListSummary a='Summary'/>
-                <!--ListInserter action={addList} icon/-->
-
-
-            </List>
-
-            <div class="ml-3 mt-20 mb-10">
-                <button on:click={(e) => pop() }>
-                    <div class="inline-block mt-1.5 w-3 h-3"><FaChevronLeft/></div>
-                    _; Back; Volver; Wróć
-                </button>
-            </div>
-        </section>
-        </Paper>
-
-        </Page>
-    {/if}
     {/key}
 {:else}
     <Spinner delay={3000}/>

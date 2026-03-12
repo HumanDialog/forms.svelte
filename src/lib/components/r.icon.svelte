@@ -110,6 +110,7 @@
   import Archive from './ricons/archive.svelte'
 
   import Trash from './ricons/trash.svelte'
+  import Building from './ricons/building.svelte'
 
 
   let ricons_box = {
@@ -131,6 +132,8 @@
     "chevron-left": ChevronLeft,
     "chevron-right": ChevronRight,
     "chevron-up": ChevronUp,
+
+    "building": Building,
 
     "chevrons-left-right": ChevronLeftRight,
     "chevrons-up-down": ChevronUpDown,

@@ -13,7 +13,7 @@
     export let sidebar = true;
 
     let userTaskLists = [];
-    let groupTaskLists = [];
+
     let user = {};
     let navUserLists;
     let navGroupLists;
@@ -47,20 +47,13 @@
             navUserLists?.reload(userTaskLists)
         }
 
-        const cachedGroupLists = cache.get('listsNavigator_1')
-        if(cachedGroupLists)
-        {
-            groupTaskLists = cachedGroupLists;
-            navGroupLists?.reload(groupTaskLists)
-        }
 
         await fetchData()
 
-        navGroupLists?.reload(groupTaskLists)
         navUserLists?.reload(userTaskLists)
 
         cache.set('listsNavigator_0', userTaskLists);
-        cache.set('listsNavigator_1', groupTaskLists);
+
     }
 
     async function fetchData()
@@ -70,7 +63,7 @@
         const userTasklistsPromise = reef.post('user/query', {
             Id: 1,
             Name: 'user tasklists',
-            Limit: limit,
+            Limit: 10,
             Tree: [
                 {
                     Id: 11,
@@ -88,22 +81,8 @@
             ]
         }, onErrorShowAlert)
 
-        const groupTasklistsPromise = reef.post('group/query', {
-            Id: 2,
-            Name: "group tasklists",
-            ExpandLevel: 1,
-            Limit: limit,
-            Tree: [
-                {
-                    Id: 21,
-                    Association: 'Lists',
-                    Sort: "Order",
-                    Expressions: ['Id', 'Name', 'Summary', 'Order', 'href', '$ref', '$type']
-                }
-            ]
-        }, onErrorShowAlert)
 
-        const results = await Promise.all([userTasklistsPromise, groupTasklistsPromise])
+        const results = await Promise.all([userTasklistsPromise])
 
         if(results[0])
         {
@@ -116,16 +95,11 @@
             userTaskLists = []
         }
 
-        if(results[1])
-            groupTaskLists = results[1].TaskList;
-        else
-            groupTaskLists = []
     }
 
     async function reload()
     {
         await fetchData();
-        navGroupLists.reload(groupTaskLists)
         navUserLists.reload(userTaskLists)
     }
 
@@ -155,7 +129,6 @@
 {#key currentPath}
 <div class="w-full prose prose-base prose-zinc dark:prose-invert prose-a:no-underline ">
 
-    {#if groupTaskLists && groupTaskLists.length > 0}
 
         {#if $session.isActive}
             <!--SidebarGroup border title={i18n({en: 'Current work', es: 'Trabajo actual', pl: 'Bieżąca praca'})}-->
@@ -171,12 +144,6 @@
                                 active={isRoutingTo("/teamday", currentPath)}
                                 selectable={teamday}>
                     _; Observed lists; Trabajo común; Obserwowane listy
-                </SidebarItem>
-                <SidebarItem   href="/mytasks"
-                                icon='square-pen'
-                                active={isRoutingTo("/mytasks", currentPath)}
-                                selectable={user}> <!-- summary={i18n(["All active tasks assigned to me", "Tareas activas asignadas a mí", "Aktywne zadania przypisane do mnie"])} -->
-                    _; Assigned to me; Asignado a mí; Przydzielone do mnie
                 </SidebarItem>
             <!--/SidebarGroup-->
 
@@ -194,42 +161,49 @@
                                 >
                     _; My Folders; Mis carpetas; Moje Foldery
                 </SidebarItem>
+                <SidebarItem   href="/mytasks"
+                                icon='square-pen'
+                                active={isRoutingTo("/mytasks", currentPath)}
+                                selectable={user}> <!-- summary={i18n(["All active tasks assigned to me", "Tareas activas asignadas a mí", "Aktywne zadania przypisane do mnie"])} -->
+                    _; Tasks assigned to me; Tareas que me han sido asignadas; Zadania przydzielone do mnie
+                </SidebarItem>
 
+                {#if userTaskLists && userTaskLists.length > 0}
 
-            <SidebarGroup   title={i18n({en: 'My lists', es: 'Mis listas', pl: 'Moje listy'})}
-                            moreHref="/mylists">
+                <SidebarGroup   title={i18n({en: 'My lists', es: 'Mis listas', pl: 'Moje listy'})}
+                                moreHref="/mylists">
 
-                <SidebarList    objects={userTaskLists}
-                                orderAttrib='Order'
-                                bind:this={navUserLists}>
-                    <svelte:fragment let:item let:idx>
-                        {@const href = item.href}
-                        <SidebarItem   {href}
-                                        icon='notebook'
-                                        active={isRoutingTo(href, currentPath)}
-                                        >
-                            {ext(item.Name)}
-                        </SidebarItem>
-                    </svelte:fragment>
-                </SidebarList>
-            </SidebarGroup>
+                    <SidebarList    objects={userTaskLists}
+                                    orderAttrib='Order'
+                                    bind:this={navUserLists}>
+                        <svelte:fragment let:item let:idx>
+                            {@const href = item.href}
+                            <SidebarItem   {href}
+                                            icon='notebook'
+                                            active={isRoutingTo(href, currentPath)}
+                                            >
+                                {ext(item.Name)}
+                            </SidebarItem>
+                        </svelte:fragment>
+                    </SidebarList>
+                </SidebarGroup>
 
-        {/if}
+                {/if}
 
         <SidebarGroup   title={i18n({en: 'Others', es: 'Otros', pl: 'Inne'})}
                         >
 
-                <SidebarItem   href="/myday"
+                <SidebarItem   href="/folder/myarchive"
                                 icon='archive'
-                                active={isRoutingTo("/myday", currentPath)}
+                                active={isRoutingTo("/folder/myarchive", currentPath)}
                                 selectable={myday}>
-                    _; My archive; Mi día; Moje archiwum *
+                    _; My archive; Mi día; Moje archiwum
                 </SidebarItem>
-                <SidebarItem   href="/teamday"
+                <SidebarItem   href="/folder/mytrash"
                                 icon='trash'
-                                active={isRoutingTo("/teamday", currentPath)}
+                                active={isRoutingTo("/folder/mytrash", currentPath)}
                                 selectable={teamday}>
-                    _; My trash; Trabajo común; Mój kosz *
+                    _; My trash; Trabajo común; Mój kosz
                 </SidebarItem>
         </SidebarGroup>
 

@@ -235,15 +235,15 @@
         <SidebarGroup   title={i18n({en: 'Others', es: 'Otros', pl: 'Inne'})}
                     >
 
-            <SidebarItem   href="/myday"
+            <SidebarItem   href="/folder/archive"
                             icon='archive'
-                            active={isRoutingTo("/myday", currentPath)}
+                            active={isRoutingTo("/folder/archive", currentPath)}
                             selectable={true}>
                 _; Archive; Día; Archiwum *
             </SidebarItem>
             <SidebarItem   href="/folder/trash"
                             icon='trash'
-                            active={isRoutingTo("/teamday", currentPath)}
+                            active={isRoutingTo("/folder/trash", currentPath)}
                             selectable={true}>
                 _; Trash; Trabajo común; Kosz *
             </SidebarItem>

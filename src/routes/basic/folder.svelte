@@ -40,6 +40,7 @@
 
     let contextItem = null;
     let contextNavigation;
+    let cacheKey;
     let contextItemSelector;
     let contextPath;
     let contextItemId;
@@ -72,48 +73,54 @@
         else
             contextItemSelector = segments[segments.length - 1]
 
+
+
         switch (contextItemSelector)
         {
         case 'default':
             contextNavigation = "/user/Folders/first";
+            cacheKey = "user_Folders_first";
+            break;
+        case 'mytrash':
+            contextNavigation = "/user/TrashFolder";
+            cacheKey = "user_TrashFolder";
+            break;
+        case 'myarchive':
+            contextNavigation = "/user/ArchiveFolder";
+            cacheKey = "user_ArchiveFolder";
             break;
         case 'trash':
             contextNavigation = "/group/TrashFolder";
+            cacheKey = "group_TrashFolder";
             break;
         case 'archive':
             contextNavigation = "/group/ArchiveFolder";
+            cacheKey = "group_ArchiveFolder";
             break;
         default:
-
-
+            contextItemId = parseInt(segments[segments.length-1])
+            contextNavigation = `/Folder/${contextItemId}`
+            cacheKey = `Folder_${contextItemId}`;
+            break;
         }
-        contextItemId = parseInt()
 
-
-        contextItem = null
-
-
-        contextPath = `/Folder/${contextItemId}`
-
-
-        const cacheKey = `folder_${contextItemId}`
         const cachedValue = cache.get(cacheKey)
         if(cachedValue)
         {
             contextItem = cachedValue;
             folderTitle = ext(contextItem.Title);
-
+            contextItemId = cachedValue.Id;
             listComponent?.reload(contextItem, listComponent.KEEP_SELECTION)
         }
         //---------------------------------------------------
-        const readItem = await readContextItem(contextItemId)
+        const readItem = await readContextItem(contextNavigation, cacheKey)
 
         // dodatkowe zabezpiecznie dla przypadku kiedy pokazalismy folder, ale jego wersje z cache'a
         // i wciąż jeszcze czekamy na odpowiedź z serwisu. W międzyczasie user przeszedł do folderu niżej
         // zostajemy więc w tym komponencie, ale zmienił się parametr folderu do załadowania
         // wysyłamy więc nowe zapytanie, a to poprzednie, które wciąż jeszcze trwa, już nas nie interesuje
-        if(readItem.Id != contextItemId)
-            return;
+        //if(readItem.Id != contextItemId)
+        //    return;
 
         contextItem  = readItem
         if(contextItem)
@@ -125,9 +132,9 @@
         listComponent?.reload(contextItem, listComponent.KEEP_SELECTION)
     }
 
-    async function readContextItem(contextItemId)
+    async function readContextItem(contextNavigation, cacheKey)
     {
-        let res = await reef.post(`/Folder/${contextItemId}/query`,
+        let res = await reef.post(`${contextNavigation}/query`,
         {
             Id: 1,
             Name: "collector",
@@ -165,7 +172,7 @@
         if(res)
         {
             const folderItem = res.Folder
-            const cacheKey = `folder_${folderItem.Id}`
+           ///const cacheKey = `folder_${folderItem.Id}`
             cache.set(cacheKey, folderItem)
             return folderItem;
         }

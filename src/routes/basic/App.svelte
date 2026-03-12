@@ -64,7 +64,7 @@
             google_analytics.init();
     }
 
-    const r = /^\/listboard|tdownload|tcontact|tasklist|deslis|design|desnav|task|note|folder|mytasks|mylists|listtemplates|mynotes|alllists|myfolders|group-folders|general-channels|private-channels|members|chat|thread|newthread|forum|thome|profile|myday|teamday|doc|request-license-file|nav\/(.*)\/?$/i
+    const app_view_routes = /^\/listboard|tdownload|tcontact|tasklist|deslis|design|desnav|task|note|folder|mytasks|mylists|listtemplates|mynotes|alllists|myfolders|group-folders|general-channels|private-channels|members|chat|thread|newthread|forum|thome|profile|myday|teamday|doc|request-license-file|nav\/(.*)\/?$/i
 
     const routes = new Map()
     routes.set('/',                     Main)
@@ -74,7 +74,7 @@
     routes.set('/doc/*',                wrap({ asyncComponent: () => import('./tilos/static.doc.svelte')}))
     routes.set('/blog',                 wrap({ asyncComponent: () => import('./landing/blog/blog.svelte')}))
     routes.set('/blog/*',               wrap({ asyncComponent: () => import('./landing/blog/article.svelte')}))
-    routes.set(r, AppView)
+    routes.set(app_view_routes, AppView)
     routes.set('*', NotFound)
 
     setLanguages([
