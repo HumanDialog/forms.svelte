@@ -38,7 +38,9 @@
                         tenant: `${tenantId}`,
                         groupsOnly: true,
                         termsAndConditionsHRef: `${website}/#/${terms}`,
-                        privacyPolicyHRef: `${website}/#/${privacy}`
+                        privacyPolicyHRef: `${website}/#/${privacy}`,
+
+                        ownSignin: 'signin',
                     },
                     local: {
                         api:    "http://127.0.0.1:1996/",
@@ -74,6 +76,11 @@
     routes.set('/doc/*',                wrap({ asyncComponent: () => import('./tilos/static.doc.svelte')}))
     routes.set('/blog',                 wrap({ asyncComponent: () => import('./landing/blog/blog.svelte')}))
     routes.set('/blog/*',               wrap({ asyncComponent: () => import('./landing/blog/article.svelte')}))
+    routes.set('/signin',               wrap({ asyncComponent: () => import('./auth/signin.svelte')}))
+    routes.set('/resetpassword',        wrap({ asyncComponent: () => import('./auth/resetpassword.svelte')}))
+    routes.set('/changepassword',       wrap({ asyncComponent: () => import('./auth/changepassword.svelte')}))
+    routes.set('/invitation',           wrap({ asyncComponent: () => import('./auth/invitation.svelte')}))
+    routes.set('/result',               wrap({ asyncComponent: () => import('./auth/result.svelte')}))
     routes.set(r, AppView)
     routes.set('*', NotFound)
 

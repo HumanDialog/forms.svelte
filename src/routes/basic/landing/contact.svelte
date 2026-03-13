@@ -165,7 +165,7 @@
                     <span class="text-sm">_; Headquarter:; Sede:; Siedziba</span><br>
                     Kazimierza Wielkiego 27<br>
                     50-077 Wrocław, 
-                    _; Poland; Polonia; Polska
+                    <span>_; Poland; Polonia; Polska</span>
                 </p>
                 <p class="mt-3">
                     KRS: 0000601130<br>

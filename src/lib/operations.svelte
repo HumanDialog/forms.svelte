@@ -5,6 +5,8 @@
     import {FaEllipsisV} from 'svelte-icons/fa'
 	import { i18n } from './i18n.js';
     import {pushChanges, hasModifications, unsavedModificationsTicket} from './updates.js'
+	import { isDeviceSmallerThan } from '$lib';
+	import { onMount } from 'svelte';
 
     export let mobile :boolean = false
 
@@ -221,6 +223,13 @@
                 })
             })
 
+
+            if(isDeviceSmallerThan("lg"))   // screen_width < 1024
+            {
+                COperations = []
+                BOperations = []
+            }
+
             leftOperations = [...AOperations, ...BOperations]
             rightOperations = COperations.toReversed()
             rightOperations = [...rightOperations, ...DOperations.toReversed()]
@@ -235,6 +244,18 @@
         }
 
         hasOperations = leftOperations.length > 0 || rightOperations.length > 0
+    }
+
+    onMount( () => {
+        window.addEventListener("resize", on_resize)
+        return () => {
+            window.removeEventListener("resize", on_resize)
+        }
+    })
+
+    function on_resize()
+    {
+        update();
     }
 
     function on_click(e, operation, isDisabled)

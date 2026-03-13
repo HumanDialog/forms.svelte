@@ -42,6 +42,7 @@
     export let showFiles = false;
     //export let show_admin = true;
     export let showAccessRoles = false;
+    export let ownInvitation = ''
 
     // ===============================================================================
 
@@ -448,14 +449,28 @@
     async function regenerateAndCopyInvitationLink(user)
     {
         try {
+                let redirect_uri = ''
+                let state = ''
+                let own_invitation_page = false
+                if(ownInvitation)
+                {
+                    redirect_uri = ownInvitation
+                    own_invitation_page = true
+                }
+                else
+                {
+                    redirect_uri = `${window.location.origin}/#/auth/cb`
+                    state = `${window.location.origin}/#/auth/signin`
+                }
+                
                 let params = `username=${user[emailAttrib]}`
                 params += `&client_id=${$session.configuration.client_id}`
-                params += `&redirect_uri=${encodeURIComponent(window.location.origin+'/#/auth/cb')}`
-                params += `&state=${encodeURIComponent(window.location.origin+'/#/auth/signin')}`
+                params += `&redirect_uri=${encodeURIComponent(redirect_uri)}`
+                params += `&state=${encodeURIComponent(state)}`
                 params += `&tenant=${$session.tid}`
                 params += `&scope=${$session.appId}`
-
-                console.log(params)
+                if(own_invitation_page)
+                    params += '&own_invitation_page=true' 
 
                 const res = await reef.fetch(`/auth/regenerate_invitation_link?${params}`)
 
@@ -1003,6 +1018,7 @@
 
 <InviteUser bind:this={invitationDialog}
     {nameAttrib} {emailAttrib} {refAttrib} {hrefAttrib}
-    {onNewUserAdded}/>
+    {onNewUserAdded}
+    {ownInvitation}/>
 
 <UserProperties bind:this={userProperiesDialog} />

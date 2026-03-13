@@ -284,7 +284,6 @@
 
     function onViewportResize(e)
     {
-        console.log('onViewportResize')
         const vp = window.visualViewport;
         setViewportHeight(vp)
 
