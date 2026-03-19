@@ -228,6 +228,7 @@
     function switchBodyClass(...args)
     {
         document.body.className = $dark_mode_store;
+        document.body.attributeStyleMap.set("touch-action", "none");
     }
 
     onMount( () => {
@@ -255,6 +256,8 @@
             // remove dark class form body element when we leave Layout view
             if($dark_mode_store)
                 document.body.classList.remove($dark_mode_store)
+
+            document.body.attributeStyleMap.delete("touch-action")
         }
     })
 

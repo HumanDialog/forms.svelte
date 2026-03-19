@@ -2,13 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body{
-
-    touch-action:none;
-    
-    }
-
-
 .thin-scrollbar {
         /* width */
         ::-webkit-scrollbar {
