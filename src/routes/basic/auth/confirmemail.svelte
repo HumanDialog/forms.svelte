@@ -10,21 +10,15 @@
     let username = ''
     let state = ''
     let validation_token = ''
-    let redirect_uri = __WEBSITE__ + '/#/changepassword'
-
-    let new_user_setup = false
+    let redirect_uri = __WEBSITE__ + '/#/confirmemail'
 
     let message = ''
 
     const PHASE_VALIDATION = 0
     const PHASE_ERROR = 1
-    const PHASE_ALLOW_PASSWORD_SET = 2
-    const PHASE_PASSWORD_CHANGED  = 3
+    const PHASE_EMAIL_CONFIRMED  = 2
 
     let phase = PHASE_VALIDATION
-
-    let new_password = ''
-    let new_password_2 = ''
 
     let lock_buttons = false
     
@@ -53,6 +47,7 @@
             state = ''
 
 
+        
         if(params.has("validation_token"))
         {
             validation_token = params.get("validation_token")
@@ -63,7 +58,7 @@
             validation_token = ''
 
 
-        new_user_setup = params.has("new_user_setup")
+        
         
         /////////////////////////////////////////////////////////////////////
 
@@ -78,16 +73,8 @@
         }
         else
         {
-             if(new_user_setup)
-            {
-                phase = PHASE_ALLOW_PASSWORD_SET
-                redirect_uri = ''   
-            }
-            else
-            {
-                phase = PHASE_VALIDATION
-                await check_validation_token()
-            }
+            phase = PHASE_VALIDATION
+            await confirm_email_address()
         }
     }
 
@@ -106,18 +93,7 @@
     })
 
     
-
-    function keydown(e)
-    {
-        if(e.key == 'Enter')
-        {
-            e.preventDefault()
-            e.stopPropagation()
-            change_password(e)   
-        }
-    }
-
-    async function check_validation_token()
+    async function confirm_email_address()
     {
         message = ''
 
@@ -128,9 +104,10 @@
         data.append("redirect_uri", redirect_uri);
         data.append("state",        state);
         data.append("validation_token", validation_token);
+        data.append("own_invitation_page", "true");
 
         try {
-            const res = await fetch(`${config.iss}/auth/checkvalidationtoken`,
+            const res = await fetch(`${config.iss}/auth/confirm_email`,
                                 {
                                     method: 'post',
                                     headers: new Headers({
@@ -140,21 +117,10 @@
                                     }),
                                     body: data
                                 })
+
             if(res.ok)
             {
-                const result = await res.json();
-                if(result.valid)
-                {
-                    phase = PHASE_ALLOW_PASSWORD_SET
-                }
-                else
-                {
-                    message = `_;
-                              The link is no longer active. It has probably already been used.;
-                              El enlace ya no está activo. Probablemente ya se haya utilizado.;
-                              Odnośnik nie jest już aktywny. Prawdopodobnie został już użyty.`
-                    phase = PHASE_ERROR
-                }
+                phase = PHASE_EMAIL_CONFIRMED;
             }
             else
             {
@@ -185,91 +151,13 @@
         }
     }
 
-
-    function reset_password_again(e)
-    {
-        push('/resetpassword')
-    }
-
     function go_to_main_page(e)
     {
         push('/')
     }
 
-    function sign_in(e)
-    {
-        push('/signin')
-    }
 
-    async function change_password(e)
-    {
-        message = ''
-
-        if(new_password.length < 4)
-        {
-            message = "_; Use at least 4 characters; Utilice al menos 4 caracteres; Użyj co najmniej 4 znaków";
-            return;
-        }
-
-        if(new_password != new_password_2)
-        {
-            message = "_; Passwords are different; Las contraseñas son diferentes; Hasła są różne";
-            return;
-        }
-
-        const config = $session.configuration
-
-        lock_buttons = true;
-
-        let data = new URLSearchParams();
-        data.append("username", username);
-        data.append("password", new_password);
-        data.append("redirect_uri", redirect_uri);
-        data.append("state", state);
-        data.append("validation_token", validation_token);
-
-
-        try {
-            const res = await fetch(`${config.iss}/auth/change_password`,
-                                {
-                                    method: 'post',
-                                    headers: new Headers({
-                                        'Authorization': 'Basic '+btoa(`${config.client_id}:${config.client_secret}`),
-                                        'Content-Type': 'application/x-www-form-urlencoded',
-                                        'Accept': 'application/json'
-                                    }),
-                                    body: data
-                                })
-
-            if (!res.ok) 
-            {
-                const result = await res.json();    
-                message = (!!result.error_description) ? result.error_description : "";
-
-                if(!message)
-                    message = "_; Unable to change password; No se ha podido cambiar la contraseña; Nie udało się zmienić hasła"
-
-                phase = PHASE_ERROR
-            }
-            else
-            {
-               phase = PHASE_PASSWORD_CHANGED
-            }
-        }
-        catch(err)
-        {
-            console.error(err)
-            message = `_; 
-                       Cannot connect to service;
-                       No se puede conectar al servicio;
-                       Nie można połączyć się z usługą`
-            phase = PHASE_ERROR
-        }
-
-        lock_buttons = false;
-    }
-
-    const title = '_; Change password; Cambiar contraseña; Zmień hasło'
+    const title = '_; Confirm your email address; Confirma tu dirección de correo electrónico; Potwierdź swój adres e-mail'
 
 </script>
 
@@ -390,57 +278,26 @@
                                         hover:bg-stone-200 hover:dark:bg-stone-700
                                         "
                                         tabindex="0"
-                                        on:click={reset_password_again}> 
-                                        _; Reset your password again; Reiniciar el restablecimiento de contraseña; Ponów resetowanie hasła
-                                </button>
-
-                                <button  type="submit"
-                                        class="px-4 my-2
-                                        bg-stone-100 dark:bg-stone-800
-                                        outline outline-offset-2 outline-2
-                                        outline-stone-200 dark:outline-stone-500
-                                        focus:outline-stone-300 dark:focus:outline-stone-400
-                                        hover:bg-stone-200 hover:dark:bg-stone-700
-                                        "
-                                        tabindex="0"
                                         on:click={go_to_main_page}> 
                                         _; Go to the home page; Ir a la página principal; Przejdź na stronę główną
                                 </button>
                             </div>
                             </h4>
 
-                        {:else if phase == PHASE_ALLOW_PASSWORD_SET}
+                        {:else if phase == PHASE_EMAIL_CONFIRMED}
 
                             <!-------------------------------------------------------------------->
                             <!-- POPUP CONTENT---------------------------------------------------->
                             <!-------------------------------------------------------------------->
                             <div class="grow max-h-[40dvh] sm:max-h-[75dvh] overflow-y-auto overscroll-contain">
 
-                                {#if new_user_setup}
                                 <p>
                                     _;
-                                    Before you access the application for the first time, you must set a password that you will use to sign in.;
-                                    Antes de acceder a la aplicación por primera vez, debe establecer una contraseña que utilizará para iniciar sesión.;
-                                    Przed pierwszym użyciem aplikacji musisz ustawić hasło, którego będziesz używać do logowania
+                                    Your email address has been confirmed. Click the button below to go to the app.;
+                                    Tu dirección de correo electrónico ha sido confirmada. Haz clic en el botón de abajo para ir a la aplicación.;
+                                    Twój adres e-mail został potwierdzony. Kliknij przycisk poniżej, aby przejść do aplikacji. 
                                 </p>
-                                {/if}
-                            
-                                <div class="px-2 outline outline-4  bg-stone-100 outline-stone-100 dark:bg-stone-800 dark:outline-stone-800">
-                                    <h4>_; New password; Nueva contraseña; Nowe hasło</h4>
-                                    <p class="flex flex-row">
-                                        <input type="password" required autocomplete="new-password" name="password" bind:value={new_password} on:keydown={keydown} tabindex="0"
-                                            class="w-full border-0 focus:outline-none bg-stone-100 dark:bg-stone-800"/>
-                                    </p>
-                                </div>
-
-                                <div class="px-2 outline outline-4  bg-stone-100 outline-stone-100 dark:bg-stone-800 dark:outline-stone-800">
-                                    <h4>_; Repeat password; Repita la contraseña; Powtórz hasło</h4>
-                                    <p class="flex flex-row">
-                                        <input type="password" required  name="password2" bind:value={new_password_2} on:keydown={keydown} tabindex="0"
-                                            class="w-full border-0 focus:outline-none bg-stone-100 dark:bg-stone-800"/>
-                                    </p>
-                                </div>
-
+                                
                                 {#if message}
                                 <div class="px-2 outline outline-4  bg-red-200 outline-red-200 dark:bg-red-950 dark:outline-red-950">
                                     <p class="flex flex-row">
@@ -459,67 +316,19 @@
 
                                 <button  type="submit"
                                         class="px-4 my-2
-                                        bg-stone-100 dark:bg-stone-700
+                                        bg-stone-100 dark:bg-stone-800
                                         outline outline-offset-2 outline-2
                                         outline-stone-200 dark:outline-stone-500
                                         focus:outline-stone-300 dark:focus:outline-stone-400
-                                        hover:bg-stone-200 hover:dark:bg-stone-600
+                                        hover:bg-stone-200 hover:dark:bg-stone-700
                                         "
                                         tabindex="0"
-                                        on:click={change_password}
-                                        disabled={lock_buttons}> 
-                                        _; Set password; Establecer contraseña; Ustaw hasło
+                                        on:click={go_to_main_page}> 
+                                        _; Go to the home page; Ir a la página principal; Przejdź na stronę główną
                                 </button>
                             </div>
                             </h4>
 
-                        {:else if phase == PHASE_PASSWORD_CHANGED}
-                            <!-------------------------------------------------------------------->
-                            <!-- POPUP CONTENT---------------------------------------------------->
-                            <!-------------------------------------------------------------------->
-                            <div class="grow max-h-[40dvh] sm:max-h-[75dvh] overflow-y-auto overscroll-contain">
-                            
-                                <div class="px-2 outline outline-4  bg-stone-100 outline-stone-100 dark:bg-stone-800 dark:outline-stone-800">
-                                    <h4>_; Success; Éxito; Sukces</h4>
-                                    {#if new_user_setup}
-                                        <p class="flex flex-row">
-                                            _;
-                                            Your password has been set. You can now sign in to the application.;
-                                            Tu contraseña ha sido configurada. Ahora puedes iniciar sesión en la aplicación.;
-                                            Twoje hasło zostało ustawione. Teraz możesz się zalogować do aplikacji. 
-                                        </p>
-                                    {:else}
-                                        <p class="flex flex-row">
-                                            _;
-                                            Your password has been changed. You can now sign in to the application using your new password.;
-                                            Tu contraseña ha sido cambiada. Ahora puedes iniciar sesión en la aplicación con la nueva contraseña.;
-                                            Twoje hasło zostało zmienione. Teraz możesz się zalogować do aplikacji używając nowego hasła. 
-                                        </p>
-                                    {/if}
-                                </div >
-                            </div>
-                            
-
-                            <!-------------------------------------------------------------------->
-                            <!-- POPUP FOOTER----------------------------------------------------->
-                            <!-------------------------------------------------------------------->
-                            <h4 class = "flex-none">
-                                <div class="flex flex-row justify-end gap-2">
-
-                                <button  type="submit"
-                                        class="px-4 my-2
-                                        bg-stone-100 dark:bg-stone-700
-                                        outline outline-offset-2 outline-2
-                                        outline-stone-200 dark:outline-stone-500
-                                        focus:outline-stone-300 dark:focus:outline-stone-400
-                                        hover:bg-stone-200 hover:dark:bg-stone-600
-                                        "
-                                        tabindex="0"
-                                        on:click={sign_in}> 
-                                        _; Sign in; Iniciar sesión; Zaloguj się
-                                </button>
-                            </div>
-                            </h4>
                         {/if}
 
                     </div>

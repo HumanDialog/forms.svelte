@@ -76,7 +76,7 @@
         </section>
 
         <!-- Content -->
-        <div class="mb-40" aria-labelledby="modal-title" role="dialog" aria-modal="true" >
+        <div class="sm:mb-40" aria-labelledby="modal-title" role="dialog" aria-modal="true" >
             <div class="">
             <div class="flex  items-end justify-center p-1 text-center sm:items-center sm:p-0">
                 <div class=" p-0

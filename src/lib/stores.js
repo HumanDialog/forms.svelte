@@ -161,6 +161,9 @@ showFABAlways.subscribe( (value) => { localStorageSave('showFABAlways', (value ?
 export const leftHandedFAB = writable( localStorageRead('leftHandedFAB') == 'true')
 leftHandedFAB.subscribe( (value) => { localStorageSave('leftHandedFAB', (value ? 'true' : '')) } );
 
+export const dont_hide_FAB_when_on_screen_keyboard_visible = writable( localStorageRead('dont_hide_FAB_when_on_screen_keyboard_visible') == 'true')
+dont_hide_FAB_when_on_screen_keyboard_visible.subscribe( (value) => { localStorageSave('dont_hide_FAB_when_on_screen_keyboard_visible', (value ? 'true' : '')) } );
+
 export const fabHiddenDueToPopup = writable(false)
 
 export function restore_defults()

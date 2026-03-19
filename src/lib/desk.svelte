@@ -17,7 +17,7 @@
             set_dark_mode_default,
             sidebar_left_pos,
             wholeAppReloader,
-            alerts, removeAlert, showFABAlways} from './stores.js'
+            alerts, removeAlert, showFABAlways, dont_hide_FAB_when_on_screen_keyboard_visible} from './stores.js'
     import {pushChanges} from './updates.js'
 
     //import { AuthorizedView} from '@humandialog/auth.svelte'
@@ -333,7 +333,9 @@
         case FAB_VISIBLE_ON_MOBILE:
             if(isDeviceSmallerThan("sm"))
             {
-                if(isOnScreenKeyboardVisible())
+                if($dont_hide_FAB_when_on_screen_keyboard_visible)
+                    is_fab_visible = true;
+                else if(isOnScreenKeyboardVisible())
                     is_fab_visible = false;
                 else
                     is_fab_visible = true;
@@ -343,7 +345,9 @@
             break;
 
         case FAB_VISIBLE_ALWAYS:
-            if(isOnScreenKeyboardVisible())
+            if($dont_hide_FAB_when_on_screen_keyboard_visible)
+                is_fab_visible = true;
+            else if(isOnScreenKeyboardVisible())
                 is_fab_visible = false;
             else
                 is_fab_visible = true;

@@ -14,6 +14,7 @@
 	import { navGetKey, navHide, navIsVisible, navShow, navToggle, isDeviceSmallerThan } from './utils';
     import {setCurrentLanguage, getLanguages, i18n, getCurrentLanguage} from './i18n.js'
     import {showMenu, SHOW_MENU_RIGHT} from './components/menu'
+    import {get_settings_menu} from './settings_menu.js'
 
     export let appConfig = undefined;
     export let clearsContext = 'sel props'
@@ -23,40 +24,21 @@
 
     let tabs = new Array();
     let config = null;
-    let has_selection_details = false;
-    let selection_detils_caption =  i18n({en: 'Properties', es: 'Propiedades', pl: 'Właściwości'});
-
-    let show_sign_in_out_icons = false;
+    
     let is_logged_in = false;
-    let sign_in_href = '';
-    let sign_out_href = '';
-
+    
     $:  {
         if(appConfig)
         {
             config = appConfig.mainToolbar;
-            has_selection_details = appConfig.selectionDetails;
-
-            if(has_selection_details)
-            {
-                if(appConfig.selectionDetails.captionFunc)
-                    selection_detils_caption = appConfig.selectionDetails.captionFunc()
-                else if(appConfig.selectionDetails.caption)
-                    selection_detils_caption = appConfig.selectionDetails.caption
-
-            }
         }
         else
         {
-            has_selection_details = false;
             config = mainToolbarConfig;
         }
 
         is_logged_in = $session.isActive;
-        show_sign_in_out_icons = config.signin ? true : false;
-        sign_in_href = $signInHRef;
-        sign_out_href = $signOutHRef;
-
+        
         tabs = new Array();
 
         if(definedTabs && Array.isArray(definedTabs) && definedTabs.length > 0)
@@ -154,135 +136,9 @@
             return;
 
         let rect = owner.getBoundingClientRect();
-        let options = [];
-
-        if(config.customOperations && Array.isArray(config.customOperations) && config.customOperations.length > 0)
-        {
-            config.customOperations.forEach( o => {
-                let add = true;
-                if(o.condition)
-                    add = o.condition();
-
-                if(add)
-                {
-                    let caption = ''
-                    if(o.captionFunc)
-                        caption = o.captionFunc()
-                    else if(o.caption)
-                        caption = o.caption
-
-                    options.push({
-                                    caption: caption,
-                                    icon: o.icon,
-                                    mricon: o.mricon,
-                                    action: o.action,
-                                    menu: o.menu
-                                })
-                }
-            })
-        }
-
-        if(show_sign_in_out_icons)
-        {
-                if(!is_logged_in)
-                {
-                    options.push({
-                        caption: i18n( { en: 'Sign in', es: 'Iniciar sesión', pl: 'Zaloguj'}),
-                        icon: FaSignInAlt,
-                        mricon: 'log-in',
-                        action: (focused) => { push(sign_in_href) }
-                    });
-                }
-                else
-                {
-                    options.push({
-                        caption: i18n({en: 'Sign out', es: 'Cerrar sesión', pl: 'Wyloguj' }) ,
-                        icon: FaSignOutAlt,
-                        mricon: 'log-out',
-                        action: (focused) => { push(sign_out_href) }
-                    });
-                }
-
-                options.push({separator: true})
-
-        }
-
-        if(!config || config.darkMode)
-        {
-            const capt = i18n({en: 'Dark mode', es: 'Modo oscuro', pl: 'Tryb ciemny'})
-            if($dark_mode_store == '')
-            {
-                options.push( {
-                        caption: capt,
-                        icon: FaToggleOff,
-                        mricon: 'sun-moon',
-                        action: (focused) => { $dark_mode_store = 'dark'; }
-                    });
-            }
-            else
-            {
-                options.push( {
-                        caption: capt,
-                        icon: FaToggleOn,
-                        mricon: 'sun-moon',
-                        action: (focused) => { $dark_mode_store = ''; }
-                    });
-            }
-        }
-
-        const langs = getLanguages()
-        if(langs && langs.length > 1)
-        {
-            const langMenu = langs.map( l => ({
-                caption: l.name,
-                img: l.flag,
-                action: (b) => {setCurrentLanguage(l); reloadWholeApp()},
-                disabled: getCurrentLanguage() == l
-            }))
-
-            options.push( {
-                caption: i18n({en: 'Language', es:'Idioma', pl:'Język'}),
-                menu: langMenu,
-                mricon: 'languages'
-            })
-        }
-
-        if(config && config.operations)
-        {
-            options.push( {
-                    caption: i18n({en:'Toolbar', es:'Barra de herramientas', pl:'Pasek narzędzi'}),
-                    toggle: $tools_visible_store,
-                    action: (focused) => { $tools_visible_store = !$tools_visible_store; }
-                });
-        }
-
-        if(!isDeviceSmallerThan("sm"))
-        {
-            options.push({
-                caption: i18n({en: 'Floating buttons', es: 'Botones flotantes', pl: 'Pływające przyciski'}),
-                toggle: $showFABAlways,
-                action: (f) => { $showFABAlways = !$showFABAlways; }
-            })
-
-            options.push({
-                caption: i18n({en: 'Left-handed mode', es: 'Modo para zurdos', pl: 'Tryb dla leworęcznych'}),
-                toggle: $leftHandedFAB,
-                disabled: !$showFABAlways,
-                action: (f) => { $leftHandedFAB = !$leftHandedFAB; }
-            })
-        }
-
-        if(has_selection_details)
-        {
-            options.push( {
-                        caption: selection_detils_caption,
-                        toggle: $bottom_bar_visible_store,
-                        action: (focused) => { $bottom_bar_visible_store = !$bottom_bar_visible_store }
-                    });
-        }
-
-        //let anchor = new DOMPoint(rect.right, rect.top)
-        showMenu(rect, options, SHOW_MENU_RIGHT);
+        const options = get_settings_menu(appConfig, mainToolbarConfig)
+        if(options && options.length > 0)
+            showMenu(rect, options, SHOW_MENU_RIGHT);
     }
 
 

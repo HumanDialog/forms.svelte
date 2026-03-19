@@ -740,7 +740,7 @@
                         <div class=" w-full flex flex-row justify-between">                    
                             {#if operation.mricon}
                                 {@const color=operation.color ?? ''}
-                            <div class="py-1 mr-1 w-4 {color}"><Ricon icon = {operation.mricon} s/></div>
+                                <div class="py-1 mr-1 w-4 {color}"><Ricon icon = {operation.mricon} s/></div>
                             {:else if operation.toggle !== undefined}
                                 {#if operation.toggle}
                                     <div class="py-1 mr-1 w-4 text-orange-800 dark:text-orange-200"><Ricon icon='toggle-right' s/></div>
@@ -748,9 +748,11 @@
                                     <div class="py-1 mr-1 w-4"><Ricon icon='toggle-left' s/></div>
                                 {/if}
                             {:else if operation.icon}
-                            <div class="py-1 mr-1 w-4 text-orange-500"><Icon s="md" component={operation.icon}/></div>
+                                <div class="py-1 mr-1 w-4 text-orange-500"><Icon s="md" component={operation.icon}/></div>
+                            {:else if operation.img}
+                                <div class="py-1 mr-1 w-4"><img class="not-prose" src={operation.img} width="20" height="20"  alt="img"/></div>
                             {:else}
-                            <div class="py-1 mr-1 w-4"></div>
+                                <div class="py-1 mr-1 w-4"></div>
                             {/if}
                             <div class="grow">
                                 <span class="px-2 text-left">{operation.caption}

@@ -179,7 +179,8 @@ export {
             tagsReloader,
             reloadVisibleTags,
             dark_mode_store,
-            showFABAlways } from './stores.js'
+            showFABAlways,
+            dont_hide_FAB_when_on_screen_keyboard_visible } from './stores.js'
 
 export {    data_tick_store,    // tmp
             hasSelectedItem,

@@ -127,6 +127,11 @@
                 {
                     error_message = '_; Invalid email or password; Correo electrónico o contraseña no válidos; Nieprawidłowy adres e-mail lub hasło'
                 }
+                else if(result && result.error == "invalid_user")
+                {
+                    // todo: user istnieje, ale nie ma konta w danej aplikacji. Czy pokazać komunikat, żeby się zarejestrował?
+                    error_message = '_; Invalid email or password; Correo electrónico o contraseña no válidos; Nieprawidłowy adres e-mail lub hasło'
+                }
                 else
                 {
                     if(result)
@@ -160,6 +165,37 @@
         push(redirect_to)
     }
 
+    async function get_google_signup_state()
+    {
+        const config = $session.configuration
+
+        const code_verifier = $session.push_code_verifier()
+        const code_challenge = await $session.get_code_challenge(code_verifier)
+
+        const gstate = {
+                client_id: config.client_id,
+                redirect_uri: `${__WEBSITE__}/#/auth/cb`,
+                code_challenge: code_challenge,
+                scope: config.scope,
+                state: redirect,
+                tenant: config.tenant,
+                force_new_space: false,
+                groups_only: config.groups_only
+            }
+
+        return JSON.stringify(gstate)
+    }
+
+    function get_google_callback()
+    {
+        const config = $session.configuration
+        
+        // tmp
+        //return 'https://localhost:1997/auth/authorize_with_google'
+        
+        return `${config.iss}/auth/authorize_with_google`
+    }
+
     const title = '_; Sign in; Iniciar sesión; Logowanie'
 
 </script>
@@ -181,7 +217,7 @@
         </section>
 
         <!-- Content -->
-        <div class="mb-40" aria-labelledby="modal-title" role="dialog" aria-modal="true" >
+        <div class="sm:mb-40" aria-labelledby="modal-title" role="dialog" aria-modal="true" >
             <div class="">
             <div class="flex  items-end justify-center p-1 text-center sm:items-center sm:p-0">
                 <div class=" p-0
@@ -294,40 +330,30 @@
 
                             <!-- signin with google -->
                             {#if true}
-                                
+
                                 <hr/>
                                 
-                                {@const gstate=JSON.stringify({
-                                    /*client_id: client_id,
-                                    redirect_uri: redirect_uri,
-                                    scope: scope,
-                                    code_challenge: code_challenge,
-                                    state: state,
-                                    tenant: tenant,
-                                    force_new_space: force_new_space,
-                                    groups_only: groups_only,
-                                    terms: terms_and_conditions_href,
-                                    privacy: privacy_policy_href*/
-                                })}
+                                {#await get_google_signup_state() then gstate}
+                                    <div id="g_id_onload"
+                                        data-client_id="543114490747-i9oj1j9kt1slk7dvavjo9f1uqrp9i0a0.apps.googleusercontent.com"
+                                        data-context="use"
+                                        data-ux_mode="redirect"
+                                        data-login_uri={get_google_callback()}
+                                        data-auto_prompt="false">
+                                    </div>
 
-                                <div id="g_id_onload"
-                                    data-client_id="543114490747-i9oj1j9kt1slk7dvavjo9f1uqrp9i0a0.apps.googleusercontent.com"
-                                    data-context="use"
-                                    data-ux_mode="redirect"
-                                    data-login_uri="https://objectreef.io/auth/authorize_with_google"
-                                    data-auto_prompt="false">
-                                </div>
+                                    <!-- data-theme="filled_black" -->
+                                    <div class="g_id_signin"
+                                        data-type="standard"
+                                        data-shape="rectangular"
+                                        data-theme={$dark_mode_store ? "filled_black" : "outline"} 
+                                        data-text="signin_with"
+                                        data-size="large"
+                                        data-logo_alignment="left"
+                                        data-state={gstate}>
+                                    </div>
+                                {/await}
 
-                                <!-- data-theme="filled_black" -->
-                                <div class="g_id_signin"
-                                    data-type="standard"
-                                    data-shape="rectangular"
-                                    data-theme={$dark_mode_store ? "filled_black" : "outline"} 
-                                    data-text="signin_with"
-                                    data-size="large"
-                                    data-logo_alignment="left"
-                                    data-state={gstate}>
-                                </div>
                             {/if}
 
                             
