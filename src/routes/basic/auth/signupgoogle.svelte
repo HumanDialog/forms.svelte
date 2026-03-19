@@ -496,7 +496,7 @@
                             <!-------------------------------------------------------------------->
                             <!-- POPUP CONTENT---------------------------------------------------->
                             <!-------------------------------------------------------------------->
-                            <div class="grow max-h-[40dvh] sm:max-h-[75dvh] overflow-y-auto overscroll-contain">
+                            <div class="grow">
                                 <p>
                                     _;
                                     We need some more information;
@@ -585,7 +585,7 @@
                             <!-------------------------------------------------------------------->
                             <!-- POPUP CONTENT---------------------------------------------------->
                             <!-------------------------------------------------------------------->
-                            <div class="grow max-h-[40dvh] sm:max-h-[75dvh] overflow-y-auto overscroll-contain">
+                            <div class="grow">
                                 <p>
                                     _;
                                     Creating an account. Please wait...;

@@ -230,7 +230,7 @@
                             <!-------------------------------------------------------------------->
                             <!-- POPUP CONTENT---------------------------------------------------->
                             <!-------------------------------------------------------------------->
-                            <div class="grow max-h-[40dvh] sm:max-h-[75dvh] overflow-y-auto overscroll-contain">
+                            <div class="grow">
                             
                                 <div class="px-2 outline outline-4  bg-stone-100 outline-stone-100 dark:bg-stone-800 dark:outline-stone-800">
                                     <h4>_; 
@@ -252,7 +252,7 @@
                             <!-------------------------------------------------------------------->
                             <!-- POPUP CONTENT---------------------------------------------------->
                             <!-------------------------------------------------------------------->
-                            <div class="grow max-h-[40dvh] sm:max-h-[75dvh] overflow-y-auto overscroll-contain">
+                            <div class="grow">
                             
                                 <div class="px-2 outline outline-4  bg-stone-100 outline-stone-100 dark:bg-stone-800 dark:outline-stone-800">
                                     <h4>_; Error; Error; Błąd</h4>
@@ -289,7 +289,7 @@
                             <!-------------------------------------------------------------------->
                             <!-- POPUP CONTENT---------------------------------------------------->
                             <!-------------------------------------------------------------------->
-                            <div class="grow max-h-[40dvh] sm:max-h-[75dvh] overflow-y-auto overscroll-contain">
+                            <div class="grow">
 
                                 <p>
                                     _;

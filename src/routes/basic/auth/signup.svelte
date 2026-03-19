@@ -857,7 +857,7 @@ El equipo de ${__APP_TITLE__}`
                             <!-------------------------------------------------------------------->
                             <!-- POPUP CONTENT---------------------------------------------------->
                             <!-------------------------------------------------------------------->
-                            <div class="grow max-h-[40dvh] sm:max-h-[75dvh] overflow-y-auto overscroll-contain">
+                            <div class="grow">
                                 <p>
                                     _;
                                     Enter the email address you'll use to sign in;
@@ -935,7 +935,7 @@ El equipo de ${__APP_TITLE__}`
                             <!-------------------------------------------------------------------->
                             <!-- POPUP CONTENT---------------------------------------------------->
                             <!-------------------------------------------------------------------->
-                            <div class="grow max-h-[40dvh] sm:max-h-[75dvh] overflow-y-auto overscroll-contain">
+                            <div class="grow">
                                 <p>
                                     _;
                                     A user with this email address already exists. Please enter your password or reset it by sending a special message to your email address.;
@@ -1010,7 +1010,7 @@ El equipo de ${__APP_TITLE__}`
                             <!-------------------------------------------------------------------->
                             <!-- POPUP CONTENT---------------------------------------------------->
                             <!-------------------------------------------------------------------->
-                            <div class="grow max-h-[40dvh] sm:max-h-[75dvh] overflow-y-auto overscroll-contain">
+                            <div class="grow">
                                 <p>
                                     {i18n({
                                         en: `You already have an account on ${__APP_TITLE__}. Click the button below to go to the app. If you need a new group, you can create one from the settings menu`,
@@ -1054,7 +1054,7 @@ El equipo de ${__APP_TITLE__}`
                             <!-------------------------------------------------------------------->
                             <!-- POPUP CONTENT---------------------------------------------------->
                             <!-------------------------------------------------------------------->
-                            <div class="grow max-h-[40dvh] sm:max-h-[75dvh] overflow-y-auto overscroll-contain">
+                            <div class="grow">
                                 <p>
                                     _;
                                     Before you access the application for the first time, you must set a password that you will use to sign in.;
@@ -1126,7 +1126,7 @@ El equipo de ${__APP_TITLE__}`
                             <!-------------------------------------------------------------------->
                             <!-- POPUP CONTENT---------------------------------------------------->
                             <!-------------------------------------------------------------------->
-                            <div class="grow max-h-[40dvh] sm:max-h-[75dvh] overflow-y-auto overscroll-contain">
+                            <div class="grow">
                                 <p>
                                     _;
                                     We need some more information;
@@ -1244,7 +1244,7 @@ El equipo de ${__APP_TITLE__}`
                             <!-------------------------------------------------------------------->
                             <!-- POPUP CONTENT---------------------------------------------------->
                             <!-------------------------------------------------------------------->
-                            <div class="grow max-h-[40dvh] sm:max-h-[75dvh] overflow-y-auto overscroll-contain">
+                            <div class="grow ">
                                 <p>
                                     _;
                                     Creating an account. Please wait...;
