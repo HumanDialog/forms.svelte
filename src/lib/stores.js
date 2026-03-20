@@ -43,12 +43,38 @@ export function popToolsActionsOperations()
     }
 }
 
-export const addAlert = (txt) => {
+export const addAlert = (txt, reload=false) => {
+    
+    if(txt.startsWith('{'))
+    {
+        try
+        { 
+            const err_obj = JSON.parse(txt)
+
+            if(err_obj.error_description)
+                txt = err_obj.error_description
+            else if(err_obj.error)
+                txt = err_obj.error
+            else
+            {
+                txt = ""
+                Object.keys(err_obj).forEach(key => {
+                txt += `${key}: ${err_obj[key]} ` 
+                })
+            }
+        }
+        catch
+        {
+
+        }
+    }
+    
     let al = get(alerts)
     const alert = {
         msg: txt,
         id: randomString(6),
-        timeoutId: setTimeout(() => removeAlert(alert), 10000)
+        timeoutId: setTimeout(() => removeAlert(alert), 10000),
+        reload: reload
     }
     al = [alert, ...al];
     alerts.set(al);

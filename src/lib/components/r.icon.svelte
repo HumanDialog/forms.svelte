@@ -106,6 +106,10 @@
   import ToggleRight from './ricons/toggle-right.svelte'
   import Settings from './ricons/settings.svelte'
 
+  import RefreshCCW from './ricons/refresh-ccw.svelte'
+  import Copy from './ricons/copy.svelte'
+	import RefreshCcw from './ricons/refresh-ccw.svelte';
+
   let ricons_box = {
     "arrow-up": ArrowUp,
     "check-check": CheckCheck,
@@ -200,7 +204,9 @@
     'external-link': ExternalLink,
     'toggle-left': ToggleLeft,
     'toggle-right': ToggleRight,
-    'settings': Settings
+    'settings': Settings,
+    'refresh-ccw' : RefreshCcw,
+    'copy' : Copy
   }
 
   let width = 24;

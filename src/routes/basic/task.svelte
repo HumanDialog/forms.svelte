@@ -23,11 +23,10 @@
 			pushChanges,
             hasModifications,
             refreshToolbarOperations,
-            informModificationEx,
             Breadcrumb, i18n, ext,
             showFloatingToolbar,
 			randomString,
-			showMenu,
+			showMenu, mainContentPageReloader,
             SHOW_MENU_BELOW, focusEditable, openInNewTab, copyAddress,
             List, ListTitle, ListSummary, ListInserter, Icon, Paper, PaperTopMargin, PaperHeader
             } from '$lib'
@@ -71,7 +70,7 @@
 
     let descriptionNotes = []
 
-    $: onParamsChanged($location)
+    $: onParamsChanged($location, $mainContentPageReloader)
 
     async function onParamsChanged(...args)
     {
@@ -130,7 +129,7 @@
                                 {
                                     Id: 1,
                                     Association: '',
-                                    Expressions:['Id', 'Index', 'Title','Summary', 'Description', 'DueDate', 'Tags', 'State', 'AttachedFiles', 'GetCanonicalPath', '$ref', '$type', '$acc', 'href', 'icon'],
+                                    Expressions:['Id', 'Index', 'Title','Summary', 'Description', 'DueDate', 'Tags', 'State', 'AttachedFiles', 'GetCanonicalPath', '$ref', '$type', '$acc', '$ver', 'href', 'icon'],
                                     SubTree:[
                                         {
                                             Id: 10,
@@ -253,12 +252,6 @@
             descriptionNotes = task.Notes.filter((n) => n.Role == NR_DESCRIPTION)
         else
             descriptionNotes = []
-    }
-
-    function onPropertySingleChange(txt, attrib)
-    {
-        informModificationEx(task.$type, task.Id, attrib, txt)
-        refreshToolbarOperations()
     }
 
     async function onUpdateAllTags(newAllTags)

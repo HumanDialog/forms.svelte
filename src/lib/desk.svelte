@@ -6,6 +6,7 @@
     import Operations from './operations.svelte'
     import Fab from './components/Fab.svelte'
      import {Alert} from 'flowbite-svelte'
+     import Ricon from './components/r.icon.svelte'
 
     import {main_sidebar_visible_store,
             tools_visible_store,
@@ -16,7 +17,7 @@
             set_default_tools_visible,
             set_dark_mode_default,
             sidebar_left_pos,
-            wholeAppReloader,
+            wholeAppReloader, reloadWholeApp,
             alerts, removeAlert, showFABAlways, dont_hide_FAB_when_on_screen_keyboard_visible} from './stores.js'
     import {pushChanges} from './updates.js'
 
@@ -543,19 +544,26 @@
                     <section class="fixed left-2 sm:left-auto sm:right-2 bottom-2 flex flex-col gap-2">
                         {#if $alerts && $alerts.length > 0}
                             {#each $alerts as alert, idx}
-                                <Alert class="bg-red-900/40  shadow-lg shadow-stone-400 dark:shadow-black flex flex-row-reverse sm:flex-row">
+                                <Alert class="bg-red-900/40  shadow-lg shadow-stone-400 dark:shadow-black flex flex-row-reverse sm:flex-row backdrop-blur-sm">
                                     {@const text_max_width = is_small ? '60vw' : '75vw'}
 
                                     <p class="flex-none truncate" style="max-width: {text_max_width}">
                                         {alert.msg}
                                     </p>
-                                    <button class="block sm:ml-auto w-3 mx-1"
-                                            on:click={() => {navigator.clipboard.writeText(alert.msg)}}>
-                                        <FaCopy/>
-                                    </button>
+                                    {#if alert.reload}
+                                        <button class="block sm:ml-auto w-3 mx-1"
+                                                on:click={() => {reloadWholeApp(); removeAlert(alert)}}>
+                                            <Ricon icon="refresh-ccw" xs/>
+                                        </button>
+                                    {:else}
+                                        <button class="block sm:ml-auto w-3 mx-1"
+                                                on:click={() => {navigator.clipboard.writeText(alert.msg)}}>
+                                            <Ricon icon="copy" xs/>
+                                        </button>
+                                    {/if}
                                     <button class="block w-3 mx-1"
                                             on:click={() => {removeAlert(alert)}}>
-                                        <FaTimes/>
+                                        <Ricon icon="x" xs/>
                                     </button>
                                 </Alert>
                             {/each}

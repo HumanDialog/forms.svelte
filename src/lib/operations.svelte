@@ -264,12 +264,14 @@
         if(!operation)
             return;
 
+        e.stopPropagation()
+
         if(isDisabled)
         {
-            e.preventDefault()
-            e.stopPropagation()
+            e.preventDefault()    
             return;
         }
+        
 
         let owner = e.target;
         while(owner && owner.tagName != 'BUTTON')

@@ -118,14 +118,14 @@
 
 <div  class="">
     <p class="block sm:hidden text-stone-800 dark:text-stone-400 text-sm ml-1 mb-1">{label}</p>
-    <div class="grid gap-2 {grid_cols} ">
+    <div class="sm:p-2 grid gap-2 {grid_cols} ">
         {#each operations as operation}
             {#if !operation.separator}
                 {@const col=col_span(operation.columns ?? 1)}
 
                 <button class=" py-2.5 px-5 {col}
                                 text-sm font-medium text-stone-900 dark:text-stone-400 dark:hover:text-white
-                                bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 active:bg-stone-200 dark:active:bg-stone-600
+                                bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-700 active:bg-stone-200 dark:active:bg-stone-600
                                 border rounded border-stone-200 dark:border-stone-600 focus:outline-none
                                 inline-flex items-center justify-center"
                                 on:click={(e) => {execute_action(e, operation)}}>
