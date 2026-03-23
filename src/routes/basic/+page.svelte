@@ -68,7 +68,7 @@
     routes.set('/invitation',           wrap({ asyncComponent: () => import('./auth/invitation.svelte')}))
     routes.set('/confirmemail',         wrap({ asyncComponent: () => import('./auth/confirmemail.svelte')}))
     routes.set('/result',               wrap({ asyncComponent: () => import('./auth/result.svelte')}))
-    routes.set(r, AppView)
+    //routes.set(r, AppView)
     routes.set('*', NotFound)
 
     setLanguages([

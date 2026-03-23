@@ -47,7 +47,7 @@
         const cachedGroupProjects = cache.get('projectsNavigator')
         if(cachedGroupProjects)
         {
-            groupProjects = cachedGroupLists;
+            groupProjects = cachedGroupProjects;
             navGroupProjects?.reload(groupProjects)
         }
 
@@ -61,19 +61,19 @@
         await fetchData()
 
         navGroupLists?.reload(groupTaskLists)
-
-        navGroupProjects?.reload()
+        navGroupProjects?.reload(groupProjects)
 
 
         cache.set('listsNavigator_1', groupTaskLists);
+        cache.set('projectsNavigator', groupProjects)
     }
 
     async function fetchData()
     {
         const limit = isDeviceSmallerThan("sm") ? 7 : 12
 
-
-        const groupProjectsPromise  = reef.post('group/query', {
+       
+        const res  = await reef.post('group/query', {
             Id: 2,
             Name: "group tasklists",
             ExpandLevel: 1,
@@ -82,43 +82,23 @@
                 {
                     Id: 20,
                     Association: 'Projects',
+                    SubTreeLimit: 3,
                     Sort: "Order",
                     Expressions: ['Id', 'Title', 'Order', 'href', '$ref', '$type']
-                }
-            ]
-        }, onErrorShowAlert)
-
-
-
-        const groupTasklistsPromise = reef.post('group/query', {
-            Id: 2,
-            Name: "group tasklists",
-            ExpandLevel: 1,
-            Limit: 20,
-            Tree: [
+                },
                 {
                     Id: 21,
                     Association: 'Lists',
+                    SubTreeLimit: 20,
                     Sort: "Order",
                     Expressions: ['Id', 'Name', 'Summary', 'Order', 'href', '$ref', '$type']
                 }
             ]
-        }, onErrorShowAlert)
-
-        const results = await Promise.all([groupProjectsPromise, groupTasklistsPromise])
+        })
 
 
-        if(results[0])
-            groupProjects = results[0].Project;
-        else
-            groupProjects = []
-
-
-        if(results[1])
-            groupTaskLists = results[1].TaskList;
-        else
-            groupTaskLists = []
-
+        groupProjects = res.Project ?? []
+        groupTaskLists = res.TaskList ?? [];
 
     }
 
@@ -126,7 +106,7 @@
     {
         await fetchData();
         navGroupLists.reload(groupTaskLists)
-        navGroupProjects.reloat(groupProjects)
+        navGroupProjects.reload(groupProjects)
     }
 
     function isRoutingTo(href, currentPath)

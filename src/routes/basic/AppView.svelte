@@ -122,7 +122,6 @@
             case 'mypages':
                 return {
                     'MY':{
-                        icon: FaList,
                         mricon: 'user',
                         component: SidebarMyPages
                     }
@@ -131,7 +130,6 @@
             case 'grouppages':
                 return {
                     'GROUP':{
-                        icon: FaList,
                         mricon: 'users',
                         component: SidebarGroupPages
                     }
@@ -140,7 +138,6 @@
             case 'tasklists':
                 return {
                     'TOC':{
-                        icon: FaList,
                         mricon: 'notebook',
                         component: Sidebar
                     }
@@ -149,7 +146,6 @@
             case 'folders':
                 return {
                     'Folders': {
-                        icon: FaFolder,
                         mricon: 'folder',
                         component: SidebarFolders
                     }
@@ -158,7 +154,6 @@
             case 'messages':
                 return {
                     'Messages': {
-                            icon: FaComments,
                             mricon: 'messages-square',
                             component: SidebarMessages,
                             mountObserver: mountMessagesObserver,

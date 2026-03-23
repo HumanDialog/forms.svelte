@@ -13,13 +13,13 @@ export default defineConfig( ({command, mode}) => {
 	case 'octopus':
 		buildConfig = {
 			__APP_MODE__: '\'local\'',
-			__OBJECTREEF_IO__: '\'localhost:1996\'',
-			__APP_ID__: '\'octopus\'',
+			__OBJECTREEF_IO__: '\'objectreef.local:1996\'',
+			__APP_ID__: '\'octopus\'', 
 			__TENANT_ID__: '\'octopus\'',
-			__SERVICE_PROTOCOL__: '\'http\'',
+			__SERVICE_PROTOCOL__: '\'https\'',
 			__CLIENT_ID__: '\'SampleClientId\'',
 			__CLIENT_SECRET__: '\'SampleClientSecret\'',
-			__WEBSITE__: '\'http://localhost:5174\'',
+			__WEBSITE__: '\'http://localhost:5173\'',
 			__GA_IDENTIFIER__: '\'\'',
 
 			__OCTOPUS601_MODULES__:'\'tasklists,folders,messages\'',
