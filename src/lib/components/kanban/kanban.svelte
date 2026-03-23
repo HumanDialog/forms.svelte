@@ -5,12 +5,13 @@
     import {contextItemsStore, contextTypesStore, data_tick_store } from '../../stores'
     import KanbanColumn from './internal/kanban.column.svelte'
 	import { informModification, pushChanges } from '$lib/updates';
-    import {Editable, focusEditable} from '$lib'
+    import {Editable, DatePicker, focusEditable} from '$lib'
 
 
     export let self                 = null;
     export let title:               string = ''
     export let summary:             string = ''
+    export let start_date:          string = ''
     export let c = '';
     export let columnsDef: rKanban_column[]|undefined = undefined
 
@@ -27,6 +28,8 @@
     setContext('rIs-table-component', true);
 
     let     cs =  c ? parseWidthDirective(c) : 'w-full min-w-full';
+
+    let start_date_b = null
 
     clearActiveItem('props')
 
@@ -308,7 +311,7 @@
 
             item[oa] = toListTop[oa] - ORDER_STEP;
             informModification(item, oa);
-            
+
             remove(allItems, item);
             insertAt(allItems, 0, item);
         }
@@ -330,7 +333,7 @@
 
             item[oa] = prevOrder + Math.floor(orderSpace / 2);
             informModification(item, oa);
-            
+
             remove(allItems, item)
             insertAfter(allItems, prevItem, item);
         }
@@ -355,7 +358,7 @@
 
         const columnElement = columns[columnIdx]
 
-    
+
         const nextItem = getNext(allItems, toListBottom)
         if(!nextItem)
         {
@@ -390,7 +393,7 @@
             remove(allItems, item)
             insertAfter(allItems, toListBottom, item)
         }
-    
+
         columnElement.reload()
     }
 
@@ -756,7 +759,7 @@
                 informModification(item, sa)
             })
 
-        
+
     }
 
     export function add(item: object|number, columnIdx: number = -1)
@@ -792,8 +795,23 @@
 <slot/> <!-- Launch definition settings -->
 
     <figure class="px-0 sm:px-4">
-    <h1><Editable self={self} a={title}/></h1>
-    <figcaption><Editable self={self} a={summary}/></figcaption>
+         <div class="w-full flex flex-row justify-between">
+                <figcaption>{start_date}</figcaption>
+                <figcaption><Editable self={self} a={start_date}/></figcaption>
+
+                <figcaption>
+
+                            <DatePicker   self={self}
+                                    a={start_date}
+                                    bind:this={start_date_b}
+                                    typo
+                                />
+
+
+                </figcaption>
+         </div>
+        <h1><Editable self={self} a={title}/></h1>
+        <figcaption><Editable self={self} a={summary}/></figcaption>
     </figure>
 
     <!--hr class="hidden sm:block w-full"-->

@@ -109,13 +109,13 @@
 
 
         if(results[0])
-            groupProjects = results[1].Project;
+            groupProjects = results[0].Project;
         else
             groupProjects = []
 
 
         if(results[1])
-            groupTaskLists = results[2].TaskList;
+            groupTaskLists = results[1].TaskList;
         else
             groupTaskLists = []
 

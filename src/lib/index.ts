@@ -188,6 +188,7 @@ export {    data_tick_store,    // tmp
 
 export { contextToolbarOperations, pageToolbarOperations, contextItemsStore, contextTypesStore } from './stores'   // tmp
 export { informModification, setjItemProperty, informModificationEx, informItem, pushChanges, hasModifications, pushChangesImmediately } from './updates'   // tmp
+export { query_item_collection } from './ui-json'
 
 
 

@@ -120,7 +120,7 @@
 
         restoreScrollAfterUpdate = true;
         prevLocation = $location
-        
+
         let prevDef = currentList?.$ref
         const cacheKey = `listboard/${listId}`
         const cachedValue = cache.get(cacheKey)
@@ -158,7 +158,7 @@
         if(restoreScrollAfterUpdate)
         {
             restoreScrollAfterUpdate = false;
-            restoreScrollPosition($location)   
+            restoreScrollPosition($location)
         }
     })
 
@@ -194,7 +194,7 @@
                                     {
                                         Id: 1,
                                         Association: '',
-                                        Expressions:['$ref','Id','Name', 'Summary', 'Kind', 'GetTaskStates','href', 'GetCanonicalPath', '$type', 'IsSubscribed', 'AreFinishedTasksHidden'],
+                                        Expressions:['$ref','Id','Name', 'Summary', 'StartDate', 'EndDate', 'DueDate', 'Kind', 'GetTaskStates','href', 'GetCanonicalPath', '$type', 'IsSubscribed', 'AreFinishedTasksHidden'],
                                         SubTree:
                                         [
                                             {
@@ -246,8 +246,8 @@
             taskStates = currentList.GetTaskStates
         else
             taskStates = [];
-        
-        
+
+
         filterTasks()
     }
 
@@ -310,12 +310,12 @@
         currentList.AreFinishedTasksHidden = !finishedTasksHidden
 
         filterTasks()
-        
+
         //////
 
         const newColumns = getKanbanColumnsDefinition()
         kanban.setColumns(newColumns)
-        
+
         await kanban.reload(currentList, kanban.KEEP_SELECTION);
         //await reload(kanban.KEEP_SELECTION)
 
@@ -333,7 +333,7 @@
         {
             const column = taskStates[idx];
             const isFinishing = column.state == STATE_FINISHED
-            
+
             newColumns.push({
                     title: ext(column.name),
                     state: column.state,
@@ -908,7 +908,7 @@
             if(column.state >= task.State )
                 order = KanbanColumnBottom;
 
-            
+
             const operation = {
                 caption: ext(column.name),
                 disabled: task.State == column.state,
@@ -1262,10 +1262,10 @@
             if(res && Array.isArray(res))
             {
                 taskStates = [...res]
-                
+
                 const columnDef = getKanbanColumnsDefinition()
                 kanban.setColumns(columnDef)
-                
+
                 await kanban.reload(currentList, kanban.CLEAR_SELECTION);
                 kanban.activateColumn(idx)
                 //kanban.editColumnName(idx);
@@ -1294,7 +1294,7 @@
 
 
     let columnPropertiesDialog;
-    
+
 
     async function addProcessColumn(pos)
     {
@@ -1351,12 +1351,12 @@
         {
             saveTaskStates();
             await fetchData()
-            
+
             const newColumns = getKanbanColumnsDefinition()
             kanban.setColumns(newColumns)
             await kanban.reload(currentList, kanban.KEEP_SELECTION);
             //await kanban.rerender(editingColumnPos)
-            
+
         }
     }
 
@@ -1398,6 +1398,7 @@
                 self = {currentList}
                 title = 'Name'
                 summary = 'Summary'
+                start_date = 'StartDate'
                 bind:this={kanban}
                 columnsDef={getKanbanColumnsDefinition()}>
 
