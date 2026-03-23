@@ -1365,11 +1365,13 @@
 </script>
 
 <svelte:head>
-    {#if currentList && currentList.Name}
-        <title>{ext(currentList.Name)} | {__APP_TITLE__}</title>
-    {:else}
-        <title>{__APP_TITLE__}</title>
-    {/if}
+    {#key currentList}
+        {#if currentList && currentList.Name}
+            <title>{ext(currentList.Name)} | {__APP_TITLE__}</title>
+        {:else}
+            <title>{__APP_TITLE__}</title>
+        {/if}
+    {/key}
 </svelte:head>
 
 {#key definitionChangedTicket}

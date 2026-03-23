@@ -48,7 +48,7 @@
 		cl += ' ' + $$props.class
 
 	onDestroy(() => {
-		console.log('#jcache the component is being destroyed');
+		//console.log('#jcache the component is being destroyed');
 		pushChanges();
 	});
 

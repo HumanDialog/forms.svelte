@@ -11,7 +11,7 @@ const modified_item_store = writable(null);
 
 export function setjItemProperty(item, field_name, value)
 {
-    console.log('setjItemProperty ' + field_name)
+    //console.log('setjItemProperty ' + field_name)
     
     if(item[field_name] == value)
         return
@@ -23,7 +23,7 @@ export function setjItemProperty(item, field_name, value)
 
 export function set_ritem_property(item, field_name, value)
 {
-    console.log('setjItemProperty ' + field_name)
+    //console.log('setjItemProperty ' + field_name)
     let type_name = item.$type;
     item[field_name] = value;
     informModification(item, field_name, type_name);
