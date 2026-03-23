@@ -170,7 +170,8 @@
                                                     'GetUnreadMessagesNo',
                                                     '$ref',
                                                     '$type',
-                                                    '$acc'],
+                                                    '$acc',
+                                                    '$ver'],
                                     SubTree:[
                                         {
                                             Id: 11,

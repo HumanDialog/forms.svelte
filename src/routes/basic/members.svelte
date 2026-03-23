@@ -5,6 +5,9 @@
 	import { onMount } from 'svelte';
 	
     let users = []
+
+    let ownInvitation = __WEBSITE__ + "/#/invitation"
+
     onMount( async () =>
     {
         //let result = await reef.get('app/Users')
@@ -16,7 +19,7 @@
                                     {
                                         Id: 1,
                                         Association: 'Members/User',
-                                        Expressions: ['Id', 'Name', 'login', '$ref', 'href', '$acc']
+                                        Expressions: ['Id', 'Name', 'login', '$ref', 'href', '$acc', '$ver']
                                     }
                                 ]                    
                             },
@@ -32,8 +35,10 @@
     const title = '_; Members; Miembros; Członkowie'
   </script>
 
-
+<svelte:head>
+    <title>{title} | {__APP_TITLE__}</title>
+</svelte:head>
 
 {#if users && users.length > 0}
-  <MembersPage {users} nameAttrib="Name" emailAttrib="login" refAttrib="$ref" hrefAttrib="href" showAccessRoles/>
+  <MembersPage {users} nameAttrib="Name" emailAttrib="login" refAttrib="$ref" hrefAttrib="href" showAccessRoles {ownInvitation}/>
 {/if}

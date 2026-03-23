@@ -26,13 +26,12 @@
 			pushChanges,
             hasModifications,
             refreshToolbarOperations,
-            informModificationEx,
             Breadcrumb, i18n, UI,
 			showFloatingToolbar,
 			randomString,
             showMenu,
             SHOW_MENU_BELOW,
-            ext,
+            ext, mainContentPageReloader,
             List, ListTitle, ListSummary, ListInserter, Icon, Ricon,
             reloadPageToolbarOperations, Paper, PaperHeader, focusEditable, openInNewTab, copyAddress,
 
@@ -82,7 +81,7 @@
     let isThread = false
 
 
-    $: onParamsChanged($location)
+    $: onParamsChanged($location, $mainContentPageReloader)
 
     async function onParamsChanged(...args)
     {
@@ -140,6 +139,7 @@
                                                     '$ref',
                                                     '$type',
                                                     '$acc',
+                                                    '$ver',
                                                     'href'],
                                     SubTree:[
                                         {
@@ -262,13 +262,7 @@
             noteElement.attachements.sort((a,b) => a.Order-b.Order)
     }
 
-    function onPropertySingleChange(txt, attrib)
-    {
-        //note[attrib] = txt
-        //informModification(note, attrib)
-        informModificationEx(activeNote.$type, activeNote.Id, attrib, txt)
-        refreshToolbarOperations()
-    }
+    
 
     async function onUpdateAllTags(newAllTags)
     {

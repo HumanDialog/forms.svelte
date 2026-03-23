@@ -631,7 +631,7 @@
                     if(item && a && typename)
                     {
                         //informModification(item, a, typename);
-                        informModificationEx(typename, item.Id, a, itm ? itm.Key : null)
+                        informModificationEx(typename, item, a, itm ? itm.Key : null)
 
                         if(pushChangesImmediately)
                             pushChanges();

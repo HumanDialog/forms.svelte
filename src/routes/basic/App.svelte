@@ -38,7 +38,10 @@
                         tenant: `${tenantId}`,
                         groupsOnly: true,
                         termsAndConditionsHRef: `${website}/#/${terms}`,
-                        privacyPolicyHRef: `${website}/#/${privacy}`
+                        privacyPolicyHRef: `${website}/#/${privacy}`,
+
+                        ownSignin: 'signin',
+                        ownSignup: 'signup'
                     },
                     local: {
                         api:    "http://127.0.0.1:1996/",
@@ -75,6 +78,15 @@
     routes.set('/blog',                 wrap({ asyncComponent: () => import('./landing/blog/blog.svelte')}))
     routes.set('/blog/*',               wrap({ asyncComponent: () => import('./landing/blog/article.svelte')}))
     routes.set(app_view_routes, AppView)
+    routes.set('/signin',               wrap({ asyncComponent: () => import('./auth/signin.svelte')}))
+    routes.set('/signup',               wrap({ asyncComponent: () => import('./auth/signup.svelte')}))
+    routes.set('/signupgoogle',         wrap({ asyncComponent: () => import('./auth/signupgoogle.svelte')}))
+    routes.set('/resetpassword',        wrap({ asyncComponent: () => import('./auth/resetpassword.svelte')}))
+    routes.set('/changepassword',       wrap({ asyncComponent: () => import('./auth/changepassword.svelte')}))
+    routes.set('/invitation',           wrap({ asyncComponent: () => import('./auth/invitation.svelte')}))
+    routes.set('/confirmemail',         wrap({ asyncComponent: () => import('./auth/confirmemail.svelte')}))
+    routes.set('/result',               wrap({ asyncComponent: () => import('./auth/result.svelte')}))
+    routes.set(r, AppView)
     routes.set('*', NotFound)
 
     setLanguages([

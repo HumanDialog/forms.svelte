@@ -53,7 +53,7 @@
                                 {
                                     Id: 1,
                                     Association: '',
-                                    Expressions:['Id', '$ref', 'Name', 'Email', 'Avatar', 'Bio', '$acc'],
+                                    Expressions:['Id', '$ref', 'Name', 'Email', 'Avatar', 'Bio', '$acc', '$ver'],
                                     SubTree: [
                                         {
                                             Id: 10,

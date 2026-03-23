@@ -13,7 +13,6 @@
             informModification,
 			pushChanges,
             refreshToolbarOperations,
-            informModificationEx,
             Breadcrumb, i18n, UI,
 			showFloatingToolbar,
 			randomString,
@@ -108,6 +107,7 @@
                                                     '$ref',
                                                     '$type',
                                                     '$acc',
+                                                    '$ver',
                                                     'href'],
                                     SubTree:[
                                         {
@@ -131,15 +131,6 @@
         isReadOnly = (note.$acc & 0x2) == 0
     }
 
-
-
-    function onPropertySingleChange(txt, attrib)
-    {
-        //note[attrib] = txt
-        //informModification(note, attrib)
-        informModificationEx(note.$type, note.Id, attrib, txt)
-        refreshToolbarOperations()
-    }
 
     let summary;
     let summaryPlaceholder = false;

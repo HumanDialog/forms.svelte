@@ -59,8 +59,7 @@
 
     async function onFieldChanged(text)
     {
-        if(text.startsWith('\u200B'))
-            text = text.substring(1)
+        text = trim(text)
         
         val = text
         validate()
@@ -68,14 +67,31 @@
 
     function onSingleChange(text)
     {
-        if(!text)
+        /*if(!text)
+        {
             text = '\u200B'
-        else if(text.startsWith('\u200B'))
-            text = text.substring(1)
-        
-        val = text
+            val = text
+        }
+        else if(needTrim(text))
+        {
+            text = trim(text)
+            val = text
+        }
+        */
+
         if(invalid)
             validate();
+    }
+
+    const whiteSpacePattern = /^[\s\u200B]+|[\s\u200B]+$/g;
+    function needTrim(text)
+    {
+        return whiteSpacePattern.test(text);
+    }
+
+    function trim(text)
+    {
+        return text.replace(whiteSpacePattern, "");
     }
     
 </script>

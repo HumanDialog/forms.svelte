@@ -48,8 +48,6 @@
     {
         definition.clear();
 
-        console.log('rerender cols', definition.columns)
-
         renderToken += 1;
 
         await tick();
@@ -817,7 +815,7 @@
     <!--hr class="hidden sm:block w-full"-->
 
 <div    id="__hd_svelte_kanban_columns_container"
-            class="h-full flex flex-row no-wrap
+            class=" min-h-screen sm:min-h-min sm:h-full flex flex-row no-wrap 
                 overflow-x-scroll grow sm:overflow-x-visible
                 snap-x snap-mandatory
                 xbg-lime-500

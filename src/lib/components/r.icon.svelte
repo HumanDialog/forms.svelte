@@ -111,7 +111,9 @@
 
   import Trash from './ricons/trash.svelte'
   import Building from './ricons/building.svelte'
-
+  import RefreshCCW from './ricons/refresh-ccw.svelte'
+  import Copy from './ricons/copy.svelte'
+	import RefreshCcw from './ricons/refresh-ccw.svelte';
 
   let ricons_box = {
     "archive": Archive,
@@ -211,7 +213,9 @@
     'external-link': ExternalLink,
     'toggle-left': ToggleLeft,
     'toggle-right': ToggleRight,
-    'settings': Settings
+    'settings': Settings,
+    'refresh-ccw' : RefreshCcw,
+    'copy' : Copy
   }
 
   let width = 24;

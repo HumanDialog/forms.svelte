@@ -296,10 +296,14 @@
                 "
         hidden={!visible}
         on:click={on_window_click}>
-    <div class="bg-stone-100 dark:bg-stone-800 rounded-lg shadow-md shadow-stone-500 dark:shadow-black
+
+    <!-- zabawy tłem: sm:bg-stone-100 sm:dark:bg-stone-900/70 sm:backdrop-blur-sm -->
+    <div class="bg-stone-100 dark:bg-stone-900 rounded-lg shadow-md shadow-stone-500 dark:shadow-black
                 sm:shadow-xl sm:shadow-slate-700/10
                 sm:dark:shadow-black/80
-                sm:outline sm:outline-1 sm:outline-stone-500 fixed"
+                sm:outline sm:outline-1 sm:outline-stone-500 fixed
+                
+                "
                 style={cssPosition}
                 bind:this={rootElement}>
             {#if closeButtonPos}

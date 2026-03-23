@@ -1,6 +1,7 @@
 import {writable, get} from 'svelte/store';
 import {reef} from '@humandialog/auth.svelte/dist/index'
 import {onErrorShowAlert} from './stores.js'
+import {i18n} from './i18n.js'
 
 
 let last_logged_item = null;
@@ -10,7 +11,7 @@ const modified_item_store = writable(null);
 
 export function setjItemProperty(item, field_name, value)
 {
-    console.log('setjItemProperty ' + field_name)
+    //console.log('setjItemProperty ' + field_name)
     
     if(item[field_name] == value)
         return
@@ -22,7 +23,7 @@ export function setjItemProperty(item, field_name, value)
 
 export function set_ritem_property(item, field_name, value)
 {
-    console.log('setjItemProperty ' + field_name)
+    //console.log('setjItemProperty ' + field_name)
     let type_name = item.$type;
     item[field_name] = value;
     informModification(item, field_name, type_name);
@@ -51,29 +52,34 @@ export function informModification(itm, field_name, type_name=undefined)
     }
 
     let item_entry = {
-        Id: [type_name] + itm.Id,
+        Id: type_name + itm.Id,
         type_name: type_name,
         item: { [type_name]:
                 {
                     Id: itm.Id,
-                    [field_name]: itm[field_name]
+                    [field_name]: itm[field_name],
+
+                    ... (itm.$ver) ? {$ver: itm.$ver} : {}
                 } },
+        item_reference: itm.$ver ? itm : null
     };
 
     modified_item_store.set(item_entry);
     return true;
 };
 
-export function informModificationEx(typeName, itemId, attribName, attribValue)
+export function informModificationEx(typeName, itm, attribName, attribValue)
 {
     let item_entry = {
-        Id: [typeName] + itemId,
+        Id: typeName + itm.Id,
         type_name: typeName,
         item: { [typeName]:
                 {
-                    Id: itemId,
-                    [attribName]: attribValue
+                    Id: itm.Id,
+                    [attribName]: attribValue,
+                    ... (itm.$ver) ? {$ver: itm.$ver} : {}
                 } },
+        item_reference: itm.$ver ? itm : null
     };
 
     modified_item_store.set(item_entry);
@@ -104,10 +110,11 @@ export function informItem(itm, type_name=undefined)
     }
 
     let item_entry = {
-        Id: [type_name] + itm.Id,
+        Id: type_name + itm.Id,
         type_name: type_name,
         item: { [type_name]:
                 itm },
+        item_reference: itm.$ver ? itm : null
     };
 
     modified_item_store.set(item_entry);
@@ -120,8 +127,6 @@ let afterPushCallbacks = []
 
 export function pushChanges(afterPushCallback=undefined)
 {
-    //console.trace()
-
     if(!modified_items_map.size)
         return;
 
@@ -149,6 +154,9 @@ modified_item_store.subscribe((mod_item) => {
             Object.keys(curr_mods).forEach(prop_name => {
                 last_mods[prop_name] = curr_mods[prop_name];
             });
+
+            if(mod_item.item_reference)
+                last_itm.item_reference = mod_item.item_reference
         }
         else
         {
@@ -212,6 +220,8 @@ async function flushChanges(ticket)
             })
             if (res.ok) {
 
+                await handle_push_items_response(res)
+
                 modified_items_map.clear();
                 unsavedModificationsTicket.set( get(unsavedModificationsTicket) + 1 )
 
@@ -222,19 +232,44 @@ async function flushChanges(ticket)
             {
                 console.error(path)
                 console.error(JSON.stringify( { Items: changes } ))
-                if(res.status == 400)   // basic exception like access rights
+
+                let err = ''
+
+                switch(res.status)
                 {
+                case 400:               // basic exception like access rights
                     modified_items_map.clear();
                     unsavedModificationsTicket.set( get(unsavedModificationsTicket) + 1 )
 
                     afterPushCallbacks.forEach( cb => cb())
                     afterPushCallbacks = []
+
+                    err = await res.text()
+                    console.error(err)
+                    onErrorShowAlert(err)
+                    break;
+
+                case 409:               // conflict. Bad version of item
+                    modified_items_map.clear();
+                    unsavedModificationsTicket.set( get(unsavedModificationsTicket) + 1 )
+
+                    afterPushCallbacks.forEach( cb => cb())
+                    afterPushCallbacks = []
+
+                    err = i18n({en: 'Incorrect version of the object', es: 'Versión incorrecta del objeto', pl: 'Nieprawidłowa wersja obiektu'})
+                    onErrorShowAlert(err, true) // reload = true
+                    break;
+
+                default:
+                    err = await res.text()
+                    console.error(err)
+                    onErrorShowAlert(err)
+                    break;
                 }
 
-                const err = await res.text()
-
-                console.error(err)
-                onErrorShowAlert(err)
+                
+                
+                
             }
         }
         catch (err) {
@@ -244,3 +279,44 @@ async function flushChanges(ticket)
 
     }
 } 
+
+
+async function handle_push_items_response(response)
+{
+    if(!response.body)
+        return
+
+    try 
+    {
+        const json = await response.json()
+        if(json.Changes)
+        {
+            json.Changes.forEach(ch => {
+                Object.keys(ch).forEach(type_name => {
+                    const modified_item = ch[type_name]
+                    if(modified_item && modified_item.$ver)
+                    {
+                        const update_map_key = type_name + modified_item.Id
+                        if(modified_items_map.has(update_map_key))
+                        {
+                            let mod_entry = modified_items_map.get(update_map_key);
+                            if( mod_entry.item_reference && 
+                                mod_entry.item_reference.$ver && 
+                                mod_entry.item_reference.Id == modified_item.Id &&
+                                mod_entry.item_reference.$type == type_name)
+                            {
+                                mod_entry.item_reference.$ver = modified_item.$ver
+                                mod_entry.item_reference = null
+                            }
+                        }
+            
+                    }
+                })
+            })
+        }
+    }
+    catch(err)
+    {
+        console.error(err)
+    }
+}
