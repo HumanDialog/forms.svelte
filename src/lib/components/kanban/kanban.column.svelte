@@ -12,17 +12,33 @@
 
     let definition :rKanban_definition = getContext("rKanban-definition");
 
-    let column :rKanban_column = new rKanban_column;
-    column.id = definition.columns.length + 1
-    column.title = title;
-    column.width = width;
-    column.state = state;
-    column.finishing = finishing;
-    column.operations = operations;
-    column.onTitleChanged = onTitleChanged;
-    column.notVisible = notVisible
-    
-    definition.columns.push(column)
+    let column :rKanban_column|undefined = definition.columns.find((k) => k.state == state)
+    if(column)
+    {
+        column.title = title;
+        column.width = width;
+        column.state = state;
+        column.finishing = finishing;
+        column.operations = operations;
+        column.onTitleChanged = onTitleChanged;
+        column.notVisible = notVisible
+    }
+    else
+    {
+        column = new rKanban_column;
+        column.id = definition.columns.length + 1
+        column.title = title;
+        column.width = width;
+        column.state = state;
+        column.finishing = finishing;
+        column.operations = operations;
+        column.onTitleChanged = onTitleChanged;
+        column.notVisible = notVisible
+        
+        definition.columns.push(column)
+    }
+
+    console.log('cols:', definition.columns)
 
 </script>
 

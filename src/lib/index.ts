@@ -154,7 +154,9 @@ export {
     getGroupsMenu,
     fetchHandlers,
     openInNewTab,
-    copyAddress
+    copyAddress,
+    saveScrollPosition,
+    restoreScrollPosition
 }   from './utils'
 
 export {
@@ -185,8 +187,8 @@ export {    data_tick_store,    // tmp
             setNavigatorTitle } from "./stores";
 
 export { contextToolbarOperations, pageToolbarOperations, contextItemsStore, contextTypesStore } from './stores'   // tmp
-export { informModification, setjItemProperty, informModificationEx, informItem, pushChanges, hasModifications } from './updates'   // tmp
-export { query_item_collection } from './ui-json'
+export { informModification, setjItemProperty, informModificationEx, informItem, pushChanges, hasModifications, pushChangesImmediately } from './updates'   // tmp
+
 
 
 

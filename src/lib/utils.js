@@ -1287,7 +1287,7 @@ function launchNewGroupWizzard(afterGroupCreated=undefined)
 
 export const fetchHandlers = {
     onBefore: [
-        (path) => { pushChangesImmediately() }
+        async (path) => { await pushChangesImmediately() }
     ],
 
     //onAfter: [],
@@ -1306,4 +1306,47 @@ export function copyAddress(href)
 {
     const full_address = window.location.origin + window.location.pathname + "#" + href
     navigator.clipboard.writeText(full_address)
+}
+
+const scrollPositions = new Map();
+
+export function saveScrollPosition(href)
+{
+    const state = {
+        elements: []
+    }
+
+    const scrolledElements = Array.from(document.querySelectorAll("*")).filter(el => el.scrollLeft > 0 || el.scrollTop > 0);
+    scrolledElements.forEach( el =>
+        {
+            state.elements.push({
+                id: el.id, 
+                tag: el.tagName, 
+                x: el.scrollLeft, 
+                y: el.scrollTop
+            })
+        }
+    )
+
+    scrollPositions.set(href, state)
+}
+
+export function restoreScrollPosition(href)
+{
+    if(!scrollPositions.has(href))
+        return;
+
+    const state = scrollPositions.get(href);
+    
+    state.elements.forEach(el => {
+        if(el.id)
+        {
+            const scrollableContentDiv = document.getElementById(el.id)
+            if(scrollableContentDiv)
+                scrollableContentDiv.scrollTo(el.x, el.y)
+            
+        }
+        else if(el.tag == 'HTML')
+            document.documentElement.scrollTo(el.x, el.y)
+    })
 }

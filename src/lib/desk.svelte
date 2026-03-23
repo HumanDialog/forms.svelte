@@ -413,7 +413,8 @@
                                         text-stone-500 bg-stone-200/70
                                         dark:text-orange-200 dark:bg-stone-700/70
                                         bg-stone-200 dark:bg-stone-800/70
-                                        border-t border-stone-500 ">
+                                        border-t border-stone-500 
+                                        backdrop-blur-sm">
                             <HorizontalNavigatorTabs appConfig={layout}/>
                         <div>
                     </header>
@@ -475,7 +476,7 @@
                                     z-10 overflow-hidden
 
                                     rounded-2xl
-
+                                    backdrop-blur-sm
                                     text-red-800 bg-stone-100/70
                                     rounded-full
                                     dark:text-orange-200 dark:bg-stone-900/70

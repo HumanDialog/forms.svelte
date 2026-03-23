@@ -9,6 +9,7 @@
 	import { onErrorShowAlert } from './stores';
     import EditableParagraph from './components/prose.editable.p.svelte'
     import EditableSpan from './components/prose.editable.span.svelte'
+    import Ricon from './components/r.icon.svelte'
 
     export let nameAttrib = "Name";
     export let emailAttrib = "login";
@@ -350,105 +351,129 @@ Aby zaakceptować zaproszenie, kliknij poniższy link:`
 <!-- svelte-ignore a11y-no-noninteractive-tabindex-->
 
 <Dialog bind:this={rootDialog}>
-    <menu bind:this={rootElement} on:click={clearSelection}
-        class="w-full sm:min-w-[20rem] max-h-80 sm:max-h-none overflow-y-auto sm:overflow-y-hidden overflow-x-hidden overscroll-contain" >
-        
-        {#if closeButtonPos}
-            <button class="     text-stone-800 dark:text-stone-400
-                                fixed sm:relative
-                                w-6 h-6 flex items-center justify-center
-                                focus:outline-none font-medium  text-sm text-center" 
-                                style={closeButtonPos}
-                    on:click={ closeDialog }>   <!-- rounded-full text-stone-500 bg-stone-200/70 hover:bg-stone-200 dark:text-stone-500 dark:bg-stone-700/80 dark:hover:bg-stone-700 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 -->
-                <Icon component={FaTimes} s="md"/>
-            </button>
-        {/if}
+    <div bind:this={rootElement} on:click={clearSelection}
+        class="paper w-full
+                prose prose-base prose-zinc dark:prose-invert prose-a:no-underline
 
-        <article class="w-full prose prose-base prose-zinc dark:prose-invert mb-20 sm:my-5">
-            <h3>{i18n({ en: 'Invitation', es: 'Invitación', pl: 'Zaproszenie'})}</h3>
+                m-0 pt-5 pb-5 px-1 sm:px-8
+                sm:rounded
+                bg-stone-200 dark:bg-stone-900
+                flex flex-col" >
 
-            <h4>E-mail</h4>
-            <EditableParagraph bind:this={emailElement}
-                val={email}
-                validation={isValidEmail}
-                tooltip="E-mail"
-                placeholder={i18n({
-                                    en: 'Enter the email address',
-                                    es: 'Introduce la dirección de correo electrónico',
-                                    pl: 'Wprowadź adres e-mail zapraszanej osoby'
-                                })}
-            />
-            
-            <h4>{i18n({en: 'Name', es: 'Nombre', pl: 'Imię'})}</h4>
-            <EditableParagraph bind:this={nameElement}
-                val={name}
-                placeholder={i18n({
-                                    en: 'Enter the name of the person you are inviting',
-                                    es: 'Introduce el nombre de la persona invitada',
-                                    pl: 'Wprowadź imię zapraszanej osoby'
-                                })}
-            />
-
-            <h4>{i18n({en: 'Inviting', es: 'Invitante', pl: 'Zapraszający'})}</h4>
-            <p>{invitingIdentifier}</p>
-
-            <h4>{i18n({en: 'Invitation subject', es: 'Asunto de la invitación', pl: 'Temat zaproszenia'})}</h4>
-            <EditableParagraph bind:this={subjectElement}
-                val={subject}
-                required
-                tooltip={i18n({
-                                    en: 'Click to edit',
-                                    es: 'Haga clic para editar',
-                                    pl: 'Kliknij, aby edytować'
-                                })}
-            />
-            
-
-            <h4>{i18n({en: 'Invitation content', es: 'Contenido de la invitación', pl: 'Treść zaproszenia'})}</h4>
-            <p> 
-                <EditableSpan   bind:this={contentElement}
-                                class="text-wrap break-words whitespace-pre-wrap"
-                                val={content}
-                                required
-                                multiline
-                                tooltip={i18n({
-                                    en: 'Click to edit',
-                                    es: 'Haga clic para editar',
-                                    pl: 'Kliknij, aby edytować'
-                                })}/>
-
-                <span class="uppercase text-sm text-zinc-600 dark:text-zinc-400">
-                    <br>
-                    &lt;{i18n({en: 'Unique invitation link', es: 'Enlace único de invitación', pl: 'Unikalny link zapraszający'})}&gt;
-                </span>
-            </p>
-
-            <h4>{i18n({en: 'Permissions management', es: 'Gestión de permisos', pl: 'Zarządzanie uprawnieniami'})}</h4>
-            <p class="flex flex-row">
-                {#each authAccessKinds as kind}
-                    {@const isActive = selectedAccessKey == kind.key}
-                    <button class="text-sm px-2 mx-1
-                                text-stone-700 dark:text-stone-300 dark:hover:text-white
-                                hover:bg-stone-200 dark:hover:bg-stone-700
-                                border border-stone-300 focus:outline-none dark:border-stone-600
-                                flex items-center rounded"
-                                class:bg-stone-200={isActive}
-                                class:dark:bg-stone-700={isActive}
-                                class:dark:text-white={isActive}
-                                disabled={isActive}
-                                on:click={(e)=> selectedAccessKey=kind.key}>
-                        {kind.name}
+        <!-------------------------------------------------------------------->
+        <!-- POPUP HEADER ---------------------------------------------------->
+        <!-------------------------------------------------------------------->
+        <h3 class = "flex-none">
+            <div class="w-full flex flex-row justify-between">
+                <!--div class="py-1.5  flex flex-row justify-between">
+                    <button class="mr-4 w-6
+                                hover:bg-stone-200 hover:dark:bg-stone-700
+                                hover:outline hover:outline-8
+                                hover:outline-stone-200 hover:dark:outline-stone-700"
+                        ><Ricon icon = 'arrow-up' />
                     </button>
-                {/each}
-                
-            </p>
+                    <button class="mr-4 w-6
+                                hover:bg-stone-200 hover:dark:bg-stone-700
+                                hover:outline hover:outline-8
+                                hover:outline-stone-200 hover:dark:outline-stone-700">
+                        <Ricon icon = 'check-check' />
+                    </button>
+                </div-->
+                <div class="grow ">
+                    <span class="text-left">{i18n({ en: 'Invitation', es: 'Invitación', pl: 'Zaproszenie'})}</span>
+                </div>
+                <div class="py-1.5  flex flex-row justify-between">
+                    <button class="ml-4 w-6
+                                hover:bg-stone-200 hover:dark:bg-stone-700
+                                hover:outline hover:outline-8
+                                hover:outline-stone-200 hover:dark:outline-stone-700"
+                                on:click={ closeDialog }>
+                        <Ricon icon = 'x' />
+                    </button>
+                </div>
+            </div>
+        </h3>
+        
+        
+
+        <!-------------------------------------------------------------------->
+        <!-- POPUP CONTENT---------------------------------------------------->
+        <!-------------------------------------------------------------------->
+        <div class="grow max-h-[40dvh] sm:max-h-[75dvh] overflow-y-auto overscroll-contain">
+            <div class="px-2 outline outline-4  bg-stone-100 outline-stone-100 dark:bg-stone-800 dark:outline-stone-800">
+                <h4>E-mail</h4>
+                <EditableParagraph bind:this={emailElement}
+                    val={email}
+                    validation={isValidEmail}
+                    tooltip="E-mail"
+                    placeholder={i18n({
+                                        en: 'Enter the email address',
+                                        es: 'Introduce la dirección de correo electrónico',
+                                        pl: 'Wprowadź adres e-mail zapraszanej osoby'
+                                    })}
+                />
+            </div>
+
+            <div class="px-2 outline outline-4  bg-stone-100 outline-stone-100 dark:bg-stone-800 dark:outline-stone-800">
+                <h4>{i18n({en: 'Name', es: 'Nombre', pl: 'Imię'})}</h4>
+                <EditableParagraph bind:this={nameElement}
+                    val={name}
+                    placeholder={i18n({
+                                        en: 'Enter the name of the person you are inviting',
+                                        es: 'Introduce el nombre de la persona invitada',
+                                        pl: 'Wprowadź imię zapraszanej osoby'
+                                    })}
+                />
+            </div>
+
+            <div class="px-2 outline outline-4  bg-stone-100 outline-stone-100 dark:bg-stone-800 dark:outline-stone-800">
+                <h4><h4>{i18n({en: 'Inviting', es: 'Invitante', pl: 'Zapraszający'})}</h4></h4>
+                <p>{invitingIdentifier}</p>
+            </div>
+
+            <div class="px-2 outline outline-4  bg-stone-100 outline-stone-100 dark:bg-stone-800 dark:outline-stone-800">
+                <h4>{i18n({en: 'Invitation subject', es: 'Asunto de la invitación', pl: 'Temat zaproszenia'})}</h4>
+                <EditableParagraph bind:this={subjectElement}
+                    val={subject}
+                    required
+                    tooltip={i18n({
+                                        en: 'Click to edit',
+                                        es: 'Haga clic para editar',
+                                        pl: 'Kliknij, aby edytować'
+                                    })}
+                />
+            </div>
 
 
-            {#if showAccessRoles}
-                <h4>{i18n({en: 'Role in the application', es: 'Papel en la aplicación', pl: 'Rola w aplikacji'})}</h4>
+
+             <div class="px-2 outline outline-4  bg-stone-100 outline-stone-100 dark:bg-stone-800 dark:outline-stone-800">
+                <h4>{i18n({en: 'Invitation content', es: 'Contenido de la invitación', pl: 'Treść zaproszenia'})}</h4>
+                <p> 
+                    <EditableSpan   bind:this={contentElement}
+                                    class="text-wrap break-words whitespace-pre-wrap"
+                                    val={content}
+                                    required
+                                    multiline
+                                    tooltip={i18n({
+                                        en: 'Click to edit',
+                                        es: 'Haga clic para editar',
+                                        pl: 'Kliknij, aby edytować'
+                                    })}/>
+
+                    <span class="uppercase text-sm text-zinc-600 dark:text-zinc-400">
+                        <br>
+                        &lt;{i18n({en: 'Unique invitation link', es: 'Enlace único de invitación', pl: 'Unikalny link zapraszający'})}&gt;
+                    </span>
+                </p>
+            </div>
+
+
+
+            <div class="px-2 outline outline-4  bg-stone-100 outline-stone-100 dark:bg-stone-800 dark:outline-stone-800">
+                <h4>{i18n({en: 'Permissions management', es: 'Gestión de permisos', pl: 'Zarządzanie uprawnieniami'})}</h4>
                 <p class="flex flex-row">
-                    {#each appRoles as role}
-                        {@const isActive = selectedAppRole == role.name}
+                    {#each authAccessKinds as kind}
+                        {@const isActive = selectedAccessKey == kind.key}
                         <button class="text-sm px-2 mx-1
                                     text-stone-700 dark:text-stone-300 dark:hover:text-white
                                     hover:bg-stone-200 dark:hover:bg-stone-700
@@ -458,35 +483,65 @@ Aby zaakceptować zaproszenie, kliknij poniższy link:`
                                     class:dark:bg-stone-700={isActive}
                                     class:dark:text-white={isActive}
                                     disabled={isActive}
-                                    on:click={(e)=> selectedAppRole=role.name}>
-                            {role.summary}
+                                    on:click={(e)=> selectedAccessKey=kind.key}>
+                            {kind.name}
                         </button>
                     {/each}
                 </p>
-            {/if}
+            </div>
 
-            <hr/>
-            <section class="flex flex-row gap-1">
-                <button class=" ms-auto
-                                    py-2.5 px-4
-                                    text-stone-700 dark:text-stone-300 dark:hover:text-white
-                                    hover:bg-stone-200 dark:hover:bg-stone-700
-                                    border border-stone-300 focus:outline-none dark:border-stone-600
-                                    flex items-center rounded"
-                                    on:click={invite}
-                                >
-                    {i18n({ en: 'Invite', es: 'Invitar', pl: 'Zaproś'})}
+            {#if showAccessRoles}
+                <div class="px-2 outline outline-4  bg-stone-100 outline-stone-100 dark:bg-stone-800 dark:outline-stone-800">
+                    <h4>{i18n({en: 'Role in the application', es: 'Papel en la aplicación', pl: 'Rola w aplikacji'})}</h4>
+                    <p class="flex flex-row">
+                        {#each appRoles as role}
+                            {@const isActive = selectedAppRole == role.name}
+                            <button class="text-sm px-2 mx-1
+                                        text-stone-700 dark:text-stone-300 dark:hover:text-white
+                                        hover:bg-stone-200 dark:hover:bg-stone-700
+                                        border border-stone-300 focus:outline-none dark:border-stone-600
+                                        flex items-center rounded"
+                                        class:bg-stone-200={isActive}
+                                        class:dark:bg-stone-700={isActive}
+                                        class:dark:text-white={isActive}
+                                        disabled={isActive}
+                                        on:click={(e)=> selectedAppRole=role.name}>
+                                {role.summary}
+                            </button>
+                        {/each}
+                    </p>
+                </div>
+            {/if}
+        </div>
+
+          
+        <!-------------------------------------------------------------------->
+        <!-- POPUP FOOTER----------------------------------------------------->
+        <!-------------------------------------------------------------------->
+        <h4 class = "flex-none">
+
+            <div class="flex flex-row justify-end gap-2">
+
+                <button class="px-4 mx-2
+                            bg-stone-100 dark:bg-stone-700
+                            outline outline-offset-2 outline-2
+                            outline-stone-200 dark:outline-stone-500
+                            hover:bg-stone-200 hover:dark:bg-stone-700"
+                        on:click={invite}> 
+                        {i18n({ en: 'Invite', es: 'Invitar', pl: 'Zaproś'})}
                 </button>
-                    <button class=" py-2.5 px-4
-                                    text-stone-700 dark:text-stone-300 dark:hover:text-white
-                                    hover:bg-stone-200 dark:hover:bg-stone-700
-                                    border border-stone-300 focus:outline-none dark:border-stone-600
-                                    flex items-center rounded"
-                                    on:click={copyInvitation}
-                                    >
+
+                <button class="px-4 mx-2
+                            bg-stone-100 dark:bg-stone-700
+                            outline outline-offset-2 outline-2
+                            outline-stone-200 dark:outline-stone-500
+                            hover:bg-stone-200 hover:dark:bg-stone-700"
+                        on:click={copyInvitation}>
                         {i18n({ en: 'Copy invitation', es: 'Copiar invitación', pl: 'Skopiuj zaproszenie'})}
-                    </button>
-            </section>
-        </article>
-    </menu>
+                </button>
+            </div>
+        </h4>
+
+        
+    </div>
 </Dialog>

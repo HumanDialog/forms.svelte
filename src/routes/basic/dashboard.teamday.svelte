@@ -196,13 +196,15 @@
                 {#if tasksNo > 0 && user.SubscribedLists && user.SubscribedLists.length > 0}
 
                     {#each user.SubscribedLists as list, idx}
-                        <SubscibedList {list}
-                                    tasks={list.List.Tasks}
-                                    getAllTags={() => allTags}
-                                    {onUpdateAllTags}
-                                    {users}
-                                    {onRefreshDashboard}
-                                    bind:this={listElements[idx]}/>
+                        {#if list.List && list.List.Tasks && list.List.Tasks.length > 0}
+                            <SubscibedList {list}
+                                        tasks={list.List.Tasks}
+                                        getAllTags={() => allTags}
+                                        {onUpdateAllTags}
+                                        {users}
+                                        {onRefreshDashboard}
+                                        bind:this={listElements[idx]}/>
+                        {/if}
                     {/each}
                 {/if}
 

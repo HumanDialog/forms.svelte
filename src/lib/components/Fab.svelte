@@ -488,7 +488,7 @@
                         <div class="    focus:outline-none font-medium  text-sm text-center
 
                                         text-stone-500 bg-stone-200/70 hover:bg-stone-200
-                                        rounded-full
+                                        rounded-full backdrop-blur-sm
                                         dark:text-orange-200 dark:bg-stone-700/40 dark:hover:bg-stone-700
                                         ring-1 ring-orange-800/40 dark:ring-orange-200/30
 

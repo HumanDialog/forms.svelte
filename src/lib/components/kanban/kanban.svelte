@@ -1,15 +1,18 @@
 <script lang="ts">
-    import {setContext, getContext, afterUpdate, tick} from 'svelte'
+    import {setContext, getContext, afterUpdate, tick, onMount} from 'svelte'
     import {KanbanColumnBottom, KanbanColumnTop, rKanban_definition, rKanban_column} from './Kanban'
     import {parseWidthDirective, clearActiveItem, getPrev, getNext, remove, insertAt, insertAfter, swapElements, getActive} from '../../utils'
     import {contextItemsStore, contextTypesStore, data_tick_store } from '../../stores'
     import KanbanColumn from './internal/kanban.column.svelte'
 	import { informModification, pushChanges } from '$lib/updates';
     import {Editable, focusEditable} from '$lib'
+
+
     export let self                 = null;
     export let title:               string = ''
     export let summary:             string = ''
     export let c = '';
+    export let columnsDef: rKanban_column[]|undefined = undefined
 
     // reload selection parameter
     export const CLEAR_SELECTION = 0;
@@ -31,13 +34,19 @@
 
     function setup(...args)
     {
-
+        if(columnsDef)
+            definition.columns = columnsDef;
+        else if(definition.columns)
+            columnsDef = definition.columns;
     }
 
     let renderToken = 0;
     export async function rerender(selectColumnIdx: number = -1, selectCardId :number = -1)
     {
         definition.clear();
+
+        console.log('rerender cols', definition.columns)
+
         renderToken += 1;
 
         await tick();
@@ -759,7 +768,7 @@
 
     export function setColumns(columnsDefinition)
     {
-        definition.columns = []
+        columnsDef = []
         columnsDefinition.forEach((c) => {
 
             let column :rKanban_column = new rKanban_column;
@@ -771,8 +780,10 @@
             column.notVisible = c.notVisible ?? false;
             column.operations = c.operations ?? undefined;
             column.onTitleChanged = c.onTitleChanged ?? undefined;
-            definition.columns.push(column)
+            columnsDef?.push(column)
         })
+
+        definition.columns = columnsDef
     }
 
 </script>
@@ -798,27 +809,30 @@
                 pb-20
                 xbg-lime-800
                 "> <!--sm:justify-center -->
-    {#each definition.columns as column, idx (column.title + column.state)}
-            <KanbanColumn currentColumnIdx={idx}
-                    {onInsert}
-                    {definition}
-                    bind:this={columns[idx]}>
+    {#if columnsDef}
+        {#each columnsDef as column, idx (column.state)}
+                {#key column}
+                    <KanbanColumn currentColumnIdx={idx}
+                            {onInsert}
+                            {definition}
+                            bind:this={columns[idx]}>
 
 
-                <svelte:fragment slot="kanbanCardTopProps" let:element>
-                    <slot name="kanbanCardTopProps" {element}/>
-                </svelte:fragment>
+                        <svelte:fragment slot="kanbanCardTopProps" let:element>
+                            <slot name="kanbanCardTopProps" {element}/>
+                        </svelte:fragment>
 
-                <svelte:fragment slot="kanbanCardMiddleProps" let:element>
-                    <slot name="kanbanCardMiddleProps" {element}/>
-                </svelte:fragment>
+                        <svelte:fragment slot="kanbanCardMiddleProps" let:element>
+                            <slot name="kanbanCardMiddleProps" {element}/>
+                        </svelte:fragment>
 
-                <svelte:fragment slot="kanbanCardBottomProps" let:element>
-                    <slot name="kanbanCardBottomProps" {element}/>
-                </svelte:fragment>
+                        <svelte:fragment slot="kanbanCardBottomProps" let:element>
+                            <slot name="kanbanCardBottomProps" {element}/>
+                        </svelte:fragment>
 
-            </KanbanColumn>
-        
-    {/each}
+                    </KanbanColumn>
+                {/key}
+        {/each}
+    {/if}
 </div>
 {/key}
