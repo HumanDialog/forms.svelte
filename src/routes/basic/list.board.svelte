@@ -194,7 +194,7 @@
                                     {
                                         Id: 1,
                                         Association: '',
-                                        Expressions:['$ref','Id','Name', 'Summary', 'StartDate', 'EndDate', 'DueDate', 'Kind', 'GetTaskStates','href', 'GetCanonicalPath', '$type', 'IsSubscribed', 'AreFinishedTasksHidden'],
+                                        Expressions:['$ref','Id','Name', 'Summary', 'StartDate', 'EndDate', 'DueDate', 'Kind', 'GetTaskStates','href', 'GetCanonicalPath', '$type', 'IsSubscribed', 'AreFinishedTasksHidden', '$ver'],
                                         SubTree:
                                         [
                                             {
@@ -425,6 +425,10 @@
                                 {
                                     caption: '_; Summary; Resumen; Podsumowanie',
                                     action: () =>  { kanban.editSummary() }
+                                },
+                                {
+                                    caption: '_; Start date; Fecha de inicio; Data początku',
+                                    action: () =>  { kanban.editStartDate() }
                                 }
                             ]
                         },
@@ -1360,6 +1364,11 @@
         }
     }
 
+    function forceReload()
+    {
+        reload(kanban.KEEP_SELECTION);
+    }
+
     let otherCaption = '_; <Other>; <Otros>; <Inne>'
 
 </script>
@@ -1425,7 +1434,7 @@
                             state={-1} />
             -->
 
-			<KanbanCallbacks {onAdd} {getCardOperations} {onReplace}/>
+			<KanbanCallbacks {onAdd} {getCardOperations} {onReplace} onReload={forceReload}/>
 
 			<KanbanTitle    a="Title"
                             hrefFunc={(task) => `/task/${task.Id}`}

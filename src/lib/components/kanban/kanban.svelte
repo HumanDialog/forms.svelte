@@ -1,6 +1,6 @@
 <script lang="ts">
     import {setContext, getContext, afterUpdate, tick, onMount} from 'svelte'
-    import {KanbanColumnBottom, KanbanColumnTop, rKanban_definition, rKanban_column} from './Kanban'
+    import {KanbanColumnBottom, KanbanColumnTop, rKanban_definition, rKanban_column, all_kanban_cards_repainter} from './Kanban'
     import {parseWidthDirective, clearActiveItem, getPrev, getNext, remove, insertAt, insertAfter, swapElements, getActive} from '../../utils'
     import {contextItemsStore, contextTypesStore, data_tick_store } from '../../stores'
     import KanbanColumn from './internal/kanban.column.svelte'
@@ -153,6 +153,11 @@
         definition.items = null;
         columns?.forEach( c => c?.reload())
 
+        if(!Array.isArray(data))
+            start_date_b?.reload(data);
+
+        $data_tick_store = $data_tick_store + 1
+
         // ====================================================
 
         await tick();
@@ -222,6 +227,12 @@
     export function editSummary()
     {
         focusEditable(summary)
+    }
+
+    export function editStartDate()
+    {
+        if(start_date_b)
+            start_date_b.show()
     }
 
     let columns = []
@@ -787,6 +798,12 @@
         definition.columns = columnsDef
     }
 
+    function list_start_date_changed(value)
+    {
+        if(definition.onReload)
+            definition.onReload()
+    }
+
 </script>
 
 {#key renderToken}
@@ -794,18 +811,16 @@
 
     <figure class="px-0 sm:px-4">
          <div class="w-full flex flex-row justify-between">
-                <figcaption>{start_date}</figcaption>
-                <figcaption><Editable self={self} a={start_date}/></figcaption>
-
+                <!-- svelte-ignore a11y-structure -->
                 <figcaption>
-
+                        {#if start_date}
                             <DatePicker   self={self}
                                     a={start_date}
                                     bind:this={start_date_b}
-                                    typo
+                                    changed={list_start_date_changed}
+                                    typo forceNotCompact
                                 />
-
-
+                        {/if}
                 </figcaption>
          </div>
         <h1><Editable self={self} a={title}/></h1>

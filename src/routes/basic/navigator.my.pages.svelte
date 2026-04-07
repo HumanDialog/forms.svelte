@@ -58,9 +58,7 @@
 
     async function fetchData()
     {
-        const limit = isDeviceSmallerThan("sm") ? 7 : 12
-
-        const userTasklistsPromise = reef.post('user/query', {
+        const res = await reef.post('user/query', {
             Id: 1,
             Name: 'user tasklists',
             Limit: 10,
@@ -79,22 +77,10 @@
                     ]
                 }
             ]
-        }, onErrorShowAlert)
+        })
 
-
-        const results = await Promise.all([userTasklistsPromise])
-
-        if(results[0])
-        {
-            user = results[0].User;
-            userTaskLists = user.MyLists
-        }
-        else
-        {
-            user = null
-            userTaskLists = []
-        }
-
+        user = res.User
+        userTaskLists = user.MyLists ?? []
     }
 
     async function reload()
@@ -136,73 +122,76 @@
                 <SidebarItem   href="/myday"
                                 icon='calendar'
                                 active={isRoutingTo("/myday", currentPath)}
-                                selectable={myday}>
+                                >
                     _; My day; Mi día; Mój dzień
                 </SidebarItem>
                 <SidebarItem   href="/teamday"
                                 icon='calendars'
                                 active={isRoutingTo("/teamday", currentPath)}
-                                selectable={teamday}>
+                                >
                     _; Observed lists; Trabajo común; Obserwowane listy
                 </SidebarItem>
             <!--/SidebarGroup-->
 
 
-                <SidebarItem   href="/mynotes"
-                                icon = 'file-text'
-                                active={isRoutingTo("/mynotes", currentPath)}
-
-                                selectable={mynotes_selection}>
-                    _; My notes; Mis notas; Moje notatki
-                </SidebarItem>
+                
                 <SidebarItem   href="/myfolders"
                                 icon = 'folder'
                                 active={isRoutingTo("/myfolders", currentPath)}
                                 >
                     _; My Folders; Mis carpetas; Moje Foldery
                 </SidebarItem>
-                <SidebarItem   href="/mytasks"
-                                icon='square-pen'
-                                active={isRoutingTo("/mytasks", currentPath)}
-                                selectable={user}> <!-- summary={i18n(["All active tasks assigned to me", "Tareas activas asignadas a mí", "Aktywne zadania przypisane do mnie"])} -->
-                    _; Tasks assigned to me; Tareas que me han sido asignadas; Zadania przydzielone do mnie
-                </SidebarItem>
 
-                {#if userTaskLists && userTaskLists.length > 0}
+                
 
+                
                 <SidebarGroup   title={i18n({en: 'My lists', es: 'Mis listas', pl: 'Moje listy'})}
                                 moreHref="/mylists">
 
-                    <SidebarList    objects={userTaskLists}
-                                    orderAttrib='Order'
-                                    bind:this={navUserLists}>
-                        <svelte:fragment let:item let:idx>
-                            {@const href = item.href}
-                            <SidebarItem   {href}
-                                            icon='notebook'
-                                            active={isRoutingTo(href, currentPath)}
-                                            >
-                                {ext(item.Name)}
-                            </SidebarItem>
-                        </svelte:fragment>
-                    </SidebarList>
-                </SidebarGroup>
+                <SidebarList    objects={userTaskLists}
+                                orderAttrib='Order'
+                                bind:this={navUserLists}>
+                    <svelte:fragment let:item let:idx>
+                        {@const href = item.href}
+                        <SidebarItem   {href}
+                                        icon='notebook'
+                                        active={isRoutingTo(href, currentPath)}
+                                        >
+                            {ext(item.Name)}
+                        </SidebarItem>
+                    </svelte:fragment>
+                </SidebarList>
+            </SidebarGroup>
 
-                {/if}
+                
 
         <SidebarGroup   title={i18n({en: 'Others', es: 'Otros', pl: 'Inne'})}
                         >
 
+                <SidebarItem   href="/mynotes"
+                                icon = 'file-text'
+                                active={isRoutingTo("/mynotes", currentPath)}
+                                >
+                    _; My notes; Mis notas; Moje notatki
+                </SidebarItem>
+                
+                <SidebarItem   href="/mytasks"
+                                icon='square-pen'
+                                active={isRoutingTo("/mytasks", currentPath)}
+                                > <!-- summary={i18n(["All active tasks assigned to me", "Tareas activas asignadas a mí", "Aktywne zadania przypisane do mnie"])} -->
+                    _; Tasks assigned to me; Tareas que me han sido asignadas; Zadania przydzielone do mnie
+                </SidebarItem>
+
                 <SidebarItem   href="/folder/myarchive"
                                 icon='archive'
                                 active={isRoutingTo("/folder/myarchive", currentPath)}
-                                selectable={myday}>
+                                >
                     _; My archive; Mi día; Moje archiwum
                 </SidebarItem>
                 <SidebarItem   href="/folder/mytrash"
                                 icon='trash'
                                 active={isRoutingTo("/folder/mytrash", currentPath)}
-                                selectable={teamday}>
+                                >
                     _; My trash; Trabajo común; Mój kosz
                 </SidebarItem>
         </SidebarGroup>

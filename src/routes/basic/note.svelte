@@ -156,16 +156,19 @@
                                         {
                                             Id: 13,
                                             Association: 'InFolders',
+                                            Filter: 'Status=STATUS_ACTIVE',
                                             Expressions:['$ref', 'InTitle', 'InSummary', 'InHRef', 'InIcon', 'IsCanonical', '$type']
                                         },
                                         {
                                             Id: 14,
                                             Association: 'InTasks',
+                                            Filter: 'Status=STATUS_ACTIVE',
                                             Expressions:['$ref', 'InTitle', 'InSummary', 'InHRef', 'InIcon', 'IsCanonical', '$type']
                                         },
                                         {
                                             Id: 15,
                                             Association: 'InNotes',
+                                            Filter: 'Status=STATUS_ACTIVE',
                                             Expressions:['$ref', 'InTitle', 'InSummary', 'InHRef', 'InIcon', 'IsCanonical', '$type']
                                         },
 
@@ -1242,7 +1245,11 @@
             linkOperations = [
                 {
                     caption: '_; Delete; Eliminar; Usuń',
-                    action: (f) => askToDeleteAttachement(element, kind)
+                    action: (f) => moveAttachementToTrash(element, kind)
+                },
+                {
+                    caption: '_; Archive; Archivar; Archiwizuj',
+                    action: (f) => moveAttachementToArchive(element, kind)
                 }
             ]
         }
@@ -1472,6 +1479,62 @@
             attachementsComponent.reload(activeNote, attachementsComponent.SELECT_NEXT);
         else
             clearActiveItem('props')
+    }
+
+    async function moveAttachementToTrash(object, kind)
+    {
+        if(!object)
+            return;
+
+        let success = false
+
+        switch(kind)
+        {
+        case 'NoteNote':
+            success = await reef.get(`${object.$ref}/Note/MoveMeToTrash`);
+            break;
+
+        case 'NoteFile':
+            success = await reef.get(`${object.$ref}/File/MoveMeToTrash`);
+            break;
+        }
+
+        if(success)
+        {
+            await reloadData();
+            if(attachementsComponent)
+                attachementsComponent.reload(activeNote, attachementsComponent.SELECT_NEXT);
+            else
+                clearActiveItem('props')
+        }
+    }
+
+    async function moveAttachementToArchive(object, kind)
+    {
+        if(!object)
+            return;
+
+        let success = false
+
+        switch(kind)
+        {
+        case 'NoteNote':
+            success = await reef.get(`${object.$ref}/Note/MoveMeToArchive`);
+            break;
+
+        case 'NoteFile':
+            success = await reef.get(`${object.$ref}/File/MoveMeToArchive`);
+            break;
+        }
+
+        if(success)
+        {
+            await reloadData();
+            if(attachementsComponent)
+                attachementsComponent.reload(activeNote, attachementsComponent.SELECT_NEXT);
+            else
+                clearActiveItem('props')
+        }
     }
 
     let deleteModal;

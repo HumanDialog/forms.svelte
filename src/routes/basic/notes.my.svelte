@@ -51,7 +51,9 @@
     let pageNo = 0
     let allPagesNo = 1
     let pageElementsNo = 25
+
     $: onParamsChanged($session, $mainContentPageReloader, $querystring);
+    
     async function onParamsChanged(...args) {
         if (!$session.isActive) {
             user = null;
@@ -73,11 +75,12 @@
         paginatorBtt ?.updatePageNo(pageNo)
         paginatorBtt ?.updateAllPagesNo(allPagesNo)
     }
+
     async function fetchData() {
         if (pageNo < 0)
             pageNo = 0
         const pageOffset = pageNo * pageElementsNo
-        let res = await reef.post(`/user/query`, {
+        let res = await reef.post(`user/query`, {
                 Id: 1,
                 Name: "collector",
                 ExpandLevel: 3,
@@ -193,7 +196,11 @@
                         },
                         {
                             caption: '_; Delete; Eliminar; Usuń',
-                            action: (f) => askToDelete(list)
+                            action: (f) => moveToTrash(list)
+                        },
+                        {
+                            caption: '_; Archive; Archivar; Archiwizuj',
+                            action: (f) => moveToArchive(list)
                         },
                         {
                             caption: '_; Properties; Propiedades; Właściwości',
@@ -223,6 +230,21 @@
                 break;
         }
     }
+
+    async function moveToTrash(note)
+    {
+        const success = await reef.get(`${note.$ref}/MoveMeToTrash`);
+        if(success)
+            await reloadNotes(listComponent.SELECT_NEXT)
+    }
+
+    async function moveToArchive(note)
+    {
+        const success = await reef.get(`${note.$ref}/MoveMeToArchive`);
+        if(success)
+            await reloadNotes(listComponent.SELECT_NEXT)
+    }
+
     let list_properties = {
         Title: "Title",
         Summary: "Summary",

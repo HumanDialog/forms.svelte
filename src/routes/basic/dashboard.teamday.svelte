@@ -113,7 +113,7 @@
         cache.set(cacheKey, user)
 
         tasksNo = 0
-        user.SubscribedLists.forEach((l) => {
+        user.SubscribedLists?.forEach((l) => {
             if(l.List && l.List.Tasks)
                 tasksNo += l.List.Tasks.length
         })
@@ -129,7 +129,7 @@
         user = cachedValue
 
         tasksNo = 0
-        user.SubscribedLists.forEach((l) => {
+        user.SubscribedLists?.forEach((l) => {
             if(l.List && l.List.Tasks)
                 tasksNo += l.List.Tasks.length
         })
@@ -171,7 +171,7 @@
     const pageOperations = []
 
 
-    const title = "_; Common work; Trabajo común; Wspólna praca"
+    const title = "_; Observed lists; Trabajo común; Obserwowane listy"
 </script>
 
 <svelte:head>

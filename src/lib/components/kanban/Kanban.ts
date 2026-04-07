@@ -1,8 +1,11 @@
 import type { rList_property } from "../list/List";
+import { writable } from "svelte/store";
 
 export const KanbanCardTop = 1;
 export const KanbanCardMiddle = 2;
 export const KanbanCardBottom = 3;
+
+export const all_kanban_cards_repainter = writable(0);
 
 export class rKanban_column
 {
@@ -48,6 +51,7 @@ export class rKanban_definition
     public  onRemove: Function | undefined = undefined;
     public  onReplace: Function | undefined = undefined;
     public  onOpen: Function | undefined = undefined;
+    public  onReload: Function | undefined = undefined;
    
     public  getCardOperations: Function | undefined = undefined;
     
@@ -125,6 +129,7 @@ export class rKanban_definition
         this.onRemove = undefined;
         this.onReplace = undefined;
         this.onOpen = undefined;
+        this.onReload = undefined;
 
         this.getCardOperations = undefined;
         this.items = null;

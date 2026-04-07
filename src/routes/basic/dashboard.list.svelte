@@ -105,15 +105,7 @@
                             fab: 'M09',
                             hideToolbarCaption: true
                         },
-                    /*    {
-                            caption: '_; Archive; Archivar; Zarchiwizuj',
-                            action: (f) => askToArchive(list)
-                        },
-                        {
-                            caption: '_; Delete; Eliminar; Usuń',
-                            action: (f) => askToDelete(list)
-                        }
-                    */
+                    
                     ]
                 }
 

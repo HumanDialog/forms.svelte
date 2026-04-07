@@ -15,7 +15,7 @@
     export let date :Date  = null;
     export let onSelect = undefined;
     export let type = "date";   // datetime-local
-    export let changed = undefined;
+    export let changed :Function|undefined = undefined;
     export let readOnly: boolean = false
 
     export  let s = 'sm'
@@ -23,6 +23,7 @@
 
     export let typo:boolean = false;
     export let compact :boolean = false;
+    export let forceNotCompact: boolean = false
     export let inContext :string = 'sel'   // in compact mode
     export let pushChangesImmediately: boolean = false;
 
@@ -56,6 +57,8 @@
     }
 
     let is_compact :boolean = getContext('rIs-table-component') || compact;
+    if(is_compact && forceNotCompact)
+        is_compact = false
 
     let input_pt = 'pt-0.5'
     let input_pb = 'pb-1'
@@ -107,7 +110,6 @@
             chevron_mt = ''
     }
 
-    let   item = null
     let   user_class = $$restProps.class ?? '';
     let   value :Date = null;
     let   rValue :string = '';
@@ -132,10 +134,17 @@
     let can_be_activated :boolean = !readOnly;
 
     let  last_tick = -1;
-    $: setup($data_tick_store, $contextItemsStore);
+    $: item = self ?? $contextItemsStore[ctx];
+    $: setup($data_tick_store, $contextItemsStore, item);
 
     export function refresh()
     {
+        setup();
+    }
+
+    export function reload(item)
+    {
+        self = item
         setup();
     }
 
@@ -148,7 +157,7 @@
 
         if(!date)
         {
-            item = self ?? $contextItemsStore[ctx];
+            //item = 
 
             if(!typename)
                 typename = $contextTypesStore[ctx];
@@ -206,8 +215,6 @@
             pretty_value = getNiceStringDateTime(value);
         else
             pretty_value = getNiceStringDate(value);
-
-
     }
 
 
@@ -238,7 +245,8 @@
                     pushChanges();
             }
 
-            if(!!changed)
+
+            if(changed)
                 changed(value);
         }
     }
@@ -255,7 +263,7 @@
     <div class="inline-block relative flex flex-row  items-center">
         <span class="mr-1">{pretty_value}</span>
 
-        {#if can_be_activated}
+        {#if can_be_activated && pretty_value}
             <Ricon icon = "chevron-down" size="xs"/>
         {:else}
             <span class="w-[16px]"></span>  <!-- Ricon xs space -->
@@ -282,8 +290,7 @@
 
 
     </div>
-
-
+    
 {:else if is_compact}
     <div class="inline-block  {line_h}">
        <div class="dark:text-stone-300  truncate" >

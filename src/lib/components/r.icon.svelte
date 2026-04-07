@@ -55,6 +55,8 @@
 
   import CircleDotDashed from './ricons/circle-dot-dashed.svelte'
   import CircleDashed from './ricons/circle-dashed.svelte'
+  import Circle from './ricons/circle.svelte'
+  import CircleCheck from './ricons/circle-check.svelte'
 
   import Pencil from './ricons/pencil.svelte'
 
@@ -114,7 +116,9 @@
   import RefreshCCW from './ricons/refresh-ccw.svelte'
   import Copy from './ricons/copy.svelte'
 	import RefreshCcw from './ricons/refresh-ccw.svelte';
-
+  import Undo from './ricons/undo.svelte'
+  import BrushCleaning from './ricons/brush-cleaning.svelte'
+	
   let ricons_box = {
     "archive": Archive,
     "trash": Trash,
@@ -167,6 +171,8 @@
     "ellipsis-vertical": EllipsisVertical,
     "circle-dot-dashed": CircleDotDashed,
     "circle-dashed": CircleDashed,
+    "circle": Circle,
+    "circle-check": CircleCheck,
 
     "pencil": Pencil,
 
@@ -215,7 +221,9 @@
     'toggle-right': ToggleRight,
     'settings': Settings,
     'refresh-ccw' : RefreshCcw,
-    'copy' : Copy
+    'copy' : Copy,
+    'undo' : Undo,
+    'brush-cleaning': BrushCleaning
   }
 
   let width = 24;
@@ -226,6 +234,7 @@
   {
       width = 16;
       height = 16;
+      stroke = 1
   }
   else if(s)
   {

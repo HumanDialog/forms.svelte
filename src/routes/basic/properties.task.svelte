@@ -92,7 +92,7 @@
                                {
                                     Id: 101,
                                     Association: 'InFolders',
-                                    Filter: 'not IsCanonical',
+                                    Filter: 'not IsCanonical and Status=STATUS_ACTIVE',
                                     Expressions:['$ref', 'InTitle', 'InSummary', 'InHRef', 'InIcon', 'IsCanonical', '$type']
                                 },
                                 {

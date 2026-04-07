@@ -25,6 +25,14 @@
         {
             prevLines = [...prevLines, `${prompt} ${input}`];
 
+            if(input == 'clear')
+            {
+                prevLines = []
+                updateHistory(input)
+                input = "";
+                return;
+            }
+            
             const orgInput = input
             if(input.startsWith('self'))
             {

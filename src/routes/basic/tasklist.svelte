@@ -901,6 +901,7 @@
 
         </List>
 
+        <!--
         {#if !isArchivedTasks}
             {#if !isArchivedList}
                 <div class="ml-3 mt-20 mb-10">
@@ -921,6 +922,7 @@
 
             </div>
         {/if}
+        -->
 
         </Paper>
     </Page>

@@ -1,10 +1,10 @@
 <script lang="ts">
     import {setContext, getContext, afterUpdate, tick, onMount} from 'svelte'
     import {data_tick_store, contextItemsStore, contextTypesStore } from '../../stores'
-    import {activateItem, getActive, clearActiveItem, parseWidthDirective, getPrev, getNext, swapElements, getLast, insertAfter, getActiveCount, addActiveItem, getFirst, insertAt, remove as removeFrom} from '../../utils'
-    import Icon from '../icon.svelte'
-    import {FaRegCircle, FaRegCheckCircle} from 'svelte-icons/fa/'
-
+    import {activateItem, getActive, clearActiveItem, parseWidthDirective, getPrev, getNext, swapElements, getLast, insertAfter, getActiveCount, addActiveItem, getFirst, insertAt, remove as removeFrom,
+        reloadPageToolbarOperations
+    } from '../../utils'
+    
     import {rList_definition} from './List'
     import ListElement from './internal/list.element.svelte'
     import Inserter from './internal/list.inserter.svelte'
@@ -129,7 +129,7 @@
         let selectElementId: string|number|null = null;
         let altSelectElementId: string|number|null = null;
 
-        //console.log('reload', currentSelectedItemKey, selectElement)
+        //console.log('reload', selectionKey, currentSelectedItem, currentSelectedItemKey, selectElement)
 
         switch(selectElement)
         {
@@ -577,6 +577,19 @@
             return elementProps[propName]
 
         return undefined
+    }
+
+    export function reloadSelectionOperations()
+    {
+        let currentSelectedItem = getActive(selectionKey);
+        if(!currentSelectedItem)
+            return
+
+        if(!toolbarOperations)
+            return
+
+        const newOperations = toolbarOperations(currentSelectedItem)
+        reloadPageToolbarOperations(newOperations, true)
     }
 
 </script>

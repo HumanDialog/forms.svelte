@@ -14,7 +14,7 @@
 
     let groupFolders = [];
     let user = {};
-    let basket = {}
+    //let basket = {}
     let pinnedElements = []
     let navGroupFolders;
     let navPinnedElements;
@@ -48,7 +48,7 @@
             if(cachedUser)
             {
                 user = cachedUser;
-                basket = user.BasketFolder
+                //basket = user.BasketFolder
 
                 pinnedElements = []
                 if(user.PinnedFolders.Folders)
@@ -74,12 +74,12 @@
                         Association: '',
                         Expressions:['Id','$ref', 'Name'],
                         SubTree: [
-                            {
+                        /*    {
                                 Id: 11,
                                 Association: 'BasketFolder',
                                 Expressions:['Id','$ref', 'Title', 'href', 'Summary', 'icon'],
                             },
-                            {
+                        */    {
                                 Id: 12,
                                 Association: 'PinnedFolders',
                                 Expressions:['Id','$ref', 'Title', 'href'],
@@ -108,7 +108,7 @@
                 if(res)
                 {
                     user = res.User
-                    basket = user.BasketFolder
+                    //basket = user.BasketFolder
 
                     pinnedElements = []
                     if(user.PinnedFolders.Folders)
@@ -239,13 +239,13 @@
                             icon='archive'
                             active={isRoutingTo("/folder/archive", currentPath)}
                             selectable={true}>
-                _; Archive; Día; Archiwum *
+                _; Archive; Día; Archiwum
             </SidebarItem>
             <SidebarItem   href="/folder/trash"
                             icon='trash'
                             active={isRoutingTo("/folder/trash", currentPath)}
                             selectable={true}>
-                _; Trash; Trabajo común; Kosz *
+                _; Trash; Trabajo común; Kosz
             </SidebarItem>
         </SidebarGroup>
 

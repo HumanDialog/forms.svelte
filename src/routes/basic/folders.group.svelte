@@ -95,6 +95,25 @@
         deleteModal.show()
     }
 
+    async function moveToTrash(folder) 
+    {
+        if(!folder)
+            return;
+
+        const success = await reef.get(`${folder.$ref}/MoveMeToTrash`);
+        if(success)
+            await reloadFolders(listComponent.SELECT_NEXT)
+    }
+
+    async function moveToArchive(folder) 
+    {
+        if(!folder)
+            return;
+
+        const success = await reef.get(`${folder.$ref}/MoveMeToArchive`);
+        if(success)
+            await reloadFolders(listComponent.SELECT_NEXT)
+    }
 
     async function deleteFolder()
     {
@@ -261,10 +280,11 @@
 
                        {
                             caption: '_; Delete; Eliminar; Usuń',
-                            //icon: FaTrash,
-                            action: (f) => askToDelete(folder),
-                            //fab:'M30',
-                            //tbr:'B'
+                            action: (f) => moveToTrash(folder),
+                        },
+                        {
+                            caption: '_; Archive; Archivar; Archiwizuj',
+                            action: (f) => moveToArchive(folder),
                         },
                         {
                             caption: '_; Properties; Propiedades; Właściwości',

@@ -229,7 +229,18 @@
     function switchBodyClass(...args)
     {
         document.body.className = $dark_mode_store;
-        document.body.attributeStyleMap.set("touch-action", "none");
+        // not supported on ff 
+        //document.body.attributeStyleMap.set("touch-action", "none");
+    }
+
+    function handleGlobalKeyDown(event)
+    {
+        const isMod = event.ctrlKey || event.metaKey;
+        if (isMod && event.key === 's') 
+        {
+            event.preventDefault();
+            pushChanges()
+        }   
     }
 
     onMount( () => {
@@ -245,10 +256,12 @@
         //document.addEventListener('focusout', onFocusOut)
 
         document.addEventListener("visibilitychange",onVisibilityChanged);
+        window.addEventListener('keydown', handleGlobalKeyDown);
 
         return () => {
 
           //  document.removeEventListener('focusout', onFocusOut)
+            window.removeEventListener('keydown', handleGlobalKeyDown);
             document.removeEventListener('selectionchange', onSelectionChanged)
             document.removeEventListener("visibilitychange",onVisibilityChanged);
             vp?.removeEventListener('resize', onViewportResize)
@@ -258,7 +271,8 @@
             if($dark_mode_store)
                 document.body.classList.remove($dark_mode_store)
 
-            document.body.attributeStyleMap.delete("touch-action")
+            // not supported on ff
+            //document.body.attributeStyleMap.delete("touch-action")
         }
     })
 

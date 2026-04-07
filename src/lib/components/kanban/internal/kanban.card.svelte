@@ -12,10 +12,11 @@
                 pushChanges,
 				startEditing,
                 Ricon,
-				focusEditable} from '$lib'
+				focusEditable,
+				data_tick_store} from '$lib'
     import {FaRegFileAlt} from 'svelte-icons/fa'
     import Properties from './kanban.props.svelte'
-    import {KanbanCardTop, KanbanCardMiddle, KanbanCardBottom} from '../Kanban'
+    import {KanbanCardTop, KanbanCardMiddle, KanbanCardBottom, all_kanban_cards_repainter} from '../Kanban'
     import Editable from '../../r.editable.svelte'
 
     export let item: object;
@@ -306,7 +307,7 @@
     {/if}
 
     <Properties position={KanbanCardMiddle} {item} bind:this={middleProps}/>
-
+    
     {#if item[definition.summaryAttrib] || summaryPlaceholder}
         {#key item[definition.summaryAttrib]}
             {#if isCardActive}

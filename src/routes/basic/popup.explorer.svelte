@@ -98,6 +98,10 @@
             elements = await generateGroupFoldersReferences()
             break;
 
+        case '/allprojects':
+            elements = await generateActiveProjectsReferences()
+            break;
+
         default:
             if(whatToShow.startsWith('/folder/'))
                 elements = await generateFolderReferences(whatToShow)
@@ -109,6 +113,8 @@
                 elements = await generateTaskReferences(whatToShow)
             else if(whatToShow.startsWith('/note/'))
                 elements = await generateNoteReferences(whatToShow)
+            else if(whatToShow.startsWith('/project/'))
+                elements = await generateProjectReferences(whatToShow)
             else
                 elements = await generateRootReferences()
         }
@@ -167,6 +173,19 @@
             }
         ]
 
+        const projects = {
+            ElementId: 0,
+                ElementType: '',
+                ElementNav: '',
+                Title: '_; Active projects; Proyectos en curso; Aktywne projekty',
+                Summary: '',
+                icon: 'building',
+                href: '/allprojects',
+                ElementInfo: 0,
+                $ref: 'allprojects',
+                $type: 'Container'
+        }
+
         const root_folders = [
             {
                 ElementId: 0,
@@ -211,19 +230,22 @@
             return [ 
                 my_tasks,
                 ...root_tasklists,
+                projects,
                 ...root_folders
             ]
         }
         else if(rootFilter == 'FOLDERS')
         {
             return [
+                projects,
                 ...root_folders
             ]
         }
         else if(rootFilter == 'TASKLISTS')
         {
             return [
-                ...root_tasklists
+                ...root_tasklists,
+                projects
             ]
         }
         else
@@ -575,6 +597,42 @@
         }
     }
 
+    async function generateActiveProjectsReferences()
+    {
+        canSelectElements = false
+        levelUpHRef = '/root'
+        currentLevelTitle = '_; Active projects; Proyectos en curso; Aktywne projekty'
+        canAttachToCurrentContainer = canAttachAsRootFolder
+
+        let res = await reef.get(`/group/Projects?fields=Id,$type,$ref,Title,Summary,href,icon&sort=Order`);
+        if(!res)
+            return null
+        else
+        {
+            if(attachToContainer)
+                setGroupAsContainerRef()
+
+            let references = [ ]
+
+            res.Project.forEach(t => {
+                references.push({
+                    ElementId: t.Id,
+                    ElementType: t.$type,
+                    ElementNav: t.$ref,
+                    Title: t.Title,
+                    Summary: t.Summary,
+                    icon: t.icon,
+                    href: t.href,
+                    ElementInfo: 0,
+                    $ref: t.$ref,
+                    $type: 'Container'
+                })
+            })
+
+            return references
+        }
+    }
+
 
     async function generateFolderReferences(whatToShow)
     {
@@ -749,6 +807,141 @@
         }
     }
 
+
+    async function generateProjectReferences(whatToShow)
+    {
+        const segments = whatToShow.split('/')
+        const projectId = parseInt(segments[2])
+
+        canAttachToCurrentContainer = true
+
+        canSelectElements = !attachToContainer
+
+        let res = await reef.post(`/Project/${projectId}/query`,
+                            {
+                                Id: 1,
+                                Name: "collector",
+                                ExpandLevel: 3,
+                                Tree:
+                                [
+                                    {
+                                        Id: 1,
+                                        Association: '',
+                                        Expressions:['Title','GetCanonicalPath', 'Id', '$ref', '$type', 'icon'],
+                                        SubTree:
+                                        [
+                                            {
+                                                Id: 2,
+                                                Association: 'Lists',
+                                                Expressions:['Id', '$ref', 'Name', 'Summary', 'Order', 'href', '$type']
+
+                                            },
+                                            {
+                                                Id: 3,
+                                                Association: 'Folders',
+                                                Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href', 'icon',  '$type']
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            onErrorShowAlert);
+
+
+
+        if(!res)
+        {
+            levelUpHRef = '/root'
+            currentLevelTitle = ''
+            return null
+        }
+        else
+        {
+            let contextItem = res.Project
+            const canonicalPath = contextItem.GetCanonicalPath
+            if(canonicalPath.length > 0)
+                levelUpHRef = canonicalPath[canonicalPath.length-1].href
+            else
+                levelUpHRef = '/root'
+
+             if(attachToContainer && contextItem)
+            {
+                containerRef = {
+                    ElementId: contextItem.Id,
+                    ElementType: contextItem.$type,
+                    ElementNav: contextItem.$ref,
+                    Title: contextItem.Title,
+                    Summary: '',
+                    icon: contextItem.icon,
+                    ElementInfo: 0,
+                    $ref: contextItem.$ref
+                }        
+            }
+
+           currentLevelTitle = contextItem.Title
+
+            let references = [  ]
+
+            let allElements = []
+
+            if(rootFilter == 'ALL' || rootFilter == 'TASKLISTS')
+            {
+                if(contextItem.Lists && contextItem.Lists.length > 0)
+                {
+                    contextItem.Lists.forEach((f) => {
+                        allElements.push({
+                            Id: f.Id,
+                            $type: f.$type,
+                            Title: f.Name,
+                            Summary: f.Summary,
+                            icon: 'notebook',
+                            href: f.href,
+                            Order: f.Order,
+                            $ref: f.$ref
+                        })
+                    })
+                }
+            }
+
+            if(rootFilter == 'ALL' || rootFilter == 'FOLDERS')
+            {
+                if(contextItem.Folders)
+                {
+                    allElements.push({
+                        Id: contextItem.Folders.Id,
+                        $type: contextItem.Folders.$type,
+                        Title: contextItem.Folders.Title,
+                        Summary: contextItem.Folders.Summary,
+                        icon: contextItem.Folders.icon,
+                        href: `/folder/${contextItem.Folders.Id}`,
+                        Order: contextItem.Folders.Order,
+                        $ref: contextItem.Folders.$ref
+                    })
+                
+                }
+            }
+
+        //allElements.sort((a,b) => a.Order - b.Order)
+
+            allElements.forEach(t => {
+                references.push({
+                    ElementId: t.Id,
+                    ElementType: t.$type,
+                    ElementNav: t.$ref,
+                    Title: t.Title,
+                    Summary: t.Summary,
+                    icon: t.icon,
+                    href: t.href ?? undefined,
+                    ElementInfo: 0,
+                    $ref: t.$ref,
+                    $type: 'Container'
+                })
+            })
+
+            return references
+        }
+    }
+
     async function generateTaskListReferences(whatToShow)
     {
         const segments = whatToShow.split('/')
@@ -822,7 +1015,7 @@
             if(!canShow('Task'))
                 return references;
 
-            contextItem.Tasks.forEach(t => {
+            contextItem.Tasks?.forEach(t => {
                 references.push({
                     ElementId: t.Id,
                     ElementType: t.$type,

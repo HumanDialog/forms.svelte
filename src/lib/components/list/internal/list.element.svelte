@@ -399,7 +399,7 @@
 
     {#if summary && item[summary]}
     <figcaption>
-        {item[summary]}
+        {ext(item[summary])}
     </figcaption>
     {/if}
 

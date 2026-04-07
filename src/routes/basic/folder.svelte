@@ -39,10 +39,9 @@
     export let params = {}
 
     let contextItem = null;
-    let contextNavigation;
-    let cacheKey;
+    let contextNavigation = '';
+    let cacheKey = '';
     let contextItemSelector;
-    let contextPath;
     let contextItemId;
 
     let listComponent;
@@ -59,6 +58,12 @@
     const FK_TABLE              = 3
     const FK_DOCUMENT           = 4
 
+    const OP_FOLDER             = 0
+    const OP_TRASH              = 1
+    const OP_ARCHIVE            = 2
+
+    let operations_kind = OP_FOLDER
+
     $: onParamsChanged($location, $querystring, $mainContentPageReloader, $session);
 
     async function onParamsChanged(...args)
@@ -68,39 +73,76 @@
         if(foundIdx < 0)
             return;
 
+        let selector_idx = 0 
         if(!segments.length)
             contextItemSelector = 'default'
         else
-            contextItemSelector = segments[segments.length - 1]
+        {
+            selector_idx = segments.findIndex(s => s == 'folder')
+            if(selector_idx >= 0)
+            {
+                selector_idx++
+                contextItemSelector = segments[selector_idx]
+            }
+            else
+                contextItemSelector = 'default'
+        }
 
-
+        contextItemId = 0
 
         switch (contextItemSelector)
         {
         case 'default':
-            contextNavigation = "/user/Folders/first";
+            contextNavigation = "user/Folders/first";
             cacheKey = "user_Folders_first";
+            operations_kind = OP_FOLDER
             break;
         case 'mytrash':
-            contextNavigation = "/user/TrashFolder";
+            contextNavigation = "user/TrashFolder";
             cacheKey = "user_TrashFolder";
+            operations_kind = OP_TRASH
             break;
         case 'myarchive':
-            contextNavigation = "/user/ArchiveFolder";
+            contextNavigation = "user/ArchiveFolder";
             cacheKey = "user_ArchiveFolder";
+            operations_kind = OP_ARCHIVE
             break;
         case 'trash':
-            contextNavigation = "/group/TrashFolder";
+            contextNavigation = "group/TrashFolder";
             cacheKey = "group_TrashFolder";
+            operations_kind = OP_TRASH
             break;
         case 'archive':
-            contextNavigation = "/group/ArchiveFolder";
+            contextNavigation = "group/ArchiveFolder";
             cacheKey = "group_ArchiveFolder";
+            operations_kind = OP_ARCHIVE
+            break;
+        case 'project':
+            contextItemId = parseInt(segments[selector_idx+1])
+            contextNavigation = `Project/${contextItemId}/Folders`
+            cacheKey = `ProjectFolder_${contextItemId}`;
+            operations_kind = OP_FOLDER
+            contextItemId = 0   // tmp
+            break;
+        case 'projecttrash':
+            contextItemId = parseInt(segments[selector_idx+1])
+            contextNavigation = `Project/${contextItemId}/TrashFolder`
+            cacheKey = `ProjectTrashFolder_${contextItemId}`;
+            operations_kind = OP_TRASH
+            contextItemId = 0   // tmp
+            break;
+        case 'projectarchive':
+            contextItemId = parseInt(segments[selector_idx+1])
+            contextNavigation = `Project/${contextItemId}/ArchiveFolder`
+            cacheKey = `ProjectArchiveFolder_${contextItemId}`;
+            operations_kind = OP_ARCHIVE
+            contextItemId = 0   // tmp
             break;
         default:
             contextItemId = parseInt(segments[segments.length-1])
-            contextNavigation = `/Folder/${contextItemId}`
+            contextNavigation = `Folder/${contextItemId}`
             cacheKey = `Folder_${contextItemId}`;
+            operations_kind = OP_FOLDER
             break;
         }
 
@@ -113,16 +155,19 @@
             listComponent?.reload(contextItem, listComponent.KEEP_SELECTION)
         }
         //---------------------------------------------------
-        const readItem = await readContextItem(contextNavigation, cacheKey)
+        const readItem = await readContextItem(contextNavigation)
 
         // dodatkowe zabezpiecznie dla przypadku kiedy pokazalismy folder, ale jego wersje z cache'a
         // i wciąż jeszcze czekamy na odpowiedź z serwisu. W międzyczasie user przeszedł do folderu niżej
         // zostajemy więc w tym komponencie, ale zmienił się parametr folderu do załadowania
         // wysyłamy więc nowe zapytanie, a to poprzednie, które wciąż jeszcze trwa, już nas nie interesuje
-        //if(readItem.Id != contextItemId)
-        //    return;
+        if((contextItemId > 0) && (readItem.Id != contextItemId))
+            return;
 
         contextItem  = readItem
+        cache.set(cacheKey, contextItem)
+       
+
         if(contextItem)
         {
             folderTitle = ext(contextItem.Title);
@@ -132,7 +177,7 @@
         listComponent?.reload(contextItem, listComponent.KEEP_SELECTION)
     }
 
-    async function readContextItem(contextNavigation, cacheKey)
+    async function readContextItem(contextNavigation)
     {
         let res = await reef.post(`${contextNavigation}/query`,
         {
@@ -142,26 +187,26 @@
             Tree:
             [
             {   Id: 1, Association: '',
-                Expressions:['Id', '$ref', '$type', 'icon', 'Title','Summary', 'Kind', 'ModificationDate', 'CreatedBy', 'IsPinned', 'IsBasket', 'IsRootPinned', 'GetCanonicalPath'],
+                Expressions:['Id', '$ref', '$type', 'icon', 'Title','Summary', 'Kind', 'ModificationDate', 'CreatedBy', 'IsPinned', 'IsBasket', 'IsRootPinned', 'GetCanonicalPath', '$ver'],
                 SubTree:[
                     {   Id: 2, Association: 'Folders',
-                        Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'icon', 'IsInBasket' , 'IsCanonical',  'icon', 'FolderId', '$type']
+                        Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'icon', 'IsInBasket' , 'IsCanonical',  'icon', 'FolderId', '$type', '$ver']
                     },
                     { Id: 3, Association: 'Notes',
-                        Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href', 'icon', 'IsInBasket', 'IsCanonical', 'NoteId', '$type']
+                        Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href', 'icon', 'IsInBasket', 'IsCanonical', 'NoteId', '$type', '$ver']
                     },
                     {
                         Id: 4,
                         Association: 'Tasks',
                         //Filter: 'State <> STATE_FINISHED',
                         //Sort: 'Order',
-                        Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'ListName', 'DueDate', 'href', 'icon', 'IsInBasket', 'IsCanonical', 'icon', 'TaskId', '$type']
+                        Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'ListName', 'DueDate', 'href', 'icon', 'IsInBasket', 'IsCanonical', 'icon', 'TaskId', '$type', '$ver']
 
                     },
                     {
                         Id: 5,
                         Association: 'Files',
-                        Expressions:['Id', 'FileId', '$ref', 'Title', 'Summary', 'Order', 'href', 'icon', 'IsInBasket', 'IsCanonical', 'FileId', '$type']
+                        Expressions:['Id', 'FileId', '$ref', 'Title', 'Summary', 'Order', 'href', 'icon', 'IsInBasket', 'IsCanonical', 'FileId', '$type', '$ver']
 
                     }
                 ]
@@ -172,8 +217,7 @@
         if(res)
         {
             const folderItem = res.Folder
-           ///const cacheKey = `folder_${folderItem.Id}`
-            cache.set(cacheKey, folderItem)
+           
             return folderItem;
         }
         else
@@ -200,7 +244,8 @@
 
     async function fetchData()
     {
-        contextItem = await readContextItem(contextItemId);
+        contextItem = await readContextItem(contextNavigation);
+        cache.set(cacheKey, contextItem)
         if(contextItem)
         {
             folderTitle = ext(contextItem.Title);
@@ -248,6 +293,193 @@
         }
     }
     */
+
+    async function moveToTrash(object, kind)
+    {
+        let success = false
+
+        switch(kind)
+        {
+        case 'FolderFolder':
+            success = await reef.get(`${object.$ref}/Folder/MoveMeToTrash`);
+            break;
+
+        case 'FolderTask':
+            success = await reef.get(`${object.$ref}/Task/MoveMeToTrash`);
+            break;
+
+        case 'FolderNote':
+            success = await reef.get(`${object.$ref}/Note/MoveMeToTrash`);
+            break;
+
+        case 'FolderFile':
+            success = await reef.get(`${object.$ref}/File/MoveMeToTrash`);
+            break;
+
+        case 'multi':
+            {
+                let refs = []
+                object.forEach(i =>
+                    refs.push({
+                        Type: i.$type,
+                        Id: i.Id,
+                        Title: i.Title,
+                        ref: i.$ref
+                        })
+                )
+                success = await reef.post(`${contextItem.$ref}/MoveElementsToTrash`, { items: refs });
+            }
+            break;
+        }
+
+        if(success)
+        {
+            await fetchData();
+            listComponent.reload(contextItem, listComponent.SELECT_NEXT);
+        }
+    }
+
+    async function restoreTrashElement(object, kind)
+    {
+        let success = false
+
+        switch(kind)
+        {
+        case 'FolderFolder':
+            success = await reef.get(`${object.$ref}/Folder/RestoreFromTrash`);
+            break;
+
+        case 'FolderTask':
+            success = await reef.get(`${object.$ref}/Task/RestoreFromTrash`);
+            break;
+
+        case 'FolderNote':
+            success = await reef.get(`${object.$ref}/Note/RestoreFromTrash`);
+            break;
+
+        case 'FolderFile':
+            success = await reef.get(`${object.$ref}/File/RestoreFromTrash`);
+            break;
+
+        case 'multi':
+            {
+                let refs = []
+                object.forEach(i =>
+                    refs.push({
+                        Type: i.$type,
+                        Id: i.Id,
+                        Title: i.Title,
+                        ref: i.$ref
+                        })
+                )
+                success = await reef.post(`${contextItem.$ref}/RestoreElementsFromTrash`, { items: refs } );
+            }
+            break;
+        }
+
+        if(success)
+        {
+            await fetchData();
+            listComponent.reload(contextItem, listComponent.SELECT_NEXT);
+        }
+    }
+
+    async function moveToArchive(object, kind)
+    {
+        let success = false
+
+        switch(kind)
+        {
+        case 'FolderFolder':
+            success = await reef.get(`${object.$ref}/Folder/MoveMeToArchive`);
+            break;
+
+        case 'FolderTask':
+            success = await reef.get(`${object.$ref}/Task/MoveMeToArchive`);
+            break;
+
+        case 'FolderNote':
+            success = await reef.get(`${object.$ref}/Note/MoveMeToArchive`);
+            break;
+
+        case 'FolderFile':
+            success = await reef.get(`${object.$ref}/File/MoveMeToArchive`);
+            break;
+
+        case 'multi':
+            {
+                let refs = []
+                object.forEach(i =>
+                    refs.push({
+                        Type: i.$type,
+                        Id: i.Id,
+                        Title: i.Title,
+                        ref: i.$ref
+                        })
+                )
+                success = await reef.post(`${contextItem.$ref}/MoveElementsToArchive`, { items: refs } );
+            }
+            break;
+        }
+
+        if(success)
+        {
+            await fetchData();
+            listComponent.reload(contextItem, listComponent.SELECT_NEXT);
+        }
+    }
+
+    async function restoreArchivedElement(object, kind)
+    {
+        let success = false
+
+        switch(kind)
+        {
+        case 'FolderFolder':
+            success = await reef.get(`${object.$ref}/Folder/RestoreFromArchive`);
+            break;
+
+        case 'FolderTask':
+            success = await reef.get(`${object.$ref}/Task/RestoreFromArchive`);
+            break;
+
+        case 'FolderNote':
+            success = await reef.get(`${object.$ref}/Note/RestoreFromArchive`);
+            break;
+
+        case 'FolderFile':
+            success = await reef.get(`${object.$ref}/File/RestoreFromArchive`);
+            break;
+
+        case 'multi':
+            {
+                let refs = []
+                object.forEach(i =>
+                    refs.push({
+                        Type: i.$type,
+                        Id: i.Id,
+                        Title: i.Title,
+                        ref: i.$ref
+                        })
+                )
+                success = await reef.post(`${contextItem.$ref}/RestoreElementsFromArchive`, { items: refs } );
+            }
+            break;
+        }
+
+        if(success)
+        {
+            await fetchData();
+            listComponent.reload(contextItem, listComponent.SELECT_NEXT);
+        }
+    }
+
+    async function emptyTrash() 
+    {
+        await reef.get(`${contextItem.$ref}/EmptyTrash`);
+        await fetchData();
+        listComponent.reload(contextItem, listComponent.CLEAR_SELECTION);
+    }
 
     let deleteModal;
     let objectToDelete;
@@ -468,7 +700,7 @@
 
     async function addTask(newTaskAttribs)
     {
-        let res = await reef.post(`${contextPath}/CreateTaskEx`,{ properties: newTaskAttribs }, onErrorShowAlert)
+        let res = await reef.post(`${contextNavigation}/CreateTaskEx`,{ properties: newTaskAttribs }, onErrorShowAlert)
         if(!res)
             return null;
 
@@ -481,7 +713,7 @@
 
     async function addNote(newNoteAttribs)
     {
-        let res = await reef.post(`${contextPath}/CreateNoteEx`,{ properties: newNoteAttribs }, onErrorShowAlert)
+        let res = await reef.post(`${contextNavigation}/CreateNoteEx`,{ properties: newNoteAttribs }, onErrorShowAlert)
         if(!res)
             return null;
 
@@ -494,7 +726,7 @@
 
     async function addFile(newFileAttribs)
     {
-        let res = await reef.post(`${contextPath}/CreateFileEx`,{ properties: newFileAttribs }, onErrorShowAlert)
+        let res = await reef.post(`${contextNavigation}/CreateFileEx`,{ properties: newFileAttribs }, onErrorShowAlert)
         if(!res)
             return null;
 
@@ -506,7 +738,7 @@
 
     async function addFolder(newFolderAttribs)
     {
-        let res = await reef.post(`${contextPath}/CreateSubFolder`,{
+        let res = await reef.post(`${contextNavigation}/CreateSubFolder`,{
             title: newFolderAttribs.Title,
             summary:  newFolderAttribs.Summary,
             order: newFolderAttribs.Order,
@@ -523,7 +755,7 @@
 
     async function addForum(newFolderAttribs)
     {
-        let res = await reef.post(`${contextPath}/CreateSubForum`,{
+        let res = await reef.post(`${contextNavigation}/CreateSubForum`,{
             title: newFolderAttribs.Title,
             summary:  newFolderAttribs.Summary,
             order: newFolderAttribs.Order,
@@ -540,7 +772,7 @@
 
     async function addThread(newNoteAttribs)
     {
-        let res = await reef.post(`${contextPath}/CreateThread`,{
+        let res = await reef.post(`${contextNavigation}/CreateThread`,{
             title: newNoteAttribs.Title,
             summary:  newNoteAttribs.Summary,
             order: newNoteAttribs.Order})
@@ -568,31 +800,7 @@
         }
     }
 
-    async function changeElementProperty(item, value, propName)
-    {
-        item[propName] = value
-
-        switch(propName)
-        {
-        case 'Title':
-            await reef.post(`${item.$ref}/SetTitle`, { value: value }, onErrorShowAlert)
-            break;
-
-        case 'Summary':
-            await reef.post(`${item.$ref}/SetSummary`, { value: value }, onErrorShowAlert)
-            break;
-        }
-
-    }
-
-    async function dettachAllMyContent()
-    {
-        await reef.post(`${contextItem.$ref}/DettachAllContent`, {} , onErrorShowAlert)
-
-        await fetchData();
-        listComponent.reload(contextItem, listComponent.CLEAR_SELECTION)
-    }
-
+    
     async function refreshView()
     {
         await fetchData();
@@ -614,9 +822,7 @@
                     if(UI.navigator)
                         UI.navigator.refresh()
                     },
-                //fab: 'S00',
-                //tbr: 'C',
-                //hideToolbarCaption: true
+                
             }
         }
         else
@@ -631,9 +837,7 @@
                     if(UI.navigator)
                         UI.navigator.refresh()
                 },
-                //fab: 'S00',
-                //tbr: 'C',
-                //hideToolbarCaption: true
+                
             }
         }
         return pinOperation;
@@ -710,7 +914,6 @@
 
         let result = {
             caption: '_; File; Archivo; Plik',
-            // tbr: 'B',
             operations: [ ]
         }
 
@@ -767,8 +970,6 @@
             }
         ]
 
-        //fab: 'M01',
-        //tbr: 'A'
     }
 
     async function pasteRecentClipboardElement(btt, aroundRect)
@@ -777,7 +978,7 @@
         if(clipboardElements && clipboardElements.length > 0)
         {
             const references = transformClipboardToJSONReferences([clipboardElements[0]])
-            const res = await reef.post(`${contextPath}/AttachClipboard`, { references: references }, onErrorShowAlert)
+            const res = await reef.post(`${contextNavigation}/AttachClipboard`, { references: references }, onErrorShowAlert)
             if(res)
                 refreshViewAfterAttachingFromBasket(res);
         }
@@ -787,7 +988,7 @@
     {
         const clipboardElements = await fetchComposedClipboard4Folder()
         showFloatingToolbar(aroundRect, BasketPreview, {
-            destinationContainer: contextPath,
+            destinationContainer: contextNavigation,
             onRefreshView: refreshViewAfterAttachingFromBasket,
             clipboardElements: clipboardElements,
             ownCloseButton: true
@@ -798,7 +999,7 @@
     {
         const clipboardElements = getBrowserRecentElements4Folder()
         showFloatingToolbar(aroundRect, BasketPreview, {
-            destinationContainer: contextPath,
+            destinationContainer: contextNavigation,
             onRefreshView: refreshViewAfterAttachingFromBasket,
             clipboardElements: clipboardElements,
             browserBasedClipboard: true,
@@ -810,7 +1011,7 @@
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
             rootFilter: 'FOLDERS',
-            destinationContainer: contextPath,
+            destinationContainer: contextNavigation,
             onRefreshView: refreshViewAfterAttachingFromBasket,
             ownCloseButton: true
         })
@@ -820,7 +1021,7 @@
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
             rootFilter: 'TASKLISTS',
-            destinationContainer: contextPath,
+            destinationContainer: contextNavigation,
             onRefreshView: refreshViewAfterAttachingFromBasket,
             ownCloseButton: true
         })
@@ -866,7 +1067,6 @@
         })
     }
 
-
     function  folderPageOperations()
     {
         const isClipboard = contextItem.IsBasket
@@ -901,22 +1101,9 @@
                         },
                         insertOperation,
                         ... !canPin ? [] : [pinOp()],
-                        {
-                            caption: '_; Select; Seleccionar; Zaznacz',
-                            mricon: 'check-check',
-                            hideToolbarCaption: true,
-                            tbr: 'C',
-                            fab: 'S20',
-                            action: (f) => { listComponent.toggleMultiselection(); reloadPageToolbarOperations(multiselectPageOperations()) }
-                        },
-                        {
-                            caption: '_; Refresh; Actualizar; Odśwież',
-                            action: async (f) => await refreshView(),
-                        },
-                        {
-                            caption: '_; Properties; Propiedades; Właściwości',
-                            action: (btt, rect)=> runElementProperties(btt, rect, contextItem, 'Folder')
-                        }
+                        enable_multiselection_operation,
+                        refresh_operation,
+                        properties_operation
                     ]
                 }
 
@@ -924,7 +1111,52 @@
         }
     }
 
-    function multiselectPageOperations()
+    const enable_multiselection_operation = {
+        caption: '_; Select; Seleccionar; Zaznacz',
+        mricon: 'check-check',
+        hideToolbarCaption: true,
+        tbr: 'C',
+        fab: 'S20',
+        action: (f) => { listComponent.toggleMultiselection(); reloadPageToolbarOperations(multiselectPageOperations()) }
+    }
+
+    const disable_multiselection_operation = {
+            caption: '_; Select; Seleccionar; Zaznacz',
+            mricon: 'check-check',
+            hideToolbarCaption: true,
+            tbr: 'C',
+            fab: 'S20',
+            action: (f) => { listComponent.toggleMultiselection(); reloadPageToolbarOperations(getPageOperations()) },
+            active: true
+        }
+
+    const refresh_operation = {
+        caption: '_; Refresh; Actualizar; Odśwież',
+        action: async (f) => await refreshView(),
+    }
+
+    const properties_operation = {
+        caption: '_; Properties; Propiedades; Właściwości',
+        action: (btt, rect)=> runElementProperties(btt, rect, contextItem, 'Folder')
+    }
+
+    const toggle_select_all_operation = {
+        caption: '_; All; Todos; Wszystkie',
+        action: () => listComponent.toggleSelectAll(),
+        mricon: 'circle-check',
+        tbr: 'A',
+        fab: 'M01'
+    }
+
+    const empty_trash_operation = {
+        caption: '_; Empty the trash; Vacía la papelera; Opróżnij kosz',
+        action: () => emptyTrash(),
+        tbr: 'A',
+        fab: 'S00',
+        mricon: 'brush-cleaning',
+    }
+
+    function folderMultiselectPageOperations()
     {
         const isClipboard = contextItem.IsBasket
         const isRootPinned = contextItem.IsRootPinned
@@ -938,32 +1170,28 @@
                 {
                     caption: '_; View; Ver; Widok',
                     operations: [
-                        {
-                            caption: '_; All; Todos; Wszystkie',
-                            ricon: '',
-                            action: () => listComponent.toggleSelectAll(),
-                            ctrl: "main_list",
-                            list_action: "toggle_select_all",
-                            //fab: 'M30',
-                            tbr: 'A',
-                        },
+                        toggle_select_all_operation,
                        // ... !canPin ? [] : [pinOp()],
-                        {
-                            caption: '_; Select; Seleccionar; Zaznacz',
-                            mricon: 'check-check',
-                            hideToolbarCaption: true,
-                            tbr: 'C',
-                            fab: 'S20',
-                            action: (f) => { listComponent.toggleMultiselection(); reloadPageToolbarOperations(getPageOperations()) },
-                            active: true
-                        },
-                        {
-                            caption: '_; Refresh; Actualizar; Odśwież',
-                            action: async (f) => await refreshView(),
-                        }
+                        disable_multiselection_operation,
+                        refresh_operation
                     ]
                 }
             ]
+        }
+    }
+
+    function multiselectPageOperations()
+    {
+        switch(operations_kind)
+        {
+        case OP_FOLDER:
+            return folderMultiselectPageOperations();
+
+        case OP_ARCHIVE:
+            return archiveMultiselectPageOperations();
+
+        case OP_TRASH:
+            return trashMultiselectPageOperations();
         }
     }
 
@@ -972,7 +1200,17 @@
         if(!contextItem)
             return [];
 
-        return folderPageOperations();
+        switch(operations_kind)
+        {
+        case OP_FOLDER:
+            return folderPageOperations();
+
+        case OP_ARCHIVE:
+            return archivePageOperations();
+
+        case OP_TRASH:
+            return trashPageOperations();
+        }
     }
 
     async function refreshViewAfterAttachingFromBasket(f)
@@ -1085,15 +1323,12 @@
     }
 
 
-
     function folderElementOperations(element, kind)
     {
-        const isClipboard = contextItem.IsBasket
         const isRootPinned = contextItem.IsRootPinned
-        const canPin = !(isRootPinned || isClipboard)
+        const canPin = !isRootPinned
         const isCanonical = element.IsCanonical
-        const isForum = contextItem.Kind == FK_DISCUSSION
-
+        
         let list = listComponent;
 
         let linkOperations = []
@@ -1102,7 +1337,11 @@
             linkOperations = [
                 {
                     caption: '_; Delete; Eliminar; Usuń',
-                    action: (f) => askToDelete(element, kind)
+                    action: (f) => moveToTrash(element, kind)
+                },
+                {
+                    caption: '_; Archive; Archivar; Archiwizuj',
+                    action: (f) => moveToArchive(element, kind)
                 }
             ]
         }
@@ -1232,18 +1471,8 @@
                         operations: [
                         insertOperation,
                         ... !canPin ? [] : [pinOp()],
-                         {
-                            caption: '_; Select; Seleccionar; Zaznacz',
-                            mricon: 'check-check',
-                            hideToolbarCaption: true,
-                            tbr: 'C',
-                            fab: 'S20',
-                            action: (f) => { listComponent.toggleMultiselection(); reloadPageToolbarOperations(multiselectPageOperations()) }
-                        },
-                        {
-                            caption: '_; Refresh; Actualizar; Odśwież',
-                            action: async (f) => await refreshView(),
-                        }
+                        enable_multiselection_operation,
+                        refresh_operation
                         ]
                     }
                 ]
@@ -1252,11 +1481,23 @@
 
 
 
-    let elementOperations = (element, kind) => {
-        return folderElementOperations(element, kind)
+    let elementOperations = (element, kind) => 
+    {
+        switch(operations_kind)
+        {
+        case OP_FOLDER:
+            return folderElementOperations(element, kind)
+
+        case OP_ARCHIVE:
+            return archiveElementOperations(element, kind)
+
+        case OP_TRASH:
+            return trashElementOperations(element, kind)
+        }
+        
     }
 
-    function multiselectOperations(items)
+    function folderMultiselectionOperations(items)
     {
         //if(items.length == 0)
         //    return []
@@ -1279,12 +1520,7 @@
                     {
                         caption: '_; Element; Elemento; Element',
                         operations: [
-                            {
-                                caption: '_; All; Todos; Wszystkie',
-                                action: () => listComponent.toggleSelectAll(),
-                                //fab: 'M30',
-                                tbr: 'A',
-                            },
+                            toggle_select_all_operation,
                             {
                                 caption: '_; Send; Enviar; Wyślij',
                                 mricon: 'upload',
@@ -1316,8 +1552,11 @@
                             },
                             {
                                 caption: '_; Delete; Eliminar; Usuń',
-                             //   icon: FaTrash,
-                                action: (f) => askToDelete(items, 'multi'),
+                                action: (f) => moveToTrash(items, 'multi'),
+                            },
+                            {
+                                caption: '_; Archive; Archivar; Archiwizuj',
+                                action: (f) => moveToArchive(items, 'multi'),
                             }
                         ]
                     },
@@ -1326,23 +1565,8 @@
                         //tbr: 'B',
                         operations: [
                            // ... !canPin ? [] : [pinOp()],
-                            {
-                                caption: '_; Select; Seleccionar; Zaznacz',
-                                mricon: 'check-check',
-                                hideToolbarCaption: true,
-                                tbr: 'C',
-                                fab: 'S20',
-                                action: (f) => { listComponent.toggleMultiselection(); reloadPageToolbarOperations(getPageOperations()); },
-                                active: true
-                            },
-                            {
-                                caption: '_; Refresh; Actualizar; Odśwież',
-                                //icon: FaSync,
-                                action: async (f) => await refreshView(),
-                                //fab: 'S10',
-                                //tbr: 'C',
-                                //hideToolbarCaption: true
-                            }
+                            disable_multiselection_operation,
+                            refresh_operation
                         ]
                     }
                 ]
@@ -1350,48 +1574,20 @@
         }
     }
 
-    function multiselectBasketOperations(items)
+    function multiselectOperations(items)
     {
-        return {
-                opver: 2,
-                fab: 'M00',
-                tbr: 'D',
-                operations: [
-                    {
-                        caption: '_; Element; Elemento; Element',
-                        operations: [
-                            {
-                            //    icon: FaTrash,
-                                caption: '_; Remove from Clipboard; Eliminar del portapapeles; Usuń ze schowka',
-                                action: (f) => dettachElementMulti(items),
-                            //    fab:'M30',
-                            //    tbr:'A'
-                            }
-                        ]
-                    },
+        switch(operations_kind)
+        {
+        case OP_FOLDER:
+            return folderMultiselectionOperations(items)
 
-                    {
-                        caption: '_; View; Ver; Widok',
-                        operations: [
-                            {
-                                caption: '_; Select; Seleccionar; Zaznacz',
-                                mricon: 'check-check',
-                                hideToolbarCaption: true,
-                                tbr: 'C',
-                                fab: 'S20',
-                                action: (f) => { listComponent.toggleMultiselection(); reloadPageToolbarOperations(getPageOperations()) },
-                                active: true
-                            },
-                            {
-                                caption: '_; Refresh; Actualizar; Odśwież',
-                                action: async (f) => await refreshView(),
-                            }
-                        ]
-                    }
-                ]
+        case OP_ARCHIVE:
+            return archiveMultiselectionOperations(items)
+
+        case OP_TRASH:
+            return trashMultiselectionOperations(items)
         }
     }
-
 
     let attInput;
     let insertFileAfterElement = null;
@@ -1410,7 +1606,7 @@
 
             const fileOrder = listComponent.assignOrder(insertFileAfterElement)
 
-            let fileLink = await reef.post(`${contextPath}/CreateFile`,
+            let fileLink = await reef.post(`${contextNavigation}/CreateFile`,
                                     {
                                         title: file.name,
                                         mimeType: file.type,
@@ -1523,6 +1719,236 @@
         }
     }
 
+
+
+    function archivePageOperations()
+    {
+        return {
+            opver: 2,
+            fab: 'M00',
+            tbr: 'D',
+            operations: [
+                {
+                    caption: '_; View; Ver; Widok',
+                    operations: [
+                        enable_multiselection_operation,
+                        refresh_operation,
+                        properties_operation
+                    ]
+                }
+
+            ]
+        }
+    }
+
+    function trashPageOperations()
+    {
+        return {
+            opver: 2,
+            fab: 'M00',
+            tbr: 'D',
+            operations: [
+                {
+                    caption: '_; View; Ver; Widok',
+                    operations: [
+                        empty_trash_operation,
+                        enable_multiselection_operation,
+                        refresh_operation,
+                        properties_operation
+                    ]
+                }
+
+            ]
+        }
+    }
+
+
+    function archiveElementOperations(element, kind)
+    {
+        return {
+                opver: 2,
+                fab: 'M00',
+                tbr: 'D',
+                operations: [
+                    {
+                        caption: '_; Element; Elemento; Element',
+                        operations: [
+                            {
+                                caption: '_; Restore; Restaurar; Przywróć',
+                                mricon: 'undo',
+                                tbr: 'B',
+                                fab: 'M20',
+                                action: (btt, rect)=> restoreArchivedElement(element, kind),
+                            },
+                            {
+                                caption: '_; Delete; Eliminar; Usuń',
+                                action: (f) => askToDelete(element, kind)
+                            },
+                            {
+                                caption: '_; Properties; Propiedades; Właściwości',
+                                action: (btt, rect)=> runElementProperties(btt, rect, element, kind)
+                            }
+                        ]
+                    },
+                    {
+                        caption: '_; View; Ver; Widok',
+                        operations: [
+                            enable_multiselection_operation,
+                            refresh_operation
+                        ]
+                    }
+                ]
+            }
+    }
+
+    function trashElementOperations(element, kind)
+    {
+        return {
+                opver: 2,
+                fab: 'M00',
+                tbr: 'D',
+                operations: [
+                    {
+                        caption: '_; Element; Elemento; Element',
+                        operations: [
+                            {
+                                caption: '_; Restore; Restaurar; Przywróć',
+                                mricon: 'undo',
+                                tbr: 'B',
+                                fab: 'M20',
+                                action: (btt, rect)=> restoreTrashElement(element, kind),
+                            },
+                            {
+                                caption: '_; Properties; Propiedades; Właściwości',
+                                action: (btt, rect)=> runElementProperties(btt, rect, element, kind)
+                            }
+                        ]
+                    },
+                    {
+                        caption: '_; View; Ver; Widok',
+                        operations: [
+                            empty_trash_operation,
+                            enable_multiselection_operation,
+                            refresh_operation
+                        ]
+                    }
+                ]
+            }
+    }
+
+    function archiveMultiselectPageOperations()
+    {
+        return {
+            opver: 2,
+            fab: 'M00',
+            tbr: 'D',
+            operations: [
+                {
+                    caption: '_; View; Ver; Widok',
+                    operations: [
+                        toggle_select_all_operation,
+                        {separator: true, tbr: 'A'},
+                        disable_multiselection_operation,
+                        refresh_operation
+                    ]
+                }
+            ]
+        }
+    }
+
+    function trashMultiselectPageOperations()
+    {
+        return {
+            opver: 2,
+            fab: 'M00',
+            tbr: 'D',
+            operations: [
+                {
+                    caption: '_; View; Ver; Widok',
+                    operations: [
+                        toggle_select_all_operation,    
+                        {separator: true, tbr: 'A'},
+                        empty_trash_operation,
+                        disable_multiselection_operation,
+                        refresh_operation
+                    ]
+                }
+            ]
+        }
+    }
+
+    function archiveMultiselectionOperations(items)
+    {
+        return {
+                opver: 2,
+                fab: 'M00',
+                tbr: 'D',
+                operations: [
+                    {
+                        caption: '_; Element; Elemento; Element',
+                        operations: [
+                            toggle_select_all_operation,
+                            {
+                                caption: '_; Restore; Restaurar; Przywróć',
+                                mricon: 'undo',
+                                tbr: 'B',
+                                fab: 'M20',
+                                action: (btt, rect)=> restoreArchivedElement(items, 'multi'),
+                            },
+                            {
+                                caption: '_; Delete; Eliminar; Usuń',
+                                action: (f) => askToDelete(items, 'multi'),
+                            }
+                        ]
+                    },
+                    {
+                        caption: '_; View; Ver; Widok',
+                        //tbr: 'B',
+                        operations: [
+                            disable_multiselection_operation,
+                            refresh_operation
+                        ]
+                    }
+                ]
+            }
+    
+    }
+
+    function trashMultiselectionOperations(items)
+    {
+       
+        return {
+                opver: 2,
+                fab: 'M00',
+                tbr: 'D',
+                operations: [
+                    {
+                        caption: '_; Element; Elemento; Element',
+                        operations: [
+                            toggle_select_all_operation,
+                            {
+                                caption: '_; Restore; Restaurar; Przywróć',
+                                mricon: 'undo',
+                                tbr: 'B',
+                                fab: 'M20',
+                                action: (btt, rect)=> restoreTrashElement(items, 'multi'),
+                            },
+                        ]
+                    },
+                    {
+                        caption: '_; View; Ver; Widok',
+                        //tbr: 'B',
+                        operations: [
+                            empty_trash_operation,
+                            disable_multiselection_operation,
+                            refresh_operation
+                        ]
+                    }
+                ]
+            }
+    
+    }
+
     let prev_folder_properties = {
         element:{
             icon: "icon",
@@ -1609,7 +2035,7 @@
 
 
 {#if contextItem}
-    {#key contextPath}  <!-- to force new page operations -->
+    {#key contextNavigation}  <!-- to force new page operations -->
     <Page   self={contextItem}
             toolbarOperations={ getPageOperations() }
             clearsContext='props sel'
@@ -1625,24 +2051,11 @@
                 summary=
             </div-->
 
-            {#if true}
-                <h1><Editable self={contextItem} a='Title'/></h1>
+            <h1><Editable self={contextItem} a='Title'/></h1>
 
-                    <p class="lead">
-                        <Editable self={contextItem} a='Summary'/>
-                    </p>
-
-            {:else}
-                <h1>
-                    {ext(contextItem.Title)}
-                </h1>
-                {#if contextItem.Summary}
-                    <p class="lead">
-                        {ext(contextItem.Summary)}
-                    </p>
-                {/if}
-            {/if}
-
+            <p class="lead">
+                <Editable self={contextItem} a='Summary'/>
+            </p>
 
             <List    self={contextItem}
                     a='allElements'

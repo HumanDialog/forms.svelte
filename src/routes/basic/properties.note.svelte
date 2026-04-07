@@ -100,19 +100,19 @@
                                {
                                     Id: 102,
                                     Association: 'InFolders',
-                                    Filter: 'not IsCanonical',
+                                    Filter: 'not IsCanonical and Status=STATUS_ACTIVE',
                                     Expressions:['$ref', 'InTitle', 'InSummary', 'InHRef', 'InIcon', 'IsCanonical', '$type']
                                 },
                                 {
                                     Id: 103,
                                     Association: 'InTasks',
-                                    Filter: 'not IsCanonical',
+                                    Filter: 'not IsCanonical and Status=STATUS_ACTIVE',
                                     Expressions:['$ref', 'InTitle', 'InSummary', 'InHRef', 'InIcon', 'IsCanonical', '$type']
                                 },
                                 {
                                     Id: 104,
                                     Association: 'InNotes',
-                                    Filter: 'not IsCanonical',
+                                    Filter: 'not IsCanonical and Status=STATUS_ACTIVE',
                                     Expressions:['$ref', 'InTitle', 'InSummary', 'InHRef', 'InIcon', 'IsCanonical', '$type']
                                 }
                             ]

@@ -135,6 +135,7 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-structure -->
 {#if properties && (properties_no > 0 || placeholder != '')}
+    
 <figcaption class = "kanban-prooperties">
 <div class="flex flex-row justify-between">
     {#each properties as prop, idx}

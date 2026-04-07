@@ -48,7 +48,7 @@
                     fetchHandlers: fetchHandlers
                    });
 
-    const app_view_routes = /^\/listboard|tdownload|tcontact|tasklist|destlis|deslis|design|desnav|task|note|folder|project|mytasks|mylists|listtemplates|mynotes|alllists|archivedlists|allprojects|myfolders|group-folders|general-channels|private-channels|members|chat|thread|newthread|forum|thome|profile|myday|teamday|doc|request-license-file|nav\/(.*)\/?$/i
+    const app_view_routes = /^\/listboard|tdownload|tcontact|tasklist|destlis|deslis|design|desnav|task|note|folder|project|projecttrash|projectarchive|mytasks|mylists|listtemplates|mynotes|alllists|archivedlists|deletedlists|myarchivedlists|mydeletedlists|allprojects|archivedprojects|deletedprojects|myfolders|group-folders|general-channels|private-channels|members|chat|thread|newthread|forum|thome|profile|myday|teamday|doc|request-license-file|nav\/(.*)\/?$/i
 
     const routes = new Map()
     routes.set('/',                     Main)

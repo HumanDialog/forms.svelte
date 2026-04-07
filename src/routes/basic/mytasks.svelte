@@ -141,6 +141,26 @@
     }
 
 
+    async function moveToTrash(task)
+    {
+        if(!task)
+            return;
+
+        const success = await reef.get(`${task.$ref}/MoveMeToTrash`);
+        if(success)
+            await reloadTasks(listComponent.SELECT_NEXT)
+    }
+
+    async function moveToArchive(task)
+    {
+        if(!task)
+            return;
+
+        const success = await reef.get(`${task.$ref}/MoveMeToArchive`);
+        if(success)
+            await reloadTasks(listComponent.SELECT_NEXT)
+    }
+
     let deleteModal;
     let taskToDelete;
     function askToDelete(task)
@@ -377,7 +397,11 @@
                         }, */
                         {
                             caption: '_; Delete; Eliminar; Usuń',
-                            action: (f) => askToDelete(task)
+                            action: (f) => moveToTrash(task),
+                        },
+                        {
+                            caption: '_; Archive; Archivar; Archiwizuj',
+                            action: (f) => moveToArchive(task),
                         },
                         {
                             caption: '_; Properties; Propiedades; Właściwości',

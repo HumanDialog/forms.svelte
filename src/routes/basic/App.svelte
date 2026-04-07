@@ -67,7 +67,7 @@
             google_analytics.init();
     }
 
-    const app_view_routes = /^\/listboard|tdownload|tcontact|tasklist|deslis|design|desnav|task|note|folder|mytasks|mylists|listtemplates|mynotes|alllists|myfolders|group-folders|general-channels|private-channels|members|chat|thread|newthread|forum|thome|profile|myday|teamday|doc|request-license-file|nav\/(.*)\/?$/i
+    const app_view_routes = /^\/listboard|tdownload|tcontact|tasklist|destlis|deslis|design|desnav|task|note|folder|project|projecttrash|projectarchive|mytasks|mylists|listtemplates|mynotes|alllists|archivedlists|deletedlists|myarchivedlists|mydeletedlists|allprojects|archivedprojects|deletedprojects|myfolders|group-folders|general-channels|private-channels|members|chat|thread|newthread|forum|thome|profile|myday|teamday|doc|request-license-file|nav\/(.*)\/?$/i
 
     const routes = new Map()
     routes.set('/',                     Main)
@@ -86,7 +86,7 @@
     routes.set('/invitation',           wrap({ asyncComponent: () => import('./auth/invitation.svelte')}))
     routes.set('/confirmemail',         wrap({ asyncComponent: () => import('./auth/confirmemail.svelte')}))
     routes.set('/result',               wrap({ asyncComponent: () => import('./auth/result.svelte')}))
-    routes.set(r, AppView)
+    //routes.set(r, AppView)
     routes.set('*', NotFound)
 
     setLanguages([

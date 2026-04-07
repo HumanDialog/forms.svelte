@@ -799,7 +799,15 @@
         addKeyboardShortcuts() {
             return {
                 'Mod-s': () => {
-                    console.log('todo: save content')
+                    save()
+
+                    if (typeof window !== 'undefined' && window.event) 
+                    {
+                        window.event.preventDefault();
+                        window.event.stopPropagation();
+                    }
+
+                    return true
                 }
             }
         }
@@ -870,6 +878,7 @@
             },
 			element: editorElement,
 			extensions: [
+                additionalShortcuts,
                 Document,
                 Paragraph,
                 Text,

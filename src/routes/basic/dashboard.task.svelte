@@ -124,18 +124,7 @@
                                 ],
                             hideToolbarCaption: true
                         },
-                    /*  don't know if it does make sense
                         {
-                            caption: '_; Archive; Archivar; Zarchiwizuj',
-                            //icon: FaArchive,
-                            action: (f) => askToArchive(task)
-                        },
-                        {
-                            caption: '_; Delete; Eliminar; Usuń',
-                            //icon: FaTrash,
-                            action: (f) => askToDelete(task)
-                        },
-                    */  {
                             caption: '_; Properties; Propiedades; Właściwości',
                             action: (btt, rect)=> runElementProperties(btt, rect)
                         }

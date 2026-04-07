@@ -317,6 +317,6 @@ async function handle_push_items_response(response)
     }
     catch(err)
     {
-        console.error(err)
+        //console.error(err)
     }
 }

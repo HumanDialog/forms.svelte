@@ -119,7 +119,7 @@
         cache.set(cacheKey, user)
 
         tasksNo = 0
-        user.SubscribedLists.forEach((l) => {
+        user.SubscribedLists?.forEach((l) => {
             if(l.List && l.List.Tasks)
                 tasksNo += l.List.Tasks.length
         })
@@ -135,7 +135,7 @@
         user = cachedValue
 
         tasksNo = 0
-        user.SubscribedLists.forEach((l) => {
+        user.SubscribedLists?.forEach((l) => {
             if(l.List && l.List.Tasks)
                 tasksNo += l.List.Tasks.length
         })

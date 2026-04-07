@@ -18,6 +18,7 @@
     import {querystring, location} from 'svelte-spa-router'
     import {FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegCheckCircle, FaRegCalendar, FaRegCalendarCheck, FaPen, FaArchive, FaEllipsisH} from 'svelte-icons/fa'
     import FolderProperties from './properties.folder.svelte'
+    import {cache} from './cache'
 
     export let params = {}
 
@@ -38,7 +39,14 @@
             return;
         }
 
+        const cacheKey = 'myFolders';
+        cache.has(cacheKey)
+            user = cache.get(cacheKey);
+
         await fetchData()
+
+        cache.set(cacheKey, user)
+        listComponent?.reload(user);
     }
 
     async function fetchData()
@@ -219,13 +227,13 @@
                             fab:'M04',
                             tbr:'A'
                         },
-
-                       {
+                        {
                             caption: '_; Delete; Eliminar; Usuń',
-                            //icon: FaTrash,
-                            action: (f) => askToDelete(folder),
-                            //fab:'M30',
-                            //tbr:'B'
+                            action: (f) => moveToTrash(folder),
+                        },
+                        {
+                            caption: '_; Archive; Archivar; Archiwizuj',
+                            action: (f) => moveToArchive(folder),
                         },
                         {
                             caption: '_; Properties; Propiedades; Właściwości',
@@ -265,25 +273,28 @@
         }
     }
 
-    function getFolderIcon(folder)
+    async function moveToTrash(folder)
     {
-        if(folder.icon)
-        {
-            switch(folder.icon)
-            {
-            case 'Folder':
-                return FaRegFolder;
-            case 'Clipboard':
-                return FaRegClipboard;
-            case 'Discussion':
-                return FaRegComments;
-            default:
-                return FaRegFolder
-            }
-        }
-        else
-            return FaRegFolder
+        if(!folder)
+            return;
+
+        const success = await reef.get(`${folder.$ref}/MoveMeToTrash`);
+        if(success)
+            await reloadFolders(listComponent.SELECT_NEXT)
     }
+
+
+    async function moveToArchive(folder)
+    {
+        if(!folder)
+            return;
+
+        const success = await reef.get(`${folder.$ref}/MoveMeToArchive`);
+        if(success)
+            await reloadFolders(listComponent.SELECT_NEXT)
+    }
+
+
     let list_properties = {
         Title: "Title",
         Summary: "Summary",

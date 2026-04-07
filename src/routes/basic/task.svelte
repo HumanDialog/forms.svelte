@@ -149,6 +149,7 @@
                                         {
                                             Id: 13,
                                             Association: 'InFolders',
+                                            Filter: 'Status=STATUS_ACTIVE',
                                             Expressions:['$ref', 'InTitle', 'InSummary', 'InHRef', 'InIcon', 'IsCanonical', '$type']
                                         },
                                         {
@@ -1559,7 +1560,11 @@
             linkOperations = [
                 {
                     caption: '_; Delete; Eliminar; Usuń',
-                    action: (f) => askToDeleteAttachement(element, kind)
+                    action: (f) => moveAttachementToTrash(element, kind)
+                },
+                {
+                    caption: '_; Archive; Archivar; Archiwizuj',
+                    action: (f) => moveAttachementToArchive(element, kind)
                 }
             ]
         }
@@ -1831,6 +1836,62 @@
         case 'UploadedFile':
         case 'TaskFile':
             attachementsComponent?.reload(task, attachementsComponent.KEEP_SELECTION);
+        }
+    }
+
+    async function moveAttachementToTrash(object, kind)
+    {
+        if(!object)
+            return;
+
+        let success = false
+
+        switch(kind)
+        {
+        case 'TaskNote':
+            success = await reef.get(`${object.$ref}/Note/MoveMeToTrash`);
+            break;
+
+        case 'TaskFile':
+            success = await reef.get(`${object.$ref}/File/MoveMeToTrash`);
+            break;
+        }
+
+        if(success)
+        {
+            await reloadData();
+            if(attachementsComponent)
+                attachementsComponent.reload(task, attachementsComponent.SELECT_NEXT);
+            else
+                clearActiveItem('props')
+        }
+    }
+
+    async function moveAttachementToArchive(object, kind)
+    {
+        if(!object)
+            return;
+
+        let success = false
+
+        switch(kind)
+        {
+        case 'TaskNote':
+            success = await reef.get(`${object.$ref}/Note/MoveMeToArchive`);
+            break;
+
+        case 'TaskFile':
+            success = await reef.get(`${object.$ref}/File/MoveMeToArchive`);
+            break;
+        }
+
+        if(success)
+        {
+            await reloadData();
+            if(attachementsComponent)
+                attachementsComponent.reload(task, attachementsComponent.SELECT_NEXT);
+            else
+                clearActiveItem('props')
         }
     }
 

@@ -70,26 +70,22 @@
 
     async function fetchData()
     {
-        const limit = isDeviceSmallerThan("sm") ? 7 : 12
-
-       
         const res  = await reef.post('group/query', {
             Id: 2,
             Name: "group tasklists",
             ExpandLevel: 1,
-            Limit: 3,
             Tree: [
                 {
                     Id: 20,
                     Association: 'Projects',
-                    SubTreeLimit: 3,
+                    Limit: 3,
                     Sort: "Order",
                     Expressions: ['Id', 'Title', 'Order', 'href', '$ref', '$type']
                 },
                 {
                     Id: 21,
                     Association: 'Lists',
-                    SubTreeLimit: 20,
+                    Limit: 20,
                     Sort: "Order",
                     Expressions: ['Id', 'Name', 'Summary', 'Order', 'href', '$ref', '$type']
                 }
@@ -134,7 +130,7 @@
 {#key currentPath}
 <div class="w-full prose prose-base prose-zinc dark:prose-invert prose-a:no-underline ">
 
-    {#if groupTaskLists && groupTaskLists.length > 0}
+    
 
         {#if $session.isActive}
             <SidebarGroup   title={i18n({en: 'Projects', es: 'Mis Proyectos', pl: 'Projekty'})}
@@ -183,9 +179,7 @@
                 </SidebarItem>
         </SidebarGroup>
 
-    {:else}
-        <Spinner delay={3000}/>
-    {/if}
+    
 
 </div>
 {/key}
