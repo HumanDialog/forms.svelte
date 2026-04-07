@@ -49,6 +49,10 @@
         return { separator: true }
     }
 
+    const separator_A_op = () => {
+        return { separator: true, tbr: 'A' }
+    }
+
     let new_element_creator = null
 
     const new_list_op = (list=null) => {
@@ -459,6 +463,25 @@
         await reloadLists(listComponent.CLEAR_SELECTION)
     }
 
+    const edit_page_op = () => {
+        return {
+                    caption: '_; Edit; Editar; Edytuj',
+                    mricon: 'pencil',
+                    tbr: 'A',
+                    fab:'M20',
+                    grid:[
+                        {
+                            caption: '_; Title; Título; Tytuł',
+                            action: () =>  { focusEditable('Title') },
+                        },
+                        {
+                            caption: '_; Summary; Resumen; Podsumowanie',
+                            action: () =>  { focusEditable('Summary') }
+                        }
+                    ]
+        }
+    }
+
     const group_expressions = ['Id', '$type', '$ref', 'Name'];
     const user_expressions = ['Id', '$type', '$ref', 'Name'];
     const project_expressions = ['Id','$type', '$ref', 'Title', 'Summary', 'Order', 'href', '$ver'];
@@ -701,7 +724,7 @@
                 element_expressions: task_list_expressions,
                 operations:{
                     page:{
-                        new: [new_list_op, new_list_from_template_op],
+                        new: [new_list_op, new_list_from_template_op, separator_A_op, edit_page_op],
                         view: [show_project_archived_lists_op, show_project_deleted_lists_op]
                     },
                     element:{

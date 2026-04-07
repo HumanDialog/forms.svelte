@@ -62,6 +62,9 @@
         text = trim(text)
         
         val = text
+        
+        show_placeholder = can_show_placeholder()
+
         validate()
     }
 
@@ -93,6 +96,30 @@
     {
         return text.replace(whiteSpacePattern, "");
     }
+
+    let show_placeholder = can_show_placeholder()
+    function can_show_placeholder()
+    {
+        if(!placeholder)
+            return false
+
+        if(val)
+            return false
+
+        return true
+    }
+
+    function focus(e)
+    {
+        //console.log('span focus')
+        show_placeholder = false
+    }
+
+    function blur(e)
+    {
+        show_placeholder = can_show_placeholder()
+       // console.log('span blur', show_placeholder)
+    }
     
 </script>
 
@@ -100,10 +127,41 @@
 <!-- svelte-ignore a11y-no-noninteractive-interactions -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex-->
 
-<span class="{userClass}"
-    on:click={runEditing}
+<span class="{userClass} block w-full relative"
+    
     title={tooltip}
-    tabindex="0">
+    >
+
+    {#if show_placeholder}
+        <span class="text-zinc-600 dark:text-zinc-400 absolute top-0 left-0 w-full pointer-events-none"
+                class:dark:!text-red-400={invalid}
+                class:!text-red-600={invalid}>
+            {placeholder}
+        </span>
+    {/if}
+
+     <span  class="w-full" 
+            class:text-red-500={invalid}
+            bind:this={fieldElement}
+            use:editable={{
+                action: (text) => onFieldChanged(text), 
+                active: true,
+                onSingleChange: onSingleChange,
+                enterAsNewLine: multiline,
+                readonly: readonly}}
+                on:focus={focus}
+                on:blur={blur}
+                tabindex="0">
+        {#if val}
+            {val}
+        {:else}
+            &ZeroWidthSpace;
+        {/if}
+    </span>
+    
+     
+
+    <!--
         {#if val || fieldPlaceholder}
             <span   class:text-red-500={invalid}
                     bind:this={fieldElement}
@@ -126,5 +184,7 @@
                 {placeholder}
             </span>
         {/if}
+    -->
+        
 </span>
 

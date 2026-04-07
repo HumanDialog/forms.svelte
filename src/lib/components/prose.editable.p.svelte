@@ -41,7 +41,7 @@
 <!-- svelte-ignore a11y-no-noninteractive-tabindex-->
 
 <p class="cursor-text {userClass}"
-    on:click={onClick}>
+    >
     <EditableSpan bind:this={spanElement}
         {tooltip}
         {val}

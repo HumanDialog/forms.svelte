@@ -20,6 +20,7 @@
             wholeAppReloader, reloadWholeApp,
             alerts, removeAlert, showFABAlways, dont_hide_FAB_when_on_screen_keyboard_visible} from './stores.js'
     import {pushChanges} from './updates.js'
+    import {pauseKicksObservers, restoreKicksObservers} from './kicks.js'
 
     //import { AuthorizedView} from '@humandialog/auth.svelte'
     import { handleSelect, isDeviceSmallerThan, isOnScreenKeyboardVisible, navGetMode, removeAt, UI, NAV_MODE_SIDEBAR, navAutoHide, navIsVisible } from './utils'
@@ -310,8 +311,15 @@
 
     function onVisibilityChanged()
     {
-        console.log('#jcache onVisibilityChanged')
-        pushChanges();
+        if(document.hidden)
+        {
+            pushChanges()
+            pauseKicksObservers()
+        }
+        else
+        {
+            restoreKicksObservers()
+        }
     }
 
     function onSelectionChanged(e)

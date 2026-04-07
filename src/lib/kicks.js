@@ -12,9 +12,6 @@ let lastKicks = new Map();
 
 export function registerKicksObserver(labels, interval, callback)
 {
-    // temporary disabled
-    return 0;
-
     let lbs = []
     if(labels && Array.isArray(labels))
         lbs = labels
@@ -37,9 +34,6 @@ export function registerKicksObserver(labels, interval, callback)
 
 export function unregisterKicksObserver(regId)
 {
-    // temporary disabled
-    return
-
     const fIdx = registeredObservers.findIndex( (o) => o.id == regId)
     if(fIdx >=0)
         registeredObservers.splice(fIdx, 1)
@@ -103,28 +97,35 @@ function updateTimer()
         checkKicks(false)
 }
 
-function pauseTimer()
+export function pauseKicksObservers()
 {
     if(timerId > 0)
     {
         clearTimeout(timerId)
         timerId = 0
-        paused = true
     }
+
+    paused = true
+    return paused
 }
 
-function restoreTimer()
+export function restoreKicksObservers()
 {
     if(paused && minInterval)
     {
-        timerId = setTimeout(timerHandler, minInterval*1000)
-        paused = false
+        if(!timerId)
+            timerId = setTimeout(timerHandler, minInterval*1000)
     }
+
+    paused = false
 }
 
 
 function checkKicks(informObservers=true)
 {
+    if(paused)
+        return;
+
     const s = get(session)
     const appId = s.appId ? s.appId : 'octopus'
     const tid = s.tid ? s.tid : 'octopus/13'
