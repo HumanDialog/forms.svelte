@@ -20,6 +20,7 @@
         } from '$lib'
     import {FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaList, FaPen, FaArchive, FaChevronLeft, FaChevronRight} from 'svelte-icons/fa'
     import {location, pop, push, querystring, link} from 'svelte-spa-router'
+    import { STATUS_ACTIVE, STATUS_ARCHIVED, STATUS_DELETED } from './consts';
 
     export let params = {}
 
@@ -127,6 +128,31 @@
         showMenu(rect, templates_menu)
     }
 
+    const new_template_list_op = (list=null) => {
+        return {
+            mricon: 'notebook',
+            caption: '_; New template; Nueva plantilla; Nowy szablon',
+            action: () => { new_element_creator=new_template_list_creator; listComponent.addRowAfter(list) },
+            fab: 'M01',
+            tbr: 'A'
+        }
+    }
+
+
+    const new_template_list_creator = async (attribs) => {
+        
+        const res = await reef.post(`${self.$ref}/CreateTemplateList`,
+                            {
+                                name: attribs.Name,
+                                order: attribs.Order,
+                                summary: attribs.Summary
+                            });
+        if(!res)
+            return null;
+        else
+            return res.TaskList;
+    } 
+
     const edit_list_op = (list) => {
         return {
                     caption: '_; Edit...; Editar...; Edytuj...',
@@ -211,40 +237,7 @@
             }
     }
 
-    const move_to_archive_op = (list) => {
-        return {
-                caption: '_; Archive; Archivar; Archiwizuj',
-                action: () => move_to_archive(list)
-        }
-    }
-
-
-    const move_to_trash_op = (list) => {
-        return {
-                caption: '_; Delete; Eliminar; Usuń',
-                action: () => move_to_trash(list)
-        }
-    }
-
-    async function move_to_archive(list)
-    {
-        if(!list)
-            return;
-
-        await reef.get(`${list.$ref}/MoveMeToArchive`)
-        
-        await reloadLists(listComponent.SELECT_NEXT)
-    }
-
-    async function move_to_trash(list)
-    {
-        if(!list)
-            return;
-
-        await reef.get(`${list.$ref}/MoveMeToTrash`)
-        
-        await reloadLists(listComponent.SELECT_NEXT)
-    }
+    
 
     const save_list_as_template_op = (list) => {
         return {
@@ -258,37 +251,38 @@
         if(!list)
             return;
 
-        const res = await reef.get(`${list.$ref}/SaveAsTemplate`)
-        const template = res.TaskList
+        const href = await reef.get(`${list.$ref}/SaveAsTemplate`)
+        if(href)
+            push(href)
     }
 
     const show_active_elements = (icon, href, fab='S01') => {
         return {
-            mricon: icon,
+            //mricon: icon,
             caption: '_; Show active; Mostrar los activos; Pokaż aktywne',
             action: () => push(href),
-            fab: fab,
-            tbr: 'C'
+            //fab: fab,
+            //tbr: 'C'
         }
     }
 
     const show_archived_elements = (href, fab='S02') => {
         return {
-            mricon: 'archive',
+            //mricon: 'archive',
             caption: '_; Show archived; Mostrar archivos; Pokaż archiwalne',
             action: () => push(href),
-            fab: fab,
-            tbr: 'C'
+            //fab: fab,
+            //tbr: 'C'
         }
     }
 
     const show_deleted_elements = (href, fab='S01') => {
         return {
-            mricon: 'trash',
+            //mricon: 'trash',
             caption: '_; Show deleted; Mostrar los eliminados; Pokaż usunięte',
             action: () => push(href),
-            fab: fab,
-            tbr: 'C'
+            //fab: fab,
+            //tbr: 'C'
         }
     }
 
@@ -408,6 +402,41 @@
                 }
     }
 
+    const move_project_to_archive_op = (list) => {
+        return {
+                caption: '_; Archive project; Archivar proyecto; Archiwizuj projekt',
+                action: () => move_me_to_archive(),
+                disabledFunc: () => self ? self.Status != STATUS_ACTIVE : false
+        }
+    }
+
+
+    const move_project_to_trash_op = (list) => {
+        return {
+                caption: '_; Delete project; Eliminar proyecto; Usuń projekt',
+                action: () => move_me_to_trash(),
+                disabledFunc: () => self ? self.Status == STATUS_DELETED : false
+        }
+    }
+
+    async function move_me_to_archive()
+    {
+        if(!self)
+            return;
+
+        await reef.get(`${self.$ref}/MoveMeToArchive`)   
+        await reloadLists(listComponent.SELECT_NEXT)
+    }
+
+    async function move_me_to_trash()
+    {
+        if(!self)
+            return;
+
+        await reef.get(`${self.$ref}/MoveMeToTrash`)
+        await reloadLists(listComponent.SELECT_NEXT)
+    }
+
     const show_active_projects_from_archive_op = () => show_active_elements('building', '/allprojects', 'S02')
     const show_active_projects_from_trash_op = () => show_active_elements('building', '/allprojects', 'S01')
 
@@ -484,7 +513,7 @@
 
     const group_expressions = ['Id', '$type', '$ref', 'Name'];
     const user_expressions = ['Id', '$type', '$ref', 'Name'];
-    const project_expressions = ['Id','$type', '$ref', 'Title', 'Summary', 'Order', 'href', '$ver'];
+    const project_expressions = ['Id','$type', '$ref', 'Title', 'Summary', 'Order', 'Status', 'href', '$ver'];
     const task_list_expressions = ['Id', '$type', 'Name', 'Summary', 'Order', 'href', '$ref', 'IsSubscribed', '$ver'];
 
     const task_lists_grid_definition = {
@@ -533,7 +562,7 @@
                     },
                     element:{
                         new: [new_list_op, new_list_from_template_op],
-                        file: [edit_list_op, move_top_op, move_up_op, move_down_op, subscribe_list_op, separator_op, save_list_as_template_op, move_to_archive_op, move_to_trash_op],
+                        file: [edit_list_op, move_top_op, move_up_op, move_down_op],
                         view: [show_group_archived_lists_op, show_group_deleted_lists_op]
                     }
                 },
@@ -552,7 +581,7 @@
                         view: [show_group_lists_from_archive_op, show_group_deleted_lists_op]
                     },
                     element:{
-                        file: [restore_from_archive_op, move_to_trash_op],
+                        file: [restore_from_archive_op],
                         view: [show_group_lists_from_archive_op, show_group_deleted_lists_op]
                     }
                 },
@@ -592,7 +621,7 @@
                     },
                     element:{
                         new: [new_list_op, new_list_from_template_op],
-                        file: [edit_list_op, move_top_op, move_up_op, move_down_op, subscribe_list_op, separator_op, save_list_as_template_op, move_to_archive_op, move_to_trash_op],
+                        file: [edit_list_op, move_top_op, move_up_op, move_down_op],
                         view: [show_my_archived_lists_op, show_my_deleted_lists_op]
                     }
                 },
@@ -611,7 +640,7 @@
                         view: [show_my_lists_from_archive_op, show_my_deleted_lists_op]
                     },
                     element:{
-                        file: [restore_from_archive_op, move_to_trash_op],
+                        file: [restore_from_archive_op],
                         view: [show_my_lists_from_archive_op, show_my_deleted_lists_op]
                     }
                 },
@@ -646,10 +675,12 @@
                 element_expressions: task_list_expressions,
                 operations:{
                     page:{
+                        new: [new_template_list_op],
                         view: [show_group_archived_lists_op, show_group_deleted_lists_op]
                     },
                     element:{
-                        file: [edit_list_op, move_top_op, move_up_op, move_down_op, separator_op, move_to_archive_op, move_to_trash_op],
+                        new: [new_template_list_op],
+                        file: [edit_list_op, move_top_op, move_up_op, move_down_op],
                         view: [show_group_archived_lists_op, show_group_deleted_lists_op]
                     }
                 },
@@ -670,7 +701,7 @@
                     },
                     element:{
                         new: [new_project_op],
-                        file: [edit_project_op, move_top_op, move_up_op, move_down_op, separator_op, move_to_archive_op, move_to_trash_op],
+                        file: [edit_project_op, move_top_op, move_up_op, move_down_op],
                         view: [show_archived_projects_op, show_deleted_projects_op]
                     }
                 },
@@ -689,7 +720,7 @@
                         view: [show_active_projects_from_archive_op, show_deleted_projects_op]
                     },
                     element:{
-                        file: [restore_from_archive_op, move_to_trash_op],
+                        file: [restore_from_archive_op],
                         view: [show_active_projects_from_archive_op, show_deleted_projects_op]
                     }
                 },
@@ -724,13 +755,13 @@
                 element_expressions: task_list_expressions,
                 operations:{
                     page:{
-                        new: [new_list_op, new_list_from_template_op, separator_A_op, edit_page_op],
-                        view: [show_project_archived_lists_op, show_project_deleted_lists_op]
+                        new: [new_list_op, new_list_from_template_op],
+                        view: [edit_page_op, move_project_to_archive_op, move_project_to_trash_op, show_project_archived_lists_op, show_project_deleted_lists_op]
                     },
                     element:{
                         new: [new_list_op, new_list_from_template_op],
-                        file: [edit_list_op, move_top_op, move_up_op, move_down_op, subscribe_list_op, separator_op, save_list_as_template_op, move_to_archive_op, move_to_trash_op],
-                        view: [show_project_archived_lists_op, show_project_deleted_lists_op]
+                        file: [edit_list_op, move_top_op, move_up_op, move_down_op],
+                        view: [move_project_to_archive_op, move_project_to_trash_op, show_project_archived_lists_op, show_project_deleted_lists_op]
                     }
                 },
                 list_properties: task_lists_grid_definition,
@@ -783,7 +814,7 @@
                         view: [show_project_active_lists_from_archive_op, show_project_deleted_lists_op]
                     },
                     element:{
-                        file: [restore_from_archive_op, move_to_trash_op],
+                        file: [restore_from_archive_op],
                         view: [show_project_active_lists_from_archive_op, show_project_deleted_lists_op]
                     }
                 },
@@ -1085,15 +1116,6 @@
 
 
             </List>
-
-            <!--div class="ml-3 mt-20 mb-10">
-                <a  href={`/alllists?archived`}
-                    class="hover:underline"
-                    use:link>
-                        _; Show archived lists; Mostrar listas archivadas; Pokaż zarchiwizowane listy
-                        <div class="inline-block mt-1.5 w-3 h-3"><FaChevronRight/></div>
-                </a>
-            </div-->
 
             {#if context && context.supplementary && context.supplementary.a}
                 <p class="mt-20 mb-10">

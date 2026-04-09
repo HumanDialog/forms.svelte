@@ -24,6 +24,7 @@
         newGroupModalVisible = false;
     }
 
+    let creating_semaphore = false
     async function onNewGroupOK()
     {
         const appId = $session.appId
@@ -38,11 +39,16 @@
             return onNewGroupCancel()
         }
 
+        if(creating_semaphore)
+            return;
+
+            creating_semaphore = true
+
             const body = {
                 app_id: $session.appId,
                 tenant: $session.configuration.tenant,
-                org_name: newGroupParams.name,
-                idempotency_token: newGroupIdempotencyToken
+                org_name: newGroupParams.name
+           //     idempotency_token: newGroupIdempotencyToken
             }
 
             const res = await reef.fetch(  "/dev/create-group-for-me",
@@ -64,6 +70,8 @@
                 console.error(result.error);
                 onErrorShowAlert(result.error)
             }
+
+            creating_semaphore = false
 
         newGroupParams.name = '';
         newGroupModalVisible = false;

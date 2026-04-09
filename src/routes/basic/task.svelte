@@ -48,6 +48,7 @@
 	import NoteProperties from './properties.note.svelte'
     import TaskProperties from './properties.task.svelte'
     import TaskDescriptionNote from './task.description.svelte'
+	import { STATUS_ACTIVE, STATUS_ARCHIVED, STATUS_DELETED } from './consts';
 
     let taskRef = ''
     let task = null;
@@ -129,7 +130,7 @@
                                 {
                                     Id: 1,
                                     Association: '',
-                                    Expressions:['Id', 'Index', 'Title','Summary', 'Description', 'DueDate', 'Tags', 'State', 'AttachedFiles', 'GetCanonicalPath', '$ref', '$type', '$acc', '$ver', 'href', 'icon'],
+                                    Expressions:['Id', 'Index', 'Title','Summary', 'Description', 'DueDate', 'Tags', 'State', 'Status', 'AttachedFiles', 'GetCanonicalPath', '$ref', '$type', '$acc', '$ver', 'href', 'icon'],
                                     SubTree:[
                                         {
                                             Id: 10,
@@ -789,6 +790,8 @@
                                 }
                             ]
                         },
+                        move_to_archive_op,
+                        move_to_trash_op,
                         {
                             caption: '_; Properties; Propiedades; Właściwości',
                             action: (btt, rect)=> runElementProperties(btt, rect, task, 'Task')
@@ -799,6 +802,32 @@
             ]
         }
     }
+
+    const move_to_archive_op = {
+        caption: '_; Archive; Archivar; Archiwizuj',
+        action: () => move_to_archive(),
+        disabledFunc: () => task ? task.Status != STATUS_ACTIVE : false
+    }
+
+
+    const move_to_trash_op = {
+        caption: '_; Delete; Eliminar; Usuń',
+        action: () => move_to_trash(),
+        disabledFunc: () => task ? task.Status == STATUS_DELETED : false
+    }
+
+    async function move_to_archive()
+    {
+        await reef.get(`${task.$ref}/MoveMeToArchive`)
+        await reloadData();
+    }
+
+    async function move_to_trash()
+    {
+        await reef.get(`${task.$ref}/MoveMeToTrash`)
+        await reloadData();
+    }
+
 
 
     function getPageOperationsWithFormattingTools()

@@ -54,6 +54,7 @@
     import PopupExplorer from './popup.explorer.svelte'
     import {fetchComposedClipboard4Editor, fetchComposedClipboard4Note, transformClipboardToJSONReferences, pushBrowserRecentElements, setBrowserRecentElement, getBrowserRecentElements, getBrowserRecentElements4Note} from './basket.utils'
     import {getElementIcon} from './icons'
+    import { STATUS_ACTIVE, STATUS_ARCHIVED, STATUS_DELETED } from './consts';
 
     import FileProperties from './properties.file.svelte'
 	import NoteProperties from './properties.note.svelte'
@@ -134,6 +135,7 @@
                                                     'AttachedFiles',
                                                     'Kind',
                                                     'State',
+                                                    'Status',
                                                     'IsPinned',
                                                     'GetCanonicalPath',
                                                     '$ref',
@@ -159,7 +161,7 @@
                                             Filter: 'Status=STATUS_ACTIVE',
                                             Expressions:['$ref', 'InTitle', 'InSummary', 'InHRef', 'InIcon', 'IsCanonical', '$type']
                                         },
-                                        {
+                                    {
                                             Id: 14,
                                             Association: 'InTasks',
                                             Filter: 'Status=STATUS_ACTIVE',
@@ -436,6 +438,10 @@
             operations.push({separator: true})
 
         operations.push(pinOp())
+        
+        operations.push(move_to_archive_op)
+        operations.push(move_to_trash_op)
+
         operations.push({
             caption: '_; Properties; Propiedades; Właściwości',
             action: (btt, rect)=> runElementProperties(btt, rect, note, 'Note')
@@ -453,6 +459,32 @@
             ]
         }
     }
+
+    const move_to_archive_op = {
+        caption: '_; Archive; Archivar; Archiwizuj',
+        action: () => move_to_archive(),
+        disabledFunc: () => note ? note.Status != STATUS_ACTIVE : false
+    }
+
+
+    const move_to_trash_op = {
+        caption: '_; Delete; Eliminar; Usuń',
+        action: () => move_to_trash(),
+        disabledFunc: () => note ? note.Status == STATUS_DELETED : false
+    }
+
+    async function move_to_archive()
+    {
+        await reef.get(`${note.$ref}/MoveMeToArchive`)
+        await reloadData();
+    }
+
+    async function move_to_trash()
+    {
+        await reef.get(`${note.$ref}/MoveMeToTrash`)
+        await reloadData();
+    }
+
 
     function pinOp()
     {

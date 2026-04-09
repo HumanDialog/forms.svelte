@@ -546,7 +546,7 @@
                                 client_id: $session.configuration.client_id,
                                 redirect_uri: `${window.location.origin}/#/auth/cb`,
                                 state: `${window.location.origin}/#/auth/signin`,
-                                idempotency_token: inviteUserIdempotencyToken,
+                            //    idempotency_token: inviteUserIdempotencyToken,
                                 silently: new_user.silently ?? false,
                                 accepted: new_user.accepted ?? false,
                                 set:
@@ -632,15 +632,23 @@
         removeModal.show()
     }
 
+    let request_semaphore = false
+
     async function removeUser()
     {
         if(!userToRemove)
             return;
 
+        if(request_semaphore)
+            return
+
+        request_semaphore = true
+
         let email = userToRemove[emailAttrib];
         try{
 
-            const res = await reef.fetch(`/json/anyv/sys/kick_out_user?email=${email}&idempotency_token=${removeUserIdempotencyToken}`)
+            //const res = await reef.fetch(`/json/anyv/sys/kick_out_user?email=${email}&idempotency_token=${removeUserIdempotencyToken}`)
+            const res = await reef.fetch(`/json/anyv/sys/kick_out_user?email=${email}`)
             removeModal.hide();
 
             if(res.ok)
@@ -660,6 +668,8 @@
         {
             onErrorShowAlert(err);
         }
+
+        request_semaphore = false
     }
 
     let deleteAccountModal;
@@ -676,9 +686,15 @@
         if(!my_email)
             return;
 
+        if(request_semaphore)
+            return;
+
+        request_semaphore = true
+
         try{
 
-            const res = await reef.fetch(`json/anyv/sys/unregister_user?email=${my_email}&idempotency_token=${deleteAccountIdempotencyToken}`)
+            //const res = await reef.fetch(`json/anyv/sys/unregister_user?email=${my_email}&idempotency_token=${deleteAccountIdempotencyToken}`)
+            const res = await reef.fetch(`json/anyv/sys/unregister_user?email=${my_email}`)
             deleteAccountModal.hide();
 
             if(res.ok)
@@ -699,6 +715,8 @@
             console.error(err)
             onErrorShowAlert(err);
         }
+
+        request_semaphore = false
     }
 
     async function askToAddAgain(user)
@@ -706,6 +724,11 @@
         let email = user[emailAttrib];
         let name = user[nameAttrib] ?? '';
         let idempotencyToken = randomString(8)
+
+        if(request_semaphore)
+            return
+
+        request_semaphore = true
 
         let accRole = ''
         if(showAccessRoles && access_roles.length > 0)
@@ -722,7 +745,7 @@
                                 client_id: $session.configuration.client_id,
                                 redirect_uri: `${window.location.origin}/#/auth/cb`,
                                 state: `${window.location.origin}/#/auth/signin`,
-                                idempotency_token: idempotencyToken,
+                           //     idempotency_token: idempotencyToken,
                                 silently: true,
                                 accepted: true,
                                 set:
@@ -749,6 +772,8 @@
         {
             onErrorShowAlert(err);
         }
+
+        request_semaphore = false
     }
 
    function getHRefFunc()

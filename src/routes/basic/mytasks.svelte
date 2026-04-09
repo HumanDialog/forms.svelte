@@ -391,10 +391,7 @@
                             tbr: 'A'
                         },
 
-                         {
-                            caption: '_; Archive; Archivar; Zarchiwizuj',
-                            action: (f) => askToArchive(task)
-                        }, */
+                        
                         {
                             caption: '_; Delete; Eliminar; Usuń',
                             action: (f) => moveToTrash(task),
@@ -403,6 +400,8 @@
                             caption: '_; Archive; Archivar; Archiwizuj',
                             action: (f) => moveToArchive(task),
                         },
+                         */
+                        
                         {
                             caption: '_; Properties; Propiedades; Właściwości',
                             action: (btt, rect)=> runElementProperties(btt, rect, task, 'Task')

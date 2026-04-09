@@ -188,6 +188,8 @@ Aby zaakceptować zaproszenie, kliknij poniższy link:`
     let subjectElement
     let contentElement
 
+    let creating_semaphore = false
+
     async function invite(e)
     {
         let isValid = true
@@ -202,6 +204,11 @@ Aby zaakceptować zaproszenie, kliknij poniższy link:`
         }
         else
         {
+            if(creating_semaphore)
+                return
+
+            creating_semaphore = true
+
             email = emailElement.getValue().trim()
             name = nameElement.getValue().trim()
             subject = subjectElement.getValue().trim()
@@ -233,7 +240,7 @@ Aby zaakceptować zaproszenie, kliknij poniższy link:`
                                 redirect_uri: redirect_uri,
                                 state: state,
                                 own_invitation_page: own_invitation_page,
-                                idempotency_token: inviteUserIdempotencyToken,
+                            //    idempotency_token: inviteUserIdempotencyToken,
                                 silently: silently,
                                 accepted: accepted,
                                 subject: subject,
@@ -265,6 +272,8 @@ Aby zaakceptować zaproszenie, kliknij poniższy link:`
                 onErrorShowAlert(err);
             }
 
+            creating_semaphore = false
+
 
             rootDialog.hide()
         }
@@ -284,6 +293,11 @@ Aby zaakceptować zaproszenie, kliknij poniższy link:`
         }
         else
         {
+            if(creating_semaphore)
+                return
+
+            creating_semaphore = true
+
             email = emailElement.getValue().trim()
             name = nameElement.getValue().trim()
             subject = subjectElement.getValue().trim()
@@ -315,7 +329,7 @@ Aby zaakceptować zaproszenie, kliknij poniższy link:`
                                 redirect_uri: redirect_uri,
                                 state: state,
                                 own_invitation_page: own_invitation_page,
-                                idempotency_token: inviteUserIdempotencyToken,
+                            //    idempotency_token: inviteUserIdempotencyToken,
                                 silently: true,
                                 accepted: accepted,
                                 set:
@@ -371,6 +385,8 @@ Aby zaakceptować zaproszenie, kliknij poniższy link:`
             {
                 onErrorShowAlert(err);
             }
+
+            creating_semaphore = false
 
 
             rootDialog.hide()

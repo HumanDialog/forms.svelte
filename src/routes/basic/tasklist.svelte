@@ -26,6 +26,7 @@
     import PopupExplorer from './popup.explorer.svelte'
 	import { fetchComposedClipboard4TaskList, transformClipboardToJSONReferences, setBrowserRecentElement, getBrowserRecentElements4TaskList } from './basket.utils.js';
     import TaskProperties from './properties.task.svelte'
+    import { STATUS_ACTIVE, STATUS_ARCHIVED, STATUS_DELETED, STATUS_TEMPLATE } from './consts';
 
     export let params = {}
 
@@ -155,7 +156,7 @@
                                     {
                                         Id: 1,
                                         Association: '',
-                                        Expressions:['Id','Name', 'Summary', 'href', 'GetCanonicalPath', 'IsSubscribed', '$type'],
+                                        Expressions:['Id','Name', 'Summary', 'href', 'Status', 'GetCanonicalPath', 'IsSubscribed', '$type', '$ref'],
                                         SubTree:
                                         [
                                             {
@@ -421,7 +422,11 @@
                             action: changeListKind,
                         //    fab: 'S02',
                         //    tbr: 'C'
-                        }
+                        },
+                        save_as_template_op,
+                        repeat_list_op,
+                        move_to_archive_op,
+                        move_to_trash_op
                     ]
                 }
             ]
@@ -429,6 +434,66 @@
 
 
 
+    }
+
+    const save_as_template_op = {
+        caption: '_; Save as a template; Guardar como plantilla; Zapisz jako szablon',
+        action: () => save_list_as_template()
+    }
+
+    async function save_list_as_template()
+    {
+        const href = await reef.get(`${currentList.$ref}/SaveAsTemplate`)
+        if(href)
+            push(href)
+    }
+
+    const repeat_list_op = {
+        caption: '_; Repeat list; Repite la lista; Powtórz listę',
+        action: () => repeat_list()
+    }
+
+    async function repeat_list()
+    {
+        const href = await reef.get(`${currentList.$ref}/RepeatList`)
+        if(href)
+        {
+            push(href)
+
+            if(UI.navigator)
+                UI.navigator.refresh();
+        }
+    }
+
+    const move_to_archive_op = {
+        caption: '_; Archive; Archivar; Archiwizuj',
+        action: () => move_to_archive(),
+        disabledFunc: () => currentList ? (currentList.Status == STATUS_ARCHIVED) || (currentList.Status == STATUS_DELETED) : false
+    }
+
+
+    const move_to_trash_op = {
+        caption: '_; Delete; Eliminar; Usuń',
+        action: () => move_to_trash(),
+        disabledFunc: () => currentList ? currentList.Status == STATUS_DELETED : false
+    }
+
+    async function move_to_archive()
+    {
+        await reef.get(`${currentList.$ref}/MoveMeToArchive`)
+        await reloadTasks(listComponent.KEEP_SELECTION)
+
+        if(UI.navigator)
+            UI.navigator.refresh();
+    }
+
+    async function move_to_trash()
+    {
+        await reef.get(`${currentList.$ref}/MoveMeToTrash`)
+        await reloadTasks(listComponent.KEEP_SELECTION)
+
+        if(UI.navigator)
+            UI.navigator.refresh();
     }
 
     async function pasteRecentClipboardElement(btt, aroundRect)
@@ -721,7 +786,11 @@
                         {
                             caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
                             action: changeListKind,
-                        }
+                        },
+                        save_as_template_op,
+                        repeat_list_op,
+                        //move_to_archive_op,
+                        //move_to_trash_op
                     ]
                 }
             ]

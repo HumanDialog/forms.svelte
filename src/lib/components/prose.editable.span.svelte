@@ -113,6 +113,7 @@
     {
         //console.log('span focus')
         show_placeholder = false
+    
     }
 
     function blur(e)
@@ -140,7 +141,7 @@
         </span>
     {/if}
 
-     <span  class="w-full" 
+     <span  class="w-full inline-block" 
             class:text-red-500={invalid}
             bind:this={fieldElement}
             use:editable={{

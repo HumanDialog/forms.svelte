@@ -1103,6 +1103,8 @@
                         ... !canPin ? [] : [pinOp()],
                         enable_multiselection_operation,
                         refresh_operation,
+                        move_whole_folder_to_archive_op,
+                        move_whole_folder_to_trash_op,
                         properties_operation
                     ]
                 }
@@ -1173,7 +1175,9 @@
                         toggle_select_all_operation,
                        // ... !canPin ? [] : [pinOp()],
                         disable_multiselection_operation,
-                        refresh_operation
+                        refresh_operation,
+                        move_whole_folder_to_archive_op,
+                        move_whole_folder_to_trash_op,
                     ]
                 }
             ]
@@ -1212,6 +1216,30 @@
             return trashPageOperations();
         }
     }
+
+    const move_whole_folder_to_archive_op = {
+            caption: '_; Archive folder; Archivar carpeta; Archiwizuj folder',
+            action: () => move_me_to_archive()
+    }
+
+
+    const move_whole_folder_to_trash_op =  {
+            caption: '_; Delete folder; Eliminar carpeta; Usuń folder',
+            action: () => move_me_to_trash()
+    }
+
+    async function move_me_to_archive()
+    {
+        await reef.get(`${contextItem.$ref}/MoveMeToArchive`)   
+        await fetchData();
+    }
+
+    async function move_me_to_trash()
+    {
+        await reef.get(`${contextItem.$ref}/MoveMeToTrash`)
+        await fetchData();
+    }
+
 
     async function refreshViewAfterAttachingFromBasket(f)
     {
@@ -1336,11 +1364,11 @@
         {
             linkOperations = [
                 {
-                    caption: '_; Delete; Eliminar; Usuń',
+                    caption: '_; Delete selected item; Eliminar el elemento seleccionado; Usuń zaznaczony element',
                     action: (f) => moveToTrash(element, kind)
                 },
                 {
-                    caption: '_; Archive; Archivar; Archiwizuj',
+                    caption: '_; Archive selected item; Archivar el elemento seleccionado; Archiwizuj zaznaczony element',
                     action: (f) => moveToArchive(element, kind)
                 }
             ]
@@ -1472,7 +1500,9 @@
                         insertOperation,
                         ... !canPin ? [] : [pinOp()],
                         enable_multiselection_operation,
-                        refresh_operation
+                        refresh_operation,
+                        move_whole_folder_to_archive_op,
+                        move_whole_folder_to_trash_op
                         ]
                     }
                 ]
@@ -1551,11 +1581,11 @@
                                 action: (f) => dettachElementMulti(items),
                             },
                             {
-                                caption: '_; Delete; Eliminar; Usuń',
+                                caption: '_; Delete selected items; Eliminar los elementos seleccionados; Usuń zaznaczone elementy',
                                 action: (f) => moveToTrash(items, 'multi'),
                             },
                             {
-                                caption: '_; Archive; Archivar; Archiwizuj',
+                                caption: '_; Archive selected items; Archivar los elementos seleccionados; Archiwizuj zaznaczone elementy',
                                 action: (f) => moveToArchive(items, 'multi'),
                             }
                         ]
@@ -1566,7 +1596,9 @@
                         operations: [
                            // ... !canPin ? [] : [pinOp()],
                             disable_multiselection_operation,
-                            refresh_operation
+                            refresh_operation,
+                            move_whole_folder_to_archive_op,
+                            move_whole_folder_to_trash_op,
                         ]
                     }
                 ]
@@ -1781,7 +1813,7 @@
                                 action: (btt, rect)=> restoreArchivedElement(element, kind),
                             },
                             {
-                                caption: '_; Delete; Eliminar; Usuń',
+                                caption: '_; Delete selected item; Eliminar el elemento seleccionado; Usuń zaznaczony element',
                                 action: (f) => askToDelete(element, kind)
                             },
                             {
@@ -1896,7 +1928,7 @@
                                 action: (btt, rect)=> restoreArchivedElement(items, 'multi'),
                             },
                             {
-                                caption: '_; Delete; Eliminar; Usuń',
+                                caption: '_; Delete selected items; Eliminar los elementos seleccionados; Usuń zaznaczone elementy',
                                 action: (f) => askToDelete(items, 'multi'),
                             }
                         ]

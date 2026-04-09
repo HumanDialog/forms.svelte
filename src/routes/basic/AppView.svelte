@@ -593,7 +593,7 @@
         {
             const hashPosition = window.location.href.indexOf('#/')
             let location = (hashPosition > -1) ? window.location.href.substr(hashPosition + 1) : '/'
-            if(location.length > 1)
+            if((location.length > 1) && (!location.startsWith('/auth/')))
             {
                 const state = {
                     path: location,

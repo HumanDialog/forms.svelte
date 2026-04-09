@@ -194,7 +194,7 @@
                                 }
                             ]
                         },
-                        {
+                    /*    {
                             caption: '_; Delete; Eliminar; Usuń',
                             action: (f) => moveToTrash(list)
                         },
@@ -202,7 +202,7 @@
                             caption: '_; Archive; Archivar; Archiwizuj',
                             action: (f) => moveToArchive(list)
                         },
-                        {
+                    */    {
                             caption: '_; Properties; Propiedades; Właściwości',
                             action: (btt, rect) => runElementProperties(btt, rect, list, 'Note')
                         }

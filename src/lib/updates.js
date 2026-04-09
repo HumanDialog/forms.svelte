@@ -183,6 +183,9 @@ export async function pushChangesImmediately()
     update_request_ticket.set(ticket)
 }
 
+
+let flush_changes_semaphore = false
+
 async function flushChanges(ticket)
 {
     if(ticket != last_update_ticket)
@@ -190,6 +193,9 @@ async function flushChanges(ticket)
         last_update_ticket = ticket;
 
         if(!modified_items_map.size)
+            return;
+
+        if(flush_changes_semaphore)
             return;
 
         let changes = [];
@@ -207,6 +213,8 @@ async function flushChanges(ticket)
             modified_items_map.clear();
         //}
         */
+
+        flush_changes_semaphore = true
 
         let path = reef.correct_path_with_api_version_if_needed('/Push')
 
@@ -226,7 +234,7 @@ async function flushChanges(ticket)
                 unsavedModificationsTicket.set( get(unsavedModificationsTicket) + 1 )
 
                 afterPushCallbacks.forEach( cb => cb())
-                afterPushCallbacks = []
+                afterPushCallbacks = [] 
             }
             else
             {
@@ -276,6 +284,8 @@ async function flushChanges(ticket)
             console.error(err);
             onErrorShowAlert(err)
         }
+
+        flush_changes_semaphore = false
 
     }
 } 

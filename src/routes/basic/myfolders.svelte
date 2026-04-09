@@ -227,7 +227,7 @@
                             fab:'M04',
                             tbr:'A'
                         },
-                        {
+                    /*    {
                             caption: '_; Delete; Eliminar; Usuń',
                             action: (f) => moveToTrash(folder),
                         },
@@ -235,7 +235,7 @@
                             caption: '_; Archive; Archivar; Archiwizuj',
                             action: (f) => moveToArchive(folder),
                         },
-                        {
+                    */    {
                             caption: '_; Properties; Propiedades; Właściwości',
                             action: (btt, rect)=> runElementProperties(btt, rect, folder, 'Folder')
                         }

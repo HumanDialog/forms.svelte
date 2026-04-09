@@ -149,6 +149,7 @@
                     compact={true}
                     s="sm"
                     inContext="props"
+                    changed={(k,n) => { properties_no = count_properties() }}
                     bind:this={propElements[idx]}/>
             {:else if prop.type == rList_property_type.Combo && notEmpty}
                 <Combo
