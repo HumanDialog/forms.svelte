@@ -176,7 +176,7 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-interactions -->
 
-{#if tasks && tasks.length > 0}
+{#if tasks}
 
 <!------------------------------------------------------------------------------------------------->
 <!------------------------------------------------------------------------------------------------->
@@ -200,12 +200,14 @@
                 <p>{list.Summary}</p>
     {/if}
 
-    {#each tasks as task}
-        <Task   {task}
-                {getAllTags}
-                {onUpdateAllTags}
-                {users}/>
-    {/each}
+    {#if tasks.length > 0}
+        {#each tasks as task}
+            <Task   {task}
+                    {getAllTags}
+                    {onUpdateAllTags}
+                    {users}/>
+        {/each}
+    {/if}
 </div>
 
 
@@ -238,12 +240,14 @@
                 </p>
     {/if}
 
-    {#each tasks as task}
-        <Task   {task}
-                {getAllTags}
-                {onUpdateAllTags}
-                {users}/>
-    {/each}
+    {#if tasks.length > 0}
+        {#each tasks as task}
+            <Task   {task}
+                    {getAllTags}
+                    {onUpdateAllTags}
+                    {users}/>
+        {/each}
+    {/if}
 </div>
 {/if}
 {/if}

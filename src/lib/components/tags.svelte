@@ -338,7 +338,7 @@
 </script>
 
 {#if typo}
-<span> #takshere# </span>
+<span> &nbsp; </span>
 {:else}
 
 <section class="{userClass} flex flex-row {gap} flex-wrap mr-1 sm:mr-0" bind:this={rootElement}>

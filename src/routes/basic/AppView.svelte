@@ -1,7 +1,7 @@
 <script>
     import {reef, session, Authorized, NotAuthorized} from '@humandialog/auth.svelte'
 	import {Layout, onErrorShowAlert, Spinner, i18n, Console, registerKicksObserver, unregisterKicksObserver,
-        getGroupsMenu
+        getGroupsMenu, navAutoHide
     } from '$lib';
     import Sidebar from './sidebar.svelte'
 
@@ -44,10 +44,6 @@
     import TilosContact from './tilos/contact.svelte'
     import Unauthorized from './tilos/unauthorized.access.svelte';
     import TaskLists from './tasklists.svelte'
-    import Projects from './projects.svelte'
-    import AllTaskLists from './tasklists.all.svelte'
-    import MyTaskLists from './tasklists.my.svelte'
-    import TaskListsTemplates from './tasklists.templates.svelte'
     import GroupFolders from './folders.group.svelte'
     import GeneralChannels from './channels.general.svelte'
     import PrivateChannels from './channels.private.svelte'
@@ -333,7 +329,7 @@
                          //   caption: '_; Profile; Perfil; Profil',
                             captionFunc: () => '_; Profile; Perfil; Profil',
                             mricon: 'user',
-                            action: (f) => { push('/profile')},
+                            action: (f) => { navAutoHide(); push('/profile')},
                             condition: () => $session.isActive
                         },
                         {
@@ -348,7 +344,7 @@
                             captionFunc: () => '_; Members; Miembros; Członkowie',
                             mricon: 'users',
                             icon: FaUsersCog,
-                            action: (f) => { push(`/members`) },
+                            action: (f) => { navAutoHide(); push(`/members`) },
                             condition: () => $session.authAccessGroup() != 0
                         },
                       /*  {
