@@ -319,7 +319,7 @@
                             caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
                             hideToolbarCaption: true,
                             mricon: 'chevron-down',
-                            mricon: 'chevrons-down',
+
                             action: (f) => listComponent.moveDown(list),
                             fab: 'M04',
                             tbr: 'A'

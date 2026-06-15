@@ -49,6 +49,7 @@
   import NotebookTabs from './ricons/notebook-tabs.svelte'
   import Square from './ricons/square.svelte'
   import ArrowUp from './ricons/arrow-up.svelte'
+  import ArrowLeft from './ricons/arrow-left.svelte'
   import CheckCheck from './ricons/check-check.svelte'
   import X from './ricons/x.svelte'
   import EllipsisVertical from './ricons/ellipsis-vertical.svelte'
@@ -118,11 +119,12 @@
 	import RefreshCcw from './ricons/refresh-ccw.svelte';
   import Undo from './ricons/undo.svelte'
   import BrushCleaning from './ricons/brush-cleaning.svelte'
-	
+
   let ricons_box = {
     "archive": Archive,
     "trash": Trash,
     "arrow-up": ArrowUp,
+    "arrow-left": ArrowLeft,
     "check-check": CheckCheck,
     "folder": Folder,
     "square-pen": SquarePen,
