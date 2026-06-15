@@ -17,7 +17,7 @@
     import {cache} from './cache.js'
 
     let user = null
-    let tasksNo = 0
+    //let tasksNo = 0
     let allTags = ''
     let users = []
 
@@ -112,11 +112,16 @@
 
         cache.set(cacheKey, user)
 
-        tasksNo = 0
-        user.SubscribedLists?.forEach((l) => {
-            if(l.List && l.List.Tasks)
-                tasksNo += l.List.Tasks.length
+        user.SubscribedLists?.forEach(sb => {
+            if(sb.List && sb.List.Tasks == undefined)
+                sb.List.Tasks = []
         })
+
+        //tasksNo = 0
+        //user.SubscribedLists?.forEach((l) => {
+        //    if(l.List && l.List.Tasks)
+        //        tasksNo += l.List.Tasks.length
+        //})
     }
 
     function showCachedDataFirst(cacheKey)
@@ -128,11 +133,11 @@
 
         user = cachedValue
 
-        tasksNo = 0
-        user.SubscribedLists?.forEach((l) => {
-            if(l.List && l.List.Tasks)
-                tasksNo += l.List.Tasks.length
-        })
+        //tasksNo = 0
+        //user.SubscribedLists?.forEach((l) => {
+        //    if(l.List && l.List.Tasks)
+        //        tasksNo += l.List.Tasks.length
+        //})
     }
 
     async function onUpdateAllTags(allAllTags)
@@ -193,10 +198,10 @@
 
                 <h1>{title}</h1>
 
-                {#if tasksNo > 0 && user.SubscribedLists && user.SubscribedLists.length > 0}
+                {#if user.SubscribedLists && user.SubscribedLists.length > 0}
 
                     {#each user.SubscribedLists as list, idx}
-                        {#if list.List && list.List.Tasks && list.List.Tasks.length > 0}
+                        {#if list.List && list.List.Tasks}
                             <SubscibedList {list}
                                         tasks={list.List.Tasks}
                                         getAllTags={() => allTags}

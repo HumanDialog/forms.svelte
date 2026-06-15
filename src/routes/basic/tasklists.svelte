@@ -56,11 +56,12 @@
 
     let new_element_creator = null
 
-    const new_list_op = (list=null) => {
+    const new_list_op = (after=null) => {
         return {
             mricon: 'notebook',
             caption: '_; New list; Nueva lista; Nowa lista',
-            action: () => { new_element_creator=new_list_creator; listComponent.addRowAfter(list) },
+            action: (btt, rect) => create_new_list_from_template(after, btt, rect),
+            //action: () => { new_element_creator=new_list_creator; listComponent.addRowAfter(after) },
             fab: 'M01',
             tbr: 'A'
         }
@@ -557,11 +558,11 @@
                 element_expressions: task_list_expressions,
                 operations:{
                     page:{
-                        new: [new_list_op, new_list_from_template_op],
+                        new: [new_list_op/*, new_list_from_template_op*/],
                         view: [show_group_archived_lists_op, show_group_deleted_lists_op]
                     },
                     element:{
-                        new: [new_list_op, new_list_from_template_op],
+                        new: [new_list_op/*, new_list_from_template_op*/],
                         file: [edit_list_op, move_top_op, move_up_op, move_down_op],
                         view: [show_group_archived_lists_op, show_group_deleted_lists_op]
                     }
@@ -616,11 +617,11 @@
                 element_expressions: task_list_expressions,
                 operations:{
                     page:{
-                        new: [new_list_op, new_list_from_template_op],
+                        new: [new_list_op/*, new_list_from_template_op*/],
                         view: [show_my_archived_lists_op, show_my_deleted_lists_op]
                     },
                     element:{
-                        new: [new_list_op, new_list_from_template_op],
+                        new: [new_list_op/*, new_list_from_template_op*/],
                         file: [edit_list_op, move_top_op, move_up_op, move_down_op],
                         view: [show_my_archived_lists_op, show_my_deleted_lists_op]
                     }
@@ -755,11 +756,11 @@
                 element_expressions: task_list_expressions,
                 operations:{
                     page:{
-                        new: [new_list_op, new_list_from_template_op],
+                        new: [new_list_op/*, new_list_from_template_op*/],
                         view: [edit_page_op, move_project_to_archive_op, move_project_to_trash_op, show_project_archived_lists_op, show_project_deleted_lists_op]
                     },
                     element:{
-                        new: [new_list_op, new_list_from_template_op],
+                        new: [new_list_op/*, new_list_from_template_op*/],
                         file: [edit_list_op, move_top_op, move_up_op, move_down_op],
                         view: [move_project_to_archive_op, move_project_to_trash_op, show_project_archived_lists_op, show_project_deleted_lists_op]
                     }

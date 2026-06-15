@@ -817,9 +817,9 @@
             Title: nameAttrib,
             Summary: emailAttrib,
             readonlySummary: true,
-            $properties: {
+        /*    $properties: {
                 t: { l: [ '^auth_group;all_auth_accesses;name;key', '^acc_role;all_roles;summary;name', 'membership_tag']},
-            }
+            }*/
         }
     }
 

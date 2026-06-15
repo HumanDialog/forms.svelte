@@ -118,7 +118,7 @@
                                         {
                                             Id: 12,
                                             Association: 'ModifiedBy',
-                                            Expressions:['$ref', 'Name']
+                                            Expressions:['$ref', 'Name', 'href']
                                         }
                                     ]
                                 }
@@ -955,9 +955,9 @@
 
 <div class="w-full flex flex-row flex-wrap justify-between">
             <div class="grow-0">
-                {#if note.CreatedBy}
-                    {@const href = `${note.CreatedBy.href}`}
-                    <a {href} use:link> {note.CreatedBy.Name} </a>
+                {#if note.ModifiedBy}
+                    {@const href = `${note.ModifiedBy.href}`}
+                    <a {href} use:link> {note.ModifiedBy.Name} </a>
                 {/if}
             </div>
 
@@ -966,7 +966,7 @@
 
             <div>
                  <span>
-                    {getNiceStringDate(note.CreationDate)}
+                    {getNiceStringDate(note.ModificationDate)}
                 </span>
             </div>
             </div>
