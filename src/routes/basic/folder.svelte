@@ -138,6 +138,16 @@
             operations_kind = OP_ARCHIVE
             contextItemId = 0   // tmp
             break;
+        case 'myshared':
+            contextNavigation = "user/SharedFolders";
+            cacheKey = "user_SharedFolder";
+            operations_kind = OP_FOLDER
+            break;
+        case 'shared':
+            contextNavigation = "group/SharedFolders";
+            cacheKey = "group_SharedFolder";
+            operations_kind = OP_FOLDER
+            break;
         default:
             contextItemId = parseInt(segments[segments.length-1])
             contextNavigation = `Folder/${contextItemId}`

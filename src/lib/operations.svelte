@@ -339,6 +339,16 @@
         else
             return ''
     }
+
+    let history_back = {
+                            caption: '_; Back; Atrás; Powrót',
+                            hideToolbarCaption: true,
+                            mricon: 'arrow-left',
+                            action: () => pop(),
+                            fab: 'S01',
+                            tbr: 'A'
+                        }
+                        
 </script>
 
 {#if hasOperations}

@@ -143,7 +143,12 @@
                 </SidebarItem>
 
                 
-
+                <SidebarItem   href="/folder/myshared"
+                            icon='share-2'
+                            active={isRoutingTo("/folder/myshared", currentPath)}
+                            >
+                    _; Shared; Compartido; Udostępnione
+                </SidebarItem>
                 
                 <SidebarGroup   title={i18n({en: 'My lists', es: 'Mis listas', pl: 'Moje listy'})}
                                 moreHref="/mylists">

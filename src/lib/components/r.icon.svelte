@@ -119,6 +119,7 @@
 	import RefreshCcw from './ricons/refresh-ccw.svelte';
   import Undo from './ricons/undo.svelte'
   import BrushCleaning from './ricons/brush-cleaning.svelte'
+  import Share2  from './ricons/share-2.svelte'
 
   let ricons_box = {
     "archive": Archive,
@@ -225,7 +226,8 @@
     'refresh-ccw' : RefreshCcw,
     'copy' : Copy,
     'undo' : Undo,
-    'brush-cleaning': BrushCleaning
+    'brush-cleaning': BrushCleaning,
+    'share-2': Share2
   }
 
   let width = 24;

@@ -234,7 +234,12 @@
 
         <SidebarGroup   title={i18n({en: 'Others', es: 'Otros', pl: 'Inne'})}
                     >
-
+            <SidebarItem   href="/folder/shared"
+                            icon='share-2'
+                            active={isRoutingTo("/folder/shared", currentPath)}
+                            selectable={true}>
+                _; Shared; Compartido; Udostępnione
+            </SidebarItem>
             <SidebarItem   href="/folder/archive"
                             icon='archive'
                             active={isRoutingTo("/folder/archive", currentPath)}
