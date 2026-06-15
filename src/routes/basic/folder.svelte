@@ -20,7 +20,7 @@
                 refreshToolbarOperations,
 				showFloatingToolbar,
                 reloadPageToolbarOperations, Paper, PaperHeader, openInNewTab, copyAddress,
-				focusEditable, showMenu} from '$lib'
+				focusEditable, showMenu, Ricon} from '$lib'
     import {FaTrash, FaCloudUploadAlt} from 'svelte-icons/fa'
 
 
@@ -187,7 +187,7 @@
             Tree:
             [
             {   Id: 1, Association: '',
-                Expressions:['Id', '$ref', '$type', 'icon', 'Title','Summary', 'Kind', 'ModificationDate', 'CreatedBy', 'IsPinned', 'IsBasket', 'IsRootPinned', 'GetCanonicalPath', '$ver'],
+                Expressions:['Id', '$ref', '$type', 'icon', 'Title','Summary', 'Kind', 'ModificationDate', 'CreatedBy', 'IsPinned', 'IsBasket', 'IsRootPinned', 'GetCanonicalPath', '$ver', 'Status'],
                 SubTree:[
                     {   Id: 2, Association: 'Folders',
                         Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'icon', 'IsInBasket' , 'IsCanonical',  'icon', 'FolderId', '$type', '$ver']
@@ -2148,7 +2148,13 @@
 
         <Paper>
             <PaperHeader>
-            <Breadcrumb  path = {contextItem.GetCanonicalPath}/>
+            <div class="flex flex-row items-center">
+                <Breadcrumb  path = {contextItem.GetCanonicalPath}/>
+                <div class="ml-auto">
+                    <Ricon icon='archive' s/>
+                </div>
+            </div>
+
             </PaperHeader>
 
             <!--div class="w-full flex flex-row justify-between">

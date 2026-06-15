@@ -7,6 +7,7 @@
     import Ricon from './r.icon.svelte'
     import {i18n} from '../i18n.js'
     import {pushChanges, hasModifications, unsavedModificationsTicket} from '../updates.js'
+	import { pop } from 'svelte-spa-router';
 
     export let mainPageCoords = undefined
 
@@ -471,7 +472,7 @@
                             caption: '_; Back; Atrás; Powrót',
                             hideToolbarCaption: true,
                             mricon: 'arrow-left',
-                            action: null,
+                            action: () => pop(),
                             fab: 'S01',
                             tbr: 'A'
                         }
