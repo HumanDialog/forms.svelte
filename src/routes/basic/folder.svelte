@@ -20,7 +20,7 @@
                 refreshToolbarOperations,
 				showFloatingToolbar,
                 reloadPageToolbarOperations, Paper, PaperHeader, openInNewTab, copyAddress,
-				focusEditable} from '$lib'
+				focusEditable, showMenu} from '$lib'
     import {FaTrash, FaCloudUploadAlt} from 'svelte-icons/fa'
 
 
@@ -1103,6 +1103,7 @@
                         ... !canPin ? [] : [pinOp()],
                         enable_multiselection_operation,
                         refresh_operation,
+                        share_this_folder_to_another_group_op,
                         move_whole_folder_to_archive_op,
                         move_whole_folder_to_trash_op,
                         properties_operation
@@ -1176,6 +1177,7 @@
                        // ... !canPin ? [] : [pinOp()],
                         disable_multiselection_operation,
                         refresh_operation,
+                        share_this_folder_to_another_group_op,
                         move_whole_folder_to_archive_op,
                         move_whole_folder_to_trash_op,
                     ]
@@ -1217,6 +1219,71 @@
         }
     }
 
+    async function share_element(owner, aroun_rect, element, kind)
+    {
+        const ret = await reef.post(`user/query`, {
+            Id: 1,
+            Name: "collector",
+            ExpandLevel: 3,
+            Tree:
+            [
+                {   Id: 1, Association: 'Groups/Group',
+                    //Filter: "Id <> group/Id",
+                    Expressions:['Id', '$ref', '$type', '$acc', 'Name']
+                }
+            ]
+        })
+
+        if(!ret)
+            return;
+
+        if(ret.Group && ret.Group.length > 0)
+        {
+            let items = []
+            ret.Group.forEach(g => 
+                items.push({
+                    caption: g.Name,
+                    action: () => share_element_to_group(element, g, kind)
+                })
+            )
+
+            if(items.length > 0)
+                showMenu(aroun_rect, items)
+        }
+    }
+
+    async function share_element_to_group(element, g, kind)
+    {
+        switch(kind)
+        {
+        case 'Folder':
+            await reef.post(`${g.$ref}/AddSharedFolder`, { folder: element.$ref })
+            break;
+
+        case 'FolderFolder':
+            await reef.post(`${g.$ref}/AddSharedFolderLink`, { link: element.$ref })
+            break;
+
+        case 'TaskFolder':
+            await reef.post(`${g.$ref}/AddSharedTask`, { link: element.$ref })
+            break;
+
+        case 'NoteFolder':
+            await reef.post(`${g.$ref}/AddSharedNote`, { link: element.$ref })
+            break;
+
+        case 'FileFolder':
+            await reef.post(`${g.$ref}/AddSharedFile`, { link: element.$ref })
+            break;
+        }        
+    }
+
+    const share_this_folder_to_another_group_op = {
+        caption: '_; Share folder; Carpeta compartida; Udostępnij folder',
+        action: (owner, around_rect) => share_element(owner, around_rect, contextItem, 'Folder')
+    }
+
+   
     const move_whole_folder_to_archive_op = {
             caption: '_; Archive folder; Archivar carpeta; Archiwizuj folder',
             action: () => move_me_to_archive()
@@ -1364,6 +1431,10 @@
         {
             linkOperations = [
                 {
+                    caption: '_; Share selected item; Compartir el elemento seleccionado; Udostępnij zaznaczony element',
+                    action: (owner, around_rect) => share_element(owner, around_rect, element, kind)
+                },
+                {
                     caption: '_; Delete selected item; Eliminar el elemento seleccionado; Usuń zaznaczony element',
                     action: (f) => moveToTrash(element, kind)
                 },
@@ -1501,6 +1572,7 @@
                         ... !canPin ? [] : [pinOp()],
                         enable_multiselection_operation,
                         refresh_operation,
+                        share_this_folder_to_another_group_op,
                         move_whole_folder_to_archive_op,
                         move_whole_folder_to_trash_op
                         ]
@@ -1597,6 +1669,7 @@
                            // ... !canPin ? [] : [pinOp()],
                             disable_multiselection_operation,
                             refresh_operation,
+                            share_this_folder_to_another_group_op,
                             move_whole_folder_to_archive_op,
                             move_whole_folder_to_trash_op,
                         ]
