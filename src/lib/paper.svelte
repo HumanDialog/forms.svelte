@@ -9,7 +9,7 @@
 
                 mx-0 mb-20 px-3 pt-2 pb-10
 
-                sm:mt-8
+                sm:mt-14
 
                 md:px-16 md:mx-auto
 

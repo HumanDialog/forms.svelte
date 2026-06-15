@@ -121,7 +121,7 @@
 
                 flatOperations.push({separator: true})
                 flatOperations.push(saveOperation)
-                
+
                 const realOps = flatOperations.filter((el) => !!el.separator == false)
                 if(realOps.length > 1)
                 {
@@ -467,7 +467,20 @@
         }
     }
 
+    let history_back = {
+                            caption: '_; Back; Atrás; Powrót',
+                            hideToolbarCaption: true,
+                            mricon: 'arrow-left',
+                            action: null,
+                            fab: 'S01',
+                            tbr: 'A'
+                        }
+
+    let history_back_pos = calculatePosition(history_back)
+
 </script>
+
+
 
 
 {#if operations && operations.length > 0}
@@ -509,6 +522,35 @@
         {/if}
     {/each}
 {/if}
+
+
+<button
+
+    class=" w-[55px] h-[55px]
+            fixed m-0
+            flex items-center justify-center
+            disable-dbl-tap-zoom
+            cursor-pointer z-20"
+            style={history_back_pos}
+            on:click|stopPropagation={(e) => {on_click(e, history_back)}}
+            on:mousedown={mousedown} >
+
+        <div class="    focus:outline-none font-medium  text-sm text-center
+
+                        text-stone-500 bg-stone-200/70 hover:bg-stone-200
+                        rounded-full backdrop-blur-sm
+                        dark:text-orange-200 dark:bg-stone-700/40 dark:hover:bg-stone-700
+                        ring-1 ring-orange-800/40 dark:ring-orange-200/30
+
+                        focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800
+
+                        flex items-center justify-center
+                        w-8 h-8">
+
+                <div class="py-1 mr-1 w-4"><Ricon icon = {history_back.mricon} s/></div>
+
+        </div>
+</button>
 
 
 <style>
