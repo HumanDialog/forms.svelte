@@ -51,6 +51,7 @@
     import MyDay from './dashboard.myday.svelte'
     import TeamDay from './dashboard.teamday.svelte'
     //import StaticDoc from './tilos/static.doc.svelte'
+    import Project from './project.svelte'
 
     import { tick, onMount } from 'svelte';
 
@@ -299,10 +300,9 @@
                         '/tcontact':    {component: TilosContact},
                         '/alllists':    {component: TaskLists},
                         '/alllists/*':    {component: TaskLists},
-                        '/project':     {component: TaskLists},
-                        '/project/*':     {component: TaskLists},
-                        '/projectarchive/*': {component: TaskLists},
-                        '/projecttrash/*': {component: TaskLists},
+                        '/project/*':     {component: Project},
+                        '/projectarchive/*': {component: Project},
+                        '/projecttrash/*': {component: Project},
                         '/archivedlists':    {component: TaskLists},
                         '/deletedlists':    {component: TaskLists},
                         '/mylists':     {component: TaskLists},

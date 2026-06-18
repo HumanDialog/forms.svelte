@@ -156,7 +156,8 @@ export {
     openInNewTab,
     copyAddress,
     saveScrollPosition,
-    restoreScrollPosition
+    restoreScrollPosition,
+    get_main_object_fetch_error_description
 }   from './utils'
 
 export {

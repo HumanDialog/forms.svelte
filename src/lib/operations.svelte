@@ -7,6 +7,7 @@
     import {pushChanges, hasModifications, unsavedModificationsTicket} from './updates.js'
 	import { isDeviceSmallerThan } from '$lib';
 	import { onMount } from 'svelte';
+    import { pop } from 'svelte-spa-router'
 
     export let mobile :boolean = false
 
@@ -348,15 +349,47 @@
                             fab: 'S01',
                             tbr: 'A'
                         }
-                        
+
 </script>
 
-{#if hasOperations}
+{#if hasOperations || history_back}
+    {@const enabledLightColors ='text-stone-600 hover:text-stone-800 hover:bg-stone-200 active:bg-stone-100 border-stone-200'}
+    {@const disabledLightColors ='text-stone-400 border-stone-200'}
+
+    {@const enabledDarkColors ='dark:text-stone-300 dark:hover:text-white dark:hover:bg-stone-800 dark:active:bg-stone-600 dark:border-stone-600'}
+    {@const disabledDarkColors ='dark:text-stone-500 dark:border-stone-600'}
+
+    {@const disabledColors =`${disabledLightColors} ${disabledDarkColors}`}
+    {@const enabledColors =`${enabledLightColors} ${enabledDarkColors}`}
+
 <section class="operations-0 flex flex-row no-print h-full
 
                 overflow-x-hidden overflow-y-clip py-0 text-xs whitespace-nowrap">
     <div    class="operations-a flex flex-row"
             class:flex-row-reverse={mobile}>
+
+        {#if history_back}
+            {@const isDisabled=isOperationDisabled(history_back)}
+            {@const colors = isDisabled ? disabledColors : enabledColors}
+            <button type="button"
+                    class="operation-2 px-2
+                    text-xs font-thin
+                    focus:outline-none
+                    inline-flex items-center
+                    {colors}"
+                    disabled={isDisabled}
+                    title={operationTooltip(history_back)}
+                    on:mousedown={(e) => mousedown(e, history_back)}
+                    on:click={(e) => {on_click(e, history_back, isDisabled)}}>
+                {#if history_back.mricon}
+                    <div class="py-1 mr-1 w-4"><Ricon icon = {history_back.mricon} s/></div>
+                {/if}
+                
+            </button>
+            <!-- separator -->
+            <div class="border border-l my-1.5 mx-2 border-stone-200 dark:border-stone-800"></div>
+        {/if}
+
 
         {#each leftOperations as operation}
             {#if !operation.separator}
@@ -390,14 +423,7 @@
                         </button>
                     {/each}
                 {:else}
-                    {@const enabledLightColors ='text-stone-600 hover:text-stone-800 hover:bg-stone-200 active:bg-stone-100 border-stone-200'}
-                    {@const disabledLightColors ='text-stone-400 border-stone-200'}
-
-                    {@const enabledDarkColors ='dark:text-stone-300 dark:hover:text-white dark:hover:bg-stone-800 dark:active:bg-stone-600 dark:border-stone-600'}
-                    {@const disabledDarkColors ='dark:text-stone-500 dark:border-stone-600'}
-
-                    {@const disabledColors =`${disabledLightColors} ${disabledDarkColors}`}
-                    {@const enabledColors =`${enabledLightColors} ${enabledDarkColors}`}
+                    
                     {@const colors = isDisabled ? disabledColors : enabledColors}
 
                     <button type="button"

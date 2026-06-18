@@ -28,7 +28,7 @@
 			randomString,
 			showMenu, mainContentPageReloader,
             SHOW_MENU_BELOW, focusEditable, openInNewTab, copyAddress,
-            List, ListTitle, ListSummary, ListInserter, Icon, Paper, PaperTopMargin, PaperHeader
+            List, ListTitle, ListSummary, ListInserter, Icon, Paper, PaperTopMargin, PaperHeader, get_main_object_fetch_error_description
             } from '$lib'
 	import { onMount, tick, afterUpdate } from 'svelte';
     import {location, querystring, push, link} from 'svelte-spa-router'
@@ -120,6 +120,8 @@
         if(!taskRef)
             return;
 
+        failed_message = ''
+
         let res = await reef.post(`${taskRef}/query`,
                         {
                             Id: 1,
@@ -170,7 +172,7 @@
                                 }
                             ]
                         },
-                        onErrorShowAlert)
+                        handle_fetch_error)
 
         task = res.Task
         if(task.TaskList?.TaskStates)
@@ -239,7 +241,6 @@
                 IsCanonical: 1
         })
 
-
         task.attachements = []
         if(task.Notes && task.Notes.length > 0)
             task.Notes.forEach((n) => task.attachements.push(n))
@@ -254,6 +255,14 @@
             descriptionNotes = task.Notes.filter((n) => n.Role == NR_DESCRIPTION)
         else
             descriptionNotes = []
+    }
+
+
+    let failed_message = ''
+    function handle_fetch_error(err, res)
+    {
+        task = null
+        failed_message = get_main_object_fetch_error_description(err, res)
     }
 
     async function onUpdateAllTags(newAllTags)
@@ -2403,6 +2412,17 @@
     <input hidden type="file" id="imageFile" accept="image/*" bind:this={imgInput} on:change={onImageSelected}/> <!-- capture="environment" -->
     <input hidden type="file" id="attachementFile" accept="*/*" bind:this={attInput} on:change={onAttachementSelected}/>
 </Page>
+{:else}
+    {#if failed_message}
+        <Paper>
+            <PaperHeader></PaperHeader>
+            <h3>_; Error; Error; Błąd</h3>
+            <p>{failed_message}</p>
+        </Paper>
+        
+    {:else}
+        <Spinner delay={3000}/>
+    {/if}
 {/if}
 
 <Modal title={i18n(['Uploading...', 'Carga...', 'Przesyłanie...'])}

@@ -246,6 +246,8 @@ async function flushChanges(ticket)
                 switch(res.status)
                 {
                 case 400:               // basic exception like access rights
+                case 401:
+                case 403:
                     modified_items_map.clear();
                     unsavedModificationsTicket.set( get(unsavedModificationsTicket) + 1 )
 

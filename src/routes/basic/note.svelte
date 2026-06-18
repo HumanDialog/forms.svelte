@@ -34,7 +34,7 @@
             ext, mainContentPageReloader,
             List, ListTitle, ListSummary, ListInserter, Icon, Ricon,
             reloadPageToolbarOperations, Paper, PaperHeader, focusEditable, openInNewTab, copyAddress,
-
+            get_main_object_fetch_error_description,
 			getNiceStringDateTime
 
             } from '$lib'
@@ -80,7 +80,8 @@
     const NK_THREAD            = 1
     const NK_POST              = 2
     let isThread = false
-
+    let failed_message = ''
+      
 
     $: onParamsChanged($location, $mainContentPageReloader)
 
@@ -113,6 +114,8 @@
     {
         if(!noteRef)
             return;
+
+        failed_message = ''
 
         let res = await reef.post(`${noteRef}/query`,
                         {
@@ -197,7 +200,7 @@
                                 }
                             ]
                         },
-                        onErrorShowAlert)
+                        handle_fetch_error)
 
         note = res.Note
 
@@ -245,6 +248,12 @@
 
         prepareAttachementsList(note)
 
+    }
+
+    function handle_fetch_error(err, res)
+    {
+        note = null
+        failed_message = get_main_object_fetch_error_description(err, res)
     }
 
     function prepareAttachementsList(noteElement)
@@ -2014,6 +2023,17 @@
     <input hidden type="file" id="attachementFile" accept="*/*" bind:this={attInput} on:change={onAttachementSelected}/>
 </Page>
 
+{:else}
+    {#if failed_message}
+        <Paper>
+            <PaperHeader></PaperHeader>
+            <h3>_; Error; Error; Błąd</h3>
+            <p>{failed_message}</p>
+        </Paper>
+        
+    {:else}
+        <Spinner delay={3000}/>
+    {/if}
 {/if}
 {/key}
 

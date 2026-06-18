@@ -14,7 +14,7 @@
             forceKicksChecking,
             i18n, ext,
 			showMenu, Editable, focusEditable,
-            SHOW_MENU_ABOVE, Paper
+            SHOW_MENU_ABOVE, Paper, PaperHeader, Spinner, get_main_object_fetch_error_description
             } from '$lib'
 	import { afterUpdate, tick, onMount } from 'svelte';
     import {location, link, querystring} from 'svelte-spa-router'
@@ -37,6 +37,7 @@
 
     const heuristicIntevals = [5,10,20,40]
     let heuristicIntervalIdx = -1
+    let failed_message = ''
 
 
     $: onParamsChanged($location, $querystring)
@@ -150,6 +151,8 @@
         if(!channelRef)
             return;
 
+        failed_message = ''
+
         let res = await reef.post(`${channelRef}/query`,
                         {
                             Id: 1,
@@ -201,7 +204,7 @@
                                 }
                             ]
                         },
-                        onErrorShowAlert)
+                        handle_fetch_error)
 
         channel = res.MessageChannel
 
@@ -213,6 +216,11 @@
         isReadOnly = (channel.$acc & 0x2) == 0
     }
 
+    function handle_fetch_error(err, res)
+    {
+        channel = null
+        failed_message = get_main_object_fetch_error_description(err, res);
+    }
 
     async function markRead()
     {
@@ -851,4 +859,15 @@
     <!--input hidden type="file" id="imageFile" accept="image/*" bind:this={imgInput} on:change={onImageSelected}/--> <!-- capture="environment" -->
 </Page>
 {/key}
+{:else}
+    {#if failed_message}
+        <Paper>
+            <PaperHeader></PaperHeader>
+            <h3>_; Error; Error; Błąd</h3>
+            <p>{failed_message}</p>
+        </Paper>
+        
+    {:else}
+        <Spinner delay={3000}/>
+    {/if}
 {/if}

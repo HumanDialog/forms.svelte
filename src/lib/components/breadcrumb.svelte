@@ -29,6 +29,13 @@
 
     }
 
+    export function reload(_path)
+    {
+        path = _path
+        segments = []
+        init()
+    }
+
 
     function shouldBeCollapsed(idx)
     {

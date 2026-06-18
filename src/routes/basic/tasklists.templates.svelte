@@ -24,7 +24,7 @@
     let listComponent;
     let showArchived = false;
     let canonicalPath = []
-    const title = '_; List templates; Plantillas de listas; Wzorce list (*)'
+    const title = '_; List templates; Plantillas de listas; Szablony list'
 
     $: onParamsChanged($session, $mainContentPageReloader, $querystring);
 

@@ -20,7 +20,7 @@
                 refreshToolbarOperations,
 				showFloatingToolbar,
                 reloadPageToolbarOperations, Paper, PaperHeader, openInNewTab, copyAddress,
-				focusEditable, showMenu, Ricon} from '$lib'
+				focusEditable, showMenu, Ricon, get_main_object_fetch_error_description} from '$lib'
     import {FaTrash, FaCloudUploadAlt} from 'svelte-icons/fa'
 
 
@@ -45,8 +45,10 @@
     let contextItemId;
 
     let listComponent;
+    let breadcrump;
     let folderTitle = ''
     let pendingUploading = false;
+    let failed_message = ''
 
     let users = [];
 
@@ -163,6 +165,7 @@
             folderTitle = ext(contextItem.Title);
             contextItemId = cachedValue.Id;
             listComponent?.reload(contextItem, listComponent.KEEP_SELECTION)
+            breadcrump?.reload(contextItem.GetCanonicalPath)
         }
         //---------------------------------------------------
         const readItem = await readContextItem(contextNavigation)
@@ -185,10 +188,12 @@
         }
 
         listComponent?.reload(contextItem, listComponent.KEEP_SELECTION)
+        breadcrump?.reload(contextItem.GetCanonicalPath)
     }
 
     async function readContextItem(contextNavigation)
     {
+        failed_message = ''
         let res = await reef.post(`${contextNavigation}/query`,
         {
             Id: 1,
@@ -223,15 +228,22 @@
             }
         ]
         },
-        onErrorShowAlert);
+        handle_fetch_error);
         if(res)
         {
             const folderItem = res.Folder
-           
             return folderItem;
         }
         else
+        {
             return null;
+        }
+    }
+
+    function handle_fetch_error(err, res)
+    {
+        contextItem = null
+        failed_message = get_main_object_fetch_error_description(err, res);
     }
 
     function setupAllElements(contextItem)
@@ -2159,7 +2171,7 @@
         <Paper>
             <PaperHeader>
             <div class="flex flex-row items-center">
-                <Breadcrumb  path = {contextItem.GetCanonicalPath}/>
+                <Breadcrumb  path = {contextItem.GetCanonicalPath} bind:this={breadcrump}/>
                 <div class="ml-auto">
                     <Ricon icon='archive' s/>
                 </div>
@@ -2199,7 +2211,16 @@
     </Page>
     {/key}
 {:else}
-    <Spinner delay={3000}/>
+    {#if failed_message}
+        <Paper>
+            <PaperHeader></PaperHeader>
+            <h3>_; Error; Error; Błąd</h3>
+            <p>{failed_message}</p>
+        </Paper>
+        
+    {:else}
+        <Spinner delay={3000}/>
+    {/if}
 {/if}
 
 

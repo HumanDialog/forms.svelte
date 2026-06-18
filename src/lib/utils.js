@@ -1350,3 +1350,32 @@ export function restoreScrollPosition(href)
             document.documentElement.scrollTo(el.x, el.y)
     })
 }
+
+export function get_main_object_fetch_error_description(err, res)
+{
+    if(res)
+    {
+        switch(res.status)
+        {
+        case 404:
+            return i18n({en:'Object not found', es:'Objeto no encontrado', pl: 'Nie znaleziono obiektu'})
+            
+        case 403:
+            return i18n({en:' Access denied', es:'Acceso denegado', pl: 'Odmowa dostępu'})
+        
+        default:
+            return err;
+        }
+    }
+    else
+    {
+        // tmp
+        if(err.startsWith("Error: 404"))
+            return i18n({en:'Object not found', es:'Objeto no encontrado', pl: 'Nie znaleziono obiektu'})
+        else if(err.startsWith("Error: 8225"))
+            return i18n({en:' Access denied', es:'Acceso denegado', pl: 'Odmowa dostępu'})
+        else
+            return err;
+    }
+
+}

@@ -175,7 +175,7 @@
                                 icon='notebook-tabs'
                                 active={isRoutingTo("/myday", currentPath)}
                                 selectable={myday}>
-                    _; List templates; Modelos de cartas; Wzorce list
+                    _; List templates; Plantillas de listas; Szablony list
                 </SidebarItem>
         </SidebarGroup>
 
