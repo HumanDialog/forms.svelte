@@ -1,0 +1,13 @@
+<script>
+  export let w = 24;
+  export let h = 24;
+  export let s = 1;
+</script>
+
+
+<svg xmlns="http://www.w3.org/2000/svg" width={w} height={h} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+  stroke-width={s}  stroke-linecap="round" stroke-linejoin="round"
+  class="lucide lucide-lock-keyhole-icon lucide-lock-keyhole">
+  <circle cx="12" cy="16" r="1" />
+  <rect x="3" y="10" width="18" height="12" rx="2" />
+  <path d="M7 10V7a5 5 0 0 1 10 0v3" /></svg>

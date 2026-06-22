@@ -73,7 +73,7 @@
         if(foundIdx < 0)
             return;
 
-        let selector_idx = 0 
+        let selector_idx = 0
         if(!segments.length)
             contextItemSelector = 'default'
         else
@@ -176,7 +176,7 @@
 
         contextItem  = readItem
         cache.set(cacheKey, contextItem)
-       
+
 
         if(contextItem)
         {
@@ -227,7 +227,7 @@
         if(res)
         {
             const folderItem = res.Folder
-           
+
             return folderItem;
         }
         else
@@ -484,7 +484,7 @@
         }
     }
 
-    async function emptyTrash() 
+    async function emptyTrash()
     {
         await reef.get(`${contextItem.$ref}/EmptyTrash`);
         await fetchData();
@@ -810,7 +810,7 @@
         }
     }
 
-    
+
     async function refreshView()
     {
         await fetchData();
@@ -832,7 +832,7 @@
                     if(UI.navigator)
                         UI.navigator.refresh()
                     },
-                
+
             }
         }
         else
@@ -847,7 +847,7 @@
                     if(UI.navigator)
                         UI.navigator.refresh()
                 },
-                
+
             }
         }
         return pinOperation;
@@ -1250,7 +1250,7 @@
         if(ret.Group && ret.Group.length > 0)
         {
             let items = []
-            ret.Group.forEach(g => 
+            ret.Group.forEach(g =>
                 items.push({
                     caption: g.Name,
                     action: () => share_element_to_group(element, g, kind)
@@ -1285,7 +1285,7 @@
         case 'FileFolder':
             await reef.post(`${g.$ref}/AddSharedFile`, { link: element.$ref })
             break;
-        }        
+        }
     }
 
     const share_this_folder_to_another_group_op = {
@@ -1293,7 +1293,7 @@
         action: (owner, around_rect) => share_element(owner, around_rect, contextItem, 'Folder')
     }
 
-   
+
     const move_whole_folder_to_archive_op = {
             caption: '_; Archive folder; Archivar carpeta; Archiwizuj folder',
             action: () => move_me_to_archive()
@@ -1307,7 +1307,7 @@
 
     async function move_me_to_archive()
     {
-        await reef.get(`${contextItem.$ref}/MoveMeToArchive`)   
+        await reef.get(`${contextItem.$ref}/MoveMeToArchive`)
         await fetchData();
     }
 
@@ -1433,7 +1433,7 @@
         const isRootPinned = contextItem.IsRootPinned
         const canPin = !isRootPinned
         const isCanonical = element.IsCanonical
-        
+
         let list = listComponent;
 
         let linkOperations = []
@@ -1593,7 +1593,7 @@
 
 
 
-    let elementOperations = (element, kind) => 
+    let elementOperations = (element, kind) =>
     {
         switch(operations_kind)
         {
@@ -1606,7 +1606,7 @@
         case OP_TRASH:
             return trashElementOperations(element, kind)
         }
-        
+
     }
 
     function folderMultiselectionOperations(items)
@@ -1981,7 +1981,7 @@
                 {
                     caption: '_; View; Ver; Widok',
                     operations: [
-                        toggle_select_all_operation,    
+                        toggle_select_all_operation,
                         {separator: true, tbr: 'A'},
                         empty_trash_operation,
                         disable_multiselection_operation,
@@ -2026,12 +2026,12 @@
                     }
                 ]
             }
-    
+
     }
 
     function trashMultiselectionOperations(items)
     {
-       
+
         return {
                 opver: 2,
                 fab: 'M00',
@@ -2061,7 +2061,7 @@
                     }
                 ]
             }
-    
+
     }
 
     let prev_folder_properties = {
@@ -2160,8 +2160,8 @@
             <PaperHeader>
             <div class="flex flex-row items-center">
                 <Breadcrumb  path = {contextItem.GetCanonicalPath}/>
-                <div class="ml-auto">
-                    <Ricon icon='archive' s/>
+                <div class="ml-auto text-red-500" >
+                    <Ricon icon='lock' s/>
                 </div>
             </div>
 

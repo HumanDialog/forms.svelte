@@ -104,6 +104,13 @@
   import Eye from './ricons/eye.svelte'
   import EyeOff from './ricons/eye-off.svelte'
 
+  import Lock from './ricons/lock.svelte'
+  import LockOpen from './ricons/lock-open.svelte'
+  import LockKeyhole from './ricons/lock-keyhole.svelte'
+  import LockKeyholeOpen from './ricons/lock-keyhole-open.svelte'
+  import Rss from './ricons/rss.svelte'
+
+
   import ExternalLink from './ricons/external-link.svelte'
   import ToggleLeft from './ricons/toggle-left.svelte'
   import ToggleRight from './ricons/toggle-right.svelte'
@@ -218,6 +225,12 @@
     'bell-off': BellOff,
     'eye': Eye,
     'eye-off': EyeOff,
+
+    'lock': Lock,
+    'lock-open': LockOpen,
+    'lock-keyhole': LockKeyhole,
+    'lock-keyhole-open': LockKeyholeOpen,
+    'rss': Rss,
 
     'external-link': ExternalLink,
     'toggle-left': ToggleLeft,
