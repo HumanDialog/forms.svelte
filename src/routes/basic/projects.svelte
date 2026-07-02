@@ -47,7 +47,7 @@
                 collection: "Lists"
             },
             allprojects: {
-                title: '_; Active projects; Proyectos activos; Aktywne projekty',
+                title: '_; Projects; Proyectos; Projekty',
                 self: "group",
                 collection: "Projects"
             },

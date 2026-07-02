@@ -133,7 +133,7 @@
     
 
         {#if $session.isActive}
-            <SidebarGroup   title={i18n({en: 'Projects', es: 'Mis Proyectos', pl: 'Projekty'})}
+            <SidebarGroup   title={i18n({en: 'Projects', es: 'Proyectos', pl: 'Projekty'})}
                             moreHref="/allprojects">
 
                 <SidebarList    objects={groupProjects}

@@ -91,7 +91,8 @@
                         if(res)
                         {
                             const new_list = res.TaskList
-                            await reload_list(new_list.$ref)
+                            await fetch_data();
+                            lists_component.reload(context_item, new_list.$ref);
                         }
                     }
                 })
@@ -298,13 +299,17 @@
     async function restore_list_from_archive(list)
     {
         await reef.get(`${list.$ref}/RestoreFromArchive`);
-        await reload_list(lists_component.SELECT_NEXT)
+
+        await fetch_data();
+        lists_component.reload(context_item, lists_component.SELECT_NEXT);
     }
 
     async function restore_list_from_trash(list)
     {
         await reef.get(`${list.$ref}/RestoreFromTrash`);
-        await reload_list(lists_component.SELECT_NEXT)
+
+        await fetch_data();
+        lists_component.reload(context_item, lists_component.SELECT_NEXT);
     }
 
     
@@ -466,7 +471,9 @@
             return;
 
         await reef.get(`${context_item.$ref}/MoveMeToArchive`)   
-        await reload_list(lists_component.SELECT_NEXT)
+        await fetch_data();
+        lists_component.reload(context_item, lists_component.CLEAR_SELECTION);
+        folder_component.reload(context_item, lists_component.CLEAR_SELECTION);
     }
 
     async function move_me_to_trash()
@@ -475,7 +482,9 @@
             return;
 
         await reef.get(`${context_item.$ref}/MoveMeToTrash`)
-        await reload_list(lists_component.SELECT_NEXT)
+        await fetch_data();
+        lists_component.reload(context_item, lists_component.CLEAR_SELECTION);
+        folder_component.reload(context_item, lists_component.CLEAR_SELECTION);
     }
 
     const show_project_active_lists_from_archive_op = () => show_active_elements('notebook', `/project/${context_item.Id}`, 'S02')
@@ -503,8 +512,10 @@
     async function empty_project_trash()
     {
         await reef.get(`${context_item.$ref}/EmptyTrash`);
-        await reload_list(lists_component.CLEAR_SELECTION)
-        await reload_list(folder_component.CLEAR_SELECTION)
+
+        await fetch_data();
+        lists_component.reload(context_item, lists_component.CLEAR_SELECTION);
+        folder_component.reload(context_item, lists_component.CLEAR_SELECTION);
     }
 
     const edit_page_op = () => {
@@ -740,7 +751,8 @@
                 SubTree:[
                     {   
                         Id: 2, Association: list_assoc_name,
-                        Expressions:['Id', '$type', 'Name', 'Summary', 'Order', 'href', '$ref', 'IsSubscribed', '$ver']
+                        Expressions:['Id', '$type', 'Name', 'Summary', 'Order', 'href', '$ref', 'IsSubscribed', '$ver'],
+                        Sort: "Order"
                     },
                     { 
                         Id: 3, Association: main_folder_assoc_name,
@@ -828,13 +840,6 @@
     }
 
 
-    async function reload_list(select_recommendation)
-    {
-        await fetch_data();
-        lists_component.reload(self, select_recommendation);
-    }
-
-
     async function add_list(newListAttribs)
     {
         let newElement
@@ -845,7 +850,8 @@
         if(!newElement)
             return null;
 
-        await reload_list(newElement.$ref)
+        await fetch_data();
+        lists_component.reload(context_item, newElement.$ref);
     }
 
     let att_input_element;
@@ -1041,12 +1047,12 @@
                 view: [edit_page_op, insert_operation_op, show_project_folder_op, move_project_to_archive_op, move_project_to_trash_op, show_project_archived_lists_op, show_project_deleted_lists_op]
             },
             list: {
-                new: [new_list_op],
+                new: [new_list_op, new_folder_op, new_note_op, new_task_op, new_file_op], //[new_list_op],
                 file: [edit_list_op, move_list_top_op, move_list_up_op, move_list_down_op],
                 view: [insert_operation_op, show_project_folder_op, move_project_to_archive_op, move_project_to_trash_op, show_project_archived_lists_op, show_project_deleted_lists_op]
             },
             folder: {
-                new: [new_folder_op, new_note_op, new_task_op, new_file_op],
+                new: [new_list_op, new_folder_op, new_note_op, new_task_op, new_file_op],
                 file: [edit_folder_element_op, move_folder_top_op, move_folder_up_op, move_folder_down_op, delete_folder_element_op],
                 view: [insert_operation_op, show_project_folder_op, move_project_to_archive_op, move_project_to_trash_op, show_project_archived_lists_op, show_project_deleted_lists_op]
             }
