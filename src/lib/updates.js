@@ -217,11 +217,7 @@ async function flushChanges(ticket)
             let path = reef.correct_path_with_api_version_if_needed('/Push')
 
             try {
-                console.log("PUSH")
-                console.trace()
-
-                await new Promise(r => setTimeout(r, 1000));
-
+                
                 let res = await reef.fetch(path, {
                     method: 'POST',
                     body: JSON.stringify( { Items: changes })
