@@ -4,7 +4,7 @@
     import {parseWidthDirective, clearActiveItem, getPrev, getNext, remove, insertAt, insertAfter, swapElements, getActive} from '../../utils'
     import {contextItemsStore, contextTypesStore, data_tick_store } from '../../stores'
     import KanbanColumn from './internal/kanban.column.svelte'
-	import { informModification, pushChanges } from '$lib/updates';
+	import { informModification, pushChanges, pushChangesImmediately } from '$lib/updates';
     import {Editable, DatePicker, focusEditable} from '$lib'
 
 
@@ -582,7 +582,7 @@
             // there was some changes in order, mayby even reorderElements
             if(propsChanges.state >= 0)
             {
-                pushChanges();
+                await pushChangesImmediately();
             }
 
             const req = {

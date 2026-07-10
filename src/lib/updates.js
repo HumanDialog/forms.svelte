@@ -184,7 +184,9 @@ export async function pushChangesImmediately()
 }
 
 
+
 let flush_changes_semaphore = false
+let flush_promise = null;
 
 async function flushChanges(ticket)
 {
@@ -195,100 +197,103 @@ async function flushChanges(ticket)
         if(!modified_items_map.size)
             return;
 
-        if(flush_changes_semaphore)
-            return;
-
-        let changes = [];
-        modified_items_map.forEach((value, key) =>
+        if (flush_promise) 
         {
-            changes.push(value.item);
-        });
+            await flush_promise;
+            return; 
+        }
+
+        flush_promise = ( async () => { 
+
+            let changes = [];
+            modified_items_map.forEach((value, key) =>
+            {
+                changes.push(value.item);
+            });
 
 
-        /*
-        const res = await reef.post('/Push', { Items: changes }, onErrorShowAlert);
+            //flush_changes_semaphore = true
 
-        //if(res)
-        //{
-            modified_items_map.clear();
-        //}
-        */
+            let path = reef.correct_path_with_api_version_if_needed('/Push')
 
-        flush_changes_semaphore = true
+            try {
+                console.log("PUSH")
+                console.trace()
 
-        let path = reef.correct_path_with_api_version_if_needed('/Push')
+                await new Promise(r => setTimeout(r, 1000));
+
+                let res = await reef.fetch(path, {
+                    method: 'POST',
+                    body: JSON.stringify( { Items: changes })
+                })
+                if (res.ok) {
+
+                    await handle_push_items_response(res)
+
+                    modified_items_map.clear();
+                    unsavedModificationsTicket.set( get(unsavedModificationsTicket) + 1 )
+
+                    afterPushCallbacks.forEach( cb => cb())
+                    afterPushCallbacks = [] 
+                }
+                else
+                {
+                    console.error(path)
+                    console.error(JSON.stringify( { Items: changes } ))
+
+                    let err = ''
+
+                    switch(res.status)
+                    {
+                    case 400:               // basic exception like access rights
+                    case 401:
+                    case 403:
+                        modified_items_map.clear();
+                        unsavedModificationsTicket.set( get(unsavedModificationsTicket) + 1 )
+
+                        afterPushCallbacks.forEach( cb => cb())
+                        afterPushCallbacks = []
+
+                        err = await res.text()
+                        console.error(err)
+                        onErrorShowAlert(err)
+                        break;
+
+                    case 409:               // conflict. Bad version of item
+                        modified_items_map.clear();
+                        unsavedModificationsTicket.set( get(unsavedModificationsTicket) + 1 )
+
+                        afterPushCallbacks.forEach( cb => cb())
+                        afterPushCallbacks = []
+
+                        err = i18n({en: 'Incorrect version of the object', es: 'Versión incorrecta del objeto', pl: 'Nieprawidłowa wersja obiektu'})
+                        onErrorShowAlert(err, true) // reload = true
+                        break;
+
+                    default:
+                        err = await res.text()
+                        console.error(err)
+                        onErrorShowAlert(err)
+                        break;
+                    }
+
+                    
+                    
+                    
+                }
+            }
+            catch (err) {
+                console.error(err);
+                onErrorShowAlert(err)
+            } 
+        }) ();
 
         try {
-            console.info(path)
-            console.info(JSON.stringify( { Items: changes } ))
-
-            let res = await reef.fetch(path, {
-                method: 'POST',
-                body: JSON.stringify( { Items: changes } )
-            })
-            if (res.ok) {
-
-                await handle_push_items_response(res)
-
-                modified_items_map.clear();
-                unsavedModificationsTicket.set( get(unsavedModificationsTicket) + 1 )
-
-                afterPushCallbacks.forEach( cb => cb())
-                afterPushCallbacks = [] 
-            }
-            else
-            {
-                console.error(path)
-                console.error(JSON.stringify( { Items: changes } ))
-
-                let err = ''
-
-                switch(res.status)
-                {
-                case 400:               // basic exception like access rights
-                case 401:
-                case 403:
-                    modified_items_map.clear();
-                    unsavedModificationsTicket.set( get(unsavedModificationsTicket) + 1 )
-
-                    afterPushCallbacks.forEach( cb => cb())
-                    afterPushCallbacks = []
-
-                    err = await res.text()
-                    console.error(err)
-                    onErrorShowAlert(err)
-                    break;
-
-                case 409:               // conflict. Bad version of item
-                    modified_items_map.clear();
-                    unsavedModificationsTicket.set( get(unsavedModificationsTicket) + 1 )
-
-                    afterPushCallbacks.forEach( cb => cb())
-                    afterPushCallbacks = []
-
-                    err = i18n({en: 'Incorrect version of the object', es: 'Versión incorrecta del objeto', pl: 'Nieprawidłowa wersja obiektu'})
-                    onErrorShowAlert(err, true) // reload = true
-                    break;
-
-                default:
-                    err = await res.text()
-                    console.error(err)
-                    onErrorShowAlert(err)
-                    break;
-                }
-
-                
-                
-                
-            }
+            await flush_promise;
+        } finally 
+        {
+            flush_promise = null;
         }
-        catch (err) {
-            console.error(err);
-            onErrorShowAlert(err)
-        }
-
-        flush_changes_semaphore = false
-
     }
 } 
 

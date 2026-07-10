@@ -47,9 +47,9 @@
                         api:    "http://127.0.0.1:1996/",
                         //api:    "http://192.168.0.103:1996/",
                         users: appUsers,
-                        apiVersion: "v001"},
-                    fetchHandlers: fetchHandlers
-                   });
+                        apiVersion: "v001"}
+                   },
+                fetchHandlers);
 
     let google_analytics;
     const google_analytics_identifier = __GA_IDENTIFIER__

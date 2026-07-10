@@ -45,8 +45,8 @@
                         //api:    "http://192.168.0.103:1996/",
                         users: appUsers,
                         apiVersion: "v001"},
-                    fetchHandlers: fetchHandlers
-                   });
+                   },
+                fetchHandlers);
 
     const app_view_routes = /^\/listboard|tdownload|tcontact|tasklist|destlis|deslis|design|desnav|task|note|folder|project|projecttrash|projectarchive|mytasks|mylists|listtemplates|mynotes|alllists|archivedlists|deletedlists|myarchivedlists|mydeletedlists|allprojects|archivedprojects|deletedprojects|myfolders|group-folders|general-channels|private-channels|members|chat|thread|newthread|forum|thome|profile|myday|teamday|doc|request-license-file|nav\/(.*)\/?$/i
 
