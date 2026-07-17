@@ -241,6 +241,7 @@
                 mricon: 'bell-off',
                 action: (f) => unsubscribeChannel(),
                 tbr: 'C',
+                fab: 'M09',
                 hideToolbarCaption: true
             }
         }
@@ -251,6 +252,7 @@
                 mricon: 'bell',
                 action: (f) => subscribeChannel(),
                 tbr: 'C',
+                fab: 'M09',
                 hideToolbarCaption: true
             }
         }
@@ -871,3 +873,27 @@
         <Spinner delay={3000}/>
     {/if}
 {/if}
+
+
+<style>
+    .separator {
+        display: flex;
+        align-items: center;
+        text-align: center;
+    }
+
+    .separator::before,
+    .separator::after {
+        content: '';
+        flex: 1;
+
+    }
+
+    .separator:not(:empty)::before {
+        margin-right: 1rem;
+    }
+
+    .separator:not(:empty)::after {
+        margin-left: 1rem;
+    }
+</style>
