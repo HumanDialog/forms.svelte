@@ -743,7 +743,7 @@
                 list_properties: task_lists_grid_definition
             },
             allprojects:{
-                title: '__; en: Active projects; es: Proyectos en curso; pl: Aktywne projekty',
+                title: '__; en: Projects; es: Proyectos; pl: Projekty',
                 summary: "__;en: All active projects visible to all group members;es: Todos los proyectos activos visibles para todos los miembros del grupo;pl: Wszystkie aktywne projekty widoczne dla wszystkich członków grupy",
                 self: "group",
                 self_type: 'Group',

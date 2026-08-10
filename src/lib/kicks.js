@@ -171,8 +171,12 @@ function checkKicks(informObservers=true)
                 }
                 ).catch(err => console.error(err))
             }
+            else if(res.status == 404)
+            {
+                pauseKicksObservers()
+            }
         }).catch(err => {
-            console.error(err)
+            //console.error(err)
         })
     }
     

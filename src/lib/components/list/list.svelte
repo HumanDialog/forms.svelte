@@ -301,6 +301,8 @@
         if(!definition.can_insert)
             return;
 
+        after = ensure_is_on_list(after)
+
         show_insertion_row_after_element = after ?? END_OF_LIST;
 
         last_activated_element = getActive(selectionKey);
@@ -447,10 +449,31 @@
         pushChanges();
     }
 
+    function ensure_is_on_list(after)
+    {
+        if(!after)
+            return null;
+
+        const after_key = getItemKey(after)
+        if(!after_key)
+            return null
+
+        if(!items)
+            return null
+
+        const idx = items.findIndex(e => getItemKey(e) == after_key)
+        if(idx < 0)
+            return null
+        else
+            return after
+    }
+
     export function assignOrder(after: object | null): number
     {
         if(!orderAttrib)
             return 0;
+
+        after = ensure_is_on_list(after)
 
         if(after)
         {

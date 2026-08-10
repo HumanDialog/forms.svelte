@@ -122,12 +122,25 @@
         })
     }
 
+    function testUnreadMessagesA(channels)
+    {
+        channels.forEach(ch => ch.GetUnreadMessagesNo=4)
+    }
+
+    function testUnreadMessagesB(channels)
+    {
+        channels.forEach(ch => ch.UnreadMessagesNo=3)
+    }
+
     function fetchGeneralChannels()
     {
         return reef.get("/group/MessageChannels?sort=Order&fields=$ref,Id,Title,Summary,Order,href,icon,$type,GetUnreadMessagesNo,IsSubscribed", onErrorShowAlert).then((res) =>
         {
             if(res != null)
+            {
                 generalChannels = res.MessageChannel;
+                //testUnreadMessagesA(generalChannels)
+            }
             else
                 generalChannels = [];
         })
@@ -138,7 +151,10 @@
         return reef.get("/user/MessageChannels?sort=Order&fields=$ref,Id,Title,Summary,Order,href,icon,$type,UnreadMessagesNo,MessageChannelId", onErrorShowAlert).then((res) =>
         {
             if(res != null)
+            {
                 directChannels = res.MessageChannelUser;
+                //testUnreadMessagesB(directChannels)
+            }
             else
                 directChannels = [];
         })
@@ -197,9 +213,10 @@
                                     <div class="absolute
                                             inline-flex items-center justify-center
                                             w-5 h-5
-                                            text-[10px] font-bold text-white bg-red-500 border-2 border-white rounded-full -top-1 -end-5 dark:border-gray-900">
-                                        {#if item.UnreadMessagesNo <= 9}
-                                            {item.UnreadMessagesNo}
+                                            text-[10px] font-bold text-white bg-red-500 border-2 border-white rounded-full -top-1 -end-5 dark:border-gray-900
+                                            indent-0">
+                                        {#if item.GetUnreadMessagesNo <= 9}
+                                            {item.GetUnreadMessagesNo}
                                         {:else}
                                             9+
                                         {/if}
@@ -233,7 +250,8 @@
                                     <div class="absolute
                                             inline-flex items-center justify-center
                                             w-5 h-5
-                                            text-[10px] font-bold text-white bg-red-500 border-2 border-white rounded-full -top-1 -end-5 dark:border-gray-900">
+                                            text-[10px] font-bold text-white bg-red-500 border-2 border-white rounded-full -top-1 -end-5 dark:border-gray-900
+                                            indent-0">
                                         {#if item.UnreadMessagesNo <= 9}
                                             {item.UnreadMessagesNo}
                                         {:else}

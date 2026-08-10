@@ -177,7 +177,7 @@
             ElementId: 0,
                 ElementType: '',
                 ElementNav: '',
-                Title: '_; Active projects; Proyectos en curso; Aktywne projekty',
+                Title: '_; Projects; Proyectos; Projekty',
                 Summary: '',
                 icon: 'building',
                 href: '/allprojects',
@@ -601,7 +601,7 @@
     {
         canSelectElements = false
         levelUpHRef = '/root'
-        currentLevelTitle = '_; Active projects; Proyectos en curso; Aktywne projekty'
+        currentLevelTitle = '_; Projects; Proyectos; Projekty'
         canAttachToCurrentContainer = canAttachAsRootFolder
 
         let res = await reef.get(`/group/Projects?fields=Id,$type,$ref,Title,Summary,href,icon&sort=Order`);

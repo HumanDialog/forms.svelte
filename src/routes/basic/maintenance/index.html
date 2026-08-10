@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikacja została przeniesiona</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => 
+        {
+            const targetHost = 'https://octopus.objectreef.dev';
+
+            const currentPath = window.location.pathname;
+            const currentSearch = window.location.search;
+            const currentHash = window.location.hash;
+
+            const newTargetUrl = `${targetHost}${currentPath}${currentSearch}${currentHash}`;
+
+            const redirectLink = document.getElementById('redirect-link');
+            const displayUrl = document.getElementById('display-url');
+
+            if (redirectLink)
+                redirectLink.href = newTargetUrl;
+            
+            if (displayUrl)
+                displayUrl.textContent = newTargetUrl;
+
+            // setTimeout(() => { window.location.href = newTargetUrl; }, 3000);
+        });
+    </script>
+
+</head>
+<body class="dark bg-stone-50 dark:bg-stone-900 text-stone-700 dark:text-stone-400 ">
+
+    <div class="bg-stone-50 dark:bg-stone-900 text-stone-700 dark:text-stone-400
+                pb-20">
+        
+            <div class="sm:mb-40" aria-labelledby="modal-title" role="dialog" aria-modal="true" >
+            <div class="">
+            <div class="flex  items-end justify-center p-1 text-center sm:items-center sm:p-0">
+                <div class=" p-0
+                            sm:my-8 w-full sm:max-w-lg
+                            bg-stone-100 dark:bg-stone-800
+                            rounded-lg
+
+                            sm:shadow-xl sm:shadow-slate-700/70
+                            sm:dark:shadow-black/80
+                            sm:outline sm:outline-1 sm:outline-stone-500
+
+                            text-left transition-all">
+                    
+                    <div class=" paper w-full
+                                prose prose-base prose-zinc dark:prose-invert prose-a:no-underline
+
+                                m-0 pt-5 pb-5 px-1 sm:px-8
+                                sm:rounded
+                                bg-stone-200 dark:bg-stone-900
+                                flex flex-col">
+
+                        <!-------------------------------------------------------------------->
+                        <!-- POPUP HEADER ---------------------------------------------------->
+                        <!-------------------------------------------------------------------->
+                        <h3 class = "flex-none">
+                            <div class="w-full flex flex-row justify-between">
+                                <div class="grow ">
+                                    <span class="text-left">Aplikacja zmieniła adres</span>
+                                </div>
+                            </div>
+                        </h3>
+
+
+                        <!-------------------------------------------------------------------->
+                        <!-- POPUP CONTENT---------------------------------------------------->
+                        <!-------------------------------------------------------------------->
+                        <div class="grow">
+                            <p class="flex flex-row">
+                                Ta strona została na stałe przeniesiona pod nowy adres.<br>
+                                Kliknij poniżej, aby przejść do właściwego miejsca z zachowaniem obecnej lokalizacji.
+                            </p>
+                        </div>
+                        
+
+                        <!-------------------------------------------------------------------->
+                        <!-- POPUP FOOTER----------------------------------------------------->
+                        <!-------------------------------------------------------------------->
+                        <h4 class = "flex-none">
+
+                            <div class="flex flex-row justify-end gap-2">
+
+                                <a id="redirect-link" 
+                                    href="https://octopus.objectreef.dev" 
+                                    class="px-4 mx-2
+                                        bg-stone-100 dark:bg-stone-700
+                                        outline outline-offset-2 outline-2
+                                        outline-stone-200 dark:outline-stone-500
+                                        focus:outline-stone-300 dark:focus:outline-stone-400
+                                        hover:bg-stone-200 hover:dark:bg-stone-600">
+                                    Przejdź do octopus.objectreef.dev
+                                </a>
+                            </div>
+                        </h4>
+
+
+                    </div>
+
+
+                </div>
+            </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
