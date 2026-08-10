@@ -9,7 +9,7 @@
   export let xl = false;
 
   import Folder from './ricons/folder.svelte'
-
+  import FolderOpenDot from './ricons/folder-open-dot.svelte'
   import Turtle from './ricons/turtle.svelte'
   import Cat from './ricons/cat.svelte'
   import ChessRook from './ricons/chess-rook.svelte'
@@ -135,6 +135,7 @@
     "arrow-left": ArrowLeft,
     "check-check": CheckCheck,
     "folder": Folder,
+    "folder-open-dot": FolderOpenDot,
     "square-pen": SquarePen,
     "square-check-big": SquareCheckBig,
     "clipboard-pen-line": ClipboardPenLine,

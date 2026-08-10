@@ -15,6 +15,55 @@ export const SCREEN_SIZES = {
     xl: 1280, //px	@media (min-width: 1280px) { ... }
 }
 
+const ACC_UNKNOWN           =   0
+const ACC_USER              =   1000
+const ACC_USER_SHARED       =   2000
+
+const ACC_EXT_USER_SHARED   =   2500
+
+const ACC_GROUP             =   3000
+const ACC_GROUP_SHARED      =   7000
+
+const ACC_PUBLIC            =   9000
+
+export function get_acc_icon(acc_code)
+{
+    switch(acc_code)
+    {
+        case ACC_UNKNOWN:
+            return 'building';
+        case ACC_USER:
+            return 'lock-keyhole'
+        case ACC_USER_SHARED:
+            return 'lock-keyhole'
+        case ACC_GROUP:
+            return 'lock'
+        case ACC_GROUP_SHARED:
+            return 'lock'
+        case ACC_PUBLIC:
+            return 'shared'
+    }
+}
+
+export function get_acc_color(acc_code)
+{
+    switch(acc_code)
+    {
+        case ACC_UNKNOWN:
+            return 'text-gray-500';
+        case ACC_USER:
+            return 'text-amber-500'
+        case ACC_USER_SHARED:
+            return 'text-orange-500'
+        case ACC_GROUP:
+            return 'text-sky-500'
+        case ACC_GROUP_SHARED:
+            return 'text-purple-500'
+        case ACC_PUBLIC:
+            return 'text-lime-500'
+    }
+}
+
 export function isDeviceSmallerThan(br)
 {
     return window.innerWidth < SCREEN_SIZES[br]
@@ -604,6 +653,8 @@ export function makeEditableIdFromFieldName(fieldName)
 {
     return `__or_editable_${fieldName}`
 }
+
+
 
 export function focusEditable(fieldName)
 {
@@ -1320,9 +1371,9 @@ export function saveScrollPosition(href)
     scrolledElements.forEach( el =>
         {
             state.elements.push({
-                id: el.id, 
-                tag: el.tagName, 
-                x: el.scrollLeft, 
+                id: el.id,
+                tag: el.tagName,
+                x: el.scrollLeft,
                 y: el.scrollTop
             })
         }
@@ -1337,16 +1388,45 @@ export function restoreScrollPosition(href)
         return;
 
     const state = scrollPositions.get(href);
-    
+
     state.elements.forEach(el => {
         if(el.id)
         {
             const scrollableContentDiv = document.getElementById(el.id)
             if(scrollableContentDiv)
                 scrollableContentDiv.scrollTo(el.x, el.y)
-            
+
         }
         else if(el.tag == 'HTML')
             document.documentElement.scrollTo(el.x, el.y)
     })
+}
+
+export function get_main_object_fetch_error_description(err, res)
+{
+    if(res)
+    {
+        switch(res.status)
+        {
+        case 404:
+            return i18n({en:'Object not found', es:'Objeto no encontrado', pl: 'Nie znaleziono obiektu'})
+
+        case 403:
+            return i18n({en:' Access denied', es:'Acceso denegado', pl: 'Odmowa dostępu'})
+
+        default:
+            return err;
+        }
+    }
+    else
+    {
+        // tmp
+        if(err.startsWith("Error: 404"))
+            return i18n({en:'Object not found', es:'Objeto no encontrado', pl: 'Nie znaleziono obiektu'})
+        else if(err.startsWith("Error: 8225"))
+            return i18n({en:' Access denied', es:'Acceso denegado', pl: 'Odmowa dostępu'})
+        else
+            return err;
+    }
+
 }

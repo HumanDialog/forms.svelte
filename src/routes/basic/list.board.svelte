@@ -3,6 +3,7 @@
     import {location, push, link} from 'svelte-spa-router'
     import {
 		Page,
+        Paper,
 		Kanban,
 		KanbanColumn,
 		KanbanTitle,
@@ -33,7 +34,7 @@
         PaperTable,
         PaperHeader, reloadPageToolbarOperations,
         setjItemProperty, KanbanColumnTop, openInNewTab, copyAddress, pushChangesImmediately,
-		saveScrollPosition, restoreScrollPosition
+		saveScrollPosition, restoreScrollPosition, get_main_object_fetch_error_description
 
 	} from '$lib';
     import {FaPlus, FaList, FaPen, FaCaretLeft, FaCaretRight, FaTrash, FaArrowsAlt, FaArchive, FaCheck, FaEllipsisH, FaChevronRight,
@@ -64,6 +65,7 @@
     let usersComboSource;
     let prevLocation = '';
     let restoreScrollAfterUpdate = false
+    let failed_message = ''
 
     const TLK_KANBAN_CHECKLIST = 0
     const TLK_KANBAN_PROCESS = 1
@@ -185,6 +187,7 @@
 
     async function readContextItem()
     {
+        failed_message = ''
         let res = await reef.post(`${listPath}/query`,
                             {
                                 Id: 1,
@@ -220,7 +223,7 @@
                                     }
                                 ]
                             },
-                            onErrorShowAlert);
+                            handle_fetch_error);
         if(res)
         {
             const taskList = res.TaskList
@@ -233,6 +236,12 @@
         }
         else
             return null
+    }
+
+    function handle_fetch_error(err, res)
+    {
+        task = null
+        failed_message = get_main_object_fetch_error_description(err, res)
     }
 
     async function fetchData()
@@ -465,11 +474,8 @@
                         ... (currentList.IsSubscribed ? [unfollowOperation(reloadThisOperations, false)] : [followOperation(reloadThisOperations, false)]),
                         ... (currentList.AreFinishedTasksHidden ? [showFinishedTasksOperation( reloadThisOperations, false )] : [hideFinishedTasksOperation( reloadThisOperations, false )]),
                         {
-                            //icon: FaRandom,
-                            caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
+                            caption: '_; Change task list template; Modificar la plantilla de la lista de tareas; Zmień szablon listy zadań',
                             action: changeListKind,
-                        //    fab: 'S02',
-                        //    tbr: 'C'
                         },
                         save_as_template_op,
                         repeat_list_op,
@@ -574,35 +580,34 @@
 
     async function changeListKind(button, aroundRect)
     {
-        const listTypes = await reef.get('group/GetTaskListTypes', onErrorShowAlert)
-        if(!listTypes || !Array.isArray(listTypes) || listTypes.length == 0)
-            return;
+        const res = await reef.get('group/ListTemplates?fields=Id,$ref,Name,Summary')
+        const templates = res ? res.TaskList : []
 
-        let menuOperations = []
-        let prevKind = 0;
-
-        listTypes.forEach(template => {
-
-            //if(prevKind != template.Kind)
-            //    menuOperations.push({separator: true})
-            //prevKind = template.Kind
-
-            menuOperations.push({
-                caption: ext(template.Name),
-                description: template.Summary ? ext(template.Summary) : getDefaultTypeSummary(template),
-                action: (f) => askToChangeListKind(template)
-            })
-        })
-
-        if(menuOperations.length > 0)
+        let menu = []
+        if(!templates || !Array.isArray(templates) || templates.length == 0)
         {
-            let rect;
-            if(aroundRect)
-                rect = aroundRect
-            else
-                rect = button.getBoundingClientRect()
-            showMenu(rect, menuOperations)
+            menu = [{
+                caption: '_; No templates; No hay plantillas; Brak szablonów',
+                disabled: true
+            }]
         }
+        else
+        {
+            templates.forEach(t => {
+                menu.push({
+                    caption: ext(t.Name),
+                    description: t.Summary ? ext(t.Summary) : '',
+                    action: (f) => askToChangeListKind(t)
+                })
+            })
+        }
+
+        let rect;
+        if(aroundRect)
+            rect = aroundRect
+        else
+            rect = button.getBoundingClientRect()
+        showMenu(rect, menu)
     }
 
     let changeKindModal;
@@ -621,9 +626,7 @@
         if(!changeListTo)
             return
 
-        let newHref = await reef.post(`${listPath}/ChangeListKind`, {
-            template: changeListTo
-        }, onErrorShowAlert)
+        let newHref = await reef.post(`${listPath}/ChangeListTemplate`, { template: changeListTo.$ref})
 
         changeListTo = null
 
@@ -946,7 +949,7 @@
                         ... (currentList.IsSubscribed ? [unfollowOperation(reloadThisOperations, true)] : [followOperation(reloadThisOperations, true)]),
                         ... (currentList.AreFinishedTasksHidden ? [showFinishedTasksOperation( reloadThisOperations, true )] : [hideFinishedTasksOperation( reloadThisOperations, true )]),
                         {
-                            caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
+                            caption: '_; Change task list template; Modificar la plantilla de la lista de tareas; Zmień szablon listy zadań',
                             action: changeListKind,
                         },
                         save_as_template_op,
@@ -1131,11 +1134,8 @@
                         ... (currentList.IsSubscribed ? [unfollowOperation(reloadThisOperations, true)] : [followOperation(reloadThisOperations, true)]),
                         ... (currentList.AreFinishedTasksHidden ? [showFinishedTasksOperation( reloadThisOperations, true )] : [hideFinishedTasksOperation( reloadThisOperations, true )]),
                         {
-                            //icon: FaRandom,
-                            caption: '_; Change task list kind; Cambiar tipo de lista de tareas; Zmień rodzaj listy zadań',
+                            caption: '_; Change task list template; Modificar la plantilla de la lista de tareas; Zmień szablon listy zadań',
                             action: changeListKind,
-                        //    fab: 'S02',
-                        //    tbr: 'C'
                         },
                         save_as_template_op,
                         repeat_list_op,
@@ -1549,7 +1549,16 @@
 	</Page>
 </div>
 {:else}
-	<Spinner delay={3000} />
+	{#if failed_message}
+        <Paper>
+            <PaperHeader></PaperHeader>
+            <h3>_; Error; Error; Błąd</h3>
+            <p>{failed_message}</p>
+        </Paper>
+        
+    {:else}
+        <Spinner delay={3000}/>
+    {/if}
 {/if}
 {/key}
 
@@ -1567,8 +1576,8 @@
         bind:this={archiveModal}
         />
 
-<Modal  title={i18n(['Change list kind', 'Cambiar tipo de lista', 'Zmień rodzaj listy'])}
-        content={i18n(["Are you sure you want to change current list kind?", "¿Estás seguro de que deseas cambiar el tipo de lista actual?", "Czy na pewno chcesz zmienić aktualny rodzaj listy?"])}
+<Modal  title={i18n(['Change list template', 'Cambiar plantilla de lista', 'Zmień szablon listy'])}
+        content={i18n(["Are you sure you want to change current list template?", "¿Estás seguro de que quieres cambiar la plantilla de la lista actual?", "Czy na pewno chcesz zmienić aktualny szablon listy?"])}
         icon={FaRandom}
         onOkCallback={handleChangeListKind}
         okCaption={i18n(['Change', 'Cambiar', 'Zmień'])}

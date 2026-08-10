@@ -85,7 +85,7 @@
     const new_list_from_template_op = (after=null) => {
         return {
             //mricon: 'notebook',
-            caption: '_; New list from a template; Nueva lista a partir de una plantilla; Nowa lista ze wzorca',
+            caption: '_; New list from a template; Nueva lista a partir de una plantilla; Nowa lista według szablonu',
             action: (btt, rect) => create_new_list_from_template(after, btt, rect)
         }
     }
@@ -133,10 +133,65 @@
         return {
             mricon: 'notebook',
             caption: '_; New template; Nueva plantilla; Nowy szablon',
-            action: () => { new_element_creator=new_template_list_creator; listComponent.addRowAfter(list) },
+            //action: () => { new_element_creator=new_template_list_creator; listComponent.addRowAfter(list) },
+            action: (btt) => run_create_template_list_creator(btt, list),
             fab: 'M01',
             tbr: 'A'
         }
+    }
+
+    async function run_create_template_list_creator(btt, after)
+    {
+        const list_types = await reef.get('group/GetTaskListTypes')
+        if(!list_types || !Array.isArray(list_types) || list_types.length == 0)
+            return;
+
+        let menu = []
+        if(!list_types || !Array.isArray(list_types) || list_types.length == 0)
+        {
+            menu.push({
+                caption: '_; No list types; No hay tipos de lista; Brak typów list',
+                disabled: true
+            })
+        }
+        else
+        {
+            list_types.forEach(l => menu.push({
+                caption: ext(l.Name),
+                description: l.Summary ? ext(l.Summary) : get_default_list_type_summary(l),
+                action: async () => {
+                        const new_list_order = listComponent.assignOrder(after)
+                        const res = await reef.post(`${self.$ref}/CreateTemplateListFromType`, {
+                                        name: '',
+                                        summary: '',
+                                        listType: l,
+                                        order: new_list_order})
+                        if(res)
+                        {
+                            const new_list = res.TaskList
+                            await reloadLists(new_list.$ref)
+                        }
+                    }
+            }))
+        }
+
+        const rect = btt.getBoundingClientRect()
+        showMenu(rect, menu)
+    } 
+
+    function get_default_list_type_summary(list)
+    {
+        if(!list.TaskStates)
+            return '';
+
+        let result = ''
+        list.TaskStates.forEach(s => {
+            if(result)
+                result += ', '
+            result += ext(s.name)
+        })
+
+        return result
     }
 
 

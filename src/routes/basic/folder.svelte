@@ -20,7 +20,8 @@
                 refreshToolbarOperations,
 				showFloatingToolbar,
                 reloadPageToolbarOperations, Paper, PaperHeader, openInNewTab, copyAddress,
-				focusEditable, showMenu, Ricon} from '$lib'
+                get_acc_icon, get_acc_color,
+				focusEditable, showMenu, Ricon, get_main_object_fetch_error_description} from '$lib'
     import {FaTrash, FaCloudUploadAlt} from 'svelte-icons/fa'
 
 
@@ -45,10 +46,15 @@
     let contextItemId;
 
     let listComponent;
+    let breadcrump;
     let folderTitle = ''
     let pendingUploading = false;
+    let failed_message = ''
 
     let users = [];
+
+    let acc_icon                = 'minus'
+    let acc_color               = 'text-stone-500'
 
     const STATE_FINISHED = 7000;
 
@@ -163,6 +169,7 @@
             folderTitle = ext(contextItem.Title);
             contextItemId = cachedValue.Id;
             listComponent?.reload(contextItem, listComponent.KEEP_SELECTION)
+            breadcrump?.reload(contextItem.GetCanonicalPath)
         }
         //---------------------------------------------------
         const readItem = await readContextItem(contextNavigation)
@@ -180,15 +187,19 @@
 
         if(contextItem)
         {
+            acc_icon = get_acc_icon(contextItem.AccCode)
+            acc_color = get_acc_color(contextItem.AccCode)
             folderTitle = ext(contextItem.Title);
             setupAllElements(contextItem)
         }
 
         listComponent?.reload(contextItem, listComponent.KEEP_SELECTION)
+        breadcrump?.reload(contextItem.GetCanonicalPath)
     }
 
     async function readContextItem(contextNavigation)
     {
+        failed_message = ''
         let res = await reef.post(`${contextNavigation}/query`,
         {
             Id: 1,
@@ -197,7 +208,7 @@
             Tree:
             [
             {   Id: 1, Association: '',
-                Expressions:['Id', '$ref', '$type', 'icon', 'Title','Summary', 'Kind', 'ModificationDate', 'CreatedBy', 'IsPinned', 'IsBasket', 'IsRootPinned', 'GetCanonicalPath', '$ver', 'Status'],
+                Expressions:['Id', '$ref', '$type', 'icon', 'Title','Summary', 'Kind', 'ModificationDate', 'CreatedBy', 'IsPinned', 'IsBasket', 'IsRootPinned', 'GetCanonicalPath', '$ver', 'AccCode', 'Status'],
                 SubTree:[
                     {   Id: 2, Association: 'Folders',
                         Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'icon', 'IsInBasket' , 'IsCanonical',  'icon', 'FolderId', '$type', '$ver']
@@ -223,15 +234,22 @@
             }
         ]
         },
-        onErrorShowAlert);
+        handle_fetch_error);
         if(res)
         {
             const folderItem = res.Folder
-
             return folderItem;
         }
         else
+        {
             return null;
+        }
+    }
+
+    function handle_fetch_error(err, res)
+    {
+        contextItem = null
+        failed_message = get_main_object_fetch_error_description(err, res);
     }
 
     function setupAllElements(contextItem)
@@ -2159,9 +2177,9 @@
         <Paper>
             <PaperHeader>
             <div class="flex flex-row items-center">
-                <Breadcrumb  path = {contextItem.GetCanonicalPath}/>
-                <div class="ml-auto text-red-500" >
-                    <Ricon icon='lock' s/>
+                <Breadcrumb  path = {contextItem.GetCanonicalPath} bind:this={breadcrump}/>
+                <div class="ml-auto {acc_color}" >
+                    <Ricon icon={acc_icon} s/>
                 </div>
             </div>
 
@@ -2199,7 +2217,16 @@
     </Page>
     {/key}
 {:else}
-    <Spinner delay={3000}/>
+    {#if failed_message}
+        <Paper>
+            <PaperHeader></PaperHeader>
+            <h3>_; Error; Error; Błąd</h3>
+            <p>{failed_message}</p>
+        </Paper>
+
+    {:else}
+        <Spinner delay={3000}/>
+    {/if}
 {/if}
 
 

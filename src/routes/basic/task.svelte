@@ -28,7 +28,8 @@
 			randomString,
 			showMenu, mainContentPageReloader,
             SHOW_MENU_BELOW, focusEditable, openInNewTab, copyAddress,
-            List, ListTitle, ListSummary, ListInserter, Icon, Paper, PaperTopMargin, PaperHeader
+            List, ListTitle, ListSummary, ListInserter, Icon, Paper, PaperTopMargin, PaperHeader, get_main_object_fetch_error_description,
+            Ricon, get_acc_icon, get_acc_color,
             } from '$lib'
 	import { onMount, tick, afterUpdate } from 'svelte';
     import {location, querystring, push, link} from 'svelte-spa-router'
@@ -70,6 +71,9 @@
     const NR_COVER              = 2
 
     let descriptionNotes = []
+    let acc_icon                = 'minus'
+    let acc_color               = 'text-stone-500'
+
 
     $: onParamsChanged($location, $mainContentPageReloader)
 
@@ -120,6 +124,8 @@
         if(!taskRef)
             return;
 
+        failed_message = ''
+
         let res = await reef.post(`${taskRef}/query`,
                         {
                             Id: 1,
@@ -130,7 +136,7 @@
                                 {
                                     Id: 1,
                                     Association: '',
-                                    Expressions:['Id', 'Index', 'Title','Summary', 'Description', 'DueDate', 'Tags', 'State', 'Status', 'AttachedFiles', 'GetCanonicalPath', '$ref', '$type', '$acc', '$ver', 'href', 'icon'],
+                                    Expressions:['Id', 'Index', 'Title','Summary', 'Description', 'DueDate', 'Tags', 'State', 'Status', 'AccCode', 'AttachedFiles', 'GetCanonicalPath', '$ref', '$type', '$acc', '$ver', 'href', 'icon'],
                                     SubTree:[
                                         {
                                             Id: 10,
@@ -170,7 +176,7 @@
                                 }
                             ]
                         },
-                        onErrorShowAlert)
+                        handle_fetch_error)
 
         task = res.Task
         if(task.TaskList?.TaskStates)
@@ -239,7 +245,6 @@
                 IsCanonical: 1
         })
 
-
         task.attachements = []
         if(task.Notes && task.Notes.length > 0)
             task.Notes.forEach((n) => task.attachements.push(n))
@@ -254,6 +259,17 @@
             descriptionNotes = task.Notes.filter((n) => n.Role == NR_DESCRIPTION)
         else
             descriptionNotes = []
+
+        acc_icon = get_acc_icon(task.AccCode)
+        acc_color = get_acc_color(task.AccCode)
+    }
+
+
+    let failed_message = ''
+    function handle_fetch_error(err, res)
+    {
+        task = null
+        failed_message = get_main_object_fetch_error_description(err, res)
     }
 
     async function onUpdateAllTags(newAllTags)
@@ -473,7 +489,7 @@
     async function runPasteBasket4Task(btt, aroundRect)
     {
         const clipboardElements = await fetchComposedClipboard4Task()
-        
+
 
         showFloatingToolbar(aroundRect, BasketPreview,
             {
@@ -501,7 +517,7 @@
     async function runPasteBrowserRecent4Task(btt, aroundRect)
     {
         const clipboardElements = getBrowserRecentElements4Task()
-        
+
         showFloatingToolbar(aroundRect, BasketPreview, {
             destinationContainer: taskRef,
             onRefreshView: async (f) => await reloadWithAttachements(),
@@ -522,7 +538,7 @@
         })
     }
 
-    
+
     async function runPopupExplorer4CopyToFolder(btt, aroundRect, element)
     {
         showFloatingToolbar(aroundRect, PopupExplorer, {
@@ -551,8 +567,8 @@
         })
     }
 
-    
-    
+
+
 
     async function reloadWithAttachements()
     {
@@ -796,7 +812,7 @@
                             caption: '_; Properties; Propiedades; Właściwości',
                             action: (btt, rect)=> runElementProperties(btt, rect, task, 'Task')
                         }
-                        
+
                     ]
                 }
             ]
@@ -2181,7 +2197,12 @@
         title={task.Title}>
     <Paper>
             <PaperHeader>
+            <div class="flex flex-row items-center">
             <Breadcrumb class="mt-1 sm:min-w-[65ch]" path={task.GetCanonicalPath}/>
+            <div class="ml-auto {acc_color}" >
+                <Ricon icon={acc_icon} s/>
+            </div>
+            </div>
             </PaperHeader>
 
             <div class="w-full flex flex-row justify-between">
@@ -2403,6 +2424,17 @@
     <input hidden type="file" id="imageFile" accept="image/*" bind:this={imgInput} on:change={onImageSelected}/> <!-- capture="environment" -->
     <input hidden type="file" id="attachementFile" accept="*/*" bind:this={attInput} on:change={onAttachementSelected}/>
 </Page>
+{:else}
+    {#if failed_message}
+        <Paper>
+            <PaperHeader></PaperHeader>
+            <h3>_; Error; Error; Błąd</h3>
+            <p>{failed_message}</p>
+        </Paper>
+
+    {:else}
+        <Spinner delay={3000}/>
+    {/if}
 {/if}
 
 <Modal title={i18n(['Uploading...', 'Carga...', 'Przesyłanie...'])}
