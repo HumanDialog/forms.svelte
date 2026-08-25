@@ -35,8 +35,8 @@
             List, ListTitle, ListSummary, ListInserter, Icon, Ricon,
             reloadPageToolbarOperations, Paper, PaperHeader, focusEditable, openInNewTab, copyAddress,
             get_main_object_fetch_error_description,
-			getNiceStringDateTime
-
+			getNiceStringDateTime,
+            get_acc_icon, get_acc_color,
             } from '$lib'
 	import { onMount, tick } from 'svelte';
 
@@ -81,7 +81,9 @@
     const NK_POST              = 2
     let isThread = false
     let failed_message = ''
-      
+    let acc_icon                = 'minus'
+    let acc_color               = 'text-stone-500'
+
 
     $: onParamsChanged($location, $mainContentPageReloader)
 
@@ -105,9 +107,12 @@
 
        await reloadData();
        noteId = id
-
        if(note)
+       {
+            acc_icon = get_acc_icon(note.AccCode)
+            acc_color = get_acc_color(note.AccCode)
             pushBrowserRecentElements( note.Id, note.$type, note.$ref, note.Title, note.Summary, "file-text", note.href)
+        }
     }
 
     async function reloadData()
@@ -139,6 +144,7 @@
                                                     'Kind',
                                                     'State',
                                                     'Status',
+                                                    'AccCode',
                                                     'IsPinned',
                                                     'GetCanonicalPath',
                                                     '$ref',
@@ -276,7 +282,7 @@
             noteElement.attachements.sort((a,b) => a.Order-b.Order)
     }
 
-    
+
 
     async function onUpdateAllTags(newAllTags)
     {
@@ -447,7 +453,7 @@
             operations.push({separator: true})
 
         operations.push(pinOp())
-        
+
         operations.push(move_to_archive_op)
         operations.push(move_to_trash_op)
 
@@ -1805,7 +1811,13 @@
             title={note.Title}>
     <Paper class="mb-64">
         <PaperHeader>
+            <div class="flex flex-row items-center">
             <Breadcrumb class="mt-1 sm:min-w-[65ch]" path={note.GetCanonicalPath}/>
+            <div class="ml-auto {acc_color}" >
+                <Ricon icon={acc_icon} s/>
+            </div>
+
+            </div>
         </PaperHeader>
 
         <div class="w-full flex flex-row justify-between">
@@ -2030,7 +2042,7 @@
             <h3>_; Error; Error; Błąd</h3>
             <p>{failed_message}</p>
         </Paper>
-        
+
     {:else}
         <Spinner delay={3000}/>
     {/if}

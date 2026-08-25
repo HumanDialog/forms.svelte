@@ -154,11 +154,6 @@
             cacheKey = "group_SharedFolder";
             operations_kind = OP_FOLDER
             break;
-        case 'threads':
-            contextNavigation = "group/ThreadsRoot";
-            cacheKey = "group_ThreadsRoot";
-            operations_kind = OP_FOLDER
-            break;
         default:
             contextItemId = parseInt(segments[segments.length-1])
             contextNavigation = `Folder/${contextItemId}`
@@ -1791,7 +1786,6 @@
             }
 
             pendingUploading = false;
-            attInput.value = '';
 
             await fetchData();
             listComponent.reload(contextItem, fileLink.$ref);

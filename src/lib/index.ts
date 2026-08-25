@@ -101,6 +101,8 @@ export {default as EditableParagraph} from './components/prose.editable.p.svelte
 
 export {
     selectItem,
+    get_acc_icon,
+    get_acc_color,
     activateItem,
     clearActiveItem,
     isActive,

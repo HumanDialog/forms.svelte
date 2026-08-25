@@ -9,7 +9,7 @@
   export let xl = false;
 
   import Folder from './ricons/folder.svelte'
-
+  import FolderOpenDot from './ricons/folder-open-dot.svelte'
   import Turtle from './ricons/turtle.svelte'
   import Cat from './ricons/cat.svelte'
   import ChessRook from './ricons/chess-rook.svelte'
@@ -105,6 +105,13 @@
   import Eye from './ricons/eye.svelte'
   import EyeOff from './ricons/eye-off.svelte'
 
+  import Lock from './ricons/lock.svelte'
+  import LockOpen from './ricons/lock-open.svelte'
+  import LockKeyhole from './ricons/lock-keyhole.svelte'
+  import LockKeyholeOpen from './ricons/lock-keyhole-open.svelte'
+  import Rss from './ricons/rss.svelte'
+
+
   import ExternalLink from './ricons/external-link.svelte'
   import ToggleLeft from './ricons/toggle-left.svelte'
   import ToggleRight from './ricons/toggle-right.svelte'
@@ -135,6 +142,7 @@
     "arrow-left": ArrowLeft,
     "check-check": CheckCheck,
     "folder": Folder,
+    "folder-open-dot": FolderOpenDot,
     "square-pen": SquarePen,
     "square-check-big": SquareCheckBig,
     "clipboard-pen-line": ClipboardPenLine,
@@ -226,6 +234,12 @@
     'bell-off': BellOff,
     'eye': Eye,
     'eye-off': EyeOff,
+
+    'lock': Lock,
+    'lock-open': LockOpen,
+    'lock-keyhole': LockKeyhole,
+    'lock-keyhole-open': LockKeyholeOpen,
+    'rss': Rss,
 
     'external-link': ExternalLink,
     'toggle-left': ToggleLeft,
