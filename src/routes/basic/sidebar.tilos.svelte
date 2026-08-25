@@ -11,7 +11,7 @@
   
 <Sidebar>
     <SidebarBrand >
-        Tilos <span class="font-thin">community</span>
+        TILOS <span class="font-thin">Users Hub</span>
         
     </SidebarBrand>
     

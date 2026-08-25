@@ -30,6 +30,7 @@
 
   import FileText from './ricons/file-text.svelte'
   import FileArchive from './ricons/file-archive.svelte'
+  import FileSearchCorner from './ricons/file-search-corner.svelte'
   import Upload  from './ricons/upload.svelte'
   import Download from './ricons/download.svelte'
 
@@ -120,6 +121,12 @@
   import Undo from './ricons/undo.svelte'
   import BrushCleaning from './ricons/brush-cleaning.svelte'
   import Share2  from './ricons/share-2.svelte'
+  import ThumbsUp from './ricons/thumbs-up.svelte'
+  import Newspaper from './ricons/newspaper.svelte'
+  import Send from './ricons/send.svelte'
+  import CircleQuestionMark from './ricons/circle-question-mark.svelte'
+  import AtSign from './ricons/at-sign.svelte'
+  import Bookmark from './ricons/bookmark.svelte'
 
   let ricons_box = {
     "archive": Archive,
@@ -157,6 +164,7 @@
 
     "file-text": FileText,
     "file-archive": FileArchive,
+    "file-search-corner" : FileSearchCorner,
 
     "upload": Upload,
     "download": Download,
@@ -227,7 +235,13 @@
     'copy' : Copy,
     'undo' : Undo,
     'brush-cleaning': BrushCleaning,
-    'share-2': Share2
+    'share-2': Share2,
+    'thumbs-up': ThumbsUp,
+    'newspaper': Newspaper,
+    'send': Send,
+    'circle-question-mark' : CircleQuestionMark,
+    'at-sign': AtSign,
+    'bookmark': Bookmark
   }
 
   let width = 24;

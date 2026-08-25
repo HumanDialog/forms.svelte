@@ -1379,3 +1379,99 @@ export function get_main_object_fetch_error_description(err, res)
     }
 
 }
+
+
+export async function download_file_from_href(href, title)
+    {
+        let ref;
+        let name;
+        const queryIdx = href.indexOf('?')
+        if(queryIdx > 0)
+        {
+            ref = href.substring(0, queryIdx)
+            const query = href.substring(queryIdx)
+            const params = new URLSearchParams(query);
+            if(params.has("name"))
+                name = params.get("name")
+            else if(title)
+                name = title
+            else
+                name = 'file_' + randomString(8)
+        }
+        else
+        {
+            ref = href;
+            if(title)
+                name = title
+            else
+                name = 'file_' + randomString(8)
+        }
+
+        const res = await reef.fetch(`json/anyv/${href}`, onErrorShowAlert);
+        if(res.ok)
+        {
+            const blob = await res.blob()
+            const blobUrl = URL.createObjectURL(blob);
+
+            const link = document.createElement("a"); // Or maybe get it from the current document
+            link.href = blobUrl;
+            link.download = name;
+
+            //document.body.appendChild(link); // Or append it whereever you want
+            link.click() //can add an id to be specific if multiple anchor tag, and use #id
+
+
+            URL.revokeObjectURL(blobUrl)
+        }
+        else
+        {
+            const err = await res.text()
+            console.error(err)
+            onErrorShowAlert(err)
+        }
+    }
+
+export function truncate_html(html_string, max_chars = 300) 
+{
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html_string, 'text/html');
+
+    let current_count = 0;
+    let truncated = false;
+
+    function walk(node) 
+    {
+        if (truncated) 
+        {
+            node.remove();
+            return;
+        }
+
+        if (node.nodeType === Node.TEXT_NODE) 
+        {
+            const remaining = max_chars - current_count;
+            if (node.textContent.length > remaining) 
+            {
+                node.textContent = node.textContent.slice(0, remaining) + '...';
+                current_count = max_chars;
+                truncated = true;
+            } 
+            else 
+            {
+                current_count += node.textContent.length;
+            }
+        } 
+        else 
+        {
+            Array.from(node.childNodes).forEach(child => walk(child));
+        
+            if (node !== doc.body && !node.hasChildNodes() && !['img', 'br', 'hr'].includes(node.tagName.toLowerCase())) 
+            {
+                node.remove();
+            } 
+        }
+    }
+
+    walk(doc.body);
+    return doc.body.innerHTML;
+}

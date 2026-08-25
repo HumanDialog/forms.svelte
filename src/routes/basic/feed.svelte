@@ -20,12 +20,13 @@
                 refreshToolbarOperations,
 				showFloatingToolbar,
                 reloadPageToolbarOperations, Paper, PaperHeader, openInNewTab, copyAddress,
-				focusEditable, showMenu, Ricon, get_main_object_fetch_error_description} from '$lib'
+				focusEditable, showMenu, Ricon, get_main_object_fetch_error_description, 
+                Editor, getNiceStringDateTime, download_file_from_href, truncate_html} from '$lib'
     import {FaTrash, FaCloudUploadAlt} from 'svelte-icons/fa'
 
 
     import {onMount} from 'svelte'
-    import {location, pop, push, querystring} from 'svelte-spa-router'
+    import {location, pop, push, querystring, link} from 'svelte-spa-router'
     import BasketPreview from './basket.preview.svelte'
     import PopupExplorer from './popup.explorer.svelte'
     import {fetchComposedClipboard4Folder, transformClipboardToJSONReferences, getBrowserRecentElements4Folder, setBrowserRecentElement, recentClipboardElements} from './basket.utils'
@@ -60,6 +61,10 @@
     const FK_TABLE              = 3
     const FK_DOCUMENT           = 4
 
+    const NK_DOCUMENT          = 0
+    const NK_THREAD            = 1
+    const NK_POST              = 2 
+
     const OP_FOLDER             = 0
     const OP_TRASH              = 1
     const OP_ARCHIVE            = 2
@@ -71,7 +76,7 @@
     async function onParamsChanged(...args)
     {
         const segments = $location.split('/');
-        const foundIdx = segments.findIndex( s => s == 'folder');
+        const foundIdx = segments.findIndex( s => s == 'feed');
         if(foundIdx < 0)
             return;
 
@@ -80,7 +85,7 @@
             contextItemSelector = 'default'
         else
         {
-            selector_idx = segments.findIndex(s => s == 'folder')
+            selector_idx = segments.findIndex(s => s == 'feed')
             if(selector_idx >= 0)
             {
                 selector_idx++
@@ -94,71 +99,20 @@
 
         switch (contextItemSelector)
         {
-        case 'default':
-            contextNavigation = "user/Folders/first";
-            cacheKey = "user_Folders_first";
+        case 'my':
+            contextNavigation = "user/MyFeed";
+            cacheKey = "user_MyFeed";
             operations_kind = OP_FOLDER
             break;
-        case 'mytrash':
-            contextNavigation = "user/TrashFolder";
-            cacheKey = "user_TrashFolder";
-            operations_kind = OP_TRASH
-            break;
-        case 'myarchive':
-            contextNavigation = "user/ArchiveFolder";
-            cacheKey = "user_ArchiveFolder";
-            operations_kind = OP_ARCHIVE
-            break;
-        case 'trash':
-            contextNavigation = "group/TrashFolder";
-            cacheKey = "group_TrashFolder";
-            operations_kind = OP_TRASH
-            break;
-        case 'archive':
-            contextNavigation = "group/ArchiveFolder";
-            cacheKey = "group_ArchiveFolder";
-            operations_kind = OP_ARCHIVE
-            break;
-        case 'project':
-            contextItemId = parseInt(segments[selector_idx+1])
-            contextNavigation = `Project/${contextItemId}/Folders`
-            cacheKey = `ProjectFolder_${contextItemId}`;
-            operations_kind = OP_FOLDER
-            contextItemId = 0   // tmp
-            break;
-        case 'projecttrash':
-            contextItemId = parseInt(segments[selector_idx+1])
-            contextNavigation = `Project/${contextItemId}/TrashFolder`
-            cacheKey = `ProjectTrashFolder_${contextItemId}`;
-            operations_kind = OP_TRASH
-            contextItemId = 0   // tmp
-            break;
-        case 'projectarchive':
-            contextItemId = parseInt(segments[selector_idx+1])
-            contextNavigation = `Project/${contextItemId}/ArchiveFolder`
-            cacheKey = `ProjectArchiveFolder_${contextItemId}`;
-            operations_kind = OP_ARCHIVE
-            contextItemId = 0   // tmp
-            break;
-        case 'myshared':
-            contextNavigation = "user/SharedFolders";
-            cacheKey = "user_SharedFolder";
-            operations_kind = OP_FOLDER
-            break;
-        case 'shared':
-            contextNavigation = "group/SharedFolders";
-            cacheKey = "group_SharedFolder";
-            operations_kind = OP_FOLDER
-            break;
-        case 'threads':
-            contextNavigation = "group/ThreadsRoot";
-            cacheKey = "group_ThreadsRoot";
+        case 'sent':
+            contextNavigation = "user/MySentPosts";
+            cacheKey = "user_MySentPosts";
             operations_kind = OP_FOLDER
             break;
         default:
             contextItemId = parseInt(segments[segments.length-1])
             contextNavigation = `Folder/${contextItemId}`
-            cacheKey = `Folder_${contextItemId}`;
+            cacheKey = `Feed_${contextItemId}`;
             operations_kind = OP_FOLDER
             break;
         }
@@ -209,26 +163,24 @@
             {   Id: 1, Association: '',
                 Expressions:['Id', '$ref', '$type', 'icon', 'Title','Summary', 'Kind', 'ModificationDate', 'CreatedBy', 'IsPinned', 'IsBasket', 'IsRootPinned', 'GetCanonicalPath', '$ver', 'Status'],
                 SubTree:[
-                    {   Id: 2, Association: 'Folders',
-                        Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'icon', 'IsInBasket' , 'IsCanonical',  'icon', 'FolderId', '$type', '$ver']
+                    { 
+                        Id: 3, Association: 'Notes',
+                        Expressions:['Id', '$ref', 'Title', 'Summary', 'Content', 'Order', 'NotesCount', 'ModificationDate', 'href', 'icon', 'IsInBasket', 'IsCanonical', 'NoteId', '$type', '$ver'],
+                        Sort: "-Order",
+                        SubTree:[
+                            {
+                                Id: 31,
+                                Association: "Note/ModifiedBy",
+                                Expressions:['$ref', 'Name', 'href']
+                            },
+                            {
+                                Id: 32,
+                                Association: "Note/Files",
+                                Expressions: ["$ref", "Title", "Summary", "href", "icon", "$type"]
+                            }
+                        ]
                     },
-                    { Id: 3, Association: 'Notes',
-                        Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'href', 'icon', 'IsInBasket', 'IsCanonical', 'NoteId', '$type', '$ver']
-                    },
-                    {
-                        Id: 4,
-                        Association: 'Tasks',
-                        //Filter: 'State <> STATE_FINISHED',
-                        //Sort: 'Order',
-                        Expressions:['Id', '$ref', 'Title', 'Summary', 'Order', 'State', 'ListName', 'DueDate', 'href', 'icon', 'IsInBasket', 'IsCanonical', 'icon', 'TaskId', '$type', '$ver']
-
-                    },
-                    {
-                        Id: 5,
-                        Association: 'Files',
-                        Expressions:['Id', 'FileId', '$ref', 'Title', 'Summary', 'Order', 'href', 'icon', 'IsInBasket', 'IsCanonical', 'FileId', '$type', '$ver']
-
-                    }
+              
                 ]
             }
         ]
@@ -266,7 +218,7 @@
         if(contextItem.Files)
             contextItem.allElements = [...contextItem.allElements, ...contextItem.Files]
 
-        contextItem.allElements.sort((a,b) => a.Order - b.Order)
+        contextItem.allElements.sort((a,b) =>  b.Order - a.Order)
     }
 
     async function fetchData()
@@ -2156,6 +2108,65 @@
     }
 
 
+    
+
+
+
+
+
+
+
+
+    function showPostMenu(e, postLink)
+    {
+        e.stopPropagation()
+
+        let owner = e.target;
+        while(owner && owner.tagName != 'BUTTON')
+            owner = owner.parentElement
+
+        let rect = owner.getBoundingClientRect()
+        showMenu(rect, [
+            {
+                caption: '_; Show post; Mostrar entrada; Pokaż wpis',
+                action: (f) => push(postLink.href),
+                mricon: 'file-search-corner'
+            },
+            {
+                caption: '_; Send; Enviar; Wyślij',
+                mricon: 'upload',
+                menu: [
+                        {
+                            caption: '_; Copy; Copiar; Kopiuj',
+                            action: (f) => copyElementToBasket(postLink, postLink.$type),
+                        },
+                        {
+                            caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                            action: () => openInNewTab(postLink.href)
+                        },
+                        {
+                            caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                            action: () => copyAddress(postLink.href)
+                        }
+
+                    ]
+            },
+            {
+                separator: true
+            },
+            {
+                caption: '_; Unfollow this category; Dejar de seguir esta categoría; Przestań obserwować tę kategorię',
+                disabled: true
+            },
+        ])
+    }
+
+    const button_enabled_light_colors ='text-stone-600 hover:text-stone-800 hover:bg-stone-200 active:bg-stone-100 border-stone-200'
+    const button_disabled_light_colors ='text-stone-400 border-stone-200'
+    const button_enabled_dark_colors ='dark:text-stone-300 dark:hover:text-white dark:hover:bg-stone-800 dark:active:bg-stone-600 dark:border-stone-600'
+    const button_disabled_dark_colors ='dark:text-stone-500 dark:border-stone-600'
+    const button_disabled_colors =`${button_disabled_light_colors} ${button_disabled_dark_colors}`
+    const button_enabled_colors =`${button_enabled_light_colors} ${button_enabled_dark_colors}`
 </script>
 
 <svelte:head>
@@ -2191,12 +2202,100 @@
             </div-->
 
             <h1><Editable self={contextItem} a='Title'/></h1>
-
+            
             <p class="lead">
                 <Editable self={contextItem} a='Summary'/>
             </p>
 
-            <List    self={contextItem}
+            {#each contextItem.allElements as note, idx}
+                {@const is_first = idx == 0}
+                {@const is_last = idx == contextItem.allElements.length-1}
+
+                <section>
+                    
+                    <div class="w-full flex flex-row flex-wrap justify-between">
+                        <div class="flex flex-row gap-5 items-center">
+                            <div class="grow-0">
+                                {#if note["Note/ModifiedBy"]}
+                                    {@const modifiedBy = note["Note/ModifiedBy"]}
+                                    {@const href = `${modifiedBy.href}`}
+                                    <a {href} use:link> {modifiedBy.Name} </a>
+                                {/if}
+                            </div>
+
+                            <div class="text-sm">
+                                {getNiceStringDateTime(note.ModificationDate)}
+                            </div>
+                        </div>
+
+                        <button 
+                            on:click={(e) => showPostMenu(e, note)} class="{button_enabled_colors}"
+                            title={i18n({en: 'Show post menu', es: 'Mostrar el menú de la publicación', pl: 'Pokaż menu wpisu'})}>
+                            <Ricon icon='ellipsis-vertical' s/>
+                        </button>
+                        
+                    </div>
+
+                    {#if note.Title}
+                        <h2 class="mt-5">{note.Title}</h2>
+                    {/if}
+
+                     {#if 0 && note.Summary}
+                        {#key note.Summary}
+                            <p  class="lead">{note.Summary}</p>
+                        {/key}
+
+                    {/if}
+
+                    <!--div class="post-preview"-->
+                        <Editor     value={truncate_html(note.Content, 500)} 
+                                    readOnly compact
+                                    on:click={(e) => e.stopPropagation()}/>
+                    <!--/div-->
+                    
+                    {#if note["Note/Files"] }
+                        {@const files = note["Note/Files"]}
+                        {#if files && files.length > 0}
+                            <div class="w-full flex flex-row flex-wrap gap-2 text-sm">
+                                {#each files as file}
+                                    <button class="flex flex-row gap-1 items-center px-1 {button_enabled_colors}"
+                                            on:click={download_file_from_href(file.href, file.Title)}>
+                                        <Ricon icon="file-archive" s/>
+                                        <span>
+                                            {file.Title}
+                                        </span>
+                                    </button>
+                                {/each}
+                            </div>
+                        {/if}
+                    {/if}
+
+                    <div class="mt-8 w-full flex flex-row flex-wrap justify-around">
+                        <button disabled class="flex flex-row gap-1 items-center px-1 {button_disabled_colors}">
+                            <Ricon icon='thumbs-up' s/>
+                            <span>15</span>
+                        </button>
+
+                        <button class="flex flex-row gap-1 items-center px-1 {button_enabled_colors}"
+                                on:click={push(note.href)}>
+                            <Ricon icon='messages-square' s/>
+                            <span>{note.NotesCount}</span>
+                        </button>
+
+                        <button class="flex flex-row gap-1 items-center px-1 {button_enabled_colors}"
+                                on:click={push(note.href)}>
+                            <Ricon icon='file-search-corner' s/>
+                            <span>_; Show post; Mostrar entrada; Pokaż wpis</span>
+                        </button>
+                    </div>
+                </section>
+
+                {#if !is_last}
+                    <hr/>
+                {/if}
+            {/each}
+
+            <!--List    self={contextItem}
                     a='allElements'
                     list_properties = {folder_properties}
                     toolbarOperations={(el) => elementOperations(el, el.$type)}
@@ -2206,7 +2305,7 @@
                     component_id="main_list">
 
                 <ListInserter   action={addElement} icon/>
-            </List>
+            </List-->
 
 
 
@@ -2263,3 +2362,14 @@
 <FileProperties bind:this={filePropertiesDialog} />
 <TaskProperties bind:this={taskPropertiesDialog} />
 <NoteProperties bind:this={notePropertiesDialog} />
+
+<style>
+ 
+ .post-preview {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 6;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+</style>

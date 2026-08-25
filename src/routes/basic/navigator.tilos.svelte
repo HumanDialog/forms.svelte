@@ -9,7 +9,7 @@
                 reloadWholeApp,
                 Input,
                 onErrorShowAlert,
-                randomString, UI
+                randomString, UI, isDeviceSmallerThan
             } from '$lib'
     import {FaHome, FaFolder, FaQuestion, FaDownload, FaAt, FaRegClipboard, FaComments} from 'svelte-icons/fa'
     import {location, push} from 'svelte-spa-router'
@@ -57,7 +57,7 @@
 
 
 
-            const cacheKey = `foldersNavigator`
+            const cacheKey = `tilosNavigator`
             const cachedValue = cache.get(cacheKey)
             if(cachedValue)
             {
@@ -75,9 +75,24 @@
 
     async function fetchData()
     {
-        let res = await reef.get("/group/Folders?sort=Order&fields=Id,Title,Summary,Order,href,icon,$type", onErrorShowAlert);
+        const limit = isDeviceSmallerThan("sm") ? 5 : 7
+
+        let res = await reef.post('group/ThreadsRoot/query', {
+            Id: 1,
+            Name: 'threads',
+            Limit: limit,
+            Tree: [
+                {
+                    Id: 11,
+                    Association: 'Folders',
+                    Sort: "Order",
+                    Expressions: ['Id', 'Title', 'Summary', 'Order', 'href', 'icon', '$type']
+                }
+            ]
+        })
+
         if(res != null)
-            rootFolders = res.Folder;
+            rootFolders = res.FolderFolder;
         else
             rootFolders = [];
     }
@@ -105,26 +120,6 @@
             return false;
     }
 
-    function getFolderIcon(folder)
-    {
-        if(folder.icon)
-        {
-            switch(folder.icon)
-            {
-            case 'Folder':
-                return FaFolder;
-            case 'Clipboard':
-                return FaRegClipboard;
-            case 'Discussion':
-                return FaComments;
-            default:
-                return FaFolder
-            }
-        }
-        else
-            return FaFolder
-    }
-
     const home = {}
     const help = {}
     const download = {}
@@ -138,24 +133,39 @@
     {#if waitForRequest && !rootFolders}
         <Spinner delay={3000}/>
     {:else}
-        <SidebarGroup >
-            <SidebarItem    href="/thome"
-                            icon={FaHome}
-                            active={isRoutingTo('/thome', currentPath)}
-                            summary="The essentials in one place">
+        <SidebarGroup>
+            <SidebarItem    href="/feed/my"
+                            icon='newspaper'
+                            active={isRoutingTo('/feed/my', currentPath)}
+                            summaryX="The essentials in one place">
                 Home
+            </SidebarItem>
+            
+            <SidebarItem    href="/feed/sent"
+                            icon='send'
+                            active={isRoutingTo('/feed/sent', currentPath)}
+                            summaryX="The essentials in one place">
+                Posted contributions
+            </SidebarItem>
+
+            <SidebarItem    href="/feed/saved"
+                            icon='bookmark'
+                            active={isRoutingTo('/feed/saved', currentPath)}
+                            summaryX="The essentials in one place">
+                Saved posts
             </SidebarItem>
         </SidebarGroup>
 
         {#if rootFolders && rootFolders.length > 0}
-            <SidebarGroup border>
+            <SidebarGroup border title='Threads'
+                        moreHref="/folder/threads">
                 <SidebarList    objects={rootFolders}
                                 orderAttrib='Order'
                                 bind:this={navFolders}>
                     <svelte:fragment let:item let:idx>
                         {@const href = item.href}
                         <SidebarItem   {href}
-                                        icon={getFolderIcon(item)}
+                                        icon='messages-square'
                                         bind:this={navItems[idx]}
                                         active={isRoutingTo(href, currentPath)}
                                         summary={item.Summary}
@@ -169,21 +179,22 @@
 
             <SidebarGroup border>
                 <SidebarItem    href="/doc/reef-dev-tour-311"
-                                icon={FaQuestion}
+                                hrefX='https://tiloshelp.trimble.com/Tilos-Help-Home'
+                                icon='circle-question-mark'
                                 summary="How to get started and use Tilos">
                     Help
                 </SidebarItem>
 
                 <SidebarItem    href="/tdownload"
                                 active={isRoutingTo("/tdownload", currentPath)}
-                                icon={FaDownload}
+                                icon='download'
                                 summary="Download the installer and check the release notes">
                     Downloads
                 </SidebarItem>
 
                 <SidebarItem    href="/tcontact"
                                 active={isRoutingTo("/tcontact", currentPath)}
-                                icon={FaAt}
+                                icon='at-sign'
                                 summary="Contact us directly">
                     Contact us
                 </SidebarItem>
@@ -225,15 +236,16 @@
         {/if}
 
             <SidebarGroup border>
-                <SidebarItem    href="/doc/reef-dev-tour-311"
-                                icon={FaQuestion}
+                <SidebarItem    hrefX="/doc/reef-dev-tour-311"
+                                href='https://tiloshelp.trimble.com/Tilos-Help-Home'
+                                icon='circle-question-mark'
                                 item={help}
-                                summary="How to get started and use Tilos">
+                                summary="How to get started and use TILOS">
                     Help
                 </SidebarItem>
 
                 <SidebarItem    href="/tdownload"
-                                icon={FaDownload}
+                                icon='download'
                                 item={download}
                                 summary="Download the installer and check the release notes">
                     Downloads

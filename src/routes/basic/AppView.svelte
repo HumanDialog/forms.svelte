@@ -52,6 +52,7 @@
     import TeamDay from './dashboard.teamday.svelte'
     //import StaticDoc from './tilos/static.doc.svelte'
     import Project from './project.svelte'
+    import Feed from './feed.svelte'
 
     import { tick, onMount } from 'svelte';
 
@@ -319,7 +320,9 @@
                         '/general-channels': {component: GeneralChannels},
                         '/private-channels':{component: PrivateChannels},
                         '/myday':       {component: MyDay},
-                        '/teamday':     {component: TeamDay}
+                        '/teamday':     {component: TeamDay},
+
+                        '/feed/*':      {component: Feed}
                     }
                 },
                 mainToolbar : {

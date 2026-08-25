@@ -348,6 +348,8 @@
     let messageElements = [];
     async function onSubmit(messageText)
     {
+        // post process text beore send: auto recognize urls and convert to <a> elements
+
         const res = await reef.post(`${channelRef}/AddMessage`, {
             text: messageText,
             attachements: newMessageAttachements

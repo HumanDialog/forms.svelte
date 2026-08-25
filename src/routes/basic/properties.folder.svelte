@@ -44,6 +44,7 @@
     const FK_DISCUSSION         = 2
     const FK_TABLE              = 3
     const FK_DOCUMENT           = 4
+    const FK_FEED               = 5
 
     $: initData()
 
@@ -190,7 +191,7 @@
         }
     }
 
-    const allKinds = [FK_FOLDER, FK_TABLE, FK_DOCUMENT, FK_DISCUSSION]
+    const allKinds = [FK_FOLDER, /*FK_TABLE, FK_DOCUMENT,*/ FK_DISCUSSION, FK_FEED]
     function folderKind(kind)
     {
         switch(kind)
@@ -203,6 +204,8 @@
             return '_; Table; Tabla; Tabela'
         case FK_DOCUMENT:
             return '_; Document; Documento; Dokument'
+        case FK_FEED:
+            return '_; Feed; Flujo; Strumień'
         default:
             return '_; Unknown; Desconocido; Nieznany'
         }
