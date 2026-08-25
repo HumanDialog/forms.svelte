@@ -53,6 +53,9 @@
 
     let users = [];
 
+    let acc_icon                = 'minus'
+    let acc_color               = 'text-stone-500'
+
     const STATE_FINISHED = 7000;
 
     const FK_FOLDER             = 0
@@ -66,9 +69,6 @@
     const OP_ARCHIVE            = 2
 
     let operations_kind = OP_FOLDER
-
-    let acc_icon                = 'minus'
-    let acc_color               = 'text-stone-500'
 
     $: onParamsChanged($location, $querystring, $mainContentPageReloader, $session);
 
@@ -167,8 +167,6 @@
         {
             contextItem = cachedValue;
             folderTitle = ext(contextItem.Title);
-            acc_icon = get_acc_icon(contextItem.AccCode)
-            acc_color = get_acc_color(contextItem.AccCode)
             contextItemId = cachedValue.Id;
             listComponent?.reload(contextItem, listComponent.KEEP_SELECTION)
             breadcrump?.reload(contextItem.GetCanonicalPath)
@@ -189,10 +187,9 @@
 
         if(contextItem)
         {
-            folderTitle = ext(contextItem.Title);
             acc_icon = get_acc_icon(contextItem.AccCode)
             acc_color = get_acc_color(contextItem.AccCode)
-
+            folderTitle = ext(contextItem.Title);
             setupAllElements(contextItem)
         }
 
@@ -211,7 +208,7 @@
             Tree:
             [
             {   Id: 1, Association: '',
-                Expressions:['Id', '$ref', '$type', 'icon', 'Title','Summary', 'Kind', 'Status', 'AccCode', 'ModificationDate', 'CreatedBy', 'IsPinned', 'IsBasket', 'IsRootPinned', 'GetCanonicalPath', '$ver'],
+                Expressions:['Id', '$ref', '$type', 'icon', 'Title','Summary', 'Kind', 'ModificationDate', 'CreatedBy', 'IsPinned', 'IsBasket', 'IsRootPinned', 'GetCanonicalPath', '$ver', 'AccCode', 'Status'],
                 SubTree:[
                     {   Id: 2, Association: 'Folders',
                         Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'icon', 'IsInBasket' , 'IsCanonical',  'icon', 'FolderId', '$type', '$ver']
@@ -241,7 +238,6 @@
         if(res)
         {
             const folderItem = res.Folder
-
             return folderItem;
         }
         else
@@ -281,8 +277,6 @@
         if(contextItem)
         {
             folderTitle = ext(contextItem.Title);
-            acc_icon = get_acc_icon(contextItem.AccCode)
-            acc_color = get_acc_color(contextItem.AccCode)
             setupAllElements(contextItem)
         }
     }
@@ -2183,8 +2177,7 @@
         <Paper>
             <PaperHeader>
             <div class="flex flex-row items-center">
-
-                <Breadcrumb  path = {contextItem.GetCanonicalPath}/>
+                <Breadcrumb  path = {contextItem.GetCanonicalPath} bind:this={breadcrump}/>
                 <div class="ml-auto {acc_color}" >
                     <Ricon icon={acc_icon} s/>
                 </div>
