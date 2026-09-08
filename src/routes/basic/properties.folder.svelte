@@ -11,6 +11,7 @@
 
     import {getElementIcon} from './icons'
     import {FaExternalLinkSquareAlt, FaEllipsisV, FaTimes} from 'svelte-icons/fa'
+    import {FK_FOLDER, FK_BASKET, FK_DISCUSSION, FK_TABLE, FK_DOCUMENT, FK_FEED} from './consts'
 
     export let element = undefined
     export let onHide = undefined
@@ -38,13 +39,6 @@
     const FS_GROUP_ROOT_SHARED_FOLDER = 132
     const FS_USER_SHARED_FOLDER     = 141
     const FS_GROUP_SHARED_FOLDER    = 142
-
-    const FK_FOLDER             = 0
-    const FK_BASKET             = 1
-    const FK_DISCUSSION         = 2
-    const FK_TABLE              = 3
-    const FK_DOCUMENT           = 4
-    const FK_FEED               = 5
 
     $: initData()
 

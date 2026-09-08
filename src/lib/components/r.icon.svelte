@@ -8,6 +8,8 @@
   export let l = false;
   export let xl = false;
 
+  export let stroke = undefined
+
   import Folder from './ricons/folder.svelte'
   import FolderOpenDot from './ricons/folder-open-dot.svelte'
   import Turtle from './ricons/turtle.svelte'
@@ -43,6 +45,8 @@
 
   import MssagesSquare from './ricons/messages-square.svelte'
   import Mssagesquare from './ricons/message-square.svelte'
+  import MessageSquareMore from './ricons/message-square-more.svelte'
+
   import Package from './ricons/package.svelte'
   import Calendar from './ricons/calendar.svelte'
   import Calendars from './ricons/calendars.svelte'
@@ -134,12 +138,19 @@
   import CircleQuestionMark from './ricons/circle-question-mark.svelte'
   import AtSign from './ricons/at-sign.svelte'
   import Bookmark from './ricons/bookmark.svelte'
+  import Plus from './ricons/plus.svelte'
+  import ArrowRight from './ricons/arrow-right.svelte'
+  import Type from './ricons/type.svelte'
+  import CaseSensitive from './ricons/case-sensitive.svelte'
+  import GlobeOff from './ricons/globe-off.svelte'
+  import Stamp from './ricons/stamp.svelte'
 
   let ricons_box = {
     "archive": Archive,
     "trash": Trash,
     "arrow-up": ArrowUp,
     "arrow-left": ArrowLeft,
+    "arrow-right": ArrowRight,
     "check-check": CheckCheck,
     "folder": Folder,
     "folder-open-dot": FolderOpenDot,
@@ -179,6 +190,8 @@
 
     "messages-square": MssagesSquare,
     "message-square": Mssagesquare,
+    "message-square-more": MessageSquareMore,
+
     "package": Package,
     "calendar": Calendar,
     "calendars": Calendars,
@@ -255,24 +268,29 @@
     'send': Send,
     'circle-question-mark' : CircleQuestionMark,
     'at-sign': AtSign,
-    'bookmark': Bookmark
+    'bookmark': Bookmark,
+    'plus': Plus,
+    'type': Type,
+    'case-sensitive': CaseSensitive,
+    'globe-off': GlobeOff,
+    'stamp': Stamp
   }
 
   let width = 24;
   let height = 24;
-  let stroke = 2;
-
+  let str = 2
+  
   if(xs)
   {
       width = 16;
       height = 16;
-      stroke = 1
+      str = 1
   }
   else if(s)
   {
       width = 20;
       height = 20;
-      stroke = 1
+      str = 1
   }
   else if(l)
   {
@@ -285,6 +303,8 @@
       height = 32;
   }
 
+  if(stroke)
+    str = stroke
 
   switch (size)
   {
@@ -309,4 +329,4 @@
 
 </script>
 
-<svelte:component this={ricons_box[icon]} w={width} h={height} s={stroke}/>
+<svelte:component this={ricons_box[icon]} w={width} h={height} s={str}/>

@@ -136,7 +136,7 @@
         {
             icon: TilosIco,
             key: '',
-            onclick: (e) => { push('/thome') }
+            onclick: (e) => { push('/feed/my') }
         }
     ]
 

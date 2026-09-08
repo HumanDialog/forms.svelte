@@ -49,6 +49,7 @@
     import TaskProperties from './properties.task.svelte'
     import ColumnProperties from './list.board.column.properties.svelte'
     import { STATUS_ACTIVE, STATUS_ARCHIVED, STATUS_DELETED, STATUS_TEMPLATE } from './consts';
+    import {STATE_FINISHED} from './consts'
 
     export let params = {}
 
@@ -1317,8 +1318,6 @@
 
         reload(kanban.SELECT_NEXT);
     }
-
-    const STATE_FINISHED = 7000
 
     async function addColumn(name, idx=-1)
     {

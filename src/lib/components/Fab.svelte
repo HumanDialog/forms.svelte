@@ -468,6 +468,14 @@
         }
     }
 
+    function isOperationActivated(operation)
+    {
+        if(operation.activeFunc)
+            return operation.activeFunc();
+        else
+            return operation.active ?? false;
+    }
+
     let history_back = {
                             caption: '_; Back; Atrás; Powrót',
                             hideToolbarCaption: true,
@@ -488,6 +496,7 @@
     {#each operations as operation}
         {#if operationVisible(operation)}
             {@const position = calculatePosition(operation)}
+            {@const is_active = isOperationActivated(operation)}
             {#if position}
                 <button
                     class=" w-[55px] h-[55px]

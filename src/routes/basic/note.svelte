@@ -38,7 +38,7 @@
 			getNiceStringDateTime,
             get_acc_icon, get_acc_color,
             } from '$lib'
-	import { onMount, tick } from 'svelte';
+	import { afterUpdate, tick } from 'svelte';
 
     import {location, querystring, push, link} from 'svelte-spa-router'
 
@@ -54,16 +54,18 @@
     import PopupExplorer from './popup.explorer.svelte'
     import {fetchComposedClipboard4Editor, fetchComposedClipboard4Note, transformClipboardToJSONReferences, pushBrowserRecentElements, setBrowserRecentElement, getBrowserRecentElements, getBrowserRecentElements4Note} from './basket.utils'
     import {getElementIcon} from './icons'
-    import { STATUS_ACTIVE, STATUS_ARCHIVED, STATUS_DELETED } from './consts';
-
+    import { STATUS_ACTIVE, STATUS_ARCHIVED, STATUS_DELETED, 
+        NK_DOCUMENT, NK_THREAD, NK_COMMENT,
+        NS_DRAFT, NS_CONFIDENTIAL, NS_PUBLISHED, NS_PUBLIC, NF_WILL_CONFIDENTIAL, NR_COMMENT, NS_UNAPPROVED} from './consts';
+    
     import FileProperties from './properties.file.svelte'
 	import NoteProperties from './properties.note.svelte'
 
     let noteRef = ''
-    let activeNoteRef = ''
     let note = null;
     let activeNote = null
-
+    let activeNoteRef = ''
+    
     let noteId = 0
     let allTags = '';
 
@@ -75,17 +77,29 @@
     let creationDate = null
     let modificationDate = null
     let attachedFiles = []
-
-    const NK_DOCUMENT          = 0
-    const NK_THREAD            = 1
-    const NK_POST              = 2
+    
     let isThread = false
     let failed_message = ''
     let acc_icon                = 'minus'
     let acc_color               = 'text-stone-500'
 
+    let action_after_shown      = ''
+    let action_arg1             = ''
+    let action_arg2             = ''
+    let action_arg3             = ''
 
-    $: onParamsChanged($location, $mainContentPageReloader)
+
+    const DF_SHOW_TITLE_PLACEHOLDER                 = 0x00000001
+    const DF_DISABLE_HEADINGS                       = 0x00000002
+    const DF_DISABLE_COMMENTS_HEADINGS              = 0x00000004
+    const DF_SHOW_MAIN_NOTE_ATTACHEMENTS_COMPACT    = 0x00000008
+    const DF_SHOW_ACTIVE_NOTE_ATTACHEMENTS_LIST     = 0x00000010
+    const DF_SHOW_ORIGINAL_AUTHOR                   = 0x00000020
+    
+
+    let  display_flags = 0
+
+    $: onParamsChanged($location, $mainContentPageReloader, $querystring)
 
     async function onParamsChanged(...args)
     {
@@ -102,6 +116,18 @@
             reloadVisibleTags()
         })
 
+        const params = new URLSearchParams($querystring);
+        if(params.has("action"))
+        {
+            action_after_shown = params.get("action")
+            action_arg1 = params.has("arg1") ? params.get("arg1") : ''
+            action_arg2 = params.has("arg2") ? params.get("arg2") : ''
+            action_arg3 = params.has("arg3") ? params.get("arg3") : ''
+            
+        }
+        else
+            action_after_shown = ''
+
         // turn off read-only mode by default.
         //isReadOnly = true;
 
@@ -112,8 +138,72 @@
             acc_icon = get_acc_icon(note.AccCode)
             acc_color = get_acc_color(note.AccCode)
             pushBrowserRecentElements( note.Id, note.$type, note.$ref, note.Title, note.Summary, "file-text", note.href)
+
+            // na pewno?
+            if(activeNote != note)
+            {
+                action_after_shown = 'focuslastsubnote'
+            }
         }
     }
+
+    afterUpdate( () => {
+
+        if(note && action_after_shown)
+        {
+            switch(action_after_shown)
+            {
+            case 'showsubnote':
+                {
+                    let scroll_to_id = action_arg1
+                    if(scroll_to_id)
+                    {
+                        if(scroll_to_id.startsWith('#'))
+                            scroll_to_id = scroll_to_id.substr(1)
+                        
+                        let scroll_element = document.getElementById(scroll_to_id)
+                        if(scroll_element)
+                            scroll_element.scrollIntoView({behavior: "smooth"})
+                    }
+                }
+                break;
+
+            case 'showfirstsubnote':
+                {
+                    const arr = document.getElementsByClassName("first-comment")
+                    if(arr && arr.length > 0)
+                    {
+                        const scroll_element = arr[0]   
+                        if(scroll_element)
+                            scroll_element.scrollIntoView({behavior: "smooth"})
+                    }
+                    
+                }
+                break;
+
+            case 'focuscontent':
+                {
+                    let pos = action_arg1
+                    if(!pos)
+                        pos = 'end'
+                    description.setCursorPos(pos)
+                }
+                break;
+
+            case 'focuslastsubnote':
+                {
+                    focus_last_sub_note()
+                }
+                break;
+
+            case 'insertattachement':
+                runFileAttacher()
+                break;
+            }   
+
+            action_after_shown = ''
+        }
+    })
 
     async function reloadData()
     {
@@ -147,6 +237,7 @@
                                                     'AccCode',
                                                     'IsPinned',
                                                     'GetCanonicalPath',
+                                                    'Flags',
                                                     '$ref',
                                                     '$type',
                                                     '$acc',
@@ -187,7 +278,7 @@
                                             Id: 16,
                                             Association: 'Notes',
                                             Sort: 'Order',
-                                            Expressions:['Id', '$ref', 'Title', 'Summary', 'href', 'icon', 'IsCanonical', '$type', 'NoteId', 'Order'],
+                                            Expressions:['Id', '$ref', 'Title', 'Summary', 'href', 'icon', 'IsCanonical', '$type', 'NoteId', 'Order', 'Role'],
                                             SubTree: [
                                                 {
                                                     Id: 161,
@@ -225,22 +316,51 @@
 
         isThread = note.Kind == NK_THREAD
 
-        activeNote = note
         if(note && note.Notes && note.Notes.length > 0)
         {
             for(let idx=0; idx<note.Notes.length; idx++)
             {
                 const subNote = note.Notes[idx].Note
-                if(subNote.Kind == NK_POST)
+                if(subNote.Kind == NK_COMMENT)
                 {
                     prepareAttachementsList(subNote)
-                    activeNote = subNote
+                    //activeNote = subNote
                 }
             }
         }
 
-        activeNoteRef = activeNote.$ref
+        display_flags = 0
 
+        if(isThread)
+        {
+            display_flags |= DF_SHOW_ORIGINAL_AUTHOR
+            if(note.State == NS_DRAFT)
+                activeNote = note
+            else
+            {
+                //isReadOnly = true
+                activeNote = note
+                await fetch_working_comment(note.Id)
+            }
+        }
+        else
+        {
+            activeNote = note
+        }
+
+        if(note == activeNote)
+        {
+            if(isReadOnly)
+                display_flags |= DF_SHOW_MAIN_NOTE_ATTACHEMENTS_COMPACT
+            else
+                display_flags |= DF_SHOW_ACTIVE_NOTE_ATTACHEMENTS_LIST | DF_SHOW_TITLE_PLACEHOLDER;
+        }
+        else
+        {
+            display_flags |= DF_SHOW_MAIN_NOTE_ATTACHEMENTS_COMPACT | DF_SHOW_ACTIVE_NOTE_ATTACHEMENTS_LIST
+        }
+
+        activeNoteRef = activeNote.$ref
 
         note.connectedToList = []
         if(note.InFolders)
@@ -262,13 +382,89 @@
         failed_message = get_main_object_fetch_error_description(err, res)
     }
 
+    async function fetch_working_comment(main_note_id)
+    {
+        const res = await reef.post('user/MyDraftPosts/query', {
+            Id: 1, Name: 'not published comments', ExpandLevel: 6,
+            Tree: [
+                {
+                    Id: 1,
+                    Association: 'Notes',
+                    Filter: `Kind=NK_COMMENT and Note/IsDraftCommentInThread(${main_note_id})`,
+                    Limit: 1,
+                    SubTree: [
+                        {
+                            Id: 10,
+                            Association: 'Note',
+                            Expressions:[   'Id',
+                                            'Index',
+                                            'Title',
+                                            'Summary',
+                                            'Content',
+                                            'CreationDate',
+                                            'ModificationDate',
+                                            'Tags',
+                                            'AttachedFiles',
+                                            'Kind',
+                                            'State',
+                                            'Status',
+                                            'AccCode',
+                                            'IsPinned',
+                                            'Flags',
+                                            'GetCanonicalPath',
+                                            '$ref',
+                                            '$type',
+                                            '$acc',
+                                            '$ver',
+                                            'href'],
+                            SubTree: [
+                                {
+                                            Id: 101,
+                                            Association: 'Notes',
+                                            Sort: 'Order',
+                                            Expressions:['Id', '$ref', 'Title', 'Summary', 'href', 'icon', 'IsCanonical', '$type', 'NoteId', 'Order'],
+                                            SubTree: [
+                                                {
+                                                    Id: 1011,
+                                                    Association: 'Note',
+                                                    Recursive: 10
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            Id: 102,
+                                            Association: 'Files',
+                                            Sort: 'Order',
+                                            Expressions:['Id', '$ref', 'Title', 'Summary', 'href', 'icon', 'IsCanonical', '$type', 'FileId', 'Order']
+                                        }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        })
+        
+        if(res && res.FolderNote && res.FolderNote.length > 0)
+        {
+            const working_info = res.FolderNote[0]
+            working_info.Role = NR_COMMENT
+            prepareAttachementsList(working_info.Note)
+
+            if(!note.Notes)
+                note.Notes = []
+            note.Notes.push(working_info)
+            activeNote = note.Notes[note.Notes.length - 1].Note
+            
+        }
+    }
+
     function prepareAttachementsList(noteElement)
     {
         noteElement.attachements = []
         if(noteElement.Notes && noteElement.Notes.length > 0)
         {
             noteElement.Notes.forEach((n) => {
-                if(n.Note.Kind != NK_POST)
+                if(n.Note.Kind != NK_COMMENT)
                 {
                     noteElement.attachements.push(n)
                 }
@@ -292,8 +488,8 @@
 
     async function onTagsChanged(tags)
     {
-        activeNote.Tags = tags;
-        informModification(activeNote, 'Tags')
+        note.Tags = tags;
+        informModification(note, 'Tags')
         pushChanges(refreshToolbarOperations)
         //await reef.post(`${noteRef}/SetTags`, {val: tags}, onErrorShowAlert)
     }
@@ -388,6 +584,89 @@
         ]
     }
 
+    function get_thread_operations(formatting_tools_enabled=false)
+    {
+        const submit_post_op = {
+            caption: '_; Submit a post; Enviar una entrada; Wyślij wpis',
+            mricon: 'send',
+            tbr: 'A',
+            fab: 'M01',
+            action: async () => { await publish_thread(); reloadPageToolbarOperations(getPageOperations()) }
+        }
+
+        const is_confidential = (activeNote.Flags & NF_WILL_CONFIDENTIAL) != 0;
+        const set_confidential_op = {
+            caption: '_; Confidential; Confidencial; Poufne',
+            mricon: 'globe-off',
+            active: is_confidential,
+            tbr: 'A',
+            action: () => { set_post_confidential(!is_confidential); 
+                            reloadPageToolbarOperations(getPageOperations()) 
+                            if(formatting_tools_enabled)
+                                reloadPageToolbarOperations(getPageOperationsWithFormattingTools(editorElement), true) }
+        }
+
+        const submit_comment_op = {
+            caption: '_; Submit a comment; Enviar un comentario; Wyślij komentarz',
+            mricon: 'send',
+            tbr: 'A',
+            fab: 'M01',
+            action: async () => { await publish_comment(); reloadPageToolbarOperations(getPageOperations()) }
+        }
+
+        const add_comment_op = {
+            caption: '_; Leave a comment; Deja un comentario; Skomentuj',
+            mricon: 'message-square',
+            tbr: 'A',
+            fab: 'M01',
+            action: () => add_comment()
+        }
+
+        const approve_post_op = {
+            caption: '_; Approve the post; Aprobar la publicación; Zatwierdź wpis',
+            mricon: 'stamp',
+            tbr: 'A',
+            fab: 'M01',
+            action: async (button) => { await approve_post(button); reloadPageToolbarOperations(getPageOperations()) }
+        }
+
+        let thread_operations = []
+        switch(note.State)
+        {
+        case NS_DRAFT:
+            thread_operations = [submit_post_op, set_confidential_op]
+            break;
+
+        case NS_UNAPPROVED:
+            if(!isReadOnly)
+                thread_operations = [approve_post_op]
+            break;
+
+        default:
+            if(activeNoteRef == noteRef)
+            {
+                thread_operations = [add_comment_op]
+            }
+            else
+            {
+                switch(activeNote.State)
+                {
+                case NS_DRAFT:
+                    thread_operations = [submit_comment_op]
+                    break;
+
+                default:
+                    break;
+                }
+            }
+        }
+
+        if((thread_operations.length > 0) && (!formatting_tools_enabled))
+            thread_operations = [...thread_operations, {separator: true, tbr: 'A'}]
+
+        return thread_operations
+    }
+
     function getPageOperations()
     {
         const sendOperations = [
@@ -413,18 +692,8 @@
         let operations = []
 
         if(isThread)
-        {
-            operations.push({
-                caption: '_; New response; Nueva respuesta; Nowa odpowiedź',
-                mricon: 'message-square',
-                tbr: 'A',
-                fab: 'M01',
-                action: () => addThreadResponse()
-            })
-
-            operations.push({separator: true, tbr: 'A'})
-        }
-
+            operations = [...operations, ...get_thread_operations()]            
+        
         operations.push(
                 {
                     caption: '_; Edit...; Editar...; Edytuj...',
@@ -550,7 +819,7 @@
 
         showFloatingToolbar(aroundRect, BasketPreview,
             {
-                destinationContainer: activeNoteRef,
+                destinationContainer: activeNote?.$ref,
                 onRefreshView: async (f) => await reloadWithAttachements(),
                 clipboardElements: clipboardElements,
                 ownCloseButton: true
@@ -564,7 +833,7 @@
         if(clipboardElements && clipboardElements.length > 0)
         {
             const references = transformClipboardToJSONReferences([clipboardElements[0]])
-            const res = await reef.post(`${activeNoteRef}/AttachClipboard`, { references: references }, onErrorShowAlert)
+            const res = await reef.post(`${activeNote?.$ref}/AttachClipboard`, { references: references }, onErrorShowAlert)
             if(res)
                 await reloadWithAttachements();
 
@@ -575,7 +844,7 @@
     {
         const clipboardElements = getBrowserRecentElements4Note()
         showFloatingToolbar(aroundRect, BasketPreview, {
-            destinationContainer: activeNoteRef,
+            destinationContainer: activeNote?.$ref,
             onRefreshView: async (f) => await reloadWithAttachements(),
             clipboardElements: clipboardElements,
             browserBasedClipboard: true,
@@ -588,7 +857,7 @@
         showFloatingToolbar(aroundRect, PopupExplorer, {
             rootFilter: 'FOLDERS',
             leafFilter: ['Note', 'File'],
-            destinationContainer: activeNoteRef,
+            destinationContainer: activeNote?.$ref,
             onRefreshView: async (f) => await reloadWithAttachements(),
             ownCloseButton: true
         })
@@ -638,7 +907,7 @@
 
     function getPageOperationsWithFormattingTools(editorElement)
     {
-        const headings = [
+        let headings = [
             {
                     caption: '_; Heading 1; Título 1; Nagłówek 1',
                     mricon: 'heading-1',
@@ -670,18 +939,34 @@
                 }
         ]
 
+        let publish_operations = []
+    
+        if(isThread)
+        {
+            publish_operations = [{
+                caption: '_; Note; Nota; Notatka',
+                preAction: editorElement.preventBlur,
+                operations: get_thread_operations(true)
+            }]
+            
+        }
+                
+
+        let disable_headings = (note == activeNote) ? (display_flags & DF_DISABLE_HEADINGS) != 0 : (display_flags & DF_DISABLE_COMMENTS_HEADINGS) != 0
+        
         return {
             opver: 2,
             fab: 'M00',
             tbr: 'D',
             preAction: editorElement.preventBlur,
             operations: [
+                ...publish_operations,
                 {
                     caption: '_; Styles; Estilos; Style',
                     //tbr: 'B',
                     preAction: editorElement.preventBlur,
                     operations: [
-                        ... (isThread ? [] : headings),
+                        ... (disable_headings ? [] : headings),
                         {
                             caption: '_; Normal; Normal; Normalny',
                             mricon: 'pilcrow',
@@ -1098,17 +1383,14 @@
     ]
 
     const descriptionActive = { }
-    let isEditorFocused = false;
-
+    
     function activateFormattingTools(editorElement)
     {
-        isEditorFocused = true;
         activateItem('props', descriptionActive, getPageOperationsWithFormattingTools(editorElement))
     }
 
     function deactivateFormattingToolsIfNeeded(editorElement)
     {
-        isEditorFocused = false;
         if(isActive('props', descriptionActive))
             clearActiveItem('props')
     }
@@ -1132,7 +1414,7 @@
             if(!resizedImage)
                 resizedImage = file
 
-            const res = await reef.post(`${activeNoteRef}/Images/blob?name=${file.name}&size=${resizedImage.size}`, {}, onErrorShowAlert)
+            const res = await reef.post(`${activeNote?.$ref}/Images/blob?name=${file.name}&size=${resizedImage.size}`, {}, onErrorShowAlert)
             if(res && res.key && res.uploadUrl)
             {
                 const newKey = res.key;
@@ -1150,7 +1432,7 @@
                     if(res.ok)
                     {
                         // todo: editor path imgPath
-                        const dataPath = `${activeNoteRef}/Images/blob?key=${newKey}`
+                        const dataPath = `${activeNote?.$ref}/Images/blob?key=${newKey}`
 
                         if(imgEditorActionAfterSuccess)
                             imgEditorActionAfterSuccess(dataPath)
@@ -1208,7 +1490,7 @@
             pendingUploading = true
 
 
-            let fileLink = await reef.post(`${activeNoteRef}/CreateFile`,
+            let fileLink = await reef.post(`${activeNote?.$ref}/CreateFile`,
                                     {
                                         title: file.name,
                                         mimeType: file.type,
@@ -1467,12 +1749,12 @@
 
     async function copyNoteToBasket(forNote)
     {
-        await reef.post(`${activeNoteRef}/CopyNoteToBasket`, { noteLink: forNote.$ref } , onErrorShowAlert);
+        await reef.post(`${activeNote?.$ref}/CopyNoteToBasket`, { noteLink: forNote.$ref } , onErrorShowAlert);
     }
 
     async function cutNoteToBasket(forNote)
     {
-        await reef.post(`${activeNoteRef}/CutNoteToBasket`, { noteLink: forNote.$ref } , onErrorShowAlert);
+        await reef.post(`${activeNote?.$ref}/CutNoteToBasket`, { noteLink: forNote.$ref } , onErrorShowAlert);
         await reloadData();
         if(attachementsComponent)
             attachementsComponent.reload(activeNote, attachementsComponent.SELECT_NEXT);
@@ -1482,12 +1764,12 @@
 
     async function copyFileToBasket(file)
     {
-        await reef.post(`${activeNoteRef}/CopyFileToBasket`, { fileLink: file.$ref } , onErrorShowAlert);
+        await reef.post(`${activeNote?.$ref}/CopyFileToBasket`, { fileLink: file.$ref } , onErrorShowAlert);
     }
 
     async function cutFileToBasket(file)
     {
-        await reef.post(`${activeNoteRef}/CutFileToBasket`, { fileLink: file.$ref } , onErrorShowAlert);
+        await reef.post(`${activeNote?.$ref}/CutFileToBasket`, { fileLink: file.$ref } , onErrorShowAlert);
         await reloadData();
         if(attachementsComponent)
             attachementsComponent.reload(activeNote, attachementsComponent.SELECT_NEXT);
@@ -1510,7 +1792,7 @@
 
     async function dettachNote(forNote)
     {
-        await reef.post(`${activeNoteRef}/DettachNote`, { noteLink: forNote.$ref } , onErrorShowAlert);
+        await reef.post(`${activeNote?.$ref}/DettachNote`, { noteLink: forNote.$ref } , onErrorShowAlert);
         await reloadData();
         if(attachementsComponent)
             attachementsComponent.reload(activeNote, attachementsComponent.SELECT_NEXT);
@@ -1520,7 +1802,7 @@
 
     async function dettachFile(file)
     {
-        await reef.post(`${activeNoteRef}/DettachFile`, { fileLink: file.$ref } , onErrorShowAlert);
+        await reef.post(`${activeNote?.$ref}/DettachFile`, { fileLink: file.$ref } , onErrorShowAlert);
         await reloadData();
         if(attachementsComponent)
             attachementsComponent.reload(activeNote, attachementsComponent.SELECT_NEXT);
@@ -1604,7 +1886,7 @@
         {
         case 'Note':
         case 'NoteNote':
-            await reef.post(`${activeNoteRef}/DeletePermanentlyNote`, { noteLink: objectToDelete.$ref } , onErrorShowAlert);
+            await reef.post(`${activeNote?.$ref}/DeletePermanentlyNote`, { noteLink: objectToDelete.$ref } , onErrorShowAlert);
             deleteModal.hide();
             await reloadData();
             if(attachementsComponent)
@@ -1615,7 +1897,7 @@
 
         case 'UploadedFile':
         case 'NoteFile':
-            await reef.post(`${activeNoteRef}/DeletePermanentlyFile`, { fileLink: objectToDelete.$ref } , onErrorShowAlert);
+            await reef.post(`${activeNote?.$ref}/DeletePermanentlyFile`, { fileLink: objectToDelete.$ref } , onErrorShowAlert);
             deleteModal.hide();
             await reloadData();
             if(attachementsComponent)
@@ -1715,7 +1997,7 @@
     async function addEmptyNote(newNoteAttribs)
     {
         notesPlaceholder = false
-        let res = await reef.post(`${activeNoteRef}/CreateSubNote`,{
+        let res = await reef.post(`${activeNote?.$ref}/CreateSubNote`,{
             title: newNoteAttribs.Title,
             summary: '',
             order: 0
@@ -1736,6 +2018,23 @@
         }
     }
 
+    async function add_comment()
+    {
+        const res = await reef.post(`user/NewDraftComment`, {
+            content: '',
+            thread: note.$ref})
+
+        if(res)
+        {
+            //res.WorkingPost
+
+            await reloadData();
+            await tick();
+
+            focus_last_sub_note()
+        }
+    }
+
     async function addThreadResponse()
     {
         let res = await reef.post(`${noteRef}/AddPost`,{
@@ -1749,11 +2048,89 @@
         await reloadData();
         await tick();
 
+        focus_last_sub_note()
+    }
+
+    function focus_last_sub_note()
+    {
         if(threadResponses && threadResponses.length > 0)
         {
             const activeEditor = threadResponses[threadResponses.length-1]
-            activeEditor.run();
-            activeEditor.scrollIntoView({ block: "end" })
+            activeEditor.setCursorPos('end');
+            activeEditor.scrollIntoView({ behaviour: "smooth", block: "start" })
+        }
+    }
+
+    let title_not_valid = false
+    async function publish_thread()
+    {
+        // validate before publish
+        if(!note.Title)
+        {
+            title_not_valid = true;
+            const title_placeholder = document.getElementById("title-placeholder")
+            if(title_placeholder)
+                title_placeholder.scrollIntoView({ behaviour: "smooth", block: "start" })
+            return;
+        }
+
+        const res = await reef.post(`${activeNote.$ref}/PublishThread`, {})
+        if(res)
+            await reloadData();
+    }
+
+    async function approve_post(button)
+    {
+        let rect = button.getBoundingClientRect()
+
+        const select_op = async (ref) => {
+            const res = await reef.post(`${activeNote.$ref}/ApproveMe`, {catLink: ref})
+            if(res)
+                await reloadData();
+        }
+
+        const categories = await reef.get('group/FeedsRoot/Folders?fields=$ref,Title')
+        if(categories && categories.FolderFolder && categories.FolderFolder.length > 0)
+        {
+            let operations = []
+            categories.FolderFolder.forEach(folder => {
+                operations.push({
+                    caption: folder.Title,
+                    action: () => select_op(folder.$ref)
+                })
+            });
+
+            showMenu(rect, operations)
+        }
+        
+        
+    }
+
+    async function publish_comment()
+    {
+        const res = await reef.post(`${activeNote.$ref}/PublishComment`, {})
+        if(res)
+        {
+            await reloadData();
+            await tick();
+            clearActiveItem('props')
+        }
+    }
+
+    async function set_post_confidential(confidential=true)
+    {
+        const newFlags = confidential ? activeNote.Flags | NF_WILL_CONFIDENTIAL : (activeNote.Flags & (~NF_WILL_CONFIDENTIAL))
+        setjItemProperty(activeNote, 'Flags', newFlags)
+    }
+
+    let title_placeholder = false;
+    async function start_title_editing(e)
+    {
+        if(!focusEditable('Title'))
+        {
+            title_placeholder = true;
+            await tick();   // rerender with h1
+            focusEditable('Title')
         }
     }
 
@@ -1824,7 +2201,7 @@
             <!--span>Eidt<self=note a='index'/></span-->
 
             <span>
-                {getNiceStringDate(modificationDate)}
+                {getNiceStringDateTime(modificationDate)}
             </span>
         </div>
 
@@ -1832,15 +2209,36 @@
         <!--h1>
             <REdit self={note} a='Title'/>
         </h1-->
-        <h1><Editable self={note} a='Title' readonly={isReadOnly}/></h1>
-
-
-
+        
+        {#if display_flags & DF_SHOW_TITLE_PLACEHOLDER}
+            <h1 on:click={start_title_editing}>
+                {#if note.Title || title_placeholder}
+                    <Editable self={note} a='Title' focusOnClick={false} />
+                {:else}
+                    <span   id="title-placeholder" 
+                            class="placeholder"
+                            class:alert={title_not_valid}>
+                        _; Enter a title; Escribe el título; Wpisz tytuł
+                    </span>
+                {/if}
+            </h1>
+        {:else}
+            <h1><Editable self={note} a='Title' readonly={isReadOnly}/></h1>
+        {/if}
+        
+        
         <div class="w-full flex flex-row flex-wrap justify-between">
             <div class="grow-0">
-                {#if note.ModifiedBy}
-                    {@const href = `${note.ModifiedBy.href}`}
-                    <a {href} use:link> {note.ModifiedBy.Name} </a>
+                {#if DF_SHOW_ORIGINAL_AUTHOR}
+                    {#if note.CreatedBy}
+                        {@const href = `${note.CreatedBy.href}`}
+                        <a {href} use:link> {note.CreatedBy.Name} </a>
+                    {/if}
+                {:else}
+                    {#if note.ModifiedBy}
+                        {@const href = `${note.ModifiedBy.href}`}
+                        <a {href} use:link> {note.ModifiedBy.Name} </a>
+                    {/if}
                 {/if}
             </div>
 
@@ -1896,8 +2294,8 @@
                             a='Content'
                             compact={true}
                             bind:this={description}
-                            readOnly={isReadOnly || (noteRef!=activeNoteRef)}
-                            disableHeadings={isThread}
+                            readOnly={isReadOnly || (noteRef!=activeNote?.$ref)}
+                            disableHeadings={(display_flags & DF_DISABLE_HEADINGS) != 0}
                             onFocusCb={() => activateFormattingTools(description)}
                             onBlurCb={() => deactivateFormattingToolsIfNeeded(description)}
                             onAddImage={uploadImage}
@@ -1905,7 +2303,8 @@
                             onLinkClick={editorLinkClicked}
                             extraInsertPaletteCommands={() => extraInsertPalletteCommands(-1)}/>
 
-            {#if isThread && (noteRef != activeNoteRef) && note.attachements && note.attachements.length > 0}
+            
+            {#if (display_flags & DF_SHOW_MAIN_NOTE_ATTACHEMENTS_COMPACT) && note.attachements && note.attachements.length > 0}
                 {#each note.attachements as att}
                     <p class="bg-stone-100 dark:bg-stone-800">
                     <span class="whitespace-normal">
@@ -1943,17 +2342,24 @@
 
             {#if isThread && note.Notes && note.Notes.length > 0}
                 {#each note.Notes as subNoteLink, subNoteIdx}
-                    {@const subNote = subNoteLink.Note}
-                    {#if subNote.Kind == NK_POST}
-                        <hr/>
-                        <h4>{subNote.CreatedBy.Name} {getNiceStringDateTime(subNote.CreationDate)}</h4>
+                    {#if subNoteLink.Role == NR_COMMENT}
+                        {@const subNote = subNoteLink.Note}
+                        {@const is_first = subNoteIdx==0}
+                        {@const separator_class = is_first ? "first-comment" : ""}
+                    
+                        <hr id="{subNote.$ref}" class={separator_class}/>
+                        {#if subNote.State == NS_DRAFT}
+                            <h4>_; Your unpublished comment:; Tu comentario no publicado:; Twój nieopublikowany komentarz:</h4>
+                        {:else}
+                            <h4>{subNote.CreatedBy.Name}  <span class="font-normal ml-4 text-body">{getNiceStringDateTime(subNote.ModificationDate)}</span></h4>
+                        {/if}
                         <Editor     on:click={(e) => e.stopPropagation()}
                                     a='Content'
                                     self={subNote}
                                     compact={true}
                                     bind:this={threadResponses[subNoteIdx]}
-                                    readOnly={subNote.$ref!=activeNoteRef}
-                                    disableHeadings={isThread}
+                                    readOnly={subNote.$ref!=activeNote?.$ref}
+                                    disableHeadings={(display_flags & DF_DISABLE_COMMENTS_HEADINGS) != 0}
                                     onFocusCb={() => activateFormattingTools(threadResponses[subNoteIdx])}
                                     onBlurCb={() => deactivateFormattingToolsIfNeeded(threadResponses[subNoteIdx])}
                                     onAddImage={uploadImage}
@@ -1961,7 +2367,7 @@
                                     onLinkClick={editorLinkClicked}
                                     extraInsertPaletteCommands={() => extraInsertPalletteCommands(subNoteIdx)}/>
 
-                        {#if subNote.$ref!=activeNoteRef && subNote.attachements && subNote.attachements.length > 0}
+                        {#if subNote.$ref!=activeNote?.$ref && subNote.attachements && subNote.attachements.length > 0}
                             {#each subNote.attachements as att}
                                 <p class="bg-stone-100 dark:bg-stone-700">
                                 <span class="whitespace-normal">
@@ -1999,7 +2405,7 @@
 
             <!-- ============================================================================== -->
 
-            {#if (activeNote.attachements && activeNote.attachements.length > 0) || notesPlaceholder}
+            {#if (display_flags & DF_SHOW_ACTIVE_NOTE_ATTACHEMENTS_LIST) && ((activeNote.attachements && activeNote.attachements.length > 0) || notesPlaceholder)}
                 <h2>_;Attachments; Anexos; Załączniki</h2>
                 <section>
                         <List   self={activeNote}
@@ -2015,15 +2421,17 @@
                 </section>
             {/if}
 
-            <h2>_; Attached to; Adjunto a; Przyłączony do</h2>
-            <section>
-                <List   self={note}
-                        a='connectedToList'
-                        list_properties={attached_to_list_properties}
-                        bind:this={connectedToComponent}
-                        toolbarOperations = {(el) => connectedToOperations(el)}>
-                </List>
-            </section>
+            {#if note && note.connectedToList && note.connectedToList.length > 0}
+                <h2>_; Attached to; Adjunto a; Przyłączony do</h2>
+                <section>
+                    <List   self={note}
+                            a='connectedToList'
+                            list_properties={attached_to_list_properties}
+                            bind:this={connectedToComponent}
+                            toolbarOperations = {(el) => connectedToOperations(el)}>
+                    </List>
+                </section>
+            {/if}
 
 
 
@@ -2071,3 +2479,31 @@
 
 <FileProperties bind:this={filePropertiesDialog} />
 <NoteProperties bind:this={notePropertiesDialog} />
+
+<style lang="postcss">
+    .placeholder {
+        color: var(--tw-prose-lead);
+    }
+
+    :global(.dark) .placeholder {
+        color: var(--tw-prose-lead-invert);
+    }
+
+    .placeholder.alert {
+        color: theme('colors.red.700');
+    }
+
+    :global(.dark) .placeholder.alert {
+        color: theme('colors.red.300');
+    }
+
+    .text-body {
+        color: var(--tw-prose-body);
+    }
+
+    :global(.dark) .text-body {
+        color: var(--tw-prose-invert-body);
+    }
+
+
+</style>

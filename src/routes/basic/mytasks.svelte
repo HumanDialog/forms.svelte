@@ -20,6 +20,7 @@
     import {setBrowserRecentElement} from './basket.utils'
     import TaskProperties from './properties.task.svelte'
     import {querystring, location, push} from 'svelte-spa-router'
+    import {STATE_FINISHED} from './consts'
 
     export let params = {}
 
@@ -31,7 +32,6 @@
     let listComponent;
 
     let lists = [];
-    const STATE_FINISHED = 7000;
     let canconicalPath = []
     const title = '_; My tasks; Mis tareas; Moje zadania'
 

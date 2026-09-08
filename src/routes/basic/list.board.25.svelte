@@ -41,6 +41,7 @@
     import {fetchComposedClipboard4TaskList, transformClipboardToJSONReferences, setBrowserRecentElement, getBrowserRecentElements} from './basket.utils'
     import {cache} from './cache.js'
     import TaskProperties from './properties.task.svelte'
+    import {STATE_FINISHED} from './consts'
 
     export let params = {}
 
@@ -981,7 +982,6 @@
         reload(kanban.SELECT_NEXT);
     }
 
-    const STATE_FINISHED = 7000
     /*async function setColumnAsFinishing(columnIdx)
     {
         for(let i=0; i<taskStates.length; i++)

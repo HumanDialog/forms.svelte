@@ -157,7 +157,7 @@
                 </div>
                 
                 <h2 class="text-center">Help for Tilos users</h2>
-                <p class="text-center">Take a look through our <a href="/thome" use:link>support</a> options linked below.</p>
+                <p class="text-center">Take a look through our <a href="/feed/my" use:link>support</a> options linked below.</p>
                 
             </article>
             </section>

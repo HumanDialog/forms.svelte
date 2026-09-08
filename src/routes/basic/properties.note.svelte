@@ -11,6 +11,7 @@
 
     import {getElementIcon} from './icons'
     import {FaExternalLinkSquareAlt, FaEllipsisV, FaTimes} from 'svelte-icons/fa'
+    import {NK_DOCUMENT, NK_THREAD, NK_COMMENT} from './consts'
 
     export let elementLink = undefined
     export let onHide = undefined
@@ -26,11 +27,7 @@
     let creationDate = null
     let modificationDate = null
 
-    const NK_DOCUMENT          = 0
-    const NK_THREAD            = 1
-    const NK_POST              = 2
-
-
+    
     $: initData()
 
     async function initData(...args)
@@ -247,9 +244,9 @@
         case NK_DOCUMENT:
             return '_; Document; Documento; Dokument'
         case NK_THREAD:
-            return '_; Thread; Hilo; Wątek'
-        case NK_POST:
-            return '_; Answer; Respuesta; Odpowiedź'
+            return '_; Post; Entrada; Wpis'
+        case NK_COMMENT:
+            return '_; Comment; Comentario; Komentarz'
         }
     }
 

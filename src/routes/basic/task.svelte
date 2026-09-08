@@ -49,8 +49,10 @@
 	import NoteProperties from './properties.note.svelte'
     import TaskProperties from './properties.task.svelte'
     import TaskDescriptionNote from './task.description.svelte'
-	import { STATUS_ACTIVE, STATUS_ARCHIVED, STATUS_DELETED } from './consts';
-
+	import { STATUS_ACTIVE, STATUS_ARCHIVED, STATUS_DELETED,
+            NR_NONE, NR_DESCRIPTION, NR_COVER,
+            STATE_FINISHED } from './consts';
+    
     let taskRef = ''
     let task = null;
     let allTags = '';
@@ -64,11 +66,7 @@
     let isReadOnly = false;
     const s = session;
 
-    const STATE_FINISHED = 7000
-
-    const NR_NONE               = 0
-    const NR_DESCRIPTION        = 1
-    const NR_COVER              = 2
+  
 
     let descriptionNotes = []
     let acc_icon                = 'minus'

@@ -11,6 +11,7 @@
     import NavigatorFolders from "./navigator.group.folders.svelte";
     import NavigatorMessages from './navigator.messages.svelte'
     import NavigatorTilos from './navigator.tilos.svelte'
+    import NavigatorFeeds from './navigator.feeds.svelte'
     import {FaPlus} from 'svelte-icons/fa/'
     import {session, Authorized, NotAuthorized} from '@humandialog/auth.svelte'
     import Landing from './landing/landing.svelte'
@@ -97,6 +98,9 @@
 
         case 'Tilos':
             return NavigatorTilos;
+
+        case 'Feeds':
+            return NavigatorFeeds;
 
         default:
             return Navigator;

@@ -26,7 +26,7 @@
     import PopupExplorer from './popup.explorer.svelte'
 	import { fetchComposedClipboard4TaskList, transformClipboardToJSONReferences, setBrowserRecentElement, getBrowserRecentElements4TaskList } from './basket.utils.js';
     import TaskProperties from './properties.task.svelte'
-    import { STATUS_ACTIVE, STATUS_ARCHIVED, STATUS_DELETED, STATUS_TEMPLATE } from './consts';
+    import { STATUS_ACTIVE, STATUS_ARCHIVED, STATUS_DELETED, STATUS_TEMPLATE, STATE_FINISHED } from './consts';
 
     export let params = {}
 
@@ -43,8 +43,6 @@
     let users = [];
     let usersComboSource;
     let failed_message = ''
-
-    const STATE_FINISHED = 7000;
 
     $: onParamsChanged($location, $querystring, $mainContentPageReloader);
 

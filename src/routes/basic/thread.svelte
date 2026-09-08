@@ -279,7 +279,7 @@
             tbr: 'D',
             operations: [
                 {
-                    caption: '_; Thread; Hilo; Wątek',
+                    caption: '_; Post; Entrada; Wpis',
                     //tbr: 'B',
                     operations: [
                         {
@@ -344,7 +344,7 @@
             fab: 'M00',
             operations: [
                 {
-                    caption: '_; Thread; Hilo; Wątek',
+                    caption: '_; Post; Entrada; Wpis',
                     preAction: questionElement.preventBlur,
                     operations: [
                     /*    {

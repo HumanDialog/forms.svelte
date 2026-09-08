@@ -40,6 +40,7 @@
     import {fetchComposedClipboard4Editor, fetchComposedClipboard4Note, transformClipboardToJSONReferences, pushBrowserRecentElements, setBrowserRecentElement, getBrowserRecentElements} from './basket.utils'
     import {getElementIcon} from './icons'
     import NoteProperties from './properties.note.svelte'
+    import {NR_NONE, NR_DESCRIPTION, NR_COVER} from './consts'
 
 	export let noteLink
     export let refreshParent = null
@@ -57,11 +58,7 @@
     let noteTitleElement
     let descriptionElementsId = ''
 
-    const NR_NONE               = 0
-    const NR_DESCRIPTION        = 1
-    const NR_COVER              = 2
-
-
+ 
     $: initCompnent()
     $: isHeaderActive = calculate_active(note, $contextItemsStore)
     $: isHeaderSelected = selected(note, $contextItemsStore)

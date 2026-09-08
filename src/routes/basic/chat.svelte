@@ -13,7 +13,7 @@
             unregisterKicksObserver,
             forceKicksChecking,
             i18n, ext,
-			showMenu, Editable, focusEditable,
+			showMenu, Editable, focusEditable, 
             SHOW_MENU_ABOVE, Paper, PaperHeader, Spinner, get_main_object_fetch_error_description
             } from '$lib'
 	import { afterUpdate, tick, onMount } from 'svelte';
@@ -23,6 +23,7 @@
     import BasketPreview from './basket.preview.svelte'
     import PopupExplorer from './popup.explorer.svelte'
     import {fetchComposedClipboard4Message, transformClipboardToJSONReferences, getBrowserRecentElements4Chat} from './basket.utils'
+    import { marked } from 'marked';
 
     let channelRef = ''
     let channel = null;
@@ -38,6 +39,49 @@
     const heuristicIntevals = [5,10,20,40]
     let heuristicIntervalIdx = -1
     let failed_message = ''
+
+    const emoticons = {
+        ':)': '🙂',
+        ':-)': '🙂',
+        ':(': '🙁',
+        ':-(': '🙁',
+        ':D': '😃',
+        ':-D': '😃',
+        ';)': '😉',
+        ';-)': '😉',
+        ':P': '😛',
+        ':-P': '😛',
+        ':p': '😛',
+        ':-p': '😛',
+        ':O': '😮',
+        ':-O': '😮',
+        ':o': '😮',
+        ':-o': '😮',
+        ':/': '😕',
+        ':-/': '😕'
+    };
+
+    const emoticonExtension = {
+    name: 'emoticon',
+    level: 'inline',
+    start(src) {
+        return src.match(/[:;<]/)?.index;
+    },
+
+    tokenizer(src) {
+        for (const [emoticon, emoji] of Object.entries(emoticons)) {
+        if (src.startsWith(emoticon)) {
+            return {
+            type: 'text',
+            raw: emoticon,
+            text: emoji
+            };
+        }
+        }
+    }
+    };
+
+    marked.use({ extensions: [emoticonExtension] });
 
 
     $: onParamsChanged($location, $querystring)
@@ -721,7 +765,7 @@
                         </h4>
 
                         <p class="break-words">
-                            {@html message.Text}
+                            {@html marked.parseInline(message.Text)}
                         </p>
                             {#if notesNo>0 || tasksNo>0}
                         <p class="bg-stone-100 dark:bg-stone-700">

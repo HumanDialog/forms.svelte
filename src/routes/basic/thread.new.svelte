@@ -150,7 +150,7 @@
             fab: 'M00',
             operations: [
                 {
-                    caption: '_; Thread; Hilo; Wątek',
+                    caption: '_; Post; Entrada; Wpis',
                     tbr: 'B',
                     operations: [
                         {
@@ -195,7 +195,7 @@
             fab: 'M00',
             operations: [
                 {
-                    caption: '_; Thread; Hilo; Wątek',
+                    caption: '_; Post; Entrada; Wpis',
                     tbr: 'B',
                     preAction: contentElement.preventBlur,
                     operations: [
@@ -692,7 +692,7 @@
         pop()   // na razie tak
     }
 
-    const title = '_; New thread; Nuevo hilo; Nowy wątek'
+    const title = '_; New post; Nuevo entrada; Nowy wpis'
 
 </script>
 

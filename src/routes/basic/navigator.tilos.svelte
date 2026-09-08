@@ -8,7 +8,7 @@
                 Modal,
                 reloadWholeApp,
                 Input,
-                onErrorShowAlert,
+                onErrorShowAlert, i18n,
                 randomString, UI, isDeviceSmallerThan
             } from '$lib'
     import {FaHome, FaFolder, FaQuestion, FaDownload, FaAt, FaRegClipboard, FaComments} from 'svelte-icons/fa'
@@ -77,9 +77,9 @@
     {
         const limit = isDeviceSmallerThan("sm") ? 5 : 7
 
-        let res = await reef.post('group/ThreadsRoot/query', {
+        let res = await reef.post('group/FeedsRoot/query', {
             Id: 1,
-            Name: 'threads',
+            Name: 'feeds',
             Limit: limit,
             Tree: [
                 {
@@ -138,27 +138,27 @@
                             icon='newspaper'
                             active={isRoutingTo('/feed/my', currentPath)}
                             summaryX="The essentials in one place">
-                Home
+                _; My news feed; Mi feed de noticias; Mój strumień wiadomości
             </SidebarItem>
             
             <SidebarItem    href="/feed/sent"
                             icon='send'
                             active={isRoutingTo('/feed/sent', currentPath)}
                             summaryX="The essentials in one place">
-                Posted contributions
+                _; My posts; Mis publicaciones; Moje posty
             </SidebarItem>
 
             <SidebarItem    href="/feed/saved"
                             icon='bookmark'
                             active={isRoutingTo('/feed/saved', currentPath)}
                             summaryX="The essentials in one place">
-                Saved posts
+                _; Saved posts; Publicaciones guardadas; Zapisane posty
             </SidebarItem>
         </SidebarGroup>
 
         {#if rootFolders && rootFolders.length > 0}
-            <SidebarGroup border title='Threads'
-                        moreHref="/folder/threads">
+            <SidebarGroup border title='Categories'
+                        moreHref="/folder/feeds">
                 <SidebarList    objects={rootFolders}
                                 orderAttrib='Order'
                                 bind:this={navFolders}>

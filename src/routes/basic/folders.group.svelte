@@ -17,6 +17,7 @@
     import {querystring, location} from 'svelte-spa-router'
     import {FaRegFolder, FaPlus, FaCaretUp, FaCaretDown, FaTrash, FaRegComments, FaRegClipboard, FaPen, FaArchive, FaEllipsisH} from 'svelte-icons/fa'
     import FolderProperties from './properties.folder.svelte'
+    import {FK_FOLDER, FK_BASKET, FK_DISCUSSION, FK_TABLE, FK_DOCUMENT, FK_FEED} from './consts'
 
     export let params = {}
 
@@ -127,8 +128,6 @@
         await reloadFolders(listComponent.SELECT_NEXT)
     }
 
-    const FK_FOLDER = 0
-    const FK_DISCUSSION = 2
     let insertKind = FK_FOLDER
     
     async function addElement(newFolderAttribs)
@@ -226,7 +225,7 @@
                         {
                             caption: '_; New forum; Nuevo foro; Nowe forum',
                             mricon: 'messages-square',
-                            action: () => { insertKind=FK_DISCUSSION; listComponent.addRowAfter(null) },
+                            action: () => { insertKind=FK_DISCUSSION; listComponent.addRowAfter(folder) },
                             tbr: 'A',
                             fab: 'M04'
                         }

@@ -1526,3 +1526,5 @@ export function truncate_html(html_string, max_chars = 300)
     walk(doc.body);
     return doc.body.innerHTML;
 }
+
+export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));

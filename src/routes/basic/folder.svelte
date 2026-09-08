@@ -36,6 +36,8 @@
     import FileProperties from './properties.file.svelte'
 	import TaskProperties from './properties.task.svelte'
     import NoteProperties from './properties.note.svelte'
+    import {FK_FOLDER, FK_BASKET, FK_DISCUSSION, FK_TABLE, FK_DOCUMENT, FK_FEED} from './consts'
+    import {STATE_FINISHED} from './consts'
 
     export let params = {}
 
@@ -55,14 +57,6 @@
 
     let acc_icon                = 'minus'
     let acc_color               = 'text-stone-500'
-
-    const STATE_FINISHED = 7000;
-
-    const FK_FOLDER             = 0
-    const FK_BASKET             = 1
-    const FK_DISCUSSION         = 2
-    const FK_TABLE              = 3
-    const FK_DOCUMENT           = 4
 
     const OP_FOLDER             = 0
     const OP_TRASH              = 1
@@ -154,9 +148,14 @@
             cacheKey = "group_SharedFolder";
             operations_kind = OP_FOLDER
             break;
-        case 'threads':
-            contextNavigation = "group/ThreadsRoot";
-            cacheKey = "group_ThreadsRoot";
+        case 'feeds':
+            contextNavigation = "group/FeedsRoot";
+            cacheKey = "group_FeedsRoot";
+            operations_kind = OP_FOLDER
+            break;
+        case 'unapprovedposts':
+            contextNavigation = "group/UnapprovedPosts";
+            cacheKey = "group_UnapprovedPosts";
             operations_kind = OP_FOLDER
             break;
         default:
@@ -175,6 +174,7 @@
             contextItemId = cachedValue.Id;
             listComponent?.reload(contextItem, listComponent.KEEP_SELECTION)
             breadcrump?.reload(contextItem.GetCanonicalPath)
+            attached_to_component?.reload(contextItem, attached_to_component.CLEAR_SELECTION)
         }
         //---------------------------------------------------
         const readItem = await readContextItem(contextNavigation)
@@ -200,6 +200,7 @@
 
         listComponent?.reload(contextItem, listComponent.KEEP_SELECTION)
         breadcrump?.reload(contextItem.GetCanonicalPath)
+        attached_to_component?.reload(contextItem, attached_to_component.CLEAR_SELECTION)
     }
 
     async function readContextItem(contextNavigation)
@@ -213,7 +214,7 @@
             Tree:
             [
             {   Id: 1, Association: '',
-                Expressions:['Id', '$ref', '$type', 'icon', 'Title','Summary', 'Kind', 'ModificationDate', 'CreatedBy', 'IsPinned', 'IsBasket', 'IsRootPinned', 'GetCanonicalPath', '$ver', 'AccCode', 'Status'],
+                Expressions:['Id', '$ref', '$type', 'icon', 'Title','Summary', 'Kind', 'ModificationDate', 'CreatedBy', 'IsPinned', 'IsBasket', 'IsRootPinned', 'GetCanonicalPath', '$ver', 'AccCode', 'Status', '$acc'],
                 SubTree:[
                     {   Id: 2, Association: 'Folders',
                         Expressions:['Id','$ref', 'Title', 'Summary', 'Order', 'href', 'icon', 'IsInBasket' , 'IsCanonical',  'icon', 'FolderId', '$type', '$ver']
@@ -234,6 +235,11 @@
                         Association: 'Files',
                         Expressions:['Id', 'FileId', '$ref', 'Title', 'Summary', 'Order', 'href', 'icon', 'IsInBasket', 'IsCanonical', 'FileId', '$type', '$ver']
 
+                    },
+                    {
+                        Id: 6,
+                        Association: 'InFolders',
+                        Expressions:['$ref', 'InTitle', 'InSummary', 'InHRef', 'InIcon', 'IsCanonical', '$type']
                     }
                 ]
             }
@@ -769,13 +775,51 @@
         listComponent.reload(contextItem, newFile.$ref);
     }
 
+    let new_folder_kind = FK_FOLDER
+    function run_folder_creator(btt, after_element) // temporary 
+    {
+        newElementKind = 'Folder'
+        new_folder_kind = FK_FOLDER
+        listComponent.addRowAfter(after_element)
+        
+    }
+
+    function run_folder_creatorX(btt, after_element)
+    {
+        const run_folder_list_inserter = (after_element, kind) => {
+            newElementKind = 'Folder'
+            new_folder_kind = kind
+            listComponent.addRowAfter(after_element)
+        }
+
+        const folder_kinds = [
+            {
+                caption: '_; A regular folder; Una carpeta normal; Zwykły folder',
+                action: () => run_folder_list_inserter(after_element, FK_FOLDER)
+            },
+            { separator: true},
+            {
+                caption: '_; Feed; Feed; Strumień',
+                action: () => run_folder_list_inserter(after_element, FK_FEED)
+            },
+            {
+                caption: '_; Discussions; Debates; Dyskusje',
+                action: () => run_folder_list_inserter(after_element, FK_DISCUSSION)
+            },
+        ]
+        
+        const rect = btt.getBoundingClientRect()
+        showMenu(rect, folder_kinds)
+        
+    }
+
     async function addFolder(newFolderAttribs)
     {
         let res = await reef.post(`${contextNavigation}/CreateSubFolder`,{
             title: newFolderAttribs.Title,
             summary:  newFolderAttribs.Summary,
             order: newFolderAttribs.Order,
-            kind: 0
+            kind: new_folder_kind
         }, onErrorShowAlert)
         if(!res)
             return null;
@@ -838,6 +882,7 @@
     {
         await fetchData();
         listComponent.reload(contextItem, listComponent.KEEP_SELECTION)
+        attached_to_component?.reload(contextItem, attached_to_component.CLEAR_SELECTION);
     }
 
     function pinOp()
@@ -894,7 +939,7 @@
             caption: '_; New folder; Nueva carpeta; Nowy folder',
             hideToolbarCaption: true,
             mricon: 'folder',
-            action: (f) => { newElementKind='Folder';  listComponent.addRowAfter(afterElement) },
+            action: (btt) => run_folder_creator(btt, afterElement),
             tbr: 'A',
             fab: 'M04'
         }
@@ -936,7 +981,7 @@
         }
 
         const newThread = {
-            caption: '_; New thread; Nuevo hilo; Nowy wątek',
+            caption: '_; New post; Nuevo entrada; Nowy wpis',
             //hideToolbarCaption: true,
             mricon: 'message-square',
             action: (f) => { newElementKind='Thread';  listComponent.addRowAfter(afterElement) },
@@ -1117,6 +1162,7 @@
                     operations: [
                         {
                             caption: '_; Edit; Editar; Edytuj',
+                            disabled: (contextItem.$acc & 0x02) == 0,
                             hideToolbarCaption: true,
                             mricon: 'pencil',
                             tbr: 'A',
@@ -1332,12 +1378,14 @@
     {
         await reef.get(`${contextItem.$ref}/MoveMeToArchive`)
         await fetchData();
+        attached_to_component.reload(contextItem, attached_to_component.CLEAR_SELECTION);
     }
 
     async function move_me_to_trash()
     {
         await reef.get(`${contextItem.$ref}/MoveMeToTrash`)
         await fetchData();
+        attached_to_component.reload(contextItem, attached_to_component.CLEAR_SELECTION);
     }
 
 
@@ -2162,6 +2210,76 @@
     }
 
 
+    let attached_to_component
+    let attached_to_list_properties = {
+        element:{
+            icon: "InIcon",
+            href: "InHRef",
+            Title: "InTitle",
+            Summary: "InSummary"
+        }
+    }
+
+    function attached_to_operations(element)
+    {
+        let link_operations = []
+        if(element.IsCanonical)
+        {
+            link_operations = [ ]
+        }
+        else
+        {
+            link_operations = [
+                {
+                    caption: '_; Detach; Desconectar; Odłącz',
+                    action: (f) => dettach_parent(element)
+                },
+                {
+                    caption: '_; Set as primary location; Establecer como ubicación principal; Ustaw jako główną lokalizację',
+                    action: (f) => set_parent_location_as_canonical(element)
+                }
+             ]
+        }
+
+
+        return {
+                opver: 2,
+                fab: 'M00',
+                tbr: 'D',
+                disabled: link_operations.length == 0,
+                operations: [
+                    {
+                        caption: '_; Element; Elemento; Element',
+                        operations: link_operations
+                    }
+                ]
+            }
+    }
+
+    async function dettach_parent(element)
+    {
+        switch(element.$type)
+        {
+        case 'FolderFolder':
+            await reef.post(`${element.$ref}/InFolder/DettachSubFolder`, { folderLink: element.$ref });
+            break;
+        }
+
+        await fetchData();
+        if(attached_to_component)
+            attached_to_component.reload(contextItem, attached_to_component.SELECT_NEXT);
+        else
+            clearActiveItem('props')
+    }
+
+    async function set_parent_location_as_canonical(element)
+    {
+        await reef.get(`${element.$ref}/SetLocationAsCanonical`)
+        await fetchData();
+        attached_to_component.reload(contextItem, attached_to_component.KEEP_SELECTION);
+    }
+
+
 </script>
 
 <svelte:head>
@@ -2214,6 +2332,18 @@
                 <ListInserter   action={addElement} icon/>
             </List>
 
+
+            {#if contextItem && contextItem.InFolders && contextItem.InFolders.length > 0}
+                <h2 class="mt-20">_; Attached to; Adjunto a; Przyłączony do</h2>
+                <section>
+                    <List   self={contextItem}
+                            a='InFolders'
+                            list_properties={attached_to_list_properties}
+                            bind:this={attached_to_component}
+                            toolbarOperations = {(el) => attached_to_operations(el)}>
+                    </List>
+                </section>
+            {/if}
 
 
             <input hidden type="file" id="attachementFile" accept="*/*" bind:this={attInput} on:change={onAttachementSelected}/>

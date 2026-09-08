@@ -32,6 +32,9 @@ export function getFormattedStringDate(d, type = "datetime")
 
 export function getNiceStringDateTime(dat)
 {
+    if(!dat)
+        return ''
+
     let d
     if(typeof dat == 'string')
         d = new Date(dat)
@@ -48,6 +51,9 @@ export function getNiceStringDateTime(dat)
 
 export function getNiceStringDate(dat)
 {
+    if(!dat)
+        return ''
+    
     let d
     if(typeof dat == 'string')
         d = new Date(dat)

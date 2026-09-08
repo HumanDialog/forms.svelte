@@ -20,6 +20,7 @@
     import {tick} from 'svelte'
     import {FaPen, FaUpload} from 'svelte-icons/fa'
 	import { Span } from 'flowbite-svelte';
+    import {STATE_FINISHED} from './consts'
 
     export let task;
     export let getAllTags = undefined
@@ -29,8 +30,6 @@
     export let layout_ctrl_mode = true
     export let action_ctrl_mode = false
     export let demo_view = true
-
-    const STATE_FINISHED = 7000
 
     let placeholder = ''
 

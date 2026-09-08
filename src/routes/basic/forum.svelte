@@ -219,7 +219,7 @@
                         ... (!folder.IsRoot) ? [
                             {
                                 icon: FaPostPlus,
-                                caption: '_; New thread; Nuevo hilo; Nowy wątek',
+                                caption: '_; New post; Nuevo entrada; Nowy post',
                                 action: (f) => push(`/newthread/${contextItemId}`),
                                 tbr: 'A'
                             } ]: [],

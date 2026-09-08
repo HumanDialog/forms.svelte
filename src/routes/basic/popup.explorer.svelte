@@ -105,6 +105,8 @@
         default:
             if(whatToShow.startsWith('/folder/'))
                 elements = await generateFolderReferences(whatToShow)
+            else if(whatToShow.startsWith('/feed/'))
+                elements = await generateFolderReferences(whatToShow)
             else if(whatToShow.startsWith('/listboard/'))
                 elements = await generateTaskListReferences(whatToShow)
             else if(whatToShow.startsWith('/tasklist/'))

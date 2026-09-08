@@ -11,6 +11,7 @@
     import SidebarFolders from './sidebar.folders.svelte'
     import SidebarMessages from './sidebar.messages.svelte'
     import SidebarTilos from './sidebar.tilos.svelte'
+    import SidebarFeeds from './sidebar.feeds.svelte'
 
     import {push, querystring, location} from 'svelte-spa-router'
 
@@ -159,6 +160,14 @@
                         }
                 }
 
+            case 'feeds':
+                return {
+                    'Feeds': {
+                            mricon: 'newspaper',
+                            component: SidebarFeeds
+                        }
+                }
+
             case 'tilos':
                 return {
                     'Tilos': {
@@ -176,7 +185,7 @@
             // only tilos navigator has ability to show static content without sign-in need
             switch(module)
             {
-            case 'tilos':
+            case 'tilosX':      // disabled temporary
                 return {
                     'Tilos': {
                             icon: TilosIcon,

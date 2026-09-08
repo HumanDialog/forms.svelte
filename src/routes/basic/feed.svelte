@@ -2,41 +2,19 @@
     import {reef, session} from '@humandialog/auth.svelte'
     import {    Spinner,
                 Page,
-                Icon,
-                ComboSource,
                 Editable,
-                List,
-                ListTitle,
-                ListSummary,
-                ListInserter,
-                ListDateProperty,
-                ListComboProperty,
-				mainContentPageReloader,
-                Modal,
-                onErrorShowAlert,
-				activateItem, UI,
-				i18n, ext,
+                mainContentPageReloader, refreshToolbarOperations, reloadPageToolbarOperations,
+                i18n, ext,
                 Breadcrumb,
-                refreshToolbarOperations,
-				showFloatingToolbar,
-                reloadPageToolbarOperations, Paper, PaperHeader, openInNewTab, copyAddress,
+                Paper, PaperHeader, openInNewTab, copyAddress,
 				focusEditable, showMenu, Ricon, get_main_object_fetch_error_description, 
-                Editor, getNiceStringDateTime, download_file_from_href, truncate_html} from '$lib'
-    import {FaTrash, FaCloudUploadAlt} from 'svelte-icons/fa'
-
-
+                Editor, getNiceStringDateTime, download_file_from_href, truncate_html, sleep} from '$lib'
     import {onMount} from 'svelte'
     import {location, pop, push, querystring, link} from 'svelte-spa-router'
-    import BasketPreview from './basket.preview.svelte'
-    import PopupExplorer from './popup.explorer.svelte'
-    import {fetchComposedClipboard4Folder, transformClipboardToJSONReferences, getBrowserRecentElements4Folder, setBrowserRecentElement, recentClipboardElements} from './basket.utils'
     import {cache} from './cache.js'
-    import {getElementIcon} from './icons'
-	import FolderProperties from './properties.folder.svelte'
-    import FileProperties from './properties.file.svelte'
-	import TaskProperties from './properties.task.svelte'
-    import NoteProperties from './properties.note.svelte'
-
+    import FolderProperties from './properties.folder.svelte'
+    import {NK_COMMENT, NS_UNAPPROVED, NS_CONFIDENTIAL} from './consts.js'
+    
     export let params = {}
 
     let contextItem = null;
@@ -45,35 +23,28 @@
     let contextItemSelector;
     let contextItemId;
 
-    let listComponent;
     let breadcrump;
     let folderTitle = ''
-    let pendingUploading = false;
     let failed_message = ''
+    let details_visibility = 0
+
+    let readonly = false
+
+    const DV_SHOW_CATEGORY = 0x0001
+    const DV_SHOW_TITLE = 0x0002
+    const DV_SHOW_SUMMARY = 0x0004
+    const DV_SHOW_NEW_MESSAGE_PROMPT = 0x0008
+    const DV_ADD_FOLLOW_CATEGORY_OPERATIONS = 0x0010
+    const DV_SHOW_WORKING_POSTS = 0x0020
+    const DV_CONTEXTUAL_VIEW = 0x0040
 
     let users = [];
+    let working_posts = []
 
-    const STATE_FINISHED = 7000;
+    
+    $: on_params_changed($location, $querystring, $mainContentPageReloader, $session);
 
-    const FK_FOLDER             = 0
-    const FK_BASKET             = 1
-    const FK_DISCUSSION         = 2
-    const FK_TABLE              = 3
-    const FK_DOCUMENT           = 4
-
-    const NK_DOCUMENT          = 0
-    const NK_THREAD            = 1
-    const NK_POST              = 2 
-
-    const OP_FOLDER             = 0
-    const OP_TRASH              = 1
-    const OP_ARCHIVE            = 2
-
-    let operations_kind = OP_FOLDER
-
-    $: onParamsChanged($location, $querystring, $mainContentPageReloader, $session);
-
-    async function onParamsChanged(...args)
+    async function on_params_changed(...args)
     {
         const segments = $location.split('/');
         const foundIdx = segments.findIndex( s => s == 'feed');
@@ -96,26 +67,36 @@
         }
 
         contextItemId = 0
+        details_visibility = 0
+        working_posts = []
+        
 
         switch (contextItemSelector)
         {
         case 'my':
             contextNavigation = "user/MyFeed";
             cacheKey = "user_MyFeed";
-            operations_kind = OP_FOLDER
+            details_visibility = DV_SHOW_TITLE | DV_SHOW_SUMMARY | DV_SHOW_CATEGORY | DV_SHOW_NEW_MESSAGE_PROMPT | DV_ADD_FOLLOW_CATEGORY_OPERATIONS | DV_SHOW_WORKING_POSTS
             break;
         case 'sent':
             contextNavigation = "user/MySentPosts";
             cacheKey = "user_MySentPosts";
-            operations_kind = OP_FOLDER
+            details_visibility = DV_SHOW_TITLE | DV_SHOW_SUMMARY | DV_SHOW_CATEGORY
+            break;
+        case 'unapprovedposts':
+            contextNavigation = "group/UnapprovedPosts";
+            cacheKey = "group_UnapprovedPosts";
+            details_visibility = DV_SHOW_TITLE | DV_SHOW_SUMMARY
             break;
         default:
             contextItemId = parseInt(segments[segments.length-1])
             contextNavigation = `Folder/${contextItemId}`
             cacheKey = `Feed_${contextItemId}`;
-            operations_kind = OP_FOLDER
+            details_visibility = DV_SHOW_TITLE | DV_SHOW_SUMMARY | DV_CONTEXTUAL_VIEW
             break;
         }
+
+        const fetching_context_id = contextItemId
 
         const cachedValue = cache.get(cacheKey)
         if(cachedValue)
@@ -123,49 +104,57 @@
             contextItem = cachedValue;
             folderTitle = ext(contextItem.Title);
             contextItemId = cachedValue.Id;
-            listComponent?.reload(contextItem, listComponent.KEEP_SELECTION)
+            readonly = (contextItem.$acc & 0x02) == 0
             breadcrump?.reload(contextItem.GetCanonicalPath)
         }
         //---------------------------------------------------
-        const readItem = await readContextItem(contextNavigation)
+
+        let promises = [read_context_item(contextNavigation)]
+
+        if(details_visibility & DV_SHOW_WORKING_POSTS)
+            promises.push(fetch_my_working_threads(fetching_context_id))
+
+        const [read_item, my_working_posts] = await Promise.all(promises)
+        const folderItem = setup_data_after_fetch(read_item, my_working_posts);
+
 
         // dodatkowe zabezpiecznie dla przypadku kiedy pokazalismy folder, ale jego wersje z cache'a
         // i wciąż jeszcze czekamy na odpowiedź z serwisu. W międzyczasie user przeszedł do folderu niżej
         // zostajemy więc w tym komponencie, ale zmienił się parametr folderu do załadowania
         // wysyłamy więc nowe zapytanie, a to poprzednie, które wciąż jeszcze trwa, już nas nie interesuje
-        if((contextItemId > 0) && (readItem.Id != contextItemId))
+        if((contextItemId > 0) && (folderItem.Id != contextItemId))
             return;
 
-        contextItem  = readItem
+        contextItem  = folderItem
         cache.set(cacheKey, contextItem)
        
 
         if(contextItem)
         {
             folderTitle = ext(contextItem.Title);
-            setupAllElements(contextItem)
+            readonly = (contextItem.$acc & 0x02) == 0
+            setup_all_elements(contextItem)
         }
 
-        listComponent?.reload(contextItem, listComponent.KEEP_SELECTION)
         breadcrump?.reload(contextItem.GetCanonicalPath)
     }
 
-    async function readContextItem(contextNavigation)
+    async function read_context_item(contextNavigation)
     {
         failed_message = ''
-        let res = await reef.post(`${contextNavigation}/query`,
+        return reef.post(`${contextNavigation}/query`,
         {
             Id: 1,
             Name: "collector",
-            ExpandLevel: 3,
+            ExpandLevel: 6,
             Tree:
             [
             {   Id: 1, Association: '',
-                Expressions:['Id', '$ref', '$type', 'icon', 'Title','Summary', 'Kind', 'ModificationDate', 'CreatedBy', 'IsPinned', 'IsBasket', 'IsRootPinned', 'GetCanonicalPath', '$ver', 'Status'],
+                Expressions:['Id', '$ref', '$type', 'icon', 'Title','Summary', 'Kind', 'ModificationDate', 'CreatedBy', 'IsPinned', 'IsBasket', 'IsRootPinned', 'IsSubscribed', 'GetCanonicalPath', '$ver', 'Status', '$acc'],
                 SubTree:[
                     { 
                         Id: 3, Association: 'Notes',
-                        Expressions:['Id', '$ref', 'Title', 'Summary', 'Content', 'Order', 'NotesCount', 'ModificationDate', 'href', 'icon', 'IsInBasket', 'IsCanonical', 'NoteId', '$type', '$ver'],
+                        Expressions:['Id', '$ref', 'Title', 'Summary', 'Content', 'Order', 'State', 'NotesCount', 'Kind', 'ModificationDate', 'href', 'icon', 'IsInBasket', 'IsCanonical', 'NoteId', 'ThreadFolderInfo', '$type', '$ver'],
                         Sort: "-Order",
                         SubTree:[
                             {
@@ -175,9 +164,38 @@
                             },
                             {
                                 Id: 32,
+                                Association: "Note/CreatedBy",
+                                Expressions:['$ref', 'Name', 'href']
+                            },
+                            {
+                                Id: 33,
                                 Association: "Note/Files",
                                 Expressions: ["$ref", "Title", "Summary", "href", "icon", "$type"]
+                            },
+                            {
+                                Id: 34,
+                                Association: "Note/InNotes",
+                                Filter: "IsCanonical",
+                                Expressions: ["Id", "$ref", "InTitle", "InContent", "InModificationDate", "InHRef"],
+                                SubTree: [
+                                    {
+                                        Id: 331,
+                                        Association: "InNote/ModifiedBy",
+                                        Expressions:['$ref', 'Name', 'href']
+                                    },
+                                    {
+                                        Id: 332,
+                                        Association: "InNote/CreatedBy",
+                                        Expressions:['$ref', 'Name', 'href']
+                                    }
+                                ]
                             }
+                         /*   ,{
+                                Id: 34,
+                                Association: "Note/InFolders",
+                                Filter: "IsCanonical",
+                                Expressions: ["Id", "$ref", "InTitle", "InHRef"]
+                            }*/
                         ]
                     },
               
@@ -186,15 +204,48 @@
         ]
         },
         handle_fetch_error);
-        if(res)
+        
+    }
+
+    async function fetch_my_working_threads(parent_folder_id) 
+    {
+        working_posts = []
+        return reef.post('user/MyDraftPosts/query', {
+            Id: 1, Name: 'not published posts', ExpandLevel: 16,
+            Tree: [
+                {
+                    Id: 1,
+                    Association: 'Notes',
+                    Filter: parent_folder_id ? `Kind=NK_THREAD and Note/IsDraftThreadInCategory(${parent_folder_id})` : '',
+                    Expressions: ['Id', '$ref', 'Title', 'Summary', 'Content', 'Kind', 'href', '$type', 'ModificationDate', 'DraftThreadCategoryFolderInfo', 'DraftCommentThreadInfo', '$ver'],
+                    Sort: "-ModificationDate",
+                    SubTree: [
+                        {
+                            Id: 10,
+                            Association: 'Note/Files',
+                            Expressions: ["$ref", "Title", "Summary", "href", "icon", "$type"]
+                        }
+                    ]
+                    
+                }
+            ]
+        }) 
+
+       
+    }
+
+    function setup_data_after_fetch(context_item, draft_posts)
+    {
+        let result = null
+        if(context_item)
+            result = context_item.Folder
+           
+        if(draft_posts && draft_posts.FolderNote && draft_posts.FolderNote.length > 0)
         {
-            const folderItem = res.Folder
-            return folderItem;
+            working_posts = draft_posts.FolderNote
         }
-        else
-        {
-            return null;
-        }
+
+        return result
     }
 
     function handle_fetch_error(err, res)
@@ -203,866 +254,80 @@
         failed_message = get_main_object_fetch_error_description(err, res);
     }
 
-    function setupAllElements(contextItem)
+    function setup_all_elements(contextItem)
     {
-        contextItem.allElements = []
+        contextItem.all_elements = []
         if(contextItem.Folders)
-            contextItem.allElements = [...contextItem.allElements, ...contextItem.Folders]
+            contextItem.all_elements = [...contextItem.all_elements, ...contextItem.Folders]
 
         if(contextItem.Notes)
-            contextItem.allElements = [...contextItem.allElements, ...contextItem.Notes]
+            contextItem.all_elements = [...contextItem.all_elements, ...contextItem.Notes]
 
         if(contextItem.Tasks)
-            contextItem.allElements = [...contextItem.allElements, ...contextItem.Tasks]
+            contextItem.all_elements = [...contextItem.all_elements, ...contextItem.Tasks]
 
         if(contextItem.Files)
-            contextItem.allElements = [...contextItem.allElements, ...contextItem.Files]
+            contextItem.all_elements = [...contextItem.all_elements, ...contextItem.Files]
 
-        contextItem.allElements.sort((a,b) =>  b.Order - a.Order)
+        contextItem.all_elements.sort((a,b) =>  b.Order - a.Order)
+
+        // ==========================================
+
+
     }
 
-    async function fetchData()
+    async function fetch_data()
     {
-        contextItem = await readContextItem(contextNavigation);
+
+        let promises = [read_context_item(contextNavigation)]
+
+        if(details_visibility & DV_SHOW_WORKING_POSTS)
+            promises.push(fetch_my_working_threads(contextItemId))
+
+        const [read_item, my_working_posts] = await Promise.all(promises)
+
+        contextItem = setup_data_after_fetch(read_item, my_working_posts);
         cache.set(cacheKey, contextItem)
         if(contextItem)
         {
             folderTitle = ext(contextItem.Title);
-            setupAllElements(contextItem)
+            setup_all_elements(contextItem)
         }
     }
 
-    /*onMount( () => {
-        document.addEventListener('keydown', onKeyDown)
-        return () => {
-            document.removeEventListener('keydown', onKeyDown)
-        }
-    })
 
-    function onKeyDown(e)
-    {
-        switch(e.key)
-        {
-        case 'c':
-            if(e.ctrlKey || e.metaKey)
-            {
-                console.log('handle Ctrl+C')
-                e.stopPropagation()
-                e.preventDefault()
-            }
-            break;
-
-        case 'x':
-            if(e.ctrlKey || e.metaKey)
-            {
-                console.log('handle Ctrl+X')
-                e.stopPropagation()
-                e.preventDefault()
-            }
-            break;
-
-        case 'v':
-            if(e.ctrlKey || e.metaKey)
-            {
-                console.log('handle Ctrl+V')
-                e.stopPropagation()
-                e.preventDefault()
-            }
-            break;
-        }
-    }
-    */
-
-    async function moveToTrash(object, kind)
-    {
-        let success = false
-
-        switch(kind)
-        {
-        case 'FolderFolder':
-            success = await reef.get(`${object.$ref}/Folder/MoveMeToTrash`);
-            break;
-
-        case 'FolderTask':
-            success = await reef.get(`${object.$ref}/Task/MoveMeToTrash`);
-            break;
-
-        case 'FolderNote':
-            success = await reef.get(`${object.$ref}/Note/MoveMeToTrash`);
-            break;
-
-        case 'FolderFile':
-            success = await reef.get(`${object.$ref}/File/MoveMeToTrash`);
-            break;
-
-        case 'multi':
-            {
-                let refs = []
-                object.forEach(i =>
-                    refs.push({
-                        Type: i.$type,
-                        Id: i.Id,
-                        Title: i.Title,
-                        ref: i.$ref
-                        })
-                )
-                success = await reef.post(`${contextItem.$ref}/MoveElementsToTrash`, { items: refs });
-            }
-            break;
-        }
-
-        if(success)
-        {
-            await fetchData();
-            listComponent.reload(contextItem, listComponent.SELECT_NEXT);
-        }
+ 
+    const refresh_operation = {
+        caption: '_; Refresh; Actualizar; Odśwież',
+        action: async (f) => await fetch_data(),
     }
 
-    async function restoreTrashElement(object, kind)
-    {
-        let success = false
-
-        switch(kind)
-        {
-        case 'FolderFolder':
-            success = await reef.get(`${object.$ref}/Folder/RestoreFromTrash`);
-            break;
-
-        case 'FolderTask':
-            success = await reef.get(`${object.$ref}/Task/RestoreFromTrash`);
-            break;
-
-        case 'FolderNote':
-            success = await reef.get(`${object.$ref}/Note/RestoreFromTrash`);
-            break;
-
-        case 'FolderFile':
-            success = await reef.get(`${object.$ref}/File/RestoreFromTrash`);
-            break;
-
-        case 'multi':
-            {
-                let refs = []
-                object.forEach(i =>
-                    refs.push({
-                        Type: i.$type,
-                        Id: i.Id,
-                        Title: i.Title,
-                        ref: i.$ref
-                        })
-                )
-                success = await reef.post(`${contextItem.$ref}/RestoreElementsFromTrash`, { items: refs } );
-            }
-            break;
-        }
-
-        if(success)
-        {
-            await fetchData();
-            listComponent.reload(contextItem, listComponent.SELECT_NEXT);
-        }
-    }
-
-    async function moveToArchive(object, kind)
-    {
-        let success = false
-
-        switch(kind)
-        {
-        case 'FolderFolder':
-            success = await reef.get(`${object.$ref}/Folder/MoveMeToArchive`);
-            break;
-
-        case 'FolderTask':
-            success = await reef.get(`${object.$ref}/Task/MoveMeToArchive`);
-            break;
-
-        case 'FolderNote':
-            success = await reef.get(`${object.$ref}/Note/MoveMeToArchive`);
-            break;
-
-        case 'FolderFile':
-            success = await reef.get(`${object.$ref}/File/MoveMeToArchive`);
-            break;
-
-        case 'multi':
-            {
-                let refs = []
-                object.forEach(i =>
-                    refs.push({
-                        Type: i.$type,
-                        Id: i.Id,
-                        Title: i.Title,
-                        ref: i.$ref
-                        })
-                )
-                success = await reef.post(`${contextItem.$ref}/MoveElementsToArchive`, { items: refs } );
-            }
-            break;
-        }
-
-        if(success)
-        {
-            await fetchData();
-            listComponent.reload(contextItem, listComponent.SELECT_NEXT);
-        }
-    }
-
-    async function restoreArchivedElement(object, kind)
-    {
-        let success = false
-
-        switch(kind)
-        {
-        case 'FolderFolder':
-            success = await reef.get(`${object.$ref}/Folder/RestoreFromArchive`);
-            break;
-
-        case 'FolderTask':
-            success = await reef.get(`${object.$ref}/Task/RestoreFromArchive`);
-            break;
-
-        case 'FolderNote':
-            success = await reef.get(`${object.$ref}/Note/RestoreFromArchive`);
-            break;
-
-        case 'FolderFile':
-            success = await reef.get(`${object.$ref}/File/RestoreFromArchive`);
-            break;
-
-        case 'multi':
-            {
-                let refs = []
-                object.forEach(i =>
-                    refs.push({
-                        Type: i.$type,
-                        Id: i.Id,
-                        Title: i.Title,
-                        ref: i.$ref
-                        })
-                )
-                success = await reef.post(`${contextItem.$ref}/RestoreElementsFromArchive`, { items: refs } );
-            }
-            break;
-        }
-
-        if(success)
-        {
-            await fetchData();
-            listComponent.reload(contextItem, listComponent.SELECT_NEXT);
-        }
-    }
-
-    async function emptyTrash() 
-    {
-        await reef.get(`${contextItem.$ref}/EmptyTrash`);
-        await fetchData();
-        listComponent.reload(contextItem, listComponent.CLEAR_SELECTION);
-    }
-
-    let deleteModal;
-    let objectToDelete;
-    let deleteObjectKind = ''
-    function askToDelete(object, kind)
-    {
-        deleteObjectKind = kind;
-        objectToDelete = object;
-        deleteModal.show()
-    }
-
-
-    async function deleteElement()
-    {
-        if(!objectToDelete)
-            return;
-
-        switch(deleteObjectKind)
-        {
-        case 'Task':
-        case 'FolderTask':
-            await reef.post(`${contextItem.$ref}/DeletePermanentlyTask`, { taskLink: objectToDelete.$ref } , onErrorShowAlert);
-            deleteModal.hide();
-            await fetchData();
-            listComponent.reload(contextItem, listComponent.SELECT_NEXT);
-            break;
-
-        case 'Note':
-        case 'FolderNote':
-            await reef.post(`${contextItem.$ref}/DeletePermanentlyNote`, { noteLink: objectToDelete.$ref } , onErrorShowAlert);
-            deleteModal.hide();
-            await fetchData();
-            listComponent.reload(contextItem, listComponent.SELECT_NEXT);
-            break;
-
-        case 'Folder':
-        case 'FolderFolder':
-            await reef.post(`${contextItem.$ref}/DeletePermanentlyFolder`, { folderLink: objectToDelete.$ref } , onErrorShowAlert);
-            deleteModal.hide();
-            await fetchData();
-            listComponent.reload(contextItem, listComponent.SELECT_NEXT);
-            break;
-
-        case 'UploadedFile':
-        case 'FolderFile':
-            await reef.post(`${contextItem.$ref}/DeletePermanentlyFile`, { fileLink: objectToDelete.$ref } , onErrorShowAlert);
-            deleteModal.hide();
-            await fetchData();
-            listComponent.reload(contextItem, listComponent.SELECT_NEXT);
-            break;
-
-        case 'multi':
-            {
-                let refs = []
-                objectToDelete.forEach(i =>
-                    refs.push({
-                        Type: i.$type,
-                        Id: i.Id,
-                        Title: i.Title,
-                        ref: i.$ref
-                        })
-                )
-                await reef.post(`${contextItem.$ref}/DeletePermanentlyMulti`, { items: refs } , onErrorShowAlert);
-                deleteModal.hide();
-                await fetchData();
-                listComponent.reload(contextItem, listComponent.SELECT_NEXT);
-            }
-            break;
-        }
-
-    }
-
-    async function dettachSubFolder(folder)
-    {
-        await reef.post(`${contextItem.$ref}/DettachSubFolder`, { folderLink: folder.$ref } , onErrorShowAlert);
-        await fetchData();
-        listComponent.reload(contextItem, listComponent.SELECT_NEXT);
-    }
-
-    async function dettachNote(note)
-    {
-        await reef.post(`${contextItem.$ref}/DettachNote`, { noteLink: note.$ref } , onErrorShowAlert);
-        await fetchData();
-        listComponent.reload(contextItem, listComponent.SELECT_NEXT);
-    }
-
-    async function dettachTask(task)
-    {
-        await reef.post(`${contextItem.$ref}/DettachTask`, { taskLink: task.$ref } , onErrorShowAlert);
-        await fetchData();
-        listComponent.reload(contextItem, listComponent.SELECT_NEXT);
-    }
-
-    async function dettachFile(file)
-    {
-        await reef.post(`${contextItem.$ref}/DettachFile`, { fileLink: file.$ref } , onErrorShowAlert);
-        await fetchData();
-        listComponent.reload(contextItem, listComponent.SELECT_NEXT);
-    }
-
-    async function setLocationAsCanonical(element)
-    {
-        await reef.get(`${element.$ref}/SetLocationAsCanonical`, onErrorShowAlert)
-        await fetchData();
-        listComponent.reload(contextItem, listComponent.KEEP_SELECTION);
-    }
-
-    async function copyTaskToBasket(task)
-    {
-        await reef.post(`${contextItem.$ref}/CopyTaskToBasket`, { taskLink: task.$ref } , onErrorShowAlert);
-        //task.IsInBasket = true
-        refreshToolbarOperations()
-        // not needed
-        //await fetchData();
-        //tasksComponent.reload(contextItem, tasksComponent.SELECT_NEXT);
-    }
-
-    async function cutTaskToBasket(task)
-    {
-        await reef.post(`${contextItem.$ref}/CutTaskToBasket`, { taskLink: task.$ref } , onErrorShowAlert);
-        await fetchData();
-        listComponent.reload(contextItem, listComponent.SELECT_NEXT);
-    }
-
-    async function copyNoteToBasket(note)
-    {
-        await reef.post(`${contextItem.$ref}/CopyNoteToBasket`, { noteLink: note.$ref } , onErrorShowAlert);
-        //note.IsInBasket = true
-        refreshToolbarOperations()
-        // not needed
-        //await fetchData();
-        //tasksComponent.reload(contextItem, tasksComponent.SELECT_NEXT);
-    }
-
-    async function cutNoteToBasket(note)
-    {
-        await reef.post(`${contextItem.$ref}/CutNoteToBasket`, { noteLink: note.$ref } , onErrorShowAlert);
-        await fetchData();
-        listComponent.reload(contextItem, listComponent.SELECT_NEXT);
-    }
-
-    async function copyFileToBasket(file)
-    {
-        await reef.post(`${contextItem.$ref}/CopyFileToBasket`, { fileLink: file.$ref } , onErrorShowAlert);
-        //file.IsInBasket = true
-        refreshToolbarOperations()
-        // not needed
-        //await fetchData();
-        //tasksComponent.reload(contextItem, tasksComponent.SELECT_NEXT);
-    }
-
-    async function cutFileToBasket(file)
-    {
-        await reef.post(`${contextItem.$ref}/CutFileToBasket`, { fileLink: file.$ref } , onErrorShowAlert);
-        await fetchData();
-        listComponent.reload(contextItem, listComponent.SELECT_NEXT);
-    }
-
-    async function copySubFolderToBasket(folder)
-    {
-        await reef.post(`${contextItem.$ref}/CopySubFolderToBasket`, { folderLink: folder.$ref } , onErrorShowAlert);
-        //folder.IsInBasket = true
-        refreshToolbarOperations()
-        // not needed
-        //await fetchData();
-        //tasksComponent.reload(contextItem, tasksComponent.SELECT_NEXT);
-    }
-
-    async function cutSubFolderToBasket(folder)
-    {
-        await reef.post(`${contextItem.$ref}/CutSubFolderToBasket`, { folderLink: folder.$ref } , onErrorShowAlert);
-        await fetchData();
-        listComponent.reload(contextItem, listComponent.SELECT_NEXT);
-    }
-
-
-    async function finishTask(event, task)
-    {
-        if(event)
-            event.stopPropagation();
-
-        let result = await reef.post(`${task.$ref}/Finish`, {}, onErrorShowAlert);
-        if(result)
-        {
-            await fetchData();
-            listComponent.reload(contextItem, listComponent.KEEP_OR_SELECT_NEXT);
-        }
-    }
-
-    let newElementKind = ''
-    async function addElement(newElementAttribs)
-    {
-        switch(newElementKind)
-        {
-        case 'Folder':
-        case 'FolderFolder':
-            return await addFolder(newElementAttribs)
-
-        case 'Note':
-        case 'FolderNote':
-            return await addNote(newElementAttribs)
-
-        case 'Task':
-        case 'FolderTask':
-            return await addTask(newElementAttribs)
-
-        case 'UploadedFile':
-        case 'FolderFile':
-            return await addFile(newElementAttribs)
-
-        case 'Forum':
-            return await addForum(newElementAttribs)
-
-        case 'Thread':
-            return await addThread(newElementAttribs)
-        }
-    }
-
-    async function addTask(newTaskAttribs)
-    {
-        let res = await reef.post(`${contextNavigation}/CreateTaskEx`,{ properties: newTaskAttribs }, onErrorShowAlert)
-        if(!res)
-            return null;
-
-        let newTask = res.FolderTask;
-        setBrowserRecentElement(newTask.TaskId, 'Task')
-
-        await fetchData();
-        listComponent.reload(contextItem, newTask.$ref);
-    }
-
-    async function addNote(newNoteAttribs)
-    {
-        let res = await reef.post(`${contextNavigation}/CreateNoteEx`,{ properties: newNoteAttribs }, onErrorShowAlert)
-        if(!res)
-            return null;
-
-        let newNote = res.FolderNote;
-        setBrowserRecentElement(newNote.NoteId, 'Note')
-
-        await fetchData();
-        listComponent.reload(contextItem, newNote.$ref);
-    }
-
-    async function addFile(newFileAttribs)
-    {
-        let res = await reef.post(`${contextNavigation}/CreateFileEx`,{ properties: newFileAttribs }, onErrorShowAlert)
-        if(!res)
-            return null;
-
-        let newFile = res.FolderFile;
-
-        await fetchData();
-        listComponent.reload(contextItem, newFile.$ref);
-    }
-
-    async function addFolder(newFolderAttribs)
-    {
-        let res = await reef.post(`${contextNavigation}/CreateSubFolder`,{
-            title: newFolderAttribs.Title,
-            summary:  newFolderAttribs.Summary,
-            order: newFolderAttribs.Order,
-            kind: 0
-        }, onErrorShowAlert)
-        if(!res)
-            return null;
-
-        let newFolder = res.FolderFolder;
-
-        await fetchData();
-        listComponent.reload(contextItem, newFolder.$ref);
-    }
-
-    async function addForum(newFolderAttribs)
-    {
-        let res = await reef.post(`${contextNavigation}/CreateSubForum`,{
-            title: newFolderAttribs.Title,
-            summary:  newFolderAttribs.Summary,
-            order: newFolderAttribs.Order,
-            kind: 0
-        }, onErrorShowAlert)
-        if(!res)
-            return null;
-
-        let newFolder = res.FolderFolder;
-
-        await fetchData();
-        listComponent.reload(contextItem, newFolder.$ref);
-    }
-
-    async function addThread(newNoteAttribs)
-    {
-        let res = await reef.post(`${contextNavigation}/CreateThread`,{
-            title: newNoteAttribs.Title,
-            summary:  newNoteAttribs.Summary,
-            order: newNoteAttribs.Order})
-
-        if(!res)
-            return null;
-
-        let newNote = res.FolderNote;
-        setBrowserRecentElement(newNote.NoteId, 'Note')
-
-        await fetchData();
-        listComponent.reload(contextItem, newNote.$ref);
-    }
-
-    async function toggleFolderPinned(folder)
-    {
-        let res = await reef.post(`${folder.$ref}/TogglePinned`, {}, onErrorShowAlert)
-        if(res)
-        {
-            folder.IsPinned = true
-        }
-        else
-        {
-            folder.IsPinned = false
-        }
+    let folder_properties_dialog;
+    const properties_operation = {
+        caption: '_; Properties; Propiedades; Właściwości',
+        action: (btt, rect)=> folder_properties_dialog.show(contextItem)
     }
 
     
-    async function refreshView()
+    function get_page_operations()
     {
-        await fetchData();
-        listComponent.reload(contextItem, listComponent.KEEP_SELECTION)
-    }
+        if(!contextItem)
+            return [];
 
-    function pinOp()
-    {
-        let pinOperation;
-        if(contextItem.IsPinned)
-        {
-            pinOperation = {
-                caption: '_; Unpin folder; Desenganchar la carpeta; Odepnij folder',
-                //icon: FaStar, //aRegShareSquare, //
-                action: async (f) => {
-                    await toggleFolderPinned(contextItem);
-                    // refreshing operations
-                    activateItem('data', contextItem, getPageOperations());
-                    if(UI.navigator)
-                        UI.navigator.refresh()
-                    },
-                
-            }
-        }
-        else
-        {
-            pinOperation = {
-                caption: '_; Pin folder; Fijar carpeta; Przypnij folder',
-                //icon: FaRegStar, //aRegShareSquare, //
-                action: async (f) => {
-                    await toggleFolderPinned(contextItem);
-                    // refreshing operations
-                    activateItem('data', contextItem, getPageOperations());
-                    if(UI.navigator)
-                        UI.navigator.refresh()
-                },
-                
-            }
-        }
-        return pinOperation;
-    }
-
-    function newElementOperations(afterElement)
-    {
-        const isClipboard = contextItem.IsBasket
-        const isRootPinned = contextItem.IsRootPinned
-        const isForum = contextItem.Kind == FK_DISCUSSION
-
-        const canAddFolders = !(isRootPinned || isClipboard || isForum)
-        const canAddNotes = !(isRootPinned || isClipboard || isForum)
-        const canAddTasks = !(isRootPinned || isClipboard || isForum)
-        const canAddFiles = !(isRootPinned || isClipboard || isForum)
-        const canAddForum = isForum//!(isRootPinned || isClipboard)
-        const canAddThread = isForum
-
-
-        const newFolder = {
-            caption: '_; New folder; Nueva carpeta; Nowy folder',
-            hideToolbarCaption: true,
-            mricon: 'folder',
-            action: (f) => { newElementKind='Folder';  listComponent.addRowAfter(afterElement) },
-            tbr: 'A',
-            fab: 'M04'
-        }
-
-        const newNote = {
-            caption: '_; New note; Nueva nota; Nowa notatka',
-            hideToolbarCaption: true,
-            mricon:'file-text',
-            action: (f) => { newElementKind='Note';  listComponent.addRowAfter(afterElement) },
-            tbr: 'A',
-            fab: 'M03'
-        }
-
-        const newTask = {
-            caption: '_; New task; Nueva tarea; Nowe zadanie',
-            hideToolbarCaption: true,
-            mricon:'square-pen',
-            action: (f) => { newElementKind='Task';  listComponent.addRowAfter(afterElement) },
-            tbr: 'A',
-            fab: 'M02'
-        }
-
-        const newFile = {
-            caption: '_; Add file; Añadir archivo; Dodaj plik',
-            hideToolbarCaption: true,
-            mricon: 'file-archive',
-            action: (f) => { newElementKind='UploadedFile';  runFileAttacher(afterElement) },
-            tbr: 'A',
-            fab: 'M01'
-        }
-
-        const newForum = {
-            caption: '_; New forum; Nuevo foro; Nowe forum',
-            hideToolbarCaption: !isForum,
-            mricon: 'messages-square',
-            action: (f) => { newElementKind='Forum';  listComponent.addRowAfter(afterElement) },
-            tbr: 'A',
-            fab: 'M04'
-        }
-
-        const newThread = {
-            caption: '_; New thread; Nuevo hilo; Nowy wątek',
-            //hideToolbarCaption: true,
-            mricon: 'message-square',
-            action: (f) => { newElementKind='Thread';  listComponent.addRowAfter(afterElement) },
-            tbr: 'A',
-            fab: 'M03'
-        }
-
-
-        let result = {
-            caption: '_; File; Archivo; Plik',
-            operations: [ ]
-        }
-
-        if(canAddFolders)
-            result.operations.push(newFolder)
-
-        if(canAddNotes)
-            result.operations.push(newNote)
-
-        if(canAddTasks)
-            result.operations.push(newTask)
-
-        if(canAddFiles)
-            result.operations.push(newFile)
-
-        if(canAddForum)
-            result.operations.push(newForum)
-
-        if(canAddThread)
-            result.operations.push(newThread)
-
-        //if(result.operations.length > 0)
-        //    result.operations.push({separator: true})
-
-        return result
-    }
-
-    const insertOperation = {
-        mricon: 'download',
-        caption: '_; Insert; Insertar; Wstaw',
-        hideToolbarCaption: true,
-        tbr: 'C',
-        fab: 'S10',
-        menu: [
-            {
-                caption: '_; Paste; Pegar; Wklej',
-                action: pasteRecentClipboardElement
-            },
-            {
-                caption: '_; Select from clipboard; Seleccionar del portapapeles; Wybierz ze schowka',
-                action: runPasteBasket
-            },
-            {
-                caption: '_;Select from recent elements; Seleccionar entre elementos recientes; Wybierz z ostatnich elementów',
-                action: runPasteBrowserRecent
-            },
-            {
-                caption: '_; Select from folders; Seleccionar de las carpetas; Wybierz z folderów',
-                action: runPopupExplorer4SelectFromFolders
-            },
-            {
-                caption: '_; Select from task lists; Seleccionar de listas de tareas; Wybierz z listy zadań',
-                action: runPopupExplorer4SelectFromTaskLists
-            }
-        ]
-
-    }
-
-    async function pasteRecentClipboardElement(btt, aroundRect)
-    {
-        const clipboardElements = await fetchComposedClipboard4Folder()
-        if(clipboardElements && clipboardElements.length > 0)
-        {
-            const references = transformClipboardToJSONReferences([clipboardElements[0]])
-            const res = await reef.post(`${contextNavigation}/AttachClipboard`, { references: references }, onErrorShowAlert)
-            if(res)
-                refreshViewAfterAttachingFromBasket(res);
-        }
-    }
-
-    async function runPasteBasket(btt, aroundRect)
-    {
-        const clipboardElements = await fetchComposedClipboard4Folder()
-        showFloatingToolbar(aroundRect, BasketPreview, {
-            destinationContainer: contextNavigation,
-            onRefreshView: refreshViewAfterAttachingFromBasket,
-            clipboardElements: clipboardElements,
-            ownCloseButton: true
-        })
-    }
-
-    async function runPasteBrowserRecent(btt, aroundRect)
-    {
-        const clipboardElements = getBrowserRecentElements4Folder()
-        showFloatingToolbar(aroundRect, BasketPreview, {
-            destinationContainer: contextNavigation,
-            onRefreshView: refreshViewAfterAttachingFromBasket,
-            clipboardElements: clipboardElements,
-            browserBasedClipboard: true,
-            ownCloseButton: true
-        })
-    }
-
-    async function runPopupExplorer4SelectFromFolders(btt, aroundRect)
-    {
-        showFloatingToolbar(aroundRect, PopupExplorer, {
-            rootFilter: 'FOLDERS',
-            destinationContainer: contextNavigation,
-            onRefreshView: refreshViewAfterAttachingFromBasket,
-            ownCloseButton: true
-        })
-    }
-
-    async function runPopupExplorer4SelectFromTaskLists(btt, aroundRect)
-    {
-        showFloatingToolbar(aroundRect, PopupExplorer, {
-            rootFilter: 'TASKLISTS',
-            destinationContainer: contextNavigation,
-            onRefreshView: refreshViewAfterAttachingFromBasket,
-            ownCloseButton: true
-        })
-    }
-
-    async function runPopupExplorer4CopyToFolder(btt, aroundRect, element, kind)
-    {
-        showFloatingToolbar(aroundRect, PopupExplorer, {
-            rootFilter: 'FOLDERS',
-            attachToContainer: true,
-            canAttachAsRootFolder: kind=='FolderFolder' ? true : false,
-            onAttach: async (tmp, references) => {
-                await reef.post(`${element.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
-            },
-            ownCloseButton: true
-        })
-    }
-
-    async function runPopupExplorer4MoveToFolder(btt, aroundRect, element, kind)
-    {
-        showFloatingToolbar(aroundRect, PopupExplorer, {
-            rootFilter: 'FOLDERS',
-            attachToContainer: true,
-            canAttachAsRootFolder: kind=='FolderFolder' ? true : false,
-            onAttach: async (tmp, references) => {
-                await reef.post(`${element.$ref}/MoveMeTo`, { references: references })
-                await fetchData();
-                listComponent.reload(contextItem, listComponent.CLEAR_SELECTION)
-            },
-            ownCloseButton: true
-        })
-    }
-
-    async function runPopupExplorer4SelectTaskList(btt, aroundRect, element, kind)
-    {
-        showFloatingToolbar(aroundRect, PopupExplorer, {
-            rootFilter: 'TASKLISTS',
-            attachToContainer: true,
-            onAttach: async (tmp, references) => {
-                await reef.post(`${element.$ref}/AttachMeTo`, { references: references }, onErrorShowAlert)
-            },
-            ownCloseButton: true
-        })
-    }
-
-    function  folderPageOperations()
-    {
-        const isClipboard = contextItem.IsBasket
-        const isRootPinned = contextItem.IsRootPinned
-        const canPin = !(isRootPinned || isClipboard)
-
+        
+    
         return {
             opver: 2,
             fab: 'M00',
             tbr: 'D',
             operations: [
-                newElementOperations(null),
+                
                 {
                     caption: '_; View; Ver; Widok',
                     operations: [
                         {
                             caption: '_; Edit; Editar; Edytuj',
+                            disabled: readonly,
                             hideToolbarCaption: true,
                             mricon: 'pencil',
                             tbr: 'A',
@@ -1078,1046 +343,65 @@
                                 }
                             ]
                         },
-                        insertOperation,
-                        ... !canPin ? [] : [pinOp()],
-                        enable_multiselection_operation,
+                        ... (details_visibility & DV_CONTEXTUAL_VIEW) ? [... (contextItem.IsSubscribed ? [unfollow_op()] : [follow_op()])] : [],
                         refresh_operation,
-                        share_this_folder_to_another_group_op,
-                        move_whole_folder_to_archive_op,
-                        move_whole_folder_to_trash_op,
                         properties_operation
                     ]
                 }
 
             ]
         }
-    }
 
-    const enable_multiselection_operation = {
-        caption: '_; Select; Seleccionar; Zaznacz',
-        mricon: 'check-check',
-        hideToolbarCaption: true,
-        tbr: 'C',
-        fab: 'S20',
-        action: (f) => { listComponent.toggleMultiselection(); reloadPageToolbarOperations(multiselectPageOperations()) }
-    }
-
-    const disable_multiselection_operation = {
-            caption: '_; Select; Seleccionar; Zaznacz',
-            mricon: 'check-check',
-            hideToolbarCaption: true,
-            tbr: 'C',
-            fab: 'S20',
-            action: (f) => { listComponent.toggleMultiselection(); reloadPageToolbarOperations(getPageOperations()) },
-            active: true
-        }
-
-    const refresh_operation = {
-        caption: '_; Refresh; Actualizar; Odśwież',
-        action: async (f) => await refreshView(),
-    }
-
-    const properties_operation = {
-        caption: '_; Properties; Propiedades; Właściwości',
-        action: (btt, rect)=> runElementProperties(btt, rect, contextItem, 'Folder')
-    }
-
-    const toggle_select_all_operation = {
-        caption: '_; All; Todos; Wszystkie',
-        action: () => listComponent.toggleSelectAll(),
-        mricon: 'circle-check',
-        tbr: 'A',
-        fab: 'M01'
-    }
-
-    const empty_trash_operation = {
-        caption: '_; Empty the trash; Vacía la papelera; Opróżnij kosz',
-        action: () => emptyTrash(),
-        tbr: 'A',
-        fab: 'S00',
-        mricon: 'brush-cleaning',
-    }
-
-    function folderMultiselectPageOperations()
-    {
-        const isClipboard = contextItem.IsBasket
-        const isRootPinned = contextItem.IsRootPinned
-        const canPin = !(isRootPinned || isClipboard)
-
-        return {
-            opver: 2,
-            fab: 'M00',
-            tbr: 'D',
-            operations: [
-                {
-                    caption: '_; View; Ver; Widok',
-                    operations: [
-                        toggle_select_all_operation,
-                       // ... !canPin ? [] : [pinOp()],
-                        disable_multiselection_operation,
-                        refresh_operation,
-                        share_this_folder_to_another_group_op,
-                        move_whole_folder_to_archive_op,
-                        move_whole_folder_to_trash_op,
-                    ]
-                }
-            ]
-        }
-    }
-
-    function multiselectPageOperations()
-    {
-        switch(operations_kind)
-        {
-        case OP_FOLDER:
-            return folderMultiselectPageOperations();
-
-        case OP_ARCHIVE:
-            return archiveMultiselectPageOperations();
-
-        case OP_TRASH:
-            return trashMultiselectPageOperations();
-        }
-    }
-
-    function getPageOperations()
-    {
-        if(!contextItem)
-            return [];
-
-        switch(operations_kind)
-        {
-        case OP_FOLDER:
-            return folderPageOperations();
-
-        case OP_ARCHIVE:
-            return archivePageOperations();
-
-        case OP_TRASH:
-            return trashPageOperations();
-        }
-    }
-
-    async function share_element(owner, aroun_rect, element, kind)
-    {
-        const ret = await reef.post(`user/query`, {
-            Id: 1,
-            Name: "collector",
-            ExpandLevel: 3,
-            Tree:
-            [
-                {   Id: 1, Association: 'Groups/Group',
-                    //Filter: "Id <> group/Id",
-                    Expressions:['Id', '$ref', '$type', '$acc', 'Name']
-                }
-            ]
-        })
-
-        if(!ret)
-            return;
-
-        if(ret.Group && ret.Group.length > 0)
-        {
-            let items = []
-            ret.Group.forEach(g => 
-                items.push({
-                    caption: g.Name,
-                    action: () => share_element_to_group(element, g, kind)
-                })
-            )
-
-            if(items.length > 0)
-                showMenu(aroun_rect, items)
-        }
-    }
-
-    async function share_element_to_group(element, g, kind)
-    {
-        switch(kind)
-        {
-        case 'Folder':
-            await reef.post(`${g.$ref}/AddSharedFolder`, { folder: element.$ref })
-            break;
-
-        case 'FolderFolder':
-            await reef.post(`${g.$ref}/AddSharedFolderLink`, { link: element.$ref })
-            break;
-
-        case 'TaskFolder':
-            await reef.post(`${g.$ref}/AddSharedTask`, { link: element.$ref })
-            break;
-
-        case 'NoteFolder':
-            await reef.post(`${g.$ref}/AddSharedNote`, { link: element.$ref })
-            break;
-
-        case 'FileFolder':
-            await reef.post(`${g.$ref}/AddSharedFile`, { link: element.$ref })
-            break;
-        }        
-    }
-
-    const share_this_folder_to_another_group_op = {
-        caption: '_; Share folder; Carpeta compartida; Udostępnij folder',
-        action: (owner, around_rect) => share_element(owner, around_rect, contextItem, 'Folder')
-    }
-
-   
-    const move_whole_folder_to_archive_op = {
-            caption: '_; Archive folder; Archivar carpeta; Archiwizuj folder',
-            action: () => move_me_to_archive()
-    }
-
-
-    const move_whole_folder_to_trash_op =  {
-            caption: '_; Delete folder; Eliminar carpeta; Usuń folder',
-            action: () => move_me_to_trash()
-    }
-
-    async function move_me_to_archive()
-    {
-        await reef.get(`${contextItem.$ref}/MoveMeToArchive`)   
-        await fetchData();
-    }
-
-    async function move_me_to_trash()
-    {
-        await reef.get(`${contextItem.$ref}/MoveMeToTrash`)
-        await fetchData();
-    }
-
-
-    async function refreshViewAfterAttachingFromBasket(f)
-    {
-        await fetchData();
-        listComponent.reload(contextItem, listComponent.CLEAR_SELECTION)
-    }
-
-
-
-    async function dettachElement(element, kind)
-    {
-        switch(kind)
-        {
-        case 'Folder':
-        case 'FolderFolder':
-            return dettachSubFolder(element)
-        case 'Note':
-        case 'FolderNote':
-            return dettachNote(element)
-        case 'Task':
-        case 'FolderTask':
-            return dettachTask(element)
-        case 'UploadedFile':
-        case 'FolderFile':
-            return dettachFile(element)
-        }
-    }
-
-    async function dettachElementMulti(items)
-    {
-        let refs = []
-        items.forEach(i =>
-            refs.push({
-                Type: i.$type,
-                Id: i.Id,
-                Title: i.Title,
-                ref: i.$ref
-                })
-        )
-
-        await reef.post(`${contextItem.$ref}/DettachElementMulti`, { items: refs } , onErrorShowAlert);
-        await fetchData();
-        listComponent.reload(contextItem, listComponent.SELECT_NEXT);
-    }
-
-
-
-    async function copyElementToBasket(element, kind)
-    {
-        switch(kind)
-        {
-        case 'Folder':
-        case 'FolderFolder':
-            return copySubFolderToBasket(element)
-        case 'Note':
-        case 'FolderNote':
-            return copyNoteToBasket(element)
-        case 'Task':
-        case 'FolderTask':
-            return copyTaskToBasket(element)
-        case 'UploadedFile':
-        case 'FolderFile':
-            return copyFileToBasket(element)
-        }
-    }
-
-    async function cutElementToBasket(element, kind)
-    {
-        switch(kind)
-        {
-        case 'Folder':
-        case 'FolderFolder':
-            return cutSubFolderToBasket(element)
-        case 'Note':
-        case 'FolderNote':
-            return cutNoteToBasket(element)
-        case 'Task':
-        case 'FolderTask':
-            return cutTaskToBasket(element)
-        case 'UploadedFile':
-        case 'FolderFile':
-            return cutFileToBasket(element)
-        }
-    }
-
-    async function copyElementToBasketMulti(items)
-    {
-        let refs = []
-        items.forEach((i) => refs.push(i.$ref))
-        refs.reverse()  // elements need to be pushed in reverse order to have first element on top of the clipboard
-
-        await reef.post(`${contextItem.$ref}/CopyToBasketMulti`, { refs: refs } , onErrorShowAlert);
-
-        refreshToolbarOperations()
-        // not needed
-        //await fetchData();
-        //tasksComponent.reload(contextItem, tasksComponent.SELECT_NEXT);
-    }
-
-    async function cutElementToBasketMulti(items)
-    {
-        let refs = []
-        items.forEach((i) => refs.push(i.$ref))
-        refs.reverse()  // elements need to be pushed in reverse order to have first element on top of the clipboard
-
-        await reef.post(`${contextItem.$ref}/CutToBasketMulti`, { refs: refs } , onErrorShowAlert);
-        await fetchData();
-        listComponent.reload(contextItem, listComponent.SELECT_NEXT);
-    }
-
-
-    function folderElementOperations(element, kind)
-    {
-        const isRootPinned = contextItem.IsRootPinned
-        const canPin = !isRootPinned
-        const isCanonical = element.IsCanonical
-        
-        let list = listComponent;
-
-        let linkOperations = []
-        if(isCanonical)
-        {
-            linkOperations = [
-                {
-                    caption: '_; Share selected item; Compartir el elemento seleccionado; Udostępnij zaznaczony element',
-                    action: (owner, around_rect) => share_element(owner, around_rect, element, kind)
-                },
-                {
-                    caption: '_; Delete selected item; Eliminar el elemento seleccionado; Usuń zaznaczony element',
-                    action: (f) => moveToTrash(element, kind)
-                },
-                {
-                    caption: '_; Archive selected item; Archivar el elemento seleccionado; Archiwizuj zaznaczony element',
-                    action: (f) => moveToArchive(element, kind)
-                }
-            ]
-        }
-        else
-        {
-             linkOperations = [
-                {
-                    caption: '_; Detach; Desconectar; Odłącz',
-                    action: (f) => dettachElement(element, kind)
-                }
-            /*    {
-                    caption: '_; Set as primary location; Establecer como ubicación principal; Ustaw jako główną lokalizację',
-                    action: (f) => setLocationAsCanonical(element)
-                }*/
-             ]
-        }
-
-
-        return {
-                opver: 2,
-                fab: 'M00',
-                tbr: 'D',
-                operations: [
-                    newElementOperations(element),
-                    {
-                        caption: '_; Element; Elemento; Element',
-                        operations: [
-                            {
-                                caption: '_; Edit; Editar; Edytuj',
-                                hideToolbarCaption: true,
-                                mricon: 'pencil',
-                                tbr: 'A',
-                                fab:'M20',
-                                grid:[
-                                    {
-                                        caption: '_; Title; Título; Tytuł',
-                                        action: (focused) =>  { listComponent.edit(element, 'Title') },
-                                        tbr: 'A',
-
-                                    },
-                                    {
-                                        caption: '_; Summary; Resumen; Podsumowanie',
-                                        action: (focused) =>  { listComponent.edit(element, 'Summary') }
-                                    }
-                                ]
-
-                            },
-                            {
-                                caption: '_; Move to top ; Mover al principio de la lista; Przesuń na szczyt',
-                                mricon: 'chevrons-up',
-                                action: (f) => list.moveTop(element),
-                                fab:'M07',
-                                tbr:'A',
-                                hideToolbarCaption: true
-                            },
-                            {
-                                caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
-                                mricon: 'chevron-up',
-                                action: (f) => list.moveUp(element),
-                                fab:'M06',
-                                tbr:'A',
-                                hideToolbarCaption: true
-                            },
-                            {
-                                caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
-                                mricon: 'chevron-down',
-                                action: (f) => list.moveDown(element),
-                                fab:'M05',
-                                tbr:'A' ,
-                                hideToolbarCaption: true
-                            },
-                            {
-                                caption: '_; Send; Enviar; Wyślij',
-                                hideToolbarCaption: true,
-                                mricon: 'upload',
-                                tbr: 'C',
-                                fab: 'S00',
-                                menu: [
-                                    {
-                                        caption: '_; Copy; Copiar; Kopiuj',
-                                        action: (f) => copyElementToBasket(element, kind),
-                                    },
-                                    {
-                                        caption: '_; Cut; Cortar; Wytnij',
-                                        action: (f) => cutElementToBasket(element, kind)
-                                    },
-                                    {
-                                        caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
-                                        action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect, element, kind)
-                                    },
-                                    {
-                                        caption: '_; Move to folder; Mover a la carpeta; Przenieś do folderu',
-                                        action: (btt, rect) => runPopupExplorer4MoveToFolder(btt, rect, element, kind),
-
-                                    },
-                                    ... (kind != 'FolderTask') ? [] :
-                                    [
-                                        {
-                                            caption: '_; Select a task list; Selecciona la lista de tareas; Wybierz listę zadań',
-                                            action: (btt, rect) => runPopupExplorer4SelectTaskList(btt, rect, element, kind)
-                                        }
-                                    ],
-                                    { separator: true},
-                                    {
-                                        caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
-                                        action: () => openInNewTab(element.href)
-                                    },
-                                    {
-                                        caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
-                                        action: () => copyAddress(element.href)
-                                    }
-
-                                ]
-                            },
-                            {
-                                separator: true
-                            },
-                            ...linkOperations,
-                            {
-                                caption: '_; Properties; Propiedades; Właściwości',
-                                action: (btt, rect)=> runElementProperties(btt, rect, element, kind)
-                            }
-                        ]
-                    },
-                    {
-                        caption: '_; View; Ver; Widok',
-                        operations: [
-                        insertOperation,
-                        ... !canPin ? [] : [pinOp()],
-                        enable_multiselection_operation,
-                        refresh_operation,
-                        share_this_folder_to_another_group_op,
-                        move_whole_folder_to_archive_op,
-                        move_whole_folder_to_trash_op
-                        ]
-                    }
-                ]
-            }
-    }
-
-
-
-    let elementOperations = (element, kind) => 
-    {
-        switch(operations_kind)
-        {
-        case OP_FOLDER:
-            return folderElementOperations(element, kind)
-
-        case OP_ARCHIVE:
-            return archiveElementOperations(element, kind)
-
-        case OP_TRASH:
-            return trashElementOperations(element, kind)
-        }
         
     }
 
-    function folderMultiselectionOperations(items)
+
+    function show_working_post_menu(e, working_post)
     {
-        //if(items.length == 0)
-        //    return []
-        //else if(items.length == 1)      // not sure
-        //    return elementOperations(items[0], items[0].$type)
-        //else if(contextItem.IsBasket)
-        //    return multiselectBasketOperations(items)
-        //else
-        {
-            const isClipboard = contextItem.IsBasket
-            const isRootPinned = contextItem.IsRootPinned
-            const canPin = !(isRootPinned || isClipboard)
+        e.stopPropagation()
 
-        return {
-                opver: 2,
-                fab: 'M00',
-                tbr: 'D',
-                operations: [
-                    //newElementOperations(element),
-                    {
-                        caption: '_; Element; Elemento; Element',
-                        operations: [
-                            toggle_select_all_operation,
-                            {
-                                caption: '_; Send; Enviar; Wyślij',
-                                mricon: 'upload',
-                                tbr: 'C',
-                                fab: 'S00',
-                                menu: [
-                                    {
-                                        caption: '_; Copy; Copiar; Kopiuj',
-                                        action: (f) => copyElementToBasketMulti(items),
-                                    },
-                                    {
-                                        caption: '_; Cut; Cortar; Wytnij',
-                                        action: (f) => cutElementToBasketMulti(items)
-                                    },
-                                    {
-                                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
-                                        disabled: true
-                                    }
-                                ],
-                                hideToolbarCaption: true
-                            },
-                            {
-                                separator: true
-                            },
-                            {
-                                caption: '_; Detach; Desconectar; Odłącz',
-                          //      icon: FaUnlink,
-                                action: (f) => dettachElementMulti(items),
-                            },
-                            {
-                                caption: '_; Delete selected items; Eliminar los elementos seleccionados; Usuń zaznaczone elementy',
-                                action: (f) => moveToTrash(items, 'multi'),
-                            },
-                            {
-                                caption: '_; Archive selected items; Archivar los elementos seleccionados; Archiwizuj zaznaczone elementy',
-                                action: (f) => moveToArchive(items, 'multi'),
-                            }
-                        ]
-                    },
-                    {
-                        caption: '_; View; Ver; Widok',
-                        //tbr: 'B',
-                        operations: [
-                           // ... !canPin ? [] : [pinOp()],
-                            disable_multiselection_operation,
-                            refresh_operation,
-                            share_this_folder_to_another_group_op,
-                            move_whole_folder_to_archive_op,
-                            move_whole_folder_to_trash_op,
-                        ]
-                    }
-                ]
-            }
-        }
-    }
+        let owner = e.target;
+        while(owner && owner.tagName != 'BUTTON')
+            owner = owner.parentElement
 
-    function multiselectOperations(items)
-    {
-        switch(operations_kind)
-        {
-        case OP_FOLDER:
-            return folderMultiselectionOperations(items)
-
-        case OP_ARCHIVE:
-            return archiveMultiselectionOperations(items)
-
-        case OP_TRASH:
-            return trashMultiselectionOperations(items)
-        }
-    }
-
-    let attInput;
-    let insertFileAfterElement = null;
-    function runFileAttacher(after)
-    {
-        insertFileAfterElement = after
-        attInput?.click();
-    }
-
-    async function onAttachementSelected()
-    {
-        const [file] = attInput.files;
-        if(file)
-        {
-            pendingUploading = true
-
-            const fileOrder = listComponent.assignOrder(insertFileAfterElement)
-
-            let fileLink = await reef.post(`${contextNavigation}/CreateFile`,
-                                    {
-                                        title: file.name,
-                                        mimeType: file.type,
-                                        size: file.size,
-                                        order: fileOrder
-                                    }, onErrorShowAlert)
-            if(!fileLink)
-                return null;
-
-            fileLink = fileLink.FolderFile
-
-            const res = await reef.post(`UploadedFile/${fileLink.FileId}/Key/blob?name=${file.name}&size=${file.size}`, {}, onErrorShowAlert)
-            if(res && res.key && res.uploadUrl)
+        let rect = owner.getBoundingClientRect()
+        showMenu(rect, [
             {
-                const newKey = res.key;
-                const uploadUrl = res.uploadUrl
-
-                try
-                {
-                    //const res = await new Promise(r => setTimeout(r, 10000));
-                    const res = await fetch(uploadUrl, {
-                                                method: 'PUT',
-                                                headers: new Headers({
-                                                    'Content-Type': file.type
-                                                }),
-                                                body: file})
-                    if(res.ok)
-                    {
-                        setBrowserRecentElement(fileLink.FileId, 'UploadedFile')
-                    }
-                    else
-                    {
-                        const err = await res.text()
-                        console.error(err)
-                        onErrorShowAlert(err)
-                    }
-
-                }
-                catch(err)
-                {
-                    console.error(err)
-                    onErrorShowAlert(err)
-                }
-            }
-
-            pendingUploading = false;
-            attInput.value = '';
-
-            await fetchData();
-            listComponent.reload(contextItem, fileLink.$ref);
-        }
-    }
-
-    async function downloadFile(element)
-    {
-        //await new Promise(r => setTimeout(r, 5000));
-
-        const res = await reef.fetch(`json/anyv/${element.href}`, onErrorShowAlert);
-        if(res.ok)
-        {
-            const blob = await res.blob()
-            const blobUrl = URL.createObjectURL(blob);
-
-            const link = document.createElement("a"); // Or maybe get it from the current document
-            link.href = blobUrl;
-            link.download = element.Title;
-
-            //document.body.appendChild(link); // Or append it whereever you want
-            link.click() //can add an id to be specific if multiple anchor tag, and use #id
-
-
-            URL.revokeObjectURL(blobUrl)
-
-            setBrowserRecentElement(element.FileId, 'UploadedFile')
-        }
-        else
-        {
-            const err = await res.text()
-            console.error(err)
-            onErrorShowAlert(err)
-        }
-    }
-
-    let folderPropertiesDialog;
-    let filePropertiesDialog;
-    let taskPropertiesDialog;
-    let notePropertiesDialog;
-    function runElementProperties(btt, aroundRect, element, kind)
-    {
-        switch(kind)
-        {
-        case 'Folder':
-        case 'FolderFolder':
-            folderPropertiesDialog.show(element)
-            break;
-
-        case 'Note':
-        case 'FolderNote':
-            notePropertiesDialog.show(element)
-            break;
-
-        case 'Task':
-        case 'FolderTask':
-            taskPropertiesDialog.show(element)
-            break
-
-        case 'UploadedFile':
-        case 'FolderFile':
-            filePropertiesDialog.show(element)
-            break;
-        }
-    }
-
-
-
-    function archivePageOperations()
-    {
-        return {
-            opver: 2,
-            fab: 'M00',
-            tbr: 'D',
-            operations: [
-                {
-                    caption: '_; View; Ver; Widok',
-                    operations: [
-                        enable_multiselection_operation,
-                        refresh_operation,
-                        properties_operation
-                    ]
-                }
-
-            ]
-        }
-    }
-
-    function trashPageOperations()
-    {
-        return {
-            opver: 2,
-            fab: 'M00',
-            tbr: 'D',
-            operations: [
-                {
-                    caption: '_; View; Ver; Widok',
-                    operations: [
-                        empty_trash_operation,
-                        enable_multiselection_operation,
-                        refresh_operation,
-                        properties_operation
-                    ]
-                }
-
-            ]
-        }
-    }
-
-
-    function archiveElementOperations(element, kind)
-    {
-        return {
-                opver: 2,
-                fab: 'M00',
-                tbr: 'D',
-                operations: [
-                    {
-                        caption: '_; Element; Elemento; Element',
-                        operations: [
-                            {
-                                caption: '_; Restore; Restaurar; Przywróć',
-                                mricon: 'undo',
-                                tbr: 'B',
-                                fab: 'M20',
-                                action: (btt, rect)=> restoreArchivedElement(element, kind),
-                            },
-                            {
-                                caption: '_; Delete selected item; Eliminar el elemento seleccionado; Usuń zaznaczony element',
-                                action: (f) => askToDelete(element, kind)
-                            },
-                            {
-                                caption: '_; Properties; Propiedades; Właściwości',
-                                action: (btt, rect)=> runElementProperties(btt, rect, element, kind)
-                            }
-                        ]
-                    },
-                    {
-                        caption: '_; View; Ver; Widok',
-                        operations: [
-                            enable_multiselection_operation,
-                            refresh_operation
-                        ]
-                    }
-                ]
-            }
-    }
-
-    function trashElementOperations(element, kind)
-    {
-        return {
-                opver: 2,
-                fab: 'M00',
-                tbr: 'D',
-                operations: [
-                    {
-                        caption: '_; Element; Elemento; Element',
-                        operations: [
-                            {
-                                caption: '_; Restore; Restaurar; Przywróć',
-                                mricon: 'undo',
-                                tbr: 'B',
-                                fab: 'M20',
-                                action: (btt, rect)=> restoreTrashElement(element, kind),
-                            },
-                            {
-                                caption: '_; Properties; Propiedades; Właściwości',
-                                action: (btt, rect)=> runElementProperties(btt, rect, element, kind)
-                            }
-                        ]
-                    },
-                    {
-                        caption: '_; View; Ver; Widok',
-                        operations: [
-                            empty_trash_operation,
-                            enable_multiselection_operation,
-                            refresh_operation
-                        ]
-                    }
-                ]
-            }
-    }
-
-    function archiveMultiselectPageOperations()
-    {
-        return {
-            opver: 2,
-            fab: 'M00',
-            tbr: 'D',
-            operations: [
-                {
-                    caption: '_; View; Ver; Widok',
-                    operations: [
-                        toggle_select_all_operation,
-                        {separator: true, tbr: 'A'},
-                        disable_multiselection_operation,
-                        refresh_operation
-                    ]
-                }
-            ]
-        }
-    }
-
-    function trashMultiselectPageOperations()
-    {
-        return {
-            opver: 2,
-            fab: 'M00',
-            tbr: 'D',
-            operations: [
-                {
-                    caption: '_; View; Ver; Widok',
-                    operations: [
-                        toggle_select_all_operation,    
-                        {separator: true, tbr: 'A'},
-                        empty_trash_operation,
-                        disable_multiselection_operation,
-                        refresh_operation
-                    ]
-                }
-            ]
-        }
-    }
-
-    function archiveMultiselectionOperations(items)
-    {
-        return {
-                opver: 2,
-                fab: 'M00',
-                tbr: 'D',
-                operations: [
-                    {
-                        caption: '_; Element; Elemento; Element',
-                        operations: [
-                            toggle_select_all_operation,
-                            {
-                                caption: '_; Restore; Restaurar; Przywróć',
-                                mricon: 'undo',
-                                tbr: 'B',
-                                fab: 'M20',
-                                action: (btt, rect)=> restoreArchivedElement(items, 'multi'),
-                            },
-                            {
-                                caption: '_; Delete selected items; Eliminar los elementos seleccionados; Usuń zaznaczone elementy',
-                                action: (f) => askToDelete(items, 'multi'),
-                            }
-                        ]
-                    },
-                    {
-                        caption: '_; View; Ver; Widok',
-                        //tbr: 'B',
-                        operations: [
-                            disable_multiselection_operation,
-                            refresh_operation
-                        ]
-                    }
-                ]
-            }
-    
-    }
-
-    function trashMultiselectionOperations(items)
-    {
-       
-        return {
-                opver: 2,
-                fab: 'M00',
-                tbr: 'D',
-                operations: [
-                    {
-                        caption: '_; Element; Elemento; Element',
-                        operations: [
-                            toggle_select_all_operation,
-                            {
-                                caption: '_; Restore; Restaurar; Przywróć',
-                                mricon: 'undo',
-                                tbr: 'B',
-                                fab: 'M20',
-                                action: (btt, rect)=> restoreTrashElement(items, 'multi'),
-                            },
-                        ]
-                    },
-                    {
-                        caption: '_; View; Ver; Widok',
-                        //tbr: 'B',
-                        operations: [
-                            empty_trash_operation,
-                            disable_multiselection_operation,
-                            refresh_operation
-                        ]
-                    }
-                ]
-            }
-    
-    }
-
-    let prev_folder_properties = {
-        element:{
-            icon: "icon",
-
-            href: "href",
-            Title: "Title",
-            Summary: "Summary"
-        },
-        context:{
-            FolderFile:{
-                downloadable: true,
-                onOpen: downloadFile
-            }
-        }
-
-    }
-
-    let folder_properties = {
-        element:{
-            Title: "Title",
-            icon: "icon",
-            micon: "#link",
-            shaow_micon: 'IsShortcut',
-            href: "href",
-
-            Summary: "Summary"
-        },
-        context:{
-            FolderFile:{
-                downloadable: true,
-                onOpen: downloadFile
+                caption: '_; Finish the post; Terminar la entrada; Dokończ wpis',
+                action: (f) => push(working_post.href),
+                mricon: 'arrow-right'
             },
-            FolderTask:{
-                $properties: {
-                    t:{l: ['ListName','#barcode', '&State'],
-                       c: [],
-                       r: [':DueDate']},
-                    m:{},
-                    b:{}
-                }
+            {
+                caption: '_; Send; Enviar; Wyślij',
+                mricon: 'upload',
+                menu: [
+                    /*    {
+                            caption: '_; Copy; Copiar; Kopiuj',
+                            action: (f) => copy_note_to_basket(postLink),
+                        },
+                    */    {
+                            caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                            action: () => openInNewTab(working_post.href)
+                        },
+                        {
+                            caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                            action: () => copyAddress(working_post.href)
+                        }
 
-            }
-        }
-
-    }
-
-    let folder_properties_f = {
-        element:{
-            Title: "Title",
-            icon: "icon",
-            micon: "#link",
-            shaow_micon: 'IsShortcut',
-            href: "href",
-
-            Summary: "Summary"
-        },
-        context:{
-            FolderFile:{
-                downloadable: true,
-                onOpen: downloadFile
+                    ]
             },
-            FolderTask:{
-                $properties: {
-                    t:[['ListName','#barcode', '&State'],
-                       [],
-                       ['DueDate']],
-                    m:{},
-                    b:{}
-                }
+            {
+                separator: true
+            },
+            {
+                caption: '_; Delete; Eliminar; Usuń',
+                action: () => delete_working_post(working_post)
             }
-        }
+        ])
     }
+ 
 
-
-    
-
-
-
-
-
-
-
-
-    function showPostMenu(e, postLink)
+    function show_post_menu(e, postLink)
     {
         e.stopPropagation()
 
@@ -2138,7 +422,7 @@
                 menu: [
                         {
                             caption: '_; Copy; Copiar; Kopiuj',
-                            action: (f) => copyElementToBasket(postLink, postLink.$type),
+                            action: (f) => copy_note_to_basket(postLink),
                         },
                         {
                             caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
@@ -2151,22 +435,185 @@
 
                     ]
             },
-            {
-                separator: true
-            },
-            {
-                caption: '_; Unfollow this category; Dejar de seguir esta categoría; Przestań obserwować tę kategorię',
-                disabled: true
-            },
+            ... ((details_visibility & DV_ADD_FOLLOW_CATEGORY_OPERATIONS) > 0 && (postLink.ThreadFolderInfo)) ? [
+                {
+                    separator: true
+                },
+                ... postLink.ThreadFolderInfo.IsSubscribed ? [{
+                    caption: '_; Unfollow this category; Dejar de seguir esta categoría; Przestań obserwować tę kategorię',
+                    mricon: 'eye-off',
+                    action: () => toggle_subscribe_category(postLink.ThreadFolderInfo)
+                }] : [{
+                    caption: '_; Follow this category; Sigue esta categoría; Obserwuj tę kategorię',
+                    mricon: 'eye',
+                    action: () => toggle_subscribe_category(postLink.ThreadFolderInfo)
+                }] ]
+                : []
         ])
     }
 
-    const button_enabled_light_colors ='text-stone-600 hover:text-stone-800 hover:bg-stone-200 active:bg-stone-100 border-stone-200'
-    const button_disabled_light_colors ='text-stone-400 border-stone-200'
-    const button_enabled_dark_colors ='dark:text-stone-300 dark:hover:text-white dark:hover:bg-stone-800 dark:active:bg-stone-600 dark:border-stone-600'
-    const button_disabled_dark_colors ='dark:text-stone-500 dark:border-stone-600'
-    const button_disabled_colors =`${button_disabled_light_colors} ${button_disabled_dark_colors}`
-    const button_enabled_colors =`${button_enabled_light_colors} ${button_enabled_dark_colors}`
+
+    async function toggle_subscribe_category(info)
+    {
+        if(info.IsSubscribed)
+        {
+            const res = await reef.get(`${info.ref}/Unsubscribe`)
+            if(res)
+                info.IsSubscribed = false
+        }
+        else
+        {
+            const res = await reef.get(`${info.ref}/Subscribe`)
+            if(res)
+                info.IsSubscribed = true
+        }
+    }
+
+
+    async function copy_note_to_basket(note)
+    {
+        await reef.post(`${contextItem.$ref}/CopyNoteToBasket`, { noteLink: note.$ref } , onErrorShowAlert);
+        refreshToolbarOperations()
+    }
+
+
+    async function delete_working_post(working_post)
+    {
+        await reef.post(`${working_post.$ref}/Note/MoveMeToTrash`, {})
+        await fetch_data()
+    }
+
+
+    let new_message_content = '';
+    let new_message_confidential = false;
+    let new_message_element
+
+    function on_new_message_key_down(e)
+    {
+        if (event.key === 'Enter') 
+        {
+            event.preventDefault();
+            document.execCommand('insertLineBreak');
+        }
+    }
+
+    let working_post_creating = false
+    let working_post_spinner = ''
+
+    const MWN_NOTHING = 0
+    const MWN_FOCUS_CONTENT_END = 1
+    const MWN_FOCUS_CONTENT_ALL = 2
+    const MWN_INSERT_ATTACHEMENT = 3
+
+    async function make_working_post(e, action_after_redirecting, spinner)
+    {
+        const clean_content = new_message_content.replace(/&nbsp;/g, ' ').trim();
+        if(!clean_content)
+            return;
+
+        const lines = clean_content.split(/<br\s*[\/]?>/gi);
+
+        const parsed_title = lines[0]?.trim() || '';
+        const parsed_content = lines.slice(1).join('<br>').trim();
+
+        ///////////////////////////////
+
+
+        working_post_creating = true
+        working_post_spinner = spinner
+
+
+        //await sleep(2000)
+
+        const res = await reef.post('user/NewDraftThread', {
+            title: parsed_title,
+            summary: '',
+            content: parsed_content ? `<p>${parsed_content}</p>` : '',
+            category: details_visibility & DV_CONTEXTUAL_VIEW ? contextItem.$ref : null,
+            confidential: new_message_confidential
+        })
+
+        if(res && res.Note)
+        {
+            let href = await reef.get(`${res.Note.$ref}/href`)
+            if(href)
+            {
+                let postfix = ''
+                switch(action_after_redirecting)
+                {
+                case MWN_FOCUS_CONTENT_END:
+                    postfix = '?action=focuscontent&arg1=end'
+                    break;
+                case MWN_FOCUS_CONTENT_ALL:
+                    postfix = '?action=focuscontent&arg1=all'
+                    break;
+                case MWN_INSERT_ATTACHEMENT:
+                    postfix = '?action=insertattachement'
+                    break;
+                }
+
+                if(postfix)
+                    href += postfix
+
+                push(href)
+            }
+        }
+
+        working_post_spinner = ''
+        working_post_creating = false
+    }
+
+    function unfollow_op()
+    {
+        return {
+            caption: '_; Unfollow; Dejar de seguir; Przestań obserwować',
+            mricon: 'eye-off',
+            tbr: 'C',
+            fab: 'M09',
+            hideToolbarCaption: true,
+            action: (f) => toggle_subscribe()
+        }
+    }
+
+    function follow_op()
+    {
+        return {
+            caption: '_; Follow; Seguir; Obserwuj',
+            mricon: 'eye',
+            tbr: 'C',
+            fab: 'MO9',
+            hideToolbarCaption: true,
+            action: (f) => toggle_subscribe()
+        }
+    }
+
+    async function toggle_subscribe()
+    {
+        if(contextItem.IsSubscribed)
+        {
+            const res = await reef.get(`${contextItem.$ref}/Unsubscribe`)
+            if(res)
+                contextItem.IsSubscribed = false
+        }
+        else
+        {
+            const res = await reef.get(`${contextItem.$ref}/Subscribe`)
+            if(res)
+                contextItem.IsSubscribed = true
+        }
+
+        reloadPageToolbarOperations(get_page_operations())
+    }
+
+    const button_enabled_light_colors = 'text-stone-900/70 hover:text-stone-900 hover:bg-stone-900/10 active:bg-stone-900/20 border-stone-900/15'
+    const button_disabled_light_colors = 'text-stone-900/35 border-stone-900/10'
+    const button_enabled_dark_colors = 'dark:text-stone-100/80 dark:hover:text-white dark:hover:bg-stone-100/10 dark:active:bg-stone-100/20 dark:border-stone-100/15'
+    const button_disabled_dark_colors = 'dark:text-stone-100/30 dark:border-stone-100/10'
+
+    const button_disabled_colors = `${button_disabled_light_colors} ${button_disabled_dark_colors}`
+    const button_enabled_colors = `${button_enabled_light_colors} ${button_enabled_dark_colors}`
+    const button_colors = (disabled) => disabled ? button_disabled_colors : button_enabled_colors;
+
 </script>
 
 <svelte:head>
@@ -2181,7 +628,7 @@
 {#if contextItem}
     {#key contextNavigation}  <!-- to force new page operations -->
     <Page   self={contextItem}
-            toolbarOperations={ getPageOperations() }
+            toolbarOperations={ get_page_operations() }
             clearsContext='props sel'
             title={folderTitle}>
 
@@ -2189,9 +636,6 @@
             <PaperHeader>
             <div class="flex flex-row items-center">
                 <Breadcrumb  path = {contextItem.GetCanonicalPath} bind:this={breadcrump}/>
-                <div class="ml-auto">
-                    <Ricon icon='archive' s/>
-                </div>
             </div>
 
             </PaperHeader>
@@ -2201,115 +645,377 @@
                 summary=
             </div-->
 
-            <h1><Editable self={contextItem} a='Title'/></h1>
+            <h1><Editable self={contextItem} a='Title' {readonly}/></h1>
             
             <p class="lead">
-                <Editable self={contextItem} a='Summary'/>
+                <Editable self={contextItem} a='Summary' {readonly}/>
             </p>
 
-            {#each contextItem.allElements as note, idx}
-                {@const is_first = idx == 0}
-                {@const is_last = idx == contextItem.allElements.length-1}
 
-                <section>
+            <!-- prompt -->
+            {#if details_visibility & DV_SHOW_NEW_MESSAGE_PROMPT}
+                <!--h3 class="ml-2">Ask about TILOS</h3-->
+                <section class="not-prose
+                            min-h-20 w-full
+                            border border-stone-300 dark:border-stone-600 rounded-lg p-2
+                            bg-stone-50 dark:bg-stone-800">
+
+                    <p   class="w-full min-h-50 bg-stone-50 dark:bg-stone-800 outline-none
+                                overflow-x-clip text-wrap break-words overscroll-contain
+                                editable-placeholder"
+                                bind:innerHTML={new_message_content}
+                                bind:this={new_message_element}
+                                on:keydown={on_new_message_key_down}
+                                contenteditable="true"
+                                data-placeholder={i18n({
+                                    en: 'Enter the title of your new post...\nStart writing about your problem or idea...',
+                                    es: 'Escribe el título de la nueva entrada...\nEmpieza a escribir sobre tu problema o idea...',
+                                    pl: 'Wpisz tytuł nowego wpisu...\nZacznij opisywać problem lub pomysł...'
+                                })}
+                                >
+                        </p>
+
+                    <div class="mt-2 w-full flex flex-row gap-4 items-center">
+                        <button class="flex flex-row gap-1 items-center px-1 {button_colors(working_post_creating)}"
+                            title={i18n({ en:'Add an attachment', es: 'Añadir un archivo adjunto',  pl: 'Dodaj załącznik'})}
+                            on:click={(e) => make_working_post(e, MWN_INSERT_ATTACHEMENT, 'att')}
+                            disabled={working_post_creating}>
+                            {#if working_post_spinner!='att'}
+                                <Ricon icon='plus' s/>
+                            {:else}
+                                <Ricon icon='loader-circle' s/>
+                            {/if}
+                        </button>
+
+                        <button class="flex flex-row gap-1 items-center px-1 {button_colors(working_post_creating)}"
+                            title={i18n({ en:'Format', es: 'Formato',  pl: 'Formatuj'})}
+                            on:click={(e) => make_working_post(e, MWN_FOCUS_CONTENT_END, 'format')}
+                            disabled={working_post_creating}>
+                            {#if working_post_spinner != 'format'}
+                                <Ricon icon='case-sensitive' stroke=1/>
+                            {:else}
+                                <Ricon icon='loader-circle' s/>
+                            {/if}
+                        </button>
+
+                        {#if 1}
+                        {@const hint = i18n({en: 'Check this option to make the post visible only to TILOS developers', es: 'Marca esta opción para que la publicación solo sea visible para los desarrolladores de TILOS.', pl: 'Zaznacz tę opcję, aby wpis był widoczny wyłącznie dla programistów TILOS'})}
+                        <div class="flex items-center gap-1.5">
+                            <input  type="checkbox" 
+                                    id="confidential" 
+                                    bind:checked={new_message_confidential}
+                                    data-class="accent-stone-600 dark:accent-stone-400 h-4 w-4 cursor-pointer"
+                                    class="appearance-none h-4 w-4 rounded border 
+                                        border-stone-300 hover:border-stone-400 checked:border-stone-600
+                                        bg-white hover:bg-stone-50 checked:bg-stone-600 checked:hover:bg-stone-700
+                                        dark:border-stone-600 dark:hover:border-stone-500 dark:checked:border-stone-500
+                                        dark:bg-stone-800 dark:hover:bg-stone-700 dark:checked:bg-stone-600 dark:checked:hover:bg-stone-500
+
+                                        cursor-pointer 
+                                        relative checked:after:content-['✓'] checked:after:text-white checked:after:text-xs checked:after:absolute checked:after:inset-0 checked:after:flex checked:after:items-center checked:after:justify-center"
+                                    title={hint}/>
+
+                            <label for="confidential" class="text-sm text-stone-700 dark:text-stone-300 cursor-pointer select-none"
+                                    title={hint}>
+                                _; Confidential; Confidencial; Poufne
+                            </label>
+                        </div>
+                        {/if}
+
+                        <button class="ml-auto flex flex-row gap-1 items-center pl-3 pr-2 {button_colors(working_post_creating)}
+                            rounded-full border border-stone-300 dark:border-stone-600"
+                            on:click={(e) => make_working_post(e, MWN_FOCUS_CONTENT_END, 'finish')}
+                            disabled={working_post_creating}>
+                            <span>_; Finish the post; Terminar la entrada; Dokończ wpis</span>
+                            {#if working_post_spinner!='finish'}
+                                <Ricon icon='arrow-right' s/>
+                            {:else}
+                                <Ricon icon='loader-circle' s/>
+                            {/if}
+                        </button>
+
+                    </div>
                     
-                    <div class="w-full flex flex-row flex-wrap justify-between">
-                        <div class="flex flex-row gap-5 items-center">
-                            <div class="grow-0">
-                                {#if note["Note/ModifiedBy"]}
-                                    {@const modifiedBy = note["Note/ModifiedBy"]}
-                                    {@const href = `${modifiedBy.href}`}
-                                    <a {href} use:link> {modifiedBy.Name} </a>
-                                {/if}
+                </section>
+            {/if}
+
+            {#if working_posts && working_posts.length > 0}
+                <!--section class="mt-8 rounded-xl border border-stone-300 dark:border-stone-700/80 bg-stone-100/50 dark:bg-stone-900/40 p-5"-->
+                <section class="mt-8 mb-12 
+                                border-l-2 border-stone-300/80 dark:border-stone-700/80
+                                bg-stone-50 dark:bg-stone-800/40
+                                pl-5 pr-2 py-3 rounded-r-lg">
+                    <h4 class=" mt-0 pb-3 
+                                border-b border-stone-300/80 dark:border-stone-700/80
+                                flex flex-row items-center gap-2">
+                    <!--h4 class=" mt-0 pb-2 mb-6 
+                                flex flex-row items-center gap-2"-->
+                        <Ricon icon="square-pen" s/>
+                        _; My Draft Posts; Mis borradores de entradas; Moje szkice wpisów
+                        <span class="text-body font-normal">({working_posts.length})</span>
+                        <span class="ml-auto text-xs text-body font-normal">
+                            _; Visible only to you; Visible solo para ti; Widoczne tylko dla Ciebie
+                        </span>
+                    </h4>
+                    
+                    {#each working_posts as note, idx (note.$ref)}
+                        {@const is_first = idx == 0}
+                        {@const is_last = idx == working_posts.length-1}
+                        {@const is_comment = note.Kind==NK_COMMENT}
+                        <section>
+                            <div class="w-full flex flex-row flex-wrap justify-between">
+                                <p class="text-xs">
+                                    <span>_; Edited; Editado; Edytowany</span>
+                                    <span>
+                                        {getNiceStringDateTime(note.ModificationDate)}
+                                    </span>
+                                </p>
+
+                                <div class="flex flex-row items-center gap-2">
+                                    {#if (details_visibility & DV_SHOW_CATEGORY) && note.DraftThreadCategoryFolderInfo}
+                                        {@const title = note.DraftThreadCategoryFolderInfo.Title}
+                                        {@const href = note.DraftThreadCategoryFolderInfo.href}
+                                        {#if title && href}
+                                            <a {href} use:link class="text-xs">{title}</a>
+                                        {/if}
+                                    {/if}
+
+                                    <button 
+                                        on:click={(e) => show_working_post_menu(e, note)} class="{button_enabled_colors}"
+                                        title={i18n({en: 'Show post menu', es: 'Mostrar el menú de la publicación', pl: 'Pokaż menu wpisu'})}>
+                                        <Ricon icon='ellipsis-vertical' s/>
+                                    </button>
+                                </div>
+                                
                             </div>
 
-                            <div class="text-sm">
-                                {getNiceStringDateTime(note.ModificationDate)}
+                            {#if (details_visibility & DV_SHOW_TITLE) && note.Title}
+                                <h2 class="mt-5">{note.Title}</h2>
+                            {/if}
+
+                            {#if (details_visibility & DV_SHOW_SUMMARY) && note.Summary}
+                                <p  class="lead">{note.Summary}</p>
+                            {/if}
+
+                            <Editor     class=""
+                                        value={truncate_html(note.Content, 300)} 
+                                        readOnly compact
+                                        on:click={(e) => e.stopPropagation()}/>
+
+                            {#if note["Note/Files"] }
+                                {@const files = note["Note/Files"]}
+                                {#if files && files.length > 0}
+                                    <div class="w-full flex flex-row flex-wrap gap-2 text-sm">
+                                        {#each files as file}
+                                            <button class="flex flex-row gap-1 items-center px-1 {button_enabled_colors}"
+                                                    on:click={download_file_from_href(file.href, file.Title)}>
+                                                <Ricon icon="file-archive" s/>
+                                                <span>
+                                                    {file.Title}
+                                                </span>
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+                            {/if}
+
+                            {#if is_comment && note.DraftCommentThreadInfo}
+                                {@const thread = note.DraftCommentThreadInfo}
+                                {#if thread}
+                                    <section
+                                        class="ml-5 border border-zinc-300 dark:border-zinc-700 rounded-lg px-2 text-xs">
+                                        <a href={thread.href} use:link class="font-normal text-zinc-700 dark:text-zinc-300">
+                                            <h4 class="">
+                                                {thread.ModifiedByName}
+                                                <span class="ml-5 font-normal">
+                                                    {getNiceStringDateTime(thread.ModificationDate)}
+                                                </span>
+                                            </h4>
+                                            <p class="text-xs post-preview">
+                                                {#if thread.Title}
+                                                    {thread.Title}
+                                                {:else}
+                                                    {@html thread.Content}
+                                                {/if}
+                                            </p>
+                                        </a>
+                                    </section>
+                                {/if}
+                            {/if}
+
+                            <div class="mt-8 w-full flex flex-row flex-wrap">
+                                <div></div>
+
+                                <button class="ml-auto flex flex-row gap-1 items-center px-1 {button_enabled_colors}"
+                                        on:click={push(note.href)}>
+                                    <span>_; Finish the post; Terminar la entrada; Dokończ wpis</span>
+                                    <Ricon icon='arrow-right' s/>
+                                </button>
                             </div>
+                        
+
+                        {#if !is_last}
+                            <hr/>
+                        {/if}
+                        
+                        </section>
+                    {/each}
+                </section>
+            {/if}
+
+            <div class="mt-12"></div>
+
+            {#if contextItem.all_elements && contextItem.all_elements.length > 0}
+            
+                {#each contextItem.all_elements as note, idx (note.$ref)}
+                    {@const is_first = idx == 0}
+                    {@const is_last = idx == contextItem.all_elements.length-1}
+                    {@const is_comment = note.Kind==NK_COMMENT}
+                    {@const comment_padding = is_comment ? "" : ""}
+
+                    
+
+                    <section class="{comment_padding}">
+                        
+                        <div class="w-full flex flex-row flex-wrap justify-between">
+                            <div class="flex flex-row gap-5 items-center">
+                                <div class="grow-0">
+                                    {#if note["Note/CreatedBy"]}
+                                        {@const author = note["Note/CreatedBy"]}
+                                        {@const href = `${author.href}`}
+                                        <a {href} use:link> {author.Name} </a>
+                                    {/if}
+                                </div>
+
+                                <div class="text-sm">
+                                    {getNiceStringDateTime(note.ModificationDate)}
+                                </div>
+                            </div>
+
+                            <div class="flex flex-row items-center gap-2">
+                                {#if note.State == NS_CONFIDENTIAL}
+                                    <span title={i18n({en: 'Confidential', es: 'Confidencial', pl: 'Poufne'})}>
+                                        <Ricon icon='globe-off' s/>
+                                    </span>
+                                {/if}
+
+                                {#if (details_visibility & DV_SHOW_CATEGORY)}
+                                    {#if note.ThreadFolderInfo}
+                                        {@const title = note.ThreadFolderInfo.Title}
+                                        {@const href = note.ThreadFolderInfo.href}
+                                        {#if title && href}
+                                            <a {href} use:link class="text-xs">{title}</a>
+                                        {/if}
+                                    {:else}
+                                        {#if note.State == NS_UNAPPROVED}
+                                            <span class="text-xs">
+                                                _; Pending approval; A la espera de aprobación; Oczekuje na zatwierdzenie
+                                            </span>
+                                        {/if}
+                                    {/if}
+                                {/if}
+
+                                <button 
+                                    on:click={(e) => show_post_menu(e, note)} class="{button_enabled_colors}"
+                                    title={i18n({en: 'Show post menu', es: 'Mostrar el menú de la publicación', pl: 'Pokaż menu wpisu'})}>
+                                    <Ricon icon='ellipsis-vertical' s/>
+                                </button>
+                            </div>
+                            
                         </div>
 
-                        <button 
-                            on:click={(e) => showPostMenu(e, note)} class="{button_enabled_colors}"
-                            title={i18n({en: 'Show post menu', es: 'Mostrar el menú de la publicación', pl: 'Pokaż menu wpisu'})}>
-                            <Ricon icon='ellipsis-vertical' s/>
-                        </button>
-                        
-                    </div>
-
-                    {#if note.Title}
-                        <h2 class="mt-5">{note.Title}</h2>
-                    {/if}
-
-                     {#if 0 && note.Summary}
-                        {#key note.Summary}
-                            <p  class="lead">{note.Summary}</p>
-                        {/key}
-
-                    {/if}
-
-                    <!--div class="post-preview"-->
-                        <Editor     value={truncate_html(note.Content, 500)} 
-                                    readOnly compact
-                                    on:click={(e) => e.stopPropagation()}/>
-                    <!--/div-->
-                    
-                    {#if note["Note/Files"] }
-                        {@const files = note["Note/Files"]}
-                        {#if files && files.length > 0}
-                            <div class="w-full flex flex-row flex-wrap gap-2 text-sm">
-                                {#each files as file}
-                                    <button class="flex flex-row gap-1 items-center px-1 {button_enabled_colors}"
-                                            on:click={download_file_from_href(file.href, file.Title)}>
-                                        <Ricon icon="file-archive" s/>
-                                        <span>
-                                            {file.Title}
-                                        </span>
-                                    </button>
-                                {/each}
-                            </div>
+                        {#if (details_visibility & DV_SHOW_TITLE) && note.Title}
+                            <h2 class="mt-5">{note.Title}</h2>
                         {/if}
+
+                        {#if (details_visibility & DV_SHOW_SUMMARY) && note.Summary}
+                            <p  class="lead">{note.Summary}</p>
+                        {/if}
+
+                        <!--div class="post-preview"-->
+                            <Editor     class=""
+                                        value={truncate_html(note.Content, 300)} 
+                                        readOnly compact
+                                        on:click={(e) => e.stopPropagation()}/>
+                        <!--/div-->
+                        
+                        {#if note["Note/Files"] }
+                            {@const files = note["Note/Files"]}
+                            {#if files && files.length > 0}
+                                <div class="w-full flex flex-row flex-wrap gap-2 text-sm">
+                                    {#each files as file}
+                                        <button class="flex flex-row gap-1 items-center px-1 {button_enabled_colors}"
+                                                on:click={download_file_from_href(file.href, file.Title)}>
+                                            <Ricon icon="file-archive" s/>
+                                            <span>
+                                                {file.Title}
+                                            </span>
+                                        </button>
+                                    {/each}
+                                </div>
+                            {/if}
+                        {/if}
+
+                        </section>
+
+                        <!-- original post hint -->
+                        {#if is_comment}
+                            {@const inNotes = note["Note/InNotes"]}
+                            {@const thread = (inNotes && inNotes.length > 0) ? inNotes[0] : null}
+                            {@const author = thread ? thread["InNote/CreatedBy"] : null}
+                            {#if thread && author}
+                                <section
+                                    class="ml-5 border border-zinc-300 dark:border-zinc-700 rounded-lg px-2 text-xs">
+                                    <a href={thread.InHRef} use:link class="font-normal text-zinc-700 dark:text-zinc-300">
+                                        <h4 class="">
+                                            {author.Name}
+                                            <span class="ml-5 font-normal">
+                                                {getNiceStringDateTime(thread.InModificationDate)}
+                                            </span>
+                                        </h4>
+                                        <p class="text-xs post-preview">
+                                            {#if thread.InTitle}
+                                                {thread.InTitle}
+                                            {:else}
+                                                {@html thread.InContent}
+                                            {/if}
+                                        </p>
+                                    </a>
+                                </section>
+                            {/if}
+                        {/if}
+
+                        <div class="mt-8 w-full flex flex-row flex-wrap justify-end gap-10">
+                            <!--button disabled class="flex flex-row gap-1 items-center px-1 {button_disabled_colors}">
+                                <Ricon icon='thumbs-up' s/>
+                                <span>15</span>
+                            </button-->
+
+                            {#if !is_comment}
+                                <button class="flex flex-row gap-1 items-center px-1 {button_enabled_colors}"
+                                        on:click={push(note.href + "?action=showfirstsubnote")}>
+                                    <Ricon icon='messages-square' s/>
+                                    <span>{note.NotesCount}</span>
+                                </button>
+                            {:else}
+                                <div></div>
+                            {/if}
+
+                            <button class="flex flex-row gap-1 items-center px-1 {button_enabled_colors}"
+                                    on:click={push(note.href)}>
+                                <Ricon icon='message-square-more' s/>
+                                <span>_; Show post; Mostrar entrada; Pokaż wpis</span>
+                            </button>
+                        </div>
+                    
+
+                    {#if !is_last}
+                        <hr/>
                     {/if}
-
-                    <div class="mt-8 w-full flex flex-row flex-wrap justify-around">
-                        <button disabled class="flex flex-row gap-1 items-center px-1 {button_disabled_colors}">
-                            <Ricon icon='thumbs-up' s/>
-                            <span>15</span>
-                        </button>
-
-                        <button class="flex flex-row gap-1 items-center px-1 {button_enabled_colors}"
-                                on:click={push(note.href)}>
-                            <Ricon icon='messages-square' s/>
-                            <span>{note.NotesCount}</span>
-                        </button>
-
-                        <button class="flex flex-row gap-1 items-center px-1 {button_enabled_colors}"
-                                on:click={push(note.href)}>
-                            <Ricon icon='file-search-corner' s/>
-                            <span>_; Show post; Mostrar entrada; Pokaż wpis</span>
-                        </button>
-                    </div>
-                </section>
-
-                {#if !is_last}
-                    <hr/>
-                {/if}
-            {/each}
-
-            <!--List    self={contextItem}
-                    a='allElements'
-                    list_properties = {folder_properties}
-                    toolbarOperations={(el) => elementOperations(el, el.$type)}
-                    {multiselectOperations}
-                    orderAttrib='Order'
-                    bind:this={listComponent}
-                    component_id="main_list">
-
-                <ListInserter   action={addElement} icon/>
-            </List-->
-
-
-
-            <input hidden type="file" id="attachementFile" accept="*/*" bind:this={attInput} on:change={onAttachementSelected}/>
+                {/each}
+            {:else}
+                <p class="text-center text-zinc-600 dark:text-zinc-400">_; There's nothing here; Aquí no hay nada; Nic tu nie ma</p>
+            {/if}
 
         </Paper>
 
@@ -2329,47 +1035,37 @@
 {/if}
 
 
-
-<Modal  title={i18n(['Delete', 'Eliminar', 'Usuń'])}
-        icon={FaTrash}
-        onOkCallback={deleteElement}
-        bind:this={deleteModal}>
-    <p class="text-sm text-stone-500 dark:text-stone-300">
-        {#if deleteObjectKind == 'multi' && objectToDelete.length > 1}
-            {@const itemsNo = objectToDelete.length}
-            {i18n({
-                en: `Are you sure you want to delete ${itemsNo} elements?`,
-                es: `¿Seguro que quieres eliminar ${itemsNo} elementos?`,
-                pl: `Czy na pewno chcesz usunąć ${itemsNo} ${itemsNo < 5 ? 'elementy' : 'elementów'}?`})}
-        {:else}
-            <span>
-                _;
-                Are you sure you want to delete selected element?;
-                ¿Está seguro de que desea eliminar el elemento seleccionado?;
-                Czy na pewno chcesz usunąć wybrany element?
-            </span>
-        {/if}
-    </p>
-</Modal>
-
-<Modal title={i18n(['Uploading...', 'Carga...', 'Przesyłanie...'])}
-    bind:open={pendingUploading} mode={3} icon={FaCloudUploadAlt}>
-    <Spinner delay={500}/>
-    <span class="ml-3">_; Your file is uploading to the server; Tu archivo se está cargando en el servidor; Twój plik jest przesyłany na serwer</span>
-</Modal>
-
-<FolderProperties bind:this={folderPropertiesDialog} />
-<FileProperties bind:this={filePropertiesDialog} />
-<TaskProperties bind:this={taskPropertiesDialog} />
-<NoteProperties bind:this={notePropertiesDialog} />
+<FolderProperties bind:this={folder_properties_dialog} />
 
 <style>
  
  .post-preview {
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 6;
+    -webkit-line-clamp: 1;
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+.editable-placeholder:empty::before {
+  content: attr(data-placeholder);
+  white-space: pre-wrap;
+  color: #52525b; /* zinc-600 */
+  pointer-events: none;
+  cursor: text;
+}
+
+
+:global(.dark) .editable-placeholder:empty::before {
+  color: #a1a1aa;
+}
+
+.text-body {
+        color: var(--tw-prose-body);
+    }
+
+:global(.dark) .text-body {
+    color: var(--tw-prose-invert-body);
+}
+
 </style>
