@@ -61,7 +61,7 @@
         ':-/': '😕'
     };
 
-    const emoticonExtension = {
+    const emoticon_extension = {
     name: 'emoticon',
     level: 'inline',
     start(src) {
@@ -81,7 +81,44 @@
     }
     };
 
-    marked.use({ extensions: [emoticonExtension] });
+
+    const URL_NO_PROTO_REGEX = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(?:\/[^\s<]*)?/i;
+    const domain_link_extension = {
+        name: 'domainLink',
+        level: 'inline',
+        start(src) {
+            return src.search(/[a-zA-Z0-9]\.[a-zA-Z]/);
+        },
+        tokenizer(src) {
+            const match = URL_NO_PROTO_REGEX.exec(src);
+            if (match) {
+                let url = match[0];
+                
+                const trailing_punctuation = /[.,!?:;]+$/;
+                if (trailing_punctuation.test(url)) {
+                    url = url.replace(trailing_punctuation, '');
+                }
+
+                const href = `https://${url}`;
+
+                return {
+                    type: 'link',
+                    raw: url,
+                    href: href,
+                    text: url,
+                    tokens: [
+                        {
+                            type: 'text',
+                            raw: url,
+                            text: url
+                        }
+                    ]
+                };
+            }
+        }
+    };
+
+    marked.use({ extensions: [emoticon_extension, domain_link_extension] });
 
 
     $: onParamsChanged($location, $querystring)

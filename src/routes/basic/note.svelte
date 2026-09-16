@@ -678,6 +678,10 @@
                     caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
                     action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect, note)
                 },
+                ... ( isThread ? [] : [{
+                    caption: '_; Post to feeds; Publicar en los canales de noticias; Opublikuj w strumieniach',
+                    action: (btt, rect) => publish_note_to_feeds(note)
+                }]),
                 { separator: true},
                 {
                     caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
@@ -1095,6 +1099,10 @@
                                         caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
                                         action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect, note)
                                     },
+                                     ... ( isThread ? [] : [{
+                                        caption: '_; Post to feeds; Publicar en los canales de noticias; Opublikuj w strumieniach',
+                                        action: (btt, rect) => publish_note_to_feeds(note)
+                                    }]),
                                     { separator: true},
                                     {
                                         caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
@@ -2121,6 +2129,17 @@
     {
         const newFlags = confidential ? activeNote.Flags | NF_WILL_CONFIDENTIAL : (activeNote.Flags & (~NF_WILL_CONFIDENTIAL))
         setjItemProperty(activeNote, 'Flags', newFlags)
+    }
+
+    async function publish_note_to_feeds(note)
+    {
+        const res = await reef.post(`${note.$ref}/PublishCustomNoteAsThread`, {})
+        if(res)
+        {
+            await reloadData();  
+            await tick();
+            clearActiveItem('props') 
+        }
     }
 
     let title_placeholder = false;

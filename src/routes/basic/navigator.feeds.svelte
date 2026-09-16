@@ -164,7 +164,7 @@
             <SidebarItem    href="/feed/my"
                             icon='newspaper'
                             active={is_routing_to('/feed/my', current_location)}>
-                _; My news feed; Mi feed de noticias; Mój strumień wiadomości
+                _; News; Noticias; Wiadomości
             </SidebarItem>
             
             <SidebarItem    href="/feed/sent"
@@ -224,7 +224,7 @@
             <SidebarItem    href="/feed/my"
                             icon='newspaper'
                             item={my_feed}>
-                _; My news feed; Mi feed de noticias; Mój strumień wiadomości
+                _; News; Noticias; Wiadomości
             </SidebarItem>
 
             <SidebarItem    href="/feed/sent"

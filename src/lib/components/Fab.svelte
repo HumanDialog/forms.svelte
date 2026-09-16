@@ -8,6 +8,7 @@
     import {i18n} from '../i18n.js'
     import {pushChanges, hasModifications, unsavedModificationsTicket} from '../updates.js'
 	import { pop } from 'svelte-spa-router';
+    import {onErrorShowAlert} from '../stores.js'
 
     export let mainPageCoords = undefined
 

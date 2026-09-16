@@ -162,7 +162,8 @@ export {
     get_main_object_fetch_error_description,
     download_file_from_href,
     truncate_html,
-    sleep
+    sleep,
+    bits_count
 }   from './utils'
 
 export {

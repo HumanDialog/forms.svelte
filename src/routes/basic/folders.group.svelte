@@ -135,10 +135,11 @@
         switch(insertKind)
         {
         case FK_FOLDER:
+        case FK_DISCUSSION:
             return await addFolder(newFolderAttribs)
 
-        case FK_DISCUSSION:
-            return await addForum(newFolderAttribs)
+        //case FK_DISCUSSION:
+        //    return await addForum(newFolderAttribs)
         }
     }
 
@@ -185,14 +186,14 @@
                         action: (focused) => { insertKind=FK_FOLDER; listComponent.addRowAfter(null) },
                         tbr: 'A',
                         fab: 'M03'
-                    },
+                    }/*,
                     {
                         caption: '_; New forum; Nuevo foro; Nowe forum',
                         mricon: 'messages-square',
                         action: (focused) => { insertKind=FK_DISCUSSION; listComponent.addRowAfter(null) },
                         tbr: 'A',
                         fab: 'M04'
-                    }
+                    }*/
                 ]
             }
         ]
@@ -221,14 +222,14 @@
                             action: () => { insertKind=FK_FOLDER;  listComponent.addRowAfter(folder) },
                             tbr: 'A',
                             fab: 'M03'
-                        },
+                        }/*,
                         {
                             caption: '_; New forum; Nuevo foro; Nowe forum',
                             mricon: 'messages-square',
                             action: () => { insertKind=FK_DISCUSSION; listComponent.addRowAfter(folder) },
                             tbr: 'A',
                             fab: 'M04'
-                        }
+                        }*/
                     ]
                 },
                 {

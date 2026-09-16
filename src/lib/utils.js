@@ -1528,3 +1528,15 @@ export function truncate_html(html_string, max_chars = 300)
 }
 
 export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+
+export function bits_count(n) 
+{
+    let count = 0;
+    while (n !== 0) 
+    {
+        n &= n - 1;
+        count++;
+    }
+    return count;
+}

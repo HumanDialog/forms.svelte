@@ -40,6 +40,7 @@
 
     let users = [];
     let working_posts = []
+    //let unapproved_posts = []
 
     
     $: on_params_changed($location, $querystring, $mainContentPageReloader, $session);
@@ -69,6 +70,7 @@
         contextItemId = 0
         details_visibility = 0
         working_posts = []
+        //unapproved_posts = []
         
 
         switch (contextItemSelector)
@@ -210,14 +212,16 @@
     async function fetch_my_working_threads(parent_folder_id) 
     {
         working_posts = []
-        return reef.post('user/MyDraftPosts/query', {
+        //unapproved_posts = []
+
+        /*return reef.post('user/MyDraftPosts/query', {
             Id: 1, Name: 'not published posts', ExpandLevel: 16,
             Tree: [
                 {
                     Id: 1,
                     Association: 'Notes',
                     Filter: parent_folder_id ? `Kind=NK_THREAD and Note/IsDraftThreadInCategory(${parent_folder_id})` : '',
-                    Expressions: ['Id', '$ref', 'Title', 'Summary', 'Content', 'Kind', 'href', '$type', 'ModificationDate', 'DraftThreadCategoryFolderInfo', 'DraftCommentThreadInfo', '$ver'],
+                    Expressions: ['Id', '$ref', 'Title', 'Summary', 'Content', 'Kind', 'State', 'href', '$type', 'ModificationDate', 'DraftThreadCategoryFolderInfo', 'DraftCommentThreadInfo', '$ver'],
                     Sort: "-ModificationDate",
                     SubTree: [
                         {
@@ -230,19 +234,79 @@
                 }
             ]
         }) 
+        */
 
+        return reef.post('user/query', {
+            Id: 1, Name: 'drafts and unapproved posts', ExpandLevel: 16,
+            Tree: [
+                {
+                    Id: 1,
+                    Association: '',
+                    Expressions: [],
+                    SubTree: [
+                        {
+                            Id: 10,
+                            Association: 'MyDraftPosts',
+                            Expressions: [],
+                            SubTree: [
+                                {
+                                    Id: 100,
+                                    Association: 'Notes',
+                                    Filter: parent_folder_id ? `Kind=NK_THREAD and Note/IsDraftThreadInCategory(${parent_folder_id})` : '',
+                                    Expressions: ['Id', '$ref', 'Title', 'Summary', 'Content', 'Kind', 'State', 'href', '$type', 'ModificationDate', 'DraftThreadCategoryFolderInfo', 'DraftCommentThreadInfo', '$ver'],
+                                    Sort: "-ModificationDate",
+                                    SubTree: [
+                                        {
+                                            Id: 1000,
+                                            Association: 'Note/Files',
+                                            Expressions: ["$ref", "Title", "Summary", "href", "icon", "$type"]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }/*,
+                        {
+                            Id: 20,
+                            Association: 'MySentPosts',
+                            Expressions: [],
+                            SubTree: [
+                                {
+                                    Id: 200,
+                                    Association: 'Notes',
+                                    Filter: parent_folder_id ? `State=NS_UNAPPROVED and Note/IsDraftThreadInCategory(${parent_folder_id})` : 'State=NS_UNAPPROVED',
+                                    Expressions: ['Id', '$ref', 'Title', 'Summary', 'Content', 'Kind', 'State', 'href', '$type', 'ModificationDate', '$ver'],
+                                    Sort: "-ModificationDate",
+                                    SubTree: [
+                                        {
+                                            Id: 2000,
+                                            Association: 'Note/Files',
+                                            Expressions: ["$ref", "Title", "Summary", "href", "icon", "$type"]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }*/
+                    ]
+                }
+            ]
+        })
        
     }
 
-    function setup_data_after_fetch(context_item, draft_posts)
+    function setup_data_after_fetch(context_item, user_posts)
     {
         let result = null
         if(context_item)
             result = context_item.Folder
            
-        if(draft_posts && draft_posts.FolderNote && draft_posts.FolderNote.length > 0)
+        if(user_posts && user_posts.User)
         {
-            working_posts = draft_posts.FolderNote
+            if(user_posts.User.MyDraftPosts && user_posts.User.MyDraftPosts.Notes && user_posts.User.MyDraftPosts.Notes.length>0)
+                working_posts = user_posts.User.MyDraftPosts.Notes
+
+
+            //if(user_posts.User.MySentPosts && user_posts.User.MySentPosts.Notes && user_posts.User.MySentPosts.Notes.length>0)
+            //    unapproved_posts = user_posts.User.MySentPosts.Notes
         }
 
         return result
@@ -257,19 +321,27 @@
     function setup_all_elements(contextItem)
     {
         contextItem.all_elements = []
-        if(contextItem.Folders)
-            contextItem.all_elements = [...contextItem.all_elements, ...contextItem.Folders]
+        //if(contextItem.Folders)
+        //    contextItem.all_elements = [...contextItem.all_elements, ...contextItem.Folders]
 
         if(contextItem.Notes)
-            contextItem.all_elements = [...contextItem.all_elements, ...contextItem.Notes]
+        {
+            let unapproved_posts = contextItem.Notes.filter(el => el.State == NS_UNAPPROVED)
+            unapproved_posts.sort((a,b) =>  b.Order - a.Order)
 
-        if(contextItem.Tasks)
-            contextItem.all_elements = [...contextItem.all_elements, ...contextItem.Tasks]
+            let other_posts = contextItem.Notes.filter(el => el.State != NS_UNAPPROVED)
+            other_posts.sort((a,b) =>  b.Order - a.Order)
 
-        if(contextItem.Files)
-            contextItem.all_elements = [...contextItem.all_elements, ...contextItem.Files]
+            contextItem.all_elements = [...contextItem.all_elements, ...unapproved_posts, ...other_posts]
+        }
 
-        contextItem.all_elements.sort((a,b) =>  b.Order - a.Order)
+        //if(contextItem.Tasks)
+        //    contextItem.all_elements = [...contextItem.all_elements, ...contextItem.Tasks]
+
+        //if(contextItem.Files)
+        //    contextItem.all_elements = [...contextItem.all_elements, ...contextItem.Files]
+
+        //contextItem.all_elements.sort((a,b) =>  b.Order - a.Order)
 
         // ==========================================
 
@@ -484,11 +556,22 @@
     }
 
 
+    let new_message_title = ''
     let new_message_content = '';
+    let new_message_content_element
+    let new_message_title_element
     let new_message_confidential = false;
-    let new_message_element
 
-    function on_new_message_key_down(e)
+    function on_new_message_title_key_down(e)
+    {
+        if (event.key === 'Enter') 
+        {
+            event.preventDefault();
+            new_message_content_element?.focus()
+        }
+    }
+
+    function on_new_message_content_key_down(e)
     {
         if (event.key === 'Enter') 
         {
@@ -507,14 +590,18 @@
 
     async function make_working_post(e, action_after_redirecting, spinner)
     {
-        const clean_content = new_message_content.replace(/&nbsp;/g, ' ').trim();
-        if(!clean_content)
+        const clean_title = new_message_title.replace(/&nbsp;/g, ' ').trim();
+        if(!clean_title)
             return;
 
-        const lines = clean_content.split(/<br\s*[\/]?>/gi);
+        const clean_content = new_message_content.replace(/&nbsp;/g, ' ').trim();
+        //if(!clean_content)
+        //    return;
 
-        const parsed_title = lines[0]?.trim() || '';
-        const parsed_content = lines.slice(1).join('<br>').trim();
+        //const lines = clean_content.split(/<br\s*[\/]?>/gi);
+
+        //const parsed_title = lines[0]?.trim() || '';
+        //const parsed_content = lines.slice(1).join('<br>').trim();
 
         ///////////////////////////////
 
@@ -526,9 +613,9 @@
         //await sleep(2000)
 
         const res = await reef.post('user/NewDraftThread', {
-            title: parsed_title,
+            title: clean_title,
             summary: '',
-            content: parsed_content ? `<p>${parsed_content}</p>` : '',
+            content: clean_content ? `<p>${clean_content}</p>` : '',
             category: details_visibility & DV_CONTEXTUAL_VIEW ? contextItem.$ref : null,
             confidential: new_message_confidential
         })
@@ -655,17 +742,45 @@
             <!-- prompt -->
             {#if details_visibility & DV_SHOW_NEW_MESSAGE_PROMPT}
                 <!--h3 class="ml-2">Ask about TILOS</h3-->
-                <section class="not-prose
-                            min-h-20 w-full
+                <section class="
+                            min-h-24 w-full
                             border border-stone-300 dark:border-stone-600 rounded-lg p-2
                             bg-stone-50 dark:bg-stone-800">
 
-                    <p   class="w-full min-h-50 bg-stone-50 dark:bg-stone-800 outline-none
+                    <h2 class=" mt-2
+                                outline-none 
+                                overflow-x-clip text-wrap break-words overscroll-contain
+                                editable-placeholder"
+                        bind:innerHTML={new_message_title}
+                        bind:this={new_message_title_element}
+                        on:keydown={on_new_message_title_key_down}
+                        contenteditable="true"
+                        data-placeholder={i18n({
+                                    en: 'Enter the title of your new post...',
+                                    es: 'Escribe el título de la nueva entrada...',
+                                    pl: 'Wpisz tytuł nowego wpisu...'
+                                })}>
+                    </h2>
+                    <p  class=" outline-none 
+                                overflow-x-clip text-wrap break-words overscroll-contain
+                                editable-placeholder"
+                        bind:innerHTML={new_message_content}
+                        bind:this={new_message_content_element}
+                        on:keydown={on_new_message_content_key_down}
+                        contenteditable="true"
+                        data-placeholder={i18n({
+                                    en: 'Start writing about your problem or idea...',
+                                    es: 'Empieza a escribir sobre tu problema o idea...',
+                                    pl: 'Zacznij opisywać problem lub pomysł...'
+                                })}>
+                    </p>
+
+                    <!--p   class="w-full min-h-50 bg-stone-50 dark:bg-stone-800 outline-none
                                 overflow-x-clip text-wrap break-words overscroll-contain
                                 editable-placeholder"
                                 bind:innerHTML={new_message_content}
-                                bind:this={new_message_element}
-                                on:keydown={on_new_message_key_down}
+                                bind:this={new_message_content_element}
+                                on:keydown={on_new_message_content_key_down}
                                 contenteditable="true"
                                 data-placeholder={i18n({
                                     en: 'Enter the title of your new post...\nStart writing about your problem or idea...',
@@ -673,7 +788,7 @@
                                     pl: 'Wpisz tytuł nowego wpisu...\nZacznij opisywać problem lub pomysł...'
                                 })}
                                 >
-                        </p>
+                        </p-->
 
                     <div class="mt-2 w-full flex flex-row gap-4 items-center">
                         <button class="flex flex-row gap-1 items-center px-1 {button_colors(working_post_creating)}"

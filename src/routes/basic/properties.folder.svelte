@@ -113,6 +113,10 @@
         // tmp
         folder.ColumnsNo = 1
 
+        // tmp
+        if(folder.Kind == FK_DISCUSSION)
+                folder.Kind = FK_FOLDER
+
         if(folder.CreationDate)
             creationDate = new Date(folder.CreationDate)
         else
@@ -185,7 +189,7 @@
         }
     }
 
-    const allKinds = [FK_FOLDER, /*FK_TABLE, FK_DOCUMENT,*/ FK_DISCUSSION, FK_FEED]
+    const allKinds = [FK_FOLDER, /*FK_TABLE, FK_DOCUMENT, FK_DISCUSSION,*/ FK_FEED]
     function folderKind(kind)
     {
         switch(kind)

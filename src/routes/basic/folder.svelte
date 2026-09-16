@@ -21,7 +21,7 @@
 				showFloatingToolbar,
                 reloadPageToolbarOperations, Paper, PaperHeader, openInNewTab, copyAddress,
                 get_acc_icon, get_acc_color,
-				focusEditable, showMenu, Ricon, get_main_object_fetch_error_description} from '$lib'
+				focusEditable, showMenu, Ricon, get_main_object_fetch_error_description, bits_count} from '$lib'
     import {FaTrash, FaCloudUploadAlt} from 'svelte-icons/fa'
 
 
@@ -61,6 +61,7 @@
     const OP_FOLDER             = 0
     const OP_TRASH              = 1
     const OP_ARCHIVE            = 2
+    const OP_ROOT_FOLDER        = 3
 
     let operations_kind = OP_FOLDER
 
@@ -151,7 +152,7 @@
         case 'feeds':
             contextNavigation = "group/FeedsRoot";
             cacheKey = "group_FeedsRoot";
-            operations_kind = OP_FOLDER
+            operations_kind = OP_ROOT_FOLDER
             break;
         case 'unapprovedposts':
             contextNavigation = "group/UnapprovedPosts";
@@ -776,40 +777,41 @@
     }
 
     let new_folder_kind = FK_FOLDER
-    function run_folder_creator(btt, after_element) // temporary 
+    function run_folder_creator(btt, after_element, flags) 
     {
-        newElementKind = 'Folder'
-        new_folder_kind = FK_FOLDER
-        listComponent.addRowAfter(after_element)
-        
-    }
+        if(flags & NEF_ALLOW_CHOOSE_FOLDER_KIND)
+        {
+            const run_folder_list_inserter = (after_element, kind) => {
+                newElementKind = 'Folder'
+                new_folder_kind = kind
+                listComponent.addRowAfter(after_element)
+            }
 
-    function run_folder_creatorX(btt, after_element)
-    {
-        const run_folder_list_inserter = (after_element, kind) => {
+            const folder_kinds = [
+                {
+                    caption: '_; A regular folder; Una carpeta normal; Zwykły folder',
+                    action: () => run_folder_list_inserter(after_element, FK_FOLDER)
+                },
+                //{ separator: true},
+                {
+                    caption: '_; Feed; Feed; Strumień',
+                    action: () => run_folder_list_inserter(after_element, FK_FEED)
+                }/*,
+                {
+                    caption: '_; Discussions; Debates; Dyskusje',
+                    action: () => run_folder_list_inserter(after_element, FK_DISCUSSION)
+                },*/
+            ]
+            
+            const rect = btt.getBoundingClientRect()
+            showMenu(rect, folder_kinds)
+        }
+        else
+        {
             newElementKind = 'Folder'
-            new_folder_kind = kind
+            new_folder_kind = FK_FOLDER
             listComponent.addRowAfter(after_element)
         }
-
-        const folder_kinds = [
-            {
-                caption: '_; A regular folder; Una carpeta normal; Zwykły folder',
-                action: () => run_folder_list_inserter(after_element, FK_FOLDER)
-            },
-            { separator: true},
-            {
-                caption: '_; Feed; Feed; Strumień',
-                action: () => run_folder_list_inserter(after_element, FK_FEED)
-            },
-            {
-                caption: '_; Discussions; Debates; Dyskusje',
-                action: () => run_folder_list_inserter(after_element, FK_DISCUSSION)
-            },
-        ]
-        
-        const rect = btt.getBoundingClientRect()
-        showMenu(rect, folder_kinds)
         
     }
 
@@ -921,32 +923,48 @@
         return pinOperation;
     }
 
-    function newElementOperations(afterElement)
+    const NEF_ALLOW_NEW_FOLDER          =   0x00000001
+    const NEF_ALLOW_NEW_NOTE            =   0x00000002
+    const NEF_ALLOW_NEW_TASK            =   0x00000004
+    const NEF_ALLOW_NEW_FILE            =   0x00000008
+    const NEF_ALLOW_NEW_ALL             =   0x000000FF
+
+    const NEF_ALLOW_CHOOSE_FOLDER_KIND  =   0x00000100
+
+    function newElementOperations(afterElement, flags=NEF_ALLOW_NEW_ALL)
     {
         const isClipboard = contextItem.IsBasket
         const isRootPinned = contextItem.IsRootPinned
-        const isForum = contextItem.Kind == FK_DISCUSSION
+        const isForum = false; //contextItem.Kind == FK_DISCUSSION
 
-        const canAddFolders = !(isRootPinned || isClipboard || isForum)
-        const canAddNotes = !(isRootPinned || isClipboard || isForum)
-        const canAddTasks = !(isRootPinned || isClipboard || isForum)
-        const canAddFiles = !(isRootPinned || isClipboard || isForum)
-        const canAddForum = isForum//!(isRootPinned || isClipboard)
-        const canAddThread = isForum
+        let canAddFolders = !(isRootPinned || isClipboard || isForum)
+        let canAddNotes = !(isRootPinned || isClipboard || isForum)
+        let canAddTasks = !(isRootPinned || isClipboard || isForum)
+        let canAddFiles = !(isRootPinned || isClipboard || isForum)
+        let canAddForum = false; //isForum//!(isRootPinned || isClipboard)
+        let canAddThread = false; //isForum
 
+        canAddFiles &&= (flags & NEF_ALLOW_NEW_FOLDER) != 0
+        canAddNotes &&= (flags & NEF_ALLOW_NEW_NOTE) != 0
+        canAddTasks &&= (flags & NEF_ALLOW_NEW_TASK) != 0
+        canAddFiles &&= (flags & NEF_ALLOW_NEW_FILE) != 0
+
+        let hide_toolbar_caption = false;
+        if(bits_count(flags & NEF_ALLOW_NEW_ALL) > 2)
+            hide_toolbar_caption = true;
 
         const newFolder = {
             caption: '_; New folder; Nueva carpeta; Nowy folder',
-            hideToolbarCaption: true,
+            hideToolbarCaption: hide_toolbar_caption,
             mricon: 'folder',
-            action: (btt) => run_folder_creator(btt, afterElement),
+            action: (btt) => run_folder_creator(btt, afterElement, flags),
             tbr: 'A',
             fab: 'M04'
         }
 
         const newNote = {
             caption: '_; New note; Nueva nota; Nowa notatka',
-            hideToolbarCaption: true,
+            hideToolbarCaption: hide_toolbar_caption,
             mricon:'file-text',
             action: (f) => { newElementKind='Note';  listComponent.addRowAfter(afterElement) },
             tbr: 'A',
@@ -955,7 +973,7 @@
 
         const newTask = {
             caption: '_; New task; Nueva tarea; Nowe zadanie',
-            hideToolbarCaption: true,
+            hideToolbarCaption: hide_toolbar_caption,
             mricon:'square-pen',
             action: (f) => { newElementKind='Task';  listComponent.addRowAfter(afterElement) },
             tbr: 'A',
@@ -964,7 +982,7 @@
 
         const newFile = {
             caption: '_; Add file; Añadir archivo; Dodaj plik',
-            hideToolbarCaption: true,
+            hideToolbarCaption: hide_toolbar_caption,
             mricon: 'file-archive',
             action: (f) => { newElementKind='UploadedFile';  runFileAttacher(afterElement) },
             tbr: 'A',
@@ -1156,7 +1174,7 @@
             fab: 'M00',
             tbr: 'D',
             operations: [
-                newElementOperations(null),
+                newElementOperations(null, NEF_ALLOW_NEW_ALL),
                 {
                     caption: '_; View; Ver; Widok',
                     operations: [
@@ -1186,6 +1204,26 @@
                         move_whole_folder_to_archive_op,
                         move_whole_folder_to_trash_op,
                         properties_operation
+                    ]
+                }
+
+            ]
+        }
+    }
+
+    function  rootFolderPageOperations()
+    {
+        return {
+            opver: 2,
+            fab: 'M00',
+            tbr: 'D',
+            operations: [
+                newElementOperations(null, NEF_ALLOW_NEW_FOLDER | NEF_ALLOW_CHOOSE_FOLDER_KIND),
+                {
+                    caption: '_; View; Ver; Widok',
+                    operations: [
+                        enable_multiselection_operation,
+                        refresh_operation                        
                     ]
                 }
 
@@ -1265,12 +1303,35 @@
         }
     }
 
+    function rootFolderMultiselectPageOperations()
+    {
+        return {
+            opver: 2,
+            fab: 'M00',
+            tbr: 'D',
+            operations: [
+                {
+                    caption: '_; View; Ver; Widok',
+                    operations: [
+                        toggle_select_all_operation,
+                       // ... !canPin ? [] : [pinOp()],
+                        disable_multiselection_operation,
+                        refresh_operation
+                    ]
+                }
+            ]
+        }
+    }
+
     function multiselectPageOperations()
     {
         switch(operations_kind)
         {
         case OP_FOLDER:
             return folderMultiselectPageOperations();
+
+        case OP_ROOT_FOLDER:
+            return rootFolderMultiselectPageOperations();
 
         case OP_ARCHIVE:
             return archiveMultiselectPageOperations();
@@ -1289,6 +1350,9 @@
         {
         case OP_FOLDER:
             return folderPageOperations();
+
+        case OP_ROOT_FOLDER:
+            return rootFolderPageOperations();
 
         case OP_ARCHIVE:
             return archivePageOperations();
@@ -1545,7 +1609,7 @@
                 fab: 'M00',
                 tbr: 'D',
                 operations: [
-                    newElementOperations(element),
+                    newElementOperations(element, NEF_ALLOW_NEW_ALL),
                     {
                         caption: '_; Element; Elemento; Element',
                         operations: [
@@ -1662,6 +1726,162 @@
             }
     }
 
+    function rootFolderElementOperations(element, kind)
+    {
+        const isCanonical = element.IsCanonical
+
+        let list = listComponent;
+
+        let linkOperations = []
+        if(isCanonical)
+        {
+            linkOperations = [
+                {
+                    caption: '_; Share selected item; Compartir el elemento seleccionado; Udostępnij zaznaczony element',
+                    action: (owner, around_rect) => share_element(owner, around_rect, element, kind)
+                },
+                {
+                    caption: '_; Delete selected item; Eliminar el elemento seleccionado; Usuń zaznaczony element',
+                    action: (f) => moveToTrash(element, kind)
+                },
+                {
+                    caption: '_; Archive selected item; Archivar el elemento seleccionado; Archiwizuj zaznaczony element',
+                    action: (f) => moveToArchive(element, kind)
+                }
+            ]
+        }
+        else
+        {
+             linkOperations = [
+                {
+                    caption: '_; Detach; Desconectar; Odłącz',
+                    action: (f) => dettachElement(element, kind)
+                }
+            /*    {
+                    caption: '_; Set as primary location; Establecer como ubicación principal; Ustaw jako główną lokalizację',
+                    action: (f) => setLocationAsCanonical(element)
+                }*/
+             ]
+        }
+
+
+        return {
+                opver: 2,
+                fab: 'M00',
+                tbr: 'D',
+                operations: [
+                    newElementOperations(element, NEF_ALLOW_NEW_FOLDER | NEF_ALLOW_CHOOSE_FOLDER_KIND),
+                    {
+                        caption: '_; Element; Elemento; Element',
+                        operations: [
+                            {
+                                caption: '_; Edit; Editar; Edytuj',
+                                hideToolbarCaption: true,
+                                mricon: 'pencil',
+                                tbr: 'A',
+                                fab:'M20',
+                                grid:[
+                                    {
+                                        caption: '_; Title; Título; Tytuł',
+                                        action: (focused) =>  { listComponent.edit(element, 'Title') },
+                                        tbr: 'A',
+
+                                    },
+                                    {
+                                        caption: '_; Summary; Resumen; Podsumowanie',
+                                        action: (focused) =>  { listComponent.edit(element, 'Summary') }
+                                    }
+                                ]
+
+                            },
+                            {
+                                caption: '_; Move to top ; Mover al principio de la lista; Przesuń na szczyt',
+                                mricon: 'chevrons-up',
+                                action: (f) => list.moveTop(element),
+                                fab:'M07',
+                                tbr:'A',
+                                hideToolbarCaption: true
+                            },
+                            {
+                                caption: '_; Move up; Deslizar hacia arriba; Przesuń w górę',
+                                mricon: 'chevron-up',
+                                action: (f) => list.moveUp(element),
+                                fab:'M06',
+                                tbr:'A',
+                                hideToolbarCaption: true
+                            },
+                            {
+                                caption: '_; Move down; Desplácese hacia abajo; Przesuń w dół',
+                                mricon: 'chevron-down',
+                                action: (f) => list.moveDown(element),
+                                fab:'M05',
+                                tbr:'A' ,
+                                hideToolbarCaption: true
+                            },
+                            {
+                                caption: '_; Send; Enviar; Wyślij',
+                                hideToolbarCaption: true,
+                                mricon: 'upload',
+                                tbr: 'C',
+                                fab: 'S00',
+                                menu: [
+                                    {
+                                        caption: '_; Copy; Copiar; Kopiuj',
+                                        action: (f) => copyElementToBasket(element, kind),
+                                    },
+                                    {
+                                        caption: '_; Cut; Cortar; Wytnij',
+                                        action: (f) => cutElementToBasket(element, kind)
+                                    },
+                                    {
+                                        caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
+                                        action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect, element, kind)
+                                    },
+                                    {
+                                        caption: '_; Move to folder; Mover a la carpeta; Przenieś do folderu',
+                                        action: (btt, rect) => runPopupExplorer4MoveToFolder(btt, rect, element, kind),
+
+                                    },
+                                    ... (kind != 'FolderTask') ? [] :
+                                    [
+                                        {
+                                            caption: '_; Select a task list; Selecciona la lista de tareas; Wybierz listę zadań',
+                                            action: (btt, rect) => runPopupExplorer4SelectTaskList(btt, rect, element, kind)
+                                        }
+                                    ],
+                                    { separator: true},
+                                    {
+                                        caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                                        action: () => openInNewTab(element.href)
+                                    },
+                                    {
+                                        caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                                        action: () => copyAddress(element.href)
+                                    }
+
+                                ]
+                            },
+                            {
+                                separator: true
+                            },
+                            ...linkOperations,
+                            {
+                                caption: '_; Properties; Propiedades; Właściwości',
+                                action: (btt, rect)=> runElementProperties(btt, rect, element, kind)
+                            }
+                        ]
+                    },
+                    {
+                        caption: '_; View; Ver; Widok',
+                        operations: [
+                        enable_multiselection_operation,
+                        refresh_operation
+                        ]
+                    }
+                ]
+            }
+    }
+
 
 
     let elementOperations = (element, kind) =>
@@ -1670,6 +1890,9 @@
         {
         case OP_FOLDER:
             return folderElementOperations(element, kind)
+
+        case OP_ROOT_FOLDER:
+            return rootFolderElementOperations(element, kind)
 
         case OP_ARCHIVE:
             return archiveElementOperations(element, kind)
@@ -1760,12 +1983,80 @@
         }
     }
 
+    function rootFolderMultiselectionOperations(items)
+    {
+        {
+        return {
+                opver: 2,
+                fab: 'M00',
+                tbr: 'D',
+                operations: [
+                    //newElementOperations(element),
+                    {
+                        caption: '_; Element; Elemento; Element',
+                        operations: [
+                            toggle_select_all_operation,
+                            {
+                                caption: '_; Send; Enviar; Wyślij',
+                                mricon: 'upload',
+                                tbr: 'C',
+                                fab: 'S00',
+                                menu: [
+                                    {
+                                        caption: '_; Copy; Copiar; Kopiuj',
+                                        action: (f) => copyElementToBasketMulti(items),
+                                    },
+                                    {
+                                        caption: '_; Cut; Cortar; Wytnij',
+                                        action: (f) => cutElementToBasketMulti(items)
+                                    },
+                                    {
+                                        caption: '_; Select a location; Seleccione una ubicación; Wybierz lokalizację',
+                                        disabled: true
+                                    }
+                                ],
+                                hideToolbarCaption: true
+                            },
+                            {
+                                separator: true
+                            },
+                            {
+                                caption: '_; Detach; Desconectar; Odłącz',
+                          //      icon: FaUnlink,
+                                action: (f) => dettachElementMulti(items),
+                            },
+                            {
+                                caption: '_; Delete selected items; Eliminar los elementos seleccionados; Usuń zaznaczone elementy',
+                                action: (f) => moveToTrash(items, 'multi'),
+                            },
+                            {
+                                caption: '_; Archive selected items; Archivar los elementos seleccionados; Archiwizuj zaznaczone elementy',
+                                action: (f) => moveToArchive(items, 'multi'),
+                            }
+                        ]
+                    },
+                    {
+                        caption: '_; View; Ver; Widok',
+                        //tbr: 'B',
+                        operations: [
+                            disable_multiselection_operation,
+                            refresh_operation
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+
     function multiselectOperations(items)
     {
         switch(operations_kind)
         {
         case OP_FOLDER:
             return folderMultiselectionOperations(items)
+
+        case OP_ROOT_FOLDER:
+            return rootFolderMultiselectionOperations(items)
 
         case OP_ARCHIVE:
             return archiveMultiselectionOperations(items)
