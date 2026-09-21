@@ -19,6 +19,7 @@
     const objectreef_io = __OBJECTREEF_IO__
     const appId = __APP_ID__
     const tenantId = __TENANT_ID__
+    const groupId = __GROUP_ID__
     const proto = __SERVICE_PROTOCOL__
     const clientID = __CLIENT_ID__
     const clientSecret = __CLIENT_SECRET__
@@ -37,6 +38,7 @@
                         apiVersion: 'v001',
                         tenant: `${tenantId}`,
                         groupsOnly: true,
+                        group: groupId ?? "",
                         termsAndConditionsHRef: `${website}/#/${terms}`,
                         privacyPolicyHRef: `${website}/#/${privacy}`,
 
@@ -53,13 +55,14 @@
 
     let google_analytics;
     const google_analytics_identifier = __GA_IDENTIFIER__
+    const use_google_analytics = !!google_analytics_identifier
     let enable_google_analytics = false;
 
     $:{
         let prev_enable_google_analytics = enable_google_analytics;
 
         if($cookies_allow_analytics === 'true')
-            enable_google_analytics = true;
+            enable_google_analytics = use_google_analytics;
         else
             enable_google_analytics = false;
 
@@ -106,7 +109,7 @@
             name: 'Polski',
             flag: '/landing/lang/PL_64.png'
         }
-    ])
+    ], __ENABLED_LANGUAGES__)
 
     const authTemporaryPageClass = 'bg-white dark:bg-stone-900 dark:text-white sm:overflow-y-clip absolute top-0 left-0 w-screen h-screen'
     const authButtonClass = `py-2.5 px-4 my-1
@@ -125,10 +128,12 @@
     <link rel="icon" type="image/png" href={__APP_ICON__} />
 </svelte:head>
 
-<GoogleAnalytics
-    bind:this={google_analytics}
-    properties={[ google_analytics_identifier ]}
-    enabled={enable_google_analytics}/>
+{#if use_google_analytics}
+    <GoogleAnalytics
+        bind:this={google_analytics}
+        properties={[ google_analytics_identifier ]}
+        enabled={enable_google_analytics}/>
+{/if}
 
 <AuthorizedView optionalGuestMode automaticallyRefreshTokens={true}
         layoutTheme={$dark_mode_store}
@@ -137,5 +142,8 @@
         normalTextClass={authNormalClass}
         errorTextClass={authErrorClass}>
     <Router {routes} />
-    <Cookies/>
+
+    {#if use_google_analytics}
+        <Cookies/>
+    {/if}
 </AuthorizedView>

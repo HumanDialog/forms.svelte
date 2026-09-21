@@ -20,7 +20,7 @@
 	import { pop, push } from 'svelte-spa-router';
 	import { tick } from 'svelte';
 	import { isDeviceSmallerThan, navGetKey, navHide, navIsVisible, navShow, navToggle, navAutoHide } from './utils';
-    import {setCurrentLanguage, getLanguages, i18n, getCurrentLanguage} from './i18n.js'
+    import {setCurrentLanguage, i18n, getCurrentLanguage} from './i18n.js'
 
 
     export let appConfig = undefined;

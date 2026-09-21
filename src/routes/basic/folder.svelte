@@ -20,7 +20,7 @@
                 refreshToolbarOperations,
 				showFloatingToolbar,
                 reloadPageToolbarOperations, Paper, PaperHeader, openInNewTab, copyAddress,
-                get_acc_icon, get_acc_color,
+                get_acc_icon, get_acc_color, download_file_from_href,
 				focusEditable, showMenu, Ricon, get_main_object_fetch_error_description, bits_count} from '$lib'
     import {FaTrash, FaCloudUploadAlt} from 'svelte-icons/fa'
 
@@ -2139,32 +2139,8 @@
 
     async function downloadFile(element)
     {
-        //await new Promise(r => setTimeout(r, 5000));
-
-        const res = await reef.fetch(`json/anyv/${element.href}`, onErrorShowAlert);
-        if(res.ok)
-        {
-            const blob = await res.blob()
-            const blobUrl = URL.createObjectURL(blob);
-
-            const link = document.createElement("a"); // Or maybe get it from the current document
-            link.href = blobUrl;
-            link.download = element.Title;
-
-            //document.body.appendChild(link); // Or append it whereever you want
-            link.click() //can add an id to be specific if multiple anchor tag, and use #id
-
-
-            URL.revokeObjectURL(blobUrl)
-
-            setBrowserRecentElement(element.FileId, 'UploadedFile')
-        }
-        else
-        {
-            const err = await res.text()
-            console.error(err)
-            onErrorShowAlert(err)
-        }
+        await download_file_from_href(element.href, element.Title)
+        setBrowserRecentElement(element.FileId, 'UploadedFile')
     }
 
     let folderPropertiesDialog;

@@ -15,6 +15,7 @@
     const objectreef_io = __OBJECTREEF_IO__
     const appId = __APP_ID__
     const tenantId = __TENANT_ID__
+    const groupId = __GROUP_ID__
     const proto = __SERVICE_PROTOCOL__
     const clientID = __CLIENT_ID__
     const clientSecret = __CLIENT_SECRET__
@@ -34,6 +35,7 @@
                         apiVersion: 'v001',
                         tenant: `${tenantId}`,
                         groupsOnly: true,
+                        group: groupId ?? "",
                         termsAndConditionsHRef: `${website}/#/${terms}`,
                         privacyPolicyHRef: `${website}/#/${privacy}`,
 
@@ -88,7 +90,7 @@
             name: 'Polski',
             flag: '/landing/lang/PL_64.png'
         }
-    ])
+    ], __ENABLED_LANGUAGES__)
 
     const authTemporaryPageClass = 'bg-white dark:bg-stone-900 dark:text-white sm:overflow-y-clip absolute top-0 left-0 w-screen h-screen'
     const authButtonClass = `py-2.5 px-4 my-1
@@ -114,5 +116,5 @@
         normalTextClass={authNormalClass}
         errorTextClass={authErrorClass}>
     <Router {routes} />
-    <Cookies/>
+    <!--Cookies/-->
 </AuthorizedView>

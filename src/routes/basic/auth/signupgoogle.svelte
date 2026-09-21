@@ -146,7 +146,10 @@
     {
         const config = $session.configuration
         tenant = config.tenant
+
         ask_workspace_name = !tenant || org_name
+        if(ask_workspace_name && config.group)      // dopisujemy do konkretnej grupy. Nie pytamy o nazwę nowej grupy
+            ask_workspace_name = false
         
         setTimeout( () =>
         {
@@ -278,7 +281,7 @@
         const body = {
                 code: code,
                 app_id: app_id,
-                tenant: tenant,
+                tenant: tenant,         // todo: tenant/gid
                 org_name: tenant_name,
                 captcha: captcha_token,
                 firstname: firstname,

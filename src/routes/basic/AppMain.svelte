@@ -46,26 +46,34 @@
                 else
                     pageToRedirect = __APP_DEFAULT_PAGE__;
 
-                try 
+                const dont_use_last_navigation_as_default = __DONT_USE_LAST_NAV_AS_DEFAULT__
+                if(dont_use_last_navigation_as_default)
                 {
-                    const lastNavigationStr = window.localStorage.getItem('lastNavigation')
-                    if(lastNavigationStr)
+
+                }
+                else
+                {
+                    try 
                     {
-                        let lastNavigation = JSON.parse(lastNavigationStr)   
-                        if(lastNavigation && lastNavigation.path && lastNavigation.timestamp)
+                        const lastNavigationStr = window.localStorage.getItem('lastNavigation')
+                        if(lastNavigationStr)
                         {
-                            const when = Date.now() - lastNavigation.timestamp
-                            const threshold = 7 * 24 * 60 * 60 * 1000;   // 7 days in miliseconds
-                            if(when < threshold)
+                            let lastNavigation = JSON.parse(lastNavigationStr)   
+                            if(lastNavigation && lastNavigation.path && lastNavigation.timestamp)
                             {
-                                pageToRedirect = lastNavigation.path
+                                const when = Date.now() - lastNavigation.timestamp
+                                const threshold = 7 * 24 * 60 * 60 * 1000;   // 7 days in miliseconds
+                                if(when < threshold)
+                                {
+                                    pageToRedirect = lastNavigation.path
+                                }
                             }
                         }
                     }
-                }
-                catch(e)
-                {
-                    console.error(e)
+                    catch(e)
+                    {
+                        console.error(e)
+                    }
                 }
 
                 push(pageToRedirect);

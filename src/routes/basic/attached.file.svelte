@@ -1,6 +1,6 @@
 <script>
     import {reef} from '@humandialog/auth.svelte'
-    import {Spinner, onErrorShowAlert} from '$lib'
+    import {Spinner, onErrorShowAlert, download_file_from_href} from '$lib'
     import {FaFile} from 'svelte-icons/fa/'
 
     export let self;
@@ -41,29 +41,9 @@
         file.downloading = true;
 
         const href=`${self.$ref}/${a}/blob?key=${file.name}`
+        const name = getNiceFileName(decodeURIComponent(file.name))
 
-        const res = await reef.fetch(`json/anyv/${href}`, onErrorShowAlert);
-        if(res.ok)
-        {
-            const blob = await res.blob()
-            const blobUrl = URL.createObjectURL(blob);
-    
-            const link = document.createElement("a"); // Or maybe get it from the current document
-            link.href = blobUrl;
-            link.download = getNiceFileName(decodeURIComponent(file.name));
-
-            //document.body.appendChild(link); // Or append it whereever you want
-            link.click() //can add an id to be specific if multiple anchor tag, and use #id
-            
-            
-            URL.revokeObjectURL(blobUrl)
-        }
-        else
-        {
-            const err = await res.text()
-            console.error(err)
-            onErrorShowAlert(err)
-        }
+        await download_file_from_href(href, name)
 
         file.downloading = false;
     }

@@ -1264,8 +1264,9 @@ export function getCurrentGroupName(session)
 export async function getGroupsMenu(params)
 {
     const session = params.session
-    const reditectTo = params.redirectAfterSwitch
-    const afterGroupCreated = params.afterGroupCreated
+    const redirect_to = params.redirect_after_switch
+    const after_group_created = params.after_group_created
+    const force_hide_add_group = params.force_hide_add_group ?? false
 
     let showGroupsSwitchMenu = false;
     let canAddNewGroup = false;
@@ -1274,7 +1275,7 @@ export async function getGroupsMenu(params)
     if(session.configuration.tenant)
     {
         const instanceInfo = await reef.getAppInstanceInfo()
-        if(instanceInfo?.is_public)
+        if(instanceInfo?.is_public && (!force_hide_add_group))
         {
             showGroupsSwitchMenu = true;
             canAddNewGroup = true;
@@ -1291,8 +1292,8 @@ export async function getGroupsMenu(params)
             caption: tInfo.name,
             disabledFunc: () => tInfo.id == session.tid,
             action: async (f) => {
-                if(reditectTo)
-                    await push(reditectTo)  // __APP_DEFAULT_PAGE__
+                if(redirect_to)
+                    await push(redirect_to)  // __APP_DEFAULT_PAGE__
 
                 setTimeout(() => {
                     session.setCurrentTenantAPI(tInfo.url, tInfo.id)
@@ -1310,7 +1311,7 @@ export async function getGroupsMenu(params)
         options.push({
             caption: i18n({en:'Add group', es:'Añadir grupo', pl: 'Dodaj grupę'}),
             //icon: FaPlus,
-            action: (f) => launchNewGroupWizzard(afterGroupCreated)
+            action: (f) => launchNewGroupWizzard(after_group_created)
         })
     }
 
@@ -1433,54 +1434,72 @@ export function get_main_object_fetch_error_description(err, res)
 
 
 export async function download_file_from_href(href, title)
+{
+    let ref;
+    let name;
+    const queryIdx = href.indexOf('?')
+    if(queryIdx > 0)
     {
-        let ref;
-        let name;
-        const queryIdx = href.indexOf('?')
-        if(queryIdx > 0)
-        {
-            ref = href.substring(0, queryIdx)
-            const query = href.substring(queryIdx)
-            const params = new URLSearchParams(query);
-            if(params.has("name"))
-                name = params.get("name")
-            else if(title)
-                name = title
-            else
-                name = 'file_' + randomString(8)
-        }
+        ref = href.substring(0, queryIdx)
+        const query = href.substring(queryIdx)
+        const params = new URLSearchParams(query);
+        if(params.has("name"))
+            name = params.get("name")
+        else if(title)
+            name = title
         else
-        {
-            ref = href;
-            if(title)
-                name = title
-            else
-                name = 'file_' + randomString(8)
-        }
-
-        const res = await reef.fetch(`json/anyv/${href}`, onErrorShowAlert);
-        if(res.ok)
-        {
-            const blob = await res.blob()
-            const blobUrl = URL.createObjectURL(blob);
-
-            const link = document.createElement("a"); // Or maybe get it from the current document
-            link.href = blobUrl;
-            link.download = name;
-
-            //document.body.appendChild(link); // Or append it whereever you want
-            link.click() //can add an id to be specific if multiple anchor tag, and use #id
-
-
-            URL.revokeObjectURL(blobUrl)
-        }
-        else
-        {
-            const err = await res.text()
-            console.error(err)
-            onErrorShowAlert(err)
-        }
+            name = 'file_' + randomString(8)
     }
+    else
+    {
+        ref = href;
+        if(title)
+            name = title
+        else
+            name = 'file_' + randomString(8)
+    }
+
+    const indirect = `${(queryIdx<0) ? '?' : '&'}indirect=true`
+    const forcename = `&local_name=${encodeURIComponent(name)}`
+    const res = await reef.fetch(`json/anyv/${href}${indirect}${forcename}`, onErrorShowAlert);
+    if(res.ok)
+    {
+        const response_string = await res.text();
+        const response = JSON.parse(response_string);
+        if(response && response.download_url)
+        {
+            const link = document.createElement("a")
+            link.href = response.download_url
+            //link.download = name
+            link.style.display = "none"
+
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+        }
+        else
+        {
+            onErrorShowAlert(response_string)
+        }
+
+        //const blob = await res.blob()
+        //const blobUrl = URL.createObjectURL(blob);
+//
+        //const link = document.createElement("a")
+        //link.href = blobUrl;
+        //link.download = name;
+//
+        //link.click()
+//
+        //URL.revokeObjectURL(blobUrl)
+    }
+    else
+    {
+        const err = await res.text()
+        console.error(err)
+        onErrorShowAlert(err)
+    }
+}
 
 export function truncate_html(html_string, max_chars = 300) 
 {

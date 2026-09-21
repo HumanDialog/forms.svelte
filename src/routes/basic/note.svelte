@@ -36,7 +36,7 @@
             reloadPageToolbarOperations, Paper, PaperHeader, focusEditable, openInNewTab, copyAddress,
             get_main_object_fetch_error_description,
 			getNiceStringDateTime,
-            get_acc_icon, get_acc_color,
+            get_acc_icon, get_acc_color, download_file_from_href
             } from '$lib'
 	import { afterUpdate, tick } from 'svelte';
 
@@ -1296,60 +1296,10 @@
         }
     }
 
-    async function downloadFileFromHRef(href, title)
-    {
-        let ref;
-        let name;
-        const queryIdx = href.indexOf('?')
-        if(queryIdx > 0)
-        {
-            ref = href.substring(0, queryIdx)
-            const query = href.substring(queryIdx)
-            const params = new URLSearchParams(query);
-            if(params.has("name"))
-                name = params.get("name")
-            else if(title)
-                name = title
-            else
-                name = 'file_' + randomString(8)
-        }
-        else
-        {
-            ref = href;
-            if(title)
-                name = title
-            else
-                name = 'file_' + randomString(8)
-        }
-
-        const res = await reef.fetch(`json/anyv/${href}`, onErrorShowAlert);
-        if(res.ok)
-        {
-            const blob = await res.blob()
-            const blobUrl = URL.createObjectURL(blob);
-
-            const link = document.createElement("a"); // Or maybe get it from the current document
-            link.href = blobUrl;
-            link.download = name;
-
-            //document.body.appendChild(link); // Or append it whereever you want
-            link.click() //can add an id to be specific if multiple anchor tag, and use #id
-
-
-            URL.revokeObjectURL(blobUrl)
-        }
-        else
-        {
-            const err = await res.text()
-            console.error(err)
-            onErrorShowAlert(err)
-        }
-    }
-
     async function editorLinkClicked(href, target)
     {
         if(href.includes('/blob'))
-            await downloadFileFromHRef(href)
+            await download_file_from_href(href)
         else
             window.open(href, target);
     }
@@ -1358,7 +1308,7 @@
     {
         e.preventDefault()
         e.stopPropagation()
-        await downloadFileFromHRef(href, title);
+        await download_file_from_href(href, title);
     }
 
     function onStaticAttachementClick(e, att)
@@ -1367,7 +1317,7 @@
         {
             e.preventDefault()
             e.stopPropagation()
-            downloadFileFromHRef(att.href, att.Title);
+            download_file_from_href(att.href, att.Title);
         }
         else
         {
@@ -2167,7 +2117,7 @@
             NoteFile:{
                 icon:'#file-archive',
                 downloadable: true,
-                onOpen: async (f) => await downloadFileFromHRef(f.href, f.Title)
+                onOpen: async (f) => await download_file_from_href(f.href, f.Title)
             }
         }
     }

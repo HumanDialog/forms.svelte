@@ -96,8 +96,9 @@
             {
                 const groupsMenu = await getGroupsMenu({
                     session: $session,
-                    redirectAfterSwitch: __APP_DEFAULT_PAGE__,
-                    afterGroupCreated: afterGroupCreated
+                    redirect_after_switch: __APP_DEFAULT_PAGE__,
+                    after_group_created: afterGroupCreated,
+                    force_hide_add_group: __HIDE_ADD_GROUP_MENU__
                 })
 
                 layout = defineAuthorizedLayout(groupsMenu)
@@ -344,13 +345,14 @@
                             action: (f) => { navAutoHide(); push('/profile')},
                             condition: () => $session.isActive
                         },
+                        ... (groupsMenu && groupsMenu.length > 0) ? [
                         {
                          //   caption: '_; Profile; Perfil; Profil',
                             captionFunc: () => '_; Change group; Change group; Zmień grupę',
                             mricon: 'users',
                             menu: groupsMenu,
                             condition: () => $session.isActive
-                        },
+                        } ] : [],
                         {
                         //    caption: '_; Members; Miembros; Członkowie',
                             captionFunc: () => '_; Members; Miembros; Członkowie',

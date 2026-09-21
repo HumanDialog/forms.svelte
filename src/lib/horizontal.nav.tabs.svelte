@@ -12,7 +12,7 @@
     import {session, signInHRef, signOutHRef} from '@humandialog/auth.svelte'
     import {push } from 'svelte-spa-router';
 	import { navGetKey, navHide, navIsVisible, navShow, navToggle, isDeviceSmallerThan } from './utils';
-    import {setCurrentLanguage, getLanguages, i18n, getCurrentLanguage} from './i18n.js'
+    import {setCurrentLanguage, i18n, getCurrentLanguage} from './i18n.js'
     import {showMenu, SHOW_MENU_RIGHT} from './components/menu'
     import {get_settings_menu} from './settings_menu.js'
 

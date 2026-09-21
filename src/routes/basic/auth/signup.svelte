@@ -30,7 +30,7 @@
     let captcha_element;
 
     let tenant = ''
-    let dont_create_app_user = false    // special case for Tilos
+    let dont_create_app_user = false    // special case for Tilos Desktop
     let org_name = true
     let workspace_name_title = ''
 
@@ -273,7 +273,11 @@
     {
         const config = $session.configuration
         tenant = config.tenant
+
         ask_workspace_name = !tenant || org_name
+        if(ask_workspace_name && config.group)    // dopisujemy do konkretnej grupy. Nie pytamy o nazwę nowej grupy
+            ask_workspace_name = false
+
         ask_name = true
         ask_phone = false
 
@@ -489,13 +493,15 @@ El equipo de ${__APP_TITLE__}`
 
         const config = $session.configuration
 
+        const register_in = config.group ? config.group : tenant;
+
         const body = {
             username : username,
             password : password,
             firstname: firstname,
             client_id : client_id,
             app_id : app_id,
-            tenant : tenant,
+            tenant : register_in,
             org_name: tenant_name,
             captcha: captcha_token,
             //redirect_uri: dont_create_app_user ? '' : redirect_uri,     // na razie tak, może przydałby się jakis parametr

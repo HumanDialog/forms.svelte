@@ -52,24 +52,58 @@ function fetchCurrentLangIndex()
 
 let currentLangIndex = 0// fetchCurrentLangIndex()
 let defaultLangIndex = 0;
+let used_langs_subset = []
 
-export function setLanguages(langs)
+export function setLanguages(langs, used_langs=undefined)
 {
 	languages = langs
 	defaultLangIndex = languages.findIndex(l => l.default == true)
 	if(defaultLangIndex < 0)
 		defaultLangIndex = 0
 
+	if(used_langs)
+	{
+		const used_keys = used_langs.split(',')
+
+		for(let i=0; i<languages.length; i++)
+		{
+			const lang = languages[i]
+			if(used_keys.includes(lang.key))
+				used_langs_subset.push(i)
+		}
+
+		if(!used_langs_subset.includes(defaultLangIndex))
+			defaultLangIndex = 0;
+	}
+
 	currentLangIndex = fetchCurrentLangIndex()
+	if(used_langs_subset && used_langs_subset.length > 0)
+	{
+		if(!used_langs_subset.includes(currentLangIndex))
+			currentLangIndex = defaultLangIndex;
+	}
 }
 
 export function getLanguages()
 {
-	return languages
+	if(used_langs_subset && used_langs_subset.length > 0)
+	{
+		let result = []
+		for(let i=0; i<languages.length; i++)
+		{
+			if(used_langs_subset.includes(i))
+				result.push(languages[i])
+		}
+		return result;
+	}
+	else
+		return languages
 }
 
 export function setCurrentLanguage(sel)
 {
+	const prev_selected = currentLangIndex
+
 	if(typeof sel === 'number')
 		currentLangIndex = sel
 	else if (typeof sel === 'string' || sel instanceof String)
@@ -89,6 +123,12 @@ export function setCurrentLanguage(sel)
 			console.error(`language ${sel.key} doesn't exist`)
 			currentLangIndex = defaultLangIndex
 		}
+	}
+
+	if(used_langs_subset && used_langs_subset.length > 0)
+	{
+		if(!used_langs_subset.includes(currentLangIndex))
+			currentLangIndex = prev_selected;
 	}
 
 	localStorage.setItem("__hd_svelte_lang", JSON.stringify(currentLangIndex))
