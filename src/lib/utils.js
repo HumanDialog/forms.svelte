@@ -412,7 +412,7 @@ export function editable(node, params)
         onSoftEnter = params.onSoftEnter ?? undefined;
         onSingleChange = params.onSingleChange ?? undefined
         enterAsNewLine = params.enterAsNewLine ?? false
-
+        
         if(params.readonly)
             return;
     }
@@ -428,7 +428,7 @@ export function editable(node, params)
         if(currentEditable == node)
             currentEditable = null;
 
-        let cancel = !node.textContent
+        let cancel = node.textContent == org_text
         if(observer)
             observer.disconnect();
 
@@ -444,7 +444,9 @@ export function editable(node, params)
         let text = selNode?.textContent
         const left = text?.substring(0, selOffset)
         const right = text?.substring(selOffset)
+
         text = left + '\n' + right
+        
         node.textContent = text
 
         await tick()

@@ -56,10 +56,12 @@
     import {getElementIcon} from './icons'
     import { STATUS_ACTIVE, STATUS_ARCHIVED, STATUS_DELETED, 
         NK_DOCUMENT, NK_THREAD, NK_COMMENT,
-        NS_DRAFT, NS_CONFIDENTIAL, NS_PUBLISHED, NS_PUBLIC, NF_WILL_CONFIDENTIAL, NR_COMMENT, NS_UNAPPROVED} from './consts';
+        NS_DRAFT, NS_CONFIDENTIAL, NS_REVIEWED, NS_PUBLIC, NR_COMMENT, NS_LATEST,
+		NS_SCRATCH} from './consts';
     
     import FileProperties from './properties.file.svelte'
 	import NoteProperties from './properties.note.svelte'
+    import FinishPostDialog from './finish.post.dialog.svelte'
 
     let noteRef = ''
     let note = null;
@@ -77,6 +79,7 @@
     let creationDate = null
     let modificationDate = null
     let attachedFiles = []
+    let finish_post_dialog
     
     let isThread = false
     let failed_message = ''
@@ -238,6 +241,7 @@
                                                     'IsPinned',
                                                     'GetCanonicalPath',
                                                     'Flags',
+                                                    'CanMoveToCategory',
                                                     '$ref',
                                                     '$type',
                                                     '$acc',
@@ -384,7 +388,7 @@
 
     async function fetch_working_comment(main_note_id)
     {
-        const res = await reef.post('user/MyDraftPosts/query', {
+        const res = await reef.post('user/MyFeed/query', {
             Id: 1, Name: 'not published comments', ExpandLevel: 6,
             Tree: [
                 {
@@ -586,24 +590,13 @@
 
     function get_thread_operations(formatting_tools_enabled=false)
     {
-        const submit_post_op = {
-            caption: '_; Submit a post; Enviar una entrada; Wyślij wpis',
+        const finish_post_op = {
+            caption: '_; Finish the post; Terminar la entrada; Dokończ wpis',
+            hideToolbarCaption: true,
             mricon: 'send',
             tbr: 'A',
             fab: 'M01',
-            action: async () => { await publish_thread(); reloadPageToolbarOperations(getPageOperations()) }
-        }
-
-        const is_confidential = (activeNote.Flags & NF_WILL_CONFIDENTIAL) != 0;
-        const set_confidential_op = {
-            caption: '_; Confidential; Confidencial; Poufne',
-            mricon: 'globe-off',
-            active: is_confidential,
-            tbr: 'A',
-            action: () => { set_post_confidential(!is_confidential); 
-                            reloadPageToolbarOperations(getPageOperations()) 
-                            if(formatting_tools_enabled)
-                                reloadPageToolbarOperations(getPageOperationsWithFormattingTools(editorElement), true) }
+            action: async () => { await finish_post(); }
         }
 
         const submit_comment_op = {
@@ -622,37 +615,36 @@
             action: () => add_comment()
         }
 
-        const approve_post_op = {
-            caption: '_; Approve the post; Aprobar la publicación; Zatwierdź wpis',
-            mricon: 'stamp',
+        const move_thread_to_category_op = {
+            caption: '_; Move to category; Mover a la categoría; Przenieś do kategorii',
+            mricon: 'folder-input',
             tbr: 'A',
             fab: 'M01',
-            action: async (button) => { await approve_post(button); reloadPageToolbarOperations(getPageOperations()) }
+            action: async (button) => { await move_thread_to_category(button); }
         }
 
         let thread_operations = []
         switch(note.State)
         {
         case NS_DRAFT:
-            thread_operations = [submit_post_op, set_confidential_op]
+        case NS_SCRATCH:
+            thread_operations = [finish_post_op]
             break;
-
-        case NS_UNAPPROVED:
-            if(!isReadOnly)
-                thread_operations = [approve_post_op]
-            break;
-
+        
         default:
             if(activeNoteRef == noteRef)
             {
-                thread_operations = [add_comment_op]
+                if((note.State == NS_LATEST) && activeNote.CanMoveToCategory)
+                    thread_operations = [...thread_operations, move_thread_to_category_op]
+
+                thread_operations = [...thread_operations, add_comment_op]
             }
             else
             {
                 switch(activeNote.State)
                 {
                 case NS_DRAFT:
-                    thread_operations = [submit_comment_op]
+                    thread_operations = [finish_post_op]
                     break;
 
                 default:
@@ -696,8 +688,8 @@
         let operations = []
 
         if(isThread)
-            operations = [...operations, ...get_thread_operations()]            
-        
+            operations = [...operations, ...get_thread_operations()] 
+
         operations.push(
                 {
                     caption: '_; Edit...; Editar...; Edytuj...',
@@ -708,8 +700,7 @@
                     tbr: 'A'
                 })
 
-
-
+           
         operations.push(
             {
                 caption: '_; Send; Enviar; Wyślij',
@@ -2020,31 +2011,41 @@
     }
 
     let title_not_valid = false
-    async function publish_thread()
+    async function finish_post()
     {
         // validate before publish
-        if(!note.Title)
+        if(activeNote.Kind == NK_THREAD)
         {
-            title_not_valid = true;
-            const title_placeholder = document.getElementById("title-placeholder")
-            if(title_placeholder)
-                title_placeholder.scrollIntoView({ behaviour: "smooth", block: "start" })
-            return;
+            if(!note.Title)
+            {
+                title_not_valid = true;
+                const title_placeholder = document.getElementById("title-placeholder")
+                if(title_placeholder)
+                    title_placeholder.scrollIntoView({ behaviour: "smooth", block: "start" })
+                return;
+            }
         }
 
-        const res = await reef.post(`${activeNote.$ref}/PublishThread`, {})
-        if(res)
-            await reloadData();
+        finish_post_dialog.show(activeNote)
     }
 
-    async function approve_post(button)
+    async function on_refresh_after_finish_post(n)
+    {
+        await reloadData();
+        reloadPageToolbarOperations(getPageOperations())
+    }
+
+    async function move_thread_to_category(button)
     {
         let rect = button.getBoundingClientRect()
 
         const select_op = async (ref) => {
-            const res = await reef.post(`${activeNote.$ref}/ApproveMe`, {catLink: ref})
+            const res = await reef.post(`${activeNote.$ref}/MoveMeToFeed`, {catLink: ref})
             if(res)
+            {
                 await reloadData();
+                reloadPageToolbarOperations(getPageOperations())
+            }
         }
 
         const categories = await reef.get('group/FeedsRoot/Folders?fields=$ref,Title')
@@ -2054,7 +2055,7 @@
             categories.FolderFolder.forEach(folder => {
                 operations.push({
                     caption: folder.Title,
-                    action: () => select_op(folder.$ref)
+                    action: async () => await select_op(folder.$ref)
                 })
             });
 
@@ -2075,11 +2076,12 @@
         }
     }
 
-    async function set_post_confidential(confidential=true)
+    /*async function set_post_confidential(confidential=true)
     {
-        const newFlags = confidential ? activeNote.Flags | NF_WILL_CONFIDENTIAL : (activeNote.Flags & (~NF_WILL_CONFIDENTIAL))
+        const newFlags = confidential ? activeNote.Flags | NF_CONFIDENTIAL : (activeNote.Flags & (~NF_CONFIDENTIAL))
         setjItemProperty(activeNote, 'Flags', newFlags)
     }
+    */
 
     async function publish_note_to_feeds(note)
     {
@@ -2089,6 +2091,7 @@
             await reloadData();  
             await tick();
             clearActiveItem('props') 
+            
         }
     }
 
@@ -2448,6 +2451,7 @@
 
 <FileProperties bind:this={filePropertiesDialog} />
 <NoteProperties bind:this={notePropertiesDialog} />
+<FinishPostDialog bind:this={finish_post_dialog} on_editor on_refresh={on_refresh_after_finish_post}/>
 
 <style lang="postcss">
     .placeholder {

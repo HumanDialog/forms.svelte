@@ -20,7 +20,8 @@
     export let sidebar = true;
 
     let feed_folders = [];
-    let unapproved_posts_folder = null
+    let latest_posts_folder = null
+    let confidential_posts_folder = null
 
     let feed_folders_list_element;
     let fetching_data = false
@@ -82,7 +83,7 @@
                     SubTree: [
                         /*,*/
                         {
-                            Id: 20,
+                            Id: 10,
                             Association: 'FeedsRoot',
                             Expressions: ['Id', '$ref', '$type', 'Title', 'Summary', 'href', 'icon', '$acc'],
                             SubTree:[
@@ -94,10 +95,14 @@
                                 }]
                         },
                         {
-                            Id: 10,
-                            Association: 'UnapprovedPosts',
+                            Id: 20,
+                            Association: 'LatestPosts',
                             Expressions: ['Id', '$ref', '$type', 'Title', 'Summary', 'href', 'icon', 'NotesCount', '$acc'],
-                            
+                        },
+                        {
+                            Id: 30,
+                            Association: 'ConfidentialPosts',
+                            Expressions: ['Id', '$ref', '$type', 'Title', 'Summary', 'href', 'icon', 'NotesCount', '$acc'],
                         }
                     ]
                 }
@@ -105,14 +110,18 @@
         })
 
         feed_folders = [];
-        unapproved_posts_folder = null
+        latest_posts_folder = null
+        confidential_posts_folder = null
 
         if(res != null)
         {
             if(res.Group)
             {
-                if(res.Group.UnapprovedPosts)
-                    unapproved_posts_folder = res.Group.UnapprovedPosts
+                if(res.Group.LatestPosts)
+                    latest_posts_folder = res.Group.LatestPosts
+
+                if(res.Group.ConfidentialPosts)
+                    confidential_posts_folder = res.Group.ConfidentialPosts
 
                 if(res.Group.FeedsRoot && res.Group.FeedsRoot.Folders && res.Group.FeedsRoot.Folders.length > 0)
                     feed_folders = res.Group.FeedsRoot.Folders
@@ -182,14 +191,24 @@
             </SidebarItem-->
         </SidebarGroup>
 
-        {#if unapproved_posts_folder}
+        {#if latest_posts_folder || confidential_posts_folder}
             <SidebarGroup>
-                <SidebarItem    href={unapproved_posts_folder.href}
-                                icon='stamp'
-                                active={is_routing_to(unapproved_posts_folder.href, current_location)}
-                                summary={unapproved_posts_folder.Summary}>
-                        {ext(unapproved_posts_folder.Title)} ({unapproved_posts_folder.NotesCount})
+                {#if latest_posts_folder}
+                    <SidebarItem    href={latest_posts_folder.href}
+                                    icon='clock'
+                                    active={is_routing_to(latest_posts_folder.href, current_location)}
+                                    summary={latest_posts_folder.Summary}>
+                            {ext(latest_posts_folder.Title)}
                     </SidebarItem>
+                {/if}
+                {#if confidential_posts_folder}
+                    <SidebarItem    href={confidential_posts_folder.href}
+                                    icon='globe-off'
+                                    active={is_routing_to(confidential_posts_folder.href, current_location)}
+                                    summary={confidential_posts_folder.Summary}>
+                            {ext(confidential_posts_folder.Title)}
+                    </SidebarItem>
+                {/if}
             </SidebarGroup>
         {/if}
 
@@ -202,7 +221,7 @@
                     <svelte:fragment let:item let:idx>
                         {@const href = item.href}
                         <SidebarItem   {href}
-                                        icon='messages-square'
+                                        icon={item.icon}
                                         active={is_routing_to(href, current_location)}
                                         summary={item.Summary}
                                         >
@@ -240,13 +259,13 @@
             </SidebarItem-->
         </SidebarGroup>
 
-        {#if unapproved_posts_folder}
+        {#if latest_posts_folder}
             <SidebarGroup>
-                <SidebarItem    href={unapproved_posts_folder.href}
-                                icon='stamp'
-                                item={unapproved_posts_folder}
-                                summary={unapproved_posts_folder.Summary}>
-                        {ext(unapproved_posts_folder.Title)} ({unapproved_posts_folder.NotesCount})
+                <SidebarItem    href={latest_posts_folder.href}
+                                icon='clock'
+                                item={latest_posts_folder}
+                                summary={latest_posts_folder.Summary}>
+                        {ext(latest_posts_folder.Title)} ({latest_posts_folder.NotesCount})
                     </SidebarItem>
             </SidebarGroup>
         {/if}

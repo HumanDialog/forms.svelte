@@ -144,6 +144,8 @@
   import CaseSensitive from './ricons/case-sensitive.svelte'
   import GlobeOff from './ricons/globe-off.svelte'
   import Stamp from './ricons/stamp.svelte'
+  import Clock from './ricons/clock.svelte'
+  import FolderInput from './ricons/folder-input.svelte'
 
   let ricons_box = {
     "archive": Archive,
@@ -273,7 +275,9 @@
     'type': Type,
     'case-sensitive': CaseSensitive,
     'globe-off': GlobeOff,
-    'stamp': Stamp
+    'stamp': Stamp,
+    'clock': Clock,
+    'folder-input' : FolderInput
   }
 
   let width = 24;

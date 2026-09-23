@@ -49,7 +49,7 @@
 
         //lastReloadTicket = reloadTicket
 
-        console.log(element)
+        //console.log(element)
 
         // todo
         if(element)

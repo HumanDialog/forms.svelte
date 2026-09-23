@@ -5,15 +5,17 @@
                 Editable,
                 mainContentPageReloader, refreshToolbarOperations, reloadPageToolbarOperations,
                 i18n, ext,
-                Breadcrumb,
-                Paper, PaperHeader, openInNewTab, copyAddress,
-				focusEditable, showMenu, Ricon, get_main_object_fetch_error_description, 
-                Editor, getNiceStringDateTime, download_file_from_href, truncate_html, sleep} from '$lib'
-    import {onMount} from 'svelte'
+                Breadcrumb, contextItemsStore,
+                Paper, PaperHeader, openInNewTab, copyAddress, isActive, activateItem,
+				focusEditable, showMenu, Ricon, get_main_object_fetch_error_description,  setjItemProperty,
+                Editor, getNiceStringDateTime, download_file_from_href, truncate_html, sleep, startEditing, editable} from '$lib'
+    import {onMount, tick} from 'svelte'
     import {location, pop, push, querystring, link} from 'svelte-spa-router'
     import {cache} from './cache.js'
     import FolderProperties from './properties.folder.svelte'
-    import {NK_COMMENT, NS_UNAPPROVED, NS_CONFIDENTIAL} from './consts.js'
+    import {NK_COMMENT, NS_LATEST, NS_CONFIDENTIAL, NR_SCRATCH, NR_DRAFT} from './consts.js'
+	import FinishPostDialog from './finish.post.dialog.svelte' 
+	
     
     export let params = {}
 
@@ -27,6 +29,10 @@
     let folderTitle = ''
     let failed_message = ''
     let details_visibility = 0
+
+    let scratch_post = null
+    let finish_post_dialog
+    let prompt_rerender_ticket = 0
 
     let readonly = false
 
@@ -44,6 +50,7 @@
 
     
     $: on_params_changed($location, $querystring, $mainContentPageReloader, $session);
+    $: on_selection_changed($contextItemsStore)
 
     async function on_params_changed(...args)
     {
@@ -85,9 +92,14 @@
             cacheKey = "user_MySentPosts";
             details_visibility = DV_SHOW_TITLE | DV_SHOW_SUMMARY | DV_SHOW_CATEGORY
             break;
-        case 'unapprovedposts':
-            contextNavigation = "group/UnapprovedPosts";
-            cacheKey = "group_UnapprovedPosts";
+        case 'latest':
+            contextNavigation = "group/LatestPosts";
+            cacheKey = "group_LatestPosts";
+            details_visibility = DV_SHOW_TITLE | DV_SHOW_SUMMARY | DV_CONTEXTUAL_VIEW
+            break;
+        case 'confidential':
+            contextNavigation = "group/ConfidentialPosts";
+            cacheKey = "group_ConfidentialPosts";
             details_visibility = DV_SHOW_TITLE | DV_SHOW_SUMMARY
             break;
         default:
@@ -156,7 +168,7 @@
                 SubTree:[
                     { 
                         Id: 3, Association: 'Notes',
-                        Expressions:['Id', '$ref', 'Title', 'Summary', 'Content', 'Order', 'State', 'NotesCount', 'Kind', 'ModificationDate', 'href', 'icon', 'IsInBasket', 'IsCanonical', 'NoteId', 'ThreadFolderInfo', '$type', '$ver'],
+                        Expressions:['Id', '$ref', 'Title', 'Summary', 'Content', 'Order', 'State', 'Role', 'NotesCount', 'Kind', 'ModificationDate', 'href', 'icon', 'IsInBasket', 'IsCanonical', 'NoteId', 'ThreadFolderInfo', 'DraftCommentThreadInfo', '$type', '$ver'],
                         Sort: "-Order",
                         SubTree:[
                             {
@@ -212,31 +224,8 @@
     async function fetch_my_working_threads(parent_folder_id) 
     {
         working_posts = []
-        //unapproved_posts = []
-
-        /*return reef.post('user/MyDraftPosts/query', {
-            Id: 1, Name: 'not published posts', ExpandLevel: 16,
-            Tree: [
-                {
-                    Id: 1,
-                    Association: 'Notes',
-                    Filter: parent_folder_id ? `Kind=NK_THREAD and Note/IsDraftThreadInCategory(${parent_folder_id})` : '',
-                    Expressions: ['Id', '$ref', 'Title', 'Summary', 'Content', 'Kind', 'State', 'href', '$type', 'ModificationDate', 'DraftThreadCategoryFolderInfo', 'DraftCommentThreadInfo', '$ver'],
-                    Sort: "-ModificationDate",
-                    SubTree: [
-                        {
-                            Id: 10,
-                            Association: 'Note/Files',
-                            Expressions: ["$ref", "Title", "Summary", "href", "icon", "$type"]
-                        }
-                    ]
-                    
-                }
-            ]
-        }) 
-        */
-
-        return reef.post('user/query', {
+       
+        /*return reef.post('user/query', {
             Id: 1, Name: 'drafts and unapproved posts', ExpandLevel: 16,
             Tree: [
                 {
@@ -264,32 +253,11 @@
                                     ]
                                 }
                             ]
-                        }/*,
-                        {
-                            Id: 20,
-                            Association: 'MySentPosts',
-                            Expressions: [],
-                            SubTree: [
-                                {
-                                    Id: 200,
-                                    Association: 'Notes',
-                                    Filter: parent_folder_id ? `State=NS_UNAPPROVED and Note/IsDraftThreadInCategory(${parent_folder_id})` : 'State=NS_UNAPPROVED',
-                                    Expressions: ['Id', '$ref', 'Title', 'Summary', 'Content', 'Kind', 'State', 'href', '$type', 'ModificationDate', '$ver'],
-                                    Sort: "-ModificationDate",
-                                    SubTree: [
-                                        {
-                                            Id: 2000,
-                                            Association: 'Note/Files',
-                                            Expressions: ["$ref", "Title", "Summary", "href", "icon", "$type"]
-                                        }
-                                    ]
-                                }
-                            ]
-                        }*/
+                        }
                     ]
                 }
             ]
-        })
+        })*/
        
     }
 
@@ -298,6 +266,15 @@
         let result = null
         if(context_item)
             result = context_item.Folder
+
+        scratch_post = null  
+        if(details_visibility & DV_SHOW_NEW_MESSAGE_PROMPT)
+        {
+            if(context_item.Folder && context_item.Folder.Notes)
+            {
+                scratch_post = context_item.Folder.Notes.find(n => n.Role == NR_SCRATCH)   
+            }
+        }
            
         if(user_posts && user_posts.User)
         {
@@ -326,13 +303,14 @@
 
         if(contextItem.Notes)
         {
-            let unapproved_posts = contextItem.Notes.filter(el => el.State == NS_UNAPPROVED)
-            unapproved_posts.sort((a,b) =>  b.Order - a.Order)
+            //let unapproved_posts = contextItem.Notes.filter(el => el.State == NS_LATEST)
+            //unapproved_posts.sort((a,b) =>  b.Order - a.Order)
 
-            let other_posts = contextItem.Notes.filter(el => el.State != NS_UNAPPROVED)
-            other_posts.sort((a,b) =>  b.Order - a.Order)
+            //let other_posts = contextItem.Notes.filter(el => el.State != NS_LATEST)
+            //other_posts.sort((a,b) =>  b.Order - a.Order)
 
-            contextItem.all_elements = [...contextItem.all_elements, ...unapproved_posts, ...other_posts]
+            //contextItem.all_elements = [...contextItem.all_elements, ...unapproved_posts, ...other_posts]
+            contextItem.all_elements = [...contextItem.all_elements, ...contextItem.Notes]
         }
 
         //if(contextItem.Tasks)
@@ -341,7 +319,7 @@
         //if(contextItem.Files)
         //    contextItem.all_elements = [...contextItem.all_elements, ...contextItem.Files]
 
-        //contextItem.all_elements.sort((a,b) =>  b.Order - a.Order)
+        contextItem.all_elements.sort((a,b) =>  b.Order - a.Order)
 
         // ==========================================
 
@@ -365,9 +343,15 @@
             folderTitle = ext(contextItem.Title);
             setup_all_elements(contextItem)
         }
+        prompt_rerender_ticket = prompt_rerender_ticket + 1
     }
 
 
+    function on_selection_changed(...params)
+    {
+        if(contextItem && contextItem.all_elements)
+            contextItem.all_elements = [...contextItem.all_elements]
+    }
  
     const refresh_operation = {
         caption: '_; Refresh; Actualizar; Odśwież',
@@ -428,103 +412,6 @@
     }
 
 
-    function show_working_post_menu(e, working_post)
-    {
-        e.stopPropagation()
-
-        let owner = e.target;
-        while(owner && owner.tagName != 'BUTTON')
-            owner = owner.parentElement
-
-        let rect = owner.getBoundingClientRect()
-        showMenu(rect, [
-            {
-                caption: '_; Finish the post; Terminar la entrada; Dokończ wpis',
-                action: (f) => push(working_post.href),
-                mricon: 'arrow-right'
-            },
-            {
-                caption: '_; Send; Enviar; Wyślij',
-                mricon: 'upload',
-                menu: [
-                    /*    {
-                            caption: '_; Copy; Copiar; Kopiuj',
-                            action: (f) => copy_note_to_basket(postLink),
-                        },
-                    */    {
-                            caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
-                            action: () => openInNewTab(working_post.href)
-                        },
-                        {
-                            caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
-                            action: () => copyAddress(working_post.href)
-                        }
-
-                    ]
-            },
-            {
-                separator: true
-            },
-            {
-                caption: '_; Delete; Eliminar; Usuń',
-                action: () => delete_working_post(working_post)
-            }
-        ])
-    }
- 
-
-    function show_post_menu(e, postLink)
-    {
-        e.stopPropagation()
-
-        let owner = e.target;
-        while(owner && owner.tagName != 'BUTTON')
-            owner = owner.parentElement
-
-        let rect = owner.getBoundingClientRect()
-        showMenu(rect, [
-            {
-                caption: '_; Show post; Mostrar entrada; Pokaż wpis',
-                action: (f) => push(postLink.href),
-                mricon: 'file-search-corner'
-            },
-            {
-                caption: '_; Send; Enviar; Wyślij',
-                mricon: 'upload',
-                menu: [
-                        {
-                            caption: '_; Copy; Copiar; Kopiuj',
-                            action: (f) => copy_note_to_basket(postLink),
-                        },
-                        {
-                            caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
-                            action: () => openInNewTab(postLink.href)
-                        },
-                        {
-                            caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
-                            action: () => copyAddress(postLink.href)
-                        }
-
-                    ]
-            },
-            ... ((details_visibility & DV_ADD_FOLLOW_CATEGORY_OPERATIONS) > 0 && (postLink.ThreadFolderInfo)) ? [
-                {
-                    separator: true
-                },
-                ... postLink.ThreadFolderInfo.IsSubscribed ? [{
-                    caption: '_; Unfollow this category; Dejar de seguir esta categoría; Przestań obserwować tę kategorię',
-                    mricon: 'eye-off',
-                    action: () => toggle_subscribe_category(postLink.ThreadFolderInfo)
-                }] : [{
-                    caption: '_; Follow this category; Sigue esta categoría; Obserwuj tę kategorię',
-                    mricon: 'eye',
-                    action: () => toggle_subscribe_category(postLink.ThreadFolderInfo)
-                }] ]
-                : []
-        ])
-    }
-
-
     async function toggle_subscribe_category(info)
     {
         if(info.IsSubscribed)
@@ -556,30 +443,36 @@
     }
 
 
-    let new_message_title = ''
-    let new_message_content = '';
     let new_message_content_element
-    let new_message_title_element
-    let new_message_confidential = false;
-
-    function on_new_message_title_key_down(e)
+    
+    async function on_prompt_change(text, a)
     {
-        if (event.key === 'Enter') 
+        if(scratch_post)
         {
-            event.preventDefault();
+            setjItemProperty(scratch_post, a, text)
+        }
+        else
+        {
+            const result = await reef.post(`${contextItem.$ref}/NewScratchPost`, {title: '', summary: '', content: ''})
+            if(result && result.FolderNote)
+            {
+                scratch_post = result.FolderNote
+                scratch_post.Title = ''
+                scratch_post.Content = ''
+                //setjItemProperty(scratch_post, a, text)
+            }
+        }
+    }
+
+    function on_new_message_title_finish(detail)
+    {
+        if(detail.incremental)
+        {            
             new_message_content_element?.focus()
         }
     }
 
-    function on_new_message_content_key_down(e)
-    {
-        if (event.key === 'Enter') 
-        {
-            event.preventDefault();
-            document.execCommand('insertLineBreak');
-        }
-    }
-
+    
     let working_post_creating = false
     let working_post_spinner = ''
 
@@ -588,68 +481,82 @@
     const MWN_FOCUS_CONTENT_ALL = 2
     const MWN_INSERT_ATTACHEMENT = 3
 
-    async function make_working_post(e, action_after_redirecting, spinner)
+    async function save_scratch_as_draft(note, action_after_redirecting=MWN_NOTHING, spinner = '')
     {
-        const clean_title = new_message_title.replace(/&nbsp;/g, ' ').trim();
-        if(!clean_title)
+        if(!note)
             return;
 
-        const clean_content = new_message_content.replace(/&nbsp;/g, ' ').trim();
-        //if(!clean_content)
-        //    return;
+        let working_post_content = ''
+        if(note.Content)
+        {
+            working_post_content = note.Content.replace(/\r?\n/g, '<br>')
+            working_post_content = `<p>${working_post_content}</p>`
+        }
+        
 
-        //const lines = clean_content.split(/<br\s*[\/]?>/gi);
+        if(spinner)
+        {
+            working_post_creating = true
+            working_post_spinner = spinner
+        }
 
-        //const parsed_title = lines[0]?.trim() || '';
-        //const parsed_content = lines.slice(1).join('<br>').trim();
-
-        ///////////////////////////////
-
-
-        working_post_creating = true
-        working_post_spinner = spinner
-
-
-        //await sleep(2000)
-
-        const res = await reef.post('user/NewDraftThread', {
-            title: clean_title,
+        let href = await reef.post(`${note.$ref}/Note/SaveScratchAsDraft`, {
+            title: note.Title,
             summary: '',
-            content: clean_content ? `<p>${clean_content}</p>` : '',
-            category: details_visibility & DV_CONTEXTUAL_VIEW ? contextItem.$ref : null,
-            confidential: new_message_confidential
+            content: working_post_content
         })
 
-        if(res && res.Note)
+        if(href)
         {
-            let href = await reef.get(`${res.Note.$ref}/href`)
-            if(href)
+            let postfix = ''
+            switch(action_after_redirecting)
             {
-                let postfix = ''
-                switch(action_after_redirecting)
-                {
-                case MWN_FOCUS_CONTENT_END:
-                    postfix = '?action=focuscontent&arg1=end'
-                    break;
-                case MWN_FOCUS_CONTENT_ALL:
-                    postfix = '?action=focuscontent&arg1=all'
-                    break;
-                case MWN_INSERT_ATTACHEMENT:
-                    postfix = '?action=insertattachement'
-                    break;
-                }
-
-                if(postfix)
-                    href += postfix
-
-                push(href)
+            case MWN_FOCUS_CONTENT_END:
+                postfix = '?action=focuscontent&arg1=end'
+                break;
+            case MWN_FOCUS_CONTENT_ALL:
+                postfix = '?action=focuscontent&arg1=all'
+                break;
+            case MWN_INSERT_ATTACHEMENT:
+                postfix = '?action=insertattachement'
+                break;
             }
+
+            if(postfix)
+                href += postfix
         }
 
         working_post_spinner = ''
         working_post_creating = false
+
+        return href
     }
 
+    async function go_to_post_editor(note) 
+    {
+        let href
+        if(note.Role == NR_SCRATCH)
+            href = await save_scratch_as_draft(note, MWN_FOCUS_CONTENT_END)    
+        else    
+            href = note.href
+        
+        if(href)
+            push(href)
+    }
+
+    function finish_post(note)
+    {
+        finish_post_dialog.show(note)
+    }
+
+    async function on_refresh_after_finish_post(finishing_post)
+    {
+        if(finishing_post == scratch_post)
+            scratch_post = null
+
+        await fetch_data()
+    }
+    
     function unfollow_op()
     {
         return {
@@ -690,6 +597,151 @@
         }
 
         reloadPageToolbarOperations(get_page_operations())
+    }
+
+    function get_post_operations(note)
+    {
+        if(note.Role == NR_DRAFT)
+            return get_draft_post_operations(note)
+
+        const send_operations = [
+                {
+                    caption: '_; Copy; Copiar; Kopiuj',
+                    action: () => copy_note_to_basket(note),
+                },
+                {
+                    caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                    action: () => openInNewTab(note.href)
+                },
+                {
+                    caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                    action: () => copyAddress(note.href)
+                }
+        ]
+
+        let unfollow_note_category_operations = [] 
+        if((details_visibility & DV_ADD_FOLLOW_CATEGORY_OPERATIONS) > 0 && (note.ThreadFolderInfo)) 
+        {
+            if(note.ThreadFolderInfo.IsSubscribed)
+            {
+                unfollow_note_category_operations.push({
+                    caption: '_; Unfollow this category; Dejar de seguir esta categoría; Przestań obserwować tę kategorię',
+                    action: () => toggle_subscribe_category(note.ThreadFolderInfo)
+                })
+            }
+            else
+            {
+                unfollow_note_category_operations.push({
+                    caption: '_; Follow this category; Sigue esta categoría; Obserwuj tę kategorię',
+                    action: () => toggle_subscribe_category(note.ThreadFolderInfo)
+                })
+            }
+            unfollow_note_category_operations.push({separator: true});
+        }
+
+        return {
+            opver: 2,
+            fab: 'M00',
+            tbr: 'D',
+            operations: [
+                {
+                    caption: '_; Note; Nota; Notatka',
+                    operations: [
+                        ...unfollow_note_category_operations,
+                        {
+                            caption: '_; Send; Enviar; Wyślij',
+                            mricon: 'upload',
+                            hideToolbarCaption: true,
+                            tbr: 'C',
+                            fab: 'S00',
+                            menu: send_operations
+                        }
+                    ]
+                },
+                {
+                    caption: '_; View; Ver; Widok',
+                    operations: [
+                        ... (details_visibility & DV_CONTEXTUAL_VIEW) ? [... (contextItem.IsSubscribed ? [unfollow_op()] : [follow_op()])] : [],
+                        refresh_operation,
+                        properties_operation
+                    ]
+                }
+            ]
+        }
+    }
+
+    function get_draft_post_operations(note)
+    {
+        const send_operations = [
+                {
+                    caption: '_; Copy; Copiar; Kopiuj',
+                    action: () => copy_note_to_basket(note),
+                },
+                {
+                    caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
+                    action: () => openInNewTab(note.href)
+                },
+                {
+                    caption: '_; Copy the address; Copiar la dirección; Skopuj adres',
+                    action: () => copyAddress(note.href)
+                }
+        ]
+
+        return {
+            opver: 2,
+            fab: 'M00',
+            tbr: 'D',
+            operations: [
+                {
+                    caption: '_; Note; Nota; Notatka',
+                    operations: [        
+                        {
+                            caption: '_; Finish the post; Terminar la entrada; Dokończ wpis',
+                            mricon: 'send',
+                            //hideToolbarCaption: true,
+                            //tbr: 'A',
+                            //fab:'M20',
+                            action: () => finish_post(note)
+                        },
+                        {
+                            caption: '_; Send; Enviar; Wyślij',
+                            mricon: 'upload',
+                            hideToolbarCaption: true,
+                            tbr: 'C',
+                            fab: 'S00',
+                            menu: send_operations
+                        },
+                        {
+                            caption: '_; Delete; Eliminar; Usuń',
+                            action: () => delete_working_post(note)
+                        }
+                    ]
+                },
+                {
+                    caption: '_; View; Ver; Widok',
+                    operations: [
+                        ... (details_visibility & DV_CONTEXTUAL_VIEW) ? [... (contextItem.IsSubscribed ? [unfollow_op()] : [follow_op()])] : [],
+                        refresh_operation,
+                        properties_operation
+                    ]
+                }
+            ]
+        }
+    }
+
+    function activate_post(event, note, idx)
+    {
+        event.stopPropagation();
+
+        if(isActive('props', note))
+        {
+            push(note.href)   
+        }
+        else
+        {
+            const operations = get_post_operations(note)
+            activateItem('props', note, operations)
+        }
     }
 
     const button_enabled_light_colors = 'text-stone-900/70 hover:text-stone-900 hover:bg-stone-900/10 active:bg-stone-900/20 border-stone-900/15'
@@ -741,6 +793,7 @@
 
             <!-- prompt -->
             {#if details_visibility & DV_SHOW_NEW_MESSAGE_PROMPT}
+                {#key prompt_rerender_ticket}
                 <!--h3 class="ml-2">Ask about TILOS</h3-->
                 <section class="
                             min-h-24 w-full
@@ -751,155 +804,137 @@
                                 outline-none 
                                 overflow-x-clip text-wrap break-words overscroll-contain
                                 editable-placeholder"
-                        bind:innerHTML={new_message_title}
-                        bind:this={new_message_title_element}
-                        on:keydown={on_new_message_title_key_down}
-                        contenteditable="true"
-                        data-placeholder={i18n({
-                                    en: 'Enter the title of your new post...',
-                                    es: 'Escribe el título de la nueva entrada...',
-                                    pl: 'Wpisz tytuł nowego wpisu...'
-                                })}>
+                                data-placeholder={i18n({
+                                        en: 'Enter the title of your new post...',
+                                        es: 'Escribe el título de la nueva entrada...',
+                                        pl: 'Wpisz tytuł nowego wpisu...'
+                                    })}
+                                use:editable={{
+                                    active: true,
+                                    action: (text) => on_prompt_change(text, 'Title'),
+                                    onSingleChange: (text) => on_prompt_change(text, 'Title'),
+                                    onFinish: on_new_message_title_finish
+                                    }}
+                                >
+                            {scratch_post ? scratch_post.Title : ''}
                     </h2>
-                    <p  class=" outline-none 
+                    
+                    <p  class=" outline-none whitespace-pre-wrap
                                 overflow-x-clip text-wrap break-words overscroll-contain
                                 editable-placeholder"
-                        bind:innerHTML={new_message_content}
                         bind:this={new_message_content_element}
-                        on:keydown={on_new_message_content_key_down}
-                        contenteditable="true"
                         data-placeholder={i18n({
                                     en: 'Start writing about your problem or idea...',
                                     es: 'Empieza a escribir sobre tu problema o idea...',
                                     pl: 'Zacznij opisywać problem lub pomysł...'
-                                })}>
+                                })}
+                        use:editable={{
+                            active: true,
+                            action: (text) => on_prompt_change(text, 'Content'),
+                            onSingleChange: (text) => on_prompt_change(text, 'Content'),
+                            enterAsNewLine: true
+                        }}>
+                        {scratch_post ? scratch_post.Content : ''}
                     </p>
 
-                    <!--p   class="w-full min-h-50 bg-stone-50 dark:bg-stone-800 outline-none
-                                overflow-x-clip text-wrap break-words overscroll-contain
-                                editable-placeholder"
-                                bind:innerHTML={new_message_content}
-                                bind:this={new_message_content_element}
-                                on:keydown={on_new_message_content_key_down}
-                                contenteditable="true"
-                                data-placeholder={i18n({
-                                    en: 'Enter the title of your new post...\nStart writing about your problem or idea...',
-                                    es: 'Escribe el título de la nueva entrada...\nEmpieza a escribir sobre tu problema o idea...',
-                                    pl: 'Wpisz tytuł nowego wpisu...\nZacznij opisywać problem lub pomysł...'
-                                })}
-                                >
-                        </p-->
+                    {#if 1}
+                        {@const disabled = working_post_creating || (scratch_post==null)}
+                        <div class="mt-2 w-full flex flex-row gap-4 items-center">
+                            <button class="flex flex-row gap-1 items-center p-2 {button_colors(disabled)}"
+                                title={i18n({ en:'Open the post draft editor', es: 'Abrir el editor de borrador de la entrada',  pl: 'Otwórz edytor szkicu wpisu'})}
+                                on:click={(e) => go_to_post_editor(scratch_post)}
+                                {disabled}>
+                                {#if working_post_spinner != 'format'}
+                                    <Ricon icon='pencil' s/>
+                                {:else}
+                                    <Ricon icon='loader-circle' s/>
+                                {/if}
+                            </button>
+                        
 
-                    <div class="mt-2 w-full flex flex-row gap-4 items-center">
-                        <button class="flex flex-row gap-1 items-center px-1 {button_colors(working_post_creating)}"
-                            title={i18n({ en:'Add an attachment', es: 'Añadir un archivo adjunto',  pl: 'Dodaj załącznik'})}
-                            on:click={(e) => make_working_post(e, MWN_INSERT_ATTACHEMENT, 'att')}
-                            disabled={working_post_creating}>
-                            {#if working_post_spinner!='att'}
-                                <Ricon icon='plus' s/>
-                            {:else}
-                                <Ricon icon='loader-circle' s/>
-                            {/if}
-                        </button>
+                            <button class="ml-auto p-2 {button_colors(disabled)}
+                                rounded-full border border-stone-300 dark:border-stone-600"
+                                title={i18n({ en:'Finish the post', es: 'Terminar la entrada',  pl: 'Dokończ wpis'})}
+                                on:click={(e) => finish_post(scratch_post)}
+                                {disabled}>
+                                <Ricon icon='send' s/>
+                            </button>
 
-                        <button class="flex flex-row gap-1 items-center px-1 {button_colors(working_post_creating)}"
-                            title={i18n({ en:'Format', es: 'Formato',  pl: 'Formatuj'})}
-                            on:click={(e) => make_working_post(e, MWN_FOCUS_CONTENT_END, 'format')}
-                            disabled={working_post_creating}>
-                            {#if working_post_spinner != 'format'}
-                                <Ricon icon='case-sensitive' stroke=1/>
-                            {:else}
-                                <Ricon icon='loader-circle' s/>
-                            {/if}
-                        </button>
-
-                        {#if 1}
-                        {@const hint = i18n({en: 'Check this option to make the post visible only to TILOS developers', es: 'Marca esta opción para que la publicación solo sea visible para los desarrolladores de TILOS.', pl: 'Zaznacz tę opcję, aby wpis był widoczny wyłącznie dla programistów TILOS'})}
-                        <div class="flex items-center gap-1.5">
-                            <input  type="checkbox" 
-                                    id="confidential" 
-                                    bind:checked={new_message_confidential}
-                                    data-class="accent-stone-600 dark:accent-stone-400 h-4 w-4 cursor-pointer"
-                                    class="appearance-none h-4 w-4 rounded border 
-                                        border-stone-300 hover:border-stone-400 checked:border-stone-600
-                                        bg-white hover:bg-stone-50 checked:bg-stone-600 checked:hover:bg-stone-700
-                                        dark:border-stone-600 dark:hover:border-stone-500 dark:checked:border-stone-500
-                                        dark:bg-stone-800 dark:hover:bg-stone-700 dark:checked:bg-stone-600 dark:checked:hover:bg-stone-500
-
-                                        cursor-pointer 
-                                        relative checked:after:content-['✓'] checked:after:text-white checked:after:text-xs checked:after:absolute checked:after:inset-0 checked:after:flex checked:after:items-center checked:after:justify-center"
-                                    title={hint}/>
-
-                            <label for="confidential" class="text-sm text-stone-700 dark:text-stone-300 cursor-pointer select-none"
-                                    title={hint}>
-                                _; Confidential; Confidencial; Poufne
-                            </label>
                         </div>
-                        {/if}
+                    {/if}
 
-                        <button class="ml-auto flex flex-row gap-1 items-center pl-3 pr-2 {button_colors(working_post_creating)}
-                            rounded-full border border-stone-300 dark:border-stone-600"
-                            on:click={(e) => make_working_post(e, MWN_FOCUS_CONTENT_END, 'finish')}
-                            disabled={working_post_creating}>
-                            <span>_; Finish the post; Terminar la entrada; Dokończ wpis</span>
-                            {#if working_post_spinner!='finish'}
-                                <Ricon icon='arrow-right' s/>
-                            {:else}
-                                <Ricon icon='loader-circle' s/>
-                            {/if}
-                        </button>
-
-                    </div>
-                    
                 </section>
+                {/key}
             {/if}
 
-            {#if working_posts && working_posts.length > 0}
-                <!--section class="mt-8 rounded-xl border border-stone-300 dark:border-stone-700/80 bg-stone-100/50 dark:bg-stone-900/40 p-5"-->
-                <section class="mt-8 mb-12 
-                                border-l-2 border-stone-300/80 dark:border-stone-700/80
-                                bg-stone-50 dark:bg-stone-800/40
-                                pl-5 pr-2 py-3 rounded-r-lg">
-                    <h4 class=" mt-0 pb-3 
-                                border-b border-stone-300/80 dark:border-stone-700/80
-                                flex flex-row items-center gap-2">
-                    <!--h4 class=" mt-0 pb-2 mb-6 
-                                flex flex-row items-center gap-2"-->
-                        <Ricon icon="square-pen" s/>
-                        _; My Draft Posts; Mis borradores de entradas; Moje szkice wpisów
-                        <span class="text-body font-normal">({working_posts.length})</span>
-                        <span class="ml-auto text-xs text-body font-normal">
-                            _; Visible only to you; Visible solo para ti; Widoczne tylko dla Ciebie
-                        </span>
-                    </h4>
+            
+            <div class="mt-12"></div>
+
+            {#if contextItem.all_elements && contextItem.all_elements.length > 0}
+            
+                {#each contextItem.all_elements as note, idx (note.$ref)}
+                    {@const is_first = idx == 0}
+                    {@const is_last = idx == contextItem.all_elements.length-1}
+                    {@const is_active = isActive('props', note)}
+                    {@const is_scratch = note.Role == NR_SCRATCH}
+                    {@const is_draft = note.Role == NR_DRAFT}
+                    {@const is_comment = note.Kind == NK_COMMENT}
+                    {@const is_confidential = note.State == NS_CONFIDENTIAL}
                     
-                    {#each working_posts as note, idx (note.$ref)}
-                        {@const is_first = idx == 0}
-                        {@const is_last = idx == working_posts.length-1}
-                        {@const is_comment = note.Kind==NK_COMMENT}
-                        <section>
+                    {#if !is_scratch}
+                    
+                        {@const not_active_bg = ""}
+                        {@const active_bg = "bg-stone-200 dark:bg-stone-800 outline outline-8 outline-stone-200 dark:outline-stone-800 cursor-pointer"}
+                        {@const class_bg = is_active ? active_bg : not_active_bg}
+
+                        {@const normal_class = class_bg}
+                        {@const draft_class = `pl-5 pr-3 py-3 border-l-2 border-stone-300/80 dark:border-stone-700/80 ${class_bg}`}
+                        
+                        {@const post_class = is_draft ? draft_class : normal_class}
+                    
+                        <!-- svelte-ignore a11y-click-events-have-key-events -->
+                        <section class="{post_class}" on:click={(e) => activate_post(e, note, idx)}>
+                            
                             <div class="w-full flex flex-row flex-wrap justify-between">
-                                <p class="text-xs">
-                                    <span>_; Edited; Editado; Edytowany</span>
-                                    <span>
+                                <div class="flex flex-row gap-5 items-center">
+                                    <div class="grow-0">
+                                        {#if note["Note/CreatedBy"]}
+                                            {@const author = note["Note/CreatedBy"]}
+                                            {@const href = `${author.href}`}
+                                            <a {href} use:link on:click|stopPropagation> {author.Name}</a>
+                                        {/if}
+                                    </div>
+
+                                    <div class="text-sm">
                                         {getNiceStringDateTime(note.ModificationDate)}
-                                    </span>
-                                </p>
+                                    </div>
+                                </div>
 
                                 <div class="flex flex-row items-center gap-2">
-                                    {#if (details_visibility & DV_SHOW_CATEGORY) && note.DraftThreadCategoryFolderInfo}
-                                        {@const title = note.DraftThreadCategoryFolderInfo.Title}
-                                        {@const href = note.DraftThreadCategoryFolderInfo.href}
-                                        {#if title && href}
-                                            <a {href} use:link class="text-xs">{title}</a>
-                                        {/if}
+                                    {#if is_confidential}
+                                        <span title={i18n({en: 'Confidential', es: 'Confidencial', pl: 'Poufne'})}>
+                                            <Ricon icon='globe-off' s/>
+                                        </span>
                                     {/if}
 
-                                    <button 
-                                        on:click={(e) => show_working_post_menu(e, note)} class="{button_enabled_colors}"
+                                    {#if (details_visibility & DV_SHOW_CATEGORY)}
+                                        {#if is_draft}
+                                            <span class="text-xs">_; Your draft post; Tu borrador de entrada; Twój szkic wpisu</span>
+                                        {:else if note.ThreadFolderInfo}
+                                            {@const title = note.ThreadFolderInfo.Title}
+                                            {@const href = note.ThreadFolderInfo.href}
+                                            {#if title && href}
+                                                <a {href} use:link class="text-xs" on:click|stopPropagation>{ext(title)}</a>
+                                            {/if}
+                                        {/if}
+                                        
+                                    {/if}
+
+                                    <!--button 
+                                        on:click={(e) => show_post_menu(e, note)} class="{button_enabled_colors}"
                                         title={i18n({en: 'Show post menu', es: 'Mostrar el menú de la publicación', pl: 'Pokaż menu wpisu'})}>
                                         <Ricon icon='ellipsis-vertical' s/>
-                                    </button>
+                                    </button-->
                                 </div>
                                 
                             </div>
@@ -912,18 +947,20 @@
                                 <p  class="lead">{note.Summary}</p>
                             {/if}
 
-                            <Editor     class=""
-                                        value={truncate_html(note.Content, 300)} 
-                                        readOnly compact
-                                        on:click={(e) => e.stopPropagation()}/>
-
+                            <!--div class="post-preview"-->
+                                <Editor     class=""
+                                            value={truncate_html(note.Content, 300)} 
+                                            readOnly compact
+                                            />
+                            <!--/div-->
+                            
                             {#if note["Note/Files"] }
                                 {@const files = note["Note/Files"]}
                                 {#if files && files.length > 0}
                                     <div class="w-full flex flex-row flex-wrap gap-2 text-sm">
                                         {#each files as file}
                                             <button class="flex flex-row gap-1 items-center px-1 {button_enabled_colors}"
-                                                    on:click={download_file_from_href(file.href, file.Title)}>
+                                                    on:click|stopPropagation={(e) => download_file_from_href(file.href, file.Title)}>
                                                 <Ricon icon="file-archive" s/>
                                                 <span>
                                                     {file.Title}
@@ -934,198 +971,72 @@
                                 {/if}
                             {/if}
 
-                            {#if is_comment && note.DraftCommentThreadInfo}
-                                {@const thread = note.DraftCommentThreadInfo}
+                            
+
+                            <!-- original post hint -->
+                            {#if is_comment}
+                                {@const is_draf_comment = is_draft && note.DraftCommentThreadInfo}
+                                {@const draf_comment_thread = is_draf_comment ? note.DraftCommentThreadInfo : null}
+                                {@const inNotes = note["Note/InNotes"]}
+                                {@const comment_thread = (inNotes && inNotes.length > 0) ? inNotes[0] : null}
+                                {@const thread = is_draf_comment ? draf_comment_thread : comment_thread}
+                                
                                 {#if thread}
+                                    {@const thread_href = is_draf_comment ? thread.href : thread.InHRef}
+                                    {@const thread_author = is_draf_comment ? thread.ModifiedByName : thread["InNote/CreatedBy"]?.Name}
+                                    {@const thread_date = is_draf_comment ? thread.ModificationDate : thread.InModificationDate}
+                                    {@const thread_title = is_draf_comment ? thread.Title : thread.InTitle}
+                                    {@const thread_content = is_draf_comment ? thread.Content :thread.InContent }
+
                                     <section
                                         class="ml-5 border border-zinc-300 dark:border-zinc-700 rounded-lg px-2 text-xs">
-                                        <a href={thread.href} use:link class="font-normal text-zinc-700 dark:text-zinc-300">
+                                        <!--a href={thread_href} use:link class="font-normal text-zinc-700 dark:text-zinc-300" on:click|stopPropagation-->
                                             <h4 class="">
-                                                {thread.ModifiedByName}
+                                                {thread_author}
                                                 <span class="ml-5 font-normal">
-                                                    {getNiceStringDateTime(thread.ModificationDate)}
+                                                    {getNiceStringDateTime(thread_date)}
                                                 </span>
                                             </h4>
                                             <p class="text-xs post-preview">
-                                                {#if thread.Title}
-                                                    {thread.Title}
+                                                {#if thread_title}
+                                                    {thread_title}
                                                 {:else}
-                                                    {@html thread.Content}
+                                                    {@html thread_content}
                                                 {/if}
                                             </p>
-                                        </a>
+                                        <!--/a-->
                                     </section>
                                 {/if}
                             {/if}
 
-                            <div class="mt-8 w-full flex flex-row flex-wrap">
-                                <div></div>
+                            <div class="mt-8 w-full flex flex-row flex-wrap justify-end gap-10">
+                                <!--button disabled class="flex flex-row gap-1 items-center px-1 {button_disabled_colors}">
+                                    <Ricon icon='thumbs-up' s/>
+                                    <span>15</span>
+                                </button-->
 
-                                <button class="ml-auto flex flex-row gap-1 items-center px-1 {button_enabled_colors}"
-                                        on:click={push(note.href)}>
-                                    <span>_; Finish the post; Terminar la entrada; Dokończ wpis</span>
-                                    <Ricon icon='arrow-right' s/>
-                                </button>
+                                {#if is_draft}
+                                    <button class="ml-auto p-2 {button_colors(false)}
+                                        rounded-full border border-stone-300 dark:border-stone-600"
+                                        title={i18n({ en:'Finish the post', es: 'Terminar la entrada',  pl: 'Dokończ wpis'})}
+                                        on:click|stopPropagation={(e) => finish_post(note)}>
+                                        <Ricon icon='send' s/>
+                                    </button>
+                                {:else if !is_comment && note.NotesCount > 0}
+                                    <button class="flex flex-row gap-1 items-center px-1 {button_enabled_colors}"
+                                            title={i18n({en: 'Show comments', es: 'Mostrar comentarios', pl: 'Pokaż komentarze'})}
+                                            on:click|stopPropagation={(e) => push(note.href + "?action=showfirstsubnote")}>
+                                        <Ricon icon='messages-square' s/>
+                                        <span>{note.NotesCount}</span>
+                                    </button>
+                                {/if}
                             </div>
-                        
+
+                        </section>
 
                         {#if !is_last}
                             <hr/>
                         {/if}
-                        
-                        </section>
-                    {/each}
-                </section>
-            {/if}
-
-            <div class="mt-12"></div>
-
-            {#if contextItem.all_elements && contextItem.all_elements.length > 0}
-            
-                {#each contextItem.all_elements as note, idx (note.$ref)}
-                    {@const is_first = idx == 0}
-                    {@const is_last = idx == contextItem.all_elements.length-1}
-                    {@const is_comment = note.Kind==NK_COMMENT}
-                    {@const comment_padding = is_comment ? "" : ""}
-
-                    
-
-                    <section class="{comment_padding}">
-                        
-                        <div class="w-full flex flex-row flex-wrap justify-between">
-                            <div class="flex flex-row gap-5 items-center">
-                                <div class="grow-0">
-                                    {#if note["Note/CreatedBy"]}
-                                        {@const author = note["Note/CreatedBy"]}
-                                        {@const href = `${author.href}`}
-                                        <a {href} use:link> {author.Name} </a>
-                                    {/if}
-                                </div>
-
-                                <div class="text-sm">
-                                    {getNiceStringDateTime(note.ModificationDate)}
-                                </div>
-                            </div>
-
-                            <div class="flex flex-row items-center gap-2">
-                                {#if note.State == NS_CONFIDENTIAL}
-                                    <span title={i18n({en: 'Confidential', es: 'Confidencial', pl: 'Poufne'})}>
-                                        <Ricon icon='globe-off' s/>
-                                    </span>
-                                {/if}
-
-                                {#if (details_visibility & DV_SHOW_CATEGORY)}
-                                    {#if note.ThreadFolderInfo}
-                                        {@const title = note.ThreadFolderInfo.Title}
-                                        {@const href = note.ThreadFolderInfo.href}
-                                        {#if title && href}
-                                            <a {href} use:link class="text-xs">{title}</a>
-                                        {/if}
-                                    {:else}
-                                        {#if note.State == NS_UNAPPROVED}
-                                            <span class="text-xs">
-                                                _; Pending approval; A la espera de aprobación; Oczekuje na zatwierdzenie
-                                            </span>
-                                        {/if}
-                                    {/if}
-                                {/if}
-
-                                <button 
-                                    on:click={(e) => show_post_menu(e, note)} class="{button_enabled_colors}"
-                                    title={i18n({en: 'Show post menu', es: 'Mostrar el menú de la publicación', pl: 'Pokaż menu wpisu'})}>
-                                    <Ricon icon='ellipsis-vertical' s/>
-                                </button>
-                            </div>
-                            
-                        </div>
-
-                        {#if (details_visibility & DV_SHOW_TITLE) && note.Title}
-                            <h2 class="mt-5">{note.Title}</h2>
-                        {/if}
-
-                        {#if (details_visibility & DV_SHOW_SUMMARY) && note.Summary}
-                            <p  class="lead">{note.Summary}</p>
-                        {/if}
-
-                        <!--div class="post-preview"-->
-                            <Editor     class=""
-                                        value={truncate_html(note.Content, 300)} 
-                                        readOnly compact
-                                        on:click={(e) => e.stopPropagation()}/>
-                        <!--/div-->
-                        
-                        {#if note["Note/Files"] }
-                            {@const files = note["Note/Files"]}
-                            {#if files && files.length > 0}
-                                <div class="w-full flex flex-row flex-wrap gap-2 text-sm">
-                                    {#each files as file}
-                                        <button class="flex flex-row gap-1 items-center px-1 {button_enabled_colors}"
-                                                on:click={download_file_from_href(file.href, file.Title)}>
-                                            <Ricon icon="file-archive" s/>
-                                            <span>
-                                                {file.Title}
-                                            </span>
-                                        </button>
-                                    {/each}
-                                </div>
-                            {/if}
-                        {/if}
-
-                        </section>
-
-                        <!-- original post hint -->
-                        {#if is_comment}
-                            {@const inNotes = note["Note/InNotes"]}
-                            {@const thread = (inNotes && inNotes.length > 0) ? inNotes[0] : null}
-                            {@const author = thread ? thread["InNote/CreatedBy"] : null}
-                            {#if thread && author}
-                                <section
-                                    class="ml-5 border border-zinc-300 dark:border-zinc-700 rounded-lg px-2 text-xs">
-                                    <a href={thread.InHRef} use:link class="font-normal text-zinc-700 dark:text-zinc-300">
-                                        <h4 class="">
-                                            {author.Name}
-                                            <span class="ml-5 font-normal">
-                                                {getNiceStringDateTime(thread.InModificationDate)}
-                                            </span>
-                                        </h4>
-                                        <p class="text-xs post-preview">
-                                            {#if thread.InTitle}
-                                                {thread.InTitle}
-                                            {:else}
-                                                {@html thread.InContent}
-                                            {/if}
-                                        </p>
-                                    </a>
-                                </section>
-                            {/if}
-                        {/if}
-
-                        <div class="mt-8 w-full flex flex-row flex-wrap justify-end gap-10">
-                            <!--button disabled class="flex flex-row gap-1 items-center px-1 {button_disabled_colors}">
-                                <Ricon icon='thumbs-up' s/>
-                                <span>15</span>
-                            </button-->
-
-                            {#if !is_comment}
-                                <button class="flex flex-row gap-1 items-center px-1 {button_enabled_colors}"
-                                        on:click={push(note.href + "?action=showfirstsubnote")}>
-                                    <Ricon icon='messages-square' s/>
-                                    <span>{note.NotesCount}</span>
-                                </button>
-                            {:else}
-                                <div></div>
-                            {/if}
-
-                            <button class="flex flex-row gap-1 items-center px-1 {button_enabled_colors}"
-                                    on:click={push(note.href)}>
-                                <Ricon icon='message-square-more' s/>
-                                <span>_; Show post; Mostrar entrada; Pokaż wpis</span>
-                            </button>
-                        </div>
-                    
-
-                    {#if !is_last}
-                        <hr/>
                     {/if}
                 {/each}
             {:else}
@@ -1151,6 +1062,8 @@
 
 
 <FolderProperties bind:this={folder_properties_dialog} />
+
+<FinishPostDialog bind:this={finish_post_dialog} on_refresh={on_refresh_after_finish_post}/>
 
 <style>
  

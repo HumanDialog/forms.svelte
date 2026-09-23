@@ -14,14 +14,15 @@ export const NR_NONE               = 0
 export const NR_DESCRIPTION        = 1
 export const NR_COVER              = 2
 export const NR_COMMENT            = 3
+export const NR_SCRATCH            = 4
+export const NR_DRAFT              = 5
 
+export const NS_SCRATCH           = 950
 export const NS_DRAFT             = 1000
-export const NS_UNAPPROVED        = 1500
+export const NS_LATEST            = 1500
 export const NS_CONFIDENTIAL      = 2000
-export const NS_PUBLISHED         = 3000
+export const NS_REVIEWED          = 3000
 export const NS_PUBLIC            = 4000
-
-export const NF_WILL_CONFIDENTIAL  = 0x00000001
 
 export const FK_FOLDER             = 0
 export const FK_BASKET             = 1
