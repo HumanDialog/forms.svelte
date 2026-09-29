@@ -20,7 +20,7 @@
                 refreshToolbarOperations,
 				showFloatingToolbar,
                 reloadPageToolbarOperations, Paper, PaperHeader, openInNewTab, copyAddress,
-                get_acc_icon, get_acc_color, download_file_from_href,
+                download_file_from_href,
 				focusEditable, showMenu, Ricon, get_main_object_fetch_error_description, bits_count} from '$lib'
     import {FaTrash, FaCloudUploadAlt} from 'svelte-icons/fa'
 
@@ -38,6 +38,7 @@
     import NoteProperties from './properties.note.svelte'
     import {FK_FOLDER, FK_BASKET, FK_DISCUSSION, FK_TABLE, FK_DOCUMENT, FK_FEED} from './consts'
     import {STATE_FINISHED} from './consts'
+    import {get_acc_icon, get_acc_color} from './acc.js'
 
     export let params = {}
 
@@ -64,6 +65,7 @@
     const OP_ROOT_FOLDER        = 3
 
     let operations_kind = OP_FOLDER
+    let force_new_folder_kind = 0
 
     $: onParamsChanged($location, $querystring, $mainContentPageReloader, $session);
 
@@ -90,6 +92,9 @@
         }
 
         contextItemId = 0
+
+        operations_kind = OP_FOLDER
+        force_new_folder_kind = 0
 
         switch (contextItemSelector)
         {
@@ -150,9 +155,10 @@
             operations_kind = OP_FOLDER
             break;
         case 'feeds':
-            contextNavigation = "group/FeedsRoot";
-            cacheKey = "group_FeedsRoot";
+            contextNavigation = "group/PublishedFolder";
+            cacheKey = "group_PublishedFolder";
             operations_kind = OP_ROOT_FOLDER
+            force_new_folder_kind = NEF_FORCE_FK_FEED
             break;
         case 'unapprovedposts':
             contextNavigation = "group/UnapprovedPosts";
@@ -809,7 +815,12 @@
         else
         {
             newElementKind = 'Folder'
-            new_folder_kind = FK_FOLDER
+
+            if(flags & NEF_FORCE_NEW_FOLDER_KIND_MASK)
+                new_folder_kind = (flags & NEF_FORCE_NEW_FOLDER_KIND_MASK) >> 12
+            else
+                new_folder_kind = FK_FOLDER
+
             listComponent.addRowAfter(after_element)
         }
         
@@ -930,6 +941,11 @@
     const NEF_ALLOW_NEW_ALL             =   0x000000FF
 
     const NEF_ALLOW_CHOOSE_FOLDER_KIND  =   0x00000100
+    const NEF_FORCE_NEW_FOLDER_KIND_MASK=   0x0000F000
+    const NEF_FORCE_FK_DISUSSION        =   (FK_DISCUSSION << 12)
+    const NEF_FORCE_FK_TABLE            =   (FK_TABLE << 12)
+    const NEF_FORCE_FK_DOCUMENT         =   (FK_DOCUMENT << 12)
+    const NEF_FORCE_FK_FEED             =   (FK_FEED << 12)
 
     function newElementOperations(afterElement, flags=NEF_ALLOW_NEW_ALL)
     {
@@ -1218,7 +1234,7 @@
             fab: 'M00',
             tbr: 'D',
             operations: [
-                newElementOperations(null, NEF_ALLOW_NEW_FOLDER | NEF_ALLOW_CHOOSE_FOLDER_KIND),
+                newElementOperations(null, NEF_ALLOW_NEW_FOLDER | force_new_folder_kind),
                 {
                     caption: '_; View; Ver; Widok',
                     operations: [
@@ -1770,7 +1786,7 @@
                 fab: 'M00',
                 tbr: 'D',
                 operations: [
-                    newElementOperations(element, NEF_ALLOW_NEW_FOLDER | NEF_ALLOW_CHOOSE_FOLDER_KIND),
+                    newElementOperations(element, NEF_ALLOW_NEW_FOLDER | force_new_folder_kind),
                     {
                         caption: '_; Element; Elemento; Element',
                         operations: [

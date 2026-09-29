@@ -15,54 +15,6 @@ export const SCREEN_SIZES = {
     xl: 1280, //px	@media (min-width: 1280px) { ... }
 }
 
-const ACC_UNKNOWN           =   0
-const ACC_USER              =   1000
-const ACC_USER_SHARED       =   2000
-
-const ACC_EXT_USER_SHARED   =   2500
-
-const ACC_GROUP             =   3000
-const ACC_GROUP_SHARED      =   7000
-
-const ACC_PUBLIC            =   9000
-
-export function get_acc_icon(acc_code)
-{
-    switch(acc_code)
-    {
-        case ACC_UNKNOWN:
-            return 'building';
-        case ACC_USER:
-            return 'lock-keyhole'
-        case ACC_USER_SHARED:
-            return 'lock-keyhole'
-        case ACC_GROUP:
-            return 'lock'
-        case ACC_GROUP_SHARED:
-            return 'lock'
-        case ACC_PUBLIC:
-            return 'shared'
-    }
-}
-
-export function get_acc_color(acc_code)
-{
-    switch(acc_code)
-    {
-        case ACC_UNKNOWN:
-            return 'text-gray-500';
-        case ACC_USER:
-            return 'text-amber-500'
-        case ACC_USER_SHARED:
-            return 'text-orange-500'
-        case ACC_GROUP:
-            return 'text-sky-500'
-        case ACC_GROUP_SHARED:
-            return 'text-purple-500'
-        case ACC_PUBLIC:
-            return 'text-lime-500'
-    }
-}
 
 export function isDeviceSmallerThan(br)
 {

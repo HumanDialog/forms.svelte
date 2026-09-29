@@ -29,7 +29,7 @@
 			showMenu, mainContentPageReloader,
             SHOW_MENU_BELOW, focusEditable, openInNewTab, copyAddress,
             List, ListTitle, ListSummary, ListInserter, Icon, Paper, PaperTopMargin, PaperHeader, get_main_object_fetch_error_description,
-            Ricon, get_acc_icon, get_acc_color, download_file_from_href
+            Ricon, download_file_from_href
             } from '$lib'
 	import { onMount, tick, afterUpdate } from 'svelte';
     import {location, querystring, push, link} from 'svelte-spa-router'
@@ -52,6 +52,7 @@
 	import { STATUS_ACTIVE, STATUS_ARCHIVED, STATUS_DELETED,
             NR_NONE, NR_DESCRIPTION, NR_COVER,
             STATE_FINISHED } from './consts';
+    import {get_acc_icon, get_acc_color} from './acc.js'
     
     let taskRef = ''
     let task = null;

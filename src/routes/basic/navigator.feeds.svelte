@@ -84,7 +84,7 @@
                         /*,*/
                         {
                             Id: 10,
-                            Association: 'FeedsRoot',
+                            Association: 'PublishedFolder',
                             Expressions: ['Id', '$ref', '$type', 'Title', 'Summary', 'href', 'icon', '$acc'],
                             SubTree:[
                                 {
@@ -96,12 +96,12 @@
                         },
                         {
                             Id: 20,
-                            Association: 'LatestPosts',
+                            Association: 'LatestsFolder',
                             Expressions: ['Id', '$ref', '$type', 'Title', 'Summary', 'href', 'icon', 'NotesCount', '$acc'],
                         },
                         {
                             Id: 30,
-                            Association: 'ConfidentialPosts',
+                            Association: 'ConfidentialFolder',
                             Expressions: ['Id', '$ref', '$type', 'Title', 'Summary', 'href', 'icon', 'NotesCount', '$acc'],
                         }
                     ]
@@ -117,14 +117,14 @@
         {
             if(res.Group)
             {
-                if(res.Group.LatestPosts)
-                    latest_posts_folder = res.Group.LatestPosts
+                if(res.Group.LatestsFolder)
+                    latest_posts_folder = res.Group.LatestsFolder
 
-                if(res.Group.ConfidentialPosts)
-                    confidential_posts_folder = res.Group.ConfidentialPosts
+                if(res.Group.ConfidentialFolder)
+                    confidential_posts_folder = res.Group.ConfidentialFolder
 
-                if(res.Group.FeedsRoot && res.Group.FeedsRoot.Folders && res.Group.FeedsRoot.Folders.length > 0)
-                    feed_folders = res.Group.FeedsRoot.Folders
+                if(res.Group.PublishedFolder && res.Group.PublishedFolder.Folders && res.Group.PublishedFolder.Folders.length > 0)
+                    feed_folders = res.Group.PublishedFolder.Folders
             }
         }
         
@@ -170,17 +170,17 @@
         <Spinner delay={3000}/>
     {:else}
         <SidebarGroup>
-            <SidebarItem    href="/feed/my"
+            <SidebarItem    href="/feed/news"
                             icon='newspaper'
-                            active={is_routing_to('/feed/my', current_location)}>
-                _; News; Noticias; Wiadomości
+                            active={is_routing_to('/feed/news', current_location)}>
+                _; News; Noticias; Aktualności
             </SidebarItem>
             
-            <SidebarItem    href="/feed/sent"
+            <SidebarItem    href="/feed/mypublications"
                             icon='send'
-                            active={is_routing_to('/feed/sent', current_location)}
+                            active={is_routing_to('/feed/mypublications', current_location)}
                             summaryX="The essentials in one place">
-                _; My posts; Mis publicaciones; Moje posty
+                _; My Publications; Mis publicaciones; Moje publikacje
             </SidebarItem>
 
             <!--SidebarItem    href="/feed/saved"
@@ -240,13 +240,13 @@
         <Spinner delay={3000}/>
     {:else}
         <SidebarGroup >
-            <SidebarItem    href="/feed/my"
+            <SidebarItem    href="/feed/news"
                             icon='newspaper'
                             item={my_feed}>
-                _; News; Noticias; Wiadomości
+                _; News; Noticias; Aktualności
             </SidebarItem>
 
-            <SidebarItem    href="/feed/sent"
+            <SidebarItem    href="/feed/mypublications"
                             icon='send'
                             item={my_sent}>
                 _; My posts; Mis publicaciones; Moje posty

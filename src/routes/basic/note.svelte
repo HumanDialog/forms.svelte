@@ -35,8 +35,7 @@
             List, ListTitle, ListSummary, ListInserter, Icon, Ricon,
             reloadPageToolbarOperations, Paper, PaperHeader, focusEditable, openInNewTab, copyAddress,
             get_main_object_fetch_error_description,
-			getNiceStringDateTime,
-            get_acc_icon, get_acc_color, download_file_from_href
+			getNiceStringDateTime, download_file_from_href
             } from '$lib'
 	import { afterUpdate, tick } from 'svelte';
 
@@ -56,8 +55,9 @@
     import {getElementIcon} from './icons'
     import { STATUS_ACTIVE, STATUS_ARCHIVED, STATUS_DELETED, 
         NK_DOCUMENT, NK_THREAD, NK_COMMENT,
-        NS_DRAFT, NS_CONFIDENTIAL, NS_REVIEWED, NS_PUBLIC, NR_COMMENT, NS_LATEST,
-		NS_SCRATCH} from './consts';
+        NS_DRAFT, NS_CONFIDENTIAL, NS_REVIEWED, NS_PUBLIC, NR_COMMENT, NS_LATEST, NS_SCRATCH,
+        ACC_USER, ACC_GROUP_CONFIDENTIAL, ACC_GROUP, ACC_GROUP_PUBLISHED, ACC_WRITE} from './consts';
+    import {get_acc_icon, get_acc_color} from './acc.js'
     
     import FileProperties from './properties.file.svelte'
 	import NoteProperties from './properties.note.svelte'
@@ -79,7 +79,7 @@
     let creationDate = null
     let modificationDate = null
     let attachedFiles = []
-    let finish_post_dialog
+    //let finish_post_dialog
     
     let isThread = false
     let failed_message = ''
@@ -315,20 +315,26 @@
         else
             modificationDate = null
 
-        isReadOnly = (note.$acc & 0x2) == 0
-        canBeEditable = (note.$acc & 0x2) > 0
+        isReadOnly = (note.$acc & ACC_WRITE) == 0
+        canBeEditable = (note.$acc & ACC_WRITE) > 0
 
         isThread = note.Kind == NK_THREAD
+        activeNote = note
 
         if(note && note.Notes && note.Notes.length > 0)
         {
             for(let idx=0; idx<note.Notes.length; idx++)
             {
-                const subNote = note.Notes[idx].Note
-                if(subNote.Kind == NK_COMMENT)
+                if(note.Notes[idx].Role == NR_COMMENT)
                 {
+                    const subNote = note.Notes[idx].Note
                     prepareAttachementsList(subNote)
-                    //activeNote = subNote
+
+                    if(isThread)
+                    {
+                        if(subNote.$acc & ACC_WRITE)
+                            activeNote = subNote
+                    }
                 }
             }
         }
@@ -338,18 +344,12 @@
         if(isThread)
         {
             display_flags |= DF_SHOW_ORIGINAL_AUTHOR
-            if(note.State == NS_DRAFT)
-                activeNote = note
-            else
-            {
-                //isReadOnly = true
-                activeNote = note
-                await fetch_working_comment(note.Id)
-            }
+            //activeNote = note
+            //await fetch_working_comment(note.Id)
         }
         else
         {
-            activeNote = note
+            //activeNote = note
         }
 
         if(note == activeNote)
@@ -388,7 +388,7 @@
 
     async function fetch_working_comment(main_note_id)
     {
-        const res = await reef.post('user/MyFeed/query', {
+        const res = await reef.post('user/NewsFolder/query', {
             Id: 1, Name: 'not published comments', ExpandLevel: 6,
             Tree: [
                 {
@@ -582,6 +582,10 @@
                     {
                         caption: '_; Add file; Añadir archivo; Dodaj plik',
                         action: () => runFileAttacher()
+                    },
+                    {
+                        caption: '_; Add comment; Añadir comentario; Dodaj komentarz',
+                        action: () => add_comment()
                     }
                 ]
             }
@@ -596,7 +600,7 @@
             mricon: 'send',
             tbr: 'A',
             fab: 'M01',
-            action: async () => { await finish_post(); }
+            action: async (btt) => { await finish_post(btt, note); }
         }
 
         const submit_comment_op = {
@@ -623,8 +627,28 @@
             action: async (button) => { await move_thread_to_category(button); }
         }
 
+        const is_not_published = note.AccCode < ACC_GROUP_CONFIDENTIAL
+
         let thread_operations = []
-        switch(note.State)
+
+        if(is_not_published)
+        {
+            thread_operations = []
+        }
+        else
+        {
+            if(activeNoteRef == noteRef)
+            {
+                
+                //thread_operations = [...thread_operations, add_comment_op]
+            }
+            else        // comment
+            {
+                
+            }
+        }
+
+        /*switch(note.State)
         {
         case NS_DRAFT:
         case NS_SCRATCH:
@@ -651,12 +675,58 @@
                     break;
                 }
             }
-        }
+        }*/
 
         if((thread_operations.length > 0) && (!formatting_tools_enabled))
             thread_operations = [...thread_operations, {separator: true, tbr: 'A'}]
 
         return thread_operations
+    }
+
+    function get_publish_operations()
+    {
+        let publish_operations = []
+        const is_not_published = note.AccCode < ACC_GROUP_CONFIDENTIAL
+        if(is_not_published)
+        {
+            publish_operations = [
+                {
+                    caption: '_; Publish; Publicar; Opublikuj',
+                    action: () => publish_thread(note)
+                },
+                {
+                    caption: '_; Send as confidential; Enviar como confidencial; Przekaż jako poufne',
+                    action: () => send_thread_as_confidential(note)
+                }
+            ]
+        }
+        else if(!isReadOnly)
+        {
+            if(note.AccCode == ACC_GROUP_PUBLISHED)
+            {
+                publish_operations.push({
+                    caption: '_; Withdraw the publication; Retirar la publicación; Wycofaj publikację',
+                    action: () => console.log('todo Withdraw the publication')
+                })
+
+                if(note.CanMoveToCategory)
+                {
+                    publish_operations.push({
+                        caption: '_; Publish in subject; Publicar en la sección; Opublikuj w temacie',
+                        action: (btt, rect) => move_thread_to_category(btt, rect)
+                    })
+                }
+            }
+            else if(note.AccCode == ACC_GROUP_CONFIDENTIAL)
+            {
+                publish_operations = [{
+                    caption: '_; Withdraw from confidential; Darse de baja de la lista de confidencialidad; Wycofaj z przekazanych poufnie',
+                    action: () => console.log('todo Withdraw from confidentia')
+                }]
+            }
+        }
+
+        return publish_operations;
     }
 
     function getPageOperations()
@@ -670,10 +740,7 @@
                     caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
                     action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect, note)
                 },
-                ... ( isThread ? [] : [{
-                    caption: '_; Post to feeds; Publicar en los canales de noticias; Opublikuj w strumieniach',
-                    action: (btt, rect) => publish_note_to_feeds(note)
-                }]),
+                ... get_publish_operations(),
                 { separator: true},
                 {
                     caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
@@ -1090,10 +1157,7 @@
                                         caption: '_; Copy to folder; Copiar a la carpeta; Kopiuj do folderu',
                                         action: (btt, rect) => runPopupExplorer4CopyToFolder(btt, rect, note)
                                     },
-                                     ... ( isThread ? [] : [{
-                                        caption: '_; Post to feeds; Publicar en los canales de noticias; Opublikuj w strumieniach',
-                                        action: (btt, rect) => publish_note_to_feeds(note)
-                                    }]),
+                                     ... get_publish_operations(),
                                     { separator: true},
                                     {
                                         caption: '_; Open in a new tab; Abrir en una nueva pestaña; Otwórz w nowej karcie',
@@ -1969,9 +2033,12 @@
 
     async function add_comment()
     {
-        const res = await reef.post(`user/NewDraftComment`, {
-            content: '',
-            thread: note.$ref})
+        const res = await reef.post(`${note.$ref}/AddComment`, {
+            content: ''})
+
+        //const res = await reef.post(`user/NewDraftComment`, {
+        //    content: '',
+        //    thread: note.$ref})
 
         if(res)
         {
@@ -2011,33 +2078,74 @@
     }
 
     let title_not_valid = false
-    async function finish_post()
+    async function finish_post(btt, context_note)
     {
         // validate before publish
-        if(activeNote.Kind == NK_THREAD)
-        {
-            if(!note.Title)
-            {
-                title_not_valid = true;
-                const title_placeholder = document.getElementById("title-placeholder")
-                if(title_placeholder)
-                    title_placeholder.scrollIntoView({ behaviour: "smooth", block: "start" })
-                return;
-            }
-        }
+       
 
-        finish_post_dialog.show(activeNote)
+        //finish_post_dialog.show(activeNote)
+        const rect = btt.getBoundingClientRect()
+        const operations = [
+            {
+                caption: '_; Publish; Publicar; Publikuj',
+                action: () => publish_thread(context_note)
+            },
+            {
+                caption: '_; Send as confidential; Enviar como confidencial; Wyślij jako poufny',
+                action: () => send_thread_as_confidential(context_note)
+            }
+        ]
+        showMenu(rect, operations)
     }
 
-    async function on_refresh_after_finish_post(n)
+    async function publish_thread(note)
     {
+        if(!note.Title)
+        {
+            title_not_valid = true;
+            const title_placeholder = document.getElementById("title-placeholder")
+            if(title_placeholder)
+                title_placeholder.scrollIntoView({ behaviour: "smooth", block: "start" })
+            return;
+        }
+        
+        const res = await reef.post(`${note.$ref}/PublishThread`, {})
+        if(!res)
+            return
+
         await reloadData();
         reloadPageToolbarOperations(getPageOperations())
     }
 
-    async function move_thread_to_category(button)
+    async function send_thread_as_confidential(note)
     {
-        let rect = button.getBoundingClientRect()
+        if(!note.Title)
+        {
+            title_not_valid = true;
+            const title_placeholder = document.getElementById("title-placeholder")
+            if(title_placeholder)
+                title_placeholder.scrollIntoView({ behaviour: "smooth", block: "start" })
+            return;
+        }
+        
+        const res = await reef.post(`${note.$ref}/SendThreadAsConfidential`, {})
+        if(!res)
+            return
+
+        await reloadData();
+        reloadPageToolbarOperations(getPageOperations())
+    }
+
+    /*async function on_refresh_after_finish_post(n)
+    {
+        await reloadData();
+        reloadPageToolbarOperations(getPageOperations())
+    }*/
+
+    async function move_thread_to_category(btt, rect)
+    {
+        if(!rect)
+            rect = btt.getBoundingClientRect()
 
         const select_op = async (ref) => {
             const res = await reef.post(`${activeNote.$ref}/MoveMeToFeed`, {catLink: ref})
@@ -2048,7 +2156,7 @@
             }
         }
 
-        const categories = await reef.get('group/FeedsRoot/Folders?fields=$ref,Title')
+        const categories = await reef.get('group/PublishedFolder/Folders?fields=$ref,Title')
         if(categories && categories.FolderFolder && categories.FolderFolder.length > 0)
         {
             let operations = []
@@ -2312,7 +2420,7 @@
 
             <!-- ============================================================================== -->
 
-            {#if isThread && note.Notes && note.Notes.length > 0}
+            {#if note.Notes && note.Notes.length > 0}
                 {#each note.Notes as subNoteLink, subNoteIdx}
                     {#if subNoteLink.Role == NR_COMMENT}
                         {@const subNote = subNoteLink.Note}
@@ -2320,7 +2428,8 @@
                         {@const separator_class = is_first ? "first-comment" : ""}
                     
                         <hr id="{subNote.$ref}" class={separator_class}/>
-                        {#if subNote.State == NS_DRAFT}
+                        {#if 0}
+                            <!-- subNote.State == NS_DRAFT -->
                             <h4>_; Your unpublished comment:; Tu comentario no publicado:; Twój nieopublikowany komentarz:</h4>
                         {:else}
                             <h4>{subNote.CreatedBy.Name}  <span class="font-normal ml-4 text-body">{getNiceStringDateTime(subNote.ModificationDate)}</span></h4>
@@ -2451,7 +2560,7 @@
 
 <FileProperties bind:this={filePropertiesDialog} />
 <NoteProperties bind:this={notePropertiesDialog} />
-<FinishPostDialog bind:this={finish_post_dialog} on_editor on_refresh={on_refresh_after_finish_post}/>
+<!--FinishPostDialog bind:this={finish_post_dialog} on_editor on_refresh={on_refresh_after_finish_post}/-->
 
 <style lang="postcss">
     .placeholder {

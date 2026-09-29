@@ -31,7 +31,7 @@
     let details_visibility = 0
 
     let scratch_post = null
-    let finish_post_dialog
+    //let finish_post_dialog
     let prompt_rerender_ticket = 0
 
     let readonly = false
@@ -82,24 +82,24 @@
 
         switch (contextItemSelector)
         {
-        case 'my':
-            contextNavigation = "user/MyFeed";
-            cacheKey = "user_MyFeed";
+        case 'news':
+            contextNavigation = "user/NewsFolder";
+            cacheKey = "user_NewsFolder";
             details_visibility = DV_SHOW_TITLE | DV_SHOW_SUMMARY | DV_SHOW_CATEGORY | DV_SHOW_NEW_MESSAGE_PROMPT | DV_ADD_FOLLOW_CATEGORY_OPERATIONS | DV_SHOW_WORKING_POSTS
             break;
-        case 'sent':
-            contextNavigation = "user/MySentPosts";
-            cacheKey = "user_MySentPosts";
+        case 'mypublications':
+            contextNavigation = "user/PublishedFolder";
+            cacheKey = "user_PublishedFolder";
             details_visibility = DV_SHOW_TITLE | DV_SHOW_SUMMARY | DV_SHOW_CATEGORY
             break;
         case 'latest':
-            contextNavigation = "group/LatestPosts";
-            cacheKey = "group_LatestPosts";
+            contextNavigation = "group/LatestsFolder";
+            cacheKey = "group_LatestsFolder";
             details_visibility = DV_SHOW_TITLE | DV_SHOW_SUMMARY | DV_CONTEXTUAL_VIEW
             break;
         case 'confidential':
-            contextNavigation = "group/ConfidentialPosts";
-            cacheKey = "group_ConfidentialPosts";
+            contextNavigation = "group/ConfidentialFolder";
+            cacheKey = "group_ConfidentialFolder";
             details_visibility = DV_SHOW_TITLE | DV_SHOW_SUMMARY
             break;
         default:
@@ -235,7 +235,7 @@
                     SubTree: [
                         {
                             Id: 10,
-                            Association: 'MyDraftPosts',
+                            Association: 'DraftsFolder',
                             Expressions: [],
                             SubTree: [
                                 {
@@ -278,12 +278,12 @@
            
         if(user_posts && user_posts.User)
         {
-            if(user_posts.User.MyDraftPosts && user_posts.User.MyDraftPosts.Notes && user_posts.User.MyDraftPosts.Notes.length>0)
-                working_posts = user_posts.User.MyDraftPosts.Notes
+            if(user_posts.User.DraftsFolder && user_posts.User.DraftsFolder.Notes && user_posts.User.DraftsFolder.Notes.length>0)
+                working_posts = user_posts.User.DraftsFolder.Notes
 
 
-            //if(user_posts.User.MySentPosts && user_posts.User.MySentPosts.Notes && user_posts.User.MySentPosts.Notes.length>0)
-            //    unapproved_posts = user_posts.User.MySentPosts.Notes
+            //if(user_posts.User.PublishedFolder && user_posts.User.PublishedFolder.Notes && user_posts.User.PublishedFolder.Notes.length>0)
+            //    unapproved_posts = user_posts.User.PublishedFolder.Notes
         }
 
         return result
@@ -532,6 +532,39 @@
         return href
     }
 
+    async function save_draft(note)
+    {
+        const href = await save_scratch_as_draft(note, MWN_FOCUS_CONTENT_END)  
+        if(href)
+        {
+            scratch_post = null
+            await fetch_data()
+        }
+        
+    } 
+
+    async function publish_thread(note)
+    {
+        const res = await reef.post(`${note.$ref}/Note/PublishThread`, {})
+        if(!res)
+            return
+
+        if(note == scratch_post)
+            scratch_post = null
+        await fetch_data()
+    }
+
+    async function send_thread_as_confidential(note)
+    {
+        const res = await reef.post(`${note.$ref}/Note/SendThreadAsConfidential`, {})
+        if(!res)
+            return
+
+        if(note == scratch_post)
+            scratch_post = null
+        await fetch_data()
+    }
+
     async function go_to_post_editor(note) 
     {
         let href
@@ -544,18 +577,52 @@
             push(href)
     }
 
-    function finish_post(note)
+    function finish_post(e, butt, note)
     {
-        finish_post_dialog.show(note)
+        //finish_post_dialog.show(note)
+
+        if(!butt)
+        {
+            let owner = e.target;
+            while(owner && owner.tagName != 'BUTTON')
+                owner = owner.parentElement
+            
+            butt = owner
+        }
+        
+        const rect = butt.getBoundingClientRect()
+        
+        const save_as_draft_op = {
+            caption: '_; Save as draft; Guardar como borrador; Zapisz jako roboczy',
+            action: () => save_draft(note)
+        }
+
+        const can_show_save_operation = (note == scratch_post)
+
+        const operations = [
+            {
+                caption: '_; Publish; Publicar; Publikuj',
+                action: () => publish_thread(note)
+            },
+            {
+                caption: '_; Send as confidential; Enviar como confidencial; Wyślij jako poufny',
+                action: () => send_thread_as_confidential(note)
+            },
+            ... (can_show_save_operation ? [{separator: true}] : [] ),
+            ... (can_show_save_operation ? [save_as_draft_op] : [] )
+        ]
+
+        showMenu(rect, operations)
+
     }
 
-    async function on_refresh_after_finish_post(finishing_post)
+    /*async function on_refresh_after_finish_post(finishing_post)
     {
         if(finishing_post == scratch_post)
             scratch_post = null
 
         await fetch_data()
-    }
+    }*/
     
     function unfollow_op()
     {
@@ -701,7 +768,7 @@
                             //hideToolbarCaption: true,
                             //tbr: 'A',
                             //fab:'M20',
-                            action: () => finish_post(note)
+                            action: (butt) => finish_post(null, butt, note)
                         },
                         {
                             caption: '_; Send; Enviar; Wyślij',
@@ -855,7 +922,7 @@
                             <button class="ml-auto p-2 {button_colors(disabled)}
                                 rounded-full border border-stone-300 dark:border-stone-600"
                                 title={i18n({ en:'Finish the post', es: 'Terminar la entrada',  pl: 'Dokończ wpis'})}
-                                on:click={(e) => finish_post(scratch_post)}
+                                on:click={(e) => finish_post(e, null, scratch_post)}
                                 {disabled}>
                                 <Ricon icon='send' s/>
                             </button>
@@ -1019,7 +1086,7 @@
                                     <button class="ml-auto p-2 {button_colors(false)}
                                         rounded-full border border-stone-300 dark:border-stone-600"
                                         title={i18n({ en:'Finish the post', es: 'Terminar la entrada',  pl: 'Dokończ wpis'})}
-                                        on:click|stopPropagation={(e) => finish_post(note)}>
+                                        on:click|stopPropagation={(e) => finish_post(e, null, note)}>
                                         <Ricon icon='send' s/>
                                     </button>
                                 {:else if !is_comment && note.NotesCount > 0}
@@ -1063,7 +1130,7 @@
 
 <FolderProperties bind:this={folder_properties_dialog} />
 
-<FinishPostDialog bind:this={finish_post_dialog} on_refresh={on_refresh_after_finish_post}/>
+<!--FinishPostDialog bind:this={finish_post_dialog} on_refresh={on_refresh_after_finish_post}/-->
 
 <style>
  

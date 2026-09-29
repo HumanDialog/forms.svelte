@@ -58,7 +58,7 @@
                                         {
                                             Id: 10,
                                             Association: 'CreatedNotes',
-                                            Filter: 'Kind>=NK_THREAD',
+                                            //Filter: 'Kind>=NK_THREAD',
                                             Sort: "-CreationDate",
                                             Expressions: ['Id', '$ref', 'Title', 'Summary', 'CreationDate', 'Tags', 'Index', 'href', 'Kind']
                                         }

@@ -13,6 +13,16 @@
 
     import { GoogleAnalytics } from '@beyonk/svelte-google-analytics'
     import {cookies_allow_analytics} from './landing/cookie.preferences'
+    import { useRegisterSW } from 'virtual:pwa-register/svelte'
+
+    const { need_refresh, update_service_worker } = useRegisterSW({
+        onRegistered(reg) {
+            console.log('PWA registered:', reg);
+        },
+        onRegisterError(err) {
+            console.error('PWA registration error:', err);
+        }
+    });
 
 
 	const mode = __APP_MODE__

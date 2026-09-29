@@ -3,7 +3,7 @@ import { sveltekit } from '@sveltejs/kit/vite';
 
 export default defineConfig( ({command, mode}) => {
 
-	let finalApp = "octopus" // "tilos"	//
+	let finalApp =  "octopus" // "tilos"	//
 	let buildConfig = {}
 
 	let prod = false // true //
@@ -66,7 +66,7 @@ export default defineConfig( ({command, mode}) => {
 	case 'tilos':
 		buildConfig = {
 			__APP_MODE__:			'\'local\'',
-			__OBJECTREEF_IO__:		'\'localhost:1996\'',
+			__OBJECTREEF_IO__:		'\'objectreef.local:1996\'',
 			__APP_ID__:				'\'octopus\'',
 			__TENANT_ID__:			'\'octopus\'',
 			__GROUP_ID__: 			'\'octopus/15\'',
@@ -76,15 +76,15 @@ export default defineConfig( ({command, mode}) => {
 			__WEBSITE__:			'\'http://localhost:5173\'',
 			__GA_IDENTIFIER__:		'\'\'',
 
-			__OCTOPUS_MODULES__:'\'tilos,folders,messages\'',
-			__APP_TITLE__: '\'TILOS Users Hub\'',
+			__OCTOPUS_MODULES__:'\'feeds,messages\'',
+			__APP_TITLE__: '\'TILOS users Hub\'',
 			__APP_ICON__:'\'/ico/TILOS-48.png\'',
-			__APP_DEFAULT_PAGE__: '\'/feed/my\'',
+			__APP_DEFAULT_PAGE__: '\'/feed/news\'',
 			__APP_DEFAULT_GUEST_PAGE__: '\'/thome\'',
 			__USERS_SET__: '\'tilos\'',
 			__LANDING__: '\'\'',
-			__PRIVACY_PAGE__: '\'/doc/legal-privacy-policy\'',
-			__TERMS_PAGE__:'\'/doc/legal/legal-terms-of-service-\'',
+			__PRIVACY_PAGE__: '\'/privacy-policy\'',
+			__TERMS_PAGE__:'\'/terms-of-service-\'',
 			__DONT_USE_LAST_NAV_AS_DEFAULT__:'true',
 			__HIDE_ADD_GROUP_MENU__:'true',
 			__ENABLED_LANGUAGES__:'\'en\''

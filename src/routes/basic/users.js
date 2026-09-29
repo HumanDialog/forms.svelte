@@ -26,11 +26,12 @@ const hdTestUsers = [
 ]
 
 const tilosTestUsers = [
-    { username: "emma@example.com",       role: "TUHCustomer", groupId: 15   },
-    { username: "jack@example.com",       role: "TUHCustomer", groupId: 15   },
-    { username: "olivia@example.com",     role: "TUHCustomer", groupId: 15   },
+    { username: "emma@example.com",             role: "Customer", groupId: 15   },
+    { username: "jack@example.com",             role: "Customer", groupId: 15   },
+    { username: "olivia@example.com",           role: "Customer", groupId: 15   },
 
-    { username: "admin@example.com",     role: "TUHServiceman", groupId: 15   },
+    { username: "consultant@example.com",       role: "Consultant", groupId: 15   },
+    { username: "admin@example.com",            role: "Developer", groupId: 15   },
     
 ]
 

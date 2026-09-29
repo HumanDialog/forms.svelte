@@ -77,7 +77,7 @@
     {
         const limit = isDeviceSmallerThan("sm") ? 5 : 7
 
-        let res = await reef.post('group/FeedsRoot/query', {
+        let res = await reef.post('group/PublishedFolder/query', {
             Id: 1,
             Name: 'feeds',
             Limit: limit,
@@ -134,16 +134,16 @@
         <Spinner delay={3000}/>
     {:else}
         <SidebarGroup>
-            <SidebarItem    href="/feed/my"
+            <SidebarItem    href="/feed/news"
                             icon='newspaper'
-                            active={isRoutingTo('/feed/my', currentPath)}
+                            active={isRoutingTo('/feed/news', currentPath)}
                             summaryX="The essentials in one place">
                 _; My news feed; Mi feed de noticias; Mój strumień wiadomości
             </SidebarItem>
             
-            <SidebarItem    href="/feed/sent"
+            <SidebarItem    href="/feed/mypublications"
                             icon='send'
-                            active={isRoutingTo('/feed/sent', currentPath)}
+                            active={isRoutingTo('/feed/mypublications', currentPath)}
                             summaryX="The essentials in one place">
                 _; My posts; Mis publicaciones; Moje posty
             </SidebarItem>
