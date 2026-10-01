@@ -782,6 +782,7 @@
                     {@const notesNo = message.Notes ? message.Notes.length : 0}
                     {@const tasksNo = message.Tasks ? message.Tasks.length : 0}
                     {@const messageElementId = `__hd_channel_msg_${message.Id}`}
+                    {@const has_author = !!message.Author}
                         {#if message.Id == selectedMessageId}
                             <p  id="__hd_unread_indicator"
                                 class="  separator
@@ -793,10 +794,12 @@
                         {/if}
                         <!--    border-bottom: 1px solid #000; -->
                         <h4 id={messageElementId}>
-                            <a href={message.Author.href} use:link class="font-semibold">
-                                {message.Author.Name}
-                            </a>
-                            <span class="ml-2 text-xs font-normal opacity-70">
+                            {#if has_author}
+                                <a href={message.Author.href} use:link class="font-semibold">
+                                    {message.Author.Name}
+                                </a>
+                            {/if}
+                            <span class="ml-2 text-xs font-normal opacity-70" class:!ml-0={!has_author}>
                                 {printTime(dt)},   {getNiceStringDate(dt)}
                             </span>
                         </h4>
