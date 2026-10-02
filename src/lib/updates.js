@@ -141,6 +141,12 @@ export function xpushChanges(afterPushCallback=undefined)
 }
 
 
+export function drop_unsaved_changes()
+{
+    modified_items_map.clear();
+    unsavedModificationsTicket.set( get(unsavedModificationsTicket) + 1 )
+}
+
 const modified_items_map = new Map();
 modified_item_store.subscribe((mod_item) => {
     if(mod_item)

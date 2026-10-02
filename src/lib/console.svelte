@@ -3,6 +3,7 @@
 	import { afterUpdate } from "svelte";
     import { contextTypesStore, contextItemsStore, bottom_bar_visible_store} from './stores.js'
     import Ricon from './components/r.icon.svelte'
+    import {drop_unsaved_changes} './updates.js'
 
 	let prevLines = [];
     let prompt = '>'
@@ -28,6 +29,13 @@
             if(input == 'clear')
             {
                 prevLines = []
+                updateHistory(input)
+                input = "";
+                return;
+            }
+            else if(input == 'drop-changes')
+            {
+                drop_unsaved_changes();
                 updateHistory(input)
                 input = "";
                 return;

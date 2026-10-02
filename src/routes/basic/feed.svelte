@@ -168,7 +168,7 @@
                 SubTree:[
                     { 
                         Id: 3, Association: 'Notes',
-                        Expressions:['Id', '$ref', 'Title', 'Summary', 'Content', 'Order', 'State', 'Role', 'NotesCount', 'Kind', 'ModificationDate', 'href', 'icon', 'IsInBasket', 'IsCanonical', 'NoteId', 'ThreadFolderInfo', 'DraftCommentThreadInfo', '$type', '$ver'],
+                        Expressions:['Id', '$ref', 'Title', 'Summary', 'Content', 'Order', 'State', 'Role', 'CommentsCount', 'Kind', 'ModificationDate', 'href', 'icon', 'IsInBasket', 'IsCanonical', 'NoteId', 'ThreadFolderInfo', 'DraftCommentThreadInfo', '$type', '$ver'],
                         Sort: "-Order",
                         SubTree:[
                             {
@@ -444,22 +444,41 @@
 
 
     let new_message_content_element
+
+    let pending_request = false;
+    let pending_data_item = { }
     
     async function on_prompt_change(text, a)
     {
-        if(scratch_post)
+        if(pending_request)
+        {
+            pending_data_item[a] = text
+        }
+        else if(scratch_post)
         {
             setjItemProperty(scratch_post, a, text)
         }
         else
         {
+            pending_request = true
+            pending_data_item = { }
+
             const result = await reef.post(`${contextItem.$ref}/NewScratchPost`, {title: '', summary: '', content: ''})
+            
+            pending_request = false
+
             if(result && result.FolderNote)
             {
                 scratch_post = result.FolderNote
                 scratch_post.Title = ''
                 scratch_post.Content = ''
                 //setjItemProperty(scratch_post, a, text)
+
+                // not sure
+                /*Object.keys(pending_data_item).forEach(attrib => {
+                    if(pending_data_item[attrib])
+                        setjItemProperty(scratch_post, attrib, pending_data_item[attrib])
+                });*/
             }
         }
     }
@@ -1089,12 +1108,12 @@
                                         on:click|stopPropagation={(e) => finish_post(e, null, note)}>
                                         <Ricon icon='send' s/>
                                     </button>
-                                {:else if !is_comment && note.NotesCount > 0}
+                                {:else if !is_comment && note.CommentsCount > 0}
                                     <button class="flex flex-row gap-1 items-center px-1 {button_enabled_colors}"
                                             title={i18n({en: 'Show comments', es: 'Mostrar comentarios', pl: 'Pokaż komentarze'})}
                                             on:click|stopPropagation={(e) => push(note.href + "?action=showfirstsubnote")}>
                                         <Ricon icon='messages-square' s/>
-                                        <span>{note.NotesCount}</span>
+                                        <span>{note.CommentsCount}</span>
                                     </button>
                                 {/if}
                             </div>
