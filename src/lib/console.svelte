@@ -3,7 +3,7 @@
 	import { afterUpdate } from "svelte";
     import { contextTypesStore, contextItemsStore, bottom_bar_visible_store} from './stores.js'
     import Ricon from './components/r.icon.svelte'
-    import {drop_unsaved_changes} './updates.js'
+    import {drop_unsaved_changes} from './updates.js'
 
 	let prevLines = [];
     let prompt = '>'
